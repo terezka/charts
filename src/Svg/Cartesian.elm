@@ -20,23 +20,6 @@ module Svg.Cartesian
 -}
 
 
--- Plane
-
-
-{-| -}
-type alias Plane =
-  { x : Axis
-  , y : Axis
-  }
-
-
-{-| -}
-type alias Axis =
-  { min : Float
-  , max : Float
-  }
-
-
 
 -- Config
 
@@ -59,7 +42,21 @@ type alias AxisConfig =
 
 
 
--- Plane compilation
+-- Plane
+
+
+{-| -}
+type alias Plane =
+  { x : Axis
+  , y : Axis
+  }
+
+
+{-| -}
+type alias Axis =
+  { min : Float
+  , max : Float
+  }
 
 
 {-| -}
@@ -69,13 +66,15 @@ type alias Coord =
   }
 
 
-{-| -}
+{-| Produce a coordinate. First argument is x, second is y.
+-}
 coord : Float -> Float -> Coord
 coord =
   Coord
 
 
-{-| -}
+{-| Produce the plane fitting your data.
+-}
 plane : List Coord -> Plane
 plane coordinates =
     { x =
@@ -117,13 +116,15 @@ scaleSVG config axis value =
   value * (innerLength config) / (range config axis)
 
 
-{-| Translate SVG x to cartesian x -}
+{-| Translate SVG x to cartesian x.
+-}
 toSVGX : PlaneConfig -> Plane -> Float -> Float
 toSVGX config plane value =
   scaleSVG config.x plane.x (value - config.x.min plane.x.min) + config.x.marginLower
 
 
-{-| Translate SVG y to cartesian y -}
+{-| Translate SVG y to cartesian y.
+-}
 toSVGY : PlaneConfig -> Plane -> Float -> Float
 toSVGY config plane value =
   scaleSVG config.y plane.y (config.y.max plane.y.max - value) + config.y.marginLower
@@ -139,13 +140,15 @@ scaleCartesian config axis value =
   value * (range config axis) / (innerLength config)
 
 
-{-| Translate cartesian x to SVG x -}
+{-| Translate cartesian x to SVG x.
+-}
 toCartesianX : PlaneConfig -> Plane -> Float -> Float
 toCartesianX config plane value =
   scaleCartesian config.x plane.x (value - config.x.marginLower) + config.x.min plane.x.min
 
 
-{-| Translate cartesian y to SVG y -}
+{-| Translate cartesian y to SVG y.
+-}
 toCartesianY : PlaneConfig -> Plane -> Float -> Float
 toCartesianY config plane value =
   range config.y plane.y - scaleCartesian config.y plane.y (value - config.y.marginLower) + config.y.min plane.y.min
