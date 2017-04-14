@@ -3,7 +3,7 @@ module Tests exposing (..)
 import Test exposing (..)
 import Expect
 import Fuzz exposing (list, int, float, tuple, string)
-import Svg.Cartesian exposing (..)
+import Svg.Coordinates exposing (..)
 
 
 all : Test
