@@ -25,9 +25,9 @@ all =
       , test "toSVGY with lower margin" <|
         \() ->
           Expect.equal 92 (toSVGY ({ defaultPlaneConfig | y = updateMarginLower defaultPlaneConfig.y 20 }) defaultPlane 1)
-      , test "toSVGY with upper margin" <|
+      , test "Length should default to 1" <|
         \() ->
-          Expect.equal 72 (toSVGY ({ defaultPlaneConfig | y = updateMarginUpper defaultPlaneConfig.y 20 }) defaultPlane 1)
+          Expect.equal 0.9 (toSVGY ({ defaultPlaneConfig | y = updatelength defaultPlaneConfig.y 0 }) defaultPlane 1)
       ]
     , describe "Test validity of coordinates"
       [ fuzz float "x-coordinate produced should always be a number" <|
@@ -78,3 +78,8 @@ updateMarginLower config marginLower =
 updateMarginUpper : AxisConfig -> Float -> AxisConfig
 updateMarginUpper config marginUpper =
   { config | marginUpper = marginUpper }
+
+
+updatelength : AxisConfig -> Float -> AxisConfig
+updatelength config length =
+  { config | length = length }

@@ -157,7 +157,11 @@ toCartesianY config plane value =
 
 range : AxisConfig -> Axis -> Float
 range config axis =
-  Basics.max 0 (config.max axis.max - config.min axis.min)
+  let
+    diff =
+      config.max axis.max - config.min axis.min
+  in
+    if diff > 0 then diff else 1
 
 
 innerLength : AxisConfig -> Float
