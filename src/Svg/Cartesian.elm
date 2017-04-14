@@ -2,17 +2,20 @@ module Svg.Cartesian
   exposing
     ( Plane, Axis, PlaneConfig, AxisConfig, Coord
     , coord, plane
-    , toSVG, toSVGX, toSVGY
-    , toCartesian, toCartesianX, toCartesianY
+    , scaleSVG, toSVGX, toSVGY
+    , scaleCartesian, toCartesianX, toCartesianY
     )
 
 {-| Cartesian to SVG coordinate translation helpers.
 
-@docs Plane, Axis, PlaneConfig, AxisConfig, Coord, coord, plane
+# Plane
+@docs PlaneConfig, AxisConfig, Plane, Axis, Coord, coord, plane
 
-@docs toSVG, toSVGX, toSVGY, toSVG
+# Cartesian to SVG
+@docs toSVGX, toSVGY, scaleSVG
 
-@docs toCartesian, toCartesianX, toCartesianY
+# SVG to cartesian
+@docs toCartesianX, toCartesianY, scaleCartesian
 
 -}
 
@@ -104,40 +107,48 @@ max toValue =
 -- TRANSLATION
 
 
-{-| -}
-toSVG : AxisConfig -> Axis -> Float -> Float
-toSVG config axis value =
+{-| For scaling a cartesian value to a SVG value.
+
+  Note that this will _not_ return a coordinate on the plane,
+  but the relative value.
+-}
+scaleSVG : AxisConfig -> Axis -> Float -> Float
+scaleSVG config axis value =
   value * (innerLength config) / (range config axis)
 
 
-{-| -}
+{-| Translate SVG x to cartesian x -}
 toSVGX : PlaneConfig -> Plane -> Float -> Float
 toSVGX config plane value =
-  toSVG config.x plane.x (value - config.x.min plane.x.min) + config.x.marginLower
+  scaleSVG config.x plane.x (value - config.x.min plane.x.min) + config.x.marginLower
 
 
-{-| -}
+{-| Translate SVG y to cartesian y -}
 toSVGY : PlaneConfig -> Plane -> Float -> Float
 toSVGY config plane value =
-  toSVG config.y plane.y (config.y.max plane.y.max - value) + config.y.marginLower
+  scaleSVG config.y plane.y (config.y.max plane.y.max - value) + config.y.marginLower
 
 
-{-| -}
-toCartesian : AxisConfig -> Axis -> Float -> Float
-toCartesian config axis value =
+{-| For scaling a SVG value to a cartesian value.
+
+  Note that this will _not_ return a coordinate on the plane,
+  but the relative value.
+-}
+scaleCartesian : AxisConfig -> Axis -> Float -> Float
+scaleCartesian config axis value =
   value * (range config axis) / (innerLength config)
 
 
-{-| -}
+{-| Translate cartesian x to SVG x -}
 toCartesianX : PlaneConfig -> Plane -> Float -> Float
 toCartesianX config plane value =
-  toCartesian config.x plane.x (value - config.x.marginLower) + config.x.min plane.x.min
+  scaleCartesian config.x plane.x (value - config.x.marginLower) + config.x.min plane.x.min
 
 
-{-| -}
+{-| Translate cartesian y to SVG y -}
 toCartesianY : PlaneConfig -> Plane -> Float -> Float
 toCartesianY config plane value =
-  range config.y plane.y - toCartesian config.y plane.y (value - config.y.marginLower) + config.y.min plane.y.min
+  range config.y plane.y - scaleCartesian config.y plane.y (value - config.y.marginLower) + config.y.min plane.y.min
 
 
 
@@ -146,14 +157,9 @@ toCartesianY config plane value =
 
 range : AxisConfig -> Axis -> Float
 range config axis =
-  let
-    diff =
-      config.max axis.max - config.min axis.min
-  in
-    -- Range of 0 is bad
-    if diff /= 0 then diff else 1
+  Basics.max 0 (config.max axis.max - config.min axis.min)
 
 
 innerLength : AxisConfig -> Float
 innerLength config =
-  config.length - config.marginLower - config.marginUpper
+  Basics.max 1 (config.length - config.marginLower - config.marginUpper)
