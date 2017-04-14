@@ -2,9 +2,55 @@ module Tests exposing (..)
 
 import Test exposing (..)
 import Expect
-import Fuzz exposing (list, int, tuple, string)
-import String
+import Fuzz exposing (list, int, float, tuple, string)
 import Svg.Cartesian exposing (..)
+
+
+all : Test
+all =
+  describe "Cartesian translation"
+    [ describe "Translations"
+      [ test "toSVGX" <|
+        \() ->
+          Expect.equal 10 (toSVGX defaultPlaneConfig defaultPlane 1)
+      , test "toSVGY" <|
+        \() ->
+          Expect.equal 90 (toSVGY defaultPlaneConfig defaultPlane 1)
+      , test "toSVGX with lower margin" <|
+        \() ->
+          Expect.equal 28 (toSVGX ({ defaultPlaneConfig | x = updateMarginLower defaultPlaneConfig.x 20 }) defaultPlane 1)
+      , test "toSVGX with upper margin" <|
+        \() ->
+          Expect.equal 8 (toSVGX ({ defaultPlaneConfig | x = updateMarginUpper defaultPlaneConfig.x 20 }) defaultPlane 1)
+      , test "toSVGY with lower margin" <|
+        \() ->
+          Expect.equal 92 (toSVGY ({ defaultPlaneConfig | y = updateMarginLower defaultPlaneConfig.y 20 }) defaultPlane 1)
+      , test "toSVGY with upper margin" <|
+        \() ->
+          Expect.equal 72 (toSVGY ({ defaultPlaneConfig | y = updateMarginUpper defaultPlaneConfig.y 20 }) defaultPlane 1)
+      ]
+    , describe "Test validity of coordinates"
+      [ fuzz float "x-coordinate produced should always be a number" <|
+        \number ->
+          toSVGX defaultPlaneConfig defaultPlane number
+            |> isNaN
+            |> Expect.false "Coordinate should always be a number!"
+      , fuzz float "y-coordinate produced should always be a number" <|
+        \number ->
+          toSVGX defaultPlaneConfig defaultPlane number
+            |> isNaN
+            |> Expect.false "Coordinate should always be a number!"
+      ]
+    ]
+
+
+
+-- HELPERS
+
+
+defaultPlane : Plane
+defaultPlane =
+  plane []
 
 
 defaultPlaneConfig : PlaneConfig
@@ -24,32 +70,11 @@ defaultAxisConfig =
   }
 
 
-all : Test
-all =
-  describe "Cartesian translation"
-    [ describe "Translations"
-      [ test "toSVGX" <|
-        \() ->
-          Expect.equal 10 (toSVGX defaultPlaneConfig defaultPlane 1)
-      , test "toSVGY" <|
-        \() ->
-          Expect.equal 10 (toSVGY defaultPlaneConfig defaultPlane 1)
-      {-, test "This test should fail - you should remove it" <|
-        \() ->
-          Expect.fail "Failed as expected!" -}
-      ]
-    {-}, describe "Fuzz test examples, using randomly generated input"
-      [ fuzz (list int) "Lists always have positive length" <|
-        \aList ->
-          List.length aList |> Expect.atLeast 0
-      , fuzz (list int) "Sorting a list does not change its length" <|
-        \aList ->
-          List.sort aList |> List.length |> Expect.equal (List.length aList)
-      , fuzzWith { runs = 1000 } int "List.member will find an integer in a list containing it" <|
-        \i ->
-          List.member i [ i ] |> Expect.true "If you see this, List.member returned False!"
-      , fuzz2 string string "The length of a string equals the sum of its substrings' lengths" <|
-        \s1 s2 ->
-          s1 ++ s2 |> String.length |> Expect.equal (String.length s1 + String.length s2)
-      ]-}
-    ]
+updateMarginLower : AxisConfig -> Float -> AxisConfig
+updateMarginLower config marginLower =
+  { config | marginLower = marginLower }
+
+
+updateMarginUpper : AxisConfig -> Float -> AxisConfig
+updateMarginUpper config marginUpper =
+  { config | marginUpper = marginUpper }
