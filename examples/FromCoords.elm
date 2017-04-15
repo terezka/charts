@@ -2,25 +2,25 @@ module FromCoords exposing (..)
 
 import Svg exposing (Svg, svg, g, circle, text_, text)
 import Svg.Attributes exposing (width, height, stroke, fill, r, transform)
-import Svg.Coordinates as Coordinates
+import Svg.Coordinates as Coordinates exposing (Point, Plane)
 import Svg.Plot exposing (line, area, Interpolation(..))
 
 
-planeConfig : Coordinates.PlaneConfig
-planeConfig =
+planeFromPoints : List Point -> Plane
+planeFromPoints coordinates =
   { x =
     { marginLower = 10
     , marginUpper = 10
     , length = 300
-    , min = identity
-    , max = identity
+    , min = Coordinates.min .x coordinates
+    , max = Coordinates.max .x coordinates
     }
   , y =
     { marginLower = 10
     , marginUpper = 10
     , length = 300
-    , min = identity
-    , max = identity
+    , min = Coordinates.min .y coordinates
+    , max = Coordinates.max .y coordinates
     }
   }
 
@@ -37,11 +37,11 @@ main : Svg msg
 main =
   let
     plane =
-      Coordinates.plane planeConfig data
+      planeFromPoints data
   in
     svg
-      [ width (toString planeConfig.x.length)
-      , height (toString planeConfig.x.length)
+      [ width (toString plane.x.length)
+      , height (toString plane.x.length)
       ]
       [ area [] Monotone plane data
       , viewPoint plane "hotpink" { x = 0, y = 0 }
