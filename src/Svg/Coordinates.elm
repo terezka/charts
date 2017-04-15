@@ -76,7 +76,10 @@ type alias PlaneConfig =
 
 {-| The axis in `PlaneConfig`. The only difference from the `Plane` is the reach properties.
   Here the `min` and `max` properties is for restricting the reach of your plane based on
-  the data. So if for example you'd want to have your x-axis _always_ be always zero,
+  the data. The functions are passed the actual data reach, meaning that for example the `min`
+  will be passed the lowest value in your data set of the axis in question.
+
+  So if for example you'd want to have your x-axis _always_ be always zero,
   then you'd need to add `min = always 0` on your x-`AxisConfig`.
 -}
 type alias AxisConfig =
