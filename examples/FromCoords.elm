@@ -3,6 +3,7 @@ module FromCoords exposing (..)
 import Svg exposing (Svg, svg, g, circle, text_, text)
 import Svg.Attributes exposing (width, height, stroke, fill, r, transform)
 import Svg.Coordinates as Coordinates
+import Svg.Plot exposing (line, area, Interpolation(..))
 
 
 planeConfig : Coordinates.PlaneConfig
@@ -26,8 +27,8 @@ planeConfig =
 
 data : List Coordinates.Point
 data =
-  [ { x = 2, y = 4 }
-  , { x = -4, y = 3 }
+  [ { x = -4, y = 4 }
+  , { x = -2, y = 3 }
   , { x = 4, y = -4 }
   ]
 
@@ -42,7 +43,8 @@ main =
       [ width (toString planeConfig.x.length)
       , height (toString planeConfig.x.length)
       ]
-      [ viewPoint plane "hotpink" { x = 0, y = 0 }
+      [ area [] Monotone plane data
+      , viewPoint plane "hotpink" { x = 0, y = 0 }
       , viewPoint plane "pink" { x = -1, y = 1 }
       , viewPoint plane "pink" { x = 3, y = 3 }
       , viewPoint plane "pink" { x = -2, y = -1 }
