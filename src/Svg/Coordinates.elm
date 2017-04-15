@@ -65,7 +65,7 @@ type alias Point =
   }
 
 
-{-| DIY reach helper.
+{-| Helper to extract the minimum value amongst your coordinates.
 -}
 min : (a -> Float) -> List a -> Float
 min toValue =
@@ -74,7 +74,7 @@ min toValue =
     >> Maybe.withDefault 0
 
 
-{-| DIY reach helper.
+{-| Helper to extract the maximum value amongst your coordinates.
 -}
 max : (a -> Float) -> List a -> Float
 max toValue =
