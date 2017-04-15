@@ -75,8 +75,6 @@ interpolate interpolation points =
 type Command
   = Move Float Float
   | Line Float Float
-  | HorizontalLine Float
-  | VerticalLine Float
   | CubicBeziers Float Float Float Float Float Float
   | CubicBeziersShort Float Float Float Float
   | QuadraticBeziers Float Float Float Float
@@ -98,12 +96,6 @@ translate plane command =
 
     Line x y ->
       Line (toSVGX plane x) (toSVGY plane y)
-
-    HorizontalLine x ->
-      HorizontalLine (toSVGX plane x)
-
-    VerticalLine y ->
-      VerticalLine (toSVGY plane y)
 
     CubicBeziers cx1 cy1 cx2 cy2 x y ->
       CubicBeziers (toSVGX plane cx1) (toSVGY plane cy1) (toSVGX plane cx2) (toSVGY plane cy2) (toSVGX plane x) (toSVGY plane y)
@@ -132,12 +124,6 @@ stringCommand command =
 
     Line x y ->
       "L" ++ stringPoint (Point x y)
-
-    HorizontalLine x ->
-      "H" ++ toString x
-
-    VerticalLine y ->
-      "V" ++ toString y
 
     CubicBeziers cx1 cy1 cx2 cy2 x y ->
       "C" ++ stringPoints [ (Point cx1 cy1), (Point cx2 cy2), (Point x y) ]
