@@ -12,32 +12,32 @@ all =
     [ describe "Translations"
       [ test "toSVGX" <|
         \() ->
-          Expect.equal 10 (toSVGX defaultPlaneConfig defaultPlane 1)
+          Expect.equal 10 (toSVGX (makePlane defaultPlaneConfig) 1)
       , test "toSVGY" <|
         \() ->
-          Expect.equal 90 (toSVGY defaultPlaneConfig defaultPlane 1)
+          Expect.equal 90 (toSVGY (makePlane defaultPlaneConfig) 1)
       , test "toSVGX with lower margin" <|
         \() ->
-          Expect.equal 28 (toSVGX ({ defaultPlaneConfig | x = updateMarginLower defaultPlaneConfig.x 20 }) defaultPlane 1)
+          Expect.equal 28 (toSVGX (makePlane { defaultPlaneConfig | x = updateMarginLower defaultPlaneConfig.x 20 }) 1)
       , test "toSVGX with upper margin" <|
         \() ->
-          Expect.equal 8 (toSVGX ({ defaultPlaneConfig | x = updateMarginUpper defaultPlaneConfig.x 20 }) defaultPlane 1)
+          Expect.equal 8 (toSVGX (makePlane { defaultPlaneConfig | x = updateMarginUpper defaultPlaneConfig.x 20 }) 1)
       , test "toSVGY with lower margin" <|
         \() ->
-          Expect.equal 92 (toSVGY ({ defaultPlaneConfig | y = updateMarginLower defaultPlaneConfig.y 20 }) defaultPlane 1)
+          Expect.equal 92 (toSVGY (makePlane { defaultPlaneConfig | y = updateMarginLower defaultPlaneConfig.y 20 }) 1)
       , test "Length should default to 1" <|
         \() ->
-          Expect.equal 0.9 (toSVGY ({ defaultPlaneConfig | y = updatelength defaultPlaneConfig.y 0 }) defaultPlane 1)
+          Expect.equal 0.9 (toSVGY (makePlane { defaultPlaneConfig | y = updatelength defaultPlaneConfig.y 0 }) 1)
       ]
     , describe "Test validity of coordinates"
       [ fuzz float "x-coordinate produced should always be a number" <|
         \number ->
-          toSVGX defaultPlaneConfig defaultPlane number
+          toSVGX (makePlane defaultPlaneConfig) number
             |> isNaN
             |> Expect.false "Coordinate should always be a number!"
       , fuzz float "y-coordinate produced should always be a number" <|
         \number ->
-          toSVGX defaultPlaneConfig defaultPlane number
+          toSVGY (makePlane defaultPlaneConfig) number
             |> isNaN
             |> Expect.false "Coordinate should always be a number!"
       ]
@@ -48,9 +48,9 @@ all =
 -- HELPERS
 
 
-defaultPlane : Plane
-defaultPlane =
-  plane []
+makePlane : PlaneConfig -> Plane
+makePlane config =
+  plane config []
 
 
 defaultPlaneConfig : PlaneConfig
