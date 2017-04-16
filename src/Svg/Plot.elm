@@ -1,6 +1,14 @@
 module Svg.Plot exposing (line, area, Interpolation(..))
 
-{-| Helpers for drawing graphs in SVG and cartesian coordinates.
+{-| First of all: If you're looking to a plotting library
+ use [elm-plot](https://github.com/terezka/elm-plot) instead! If you feel
+ like you're missing something in that library, you should just open an issue
+ in that repo and I'll see what I can do to accommodate your needs.
+
+ That said, this is raw plotting elements.
+
+@docs line, area, Interpolation
+
 -}
 
 import Svg exposing (Svg, Attribute, path, text)

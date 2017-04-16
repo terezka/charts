@@ -6,10 +6,41 @@ module Svg.Coordinates
     , place, placeWithOffset
     )
 
-{-| Cartesian to SVG coordinate translation helpers.
+{-| First of all: If you're looking to a plotting library
+ use [elm-plot](https://github.com/terezka/elm-plot) instead! If you feel
+ like you're missing something in that library, you should just open an issue
+ in that repo and I'll see what I can do to accommodate your needs.
+
+That said, here are some cartesian to SVG coordinate translation helpers.
 
 # Plane
-@docs Plane, Axis, Point, min, max
+@docs Plane, Axis
+
+# Plane from data
+
+You may want to produce a plane which fits all your data. For that you need
+to find the minimum and maximum values withing your data in order to calculate
+the domain and range.
+
+@docs min, max
+
+    planeFromPoints : List Coordinates.Point -> Coordinates.Plane
+    planeFromPoints points =
+      { x =
+        { marginLower = 10
+        , marginUpper = 10
+        , length = 300
+        , min = Coordinates.min .x points
+        , max = Coordinates.max .x points
+        }
+      , y =
+        { marginLower = 10
+        , marginUpper = 10
+        , length = 300
+        , min = Coordinates.min .y points
+        , max = Coordinates.max .y points
+        }
+      }
 
 # Cartesian to SVG
 @docs toSVGX, toSVGY, scaleSVG
@@ -18,7 +49,7 @@ module Svg.Coordinates
 @docs toCartesianX, toCartesianY, scaleCartesian
 
 # Helpers
-@docs place, placeWithOffset
+@docs Point, place, placeWithOffset
 
 -}
 
@@ -54,14 +85,6 @@ type alias Axis =
   , length : Float
   , min : Float
   , max : Float
-  }
-
-
-{-| Representation of a point in your plane.
--}
-type alias Point =
-  { x : Float
-  , y : Float
   }
 
 
@@ -133,6 +156,14 @@ toCartesianY plane value =
 
 
 -- PLACING HELPERS
+
+
+{-| Representation of a point in your plane.
+-}
+type alias Point =
+  { x : Float
+  , y : Float
+  }
 
 
 {-| A `transform translate(x, y)` SVG attribute. Beware that using this and
