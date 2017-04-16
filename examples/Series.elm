@@ -2,30 +2,30 @@ module FromData exposing (..)
 
 import Svg exposing (Svg, svg, g, circle, text_, text)
 import Svg.Attributes exposing (width, height, stroke, fill, r, transform)
-import Svg.Coordinates as Coordinates
+import Svg.Coordinates exposing (..)
 import Svg.Plot exposing (..)
 
 
-planeFromPoints : List Coordinates.Point -> Coordinates.Plane
+planeFromPoints : List Point -> Plane
 planeFromPoints points =
   { x =
     { marginLower = 10
     , marginUpper = 10
     , length = 300
-    , min = Coordinates.min .x points
-    , max = Coordinates.max .x points
+    , min = minimum .x points
+    , max = maximum .x points
     }
   , y =
     { marginLower = 10
     , marginUpper = 10
     , length = 300
-    , min = Coordinates.min .y points
-    , max = Coordinates.max .y points
+    , min = minimum .y points
+    , max = maximum .y points
     }
   }
 
 
-data1 : List Coordinates.Point
+data1 : List Point
 data1 =
   [ { x = -2, y = 5 }
   , { x = 1, y = 1.5 }
@@ -33,7 +33,7 @@ data1 =
   ]
 
 
-data2 : List Coordinates.Point
+data2 : List Point
 data2 =
   [ { x = -4, y = 4 }
   , { x = -2, y = 3 }
@@ -41,7 +41,7 @@ data2 =
   ]
 
 
-data3 : List Coordinates.Point
+data3 : List Point
 data3 =
   [ { x = 1.0, y = 2 }
   , { x = 1.2, y = 1 }
