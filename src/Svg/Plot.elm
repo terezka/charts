@@ -55,14 +55,16 @@ scatter plane dots =
 -}
 linear : Plane -> List (Attribute msg) -> List (Dot msg) -> Svg msg
 linear plane attributes dots =
-  viewSeries plane dots (viewInterpolation plane attributes dots (linearInterpolation dots))
+  viewSeries plane dots <|
+    viewInterpolation plane attributes dots (linearInterpolation dots)
 
 
 {-| Series with monotone interpolation.
 -}
 monotone : Plane -> List (Attribute msg) -> List (Dot msg) -> Svg msg
 monotone plane attributes dots =
-  viewSeries plane dots (viewInterpolation plane attributes dots (monotoneInterpolation dots))
+  viewSeries plane dots <|
+    viewInterpolation plane attributes dots (monotoneInterpolation dots)
 
 
 
@@ -78,23 +80,23 @@ viewSeries plane dots interpolation =
 
 
 viewInterpolation : Plane -> List (Attribute msg) -> List (Dot msg) -> List Command -> Svg msg
-viewInterpolation plane userAttributes dots interpolationCommands =
+viewInterpolation plane userAttributes dots commands =
   case ( dots, hasFill userAttributes ) of
     ( [], _ ) ->
       text "-- No data --"
 
     ( first :: rest, False ) ->
-      viewLine plane userAttributes interpolationCommands first rest
+      viewLine plane userAttributes commands first rest
 
     ( first :: rest, True ) ->
-      viewArea plane userAttributes interpolationCommands first rest
+      viewArea plane userAttributes commands first rest
 
 
 viewLine : Plane -> List (Attribute msg) -> List Command -> Dot msg -> List (Dot msg) -> Svg msg
-viewLine plane userAttributes interpolationCommands first rest =
+viewLine plane userAttributes interpolation first rest =
   let
     commands =
-      concat [ Move first.x first.y ] interpolationCommands []
+      concat [ Move first.x first.y ] interpolation []
 
     attributes =
       concat
@@ -106,12 +108,12 @@ viewLine plane userAttributes interpolationCommands first rest =
 
 
 viewArea : Plane -> List (Attribute msg) -> List Command -> Dot msg -> List (Dot msg) -> Svg msg
-viewArea plane userAttributes interpolationCommands first rest =
+viewArea plane userAttributes interpolation first rest =
   let
     commands =
       concat
         [ Move first.x (closestToZero plane), Line first.x first.y ]
-        interpolationCommands
+        interpolation
         [ Line (Maybe.withDefault first (last rest) |> .x) (closestToZero plane) ]
 
     attributes =
