@@ -43,7 +43,7 @@ dot view { x, y } =
 
 
 {-| -}
-viewScatter : Plane -> List (Dot msg) -> data -> Svg msg
+viewScatter : Plane -> List (Dot msg) -> Svg msg
 viewScatter plane dots =
   viewSeries plane dots (text "-- No interpolation --")
 
