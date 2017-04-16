@@ -12,6 +12,17 @@ module Svg.Plot exposing (Dot, dot, clear, scatter, linear, monotone)
 @docs Dot, dot, clear
 
 # Views
+These render a line series if no `fill` attribute is added!
+
+    areaSeries : Svg msg
+    areaSeries =
+      monotone plane [ fill "pink" ] dots
+
+    lineSeries : Svg msg
+    lineSeries =
+      monotone plane [] dots
+
+
 @docs scatter, linear, monotone
 
 -}
