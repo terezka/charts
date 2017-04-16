@@ -1,4 +1,4 @@
-module FromCoords exposing (..)
+module FromData exposing (..)
 
 import Svg exposing (Svg, svg, g, circle, text_, text)
 import Svg.Attributes exposing (width, height, stroke, fill, r, transform)
@@ -43,8 +43,7 @@ main =
       [ width (toString plane.x.length)
       , height (toString plane.x.length)
       ]
-      [ viewLinear plane [ fill "lightpink" ] (List.map clear data)
-      , viewPoint plane "hotpink" { x = 0, y = 0 }
+      [ viewPoint plane "hotpink" { x = 0, y = 0 }
       , viewPoint plane "pink" { x = -1, y = 1 }
       , viewPoint plane "pink" { x = 3, y = 3 }
       , viewPoint plane "pink" { x = -2, y = -1 }
