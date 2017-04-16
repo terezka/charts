@@ -31,15 +31,15 @@ the domain and range.
         { marginLower = 10
         , marginUpper = 10
         , length = 300
-        , min = Coordinates.min .x points
-        , max = Coordinates.max .x points
+        , min = minimum .x points
+        , max = maximum .x points
         }
       , y =
         { marginLower = 10
         , marginUpper = 10
         , length = 300
-        , min = Coordinates.min .y points
-        , max = Coordinates.max .y points
+        , min = minimum .y points
+        , max = maximum .y points
         }
       }
 
