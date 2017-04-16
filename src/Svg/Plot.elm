@@ -45,7 +45,7 @@ dot view { x, y } =
 {-| -}
 viewScatter : Plane -> List (Dot msg) -> data -> Svg msg
 viewScatter plane dots =
-  viewSeries plane dots (text "No interpolation!")
+  viewSeries plane dots (text "-- No interpolation --")
 
 
 {-| -}
