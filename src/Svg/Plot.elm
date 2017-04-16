@@ -1,4 +1,4 @@
-module Svg.Plot exposing (Dot, dot, clear, viewScatter, viewLinear, viewMonotone)
+module Svg.Plot exposing (Dot, dot, clear, scatter, linear, monotone)
 
 {-| First of all: If you're looking to a plotting library
  use [elm-plot](https://github.com/terezka/elm-plot) instead! This library is not
@@ -12,7 +12,7 @@ module Svg.Plot exposing (Dot, dot, clear, viewScatter, viewLinear, viewMonotone
 @docs Dot, dot, clear
 
 # Views
-@docs viewScatter, viewLinear, viewMonotone
+@docs scatter, linear, monotone
 
 -}
 
@@ -46,22 +46,22 @@ dot view { x, y } =
 
 {-| Series with no interpolation.
 -}
-viewScatter : Plane -> List (Dot msg) -> Svg msg
-viewScatter plane dots =
+scatter : Plane -> List (Dot msg) -> Svg msg
+scatter plane dots =
   viewSeries plane dots (text "-- No interpolation --")
 
 
 {-| Series with linear interpolation.
 -}
-viewLinear : Plane -> List (Attribute msg) -> List (Dot msg) -> Svg msg
-viewLinear plane attributes dots =
+linear : Plane -> List (Attribute msg) -> List (Dot msg) -> Svg msg
+linear plane attributes dots =
   viewSeries plane dots (viewInterpolation plane attributes dots (linearInterpolation dots))
 
 
 {-| Series with monotone interpolation.
 -}
-viewMonotone : Plane -> List (Attribute msg) -> List (Dot msg) -> Svg msg
-viewMonotone plane attributes dots =
+monotone : Plane -> List (Attribute msg) -> List (Dot msg) -> Svg msg
+monotone plane attributes dots =
   viewSeries plane dots (viewInterpolation plane attributes dots (monotoneInterpolation dots))
 
 
