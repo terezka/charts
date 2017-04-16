@@ -1,9 +1,9 @@
 module Svg.Coordinates
   exposing
-    ( Plane, Axis, Point, min, max
+    ( Plane, Axis, min, max
     , scaleSVG, toSVGX, toSVGY
     , scaleCartesian, toCartesianX, toCartesianY
-    , place, placeWithOffset
+    , Point, place, placeWithOffset
     )
 
 {-| First of all: If you're looking to a plotting library
