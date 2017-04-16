@@ -1,7 +1,6 @@
 module Svg.Coordinates
   exposing
-    ( Plane, Axis, PlaneConfig, AxisConfig, Point
-    , point, plane
+    ( Plane, Axis, Point, min, max
     , scaleSVG, toSVGX, toSVGY
     , scaleCartesian, toCartesianX, toCartesianY
     , place, placeWithOffset
@@ -10,10 +9,7 @@ module Svg.Coordinates
 {-| Cartesian to SVG coordinate translation helpers.
 
 # Plane
-@docs Plane, Axis
-
-# Plane based on data
-@docs PlaneConfig, AxisConfig, Point, point, plane
+@docs Plane, Axis, Point, min, max
 
 # Cartesian to SVG
 @docs toSVGX, toSVGY, scaleSVG
@@ -61,36 +57,6 @@ type alias Axis =
   }
 
 
-
--- Config
-
-
-{-| The configuration when you want to build a plane based on some
-  data points.
--}
-type alias PlaneConfig =
-  { x : AxisConfig
-  , y : AxisConfig
-  }
-
-
-{-| The axis in `PlaneConfig`. The only difference from the `Plane` is the reach properties.
-  Here the `min` and `max` properties is for restricting the reach of your plane based on
-  the data. The functions are passed the actual data reach, meaning that for example the `min`
-  will be passed the lowest value in your data set of the axis in question.
-
-  So if for example you'd want to have your x-axis _always_ be always zero,
-  then you'd need to add `min = always 0` on your x-`AxisConfig`.
--}
-type alias AxisConfig =
-  { marginLower : Float
-  , marginUpper : Float
-  , length : Float
-  , min : Float -> Float
-  , max : Float -> Float
-  }
-
-
 {-| Representation of a point in your plane.
 -}
 type alias Point =
@@ -99,47 +65,22 @@ type alias Point =
   }
 
 
-{-| Produce a point. First argument is the x-coordinate,
-  second is the y-coordinate.
+{-| Helper to extract the minimum value amongst your coordinates.
 -}
-point : Float -> Float -> Point
-point =
-  Point
-
-
-{-| Produce the plane fitting your points.
--}
-plane : PlaneConfig -> List Point -> Plane
-plane config coordinates =
-    { x =
-      { marginLower = config.x.marginLower
-      , marginUpper = config.x.marginUpper
-      , length = config.x.length
-      , min = config.x.min (min .x coordinates)
-      , max = config.x.max (max .x coordinates)
-      }
-    , y =
-      { marginLower = config.y.marginLower
-      , marginUpper = config.y.marginUpper
-      , length = config.y.length
-      , min = config.y.min (min .y coordinates)
-      , max = config.y.max (max .y coordinates)
-      }
-    }
-
-
-min : (Point -> Float) -> List Point -> Float
+min : (a -> Float) -> List a -> Float
 min toValue =
   List.map toValue
     >> List.minimum
     >> Maybe.withDefault 0
 
 
-max : (Point -> Float) -> List Point -> Float
+{-| Helper to extract the maximum value amongst your coordinates.
+-}
+max : (a -> Float) -> List a -> Float
 max toValue =
   List.map toValue
     >> List.maximum
-    >> Maybe.withDefault 0
+    >> Maybe.withDefault 1
 
 
 

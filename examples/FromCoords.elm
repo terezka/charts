@@ -3,31 +3,32 @@ module FromCoords exposing (..)
 import Svg exposing (Svg, svg, g, circle, text_, text)
 import Svg.Attributes exposing (width, height, stroke, fill, r, transform)
 import Svg.Coordinates as Coordinates
+import Svg.Plot exposing (line, area, Interpolation(..))
 
 
-planeConfig : Coordinates.PlaneConfig
-planeConfig =
+planeFromPoints : List Coordinates.Point -> Coordinates.Plane
+planeFromPoints points =
   { x =
     { marginLower = 10
     , marginUpper = 10
     , length = 300
-    , min = identity
-    , max = identity
+    , min = Coordinates.min .x points
+    , max = Coordinates.max .x points
     }
   , y =
     { marginLower = 10
     , marginUpper = 10
     , length = 300
-    , min = identity
-    , max = identity
+    , min = Coordinates.min .y points
+    , max = Coordinates.max .y points
     }
   }
 
 
 data : List Coordinates.Point
 data =
-  [ { x = 2, y = 4 }
-  , { x = -4, y = 3 }
+  [ { x = -4, y = 4 }
+  , { x = -2, y = 3 }
   , { x = 4, y = -4 }
   ]
 
@@ -36,13 +37,14 @@ main : Svg msg
 main =
   let
     plane =
-      Coordinates.plane planeConfig data
+      planeFromPoints data
   in
     svg
-      [ width (toString planeConfig.x.length)
-      , height (toString planeConfig.x.length)
+      [ width (toString plane.x.length)
+      , height (toString plane.x.length)
       ]
-      [ viewPoint plane "hotpink" { x = 0, y = 0 }
+      [ area [] Monotone plane data
+      , viewPoint plane "hotpink" { x = 0, y = 0 }
       , viewPoint plane "pink" { x = -1, y = 1 }
       , viewPoint plane "pink" { x = 3, y = 3 }
       , viewPoint plane "pink" { x = -2, y = -1 }
