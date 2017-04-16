@@ -58,9 +58,9 @@ main =
       [ width (toString plane.x.length)
       , height (toString plane.x.length)
       ]
-      [ viewLinear plane [ fill "rgba(127, 178, 212, 0.3)", stroke "#7fb2d4" ] (List.map clear data1)
-      , viewMonotone plane [ stroke "#e67bd6" ] (List.map (dot (viewCircle "#e67bd6")) data2)
-      , viewScatter plane (List.map (dot (viewCircle "#f9c3b0")) data3)
+      [ linear plane [ fill "rgba(127, 178, 212, 0.3)", stroke "#7fb2d4" ] (List.map clear data1)
+      , monotone plane [ stroke "#e67bd6" ] (List.map (dot (viewCircle "#e67bd6")) data2)
+      , scatter plane (List.map (dot (viewCircle "#f9c3b0")) data3)
       ]
 
 
