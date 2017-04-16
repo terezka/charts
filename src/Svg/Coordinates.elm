@@ -1,6 +1,6 @@
 module Svg.Coordinates
   exposing
-    ( Plane, Axis, min, max
+    ( Plane, Axis, minimum, maximum
     , scaleSVG, toSVGX, toSVGY
     , scaleCartesian, toCartesianX, toCartesianY
     , Point, place, placeWithOffset
@@ -23,7 +23,7 @@ You may want to produce a plane which fits all your data. For that you need
 to find the minimum and maximum values withing your data in order to calculate
 the domain and range.
 
-@docs min, max
+@docs minimum, maximum
 
     planeFromPoints : List Coordinates.Point -> Coordinates.Plane
     planeFromPoints points =
@@ -91,8 +91,8 @@ type alias Axis =
 
 {-| Helper to extract the minimum value amongst your coordinates.
 -}
-min : (a -> Float) -> List a -> Float
-min toValue =
+minimum : (a -> Float) -> List a -> Float
+minimum toValue =
   List.map toValue
     >> List.minimum
     >> Maybe.withDefault 0
@@ -100,8 +100,8 @@ min toValue =
 
 {-| Helper to extract the maximum value amongst your coordinates.
 -}
-max : (a -> Float) -> List a -> Float
-max toValue =
+maximum : (a -> Float) -> List a -> Float
+maximum toValue =
   List.map toValue
     >> List.maximum
     >> Maybe.withDefault 1

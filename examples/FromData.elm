@@ -3,7 +3,6 @@ module FromData exposing (..)
 import Svg exposing (Svg, svg, g, circle, text_, text)
 import Svg.Attributes exposing (width, height, stroke, fill, r, transform)
 import Svg.Coordinates as Coordinates
-import Svg.Plot exposing (..)
 
 
 planeFromPoints : List Coordinates.Point -> Coordinates.Plane
@@ -12,15 +11,15 @@ planeFromPoints points =
     { marginLower = 10
     , marginUpper = 10
     , length = 300
-    , min = Coordinates.min .x points
-    , max = Coordinates.max .x points
+    , min = Coordinates.minimum .x points
+    , max = Coordinates.maximum .x points
     }
   , y =
     { marginLower = 10
     , marginUpper = 10
     , length = 300
-    , min = Coordinates.min .y points
-    , max = Coordinates.max .y points
+    , min = Coordinates.minimum .y points
+    , max = Coordinates.maximum .y points
     }
   }
 
