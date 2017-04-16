@@ -6,13 +6,17 @@ module Svg.Plot exposing (Dot, dot, clear, scatter, linear, monotone)
   you're welcome to open an issue in the repo and I'll see what I can do
   to accommodate your needs!
 
-  High-level path elements.
+  This module contains high-level SVG path elements.
+
 
 # Dots
 @docs Dot, dot, clear
 
-# Views
-These render a line series if no `fill` attribute is added!
+# Interpolation
+@docs scatter, linear, monotone
+
+## Note on usage
+These elements render a line series if no `fill` attribute is added!
 
     areaSeries : Svg msg
     areaSeries =
@@ -21,9 +25,6 @@ These render a line series if no `fill` attribute is added!
     lineSeries : Svg msg
     lineSeries =
       monotone plane [] dots
-
-
-@docs scatter, linear, monotone
 
 -}
 
@@ -49,7 +50,7 @@ clear { x, y } =
   Dot Nothing x y
 
 
-{-| An actual dot on the plot.
+{-| An dot with a view.
 -}
 dot : Svg msg -> Point -> Dot msg
 dot view { x, y } =

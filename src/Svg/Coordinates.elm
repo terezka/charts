@@ -12,7 +12,7 @@ module Svg.Coordinates
   you're welcome to open an issue in the repo and I'll see what I can do
   to accommodate your needs!
 
-  Cartesian to SVG coordinate translation helpers.
+  This module contains helpers for cartesian/SVG coordinate translation.
 
 # Plane
 @docs Plane, Axis
@@ -25,7 +25,7 @@ the domain and range.
 
 @docs minimum, maximum
 
-    planeFromPoints : List Coordinates.Point -> Coordinates.Plane
+    planeFromPoints : List Point -> Plane
     planeFromPoints points =
       { x =
         { marginLower = 10
@@ -75,8 +75,8 @@ type alias Plane =
   - The margin properties are the upper and lower margins for the axis. So for example,
     if you want to add margin on top of the plot, increase the marginUpper of
     the y-`Axis`.
-  - The length is the length of your SVG axis. (Plane.x.length is the width,
-    Plane.y.length is the height)
+  - The length is the length of your SVG axis. (`plane.x.length` is the width,
+    `plane.y.length` is the height)
   - The `min` and `max` values is the reach of your plane. (Domain for the y-axis, range
     for the x-axis)
 -}
