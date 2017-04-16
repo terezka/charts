@@ -30,13 +30,15 @@ type alias Dot msg =
   }
 
 
-{-| -}
+{-| A dot without visual representation.
+-}
 clear : Point -> Dot msg
 clear { x, y } =
   Dot Nothing x y
 
 
-{-| -}
+{-| An actual dot on the plot.
+-}
 dot : Svg msg -> Point -> Dot msg
 dot view { x, y } =
   Dot (Just view) x y
@@ -60,7 +62,11 @@ viewLinear plane attributes dots =
 -}
 viewMonotone : Plane -> List (Attribute msg) -> List (Dot msg) -> Svg msg
 viewMonotone plane attributes dots =
-  viewSeries plane dots (viewInterpolation plane attributes dots (monotoneXInterpolation dots))
+  viewSeries plane dots (viewInterpolation plane attributes dots (monotoneInterpolation dots))
+
+
+
+-- INTERNAL
 
 
 viewSeries : Plane -> List (Dot msg) -> Svg msg -> Svg msg
@@ -145,8 +151,8 @@ linearInterpolation =
 -- MONOTONE INTERPOLATION
 
 
-monotoneXInterpolation : List (Dot view) -> List Command
-monotoneXInterpolation points =
+monotoneInterpolation : List (Dot view) -> List Command
+monotoneInterpolation points =
     case points of
       p0 :: p1 :: p2 :: rest ->
         let
@@ -156,14 +162,14 @@ monotoneXInterpolation points =
           tangent0 =
             slope2 p0 p1 tangent1
         in
-          monotoneXCurve p0 p1 tangent0 tangent1 ++ monotoneXNext (p1 :: p2 :: rest) tangent1 []
+          monotoneCurve p0 p1 tangent0 tangent1 ++ monotoneNext (p1 :: p2 :: rest) tangent1 []
 
       _ ->
         []
 
 
-monotoneXNext : List (Dot view) -> Float -> List Command -> List Command
-monotoneXNext points tangent0 commands =
+monotoneNext : List (Dot view) -> Float -> List Command -> List Command
+monotoneNext points tangent0 commands =
   case points of
     p0 :: p1 :: p2 :: rest ->
       let
@@ -171,23 +177,23 @@ monotoneXNext points tangent0 commands =
           slope3 p0 p1 p2
 
         nextCommands =
-          commands ++ monotoneXCurve p0 p1 tangent0 tangent1
+          commands ++ monotoneCurve p0 p1 tangent0 tangent1
       in
-        monotoneXNext (p1 :: p2 :: rest) tangent1 nextCommands
+        monotoneNext (p1 :: p2 :: rest) tangent1 nextCommands
 
     [ p1, p2 ] ->
       let
         tangent1 =
           slope3 p1 p2 p2
       in
-        commands ++ monotoneXCurve p1 p2 tangent0 tangent1
+        commands ++ monotoneCurve p1 p2 tangent0 tangent1
 
     _ ->
         commands
 
 
-monotoneXCurve : (Dot view) -> (Dot view) -> Float -> Float -> List Command
-monotoneXCurve point0 point1 tangent0 tangent1 =
+monotoneCurve : (Dot view) -> (Dot view) -> Float -> Float -> List Command
+monotoneCurve point0 point1 tangent0 tangent1 =
   let
     dx =
       (point1.x - point0.x) / 3
@@ -253,7 +259,7 @@ last list =
   List.head (List.drop (List.length list - 1) list)
 
 
-{- Sorry, Evan :C -}
+{- Sorry, Evan -}
 hasFill : List (Attribute msg) -> Bool
 hasFill attributes =
   List.any (toString >> String.contains "realKey = \"fill\"") attributes
