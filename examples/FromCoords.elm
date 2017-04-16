@@ -2,25 +2,25 @@ module FromCoords exposing (..)
 
 import Svg exposing (Svg, svg, g, circle, text_, text)
 import Svg.Attributes exposing (width, height, stroke, fill, r, transform)
-import Svg.Coordinates as Coordinates exposing (Point, Plane)
+import Svg.Coordinates as Coordinates
 import Svg.Plot exposing (line, area, Interpolation(..))
 
 
-planeFromPoints : List Point -> Plane
-planeFromPoints coordinates =
+planeFromPoints : List Coordinates.Point -> Coordinates.Plane
+planeFromPoints points =
   { x =
     { marginLower = 10
     , marginUpper = 10
     , length = 300
-    , min = Coordinates.min .x coordinates
-    , max = Coordinates.max .x coordinates
+    , min = Coordinates.min .x points
+    , max = Coordinates.max .x points
     }
   , y =
     { marginLower = 10
     , marginUpper = 10
     , length = 300
-    , min = Coordinates.min .y coordinates
-    , max = Coordinates.max .y coordinates
+    , min = Coordinates.min .y points
+    , max = Coordinates.max .y points
     }
   }
 
