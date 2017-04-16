@@ -1,192 +1,148 @@
-module Svg.Plot exposing (line, area, Interpolation(..))
+module Svg.Plot exposing (Dot, dot, clear, viewScatter, viewLinear, viewMonotone)
 
 {-| First of all: If you're looking to a plotting library
  use [elm-plot](https://github.com/terezka/elm-plot) instead! If you feel
  like you're missing something in that library, you should just open an issue
  in that repo and I'll see what I can do to accommodate your needs.
 
- That said, this is raw plotting elements.
+ That said, here are some plotting helpers.
 
-@docs line, area, Interpolation
+# Dots
+@docs Dot, dot, clear
+
+# Views
+@docs viewScatter, viewLinear, viewMonotone
 
 -}
 
-import Svg exposing (Svg, Attribute, path, text)
-import Svg.Attributes exposing (width, height, stroke, fill, d, transform)
-import Svg.Coordinates exposing (Plane, Point, toSVGX, toSVGY)
+import Svg exposing (Svg, Attribute, g, path, text)
+import Svg.Attributes exposing (class, width, height, stroke, fill, d, transform)
+import Svg.Coordinates exposing (Plane, Point, place)
+import Svg.Commands exposing (..)
 
 
 {-| -}
-line : List (Attribute msg) -> Interpolation -> Plane -> List Point -> Svg msg
-line attributes interpolation plane points =
-  case points of
-    first :: rest ->
-      let
-        commands =
-          Move first.x first.y :: interpolate interpolation (first :: rest)
-      in
-        path (stroke "pink" :: attributes ++ [ fill "transparent", d (description plane commands) ]) []
-
-    _ ->
-      text "Missing data passed to this line element."
+type alias Dot msg =
+  { view : Maybe (Svg msg)
+  , x : Float
+  , y : Float
+  }
 
 
 {-| -}
-area : List (Attribute msg) -> Interpolation -> Plane -> List Point -> Svg msg
-area attributes interpolation plane points =
-  case points of
-    first :: rest ->
-      let
-        last =
-          List.drop (List.length rest - 1) rest
-            |> List.head
-            |> Maybe.withDefault first
-
-        yOrigin =
-          clamp plane.y.min plane.y.max 0
-
-        commands =
-          [ Move first.x yOrigin, Line first.x first.y ]
-          ++ interpolate interpolation (first :: rest)
-          ++ [ Line last.x yOrigin ]
-      in
-        path (stroke "pink" :: fill "lightpink" :: attributes ++ [ d (description plane commands) ]) []
-
-    _ ->
-      text "Missing data passed to this area element."
-
-
-
--- INTERPOLATION
+clear : Point -> Dot msg
+clear { x, y } =
+  Dot Nothing x y
 
 
 {-| -}
-type Interpolation
-  = Linear
-  | Monotone
+dot : Svg msg -> Point -> Dot msg
+dot view { x, y } =
+  Dot (Just view) x y
 
 
-interpolate : Interpolation -> List Point -> List Command
-interpolate interpolation points =
-  case interpolation of
-    Linear ->
-      List.map (\{ x, y } -> Line x y) points
-
-    Monotone ->
-      monotoneX points
+{-| -}
+viewScatter : Plane -> List (Dot msg) -> Svg msg
+viewScatter plane dots =
+  viewSeries plane dots (text "No interpolation!")
 
 
-
--- PATH COMMANDS
-
-
-type Command
-  = Move Float Float
-  | Line Float Float
-  | CubicBeziers Float Float Float Float Float Float
-  | CubicBeziersShort Float Float Float Float
-  | QuadraticBeziers Float Float Float Float
-  | QuadraticBeziersShort Float Float
-  | Arc Float Float Bool Bool Bool Float Float
-  | Close
+{-| -}
+viewLinear : Plane -> List (Attribute msg) -> List (Dot msg) -> Svg msg
+viewLinear plane attributes dots =
+  viewSeries plane dots (viewInterpolation plane attributes dots (linearInterpolation dots))
 
 
-description : Plane -> List Command -> String
-description plane commands =
-  joinCommands (List.map (translate plane >> stringCommand) commands)
+{-| -}
+viewMonotone : Plane -> List (Attribute msg) -> List (Dot msg) -> Svg msg
+viewMonotone plane attributes dots =
+  viewSeries plane dots (viewInterpolation plane attributes dots (monotoneXInterpolation dots))
 
 
-translate : Plane -> Command -> Command
-translate plane command =
-  case command of
-    Move x y ->
-      Move (toSVGX plane x) (toSVGY plane y)
-
-    Line x y ->
-      Line (toSVGX plane x) (toSVGY plane y)
-
-    CubicBeziers cx1 cy1 cx2 cy2 x y ->
-      CubicBeziers (toSVGX plane cx1) (toSVGY plane cy1) (toSVGX plane cx2) (toSVGY plane cy2) (toSVGX plane x) (toSVGY plane y)
-
-    CubicBeziersShort cx1 cy1 x y ->
-      CubicBeziersShort (toSVGX plane cx1) (toSVGY plane cy1) (toSVGX plane x) (toSVGY plane y)
-
-    QuadraticBeziers cx1 cy1 x y ->
-      QuadraticBeziers (toSVGX plane cx1) (toSVGY plane cy1) (toSVGX plane x) (toSVGY plane y)
-
-    QuadraticBeziersShort x y ->
-      QuadraticBeziersShort (toSVGX plane x) (toSVGY plane y)
-
-    Arc rx ry xAxisRotation largeArcFlag sweepFlag x y ->
-      Arc (toSVGX plane rx) (toSVGY plane ry) xAxisRotation largeArcFlag sweepFlag (toSVGX plane x) (toSVGY plane y)
-
-    Close ->
-      Close
+viewSeries : Plane -> List (Dot msg) -> Svg msg -> Svg msg
+viewSeries plane dots interpolation =
+  g [ class "elm-plot__series" ]
+    [ interpolation
+    , g [ class "elm-plot__dots" ] (List.map (viewDot plane) dots)
+    ]
 
 
-stringCommand : Command -> String
-stringCommand command =
-  case command of
-    Move x y ->
-      "M" ++ stringPoint (Point x y)
+viewInterpolation : Plane -> List (Attribute msg) -> List (Dot msg) -> List Command -> Svg msg
+viewInterpolation plane userAttributes dots interpolationCommands =
+  case ( dots, hasFill userAttributes ) of
+    ( [], _ ) ->
+      text "No data!"
 
-    Line x y ->
-      "L" ++ stringPoint (Point x y)
+    ( first :: rest, False ) ->
+      viewLine plane userAttributes interpolationCommands first rest
 
-    CubicBeziers cx1 cy1 cx2 cy2 x y ->
-      "C" ++ stringPoints [ (Point cx1 cy1), (Point cx2 cy2), (Point x y) ]
-
-    CubicBeziersShort cx1 cy1 x y ->
-      "Q" ++ stringPoints [ (Point cx1 cy1), (Point x y) ]
-
-    QuadraticBeziers cx1 cy1 x y ->
-      "Q" ++ stringPoints [ (Point cx1 cy1), (Point x y) ]
-
-    QuadraticBeziersShort x y ->
-      "T" ++ stringPoint (Point x y)
-
-    Arc rx ry xAxisRotation largeArcFlag sweepFlag x y ->
-      "A" ++ joinCommands
-        [ stringPoint (Point rx ry)
-        , toString xAxisRotation
-        , stringBool largeArcFlag
-        , stringBool sweepFlag
-        , stringPoint (Point x y)
-        ]
-
-    Close ->
-      "Z"
+    ( first :: rest, True ) ->
+      viewArea plane userAttributes interpolationCommands first rest
 
 
-joinCommands : List String -> String
-joinCommands commands =
-  String.join " " commands
+viewLine : Plane -> List (Attribute msg) -> List Command -> Dot msg -> List (Dot msg) -> Svg msg
+viewLine plane userAttributes interpolationCommands first rest =
+  let
+    commands =
+      concat [ Move first.x first.y ] interpolationCommands []
+
+    attributes =
+      concat
+        [ class "elm-plot__line", stroke "pink" ]
+        userAttributes
+        [ d (description plane commands), fill "transparent" ]
+  in
+    path attributes []
 
 
-stringPoint : Point -> String
-stringPoint { x, y } =
-  toString x ++ " " ++ toString y
+viewArea : Plane -> List (Attribute msg) -> List Command -> Dot msg -> List (Dot msg) -> Svg msg
+viewArea plane userAttributes interpolationCommands first rest =
+  let
+    commands =
+      concat
+        [ Move first.x (closestToZero plane), Line first.x first.y ]
+        interpolationCommands
+        [ Line (Maybe.withDefault first (last rest) |> .x) (closestToZero plane) ]
+
+    attributes =
+      concat
+        [ class "elm-plot__area", stroke "pink", fill "lightpink" ]
+        userAttributes
+        [ d (description plane commands) ]
+  in
+    path attributes []
 
 
-stringPoints : List Point -> String
-stringPoints points =
-  String.join "," (List.map stringPoint points)
+viewDot : Plane -> Dot msg -> Svg msg
+viewDot plane dot =
+  case dot.view of
+    Nothing ->
+      text ""
+
+    Just view ->
+      g [ place plane (point dot) ] [ view ]
 
 
-stringBool : Bool -> String
-stringBool bool =
-  if bool then
-    "0"
-  else
-    "1"
+point : Dot msg -> Point
+point { x, y } =
+  Point x y
+
+
+
+-- LINEAR INTERPOLATION
+
+
+linearInterpolation : List (Dot msg) -> List Command
+linearInterpolation =
+  List.map (\{ x, y } -> Line x y)
 
 
 
 -- MONOTONE INTERPOLATION
 
 
-monotoneX : List Point -> List Command
-monotoneX points =
+monotoneXInterpolation : List (Dot view) -> List Command
+monotoneXInterpolation points =
     case points of
       p0 :: p1 :: p2 :: rest ->
         let
@@ -202,7 +158,7 @@ monotoneX points =
         []
 
 
-monotoneXNext : List Point -> Float -> List Command -> List Command
+monotoneXNext : List (Dot view) -> Float -> List Command -> List Command
 monotoneXNext points tangent0 commands =
   case points of
     p0 :: p1 :: p2 :: rest ->
@@ -226,7 +182,7 @@ monotoneXNext points tangent0 commands =
         commands
 
 
-monotoneXCurve : Point -> Point -> Float -> Float -> List Command
+monotoneXCurve : (Dot view) -> (Dot view) -> Float -> Float -> List Command
 monotoneXCurve point0 point1 tangent0 tangent1 =
   let
     dx =
@@ -239,7 +195,7 @@ monotoneXCurve point0 point1 tangent0 tangent1 =
  the following paper: Steffen, M. 1990. A Simple Method for Monotonic
  Interpolation in One Dimension
 -}
-slope3 : Point -> Point -> Point -> Float
+slope3 : (Dot view) -> (Dot view) -> (Dot view) -> Float
 slope3 point0 point1 point2 =
   let
     h0 = point1.x - point0.x
@@ -267,7 +223,7 @@ toH h0 h1 =
 
 {-| Calculate a one-sided slope.
 -}
-slope2 : Point -> Point -> Float -> Float
+slope2 : (Dot view) -> (Dot view) -> Float -> Float
 slope2 point0 point1 t =
   let
     h =
@@ -282,3 +238,27 @@ sign x =
     -1
   else
     1
+
+
+-- HELPERS
+
+
+last : List a -> Maybe a
+last list =
+  List.head (List.drop (List.length list - 1) list)
+
+
+{- Sorry, Evan :C -}
+hasFill : List (Attribute msg) -> Bool
+hasFill attributes =
+  List.any (toString >> String.contains "realKey = \"fill\"") attributes
+
+
+concat : List a -> List a -> List a -> List a
+concat first second third =
+  first ++ second ++ third
+
+
+closestToZero : Plane -> Float
+closestToZero plane =
+  clamp plane.y.min plane.y.max 0
