@@ -42,19 +42,22 @@ dot view { x, y } =
   Dot (Just view) x y
 
 
-{-| -}
+{-| Series with no interpolation.
+-}
 viewScatter : Plane -> List (Dot msg) -> Svg msg
 viewScatter plane dots =
   viewSeries plane dots (text "-- No interpolation --")
 
 
-{-| -}
+{-| Series with linear interpolation.
+-}
 viewLinear : Plane -> List (Attribute msg) -> List (Dot msg) -> Svg msg
 viewLinear plane attributes dots =
   viewSeries plane dots (viewInterpolation plane attributes dots (linearInterpolation dots))
 
 
-{-| -}
+{-| Series with monotone interpolation.
+-}
 viewMonotone : Plane -> List (Attribute msg) -> List (Dot msg) -> Svg msg
 viewMonotone plane attributes dots =
   viewSeries plane dots (viewInterpolation plane attributes dots (monotoneXInterpolation dots))
@@ -72,7 +75,7 @@ viewInterpolation : Plane -> List (Attribute msg) -> List (Dot msg) -> List Comm
 viewInterpolation plane userAttributes dots interpolationCommands =
   case ( dots, hasFill userAttributes ) of
     ( [], _ ) ->
-      text "No data!"
+      text "-- No data --"
 
     ( first :: rest, False ) ->
       viewLine plane userAttributes interpolationCommands first rest
@@ -239,6 +242,7 @@ sign x =
     -1
   else
     1
+
 
 
 -- HELPERS
