@@ -1,12 +1,12 @@
 module Svg.Plot exposing (Dot, dot, clear, scatter, linear, monotone)
 
-{-| First of all: If you're looking to a plotting library
- use [elm-plot](https://github.com/terezka/elm-plot) instead! This library is not
- made to be userfriendly. If you feel like you're missing something in elm-plot,
- you're welcome to open an issue in the repo and I'll see what I can do
- to accommodate your needs.
+{-| _Note:_ If you're looking to a plotting library, then
+  use [elm-plot](https://github.com/terezka/elm-plot) instead, because this library is not
+  made to be user friendly. If you feel like you're missing something in elm-plot,
+  you're welcome to open an issue in the repo and I'll see what I can do
+  to accommodate your needs!
 
- That said, here are some plotting helpers.
+  High-level path elements.
 
 # Dots
 @docs Dot, dot, clear
@@ -20,6 +20,7 @@ import Svg exposing (Svg, Attribute, g, path, text)
 import Svg.Attributes exposing (class, width, height, stroke, fill, d, transform)
 import Svg.Coordinates exposing (Plane, Point, place)
 import Svg.Commands exposing (..)
+import Colors exposing (..)
 
 
 {-| -}
@@ -100,9 +101,9 @@ viewLine plane userAttributes interpolation first rest =
 
     attributes =
       concat
-        [ class "elm-plot__line", stroke "pink" ]
+        [ class "elm-plot__line", stroke pinkStroke ]
         userAttributes
-        [ d (description plane commands), fill "transparent" ]
+        [ d (description plane commands), fill transparent ]
   in
     path attributes []
 
@@ -118,7 +119,7 @@ viewArea plane userAttributes interpolation first rest =
 
     attributes =
       concat
-        [ class "elm-plot__area", stroke "pink", fill "lightpink" ]
+        [ class "elm-plot__area", stroke pinkStroke ]
         userAttributes
         [ d (description plane commands) ]
   in

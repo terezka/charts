@@ -4,6 +4,7 @@ import Svg exposing (Svg, svg, g, circle, text_, text)
 import Svg.Attributes exposing (width, height, stroke, fill, r, transform)
 import Svg.Coordinates exposing (..)
 import Svg.Plot exposing (..)
+import Colors exposing (..)
 
 
 planeFromPoints : List Point -> Plane
@@ -59,8 +60,8 @@ main =
       [ width (toString plane.x.length)
       , height (toString plane.x.length)
       ]
-      [ linear plane [ fill "rgba(127, 178, 212, 0.3)", stroke "#7fb2d4" ] (List.map clear data1)
-      , monotone plane [ stroke "#e67bd6" ] (List.map (dot (viewCircle "#e67bd6")) data2)
+      [ linear plane [ stroke blueStroke, fill blueFill ] (List.map clear data1)
+      , monotone plane [ stroke pinkStroke ] (List.map (dot (viewCircle pinkStroke)) data2)
       , scatter plane (List.map (dot (viewCircle "#f9c3b0")) data3)
       ]
 
