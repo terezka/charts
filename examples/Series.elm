@@ -63,6 +63,10 @@ main =
       [ linear plane [ stroke blueStroke, fill blueFill ] (List.map clear data1)
       , monotone plane [ stroke pinkStroke ] (List.map (dot (viewCircle pinkStroke)) data2)
       , scatter plane (List.map (dot (viewCircle "#f9c3b0")) data3)
+      , fullHorizontal plane [] 0
+      , fullVertical plane [] 0
+      , xTicks plane 5 [] 0 [ 1, 2, 3 ]
+      , yTicks plane 5 [] 0 [ 1, 2, 3 ]
       ]
 
 
