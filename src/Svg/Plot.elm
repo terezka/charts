@@ -11,7 +11,9 @@ module Svg.Plot
     , fullHorizontal
     , fullVertical
     , xTicks
+    , xTick
     , yTicks
+    , yTick
     )
 
 
@@ -45,7 +47,7 @@ These elements render a line series if no `fill` attribute is added!
 @docs fullHorizontal, fullVertical, horizontal, vertical
 
 ## Ticks
-@docs xTicks, yTicks
+@docs xTick, xTicks, yTick, yTicks
 
 -}
 
@@ -134,6 +136,7 @@ xTicks plane height userAttributes y xs =
   g [ class "elm-plot__x-ticks" ] (List.map (xTick plane height userAttributes y) xs)
 
 
+{-| -}
 xTick : Plane -> Int -> List (Attribute msg) -> Float -> Float -> Svg msg
 xTick plane height userAttributes y x =
   let
@@ -164,6 +167,7 @@ yTicks plane width userAttributes x ys =
   g [ class "elm-plot__y-ticks" ] (List.map (yTick plane width userAttributes x) ys)
 
 
+{-| -}
 yTick : Plane -> Int -> List (Attribute msg) -> Float -> Float -> Svg msg
 yTick plane width userAttributes x y =
   let
