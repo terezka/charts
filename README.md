@@ -1,4 +1,4 @@
-# elm-plot-rouge
+# Elm Plot Rouge
 
 Hi! If you're looking to a plotting library, then
 use [elm-plot](https://github.com/terezka/elm-plot) instead, because this library is not
