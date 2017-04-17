@@ -1,4 +1,19 @@
-module Svg.Plot exposing (Dot, dot, clear, scatter, linear, monotone)
+module Svg.Plot
+  exposing
+    ( Dot
+    , dot
+    , clear
+    , scatter
+    , linear
+    , monotone
+    , horizontal
+    , vertical
+    , gridHorizontal
+    , gridVertical
+    , xTicks
+    , yTicks
+    )
+
 
 {-| _Note:_ If you're looking to a plotting library, then
   use [elm-plot](https://github.com/terezka/elm-plot) instead, because this library is not
@@ -26,13 +41,130 @@ These elements render a line series if no `fill` attribute is added!
     lineSeries =
       monotone plane [] dots
 
+# Lines
+@docs horizontal, vertical, gridHorizontal, gridVertical, xTicks, yTicks
+
 -}
 
 import Svg exposing (Svg, Attribute, g, path, text)
-import Svg.Attributes exposing (class, width, height, stroke, fill, d, transform)
-import Svg.Coordinates exposing (Plane, Point, place)
+import Svg.Attributes as Attributes exposing (class, width, height, stroke, fill, d, transform)
+import Svg.Coordinates exposing (Plane, Point, place, toSVGX, toSVGY)
 import Svg.Commands exposing (..)
 import Colors exposing (..)
+
+
+
+-- LINES
+
+
+{-| Renders a horizontal line.
+
+    myLine : Svg msg
+    myLine =
+      horizontal plane [ stroke pink ] y x0 x1
+
+-}
+horizontal : Plane -> List (Attribute msg) -> Float -> Float -> Float -> Svg msg
+horizontal plane userAttributes y x1 x2 =
+  let
+    attributes =
+      concat
+        [ stroke darkGrey ]
+        userAttributes
+        [ d (description plane [ Move x1 y, Line x1 y, Line x2 y ]) ]
+  in
+    path attributes []
+
+
+{-| Renders a vertical line.
+
+    myLine : Svg msg
+    myLine =
+      vertical plane [ stroke "pink" ] x y0 y1
+
+-}
+vertical : Plane -> List (Attribute msg) -> Float -> Float -> Float -> Svg msg
+vertical plane userAttributes x y1 y2 =
+      let
+        attributes =
+          concat
+            [ stroke darkGrey ]
+            userAttributes
+            [ d (description plane [ Move x y1, Line x y1, Line x y2 ]) ]
+      in
+        path attributes []
+
+
+{-| Renders a horizontal line with the full length of the range.
+-}
+gridHorizontal : Plane -> List (Attribute msg) -> Float -> Svg msg
+gridHorizontal plane userAttributes y =
+  horizontal plane userAttributes y plane.x.min plane.x.max
+
+
+{-| Renders a vertical line with the full length of the domain.
+-}
+gridVertical : Plane -> List (Attribute msg) -> Float -> Svg msg
+gridVertical plane userAttributes y =
+  vertical plane userAttributes y plane.y.min plane.y.max
+
+
+{-| Renders ticks for the horizontal axis.
+
+    horizontalTicks : Svg msg
+    horizontalTicks =
+      xTicks plane height [ stroke "pink" ] axisYCoordinate tickPositions
+-}
+xTicks : Plane -> Int -> List (Attribute msg) -> Float -> List Float -> Svg msg
+xTicks plane height userAttributes y xs =
+  g [ class "elm-plot__x-ticks" ] (List.map (xTick plane height userAttributes y) xs)
+
+
+xTick : Plane -> Int -> List (Attribute msg) -> Float -> Float -> Svg msg
+xTick plane height userAttributes y x =
+  let
+    attributes =
+      concat
+        [ class "elm-plot__tick", stroke darkGrey ]
+        userAttributes
+        [ Attributes.x1 <| toString (toSVGX plane x)
+        , Attributes.x2 <| toString (toSVGX plane x)
+        , Attributes.y1 <| toString (toSVGY plane y)
+        , Attributes.y2 <| toString (toSVGY plane y + toFloat height)
+        ]
+  in
+    Svg.line attributes []
+
+
+{-| Renders ticks for the vertical axis.
+
+    verticalTicks : Svg msg
+    verticalTicks =
+      yTicks plane width [ stroke "pink" ] axisXCoordinate tickPositions
+-}
+yTicks : Plane -> Int -> List (Attribute msg) -> Float -> List Float -> Svg msg
+yTicks plane width userAttributes x ys =
+  g [ class "elm-plot__y-ticks" ] (List.map (yTick plane width userAttributes x) ys)
+
+
+yTick : Plane -> Int -> List (Attribute msg) -> Float -> Float -> Svg msg
+yTick plane width userAttributes x y =
+  let
+    attributes =
+      concat
+        [ class "elm-plot__tick",stroke darkGrey ]
+        userAttributes
+        [ Attributes.x1 <| toString (toSVGX plane x)
+        , Attributes.x2 <| toString (toSVGX plane x - toFloat width)
+        , Attributes.y1 <| toString (toSVGY plane y)
+        , Attributes.y2 <| toString (toSVGY plane y)
+        ]
+  in
+    Svg.line attributes []
+
+
+
+-- SERIES
 
 
 {-| -}
