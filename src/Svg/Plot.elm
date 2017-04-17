@@ -8,8 +8,8 @@ module Svg.Plot
     , monotone
     , horizontal
     , vertical
-    , gridHorizontal
-    , gridVertical
+    , fullHorizontal
+    , fullVertical
     , xTicks
     , yTicks
     )
@@ -21,7 +21,7 @@ module Svg.Plot
   you're welcome to open an issue in the repo and I'll see what I can do
   to accommodate your needs!
 
-  This module contains high-level SVG path elements.
+  This module contains higher-level SVG plotting elements.
 
 
 # Dots
@@ -42,7 +42,10 @@ These elements render a line series if no `fill` attribute is added!
       monotone plane [] dots
 
 # Lines
-@docs horizontal, vertical, gridHorizontal, gridVertical, xTicks, yTicks
+@docs fullHorizontal, fullVertical, horizontal, vertical
+
+## Ticks
+@docs xTicks, yTicks
 
 -}
 
@@ -96,16 +99,24 @@ vertical plane userAttributes x y1 y2 =
 
 
 {-| Renders a horizontal line with the full length of the range.
+
+    myXAxisOrGridLine : Svg msg
+    myXAxisOrGridLine =
+      fullHorizontal plane [] yPosition
 -}
-gridHorizontal : Plane -> List (Attribute msg) -> Float -> Svg msg
-gridHorizontal plane userAttributes y =
+fullHorizontal : Plane -> List (Attribute msg) -> Float -> Svg msg
+fullHorizontal plane userAttributes y =
   horizontal plane userAttributes y plane.x.min plane.x.max
 
 
 {-| Renders a vertical line with the full length of the domain.
+
+    myYAxisOrGridLine : Svg msg
+    myYAxisOrGridLine =
+      fullVertical plane [] xPosition
 -}
-gridVertical : Plane -> List (Attribute msg) -> Float -> Svg msg
-gridVertical plane userAttributes y =
+fullVertical : Plane -> List (Attribute msg) -> Float -> Svg msg
+fullVertical plane userAttributes y =
   vertical plane userAttributes y plane.y.min plane.y.max
 
 
@@ -114,6 +125,9 @@ gridVertical plane userAttributes y =
     horizontalTicks : Svg msg
     horizontalTicks =
       xTicks plane height [ stroke "pink" ] axisYCoordinate tickPositions
+
+  Passing a negative value for the height renders a ticks mirrored on the other
+  side of the axis.
 -}
 xTicks : Plane -> Int -> List (Attribute msg) -> Float -> List Float -> Svg msg
 xTicks plane height userAttributes y xs =
@@ -141,6 +155,9 @@ xTick plane height userAttributes y x =
     verticalTicks : Svg msg
     verticalTicks =
       yTicks plane width [ stroke "pink" ] axisXCoordinate tickPositions
+
+  Passing a negative value for the width renders a ticks mirrored on the other
+  side of the axis.
 -}
 yTicks : Plane -> Int -> List (Attribute msg) -> Float -> List Float -> Svg msg
 yTicks plane width userAttributes x ys =
