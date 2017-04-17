@@ -47,6 +47,9 @@ These elements render a line series if no `fill` attribute is added!
 @docs fullHorizontal, fullVertical, horizontal, vertical
 
 ## Ticks
+_Note:_ Passing a negative value as the height/width of a tick renders it
+mirrored on the other side of the axis!
+
 @docs xTick, xTicks, yTick, yTicks
 
 -}
@@ -127,16 +130,14 @@ fullVertical plane userAttributes y =
     horizontalTicks : Svg msg
     horizontalTicks =
       xTicks plane height [ stroke "pink" ] axisYCoordinate tickPositions
-
-  Passing a negative value for the height renders a ticks mirrored on the other
-  side of the axis.
 -}
 xTicks : Plane -> Int -> List (Attribute msg) -> Float -> List Float -> Svg msg
 xTicks plane height userAttributes y xs =
   g [ class "elm-plot__x-ticks" ] (List.map (xTick plane height userAttributes y) xs)
 
 
-{-| -}
+{-| Renders a single tick for the horizontal axis.
+-}
 xTick : Plane -> Int -> List (Attribute msg) -> Float -> Float -> Svg msg
 xTick plane height userAttributes y x =
   let
@@ -158,16 +159,14 @@ xTick plane height userAttributes y x =
     verticalTicks : Svg msg
     verticalTicks =
       yTicks plane width [ stroke "pink" ] axisXCoordinate tickPositions
-
-  Passing a negative value for the width renders a ticks mirrored on the other
-  side of the axis.
 -}
 yTicks : Plane -> Int -> List (Attribute msg) -> Float -> List Float -> Svg msg
 yTicks plane width userAttributes x ys =
   g [ class "elm-plot__y-ticks" ] (List.map (yTick plane width userAttributes x) ys)
 
 
-{-| -}
+{-| Renders a single tick for the vertical axis.
+-}
 yTick : Plane -> Int -> List (Attribute msg) -> Float -> Float -> Svg msg
 yTick plane width userAttributes x y =
   let
