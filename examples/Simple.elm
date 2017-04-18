@@ -28,7 +28,7 @@ main : Svg msg
 main =
   svg
       [ width (toString plane.x.length)
-      , height (toString plane.x.length)
+      , height (toString plane.y.length)
       ]
       [ viewPoint plane "hotpink" { x = 0, y = 0 }
       , viewPoint plane "pink" { x = -4, y = 4 }

@@ -1,4 +1,4 @@
-module FromData exposing (..)
+module Series exposing (..)
 
 import Svg exposing (Svg, svg, g, circle, text_, text)
 import Svg.Attributes exposing (width, height, stroke, fill, r, transform)
