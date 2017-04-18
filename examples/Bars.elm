@@ -26,7 +26,7 @@ plane =
   }
 
 
-group : Int -> List Float -> Bars msg
+group : Int -> List Float -> BarGroup msg
 group x ys =
   { bars = List.map (Bar [ stroke blueStroke, fill blueFill ]) ys
   , width = 0.8
@@ -34,7 +34,7 @@ group x ys =
   }
 
 
-data : List (Bars msg)
+data : List (BarGroup msg)
 data =
   List.indexedMap group [ [ 2, 3, 1 ], [ 5, 1, 4 ], [ 0.3, 5, 3 ] ]
 
