@@ -6,9 +6,10 @@ module Svg.Plot
     , scatter
     , linear
     , monotone
-    , BarGroup
     , Bar
-    , bars
+    , Groups
+    , Group
+    , grouped
     , Histogram
     , histogram
     , horizontal
@@ -51,7 +52,10 @@ These elements render a line series if no `fill` attribute is added!
       monotone plane [] dots
 
 # Bars
-@docs BarGroup, Bar, bars
+@docs Bar
+
+# Groups
+@docs Groups, Group, grouped
 
 ## Histograms
 @docs Histogram, histogram
@@ -78,15 +82,6 @@ import Colors exposing (..)
 -- BARS
 
 
-{-| A group of bars (a single data point in a bar chart).
--}
-type alias BarGroup msg =
-  { bars : List (Bar msg)
-  , width : Float
-  , x : Float
-  }
-
-
 {-| -}
 type alias Bar msg =
   { attributes : List (Attribute msg)
@@ -94,18 +89,35 @@ type alias Bar msg =
   }
 
 
+{-| -}
+type alias Groups msg =
+  { groups : List (Group msg)
+  , width : Float
+  }
+
+
+{-| A group of bars (a single data point in a bar chart).
+-}
+type alias Group msg =
+  { bars : List (Bar msg)
+  , x : Float
+  }
+
+
 {-| You can draw a bar chart like this:
 
-    group : Int -> List Float -> BarGroup msg
-    group x ys =
+    buys : Int -> List Float -> Group msg
+    buys x ys =
       { bars = List.map (Bar [ onClick MakeStuffHappen ]) ys
-      , width = 0.8
       , x = toFloat x + 1
       }
 
-    data : List (BarGroup msg)
-    data =
-      List.indexedMap group [ [ 2, 3, 1 ], [ 5, 1, 4 ], [ 1, 5, 3 ] ]
+    groups : Groups msg
+    groups =
+       { groups = List.indexedMap buys [ [ 2, 3, 1 ], [ 5, 1, 4 ], [ 1, 5, 3 ] ]
+       , width = 0.8
+       }
+
 
     main : Svg msg
     main =
@@ -113,19 +125,24 @@ type alias Bar msg =
         [ width (toString plane.x.length)
         , height (toString plane.y.length)
         ]
-        [ g [] (List.map (bars plane) data) ]
+        [ grouped plane groups ]
 
 Note on `width`: The width takes catersian units, however, should you have
 a width in SVG units, you can use `Svg.Coordinates.scaleCartesian` to
 translate it into cartesian units.
 -}
-bars : Plane -> BarGroup msg -> Svg msg
-bars plane group =
+grouped : Plane -> Groups msg -> Svg msg
+grouped plane { width, groups } =
+  g [] (List.map (viewGroup plane width) groups)
+
+
+viewGroup : Plane -> Float -> Group msg -> Svg msg
+viewGroup plane width group =
   let
     indexOffset index =
       toFloat index - (toFloat (List.length group.bars) / 2)
   in
-    viewBars plane indexOffset group
+    viewBars plane indexOffset width group
 
 
 
@@ -141,6 +158,7 @@ but I might add unequal support later!
 type alias Histogram msg =
   { bars : List (Bar msg)
   , interval : Float
+  , intervalBegin : Float
   }
 
 
@@ -165,23 +183,25 @@ type alias Histogram msg =
         [ histogram plane testScores ]
 -}
 histogram : Plane -> Histogram msg -> Svg msg
-histogram plane { bars, interval } =
+histogram plane { bars, intervalBegin, interval } =
   let
-    barGroup index bar =
+    group index bar =
       { bars = [ bar ]
-      , width = interval
-      , x = toFloat index * interval
+      , x = intervalBegin + toFloat index * interval
       }
+
+    viewBar index bar =
+      viewBars plane (always 0) interval (group index bar)
   in
-    g [] (List.indexedMap (\i b -> viewBars plane (always 0) (barGroup i b)) bars)
+    g [] (List.indexedMap viewBar bars)
 
 
 
 -- BARS INTERNAL
 
 
-viewBars : Plane -> (Int -> Float) -> BarGroup msg -> Svg msg
-viewBars plane indexOffset { x, width, bars } =
+viewBars : Plane -> (Int -> Float) -> Float -> Group msg -> Svg msg
+viewBars plane indexOffset width { x, bars } =
   let
     barWidth index =
       width / toFloat (List.length bars)
