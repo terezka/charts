@@ -170,7 +170,7 @@ histogram plane { bars, interval } =
     barGroup index bar =
       { bars = [ bar ]
       , width = interval
-      , x = toFloat index
+      , x = toFloat index * interval
       }
   in
     g [] (List.indexedMap (\i b -> viewBars plane (always 0) (barGroup i b)) bars)

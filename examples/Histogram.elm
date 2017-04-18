@@ -14,7 +14,7 @@ plane =
     , marginUpper = 10
     , length = 300
     , min = 0
-    , max = 10
+    , max = 21
     }
   , y =
     { marginLower = 10
@@ -29,7 +29,7 @@ plane =
 testScores : Histogram msg
 testScores =
   { bars = List.map (Bar [ stroke blueStroke, fill blueFill ]) [ 1, 2, 3, 6, 8, 9, 6, 4, 2, 1 ]
-  , interval = 1
+  , interval = 2.1
   }
 
 
