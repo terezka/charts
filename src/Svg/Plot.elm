@@ -8,7 +8,6 @@ module Svg.Plot
     , monotone
     , Bar
     , Groups
-    , Group
     , grouped
     , Histogram
     , histogram
@@ -55,7 +54,7 @@ These elements render a line series if no `fill` attribute is added!
 @docs Bar
 
 # Groups
-@docs Groups, Group, grouped
+@docs Groups, grouped
 
 ## Histograms
 @docs Histogram, histogram
@@ -91,33 +90,22 @@ type alias Bar msg =
 
 {-| -}
 type alias Groups msg =
-  { groups : List (Group msg)
+  { groups : List (List (Bar msg))
   , width : Float
-  }
-
-
-{-| A group of bars (a single data point in a bar chart).
--}
-type alias Group msg =
-  { bars : List (Bar msg)
-  , x : Float
   }
 
 
 {-| You can draw a bar chart like this:
 
-    buys : Int -> List Float -> Group msg
-    buys x ys =
-      { bars = List.map (Bar [ onClick MakeStuffHappen ]) ys
-      , x = toFloat x + 1
-      }
+    group : List Float -> List (Bar msg)
+    group =
+      List.map (Bar [ stroke "pink", fill "lightpink" ])
 
     groups : Groups msg
     groups =
-       { groups = List.indexedMap buys [ [ 2, 3, 1 ], [ 5, 1, 4 ], [ 1, 5, 3 ] ]
+       { groups = List.map group [ [ 2, 3, 1 ], [ 5, 1, 4 ], [ 1, 5, 3 ] ]
        , width = 0.8
        }
-
 
     main : Svg msg
     main =
@@ -133,16 +121,25 @@ translate it into cartesian units.
 -}
 grouped : Plane -> Groups msg -> Svg msg
 grouped plane { width, groups } =
-  g [] (List.map (viewGroup plane width) groups)
+  g [ class "elm-plot__grouped" ] (List.indexedMap (viewGroup plane width) groups)
 
 
-viewGroup : Plane -> Float -> Group msg -> Svg msg
-viewGroup plane width group =
+viewGroup : Plane -> Float -> Int -> List (Bar msg) -> Svg msg
+viewGroup plane width groupIndex bars =
   let
+    barWidth =
+      width / toFloat (List.length bars)
+
     indexOffset index =
-      toFloat index - (toFloat (List.length group.bars) / 2)
+      toFloat index - (toFloat (List.length bars) / 2)
+
+    x index =
+      toFloat groupIndex + 1 + barWidth * indexOffset index
+
+    viewGroupBar index bar =
+      viewBar plane barWidth (x index) bar
   in
-    viewBars plane indexOffset width group
+    g [ class "elm-plot__group" ] (List.indexedMap viewGroupBar bars)
 
 
 
@@ -185,47 +182,36 @@ type alias Histogram msg =
 histogram : Plane -> Histogram msg -> Svg msg
 histogram plane { bars, intervalBegin, interval } =
   let
-    group index bar =
-      { bars = [ bar ]
-      , x = intervalBegin + toFloat index * interval
-      }
+    x index =
+      intervalBegin + toFloat index * interval
 
-    viewBar index bar =
-      viewBars plane (always 0) interval (group index bar)
+    viewHistogramBar index bar =
+      viewBar plane interval (x index) bar
   in
-    g [] (List.indexedMap viewBar bars)
+    g [ class "elm-plot__histogram" ] (List.indexedMap viewHistogramBar bars)
 
 
 
 -- BARS INTERNAL
 
 
-viewBars : Plane -> (Int -> Float) -> Float -> Group msg -> Svg msg
-viewBars plane indexOffset width { x, bars } =
+viewBar : Plane -> Float -> Float -> Bar msg -> Svg msg
+viewBar plane width x bar =
   let
-    barWidth index =
-      width / toFloat (List.length bars)
-
-    offset x index =
-      x + barWidth index * indexOffset index
-
-    commands index bar =
-      [ Move (offset x index) (closestToZero plane)
-      , Line (offset x index) bar.y
-      , Line (offset x index + barWidth index) bar.y
-      , Line (offset x index + barWidth index) (closestToZero plane)
+    commands =
+      [ Move x (closestToZero plane)
+      , Line x bar.y
+      , Line (x + width) bar.y
+      , Line (x + width) (closestToZero plane)
       ]
 
-    attributes index bar =
+    attributes =
       concat
         [ stroke pinkStroke, fill pinkFill ]
         bar.attributes
-        [ d (description plane (commands index bar)) ]
-
-    viewBar index bar =
-      path (attributes index bar) []
+        [ d (description plane commands) ]
   in
-    g [ class "elm-plot__bars" ] (List.indexedMap viewBar bars)
+    path attributes []
 
 
 

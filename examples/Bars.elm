@@ -4,6 +4,7 @@ import Svg exposing (Svg, svg, g, circle, text_, text)
 import Svg.Attributes exposing (width, height, stroke, fill, r, transform)
 import Svg.Coordinates exposing (..)
 import Svg.Plot exposing (..)
+import Colors exposing (..)
 
 
 plane : Plane
@@ -25,16 +26,14 @@ plane =
   }
 
 
-buys : Int -> List Float -> Group msg
-buys x ys =
-  { bars = List.map (Bar []) ys
-  , x = toFloat x + 1
-  }
+group : List Float -> List (Bar msg)
+group =
+  List.map (Bar [ stroke blueStroke, fill blueFill ])
 
 
 groups : Groups msg
 groups =
-   { groups = List.indexedMap buys [ [ 2, 3, 1 ], [ 5, 1, 4 ], [ 1, 5, 3 ] ]
+   { groups = List.map group [ [ 2, 3, 1 ], [ 5, 1, 4 ], [ 1, 5, 3 ] ]
    , width = 0.8
    }
 
