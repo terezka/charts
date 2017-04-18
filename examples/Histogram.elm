@@ -42,7 +42,7 @@ main =
     ]
     [ histogram plane testScores
     , fullHorizontal plane [] 0
-    , fullVertical plane [] 0
-    , xTicks plane 5 [] 0 [ 1, 2, 3 ]
-    , yTicks plane 5 [] 0 [ 1, 2, 3 ]
+    , fullVertical plane [] 23
+    , xTicks plane 5 [] 0 [ 24, 26, 30 ]
+    , yTicks plane 5 [] 23 [ 1, 2, 3 ]
     ]
