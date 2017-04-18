@@ -6,6 +6,9 @@ module Svg.Plot
     , scatter
     , linear
     , monotone
+    , BarGroup
+    , Bar
+    , bars
     , horizontal
     , vertical
     , fullHorizontal
@@ -17,7 +20,7 @@ module Svg.Plot
     )
 
 
-{-| _Note:_ If you're looking to a plotting library, then
+{-| _Disclaimer:_ If you're looking to a plotting library, then
   use [elm-plot](https://github.com/terezka/elm-plot) instead, because this library is not
   made to be user friendly. If you feel like you're missing something in elm-plot,
   you're welcome to open an issue in the repo and I'll see what I can do
@@ -26,10 +29,12 @@ module Svg.Plot
   This module contains higher-level SVG plotting elements.
 
 
-# Dots
+# Series
+
+## Dots
 @docs Dot, dot, clear
 
-# Interpolation
+## Interpolation
 @docs scatter, linear, monotone
 
 ## Note on usage
@@ -43,22 +48,106 @@ These elements render a line series if no `fill` attribute is added!
     lineSeries =
       monotone plane [] dots
 
-# Lines
+# Bars
+@docs BarGroup, Bar, bars
+
+# Straight lines
 @docs fullHorizontal, fullVertical, horizontal, vertical
 
 ## Ticks
-_Note:_ Passing a negative value as the height/width of a tick renders it
+ProTip: Passing a negative value as the height/width of a tick renders it
 mirrored on the other side of the axis!
 
 @docs xTick, xTicks, yTick, yTicks
 
 -}
 
-import Svg exposing (Svg, Attribute, g, path, text)
+import Svg exposing (Svg, Attribute, g, path, rect, text)
 import Svg.Attributes as Attributes exposing (class, width, height, stroke, fill, d, transform)
 import Svg.Coordinates exposing (Plane, Point, place, toSVGX, toSVGY)
 import Svg.Commands exposing (..)
 import Colors exposing (..)
+
+
+
+-- BARS
+
+
+{-| A group of bars (a single data point in a bar chart).
+
+  Note on groups: If your dependent axis has sequential values,
+  you probably want a histogram. In this cause all you have to do, is
+  only pass a single bar to the `bars` property and have the width be
+  the delta amongst your x-values.
+-}
+type alias BarGroup msg =
+  { bars : List (Bar msg)
+  , width : Float
+  , x : Float
+  }
+
+
+{-| -}
+type alias Bar msg =
+  { attributes : List (Attribute msg)
+  , y : Float
+  }
+
+
+{-| You can draw a bar chart like this:
+
+    group : Int -> List Float -> BarGroup msg
+    group x ys =
+      { bars = List.map (Bar [ onClick MakeStuffHappen ]) ys
+      , width = 0.8
+      , x = toFloat x + 1
+      }
+
+    data : List (BarGroup msg)
+    data =
+      List.indexedMap group [ [ 2, 3, 1 ], [ 5, 1, 4 ], [ 1, 5, 3 ] ]
+
+    viewBars : Svg msg
+    viewBars =
+      svg
+        [ width (toString plane.x.length)
+        , height (toString plane.y.length)
+        ]
+        [ g [] (List.map (bars plane) data) ]
+
+Note on `width`: The width takes catersian units, however, should you have
+a width in SVG units, you can use `Svg.Coordinates.scaleCartesian` to
+translate it into cartesian units.
+-}
+bars : Plane -> BarGroup msg -> Svg msg
+bars plane { x, width, bars } =
+  let
+    barWidth index =
+      width / toFloat (List.length bars)
+
+    indexOffset index =
+      toFloat index - (toFloat (List.length bars) / 2)
+
+    offset x index =
+      x + barWidth index * indexOffset index
+
+    commands index bar =
+      [ Move (offset x index) (closestToZero plane)
+      , Line (offset x index) bar.y
+      , Line (offset x index + barWidth index) bar.y
+      , Line (offset x index + barWidth index) (closestToZero plane)
+      ]
+
+    attributes index bar =
+      concat
+        [ stroke pinkStroke, fill pinkFill ]
+        bar.attributes
+        [ d (description plane (commands index bar)) ]
+
+    viewBar index bar =
+      path (attributes index bar) []
+  in
+    g [ class "elm-plot__bars" ] (List.indexedMap viewBar bars)
 
 
 
