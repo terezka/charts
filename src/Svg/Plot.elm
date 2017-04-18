@@ -107,8 +107,8 @@ type alias Bar msg =
     data =
       List.indexedMap group [ [ 2, 3, 1 ], [ 5, 1, 4 ], [ 1, 5, 3 ] ]
 
-    viewBars : Svg msg
-    viewBars =
+    main : Svg msg
+    main =
       svg
         [ width (toString plane.x.length)
         , height (toString plane.y.length)
@@ -132,14 +132,38 @@ bars plane group =
 -- HISTOGRAM
 
 
-{-| -}
+{-| The bars are the class frequencies and the interval is the class interval's
+upper limit minus lower limit. Right now, you can only have equal class intervals,
+but I might add unequal support later!
+
+[What is going on with all these words?](http://onlinestatbook.com/2/graphing_distributions/histograms.html)
+-}
 type alias Histogram msg =
   { bars : List (Bar msg)
   , interval : Float
   }
 
 
-{-| -}
+{-|
+
+    frequencies : List Float
+    frequencies =
+      [ 1, 2, 3, 6, 8, 9, 6, 4, 2, 1 ]
+
+    testScores : Histogram msg
+    testScores =
+      { bars = List.map (Bar [ stroke blueStroke, fill blueFill ]) frequencies
+      , interval = 1
+      }
+
+    main : Svg msg
+    main =
+      svg
+        [ width (toString plane.x.length)
+        , height (toString plane.y.length)
+        ]
+        [ histogram plane testScores ]
+-}
 histogram : Plane -> Histogram msg -> Svg msg
 histogram plane { bars, interval } =
   let
