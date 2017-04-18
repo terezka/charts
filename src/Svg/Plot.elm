@@ -9,6 +9,8 @@ module Svg.Plot
     , BarGroup
     , Bar
     , bars
+    , Histogram
+    , histogram
     , horizontal
     , vertical
     , fullHorizontal
@@ -51,6 +53,9 @@ These elements render a line series if no `fill` attribute is added!
 # Bars
 @docs BarGroup, Bar, bars
 
+## Histograms
+@docs Histogram, histogram
+
 # Straight lines
 @docs fullHorizontal, fullVertical, horizontal, vertical
 
@@ -74,11 +79,6 @@ import Colors exposing (..)
 
 
 {-| A group of bars (a single data point in a bar chart).
-
-  Note on groups: If your dependent axis has sequential values,
-  you probably want a histogram. In this cause all you have to do, is
-  only pass a single bar to the `bars` property and have the width be
-  the delta amongst your x-values.
 -}
 type alias BarGroup msg =
   { bars : List (Bar msg)
@@ -107,8 +107,8 @@ type alias Bar msg =
     data =
       List.indexedMap group [ [ 2, 3, 1 ], [ 5, 1, 4 ], [ 1, 5, 3 ] ]
 
-    viewBars : Svg msg
-    viewBars =
+    main : Svg msg
+    main =
       svg
         [ width (toString plane.x.length)
         , height (toString plane.y.length)
@@ -120,13 +120,71 @@ a width in SVG units, you can use `Svg.Coordinates.scaleCartesian` to
 translate it into cartesian units.
 -}
 bars : Plane -> BarGroup msg -> Svg msg
-bars plane { x, width, bars } =
+bars plane group =
+  let
+    indexOffset index =
+      toFloat index - (toFloat (List.length group.bars) / 2)
+  in
+    viewBars plane indexOffset group
+
+
+
+-- HISTOGRAM
+
+
+{-| The bars are the class frequencies and the interval is the class interval's
+upper limit minus lower limit. Right now, you can only have equal class intervals,
+but I might add unequal support later!
+
+[What is going on with all these words?](http://onlinestatbook.com/2/graphing_distributions/histograms.html)
+-}
+type alias Histogram msg =
+  { bars : List (Bar msg)
+  , interval : Float
+  }
+
+
+{-|
+
+    frequencies : List Float
+    frequencies =
+      [ 1, 2, 3, 6, 8, 9, 6, 4, 2, 1 ]
+
+    testScores : Histogram msg
+    testScores =
+      { bars = List.map (Bar [ stroke blueStroke, fill blueFill ]) frequencies
+      , interval = 1
+      }
+
+    main : Svg msg
+    main =
+      svg
+        [ width (toString plane.x.length)
+        , height (toString plane.y.length)
+        ]
+        [ histogram plane testScores ]
+-}
+histogram : Plane -> Histogram msg -> Svg msg
+histogram plane { bars, interval } =
+  let
+    barGroup index bar =
+      { bars = [ bar ]
+      , width = interval
+      , x = toFloat index
+      }
+  in
+    g [] (List.indexedMap (\i b -> viewBars plane (always 0) (barGroup i b)) bars)
+
+
+
+-- BARS INTERNAL
+
+
+viewBars : Plane -> (Int -> Float) -> BarGroup msg -> Svg msg
+viewBars plane indexOffset { x, width, bars } =
   let
     barWidth index =
       width / toFloat (List.length bars)
-
-    indexOffset index =
-      toFloat index - (toFloat (List.length bars) / 2)
 
     offset x index =
       x + barWidth index * indexOffset index
@@ -151,7 +209,7 @@ bars plane { x, width, bars } =
 
 
 
--- LINES
+-- STRAIGHT LINES
 
 
 {-| Renders a horizontal line.
