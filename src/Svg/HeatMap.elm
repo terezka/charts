@@ -8,7 +8,7 @@ to accommodate your needs!
 
 ---
 
-For creating a SVG heatmap. Note that this return a SVG element not yet wrapped
+View for creating a SVG heatmap. Note that this return a SVG element not yet wrapped
 in the `svg` tag.
 
 # Definitions
