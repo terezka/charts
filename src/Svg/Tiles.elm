@@ -8,7 +8,7 @@ to accommodate your needs!
 
 ---
 
-View for creating a SVG tiles for heatmaps or choropleth. Note that this return a SVG element not yet wrapped
+View for creating tiled maps like heatmaps or choropleths. Note that this return a SVG element not yet wrapped
 in the `svg` tag.
 
 # Composing
@@ -27,7 +27,8 @@ import Svg.Attributes as Attributes exposing (class, width, height, stroke, tran
 -- TILES
 
 
-{-| -}
+{-| (You can use the helpers for calculating most of these properties. You're welcome.)
+-}
 type alias Map msg =
   { tiles : List (Tile msg)
   , tilesPerRow : Int
@@ -44,15 +45,16 @@ type alias Tile msg =
   }
 
 
-{-| -}
+{-| View a map!
+-}
 view : Map msg -> Svg msg
 view { tiles, tilesPerRow, tileWidth, tileHeight } =
   let
     xCoord =
-      tileXCoord tilesPerRow tileWidth
+      tileXCoord tileWidth tilesPerRow
 
     yCoord =
-      tileYCoord tilesPerRow tileHeight
+      tileYCoord tileHeight tilesPerRow
 
     tileAttributes { index, attributes } =
       [ Attributes.stroke "white"
@@ -84,19 +86,24 @@ view { tiles, tilesPerRow, tileWidth, tileHeight } =
 
 
 
-
 -- HELPERS
 
 
-{-| -}
+{-| Pass the __width__ of your map, and the __amount of
+ tiles in a row__, and it gives you back the width of
+ a single tile.
+ -}
 tileWidth : Int -> Int -> Int
 tileWidth width tilesPerRow =
   ceiling (toFloat width / toFloat tilesPerRow)
 
 
-{-| -}
+{-| Pass the __height__ of your map, the __amount of
+ tiles in a row__, and the __total number of tiles__,
+ and it gives you back the height of a single tile.
+ -}
 tileHeight : Int -> Int -> Int -> Int
-tileHeight height numberOfTiles tilesPerRow =
+tileHeight height tilesPerRow numberOfTiles =
   ceiling (toFloat height / toFloat (tilesPerColumn numberOfTiles tilesPerRow))
 
 
@@ -105,19 +112,24 @@ tilesPerColumn numberOfTiles tilesPerRow =
   ceiling (toFloat numberOfTiles / toFloat tilesPerRow)
 
 
-{-| -}
-tileXCoord : Int -> Float -> Int -> Float
-tileXCoord tilesPerRow tileWidth index =
+{-| Pass the __tile width__, the __amount of tiles in a row__, and
+ the __tile's index__ and it'll get you it's x-coordinate.
+-}
+tileXCoord : Float -> Int -> Int -> Float
+tileXCoord tileWidth tilesPerRow index =
   tileWidth * toFloat (index % tilesPerRow)
 
 
-{-| -}
-tileYCoord : Int -> Float -> Int -> Float
-tileYCoord tilesPerRow tileHeight index =
+{-| Pass the __tile height__, the __amount of tiles in a row__ and
+ the __tile's index__ and it'll get you it's y-coordinate.
+-}
+tileYCoord : Float -> Int -> Int -> Float
+tileYCoord tileHeight tilesPerRow index =
   tileHeight * toFloat (index // tilesPerRow)
 
 
-{-| -}
+{-| For heatmaps. It calculates a value's value relative to all values.
+-}
 proportion : (a -> Float) -> List a -> Float -> Float
 proportion toValue tiles value =
   let

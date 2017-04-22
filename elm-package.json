@@ -8,8 +8,8 @@
     ],
     "exposed-modules": [
         "Svg.Coordinates",
-        "Svg.Plot",
-        "Svg.HeatMap"
+        "Svg.Tiles",
+        "Svg.Plot"
     ],
     "dependencies": {
         "elm-lang/core": "5.1.1 <= v < 6.0.0",
