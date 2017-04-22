@@ -8,6 +8,7 @@
     ],
     "exposed-modules": [
         "Svg.Coordinates",
+        "Svg.Tiles",
         "Svg.Plot"
     ],
     "dependencies": {
