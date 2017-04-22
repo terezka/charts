@@ -10,8 +10,8 @@ proportion =
   Tiles.proportion identity data
 
 
-heatmap : Map msg
-heatmap =
+america : Map msg
+america =
   { tiles = List.map3 tile stateIndices stateAbbs data
   , tilesPerRow = 11
   , tileWidth = 30
@@ -39,7 +39,7 @@ main =
     [ width "300"
     , height "300"
     ]
-    [ Tiles.view heatmap ]
+    [ Tiles.view america ]
 
 
 data : List Float
