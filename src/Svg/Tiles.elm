@@ -20,11 +20,11 @@ in the `svg` tag.
 -}
 
 import Svg exposing (Svg, Attribute, g, path, rect, text)
-import Svg.Attributes as Attributes exposing (class, width, height, stroke, fill, d, transform)
+import Svg.Attributes as Attributes exposing (class, width, height, stroke, transform, style)
 
 
 
--- HEAT MAPS
+-- TILES
 
 
 {-| -}
@@ -48,6 +48,12 @@ type alias Tile msg =
 view : Map msg -> Svg msg
 view { tiles, tilesPerRow, tileWidth, tileHeight } =
   let
+    xCoord =
+      tileXCoord tilesPerRow tileWidth
+
+    yCoord =
+      tileYCoord tilesPerRow tileHeight
+
     tileAttributes { index, attributes } =
       [ Attributes.stroke "white"
       , Attributes.strokeWidth "1px"
@@ -55,13 +61,24 @@ view { tiles, tilesPerRow, tileWidth, tileHeight } =
       ++ attributes ++
       [ Attributes.width (toString tileWidth)
       , Attributes.height (toString tileHeight)
-      , Attributes.x (toString <| tileXCoord tilesPerRow tileWidth index)
-      , Attributes.y (toString <| tileYCoord tilesPerRow tileHeight index)
+      , Attributes.x (toString <| xCoord index)
+      , Attributes.y (toString <| yCoord index)
       ]
+
+    viewContent index view =
+      g [ style "text-anchor: middle;"
+        , transform <|
+            translate
+              (xCoord index + tileWidth / 2)
+              (yCoord index + tileHeight / 2 + 5)
+        ]
+        [  view ]
 
     viewTile tile =
       g [ Attributes.class "elm-plot__heat-map__tile" ]
-        [ rect (tileAttributes tile) [] ]
+        [ rect (tileAttributes tile) []
+        , Maybe.map (viewContent tile.index) tile.content |> Maybe.withDefault (text "")
+        ]
   in
     g [ Attributes.class "elm-plot__heat-map" ] (List.map viewTile tiles)
 
@@ -115,3 +132,12 @@ proportion toValue tiles value =
         |> Maybe.withDefault lowestValue
   in
     (value - lowestValue) / (highestValue - lowestValue)
+
+
+
+-- BORING FUNCTIONS
+
+
+translate : Float -> Float -> String
+translate x y =
+  "translate(" ++ toString x ++ ", " ++ toString y ++ ")"
