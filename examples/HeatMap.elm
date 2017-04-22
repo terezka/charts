@@ -2,16 +2,20 @@ module HeatMap exposing (..)
 
 import Svg exposing (Svg, svg, g, circle, text_, text)
 import Svg.Attributes exposing (width, height, stroke, fill, r, transform)
-import Svg.View as View exposing (..)
+import Svg.Tiles as Tiles exposing (..)
 
 
-heatmap : HeatMap msg
+proportion : Float -> Float
+proportion =
+  Tiles.proportion identity data
+
+
+heatmap : Map msg
 heatmap =
-  { tiles = List.indexedMap tile [ 1, 2, 3, 6, 8, 9, 6, 4, 2, 1, 3, 6, 8, 9, 6, 4, 2, 1, 4, 2, 1, 9, 6, 4, 2, 1, 3, 6, 8, 9, 6, 4, 2, 1, 4, 2, 1, 3, 6, 8, 9, 1, 2, 3, 6, 8, 9, 6, 4, 2, 1, 3, 6, 8, 9, 6, 4, 2, 1, 4, 2, 1, 9, 6, 4, 2, 1, 3, 6, 8, 9, 6, 4, 2, 1, 4, 2, 1, 3, 6, 8, 9,6, 4, 2, 1, 4, 2, 1, 3, 6, 8, 9, 6, 4, 2, 1, 4, 2, 1, 3, 6, 8, 9, 2, 1, 3, 6, 8, 9 ]
+  { tiles = List.indexedMap tile data
   , tilesPerRow = 10
-  , width = 300
-  , height = 300
-  , color = { scale = Gradient 253 185 231, missing = "grey" }
+  , tileWidth = 30
+  , tileHeight = 30
   }
 
 
@@ -19,17 +23,20 @@ heatmap =
 tile : Int -> Float -> Tile msg
 tile index value =
   { content = Nothing
-  , attributes = []
-  , value = Just value
+  , attributes = [ fill ("rgba(253, 185, 231, " ++ toString (proportion value) ++ ")") ]
   , index = index
   }
-
 
 
 main : Svg msg
 main =
   svg
-    [ width (toString heatmap.width)
-    , height (toString heatmap.height)
+    [ width "300"
+    , height "300"
     ]
-    [ View.heatmap heatmap ]
+    [ Tiles.view heatmap ]
+
+
+data : List Float
+data =
+  [ 1, 2, 3, 6, 8, 9, 6, 4, 2, 1, 3, 6, 8, 9, 6, 4, 2, 1, 4, 2, 1, 9, 6, 4, 2, 1, 3, 6, 8, 9, 6, 4, 2, 1, 4, 2, 1, 3, 6, 8, 9, 1, 2, 3, 6, 8, 9, 6, 4, 2, 1, 3, 6, 8, 9, 6, 4, 2, 1, 4, 2, 1, 9, 6, 4, 2, 1, 3, 6, 8, 9, 6, 4, 2, 1, 4, 2, 1, 3, 6, 8, 9,6, 4, 2, 1, 4, 2, 1, 3, 6, 8, 9, 6, 4, 2, 1, 4, 2, 1, 3, 6, 8, 9, 2, 1, 3, 6, 8, 9 ]
