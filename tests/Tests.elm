@@ -10,13 +10,15 @@ import Svg exposing (Svg, svg)
 import Svg.Attributes
 import Svg.Coordinates as Coordinates exposing (..)
 import Svg.Plot exposing (..)
+import Svg.Tiles exposing (..)
 
 
 all : Test
 all =
-  describe "elm-plot rouge"
+  describe "elm-plot-rouge"
     [ coordinates
     , plots
+    , maps
     ]
 
 coordinates : Test
@@ -79,6 +81,24 @@ plots =
                   |> Query.fromHtml
                   |> Query.find [ Selector.tag "path" ]
                   |> Query.has [ Selector.attribute "fill" "red" ]
+    ]
+
+
+maps : Test
+maps =
+  describe "Maps"
+    [ test "tileWidth" <|
+        \() ->
+          Expect.equal 30 (tileWidth 300 10)
+    , test "tileHeight" <|
+        \() ->
+          Expect.equal 30 (tileHeight 300 10 100)
+    , test "tileXCoord" <|
+        \() ->
+          Expect.equal 60 (tileXCoord 30 10 2)
+    , test "tileYCoord" <|
+        \() ->
+          Expect.equal 60 (tileYCoord 30 10 22)
     ]
 
 
