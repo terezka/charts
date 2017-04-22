@@ -95,7 +95,7 @@ view { tiles, tilesPerRow, tileWidth, tileHeight } =
  -}
 tileWidth : Int -> Int -> Int
 tileWidth width tilesPerRow =
-  ceiling (toFloat width / toFloat tilesPerRow)
+  floor (toFloat width / toFloat tilesPerRow)
 
 
 {-| Pass the __height__ of your map, the __amount of
@@ -104,7 +104,7 @@ tileWidth width tilesPerRow =
  -}
 tileHeight : Int -> Int -> Int -> Int
 tileHeight height tilesPerRow numberOfTiles =
-  ceiling (toFloat height / toFloat (tilesPerColumn numberOfTiles tilesPerRow))
+  floor (toFloat height / toFloat (tilesPerColumn numberOfTiles tilesPerRow))
 
 
 tilesPerColumn : Int -> Int -> Int
