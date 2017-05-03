@@ -479,40 +479,35 @@ monotoneInterpolation points =
     case points of
       p0 :: p1 :: p2 :: rest ->
         let
-          tangent1 =
+          nextTangent =
             slope3 p0 p1 p2
 
-          tangent0 =
-            slope2 p0 p1 tangent1
+          previousTangent =
+            slope2 p0 p1 nextTangent
         in
-          monotoneCurve p0 p1 tangent0 tangent1 ++ monotoneNext (p1 :: p2 :: rest) tangent1 []
+          monotoneCurve p0 p1 previousTangent nextTangent ++
+          monotoneNext (p1 :: p2 :: rest) nextTangent
 
       _ ->
         []
 
 
-monotoneNext : List (Dot view) -> Float -> List Command -> List Command
-monotoneNext points tangent0 commands =
+monotoneNext : List (Dot view) -> Float -> List Command
+monotoneNext points previousTangent =
   case points of
     p0 :: p1 :: p2 :: rest ->
       let
-        tangent1 =
+        nextTangent =
           slope3 p0 p1 p2
-
-        nextCommands =
-          commands ++ monotoneCurve p0 p1 tangent0 tangent1
       in
-        monotoneNext (p1 :: p2 :: rest) tangent1 nextCommands
+        monotoneCurve p0 p1 previousTangent nextTangent ++
+        monotoneNext (p1 :: p2 :: rest) nextTangent
 
-    [ p1, p2 ] ->
-      let
-        tangent1 =
-          slope3 p1 p2 p2
-      in
-        commands ++ monotoneCurve p1 p2 tangent0 tangent1
+    [ p0, p1 ] ->
+      monotoneCurve p0 p1 previousTangent (slope3 p0 p1 p1)
 
     _ ->
-        commands
+        []
 
 
 monotoneCurve : (Dot view) -> (Dot view) -> Float -> Float -> List Command

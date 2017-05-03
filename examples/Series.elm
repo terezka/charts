@@ -39,6 +39,9 @@ data2 =
   [ { x = -4, y = 4 }
   , { x = -2, y = 3 }
   , { x = 4, y = -4 }
+  , { x = 6, y = 4 }
+  , { x = 8, y = 3 }
+  , { x = 10, y = -4 }
   ]
 
 
@@ -61,7 +64,7 @@ main =
       , height (toString plane.x.length)
       ]
       [ linear plane [ stroke blueStroke, fill blueFill ] (List.map clear data1)
-      , monotone plane [ stroke pinkStroke ] (List.map (dot (viewCircle pinkStroke)) data2)
+      , monotone plane [ stroke pinkStroke ] (List.map (dot (viewCircle transparent)) data2)
       , scatter plane (List.map (dot (viewCircle "#f9c3b0")) data3)
       , fullHorizontal plane [] 0
       , fullVertical plane [] 0
