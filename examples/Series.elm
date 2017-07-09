@@ -69,7 +69,7 @@ main =
       , monotone plane
           [ stroke pinkStroke ]
           (List.map (applyPoint <| dot (viewCircle transparent)) data2)
-      , scatter plane 
+      , scatter plane
           (List.map (applyPoint <| dot (viewCircle "#f9c3b0")) data3)
       , fullHorizontal plane [] 0
       , fullVertical plane [] 0
