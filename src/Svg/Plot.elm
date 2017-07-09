@@ -2,6 +2,7 @@ module Svg.Plot
   exposing
     ( Dot
     , dot
+    , customDot
     , clear
     , scatter
     , linear
@@ -37,7 +38,7 @@ This module contains higher-level SVG plotting elements.
 # Series
 
 ## Dots
-@docs Dot, dot, clear
+@docs Dot, dot, clear, customDot
 
 ## Interpolation
 @docs scatter, linear, monotone
@@ -249,14 +250,14 @@ horizontal plane userAttributes y x1 x2 =
 -}
 vertical : Plane -> List (Attribute msg) -> Float -> Float -> Float -> Svg msg
 vertical plane userAttributes x y1 y2 =
-      let
-        attributes =
-          concat
-            [ stroke darkGrey ]
-            userAttributes
-            [ d (description plane [ Move x y1, Line x y1, Line x y2 ]) ]
-      in
-        path attributes []
+  let
+    attributes =
+      concat
+        [ stroke darkGrey ]
+        userAttributes
+        [ d (description plane [ Move x y1, Line x y1, Line x y2 ]) ]
+  in
+    path attributes []
 
 
 {-| Renders a horizontal line with the full length of the range.
@@ -345,7 +346,7 @@ yTick plane width userAttributes x y =
 
 {-| -}
 type alias Dot msg =
-  { view : Maybe (Svg msg)
+  { view : Maybe (Float -> Float -> Svg msg)
   , x : Float
   , y : Float
   }
@@ -353,16 +354,23 @@ type alias Dot msg =
 
 {-| A dot without visual representation.
 -}
-clear : Point -> Dot msg
-clear { x, y } =
-  Dot Nothing x y
+clear : Float -> Float -> Dot msg
+clear =
+  Dot Nothing
 
 
-{-| An dot with a view.
+{-| An dot with a view where you control how it's positioned.
 -}
-dot : Svg msg -> Point -> Dot msg
-dot view { x, y } =
-  Dot (Just view) x y
+customDot : (Float -> Float -> Svg msg) -> Float -> Float -> Dot msg
+customDot view =
+  Dot (Just view)
+
+
+{-| An dot with a view which is wrapped in a `g` element and positioned with a transform.
+-}
+dot : Svg msg -> Float -> Float -> Dot msg
+dot view =
+  customDot (defaultDotView view)
 
 
 {-| Series with no interpolation.
@@ -453,7 +461,13 @@ viewDot plane dot =
       text ""
 
     Just view ->
-      g [ place plane (point dot) ] [ view ]
+      view (toSVGX plane dot.x) (toSVGY plane dot.y)
+
+
+defaultDotView : Svg msg -> Float -> Float -> Svg msg
+defaultDotView view x y =
+  g [ transform <| "translate(" ++ toString x ++ "," ++ toString y ++ ")" ]
+    [ view ]
 
 
 point : Dot msg -> Point
@@ -476,43 +490,38 @@ linearInterpolation =
 
 monotoneInterpolation : List (Dot view) -> List Command
 monotoneInterpolation points =
-    case points of
-      p0 :: p1 :: p2 :: rest ->
-        let
-          tangent1 =
-            slope3 p0 p1 p2
-
-          tangent0 =
-            slope2 p0 p1 tangent1
-        in
-          monotoneCurve p0 p1 tangent0 tangent1 ++ monotoneNext (p1 :: p2 :: rest) tangent1 []
-
-      _ ->
-        []
-
-
-monotoneNext : List (Dot view) -> Float -> List Command -> List Command
-monotoneNext points tangent0 commands =
   case points of
     p0 :: p1 :: p2 :: rest ->
       let
-        tangent1 =
+        nextTangent =
           slope3 p0 p1 p2
 
-        nextCommands =
-          commands ++ monotoneCurve p0 p1 tangent0 tangent1
+        previousTangent =
+          slope2 p0 p1 nextTangent
       in
-        monotoneNext (p1 :: p2 :: rest) tangent1 nextCommands
-
-    [ p1, p2 ] ->
-      let
-        tangent1 =
-          slope3 p1 p2 p2
-      in
-        commands ++ monotoneCurve p1 p2 tangent0 tangent1
+        monotoneCurve p0 p1 previousTangent nextTangent ++
+        monotoneNext (p1 :: p2 :: rest) nextTangent
 
     _ ->
-        commands
+      []
+
+
+monotoneNext : List (Dot view) -> Float -> List Command
+monotoneNext points previousTangent =
+  case points of
+    p0 :: p1 :: p2 :: rest ->
+      let
+        nextTangent =
+          slope3 p0 p1 p2
+      in
+        monotoneCurve p0 p1 previousTangent nextTangent ++
+        monotoneNext (p1 :: p2 :: rest) nextTangent
+
+    [ p0, p1 ] ->
+      monotoneCurve p0 p1 previousTangent (slope3 p0 p1 p1)
+
+    _ ->
+        []
 
 
 monotoneCurve : (Dot view) -> (Dot view) -> Float -> Float -> List Command
@@ -582,7 +591,6 @@ last list =
   List.head (List.drop (List.length list - 1) list)
 
 
-{- Sorry, Evan -}
 hasFill : List (Attribute msg) -> Bool
 hasFill attributes =
   List.any (toString >> String.contains "realKey = \"fill\"") attributes

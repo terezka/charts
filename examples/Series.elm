@@ -39,6 +39,9 @@ data2 =
   [ { x = -4, y = 4 }
   , { x = -2, y = 3 }
   , { x = 4, y = -4 }
+  , { x = 6, y = 4 }
+  , { x = 8, y = 3 }
+  , { x = 10, y = -4 }
   ]
 
 
@@ -60,9 +63,14 @@ main =
       [ width (toString plane.x.length)
       , height (toString plane.x.length)
       ]
-      [ linear plane [ stroke blueStroke, fill blueFill ] (List.map clear data1)
-      , monotone plane [ stroke pinkStroke ] (List.map (dot (viewCircle pinkStroke)) data2)
-      , scatter plane (List.map (dot (viewCircle "#f9c3b0")) data3)
+      [ linear plane
+          [ stroke blueStroke, fill blueFill ]
+          (List.map (applyPoint clear) data1)
+      , monotone plane
+          [ stroke pinkStroke ]
+          (List.map (applyPoint <| dot (viewCircle transparent)) data2)
+      , scatter plane
+          (List.map (applyPoint <| dot (viewCircle "#f9c3b0")) data3)
       , fullHorizontal plane [] 0
       , fullVertical plane [] 0
       , xTicks plane 5 [] 0 [ 1, 2, 3 ]
@@ -73,3 +81,8 @@ main =
 viewCircle : String -> Svg msg
 viewCircle color =
   circle [ stroke color, fill color, r "5" ] []
+
+
+applyPoint : (Float -> Float -> a) -> Point -> a
+applyPoint f { x, y }=
+  f x y
