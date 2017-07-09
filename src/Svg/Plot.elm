@@ -590,7 +590,6 @@ last list =
   List.head (List.drop (List.length list - 1) list)
 
 
-{- Sorry, Evan -}
 hasFill : List (Attribute msg) -> Bool
 hasFill attributes =
   List.any (toString >> String.contains "realKey = \"fill\"") attributes
