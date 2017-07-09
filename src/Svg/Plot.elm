@@ -345,7 +345,7 @@ yTick plane width userAttributes x y =
 
 {-| -}
 type alias Dot msg =
-  { view : Maybe (Svg msg)
+  { view : Maybe (Float -> Float -> Svg msg)
   , x : Float
   , y : Float
   }
@@ -353,16 +353,23 @@ type alias Dot msg =
 
 {-| A dot without visual representation.
 -}
-clear : Point -> Dot msg
-clear { x, y } =
-  Dot Nothing x y
+clear : Float -> Float -> Dot msg
+clear =
+  Dot Nothing
 
 
-{-| An dot with a view.
+{-| An dot with a view where you control how it's positioned.
 -}
-dot : Svg msg -> Point -> Dot msg
-dot view { x, y } =
-  Dot (Just view) x y
+customDot : (Float -> Float -> Svg msg) -> Float -> Float -> Dot msg
+customDot view =
+  Dot (Just view)
+
+
+{-| An dot with a view which is wrapped in a `g` elemenet and positioned with a transform.
+-}
+dot : Svg msg -> Float -> Float -> Dot msg
+dot view =
+  customDot (defaultDotView view)
 
 
 {-| Series with no interpolation.
@@ -453,7 +460,13 @@ viewDot plane dot =
       text ""
 
     Just view ->
-      g [ place plane (point dot) ] [ view ]
+      view (toSVGX plane dot.x) (toSVGY plane dot.y)
+
+
+defaultDotView : Svg msg -> Float -> Float -> Svg msg
+defaultDotView view x y =
+  g [ transform <| "translate(" ++ toString x ++ "," ++ toString y ++ ")" ]
+    [ view ]
 
 
 point : Dot msg -> Point
