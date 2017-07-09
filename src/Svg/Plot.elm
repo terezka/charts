@@ -470,11 +470,6 @@ defaultDotView view x y =
     [ view ]
 
 
-point : Dot msg -> Point
-point { x, y } =
-  Point x y
-
-
 
 -- LINEAR INTERPOLATION
 
