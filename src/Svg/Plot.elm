@@ -249,14 +249,14 @@ horizontal plane userAttributes y x1 x2 =
 -}
 vertical : Plane -> List (Attribute msg) -> Float -> Float -> Float -> Svg msg
 vertical plane userAttributes x y1 y2 =
-      let
-        attributes =
-          concat
-            [ stroke darkGrey ]
-            userAttributes
-            [ d (description plane [ Move x y1, Line x y1, Line x y2 ]) ]
-      in
-        path attributes []
+  let
+    attributes =
+      concat
+        [ stroke darkGrey ]
+        userAttributes
+        [ d (description plane [ Move x y1, Line x y1, Line x y2 ]) ]
+  in
+    path attributes []
 
 
 {-| Renders a horizontal line with the full length of the range.
@@ -489,20 +489,20 @@ linearInterpolation =
 
 monotoneInterpolation : List (Dot view) -> List Command
 monotoneInterpolation points =
-    case points of
-      p0 :: p1 :: p2 :: rest ->
-        let
-          nextTangent =
-            slope3 p0 p1 p2
+  case points of
+    p0 :: p1 :: p2 :: rest ->
+      let
+        nextTangent =
+          slope3 p0 p1 p2
 
-          previousTangent =
-            slope2 p0 p1 nextTangent
-        in
-          monotoneCurve p0 p1 previousTangent nextTangent ++
-          monotoneNext (p1 :: p2 :: rest) nextTangent
+        previousTangent =
+          slope2 p0 p1 nextTangent
+      in
+        monotoneCurve p0 p1 previousTangent nextTangent ++
+        monotoneNext (p1 :: p2 :: rest) nextTangent
 
-      _ ->
-        []
+    _ ->
+      []
 
 
 monotoneNext : List (Dot view) -> Float -> List Command
