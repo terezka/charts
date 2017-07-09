@@ -366,7 +366,7 @@ customDot view =
   Dot (Just view)
 
 
-{-| An dot with a view which is wrapped in a `g` elemenet and positioned with a transform.
+{-| An dot with a view which is wrapped in a `g` element and positioned with a transform.
 -}
 dot : Svg msg -> Float -> Float -> Dot msg
 dot view =
