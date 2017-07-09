@@ -2,6 +2,7 @@ module Svg.Plot
   exposing
     ( Dot
     , dot
+    , customDot
     , clear
     , scatter
     , linear
@@ -37,7 +38,7 @@ This module contains higher-level SVG plotting elements.
 # Series
 
 ## Dots
-@docs Dot, dot, clear
+@docs Dot, dot, clear, customDot
 
 ## Interpolation
 @docs scatter, linear, monotone
