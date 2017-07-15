@@ -12,6 +12,7 @@ module Svg.Plot
     , grouped
     , Histogram
     , histogram
+    , line
     , horizontal
     , vertical
     , fullHorizontal
@@ -64,7 +65,7 @@ These elements render a line series if no `fill` attribute is added!
 @docs Histogram, histogram
 
 # Straight lines
-@docs fullHorizontal, fullVertical, horizontal, vertical
+@docs line, fullHorizontal, fullVertical, horizontal, vertical
 
 ## Ticks
 ProTip: Passing a negative value as the height/width of a tick renders it
@@ -222,11 +223,29 @@ viewBar plane width x bar =
 -- STRAIGHT LINES
 
 
+{-| Renders a line.
+
+    myLine : Svg msg
+    myLine =
+      horizontal plane [ stroke "pink" ] x0 y0 x1 y1
+-}
+line : Plane -> List (Attribute msg) -> Float -> Float -> Float -> Float -> Svg msg
+line plane userAttributes x1 y1 x2 y2 =
+  let
+    attributes =
+      concat
+        [ stroke darkGrey ]
+        userAttributes
+        [ d (description plane [ Move x1 y1, Line x1 y1, Line x2 y2 ]) ]
+  in
+    path attributes []
+
+
 {-| Renders a horizontal line.
 
     myLine : Svg msg
     myLine =
-      horizontal plane [ stroke pink ] y x0 x1
+      horizontal plane [ stroke "pink" ] y x0 x1
 
 -}
 horizontal : Plane -> List (Attribute msg) -> Float -> Float -> Float -> Svg msg
@@ -278,8 +297,8 @@ fullHorizontal plane userAttributes y =
       fullVertical plane [] xPosition
 -}
 fullVertical : Plane -> List (Attribute msg) -> Float -> Svg msg
-fullVertical plane userAttributes y =
-  vertical plane userAttributes y plane.y.min plane.y.max
+fullVertical plane userAttributes x =
+  vertical plane userAttributes x plane.y.min plane.y.max
 
 
 {-| Renders ticks for the horizontal axis.
