@@ -38,8 +38,8 @@ main =
 
 
 viewPoint : Coordinates.Plane -> String -> Coordinates.Point -> Svg msg
-viewPoint plane color point =
-  g [ Coordinates.place plane point ]
+viewPoint plane_ color point =
+  g [ Coordinates.place plane_ point ]
     [ circle [ stroke color, fill color, r "5" ] []
     , text_
       [ transform "translate(10, 5)" ]

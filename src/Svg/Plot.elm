@@ -407,23 +407,23 @@ type alias Dot msg =
 
 {-| A dot without visual representation.
 -}
-clear : Float -> Float -> Dot msg
-clear =
-  Dot Nothing
+clear : (data -> Float) -> (data -> Float) -> data -> Dot msg
+clear  toX toY data =
+  Dot Nothing (toX data) (toY data)
 
 
 {-| An dot with a view where you control how it's positioned.
 -}
-customDot : (Float -> Float -> Svg msg) -> Float -> Float -> Dot msg
-customDot view =
-  Dot (Just view)
+customDot : (data -> Float) -> (data -> Float) -> (Float -> Float -> Svg msg) -> data -> Dot msg
+customDot toX toY view data =
+  Dot (Just view) (toX data) (toY data)
 
 
 {-| An dot with a view which is wrapped in a `g` element and positioned with a transform.
 -}
-dot : Svg msg -> Float -> Float -> Dot msg
-dot view =
-  customDot (defaultDotView view)
+dot : (data -> Float) -> (data -> Float) -> Svg msg -> data -> Dot msg
+dot toX toY view data =
+  customDot toX toY (defaultDotView view) data
 
 
 {-| Series with no interpolation.
