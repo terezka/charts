@@ -1,6 +1,6 @@
 module Series exposing (..)
 
-import Svg exposing (Svg, svg, g, circle, text_, text)
+import Svg exposing (Svg, svg, g, text_, text)
 import Svg.Attributes exposing (width, height, stroke, fill, r, transform)
 import Svg.Coordinates exposing (..)
 import Svg.Chart exposing (..)
@@ -69,9 +69,10 @@ main =
       [ width (String.fromFloat plane.x.length)
       , height (String.fromFloat plane.x.length)
       ]
-      [ linearArea plane [ stroke blueStroke, fill blueFill ] (List.map (clear .x .y) data1)
-      , monotone plane [ stroke pinkStroke ] (List.map (dot .x .y (viewCircle transparent)) data2)
-      , scatter plane (List.map (dot .x .y (viewCircle "#f9c3b0")) data3)
+      [ linearArea plane .x .y [ stroke "transparent", fill blueFill ] clear data1
+      , linear plane .x .y [ stroke blueStroke ] clear data1
+      , monotone plane .x .y [ stroke pinkStroke ] (aura 3 6 0.3 diamond "blue") data2
+      , scatter plane .x .y (full 5 triangle "pink") data3
       , fullHorizontal plane [] 0
       , fullVertical plane [] 0
       , xTicks plane 5 [] 0 [ 1, 2, 3 ]
@@ -81,6 +82,3 @@ main =
       ]
 
 
-viewCircle : String -> Svg msg
-viewCircle color =
-  circle [ stroke color, fill color, r "5" ] []

@@ -1,14 +1,6 @@
 module Svg.Tiles exposing (Map, Tile, view, tileWidth, tileHeight, tileXCoord, tileYCoord, proportion)
 
-{-| _Disclaimer:_ If you're looking for a plotting library, then please
-use [elm-plot](https://github.com/terezka/elm-plot) instead, as this library is not
-made to be user friendly. If you feel like you're missing something in elm-plot,
-you're welcome to open an issue in the repo and I'll see what I can do
-to accommodate your needs!
-
----
-
-View for creating tiled maps like heatmaps or choropleths. Note that this return a SVG element not yet wrapped
+{-| View for creating tiled maps like heatmaps or choropleths. Note that this return a SVG element not yet wrapped
 in the `svg` tag.
 
 # Composing

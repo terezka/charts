@@ -1,6 +1,7 @@
 module Svg.Chart
   exposing
-    ( Dot, clear, dot, customDot
+    ( Dot, clear, empty, disconnected, aura, full
+    , circle, triangle, square, diamond, plus, cross
     , scatter, linear, linearArea, monotone, monotoneArea
     , Bar, Groups, grouped
     , Histogram, histogram
@@ -63,6 +64,7 @@ import Svg.Attributes as Attributes exposing (class, width, height, stroke, fill
 import Svg.Coordinates exposing (Plane, place, toSVGX, toSVGY, placeWithOffset)
 import Svg.Commands exposing (..)
 import Internal.Colors exposing (..)
+import Internal.Svg exposing (..)
 
 
 
@@ -331,7 +333,7 @@ yTick plane width userAttributes x y =
   let
     attributes =
       concat
-        [ class "elm-plot__tick",stroke darkGrey ]
+        [ class "elm-plot__tick", stroke darkGrey ]
         userAttributes
         [ Attributes.x1 <| String.fromFloat (toSVGX plane x)
         , Attributes.x2 <| String.fromFloat (toSVGX plane x - toFloat width)
@@ -408,86 +410,149 @@ viewLabel color string =
 
 {-| -}
 type alias Dot msg =
-  { view : Maybe (Float -> Float -> Svg msg)
-  , x : Float
-  , y : Float
-  }
+  (Plane -> Float -> Float -> Svg msg)
 
 
 {-| A dot without visual representation.
 -}
-clear : (data -> Float) -> (data -> Float) -> data -> Dot msg
-clear  toX toY data =
-  Dot Nothing (toX data) (toY data)
+clear : Plane -> Float -> Float -> Svg msg
+clear _ _ _ =
+  Svg.text ""
 
 
-{-| An dot with a view where you control how it's positioned.
--}
-customDot : (data -> Float) -> (data -> Float) -> (Float -> Float -> Svg msg) -> data -> Dot msg
-customDot toX toY view data =
-  Dot (Just view) (toX data) (toY data)
+{-| -}
+full : Float -> Shape -> String -> Dot msg
+full radius shape color =
+  viewShape radius Full shape color
 
 
-{-| An dot with a view which is wrapped in a `g` element and positioned with a transform.
--}
-dot : (data -> Float) -> (data -> Float) -> Svg msg -> data -> Dot msg
-dot toX toY view data =
-  customDot toX toY (defaultDotView view) data
+{-| -}
+aura : Float -> Int -> Float -> Shape -> String -> Dot msg
+aura radius width opacity shape color =
+  viewShape radius (Aura width opacity) shape color
+
+
+{-| -}
+disconnected : Float -> Int -> Shape -> String -> Dot msg
+disconnected radius width shape color =
+  viewShape radius (Disconnected width) shape color
+
+
+{-| -}
+empty : Float -> Int -> Shape -> String -> Dot msg
+empty radius width shape color =
+  viewShape radius (Empty width) shape color
+
+
+{-| -}
+type alias Shape =
+  Internal.Svg.Shape
+
+
+{-| -}
+circle : Shape
+circle =
+  Circle
+
+
+{-| -}
+triangle : Shape
+triangle =
+  Triangle
+
+
+{-| -}
+square : Shape
+square =
+  Square
+
+
+{-| -}
+diamond : Shape
+diamond =
+  Diamond
+
+
+{-| -}
+plus : Shape
+plus =
+  Plus
+
+
+{-| -}
+cross : Shape
+cross =
+  Cross
 
 
 {-| Series with no interpolation.
 -}
-scatter : Plane -> List (Dot msg) -> Svg msg
-scatter plane dots =
-  viewSeries plane dots (text "-- No interpolation --")
+scatter : Plane -> (data -> Float) -> (data -> Float) -> Dot msg -> List data -> Svg msg
+scatter plane toX toY dot data =
+  viewSeries plane toX toY dot data (text "-- No interpolation --")
 
 
 {-| Series with linear interpolation.
 -}
-linear : Plane -> List (Attribute msg) -> List (Dot msg) -> Svg msg
-linear plane attributes dots =
-  viewSeries plane dots <|
-    viewInterpolation plane False attributes dots (linearInterpolation dots)
+linear : Plane -> (data -> Float) -> (data -> Float) -> List (Attribute msg) -> Dot msg -> List data -> Svg msg
+linear plane toX toY attributes dot data =
+  let points = toPoints toX toY data in
+  viewSeries plane toX toY dot data <|
+    viewInterpolation plane False attributes points (linearInterpolation points)
 
 
 {-| Area series with linear interpolation.
 -}
-linearArea : Plane -> List (Attribute msg) -> List (Dot msg) -> Svg msg
-linearArea plane attributes dots =
-    viewSeries plane dots <|
-        viewInterpolation plane True attributes dots (linearInterpolation dots)
+linearArea : Plane -> (data -> Float) -> (data -> Float) -> List (Attribute msg) -> Dot msg -> List data -> Svg msg
+linearArea plane toX toY attributes dot data =
+  let points = toPoints toX toY data in
+  viewSeries plane toX toY dot data <|
+      viewInterpolation plane True attributes points (linearInterpolation points)
 
 
 {-| Series with monotone interpolation.
 -}
-monotone : Plane -> List (Attribute msg) -> List (Dot msg) -> Svg msg
-monotone plane attributes dots =
-  viewSeries plane dots <|
-    viewInterpolation plane False attributes dots (monotoneInterpolation dots)
+monotone : Plane -> (data -> Float) -> (data -> Float) -> List (Attribute msg) -> Dot msg -> List data -> Svg msg
+monotone plane toX toY attributes dot data =
+  let points = toPoints toX toY data in
+  viewSeries plane toX toY dot data <|
+    viewInterpolation plane False attributes points (monotoneInterpolation points)
 
 
 {-| Area series with monotone interpolation.
 -}
-monotoneArea : Plane -> List (Attribute msg) -> List (Dot msg) -> Svg msg
-monotoneArea plane attributes dots =
-    viewSeries plane dots <|
-        viewInterpolation plane True attributes dots (monotoneInterpolation dots)
+monotoneArea : Plane -> (data -> Float) -> (data -> Float) -> List (Attribute msg) -> Dot msg -> List data -> Svg msg
+monotoneArea plane toX toY attributes dot data =
+  let points = toPoints toX toY data in
+  viewSeries plane toX toY dot data <|
+      viewInterpolation plane True attributes points (monotoneInterpolation points)
 
 
 -- INTERNAL
 
 
-viewSeries : Plane -> List (Dot msg) -> Svg msg -> Svg msg
-viewSeries plane dots interpolation =
+type alias Point =
+  { x : Float
+  , y : Float
+  }
+
+
+toPoints : (data -> Float) -> (data -> Float) -> List data -> List Point
+toPoints toX toY data =
+  List.map (\datum -> Point (toX datum) (toY datum)) data
+
+
+viewSeries : Plane -> (data -> Float) -> (data -> Float) -> Dot msg -> List data -> Svg msg -> Svg msg
+viewSeries plane toX toY dot data interpolation =
   g [ class "elm-plot__series" ]
     [ interpolation
-    , g [ class "elm-plot__dots" ] (List.map (viewDot plane) dots)
+    , g [ class "elm-plot__dots" ] (List.map (\datum -> dot plane (toX datum) (toY datum)) data)
     ]
 
 
-viewInterpolation : Plane -> Bool -> List (Attribute msg) -> List (Dot msg) -> List Command -> Svg msg
-viewInterpolation plane hasArea userAttributes dots commands =
-  case ( dots, hasArea ) of
+viewInterpolation : Plane -> Bool -> List (Attribute msg) -> List Point -> List Command -> Svg msg
+viewInterpolation plane hasArea userAttributes points commands =
+  case ( points, hasArea ) of
     ( [], _ ) ->
       text "-- No data --"
 
@@ -498,7 +563,7 @@ viewInterpolation plane hasArea userAttributes dots commands =
       viewArea plane userAttributes commands first rest
 
 
-viewLine : Plane -> List (Attribute msg) -> List Command -> Dot msg -> List (Dot msg) -> Svg msg
+viewLine : Plane -> List (Attribute msg) -> List Command -> Point -> List Point -> Svg msg
 viewLine plane userAttributes interpolation first rest =
   let
     commands =
@@ -513,7 +578,7 @@ viewLine plane userAttributes interpolation first rest =
     path attributes []
 
 
-viewArea : Plane -> List (Attribute msg) -> List Command -> Dot msg -> List (Dot msg) -> Svg msg
+viewArea : Plane -> List (Attribute msg) -> List Command -> Point -> List Point -> Svg msg
 viewArea plane userAttributes interpolation first rest =
   let
     commands =
@@ -531,27 +596,11 @@ viewArea plane userAttributes interpolation first rest =
     path attributes []
 
 
-viewDot : Plane -> Dot msg -> Svg msg
-viewDot plane dot_ =
-  case dot_.view of
-    Nothing ->
-      text ""
-
-    Just view ->
-      view (toSVGX plane dot_.x) (toSVGY plane dot_.y)
-
-
-defaultDotView : Svg msg -> Float -> Float -> Svg msg
-defaultDotView view x y =
-  g [ transform <| "translate(" ++ String.fromFloat x ++ "," ++ String.fromFloat y ++ ")" ]
-    [ view ]
-
-
 
 -- LINEAR INTERPOLATION
 
 
-linearInterpolation : List (Dot msg) -> List Command
+linearInterpolation : List Point -> List Command
 linearInterpolation =
   List.map (\{ x, y } -> Line x y)
 
@@ -560,7 +609,7 @@ linearInterpolation =
 -- MONOTONE INTERPOLATION
 
 
-monotoneInterpolation : List (Dot view) -> List Command
+monotoneInterpolation : List Point -> List Command
 monotoneInterpolation points =
   case points of
     p0 :: p1 :: p2 :: rest ->
@@ -578,7 +627,7 @@ monotoneInterpolation points =
       []
 
 
-monotoneNext : List (Dot view) -> Float -> List Command
+monotoneNext : List Point -> Float -> List Command
 monotoneNext points previousTangent =
   case points of
     p0 :: p1 :: p2 :: rest ->
@@ -596,7 +645,7 @@ monotoneNext points previousTangent =
         []
 
 
-monotoneCurve : (Dot view) -> (Dot view) -> Float -> Float -> List Command
+monotoneCurve : Point -> Point -> Float -> Float -> List Command
 monotoneCurve point0 point1 tangent0 tangent1 =
   let
     dx =
@@ -609,7 +658,7 @@ monotoneCurve point0 point1 tangent0 tangent1 =
  the following paper: Steffen, M. 1990. A Simple Method for Monotonic
  Interpolation in One Dimension
 -}
-slope3 : (Dot view) -> (Dot view) -> (Dot view) -> Float
+slope3 : Point -> Point -> Point -> Float
 slope3 point0 point1 point2 =
   let
     h0 = point1.x - point0.x
@@ -637,7 +686,7 @@ toH h0 h1 =
 
 {-| Calculate a one-sided slope.
 -}
-slope2 : (Dot view) -> (Dot view) -> Float -> Float
+slope2 : Point -> Point -> Float -> Float
 slope2 point0 point1 t =
   let
     h =
