@@ -4,21 +4,21 @@ import Svg exposing (Svg, svg, g, circle, text_, text)
 import Svg.Attributes exposing (width, height, stroke, fill, r, transform)
 import Svg.Coordinates exposing (..)
 import Svg.Plot exposing (..)
-import Colors exposing (..)
+import Internal.Colors exposing (..)
 
 
 plane : Plane
 plane =
   { x =
-    { marginLower = 10
-    , marginUpper = 10
+    { marginLower = 20
+    , marginUpper = 20
     , length = 300
     , min = 0
     , max = 5
     }
   , y =
-    { marginLower = 10
-    , marginUpper = 10
+    { marginLower = 20
+    , marginUpper = 20
     , length = 300
     , min = -5
     , max = 10
@@ -41,12 +41,14 @@ groups =
 main : Svg msg
 main =
   svg
-    [ width (toString plane.x.length)
-    , height (toString plane.y.length)
+    [ width (String.fromFloat plane.x.length)
+    , height (String.fromFloat plane.y.length)
     ]
     [ grouped plane groups
     , fullHorizontal plane [] 0
     , fullVertical plane [] 0
     , xTicks plane 5 [] 0 [ 1, 2, 3 ]
     , yTicks plane 5 [] 0 [ 1, 2, 3 ]
+    , xLabels plane (xLabel "blue" String.fromFloat) 0 [ 1, 2, 3 ]
+    , yLabels plane (yLabel "green" String.fromFloat) 0 [ 1, 2, 3 ]
     ]

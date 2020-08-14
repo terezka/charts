@@ -23,7 +23,7 @@ heatmap =
 tile : Int -> Float -> Tile msg
 tile index value =
   { content = Nothing
-  , attributes = [ fill ("rgba(253, 185, 231, " ++ toString (proportion value) ++ ")") ]
+  , attributes = [ fill ("rgba(253, 185, 231, " ++ String.fromFloat (proportion value) ++ ")") ]
   , index = index
   }
 

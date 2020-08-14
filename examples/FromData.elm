@@ -39,8 +39,8 @@ main =
       planeFromPoints data
   in
     svg
-      [ width (toString plane.x.length)
-      , height (toString plane.y.length)
+      [ width (String.fromFloat plane.x.length)
+      , height (String.fromFloat plane.y.length)
       ]
       [ viewPoint plane "hotpink" { x = 0, y = 0 }
       , viewPoint plane "pink" { x = -1, y = 1 }
@@ -55,5 +55,5 @@ viewPoint plane color point =
     [ circle [ stroke color, fill color, r "5" ] []
     , text_
       [ transform "translate(10, 5)" ]
-      [ text ("(" ++ toString point.x ++ ", " ++ toString point.y ++ ")") ]
+      [ text ("(" ++ String.fromFloat point.x ++ ", " ++ String.fromFloat point.y ++ ")") ]
     ]

@@ -48,33 +48,33 @@ type alias Tile msg =
 {-| View a map!
 -}
 view : Map msg -> Svg msg
-view { tiles, tilesPerRow, tileWidth, tileHeight } =
+view map =
   let
     xCoord =
-      tileXCoord tileWidth tilesPerRow
+      tileXCoord map.tileWidth map.tilesPerRow
 
     yCoord =
-      tileYCoord tileHeight tilesPerRow
+      tileYCoord map.tileHeight map.tilesPerRow
 
     tileAttributes { index, attributes } =
       [ Attributes.stroke "white"
       , Attributes.strokeWidth "1px"
       ]
       ++ attributes ++
-      [ Attributes.width (toString tileWidth)
-      , Attributes.height (toString tileHeight)
-      , Attributes.x (toString <| xCoord index)
-      , Attributes.y (toString <| yCoord index)
+      [ Attributes.width (String.fromFloat map.tileWidth)
+      , Attributes.height (String.fromFloat map.tileHeight)
+      , Attributes.x (String.fromFloat <| xCoord index)
+      , Attributes.y (String.fromFloat <| yCoord index)
       ]
 
-    viewContent index view =
+    viewContent index view_ =
       g [ style "text-anchor: middle;"
         , transform <|
             translate
-              (xCoord index + tileWidth / 2)
-              (yCoord index + tileHeight / 2 + 5)
+              (xCoord index + map.tileWidth / 2)
+              (yCoord index + map.tileHeight / 2 + 5)
         ]
-        [  view ]
+        [  view_ ]
 
     viewTile tile =
       g [ Attributes.class "elm-plot__heat-map__tile" ]
@@ -82,7 +82,7 @@ view { tiles, tilesPerRow, tileWidth, tileHeight } =
         , Maybe.map (viewContent tile.index) tile.content |> Maybe.withDefault (text "")
         ]
   in
-    g [ Attributes.class "elm-plot__heat-map" ] (List.map viewTile tiles)
+    g [ Attributes.class "elm-plot__heat-map" ] (List.map viewTile map.tiles)
 
 
 
@@ -116,16 +116,16 @@ tilesPerColumn numberOfTiles tilesPerRow =
  the __tile's index__ and it'll get you it's x-coordinate.
 -}
 tileXCoord : Float -> Int -> Int -> Float
-tileXCoord tileWidth tilesPerRow index =
-  tileWidth * toFloat (index % tilesPerRow)
+tileXCoord tileWidth_ tilesPerRow index =
+  tileWidth_ * toFloat (modBy tilesPerRow index)
 
 
 {-| Pass the __tile height__, the __amount of tiles in a row__ and
  the __tile's index__ and it'll get you it's y-coordinate.
 -}
 tileYCoord : Float -> Int -> Int -> Float
-tileYCoord tileHeight tilesPerRow index =
-  tileHeight * toFloat (index // tilesPerRow)
+tileYCoord tileHeight_ tilesPerRow index =
+  tileHeight_ * toFloat (index // tilesPerRow)
 
 
 {-| For heatmaps. It calculates a value's value relative to all values.
@@ -152,4 +152,4 @@ proportion toValue tiles value =
 
 translate : Float -> Float -> String
 translate x y =
-  "translate(" ++ toString x ++ ", " ++ toString y ++ ")"
+  "translate(" ++ String.fromFloat x ++ ", " ++ String.fromFloat y ++ ")"

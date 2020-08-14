@@ -1,26 +1,10 @@
 module Svg.Plot
   exposing
-    ( Dot
-    , dot
-    , customDot
-    , clear
-    , scatter
-    , linear
-    , monotone
-    , Bar
-    , Groups
-    , grouped
-    , Histogram
-    , histogram
-    , line
-    , horizontal
-    , vertical
-    , fullHorizontal
-    , fullVertical
-    , xTicks
-    , xTick
-    , yTicks
-    , yTick
+    ( Dot, dot, customDot, clear, scatter, linear, monotone
+    , Bar, Groups, grouped
+    , Histogram, histogram
+    , line, horizontal, vertical, fullHorizontal, fullVertical
+    , xTicks, xTick, yTicks, yTick, xLabels, yLabels, xLabel, yLabel, translate
     )
 
 
@@ -79,7 +63,7 @@ import Svg exposing (Svg, Attribute, g, path, rect, text)
 import Svg.Attributes as Attributes exposing (class, width, height, stroke, fill, d, transform)
 import Svg.Coordinates exposing (Plane, Point, place, toSVGX, toSVGY)
 import Svg.Commands exposing (..)
-import Colors exposing (..)
+import Internal.Colors exposing (..)
 
 
 
@@ -115,8 +99,8 @@ type alias Groups msg =
     main : Svg msg
     main =
       svg
-        [ width (toString plane.x.length)
-        , height (toString plane.y.length)
+        [ width (String.fromFloat plane.x.length)
+        , height (String.fromFloat plane.y.length)
         ]
         [ grouped plane groups ]
 
@@ -179,8 +163,8 @@ type alias Histogram msg =
     main : Svg msg
     main =
       svg
-        [ width (toString plane.x.length)
-        , height (toString plane.y.length)
+        [ width (String.fromFloat plane.x.length)
+        , height (String.fromFloat plane.y.length)
         ]
         [ histogram plane testScores ]
 -}
@@ -321,10 +305,10 @@ xTick plane height userAttributes y x =
       concat
         [ class "elm-plot__tick", stroke darkGrey ]
         userAttributes
-        [ Attributes.x1 <| toString (toSVGX plane x)
-        , Attributes.x2 <| toString (toSVGX plane x)
-        , Attributes.y1 <| toString (toSVGY plane y)
-        , Attributes.y2 <| toString (toSVGY plane y + toFloat height)
+        [ Attributes.x1 <| String.fromFloat (toSVGX plane x)
+        , Attributes.x2 <| String.fromFloat (toSVGX plane x)
+        , Attributes.y1 <| String.fromFloat (toSVGY plane y)
+        , Attributes.y2 <| String.fromFloat (toSVGY plane y + toFloat height)
         ]
   in
     Svg.line attributes []
@@ -350,14 +334,64 @@ yTick plane width userAttributes x y =
       concat
         [ class "elm-plot__tick",stroke darkGrey ]
         userAttributes
-        [ Attributes.x1 <| toString (toSVGX plane x)
-        , Attributes.x2 <| toString (toSVGX plane x - toFloat width)
-        , Attributes.y1 <| toString (toSVGY plane y)
-        , Attributes.y2 <| toString (toSVGY plane y)
+        [ Attributes.x1 <| String.fromFloat (toSVGX plane x)
+        , Attributes.x2 <| String.fromFloat (toSVGX plane x - toFloat width)
+        , Attributes.y1 <| String.fromFloat (toSVGY plane y)
+        , Attributes.y2 <| String.fromFloat (toSVGY plane y)
         ]
   in
     Svg.line attributes []
 
+
+{-| Renders ticks for the horizontal axis.
+
+    horizontalValues : Svg msg
+    horizontalValues =
+      xLabels plane height (yLabel "pink" << String.fromFloat) axisYCoordinate tickPositions
+-}
+xLabels : Plane -> (Plane -> Float -> Float -> Svg msg) -> Float -> List Float -> Svg msg
+xLabels plane toLabel y xs =
+  g [ class "elm-plot__x-labels" ] (List.map (toLabel plane y) xs)
+
+
+{-| -}
+xLabel : String -> (Float -> String) -> Plane -> Float -> Float -> Svg msg
+xLabel color toString plane y x =
+  Svg.g
+    [ translate plane x y 0 20
+    , Attributes.style "text-anchor: middle;"
+    ]
+    [ viewLabel color (toString x) ]
+
+
+{-| Renders ticks for the horizontal axis.
+
+    horizontalValues : Svg msg
+    horizontalValues =
+      xLabels plane height (yLabel "pink" << String.fromFloat) axisYCoordinate tickPositions
+-}
+yLabels : Plane -> (Plane -> Float -> Float -> Svg msg) -> Float -> List Float -> Svg msg
+yLabels plane toLabel x ys =
+  g [ class "elm-plot__y-labels" ] (List.map (toLabel plane x) ys)
+
+
+{-| -}
+yLabel : String -> (Float -> String) -> Plane -> Float -> Float -> Svg msg
+yLabel color toString plane x y =
+  Svg.g
+    [ translate plane x y -10 5
+    , Attributes.style "text-anchor: end;"
+    ]
+    [ viewLabel color (toString y) ]
+
+
+viewLabel : String -> String -> Svg msg
+viewLabel color string =
+  Svg.text_
+    [ Attributes.fill color
+    , Attributes.style "pointer-events: none;"
+    ]
+    [ Svg.tspan [] [ Svg.text string ] ]
 
 
 -- SERIES
@@ -404,7 +438,15 @@ scatter plane dots =
 linear : Plane -> List (Attribute msg) -> List (Dot msg) -> Svg msg
 linear plane attributes dots =
   viewSeries plane dots <|
-    viewInterpolation plane attributes dots (linearInterpolation dots)
+    viewInterpolation plane False attributes dots (linearInterpolation dots)
+
+
+{-| Area series with linear interpolation.
+-}
+linearArea : Plane -> List (Attribute msg) -> List (Dot msg) -> Svg msg
+linearArea plane attributes dots =
+    viewSeries plane dots <|
+        viewInterpolation plane True attributes dots (linearInterpolation dots)
 
 
 {-| Series with monotone interpolation.
@@ -412,8 +454,15 @@ linear plane attributes dots =
 monotone : Plane -> List (Attribute msg) -> List (Dot msg) -> Svg msg
 monotone plane attributes dots =
   viewSeries plane dots <|
-    viewInterpolation plane attributes dots (monotoneInterpolation dots)
+    viewInterpolation plane False attributes dots (monotoneInterpolation dots)
 
+
+{-| Area series with monotone interpolation.
+-}
+monotoneArea : Plane -> List (Attribute msg) -> List (Dot msg) -> Svg msg
+monotoneArea plane attributes dots =
+    viewSeries plane dots <|
+        viewInterpolation plane True attributes dots (monotoneInterpolation dots)
 
 
 -- INTERNAL
@@ -427,9 +476,9 @@ viewSeries plane dots interpolation =
     ]
 
 
-viewInterpolation : Plane -> List (Attribute msg) -> List (Dot msg) -> List Command -> Svg msg
-viewInterpolation plane userAttributes dots commands =
-  case ( dots, hasFill userAttributes ) of
+viewInterpolation : Plane -> Bool -> List (Attribute msg) -> List (Dot msg) -> List Command -> Svg msg
+viewInterpolation plane hasArea userAttributes dots commands =
+  case ( dots, hasArea ) of
     ( [], _ ) ->
       text "-- No data --"
 
@@ -474,18 +523,18 @@ viewArea plane userAttributes interpolation first rest =
 
 
 viewDot : Plane -> Dot msg -> Svg msg
-viewDot plane dot =
-  case dot.view of
+viewDot plane dot_ =
+  case dot_.view of
     Nothing ->
       text ""
 
     Just view ->
-      view (toSVGX plane dot.x) (toSVGY plane dot.y)
+      view (toSVGX plane dot_.x) (toSVGY plane dot_.y)
 
 
 defaultDotView : Svg msg -> Float -> Float -> Svg msg
 defaultDotView view x y =
-  g [ transform <| "translate(" ++ toString x ++ "," ++ toString y ++ ")" ]
+  g [ transform <| "translate(" ++ String.fromFloat x ++ "," ++ String.fromFloat y ++ ")" ]
     [ view ]
 
 
@@ -605,11 +654,6 @@ last list =
   List.head (List.drop (List.length list - 1) list)
 
 
-hasFill : List (Attribute msg) -> Bool
-hasFill attributes =
-  List.any (toString >> String.contains "realKey = \"fill\"") attributes
-
-
 concat : List a -> List a -> List a -> List a
 concat first second third =
   first ++ second ++ third
@@ -618,3 +662,10 @@ concat first second third =
 closestToZero : Plane -> Float
 closestToZero plane =
   clamp plane.y.min plane.y.max 0
+
+
+translate : Plane -> Float -> Float -> Float -> Float -> Svg.Attribute msg
+translate plane x y xOff yOff =
+  transform <| "translate(" ++ String.fromFloat (toSVGX plane x + xOff) ++ "," ++ String.fromFloat (toSVGY plane y + yOff) ++ ")"
+
+

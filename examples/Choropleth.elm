@@ -23,7 +23,7 @@ america =
 tile : Int -> String -> Float -> Tile msg
 tile index abbrivation value =
   { content = Just (viewLabel abbrivation)
-  , attributes = [ fill ("rgba(253, 185, 231, " ++ toString (proportion value + 0.1) ++ ")") ]
+  , attributes = [ fill ("rgba(253, 185, 231, " ++ String.fromFloat (proportion value + 0.1) ++ ")") ]
   , index = index
   }
 

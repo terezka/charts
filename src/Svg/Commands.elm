@@ -76,9 +76,9 @@ stringCommand command =
     Arc rx ry xAxisRotation largeArcFlag sweepFlag x y ->
       "A" ++ joinCommands
         [ stringPoint (Point rx ry)
-        , toString xAxisRotation
-        , stringBool largeArcFlag
-        , stringBool sweepFlag
+        , stringBool xAxisRotation
+        , stringBoolInt largeArcFlag
+        , stringBoolInt sweepFlag
         , stringPoint (Point x y)
         ]
 
@@ -93,7 +93,7 @@ joinCommands commands =
 
 stringPoint : Point -> String
 stringPoint { x, y } =
-  toString x ++ " " ++ toString y
+  String.fromFloat x ++ " " ++ String.fromFloat y
 
 
 stringPoints : List Point -> String
@@ -101,9 +101,16 @@ stringPoints points =
   String.join "," (List.map stringPoint points)
 
 
-stringBool : Bool -> String
-stringBool bool =
+stringBoolInt : Bool -> String
+stringBoolInt bool =
   if bool then
     "0"
   else
     "1"
+
+stringBool : Bool -> String
+stringBool bool =
+  if bool then
+    "True"
+  else
+    "False"

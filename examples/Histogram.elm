@@ -4,7 +4,7 @@ import Svg exposing (Svg, svg, g, circle, text_, text)
 import Svg.Attributes exposing (width, height, stroke, fill, r, transform)
 import Svg.Coordinates exposing (..)
 import Svg.Plot exposing (..)
-import Colors exposing (..)
+import Internal.Colors exposing (..)
 
 
 plane : Plane
@@ -37,8 +37,8 @@ testScores =
 main : Svg msg
 main =
   svg
-    [ width (toString plane.x.length)
-    , height (toString plane.y.length)
+    [ width (String.fromFloat plane.x.length)
+    , height (String.fromFloat plane.y.length)
     ]
     [ histogram plane testScores
     , fullHorizontal plane [] 0

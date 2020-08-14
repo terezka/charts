@@ -177,8 +177,8 @@ type alias Point =
     myTransformAttribute =
       transform <|
         "translate("
-        ++ toString (toSVGX plane x) ++ ","
-        ++ toString (toSVGY plane y) ++ ") "
+        ++ String.fromFloat (toSVGX plane x) ++ ","
+        ++ String.fromFloat (toSVGY plane y) ++ ") "
         ++ "rotateX(" ++ whatever ++ ")"
 -}
 place : Plane -> Point -> Attribute msg
@@ -190,7 +190,7 @@ place plane point =
 -}
 placeWithOffset : Plane -> Point -> Float -> Float -> Attribute msg
 placeWithOffset plane { x, y } offsetX offsetY =
-  transform ("translate(" ++ toString (toSVGX plane x + offsetX) ++ "," ++ toString (toSVGY plane y + offsetY) ++ ")")
+  transform ("translate(" ++ String.fromFloat (toSVGX plane x + offsetX) ++ "," ++ String.fromFloat (toSVGY plane y + offsetY) ++ ")")
 
 
 

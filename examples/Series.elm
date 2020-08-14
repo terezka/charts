@@ -4,7 +4,7 @@ import Svg exposing (Svg, svg, g, circle, text_, text)
 import Svg.Attributes exposing (width, height, stroke, fill, r, transform)
 import Svg.Coordinates exposing (..)
 import Svg.Plot exposing (..)
-import Colors exposing (..)
+import Internal.Colors exposing (..)
 
 
 planeFromPoints : List Point -> Plane
@@ -60,8 +60,8 @@ main =
       planeFromPoints (data1 ++ data2 ++ data3)
   in
     svg
-      [ width (toString plane.x.length)
-      , height (toString plane.x.length)
+      [ width (String.fromFloat plane.x.length)
+      , height (String.fromFloat plane.x.length)
       ]
       [ linear plane
           [ stroke blueStroke, fill blueFill ]
@@ -75,6 +75,8 @@ main =
       , fullVertical plane [] 0
       , xTicks plane 5 [] 0 [ 1, 2, 3 ]
       , yTicks plane 5 [] 0 [ 1, 2, 3 ]
+      , xLabels plane (xLabel "blue" String.fromFloat) 0 [ 1, 2, 3 ]
+      , yLabels plane (yLabel "green" String.fromFloat) 0 [ 1, 2, 3 ]
       ]
 
 
