@@ -3,7 +3,7 @@ module Svg.Coordinates
     ( Plane, Axis, minimum, maximum
     , scaleSVG, toSVGX, toSVGY
     , scaleCartesian, toCartesianX, toCartesianY
-    , Point, place, placeWithOffset
+    , place, placeWithOffset
     )
 
 {-| _Disclaimer:_ If you're looking for a plotting library, then please
@@ -52,7 +52,7 @@ the domain and range.
 @docs toCartesianX, toCartesianY, scaleCartesian
 
 # Helpers
-@docs Point, place, placeWithOffset
+@docs place, placeWithOffset
 
 -}
 
@@ -161,14 +161,6 @@ toCartesianY plane value =
 -- PLACING HELPERS
 
 
-{-| Representation of a point in your plane.
--}
-type alias Point =
-  { x : Float
-  , y : Float
-  }
-
-
 {-| A `transform translate(x, y)` SVG attribute. Beware that using this and
   and another transform attribute on the same node, will overwrite the first.
   If that's the case, just make one yourself:
@@ -181,15 +173,15 @@ type alias Point =
         ++ String.fromFloat (toSVGY plane y) ++ ") "
         ++ "rotateX(" ++ whatever ++ ")"
 -}
-place : Plane -> Point -> Attribute msg
-place plane point =
-  placeWithOffset plane point 0 0
+place : Plane -> Float -> Float -> Attribute msg
+place plane x y =
+  placeWithOffset plane x y 0 0
 
 
 {-| Place at coordinate, but you may add a SVG offset. See `place` above for important notes.
 -}
-placeWithOffset : Plane -> Point -> Float -> Float -> Attribute msg
-placeWithOffset plane { x, y } offsetX offsetY =
+placeWithOffset : Plane -> Float -> Float -> Float -> Float -> Attribute msg
+placeWithOffset plane x y offsetX offsetY =
   transform ("translate(" ++ String.fromFloat (toSVGX plane x + offsetX) ++ "," ++ String.fromFloat (toSVGY plane y + offsetY) ++ ")")
 
 

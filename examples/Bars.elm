@@ -3,7 +3,7 @@ module Bars exposing (..)
 import Svg exposing (Svg, svg, g, circle, text_, text)
 import Svg.Attributes exposing (width, height, stroke, fill, r, transform)
 import Svg.Coordinates exposing (..)
-import Svg.Plot exposing (..)
+import Svg.Chart exposing (..)
 import Internal.Colors exposing (..)
 
 

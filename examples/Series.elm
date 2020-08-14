@@ -3,7 +3,7 @@ module Series exposing (..)
 import Svg exposing (Svg, svg, g, circle, text_, text)
 import Svg.Attributes exposing (width, height, stroke, fill, r, transform)
 import Svg.Coordinates exposing (..)
-import Svg.Plot exposing (..)
+import Svg.Chart exposing (..)
 import Internal.Colors exposing (..)
 
 
@@ -23,6 +23,12 @@ planeFromPoints points =
     , min = minimum .y points
     , max = maximum .y points
     }
+  }
+
+
+type alias Point =
+  { x : Float
+  , y : Float
   }
 
 
@@ -83,8 +89,3 @@ main =
 viewCircle : String -> Svg msg
 viewCircle color =
   circle [ stroke color, fill color, r "5" ] []
-
-
-applyPoint : (Float -> Float -> a) -> Point -> a
-applyPoint f { x, y }=
-  f x y

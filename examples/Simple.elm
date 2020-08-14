@@ -5,6 +5,12 @@ import Svg.Attributes exposing (width, height, stroke, fill, r, transform)
 import Svg.Coordinates as Coordinates
 
 
+type alias Point =
+  { x : Float
+  , y : Float
+  }
+
+
 plane : Coordinates.Plane
 plane =
   { x =
@@ -37,9 +43,9 @@ main =
       ]
 
 
-viewPoint : Coordinates.Plane -> String -> Coordinates.Point -> Svg msg
+viewPoint : Coordinates.Plane -> String -> Point -> Svg msg
 viewPoint plane_ color point =
-  g [ Coordinates.place plane_ point ]
+  g [ Coordinates.place plane_ point.x point.y ]
     [ circle [ stroke color, fill color, r "5" ] []
     , text_
       [ transform "translate(10, 5)" ]

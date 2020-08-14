@@ -1,10 +1,12 @@
-module Svg.Plot
+module Svg.Chart
   exposing
-    ( Dot, dot, customDot, clear, scatter, linear, linearArea, monotone, monotoneArea
+    ( Dot, clear, dot, customDot
+    , scatter, linear, linearArea, monotone, monotoneArea
     , Bar, Groups, grouped
     , Histogram, histogram
     , line, horizontal, vertical, fullHorizontal, fullVertical
-    , xTicks, xTick, yTicks, yTick, xLabels, yLabels, xLabel, yLabel, translate
+    , xTicks, xTick, yTicks, yTick
+    , xLabels, yLabels, xLabel, yLabel
     )
 
 
@@ -57,11 +59,16 @@ mirrored on the other side of the axis!
 
 @docs xTick, xTicks, yTick, yTicks
 
+## Labels
+
+@docs xLabel, xLabels, yLabel, yLabels
+
+
 -}
 
 import Svg exposing (Svg, Attribute, g, path, rect, text)
 import Svg.Attributes as Attributes exposing (class, width, height, stroke, fill, d, transform)
-import Svg.Coordinates exposing (Plane, Point, place, toSVGX, toSVGY)
+import Svg.Coordinates exposing (Plane, place, toSVGX, toSVGY, placeWithOffset)
 import Svg.Commands exposing (..)
 import Internal.Colors exposing (..)
 
@@ -343,43 +350,53 @@ yTick plane width userAttributes x y =
     Svg.line attributes []
 
 
-{-| Renders ticks for the horizontal axis.
+{-| Renders labels for the horizontal axis.
 
-    horizontalValues : Svg msg
-    horizontalValues =
-      xLabels plane height (yLabel "pink" << String.fromFloat) axisYCoordinate tickPositions
+    horizontalLabels : Svg msg
+    horizontalLabels =
+      xLabels plane (xLabel "blue" String.fromFloat) axisYCoordinate tickPositions
 -}
 xLabels : Plane -> (Plane -> Float -> Float -> Svg msg) -> Float -> List Float -> Svg msg
 xLabels plane toLabel y xs =
   g [ class "elm-plot__x-labels" ] (List.map (toLabel plane y) xs)
 
 
-{-| -}
+{-| Renders a label for the horizontal axis.
+
+    horizontalLabel : Svg msg
+    horizontalLabel =
+      xLabel "blue" String.fromFloat plane y x
+-}
 xLabel : String -> (Float -> String) -> Plane -> Float -> Float -> Svg msg
 xLabel color toString plane y x =
   Svg.g
-    [ translate plane x y 0 20
+    [ placeWithOffset plane x y 0 20
     , Attributes.style "text-anchor: middle;"
     ]
     [ viewLabel color (toString x) ]
 
 
-{-| Renders ticks for the horizontal axis.
+{-| Renders labels for the vertical axis.
 
-    horizontalValues : Svg msg
-    horizontalValues =
-      xLabels plane height (yLabel "pink" << String.fromFloat) axisYCoordinate tickPositions
+    verticalLabels : Svg msg
+    verticalLabels =
+      yLabels plane (yLabel "blue" String.fromFloat) axisXCoordinate tickPositions
 -}
 yLabels : Plane -> (Plane -> Float -> Float -> Svg msg) -> Float -> List Float -> Svg msg
 yLabels plane toLabel x ys =
   g [ class "elm-plot__y-labels" ] (List.map (toLabel plane x) ys)
 
 
-{-| -}
+{-| Renders a label for the vertical axis.
+
+    verticalLabel : Svg msg
+    verticalLabel =
+      yLabel "blue" String.fromFloat plane x y
+-}
 yLabel : String -> (Float -> String) -> Plane -> Float -> Float -> Svg msg
 yLabel color toString plane x y =
   Svg.g
-    [ translate plane x y -10 5
+    [ placeWithOffset plane x y -10 5
     , Attributes.style "text-anchor: end;"
     ]
     [ viewLabel color (toString y) ]

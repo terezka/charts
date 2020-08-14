@@ -3,7 +3,7 @@ module Svg.Commands exposing (Command(..), description)
 {-| SVG path commands.
 -}
 
-import Svg.Coordinates exposing (Plane, Point, toSVGX, toSVGY)
+import Svg.Coordinates exposing (Plane, toSVGX, toSVGY)
 
 
 {-| -}
@@ -56,30 +56,30 @@ stringCommand : Command -> String
 stringCommand command =
   case command of
     Move x y ->
-      "M" ++ stringPoint (Point x y)
+      "M" ++ stringPoint (x, y)
 
     Line x y ->
-      "L" ++ stringPoint (Point x y)
+      "L" ++ stringPoint (x, y)
 
     CubicBeziers cx1 cy1 cx2 cy2 x y ->
-      "C" ++ stringPoints [ (Point cx1 cy1), (Point cx2 cy2), (Point x y) ]
+      "C" ++ stringPoints [ (cx1, cy1), (cx2, cy2), (x, y) ]
 
     CubicBeziersShort cx1 cy1 x y ->
-      "Q" ++ stringPoints [ (Point cx1 cy1), (Point x y) ]
+      "Q" ++ stringPoints [ (cx1, cy1), (x, y) ]
 
     QuadraticBeziers cx1 cy1 x y ->
-      "Q" ++ stringPoints [ (Point cx1 cy1), (Point x y) ]
+      "Q" ++ stringPoints [ (cx1, cy1), (x, y) ]
 
     QuadraticBeziersShort x y ->
-      "T" ++ stringPoint (Point x y)
+      "T" ++ stringPoint (x, y)
 
     Arc rx ry xAxisRotation largeArcFlag sweepFlag x y ->
       "A" ++ joinCommands
-        [ stringPoint (Point rx ry)
+        [ stringPoint (rx, ry)
         , stringBool xAxisRotation
         , stringBoolInt largeArcFlag
         , stringBoolInt sweepFlag
-        , stringPoint (Point x y)
+        , stringPoint (x, y)
         ]
 
     Close ->
@@ -91,12 +91,12 @@ joinCommands commands =
   String.join " " commands
 
 
-stringPoint : Point -> String
-stringPoint { x, y } =
+stringPoint : ( Float, Float ) -> String
+stringPoint (x, y) =
   String.fromFloat x ++ " " ++ String.fromFloat y
 
 
-stringPoints : List Point -> String
+stringPoints : List ( Float, Float ) -> String
 stringPoints points =
   String.join "," (List.map stringPoint points)
 
