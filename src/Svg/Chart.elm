@@ -11,28 +11,16 @@ module Svg.Chart
     )
 
 
-
 {-| This module contains higher-level SVG plotting elements.
-
 
 # Series
 
 ## Dots
-@docs Dot, dot, clear, customDot
+@docs Dot, clear, empty, disconnected, aura, full
+@docs circle, triangle, square, diamond, plus, cross
 
 ## Interpolation
 @docs scatter, linear, linearArea, monotone, monotoneArea
-
-## Note on usage
-These elements render a line series if no `fill` attribute is added!
-
-    areaSeries : Svg msg
-    areaSeries =
-      monotone plane [ fill "pink" ] dots
-
-    lineSeries : Svg msg
-    lineSeries =
-      monotone plane [] dots
 
 # Bars
 @docs Bar
@@ -420,25 +408,45 @@ clear _ _ _ =
   Svg.text ""
 
 
-{-| -}
+{-| Make a regular shape.
+
+    someDot : Svg msg
+    someDot =
+      full radius circle "blue" plane x y
+-}
 full : Float -> Shape -> String -> Dot msg
 full radius shape color =
   viewShape radius Full shape color
 
 
-{-| -}
+{-| Make a shape with a little translucent border.
+
+    someDot : Svg msg
+    someDot =
+      aura radius width opacity circle "blue" plane x y
+-}
 aura : Float -> Int -> Float -> Shape -> String -> Dot msg
 aura radius width opacity shape color =
   viewShape radius (Aura width opacity) shape color
 
 
-{-| -}
+{-| Make a shape with a white border.
+
+    someDot : Svg msg
+    someDot =
+      disconnected radius width circle "blue" plane x y
+-}
 disconnected : Float -> Int -> Shape -> String -> Dot msg
 disconnected radius width shape color =
   viewShape radius (Disconnected width) shape color
 
 
-{-| -}
+{-| Make a shape with a white core.
+
+    someDot : Svg msg
+    someDot =
+      empty radius width circle "blue" plane x y
+-}
 empty : Float -> Int -> Shape -> String -> Dot msg
 empty radius width shape color =
   viewShape radius (Empty width) shape color
@@ -486,6 +494,10 @@ cross =
 
 
 {-| Series with no interpolation.
+
+    someScatter : Svg msg
+    someScatter =
+      scatter plane .x .y (full 6 circle "blue") points
 -}
 scatter : Plane -> (data -> Float) -> (data -> Float) -> Dot msg -> List data -> Svg msg
 scatter plane toX toY dot data =

@@ -61,9 +61,8 @@ data3 =
 
 main : Svg msg
 main =
-  let
-    plane =
-      planeFromPoints (data1 ++ data2 ++ data3)
+  let plane =
+        planeFromPoints (data1 ++ data2 ++ data3)
   in
     svg
       [ width (String.fromFloat plane.x.length)
