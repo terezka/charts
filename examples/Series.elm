@@ -63,7 +63,7 @@ main =
       [ width (String.fromFloat plane.x.length)
       , height (String.fromFloat plane.x.length)
       ]
-      [ linear plane
+      [ linearArea plane
           [ stroke blueStroke, fill blueFill ]
           (List.map (applyPoint clear) data1)
       , monotone plane

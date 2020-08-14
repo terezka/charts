@@ -1,6 +1,6 @@
 module Svg.Plot
   exposing
-    ( Dot, dot, customDot, clear, scatter, linear, monotone
+    ( Dot, dot, customDot, clear, scatter, linear, linearArea, monotone, monotoneArea
     , Bar, Groups, grouped
     , Histogram, histogram
     , line, horizontal, vertical, fullHorizontal, fullVertical
