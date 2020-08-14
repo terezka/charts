@@ -69,14 +69,9 @@ main =
       [ width (String.fromFloat plane.x.length)
       , height (String.fromFloat plane.x.length)
       ]
-      [ linearArea plane
-          [ stroke blueStroke, fill blueFill ]
-          (List.map (clear .x .y) data1)
-      , monotone plane
-          [ stroke pinkStroke ]
-          (List.map (dot .x .y (viewCircle transparent)) data2)
-      , scatter plane
-          (List.map (dot .x .y (viewCircle "#f9c3b0")) data3)
+      [ linearArea plane [ stroke blueStroke, fill blueFill ] (List.map (clear .x .y) data1)
+      , monotone plane [ stroke pinkStroke ] (List.map (dot .x .y (viewCircle transparent)) data2)
+      , scatter plane (List.map (dot .x .y (viewCircle "#f9c3b0")) data3)
       , fullHorizontal plane [] 0
       , fullVertical plane [] 0
       , xTicks plane 5 [] 0 [ 1, 2, 3 ]

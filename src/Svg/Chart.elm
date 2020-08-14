@@ -11,15 +11,7 @@ module Svg.Chart
 
 
 
-{-| _Disclaimer:_ If you're looking for a plotting library, then please
-use [elm-plot](https://github.com/terezka/elm-plot) instead, as this library is not
-made to be user friendly. If you feel like you're missing something in elm-plot,
-you're welcome to open an issue in the repo and I'll see what I can do
-to accommodate your needs!
-
----
-
-This module contains higher-level SVG plotting elements.
+{-| This module contains higher-level SVG plotting elements.
 
 
 # Series
@@ -28,7 +20,7 @@ This module contains higher-level SVG plotting elements.
 @docs Dot, dot, clear, customDot
 
 ## Interpolation
-@docs scatter, linear, monotone
+@docs scatter, linear, linearArea, monotone, monotoneArea
 
 ## Note on usage
 These elements render a line series if no `fill` attribute is added!
