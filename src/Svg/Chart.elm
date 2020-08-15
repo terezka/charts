@@ -3,8 +3,7 @@ module Svg.Chart
     ( Dot, clear, empty, disconnected, aura, full
     , circle, triangle, square, diamond, plus, cross
     , scatter, linear, linearArea, monotone, monotoneArea
-    , Bar, Groups, grouped
-    , Histogram, histogram
+    , Bar, bar, bars, histogram
     , line, horizontal, vertical, fullHorizontal, fullVertical
     , xTicks, xTick, yTicks, yTick
     , xLabels, yLabels, xLabel, yLabel
@@ -22,14 +21,8 @@ module Svg.Chart
 ## Interpolation
 @docs scatter, linear, linearArea, monotone, monotoneArea
 
-# Bars
-@docs Bar
-
-# Groups
-@docs Groups, grouped
-
-## Histograms
-@docs Histogram, histogram
+# Bar charts
+@docs Bar, bar, bars, histogram
 
 # Straight lines
 @docs line, fullHorizontal, fullVertical, horizontal, vertical
@@ -67,23 +60,12 @@ type alias Bar msg =
 
 
 {-| -}
-type alias Groups msg =
-  { groups : List (List (Bar msg))
-  , width : Float
-  }
+bar : List (Attribute msg) -> Float -> Bar msg
+bar =
+  Bar
 
 
 {-| You can draw a bar chart like this:
-
-    group : List Float -> List (Bar msg)
-    group =
-      List.map (Bar [ stroke "pink", fill "lightpink" ])
-
-    groups : Groups msg
-    groups =
-       { groups = List.map group [ [ 2, 3, 1 ], [ 5, 1, 4 ], [ 1, 5, 3 ] ]
-       , width = 0.8
-       }
 
     main : Svg msg
     main =
@@ -91,63 +73,45 @@ type alias Groups msg =
         [ width (String.fromFloat plane.x.length)
         , height (String.fromFloat plane.y.length)
         ]
-        [ grouped plane groups ]
+        [ bars plane 0.8
+            [ bar [ fill "red" ] << Tuple.first
+            , bar [ fill "blue" ] << Tuple.second
+            ]
+            [ ( 2, 3 ), ( 5, 1 ), ( 1, 5 ) ]
+        ]
 
 Note on `width`: The width takes catersian units, however, should you have
 a width in SVG units, you can use `Svg.Coordinates.scaleCartesian` to
 translate it into cartesian units.
 -}
-grouped : Plane -> Groups msg -> Svg msg
-grouped plane { width, groups } =
-  g [ class "elm-plot__grouped" ] (List.indexedMap (viewGroup plane width) groups)
+bars : Plane -> Float -> List (data -> Bar msg) -> List data -> Svg msg
+bars plane width toYs data =
+  g [ class "elm-charts__bars" ] (List.indexedMap (viewBars plane width toYs) data)
 
 
-viewGroup : Plane -> Float -> Int -> List (Bar msg) -> Svg msg
-viewGroup plane width groupIndex bars =
+viewBars : Plane -> Float -> List (data -> Bar msg) -> Int -> data -> Svg msg
+viewBars plane width toYs groupIndex data =
   let
     barWidth =
-      width / toFloat (List.length bars)
+      width / toFloat (List.length toYs)
 
     indexOffset index =
-      toFloat index - (toFloat (List.length bars) / 2)
+      toFloat index - (toFloat (List.length toYs) / 2)
 
     x index =
       toFloat groupIndex + 1 + barWidth * indexOffset index
 
-    viewGroupBar index bar =
-      viewBar plane barWidth (x index) bar
+    viewGroupBar index toBar =
+      viewBar plane barWidth (x index) (toBar data)
   in
-    g [ class "elm-plot__group" ] (List.indexedMap viewGroupBar bars)
+    g [ class "elm-charts__bar" ] (List.indexedMap viewGroupBar toYs)
 
 
 
 -- HISTOGRAM
 
 
-{-| The bars are the class frequencies and the interval is the class interval's
-upper limit minus lower limit. Right now, you can only have equal class intervals,
-but I might add unequal support later!
-
-[What is going on with all these words?](http://onlinestatbook.com/2/graphing_distributions/histograms.html)
--}
-type alias Histogram msg =
-  { bars : List (Bar msg)
-  , interval : Float
-  , intervalBegin : Float
-  }
-
-
-{-|
-
-    frequencies : List Float
-    frequencies =
-      [ 1, 2, 3, 6, 8, 9, 6, 4, 2, 1 ]
-
-    testScores : Histogram msg
-    testScores =
-      { bars = List.map (Bar [ stroke blueStroke, fill blueFill ]) frequencies
-      , interval = 1
-      }
+{-| Make a histogram.
 
     main : Svg msg
     main =
@@ -155,18 +119,18 @@ type alias Histogram msg =
         [ width (String.fromFloat plane.x.length)
         , height (String.fromFloat plane.y.length)
         ]
-        [ histogram plane testScores ]
+        [ histogram plane 1 1 (bar [ stroke blueStroke, fill blueFill ]) [ 1, 2, 3, 6, 8, 9, 6, 4, 2, 1 ] ]
 -}
-histogram : Plane -> Histogram msg -> Svg msg
-histogram plane { bars, intervalBegin, interval } =
+histogram : Plane -> Float -> Float -> (data -> Bar msg) -> List data -> Svg msg
+histogram plane intervalBegin interval toBar data =
   let
     x index =
       intervalBegin + toFloat index * interval
 
-    viewHistogramBar index bar =
-      viewBar plane interval (x index) bar
+    viewHistogramBar index datum =
+      viewBar plane interval (x index) (toBar datum)
   in
-    g [ class "elm-plot__histogram" ] (List.indexedMap viewHistogramBar bars)
+    g [ class "elm-charts__histogram" ] (List.indexedMap viewHistogramBar data)
 
 
 
@@ -174,19 +138,19 @@ histogram plane { bars, intervalBegin, interval } =
 
 
 viewBar : Plane -> Float -> Float -> Bar msg -> Svg msg
-viewBar plane width x bar =
+viewBar plane width x bar_ =
   let
     commands =
       [ Move x (closestToZero plane)
-      , Line x bar.y
-      , Line (x + width) bar.y
+      , Line x bar_.y
+      , Line (x + width) bar_.y
       , Line (x + width) (closestToZero plane)
       ]
 
     attributes =
       concat
         [ stroke pinkStroke, fill pinkFill ]
-        bar.attributes
+        bar_.attributes
         [ d (description plane commands) ]
   in
     path attributes []
@@ -282,7 +246,7 @@ fullVertical plane userAttributes x =
 -}
 xTicks : Plane -> Int -> List (Attribute msg) -> Float -> List Float -> Svg msg
 xTicks plane height userAttributes y xs =
-  g [ class "elm-plot__x-ticks" ] (List.map (xTick plane height userAttributes y) xs)
+  g [ class "elm-charts__x-ticks" ] (List.map (xTick plane height userAttributes y) xs)
 
 
 {-| Renders a single tick for the horizontal axis.
@@ -292,7 +256,7 @@ xTick plane height userAttributes y x =
   let
     attributes =
       concat
-        [ class "elm-plot__tick", stroke darkGrey ]
+        [ class "elm-charts__tick", stroke darkGrey ]
         userAttributes
         [ Attributes.x1 <| String.fromFloat (toSVGX plane x)
         , Attributes.x2 <| String.fromFloat (toSVGX plane x)
@@ -311,7 +275,7 @@ xTick plane height userAttributes y x =
 -}
 yTicks : Plane -> Int -> List (Attribute msg) -> Float -> List Float -> Svg msg
 yTicks plane width userAttributes x ys =
-  g [ class "elm-plot__y-ticks" ] (List.map (yTick plane width userAttributes x) ys)
+  g [ class "elm-charts__y-ticks" ] (List.map (yTick plane width userAttributes x) ys)
 
 
 {-| Renders a single tick for the vertical axis.
@@ -321,7 +285,7 @@ yTick plane width userAttributes x y =
   let
     attributes =
       concat
-        [ class "elm-plot__tick", stroke darkGrey ]
+        [ class "elm-charts__tick", stroke darkGrey ]
         userAttributes
         [ Attributes.x1 <| String.fromFloat (toSVGX plane x)
         , Attributes.x2 <| String.fromFloat (toSVGX plane x - toFloat width)
@@ -340,7 +304,7 @@ yTick plane width userAttributes x y =
 -}
 xLabels : Plane -> (Plane -> Float -> Float -> Svg msg) -> Float -> List Float -> Svg msg
 xLabels plane toLabel y xs =
-  g [ class "elm-plot__x-labels" ] (List.map (toLabel plane y) xs)
+  g [ class "elm-charts__x-labels" ] (List.map (toLabel plane y) xs)
 
 
 {-| Renders a label for the horizontal axis.
@@ -366,7 +330,7 @@ xLabel color toString plane y x =
 -}
 yLabels : Plane -> (Plane -> Float -> Float -> Svg msg) -> Float -> List Float -> Svg msg
 yLabels plane toLabel x ys =
-  g [ class "elm-plot__y-labels" ] (List.map (toLabel plane x) ys)
+  g [ class "elm-charts__y-labels" ] (List.map (toLabel plane x) ys)
 
 
 {-| Renders a label for the vertical axis.
@@ -403,7 +367,7 @@ type alias Dot msg =
 
 {-| A dot without visual representation.
 -}
-clear : Plane -> Float -> Float -> Svg msg
+clear : Dot msg
 clear _ _ _ =
   Svg.text ""
 
@@ -556,9 +520,9 @@ toPoints toX toY data =
 
 viewSeries : Plane -> (data -> Float) -> (data -> Float) -> Dot msg -> List data -> Svg msg -> Svg msg
 viewSeries plane toX toY dot data interpolation =
-  g [ class "elm-plot__series" ]
+  g [ class "elm-charts__series" ]
     [ interpolation
-    , g [ class "elm-plot__dots" ] (List.map (\datum -> dot plane (toX datum) (toY datum)) data)
+    , g [ class "elm-charts__dots" ] (List.map (\datum -> dot plane (toX datum) (toY datum)) data)
     ]
 
 
@@ -583,7 +547,7 @@ viewLine plane userAttributes interpolation first rest =
 
     attributes =
       concat
-        [ class "elm-plot__line", stroke pinkStroke ]
+        [ class "elm-charts__line", stroke pinkStroke ]
         userAttributes
         [ d (description plane commands), fill transparent ]
   in
@@ -601,7 +565,7 @@ viewArea plane userAttributes interpolation first rest =
 
     attributes =
       concat
-        [ class "elm-plot__area", stroke pinkStroke ]
+        [ class "elm-charts__area", stroke pinkStroke ]
         userAttributes
         [ d (description plane commands) ]
   in

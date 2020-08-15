@@ -26,12 +26,9 @@ plane =
   }
 
 
-testScores : Histogram msg
+testScores : List Int
 testScores =
-  { bars = List.map (Bar [ stroke blueStroke, fill blueFill ]) [ 1, 2, 3, 6, 8, 9, 6, 4, 2, 1 ]
-  , interval = 2.1
-  , intervalBegin = 23
-  }
+  [ 1, 2, 3, 6, 8, 9, 6, 4, 2, 1 ]
 
 
 main : Svg msg
@@ -40,7 +37,7 @@ main =
     [ width (String.fromFloat plane.x.length)
     , height (String.fromFloat plane.y.length)
     ]
-    [ histogram plane testScores
+    [ histogram plane 23 2.1 (bar [ stroke blueStroke, fill blueFill ] << toFloat) testScores
     , fullHorizontal plane [] 0
     , fullVertical plane [] 23
     , xTicks plane 5 [] 0 [ 24, 26, 30 ]

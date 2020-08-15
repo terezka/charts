@@ -69,12 +69,12 @@ view map =
         [  view_ ]
 
     viewTile tile =
-      g [ Attributes.class "elm-plot__heat-map__tile" ]
+      g [ Attributes.class "elm-charts__heat-map__tile" ]
         [ rect (tileAttributes tile) []
         , Maybe.map (viewContent tile.index) tile.content |> Maybe.withDefault (text "")
         ]
   in
-    g [ Attributes.class "elm-plot__heat-map" ] (List.map viewTile map.tiles)
+    g [ Attributes.class "elm-charts__heat-map" ] (List.map viewTile map.tiles)
 
 
 

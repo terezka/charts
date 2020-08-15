@@ -14,28 +14,33 @@ plane =
     , marginUpper = 20
     , length = 300
     , min = 0
-    , max = 5
+    , max = toFloat (List.length data) + 0.5
     }
   , y =
     { marginLower = 20
     , marginUpper = 20
     , length = 300
-    , min = -5
-    , max = 10
+    , min = 0
+    , max = maximum (\{passed, failed} -> Maybe.withDefault 10 <| List.maximum [passed, failed]) data
     }
   }
 
+type alias Point =
+  { passed : Float
+  , failed : Float
+  }
 
-group : List Float -> List (Bar msg)
-group =
-  List.map (Bar [ stroke blueStroke, fill blueFill ])
 
+data : List Point
+data =
+  [ { passed = 4, failed = 4 }
+  , { passed = 2, failed = 3 }
+  , { passed = 4, failed = 4 }
+  , { passed = 6, failed = 4 }
+  , { passed = 8, failed = 3 }
+  , { passed = 10, failed = 4 }
+  ]
 
-groups : Groups msg
-groups =
-   { groups = List.map group [ [ 2, 3, 1 ], [ 5, 1, 4 ], [ 1, 5, 3 ] ]
-   , width = 0.8
-   }
 
 
 main : Svg msg
@@ -44,7 +49,11 @@ main =
     [ width (String.fromFloat plane.x.length)
     , height (String.fromFloat plane.y.length)
     ]
-    [ grouped plane groups
+    [ bars plane 0.8
+        [ bar [ stroke blueStroke, fill blueFill ] << .passed
+        , bar [ stroke pinkStroke, fill pinkFill ] << .failed
+        ]
+        data
     , fullHorizontal plane [] 0
     , fullVertical plane [] 0
     , xTicks plane 5 [] 0 [ 1, 2, 3 ]
