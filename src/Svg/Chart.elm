@@ -53,10 +53,8 @@ import Internal.Svg exposing (..)
 
 
 {-| -}
-type alias Bar msg =
-  { attributes : List (Attribute msg)
-  , y : Float
-  }
+type Bar msg =
+  Bar (List (Attribute msg)) Float
 
 
 {-| -}
@@ -138,19 +136,19 @@ histogram plane intervalBegin interval toBar data =
 
 
 viewBar : Plane -> Float -> Float -> Bar msg -> Svg msg
-viewBar plane width x bar_ =
+viewBar plane width x (Bar customAttributes y) =
   let
     commands =
       [ Move x (closestToZero plane)
-      , Line x bar_.y
-      , Line (x + width) bar_.y
+      , Line x y
+      , Line (x + width) y
       , Line (x + width) (closestToZero plane)
       ]
 
     attributes =
       concat
         [ stroke pinkStroke, fill pinkFill ]
-        bar_.attributes
+        customAttributes
         [ d (description plane commands) ]
   in
     path attributes []
