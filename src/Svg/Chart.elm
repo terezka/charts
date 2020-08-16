@@ -119,16 +119,12 @@ viewBars plane width toYs groupIndex data =
         ]
         [ histogram plane 1 1 (bar [ stroke blueStroke, fill blueFill ]) [ 1, 2, 3, 6, 8, 9, 6, 4, 2, 1 ] ]
 -}
-histogram : Plane -> Float -> Float -> (data -> Bar msg) -> List data -> Svg msg
-histogram plane intervalBegin interval toBar data =
-  let
-    x index =
-      intervalBegin + toFloat index * interval
-
-    viewHistogramBar index datum =
-      viewBar plane interval (x index) (toBar datum)
+histogram : Plane -> (data -> Float) -> Float -> (data -> Bar msg) -> List data -> Svg msg
+histogram plane toX width toBar data =
+  let viewHistogramBar datum =
+        viewBar plane width (toX datum) (toBar datum)
   in
-    g [ class "elm-charts__histogram" ] (List.indexedMap viewHistogramBar data)
+    g [ class "elm-charts__histogram" ] (List.map viewHistogramBar data)
 
 
 
@@ -298,9 +294,9 @@ yTick plane width userAttributes x y =
 
     horizontalLabels : Svg msg
     horizontalLabels =
-      xLabels plane (xLabel "blue" String.fromFloat) axisYCoordinate tickPositions
+      xLabels plane (xLabel "blue" .timestamp format) axisYCoordinate data
 -}
-xLabels : Plane -> (Plane -> Float -> Float -> Svg msg) -> Float -> List Float -> Svg msg
+xLabels : Plane -> (Plane -> Float -> data -> Svg msg) -> Float -> List data -> Svg msg
 xLabels plane toLabel y xs =
   g [ class "elm-charts__x-labels" ] (List.map (toLabel plane y) xs)
 
@@ -309,24 +305,24 @@ xLabels plane toLabel y xs =
 
     horizontalLabel : Svg msg
     horizontalLabel =
-      xLabel "blue" String.fromFloat plane y x
+      xLabel "blue" .timestamp format plane y datum
 -}
-xLabel : String -> (Float -> String) -> Plane -> Float -> Float -> Svg msg
-xLabel color toString plane y x =
+xLabel : List (Attribute msg) -> (data -> Float) -> (data -> String) -> Plane -> Float -> data -> Svg msg
+xLabel attrs toX toString plane y datum =
   Svg.g
-    [ placeWithOffset plane x y 0 20
+    [ placeWithOffset plane (toX datum) y 0 20
     , Attributes.style "text-anchor: middle;"
     ]
-    [ viewLabel color (toString x) ]
+    [ viewLabel attrs (toString datum) ]
 
 
 {-| Renders labels for the vertical axis.
 
     verticalLabels : Svg msg
     verticalLabels =
-      yLabels plane (yLabel "blue" String.fromFloat) axisXCoordinate tickPositions
+      yLabels plane (yLabel "blue" .age format) axisXCoordinate data
 -}
-yLabels : Plane -> (Plane -> Float -> Float -> Svg msg) -> Float -> List Float -> Svg msg
+yLabels : Plane -> (Plane -> Float -> data -> Svg msg) -> Float -> List data -> Svg msg
 yLabels plane toLabel x ys =
   g [ class "elm-charts__y-labels" ] (List.map (toLabel plane x) ys)
 
@@ -335,23 +331,29 @@ yLabels plane toLabel x ys =
 
     verticalLabel : Svg msg
     verticalLabel =
-      yLabel "blue" String.fromFloat plane x y
+      yLabel "blue" .age format plane x y
 -}
-yLabel : String -> (Float -> String) -> Plane -> Float -> Float -> Svg msg
-yLabel color toString plane x y =
+yLabel : List (Attribute msg) -> (data -> Float) -> (data -> String) -> Plane -> Float -> data -> Svg msg
+yLabel attrs toY toString plane x datum =
   Svg.g
-    [ placeWithOffset plane x y -10 5
+    [ placeWithOffset plane x (toY datum) -10 5
     , Attributes.style "text-anchor: end;"
     ]
-    [ viewLabel color (toString y) ]
+    [ viewLabel attrs (toString datum) ]
 
 
-viewLabel : String -> String -> Svg msg
-viewLabel color string =
-  Svg.text_
-    [ Attributes.fill color
-    , Attributes.style "pointer-events: none;"
-    ]
+viewLabel : List (Attribute msg) -> String -> Svg msg
+viewLabel userAttributes string =
+  let attributes =
+        concat
+          [ class "elm-charts__label"
+          , Attributes.fill "#6d6d6d"
+          , Attributes.style "pointer-events: none;"
+          ]
+          userAttributes
+          []
+  in
+  Svg.text_ attributes
     [ Svg.tspan [] [ Svg.text string ] ]
 
 

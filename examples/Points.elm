@@ -1,4 +1,4 @@
-module Simple exposing (..)
+module Points exposing (..)
 
 import Svg exposing (Svg, svg, g, circle, text_, text)
 import Svg.Attributes exposing (width, height, stroke, fill, r, transform)

@@ -85,18 +85,24 @@ type alias Axis =
 
 {-| Helper to extract the minimum value amongst your coordinates.
 -}
-minimum : (a -> Float) -> List a -> Float
-minimum toValue =
-  List.map toValue
+minimum : List (a -> Float) -> List a -> Float
+minimum toValues =
+  let fold datum toValue all = toValue datum :: all
+      eachDatum datum = List.foldl (fold datum) [] toValues
+  in
+  List.concatMap eachDatum
     >> List.minimum
     >> Maybe.withDefault 0
 
 
 {-| Helper to extract the maximum value amongst your coordinates.
 -}
-maximum : (a -> Float) -> List a -> Float
-maximum toValue =
-  List.map toValue
+maximum : List (a -> Float) -> List a -> Float
+maximum toValues =
+  let fold datum toValue all = toValue datum :: all
+      eachDatum datum = List.foldl (fold datum) [] toValues
+  in
+  List.concatMap eachDatum
     >> List.maximum
     >> Maybe.withDefault 1
 

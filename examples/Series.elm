@@ -13,15 +13,15 @@ planeFromPoints points =
     { marginLower = 10
     , marginUpper = 10
     , length = 300
-    , min = minimum .x points
-    , max = maximum .x points
+    , min = minimum [.x] points
+    , max = maximum [.x] points
     }
   , y =
     { marginLower = 10
     , marginUpper = 10
     , length = 300
-    , min = minimum .y points
-    , max = maximum .y points
+    , min = minimum [.y] points
+    , max = maximum [.y] points
     }
   }
 
@@ -70,14 +70,14 @@ main =
       ]
       [ linearArea plane .x .y [ stroke "transparent", fill blueFill ] clear data1
       , linear plane .x .y [ stroke blueStroke ] clear data1
-      , monotone plane .x .y [ stroke pinkStroke ] (aura 3 6 0.3 diamond "blue") data2
-      , scatter plane .x .y (full 5 triangle "pink") data3
+      , monotone plane .x .y [ stroke pinkStroke ] (aura 3 6 0.3 diamond pinkStroke) data2
+      , scatter plane .x .y (full 5 triangle blueStroke) data3
       , fullHorizontal plane [] 0
       , fullVertical plane [] 0
       , xTicks plane 5 [] 0 [ 1, 2, 3 ]
       , yTicks plane 5 [] 0 [ 1, 2, 3, 5, 6 ]
-      , xLabels plane (xLabel "blue" String.fromFloat) 0 [ 1, 2, 3, 5, 10 ]
-      , yLabels plane (yLabel "green" String.fromFloat) 0 [ 1, 2, 3, 5, 6 ]
+      , xLabels plane (xLabel [] identity String.fromFloat) 0 [ 1, 2, 3, 5, 10 ]
+      , yLabels plane (yLabel [] identity String.fromFloat) 0 [ 1, 2, 3, 5, 6 ]
       ]
 
 

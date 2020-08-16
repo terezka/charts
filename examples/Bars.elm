@@ -21,7 +21,7 @@ plane =
     , marginUpper = 20
     , length = 300
     , min = 0
-    , max = maximum (\{passed, failed} -> Maybe.withDefault 10 <| List.maximum [passed, failed]) data
+    , max = maximum [.passed, .failed] data
     }
   }
 
@@ -58,6 +58,6 @@ main =
     , fullVertical plane [] 0
     , xTicks plane 5 [] 0 [ 1, 2, 3 ]
     , yTicks plane 5 [] 0 [ 1, 2, 3 ]
-    , xLabels plane (xLabel "blue" String.fromFloat) 0 [ 1, 2, 3 ]
-    , yLabels plane (yLabel "green" String.fromFloat) 0 [ 1, 2, 3 ]
+    , xLabels plane (xLabel [] identity String.fromFloat) 0 [ 1, 2, 3 ]
+    , yLabels plane (yLabel [] identity String.fromFloat) 0 [ 1, 2, 3 ]
     ]
