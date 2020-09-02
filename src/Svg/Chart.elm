@@ -463,14 +463,14 @@ cross =
     someScatter =
       scatter plane .x .y (full 6 circle "blue") points
 -}
-scatter : Plane -> (data -> Float) -> (data -> Float) -> Dot msg -> List data -> Svg msg
+scatter : Plane -> (data -> Float) -> (data -> Float) -> (data -> Dot msg) -> List data -> Svg msg
 scatter plane toX toY dot data =
   viewSeries plane toX toY dot data (text "-- No interpolation --")
 
 
 {-| Series with linear interpolation.
 -}
-linear : Plane -> (data -> Float) -> (data -> Float) -> List (Attribute msg) -> Dot msg -> List data -> Svg msg
+linear : Plane -> (data -> Float) -> (data -> Float) -> List (Attribute msg) -> (data -> Dot msg) -> List data -> Svg msg
 linear plane toX toY attributes dot data =
   let points = toPoints toX toY data in
   viewSeries plane toX toY dot data <|
@@ -479,7 +479,7 @@ linear plane toX toY attributes dot data =
 
 {-| Area series with linear interpolation.
 -}
-linearArea : Plane -> (data -> Float) -> (data -> Float) -> List (Attribute msg) -> Dot msg -> List data -> Svg msg
+linearArea : Plane -> (data -> Float) -> (data -> Float) -> List (Attribute msg) -> (data -> Dot msg) -> List data -> Svg msg
 linearArea plane toX toY attributes dot data =
   let points = toPoints toX toY data in
   viewSeries plane toX toY dot data <|
@@ -488,7 +488,7 @@ linearArea plane toX toY attributes dot data =
 
 {-| Series with monotone interpolation.
 -}
-monotone : Plane -> (data -> Float) -> (data -> Float) -> List (Attribute msg) -> Dot msg -> List data -> Svg msg
+monotone : Plane -> (data -> Float) -> (data -> Float) -> List (Attribute msg) -> (data -> Dot msg) -> List data -> Svg msg
 monotone plane toX toY attributes dot data =
   let points = toPoints toX toY data in
   viewSeries plane toX toY dot data <|
@@ -497,7 +497,7 @@ monotone plane toX toY attributes dot data =
 
 {-| Area series with monotone interpolation.
 -}
-monotoneArea : Plane -> (data -> Float) -> (data -> Float) -> List (Attribute msg) -> Dot msg -> List data -> Svg msg
+monotoneArea : Plane -> (data -> Float) -> (data -> Float) -> List (Attribute msg) -> (data -> Dot msg) -> List data -> Svg msg
 monotoneArea plane toX toY attributes dot data =
   let points = toPoints toX toY data in
   viewSeries plane toX toY dot data <|
@@ -518,11 +518,11 @@ toPoints toX toY data =
   List.map (\datum -> Point (toX datum) (toY datum)) data
 
 
-viewSeries : Plane -> (data -> Float) -> (data -> Float) -> Dot msg -> List data -> Svg msg -> Svg msg
+viewSeries : Plane -> (data -> Float) -> (data -> Float) -> (data -> Dot msg) -> List data -> Svg msg -> Svg msg
 viewSeries plane toX toY dot data interpolation =
   g [ class "elm-charts__series" ]
     [ interpolation
-    , g [ class "elm-charts__dots" ] (List.map (\datum -> dot plane (toX datum) (toY datum)) data)
+    , g [ class "elm-charts__dots" ] (List.map (\datum -> dot datum plane (toX datum) (toY datum)) data)
     ]
 
 

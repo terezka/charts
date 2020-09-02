@@ -68,10 +68,10 @@ main =
       [ width (String.fromFloat plane.x.length)
       , height (String.fromFloat plane.x.length)
       ]
-      [ linearArea plane .x .y [ stroke "transparent", fill blueFill ] clear data1
-      , linear plane .x .y [ stroke blueStroke ] clear data1
-      , monotone plane .x .y [ stroke pinkStroke ] (aura 3 6 0.3 diamond pinkStroke) data2
-      , scatter plane .x .y (full 5 triangle blueStroke) data3
+      [ linearArea plane .x .y [ stroke "transparent", fill blueFill ] (\_ -> clear) data1
+      , linear plane .x .y [ stroke blueStroke ] (\_ -> clear) data1
+      , monotone plane .x .y [ stroke pinkStroke ] (\_ -> aura 3 6 0.3 diamond pinkStroke) data2
+      , scatter plane .x .y (\_ -> full 5 triangle blueStroke) data3
       , fullHorizontal plane [] 0
       , fullVertical plane [] 0
       , xTicks plane 5 [] 0 [ 1, 2, 3 ]
