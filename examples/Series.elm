@@ -10,15 +10,15 @@ import Internal.Colors exposing (..)
 planeFromPoints : List Point -> Plane
 planeFromPoints points =
   { x =
-    { marginLower = 10
+    { marginLower = 15
     , marginUpper = 10
     , length = 300
     , min = minimum [.x] points
     , max = maximum [.x] points
     }
   , y =
-    { marginLower = 10
-    , marginUpper = 10
+    { marginUpper = 10
+    , marginLower = 20
     , length = 300
     , min = minimum [.y] points
     , max = maximum [.y] points

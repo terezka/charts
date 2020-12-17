@@ -130,7 +130,7 @@ toSVGX plane value =
 -}
 toSVGY : Plane -> Float -> Float
 toSVGY plane value =
-  scaleSVG plane.y (plane.y.max - value) + plane.y.marginLower
+  scaleSVG plane.y (plane.y.max - value) + plane.y.marginUpper
 
 
 {-| For scaling a SVG value to a cartesian value. Note that this will _not_

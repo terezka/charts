@@ -9,39 +9,37 @@ import Html exposing (Html, div)
 import Svg exposing (Svg, svg)
 import Svg.Attributes
 import Svg.Coordinates as Coordinates exposing (..)
-import Svg.Plot exposing (..)
+import Svg.Chart exposing (..)
 import Svg.Tiles exposing (..)
 
-
-all : Test
-all =
-  describe "elm-plot-rouge"
-    [ coordinates
-    , plots
-    , maps
-    ]
 
 coordinates : Test
 coordinates =
   describe "Cartesian translation"
     [ test "toSVGX" <|
         \() ->
-          Expect.equal 10 (toSVGX defaultPlane 1)
+          expectFloat 11 (toSVGX defaultPlane 1)
     , test "toSVGY" <|
         \() ->
-          Expect.equal 90 (toSVGY defaultPlane 1)
+          expectFloat 99 (toSVGY defaultPlane 1)
+    --
     , test "toSVGX with lower margin" <|
         \() ->
-          Expect.equal 28 (toSVGX { defaultPlane | x = updateMarginLower defaultPlane.x 20 } 1)
+          expectFloat 20 (toSVGX { defaultPlane | x = updateMarginLower defaultPlane.x 10 } 1)
     , test "toSVGX with upper margin" <|
         \() ->
-          Expect.equal 8 (toSVGX { defaultPlane | x = updateMarginUpper defaultPlane.x 20 } 1)
+          expectFloat 10 (toSVGX { defaultPlane | x = updateMarginUpper defaultPlane.x 10 } 1)
+    --
     , test "toSVGY with lower margin" <|
         \() ->
-          Expect.equal 92 (toSVGY { defaultPlane | y = updateMarginLower defaultPlane.y 20 } 1)
+          expectFloat 90 (toSVGY { defaultPlane | y = updateMarginLower defaultPlane.y 10 } 1)
+    , test "toSVGY with upper margin" <|
+        \() ->
+          expectFloat 100 (toSVGY { defaultPlane | y = updateMarginUpper defaultPlane.y 10 } 1)
+    --
     , test "Length should default to 1" <|
         \() ->
-          Expect.equal 0.9 (toSVGY { defaultPlane | y = updatelength defaultPlane.y 0 } 1)
+          expectFloat 0.9 (toSVGY { defaultPlane | y = updatelength defaultPlane.y 0 } 1)
     , fuzz float "x-coordinate produced should always be a number" <|
         \number ->
           toSVGX defaultPlane number
@@ -66,10 +64,10 @@ plots =
                 Expect.pass
 
               actualPoints ->
-                wrapSvg [ monotone (planeFromPoints actualPoints) [ Svg.Attributes.stroke "red" ] (List.map clear actualPoints) ]
+                wrapSvg [ monotone (planeFromPoints actualPoints) .x .y [ Svg.Attributes.stroke "red" ] (always clear) actualPoints ]
                   |> Query.fromHtml
                   |> Query.find [ Selector.tag "path" ]
-                  |> Query.has [ Selector.attribute "stroke" "red" ]
+                  |> Query.has [ Selector.attribute (Svg.Attributes.stroke "red") ]
     , fuzz randomPoints "User can set fill for areas" <|
         \points ->
             case points of
@@ -77,10 +75,10 @@ plots =
                 Expect.pass
 
               actualPoints ->
-                wrapSvg [ monotone (planeFromPoints actualPoints) [ Svg.Attributes.fill "red" ] (List.map clear actualPoints) ]
+                wrapSvg [ monotoneArea (planeFromPoints actualPoints) .x .y [ Svg.Attributes.fill "red" ] (always clear) actualPoints ]
                   |> Query.fromHtml
                   |> Query.find [ Selector.tag "path" ]
-                  |> Query.has [ Selector.attribute "fill" "red" ]
+                  |> Query.has [ Selector.attribute (Svg.Attributes.fill "red") ]
     ]
 
 
@@ -122,15 +120,15 @@ planeFromPoints points =
     { marginLower = 10
     , marginUpper = 10
     , length = 300
-    , min = minimum .x points
-    , max = maximum .x points
+    , min = minimum [.x] points
+    , max = maximum [.x] points
     }
   , y =
     { marginLower = 10
     , marginUpper = 10
     , length = 300
-    , min = minimum .y points
-    , max = maximum .y points
+    , min = minimum [.y] points
+    , max = maximum [.y] points
     }
   }
 
@@ -146,7 +144,7 @@ defaultAxis : Axis
 defaultAxis =
   { marginLower = 0
   , marginUpper = 0
-  , length = 100
+  , length = 110
   , min = 0
   , max = 10
   }
@@ -165,3 +163,12 @@ updateMarginUpper config marginUpper =
 updatelength : Axis -> Float -> Axis
 updatelength config length =
   { config | length = length }
+
+
+type alias Point =
+  { x : Float, y : Float }
+
+
+expectFloat : Float -> Float -> Expect.Expectation
+expectFloat =
+  Expect.within (Expect.Absolute 0.1)
