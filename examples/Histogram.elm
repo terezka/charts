@@ -55,7 +55,10 @@ main =
     [ width (String.fromFloat plane.x.length)
     , height (String.fromFloat plane.y.length)
     ]
-    [ histogram plane .timestamp 10 (bar [] << .score) data
+    [ histogram plane .timestamp 10
+        [ bar [] << .score
+        , bar [ fill blueFill, stroke blueStroke ] << .score
+        ] data
     , xAxis plane [] 0
     , yAxis plane [] 10
     , xTicks plane 5 [] 0 (List.map .timestamp data)

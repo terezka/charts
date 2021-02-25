@@ -54,11 +54,11 @@ import Internal.Svg exposing (..)
 
 {-| -}
 type Bar msg =
-  Bar (List (Attribute msg)) Float Float
+  Bar (List (Attribute msg)) Float
 
 
 {-| -}
-bar : List (Attribute msg) -> Float -> Float -> Bar msg
+bar : List (Attribute msg) -> Float -> Bar msg
 bar =
   Bar
 
@@ -84,11 +84,11 @@ translate it into cartesian units.
 -}
 bars : Plane -> Float -> List (data -> Bar msg) -> List data -> Svg msg
 bars plane width toYs data =
-  g [ class "elm-charts__bars" ] (List.indexedMap (viewBars plane width toYs) data)
+  g [ class "elm-charts__bars" ] (List.indexedMap (\i -> viewBars plane width toYs (toFloat i + 1)) data)
 
 
-viewBars : Plane -> Float -> List (data -> Bar msg) -> Int -> data -> Svg msg
-viewBars plane width toYs groupIndex data =
+viewBars : Plane -> Float -> List (data -> Bar msg) -> Float -> data -> Svg msg
+viewBars plane width toYs baseX data =
   let
     barWidth =
       width / toFloat (List.length toYs)
@@ -97,7 +97,7 @@ viewBars plane width toYs groupIndex data =
       toFloat index - (toFloat (List.length toYs) / 2)
 
     x index =
-      toFloat groupIndex + 1 + barWidth * indexOffset index
+      baseX + barWidth * indexOffset index
 
     viewGroupBar index toBar =
       viewBar plane barWidth (x index) (toBar data)
@@ -119,10 +119,10 @@ viewBars plane width toYs groupIndex data =
         ]
         [ histogram plane 1 1 (bar [ stroke blueStroke, fill blueFill ]) [ 1, 2, 3, 6, 8, 9, 6, 4, 2, 1 ] ]
 -}
-histogram : Plane -> (data -> Float) -> Float -> (data -> Bar msg) -> List data -> Svg msg
-histogram plane toX width toBar data =
+histogram : Plane -> (data -> Float) -> Float -> List (data -> Bar msg) -> List data -> Svg msg
+histogram plane toX width toBars data =
   let viewHistogramBar datum =
-        viewBar plane width (toX datum) (toBar datum)
+        viewBars plane width toBars (toX datum + width / 2) datum
   in
     g [ class "elm-charts__histogram" ] (List.map viewHistogramBar data)
 
