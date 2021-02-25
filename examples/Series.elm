@@ -72,8 +72,8 @@ main =
       , linear plane .x .y [ stroke blueStroke ] (\_ -> clear) data1
       , monotone plane .x .y [ stroke pinkStroke ] (\_ -> aura 3 6 0.3 diamond pinkStroke) data2
       , scatter plane .x .y (\_ -> full 5 triangle blueStroke) data3
-      , fullHorizontal plane [] 0
-      , fullVertical plane [] 0
+      , xAxis plane [] 0
+      , yAxis plane [] 0
       , xTicks plane 5 [] 0 [ 1, 2, 3 ]
       , yTicks plane 5 [] 0 [ 1, 2, 3, 5, 6 ]
       , xLabels plane (xLabel [] identity String.fromFloat) 0 [ 1, 2, 3, 5, 10 ]

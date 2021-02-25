@@ -4,7 +4,7 @@ module Svg.Chart
     , circle, triangle, square, diamond, plus, cross
     , scatter, linear, linearArea, monotone, monotoneArea
     , Bar, bar, bars, histogram
-    , line, horizontal, vertical, fullHorizontal, fullVertical
+    , line, horizontal, vertical, xAxis, yAxis
     , xTicks, xTick, yTicks, yTick
     , xLabels, yLabels, xLabel, yLabel
     )
@@ -25,7 +25,7 @@ module Svg.Chart
 @docs Bar, bar, bars, histogram
 
 # Straight lines
-@docs line, fullHorizontal, fullVertical, horizontal, vertical
+@docs line, xAxis, yAxis, horizontal, vertical
 
 ## Ticks
 ProTip: Passing a negative value as the height/width of a tick renders it
@@ -54,11 +54,11 @@ import Internal.Svg exposing (..)
 
 {-| -}
 type Bar msg =
-  Bar (List (Attribute msg)) Float
+  Bar (List (Attribute msg)) Float Float
 
 
 {-| -}
-bar : List (Attribute msg) -> Float -> Bar msg
+bar : List (Attribute msg) -> Float -> Float -> Bar msg
 bar =
   Bar
 
@@ -214,10 +214,10 @@ vertical plane userAttributes x y1 y2 =
 
     myXAxisOrGridLine : Svg msg
     myXAxisOrGridLine =
-      fullHorizontal plane [] yPosition
+      xAxis plane [] yPosition
 -}
-fullHorizontal : Plane -> List (Attribute msg) -> Float -> Svg msg
-fullHorizontal plane userAttributes y =
+xAxis : Plane -> List (Attribute msg) -> Float -> Svg msg
+xAxis plane userAttributes y =
   horizontal plane userAttributes y plane.x.min plane.x.max
 
 
@@ -225,10 +225,10 @@ fullHorizontal plane userAttributes y =
 
     myYAxisOrGridLine : Svg msg
     myYAxisOrGridLine =
-      fullVertical plane [] xPosition
+      yAxis plane [] xPosition
 -}
-fullVertical : Plane -> List (Attribute msg) -> Float -> Svg msg
-fullVertical plane userAttributes x =
+yAxis : Plane -> List (Attribute msg) -> Float -> Svg msg
+yAxis plane userAttributes x =
   vertical plane userAttributes x plane.y.min plane.y.max
 
 

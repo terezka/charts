@@ -56,8 +56,8 @@ main =
     , height (String.fromFloat plane.y.length)
     ]
     [ histogram plane .timestamp 10 (bar [] << .score) data
-    , fullHorizontal plane [] 0
-    , fullVertical plane [] 10
+    , xAxis plane [] 0
+    , yAxis plane [] 10
     , xTicks plane 5 [] 0 (List.map .timestamp data)
     , yTicks plane 5 [] 10 [ 1, 2, 3 ]
     , xLabels plane (xLabel [] (.timestamp >> (+) 5) (.timestamp >> String.fromFloat)) 0 data
