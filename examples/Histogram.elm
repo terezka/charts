@@ -10,10 +10,10 @@ import Internal.Colors exposing (..)
 plane : Plane
 plane =
   { x =
-    { marginLower = 20
+    { marginLower = 40
     , marginUpper = 20
     , length = 400
-    , min = 10
+    , min = 0
     , max = maximum [.timestamp] data + 10
     }
   , y =
@@ -34,7 +34,8 @@ type alias Point =
 
 data : List Point
 data =
-  [ { timestamp = 10, score = 4 }
+  [ { timestamp = 0, score = 4 }
+  , { timestamp = 10, score = 4 }
   , { timestamp = 20, score = 2 }
   , { timestamp = 30, score = 4 }
   , { timestamp = 40, score = 6 }
@@ -51,14 +52,35 @@ data =
 
 main : Svg msg
 main =
+  let toSimpleBars _ curr _ =
+        [ Bar [] 10 curr.timestamp curr.score ]
+
+      -- Optional: Adjust width based on previous and next data point
+      toBars prev curr next =
+        case ( prev, next ) of
+          ( Nothing, Just next_ ) ->
+            [ Bar [] ((next_.timestamp - curr.timestamp) / 2) curr.timestamp curr.score
+            , Bar [ fill blueFill ] ((next_.timestamp - curr.timestamp) / 2) curr.timestamp curr.score
+            ]
+
+          ( Just prev_, Just next_ ) ->
+            [ Bar [] ((curr.timestamp - prev_.timestamp) / 2) curr.timestamp curr.score
+            , Bar [ fill blueFill ] ((curr.timestamp - prev_.timestamp) / 2) curr.timestamp curr.score
+            ]
+
+          ( Just prev_, Nothing ) ->
+            [ Bar [] ((plane.x.max - curr.timestamp) / 2) curr.timestamp curr.score
+            , Bar [ fill blueFill ] ((plane.x.max - curr.timestamp) / 2) curr.timestamp curr.score
+            ]
+
+          ( Nothing, Nothing ) ->
+            []
+  in
   svg (static plane)
-    [ histogram plane .timestamp 10
-        [ bar [] << .score
-        , bar [ fill blueFill, stroke blueStroke ] << .score
-        ] data
+    [ histogram plane toBars data
     , xAxis plane [] 0
-    , yAxis plane [] 10
+    , yAxis plane [] 0
     , xTicks plane 5 [] 0 (List.map .timestamp data)
-    , yTicks plane 5 [] 10 [ 1, 2, 3 ]
+    , yTicks plane 5 [] 0 [ 1, 2, 3 ]
     , xLabels plane (xLabel [] (.timestamp >> (+) 5) (.timestamp >> String.fromFloat)) 0 data
     ]

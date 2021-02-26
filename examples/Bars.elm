@@ -43,18 +43,19 @@ data =
   ]
 
 
-
 main : Svg msg
 main =
+  let toBars datum =
+        [ GroupBar [ stroke "white", fill blueFill ] 0.2 datum.passed
+        , GroupBar [ stroke "white", fill pinkFill ] 0.2 datum.failed
+        , GroupBar [ stroke "white", fill blueFill ] 0.2 datum.passed
+        ]
+  in
   svg
     [ width (String.fromFloat plane.x.length)
     , height (String.fromFloat plane.y.length)
     ]
-    [ bars plane 0.8
-        [ bar [ stroke blueStroke, fill blueFill ] << .passed
-        , bar [ stroke pinkStroke, fill pinkFill ] << .failed
-        ]
-        data
+    [ bars plane toBars data
     , xAxis plane [] plane.y.min
     , yAxis plane [] plane.x.min
     , xTicks plane 5 [] plane.y.min [ 1, 2, 3 ]

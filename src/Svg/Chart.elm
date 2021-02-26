@@ -4,7 +4,8 @@ module Svg.Chart
     , Dot, clear, empty, disconnected, aura, full
     , circle, triangle, square, diamond, plus, cross
     , scatter, linear, linearArea, monotone, monotoneArea
-    , Bar, bar, bars, histogram
+    , GroupBar, bars
+    , Bar, histogram
     , line, horizontal, vertical, xAxis, yAxis
     , xTicks, xTick, yTicks, yTick
     , xLabels, yLabels, xLabel, yLabel
@@ -19,6 +20,9 @@ module Svg.Chart
 
 # Series
 
+## Sizing
+@docs static, responsive
+
 ## Dots
 @docs Dot, clear, empty, disconnected, aura, full
 @docs circle, triangle, square, diamond, plus, cross
@@ -27,7 +31,7 @@ module Svg.Chart
 @docs scatter, linear, linearArea, monotone, monotoneArea
 
 # Bar charts
-@docs Bar, bar, bars, histogram
+@docs GroupBar, bars, Bar, histogram
 
 # Straight lines
 @docs line, xAxis, yAxis, horizontal, vertical
@@ -87,99 +91,118 @@ responsive plane =
 
 
 {-| -}
-type Bar msg =
-  Bar (List (Attribute msg)) Float
-
-
-{-| -}
-bar : List (Attribute msg) -> Float -> Bar msg
-bar =
-  Bar
+type alias GroupBar msg =
+  { attributes : List (Attribute msg)
+  , width : Float
+  , value : Float
+  }
 
 
 {-| You can draw a bar chart like this:
 
     main : Svg msg
     main =
+      let toBars ( a, b ) =
+            [ bar [ fill "red" ] 0.8 a
+            , bar [ fill "blue" ] 0.8 b
+            ]
+      in
       svg
         [ width (String.fromFloat plane.x.length)
         , height (String.fromFloat plane.y.length)
         ]
-        [ bars plane 0.8
-            [ bar [ fill "red" ] << Tuple.first
-            , bar [ fill "blue" ] << Tuple.second
-            ]
-            [ ( 2, 3 ), ( 5, 1 ), ( 1, 5 ) ]
+        [ bars plane toBars [ ( 2, 3 ), ( 5, 1 ), ( 1, 5 ) ]
         ]
 
 Note on `width`: The width takes catersian units, however, should you have
 a width in SVG units, you can use `Svg.Coordinates.scaleCartesian` to
 translate it into cartesian units.
 -}
-bars : Plane -> Float -> List (data -> Bar msg) -> List data -> Svg msg
-bars plane width toYs data =
-  g [ class "elm-charts__bars" ] (List.indexedMap (\i -> viewBars plane width toYs (toFloat i + 1)) data)
+bars : Plane -> (data -> List (GroupBar msg)) -> List data -> Svg msg
+bars plane toBars data =
+  let viewBars_ i d =
+        let bars_ = List.map (toBar i) (toBars d) in
+        viewBars plane (groupWidth bars_ / 2) bars_
 
+      groupWidth bars_ =
+        List.sum (List.map .width bars_)
 
-viewBars : Plane -> Float -> List (data -> Bar msg) -> Float -> data -> Svg msg
-viewBars plane width toYs baseX data =
-  let
-    barWidth =
-      width / toFloat (List.length toYs)
-
-    indexOffset index =
-      toFloat index - (toFloat (List.length toYs) / 2)
-
-    x index =
-      baseX + barWidth * indexOffset index
-
-    viewGroupBar index toBar =
-      viewBar plane barWidth (x index) (toBar data)
+      toBar i groupBar =
+        Bar groupBar.attributes groupBar.width (toFloat i + 1) groupBar.value
   in
-    g [ class "elm-charts__bar" ] (List.indexedMap viewGroupBar toYs)
+  g [ class "elm-charts__bars" ] (List.indexedMap viewBars_ data)
+
+
+viewBars : Plane -> Float -> List (Bar msg) -> Svg msg
+viewBars plane offset bars_ =
+  let foldBars bar_ ( acc, pos ) =
+        ( acc ++ [ viewBar plane (pos - offset) bar_ ]
+        , pos + bar_.width
+        )
+  in
+  g [ class "elm-charts__bar" ] (Tuple.first <| List.foldl foldBars ( [], 0 ) bars_)
 
 
 
 -- HISTOGRAM
 
 
+{-| -}
+type alias Bar msg =
+  { attributes : List (Attribute msg)
+  , width : Float
+  , position : Float
+  , value : Float
+  }
+
+
 {-| Make a histogram.
 
     main : Svg msg
     main =
+      let toBars _ datum _ =
+            [ Bar [] 10 datum.timestamp datum.score ]
+      in
       svg
         [ width (String.fromFloat plane.x.length)
         , height (String.fromFloat plane.y.length)
         ]
-        [ histogram plane 1 1 (bar [ stroke blueStroke, fill blueFill ]) [ 1, 2, 3, 6, 8, 9, 6, 4, 2, 1 ] ]
+        [ histogram plane toBars [ ( 1, 1 ), ( 2, 2 ), ( 3, 6 ) ]
 -}
-histogram : Plane -> (data -> Float) -> Float -> List (data -> Bar msg) -> List data -> Svg msg
-histogram plane toX width toBars data =
-  let viewHistogramBar datum =
-        viewBars plane width toBars (toX datum + width / 2) datum
+histogram : Plane -> (Maybe data -> data -> Maybe data -> List (Bar msg)) -> List data -> Svg msg
+histogram plane toBars data =
+  let viewHistogramBar prev datum next =
+        viewBars plane 0 (toBars prev datum next)
+
+      withPrevAndNext prev datum acc =
+        case datum of
+          curr :: next :: rest -> withPrevAndNext (Just curr) (next :: rest) (acc ++ [ viewHistogramBar prev curr (Just next) ])
+          curr :: [] -> acc ++ [ viewHistogramBar prev curr Nothing ]
+          [] -> acc
   in
-    g [ class "elm-charts__histogram" ] (List.map viewHistogramBar data)
+    g [ class "elm-charts__histogram" ] (withPrevAndNext Nothing data [])
 
 
 
 -- BARS INTERNAL
 
 
-viewBar : Plane -> Float -> Float -> Bar msg -> Svg msg
-viewBar plane width x (Bar customAttributes y) =
-  let
-    commands =
-      [ Move x (closestToZero plane)
-      , Line x y
-      , Line (x + width) y
-      , Line (x + width) (closestToZero plane)
-      ]
+viewBar : Plane -> Float -> Bar msg -> Svg msg
+viewBar plane offset bar_ =
+  let x = bar_.position + offset
 
-    attributes =
-      concat
-        [ stroke pinkStroke, fill pinkFill ]
-        customAttributes
-        [ d (description plane commands) ]
+      commands =
+        [ Move x (closestToZero plane)
+        , Line x  bar_.value
+        , Line (x + bar_.width) bar_.value
+        , Line (x + bar_.width) (closestToZero plane)
+        ]
+
+      attributes =
+        concat
+          [ stroke pinkStroke, fill pinkFill ]
+          bar_.attributes
+          [ d (description plane commands) ]
   in
     path attributes []
 
@@ -192,7 +215,7 @@ viewBar plane width x (Bar customAttributes y) =
 
     myLine : Svg msg
     myLine =
-      horizontal plane [ stroke "pink" ] x0 y0 x1 y1
+      line plane [ stroke "pink" ] x0 y0 x1 y1
 -}
 line : Plane -> List (Attribute msg) -> Float -> Float -> Float -> Float -> Svg msg
 line plane userAttributes x1 y1 x2 y2 =
