@@ -7,6 +7,10 @@ module Svg.Chart
     , line, horizontal, vertical, xAxis, yAxis
     , xTicks, xTick, yTicks, yTick
     , xLabels, yLabels, xLabel, yLabel
+
+    , eventCatcher, decodePoint
+    , Point, DataPoint, toDataPoints
+    , getNearest, getNearestX, getWithin, getWithinX
     )
 
 
@@ -38,14 +42,41 @@ mirrored on the other side of the axis!
 @docs xLabel, xLabels, yLabel, yLabels
 
 
+# Events
+
+@docs container, eventCatcher
+
+@docs decodePoint, Point, DataPoint, toDataPoints
+
+@docs getNearest, getNearestX, getWithin, getWithinX
+
+
 -}
 
 import Svg exposing (Svg, Attribute, g, path, rect, text)
-import Svg.Attributes as Attributes exposing (class, width, height, stroke, fill, d, transform)
-import Svg.Coordinates exposing (Plane, place, toSVGX, toSVGY, placeWithOffset)
+import Svg.Attributes as Attributes exposing (class, width, height, stroke, fill, d, transform, viewBox)
+import Svg.Coordinates exposing (Plane, place, toSVGX, toSVGY, toCartesianX, toCartesianY, placeWithOffset)
 import Svg.Commands exposing (..)
 import Internal.Colors exposing (..)
 import Internal.Svg exposing (..)
+import Json.Decode as Json
+import DOM
+
+
+{-| Set the size of your chart.
+-}
+static : Plane -> List (Attribute msg)
+static plane =
+  [ width (String.fromFloat plane.x.length)
+  , height (String.fromFloat plane.y.length)
+  ]
+
+
+{-| Set the dimensions of your chart, but let it respond to size changes in parent.
+-}
+responsive : Plane -> Attribute msg
+responsive plane =
+  viewBox ("0 0 " ++ String.fromFloat plane.x.length ++ " " ++ String.fromFloat plane.y.length)
 
 
 
@@ -507,12 +538,6 @@ monotoneArea plane toX toY attributes dot data =
 -- INTERNAL
 
 
-type alias Point =
-  { x : Float
-  , y : Float
-  }
-
-
 toPoints : (data -> Float) -> (data -> Float) -> List data -> List Point
 toPoints toX toY data =
   List.map (\datum -> Point (toX datum) (toY datum)) data
@@ -703,3 +728,244 @@ translate plane x y xOff yOff =
   transform <| "translate(" ++ String.fromFloat (toSVGX plane x + xOff) ++ "," ++ String.fromFloat (toSVGY plane y + yOff) ++ ")"
 
 
+
+-- EVENTS
+
+
+{-| -}
+eventCatcher : Plane -> List (Svg.Attribute msg) -> Svg msg
+eventCatcher plane events =
+  Svg.rect
+    ([ Attributes.x (String.fromFloat plane.x.marginLower)
+     , Attributes.y (String.fromFloat plane.y.marginUpper)
+     , Attributes.width (String.fromFloat plane.x.length)
+     , Attributes.height (String.fromFloat plane.y.length)
+     , Attributes.fill "transparent"
+     ] ++ events)
+    []
+
+
+{-| Container for your chart, in case you use the `eventCatcher`.
+Without this, your coordinates from the events will be wrong!
+
+-}
+container : List (Attribute msg) -> List (Html msg) -> Html msg
+container attrs =
+  Html.div
+    [ Html.Attributes.style "position" "relative"
+    , Html.Attributes.style "width" (String.fromFloat plane.x.length ++ "px")
+    , Html.Attributes.style "height" (String.fromFloat plane.y.length ++ "px")
+    ]
+
+
+
+{-| -}
+type alias Point =
+  { x : Float
+  , y : Float
+  }
+
+
+{-| -}
+type alias DataPoint data =
+  { org : data
+  , point : Point
+  }
+
+
+{-| -}
+toDataPoints : (data -> Float) -> (data -> Float) -> List data -> List (DataPoint data)
+toDataPoints toX toY =
+  List.map <| \d -> DataPoint d { x = toX d, y = toY d }
+
+
+{-| Get the data coordinates nearest to the event.
+Returns `Nothing` if you have no data showing.
+
+-}
+getNearest : List (DataPoint data) -> Plane -> Point -> Maybe data
+getNearest points plane searchedSvg =
+  let searched =
+        { x = toCartesianX plane searchedSvg.x
+        , y = toCartesianY plane searchedSvg.y
+        }
+  in
+  getNearestHelp points plane searched
+    |> Maybe.map .org
+
+
+{-| Get the data coordinates nearest of the event within the radius
+you provide in the first argument. Returns `Nothing` if you have no data showing.
+
+-}
+getWithin : Float -> List (DataPoint data) -> Plane -> Point -> Maybe data
+getWithin radius points plane searchedSvg =
+    let
+      searched =
+        { x = toCartesianX plane searchedSvg.x
+        , y = toCartesianY plane searchedSvg.y
+        }
+
+      keepIfEligible closest =
+          if withinRadius plane radius searched closest.point
+            then Just closest.org
+            else Nothing
+    in
+    getNearestHelp points plane searched
+      |> Maybe.andThen keepIfEligible
+
+
+{-| Get the data coordinates horizontally nearest to the event.
+-}
+getNearestX : List (DataPoint data) -> Plane -> Point -> List data
+getNearestX points plane searchedSvg =
+    let
+      searched =
+        { x = toCartesianX plane searchedSvg.x
+        , y = toCartesianY plane searchedSvg.y
+        }
+    in
+    getNearestXHelp points plane searched
+      |> List.map .org
+
+
+{-| Finds the data coordinates horizontally nearest to the event, within the
+distance you provide in the first argument.
+
+-}
+getWithinX : Float -> List (DataPoint data) -> Plane -> Point -> List data
+getWithinX radius points plane searchedSvg =
+    let
+      searched =
+        { x = toCartesianX plane searchedSvg.x
+        , y = toCartesianY plane searchedSvg.y
+        }
+
+      keepIfEligible =
+          withinRadiusX plane radius searched << .point
+    in
+    getNearestXHelp points plane searched
+      |> List.filter keepIfEligible
+      |> List.map .org
+
+
+
+-- COORDINATE HELPERS
+
+
+getNearestHelp : List (DataPoint data) -> Plane -> Point -> Maybe (DataPoint data)
+getNearestHelp points plane searched =
+  let
+      distance_ =
+          distance plane searched
+
+      getClosest point closest =
+          if distance_ closest.point < distance_ point.point
+            then closest
+            else point
+  in
+  withFirst points (List.foldl getClosest)
+
+
+getNearestXHelp : List (DataPoint data) -> Plane -> Point -> List (DataPoint data)
+getNearestXHelp points plane searched =
+  let
+      distanceX_ =
+          distanceX plane searched
+
+      getClosest point allClosest =
+        case List.head allClosest of
+          Just closest ->
+              if closest.point.x == point.point.x then point :: allClosest
+              else if distanceX_ closest.point > distanceX_ point.point then [ point ]
+              else allClosest
+
+          Nothing ->
+            [ point ]
+  in
+  List.foldl getClosest [] points
+
+
+distanceX : Plane -> Point -> Point -> Float
+distanceX plane searched dot =
+    abs <| toSVGX plane dot.x - toSVGX plane searched.x
+
+
+distanceY : Plane -> Point -> Point -> Float
+distanceY plane searched dot =
+    abs <| toSVGY plane dot.y - toSVGY plane searched.y
+
+
+distance : Plane -> Point -> Point -> Float
+distance plane searched dot =
+    sqrt <| distanceX plane searched dot ^ 2 + distanceY plane searched dot ^ 2
+
+
+withinRadius : Plane -> Float -> Point -> Point -> Bool
+withinRadius plane radius searched dot =
+    distance plane searched dot <= radius
+
+
+withinRadiusX : Plane -> Float -> Point -> Point -> Bool
+withinRadiusX plane radius searched dot =
+    distanceX plane searched dot <= radius
+
+
+
+-- DECODER
+
+
+{-| Decode position of mouse when tracking events. The `Plane` may
+change due to size changes of the viewport, so make sure to use the
+one given in the second argument. Also, make sure to wrap your chart
+in `container` otherwise your read coordinates maybe wrong!
+
+-}
+decodePoint : Plane -> (Plane -> Point -> msg) -> Json.Decoder msg
+decodePoint ({x, y} as plane) toMsg =
+  let
+    handle mouseX mouseY { left, top, height, width } =
+      let
+        widthPercent = width / plane.x.length
+        heightPercent = height / plane.y.length
+
+        newPlane =
+          { x =
+              { x | length = width
+              , marginLower = plane.x.marginLower * widthPercent
+              , marginUpper = plane.x.marginUpper * widthPercent
+              }
+          , y =
+              { y | length = height
+              , marginLower = plane.y.marginLower * heightPercent
+              , marginUpper = plane.y.marginUpper * heightPercent
+              }
+          }
+      in
+      toMsg newPlane { x = mouseX - left, y = mouseY - top }
+  in
+  Json.map3 handle
+    (Json.field "pageX" Json.float)
+    (Json.field "pageY" Json.float)
+    (DOM.target position)
+
+
+position : Json.Decoder DOM.Rectangle
+position =
+  Json.oneOf
+    [ DOM.boundingClientRect
+    , Json.lazy (\_ -> DOM.parentElement position)
+    ]
+
+
+-- HELPERS
+
+{-| -}
+withFirst : List a -> (a -> List a -> b) -> Maybe b
+withFirst stuff process =
+  case stuff of
+    first :: rest ->
+      Just (process first rest)
+
+    _ ->
+      Nothing

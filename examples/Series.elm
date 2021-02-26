@@ -1,10 +1,22 @@
 module Series exposing (..)
 
 import Svg exposing (Svg, svg, g, text_, text)
-import Svg.Attributes exposing (width, height, stroke, fill, r, transform)
+import Svg.Events
+import Svg.Attributes exposing (width, height, stroke, fill, r, transform, style)
 import Svg.Coordinates exposing (..)
 import Svg.Chart exposing (..)
+import Html
+import Html.Attributes
 import Internal.Colors exposing (..)
+import Browser
+
+
+main =
+  Browser.sandbox
+    { init = Nothing
+    , update = \msg model -> msg
+    , view = view
+    }
 
 
 planeFromPoints : List Point -> Plane
@@ -59,25 +71,37 @@ data3 =
   ]
 
 
-main : Svg msg
-main =
+view : Maybe Point -> Svg (Maybe Point)
+view model =
   let plane =
         planeFromPoints (data1 ++ data2 ++ data3)
-  in
-    svg
-      [ width (String.fromFloat plane.x.length)
-      , height (String.fromFloat plane.x.length)
-      ]
-      [ linearArea plane .x .y [ stroke "transparent", fill blueFill ] (\_ -> clear) data1
-      , linear plane .x .y [ stroke blueStroke ] (\_ -> clear) data1
-      , monotone plane .x .y [ stroke pinkStroke ] (\_ -> aura 3 6 0.3 diamond pinkStroke) data2
-      , scatter plane .x .y (\_ -> full 5 triangle blueStroke) data3
-      , xAxis plane [] 0
-      , yAxis plane [] 0
-      , xTicks plane 5 [] 0 [ 1, 2, 3 ]
-      , yTicks plane 5 [] 0 [ 1, 2, 3, 5, 6 ]
-      , xLabels plane (xLabel [] identity String.fromFloat) 0 [ 1, 2, 3, 5, 10 ]
-      , yLabels plane (yLabel [] identity String.fromFloat) 0 [ 1, 2, 3, 5, 6 ]
-      ]
 
+      dataPoints =
+        toDataPoints .x .y (data1 ++ data2 ++ data3)
+  in
+  Html.div
+    [ Html.Attributes.style "padding" "100px" ]
+    [ Html.div
+        [ Html.Attributes.style "position" "relative"
+        , Html.Attributes.style "width" (String.fromFloat plane.x.length ++ "px")
+        , Html.Attributes.style "height" (String.fromFloat plane.y.length ++ "px")
+        ]
+        [ svg
+          [ width (String.fromFloat plane.x.length)
+          , height (String.fromFloat plane.y.length)
+          ]
+          [ linearArea plane .x .y [ stroke "transparent", fill blueFill ] (\_ -> clear) data1
+          , linear plane .x .y [ stroke blueStroke ] (\_ -> clear) data1
+          , monotone plane .x .y [ stroke pinkStroke ] (\_ -> aura 3 6 0.3 diamond pinkStroke) data2
+          , scatter plane .x .y (\_ -> full 5 triangle blueStroke) data3
+          , xAxis plane [] 0
+          , yAxis plane [] 0
+          , xTicks plane 5 [] 0 [ 1, 2, 3 ]
+          , yTicks plane 5 [] 0 [ 1, 2, 3, 5, 6 ]
+          , xLabels plane (xLabel [] identity String.fromFloat) 0 [ 1, 2, 3, 5, 10 ]
+          , yLabels plane (yLabel [] identity String.fromFloat) 0 [ 1, 2, 3, 5, 6 ]
+          , eventCatcher plane [ Svg.Events.on "mousemove" (decodePoint plane (getNearest dataPoints)) ]
+          ]
+        ]
+    ]
 

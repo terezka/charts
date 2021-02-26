@@ -23,6 +23,13 @@ coordinates =
         \() ->
           expectFloat 99 (toSVGY defaultPlane 1)
     --
+    , test "toCartesianX" <|
+        \() ->
+          expectFloat 1 (toCartesianX defaultPlane 11)
+    , test "toCartesianY" <|
+        \() ->
+          expectFloat 1 (toCartesianY defaultPlane 99)
+    --
     , test "toSVGX with lower margin" <|
         \() ->
           expectFloat 20 (toSVGX { defaultPlane | x = updateMarginLower defaultPlane.x 10 } 1)
@@ -36,6 +43,13 @@ coordinates =
     , test "toSVGY with upper margin" <|
         \() ->
           expectFloat 100 (toSVGY { defaultPlane | y = updateMarginUpper defaultPlane.y 10 } 1)
+    --
+    , test "toCartesianY with lower margin" <|
+        \() ->
+          expectFloat 1 (toCartesianY { defaultPlane | y = updateMarginLower defaultPlane.y 10 } 90)
+    , test "toCartesianY with upper margin" <|
+        \() ->
+          expectFloat 1 (toCartesianY { defaultPlane | y = updateMarginUpper defaultPlane.y 10 } 100)
     --
     , test "Length should default to 1" <|
         \() ->

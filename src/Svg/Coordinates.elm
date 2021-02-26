@@ -152,7 +152,7 @@ toCartesianX plane value =
 -}
 toCartesianY : Plane -> Float -> Float
 toCartesianY plane value =
-  range plane.y - scaleCartesian plane.y (value - plane.y.marginLower) + plane.y.min
+  range plane.y - scaleCartesian plane.y (value - plane.y.marginUpper) + plane.y.min
 
 
 
