@@ -1,6 +1,7 @@
 module Svg.Chart
   exposing
-    ( Dot, clear, empty, disconnected, aura, full
+    ( responsive, static
+    , Dot, clear, empty, disconnected, aura, full
     , circle, triangle, square, diamond, plus, cross
     , scatter, linear, linearArea, monotone, monotoneArea
     , Bar, bar, bars, histogram
@@ -8,7 +9,7 @@ module Svg.Chart
     , xTicks, xTick, yTicks, yTick
     , xLabels, yLabels, xLabel, yLabel
 
-    , eventCatcher, decodePoint
+    , eventCatcher, container, decodePoint
     , Point, DataPoint, toDataPoints
     , getNearest, getNearestX, getWithin, getWithinX
     )
@@ -53,6 +54,8 @@ mirrored on the other side of the axis!
 
 -}
 
+import Html
+import Html.Attributes
 import Svg exposing (Svg, Attribute, g, path, rect, text)
 import Svg.Attributes as Attributes exposing (class, width, height, stroke, fill, d, transform, viewBox)
 import Svg.Coordinates exposing (Plane, place, toSVGX, toSVGY, toCartesianX, toCartesianY, placeWithOffset)
@@ -749,13 +752,13 @@ eventCatcher plane events =
 Without this, your coordinates from the events will be wrong!
 
 -}
-container : List (Attribute msg) -> List (Html msg) -> Html msg
-container attrs =
-  Html.div
+container : Plane -> List (Html.Attribute msg) -> List (Html.Html msg) -> Html.Html msg
+container plane attrs =
+  Html.div <|
     [ Html.Attributes.style "position" "relative"
     , Html.Attributes.style "width" (String.fromFloat plane.x.length ++ "px")
     , Html.Attributes.style "height" (String.fromFloat plane.y.length ++ "px")
-    ]
+    ] ++ attrs
 
 
 

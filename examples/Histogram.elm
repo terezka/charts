@@ -51,10 +51,7 @@ data =
 
 main : Svg msg
 main =
-  svg
-    [ width (String.fromFloat plane.x.length)
-    , height (String.fromFloat plane.y.length)
-    ]
+  svg (static plane)
     [ histogram plane .timestamp 10
         [ bar [] << .score
         , bar [ fill blueFill, stroke blueStroke ] << .score

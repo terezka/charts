@@ -81,14 +81,9 @@ view model =
   in
   Html.div
     [ Html.Attributes.style "padding" "100px" ]
-    [ Html.div
-        [ Html.Attributes.style "position" "relative"
-        , Html.Attributes.style "width" (String.fromFloat plane.x.length ++ "px")
-        , Html.Attributes.style "height" (String.fromFloat plane.y.length ++ "px")
-        ]
+    [ container plane []
         [ svg
-          [ width (String.fromFloat plane.x.length)
-          , height (String.fromFloat plane.y.length)
+          [ responsive plane
           ]
           [ linearArea plane .x .y [ stroke "transparent", fill blueFill ] (\_ -> clear) data1
           , linear plane .x .y [ stroke blueStroke ] (\_ -> clear) data1
