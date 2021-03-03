@@ -38,7 +38,7 @@ module Svg.Chart
 @docs GroupBar, bars, Bar, histogram
 
 # Straight lines
-@docs line, xAxis, yAxis, xArrow, yArrow, horizontal, vertical
+@docs line, xAxis, yAxis, xArrow, yArrow, xGrid, yGrid, horizontal, vertical
 
 ## Ticks
 ProTip: Passing a negative value as the height/width of a tick renders it
@@ -63,7 +63,7 @@ mirrored on the other side of the axis!
 
 @docs getNearest, getNearestX, getWithin, getWithinX
 
-@docs tooltip
+@docs tooltip, isXPastMiddle, middleOfY
 
 
 -}
