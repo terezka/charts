@@ -16,7 +16,7 @@ module Svg.Chart
     , eventCatcher, container, decodePoint
     , Point, DataPoint, toDataPoints
     , getNearest, getNearestX, getWithin, getWithinX
-    , tooltip, isXPastMiddle, middleOfY
+    , tooltip, isXPastMiddle, middleOfY, middleOfX
     )
 
 
@@ -63,7 +63,7 @@ mirrored on the other side of the axis!
 
 @docs getNearest, getNearestX, getWithin, getWithinX
 
-@docs tooltip, isXPastMiddle, middleOfY
+@docs tooltip, isXPastMiddle, middleOfY, middleOfX
 
 
 -}
@@ -1006,12 +1006,20 @@ isXPastMiddle plane x =
     x - plane.x.min > plane.x.max - x
 
 
-{-| Get the y coordinate of the middle of the domain.
+{-| Get the midmost y coordinate.
 
 -}
 middleOfY : Plane -> Float
 middleOfY plane =
     plane.y.min + (plane.y.max - plane.y.min) / 2
+
+
+{-| Get the midmost x coordinate.
+
+-}
+middleOfX : Plane -> Float
+middleOfX plane =
+    plane.x.min + (plane.x.max - plane.x.min) / 2
 
 
 
