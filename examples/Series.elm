@@ -91,12 +91,27 @@ view model =
           , scatter plane .x .y (\_ -> full 5 triangle blueStroke) data3
           , xAxis plane [] 0
           , yAxis plane [] 0
-          , xTicks plane 5 [] 0 [ 1, 2, 3 ]
-          , yTicks plane 5 [] 0 [ 1, 2, 3, 5, 6 ]
-          , xLabels plane (xLabel [] identity String.fromFloat) 0 [ 1, 2, 3, 5, 10 ]
-          , yLabels plane (yLabel [] identity String.fromFloat) 0 [ 1, 2, 3, 5, 6 ]
+          , xTicks plane 5 [] 0 [ 1, 2, 3, 4, 5 ]
+          , yTicks plane 5 [] 0 [ 1, 2, 3, 4, 5, 6 ]
+          , xLabels plane (xLabel [] identity String.fromFloat) 0 [ 1, 2, 3, 4, 5, 10 ]
+          , yLabels plane (yLabel [] identity String.fromFloat) 0 [ 1, 2, 3, 4, 5, 6 ]
           , eventCatcher plane [ Svg.Events.on "mousemove" (decodePoint plane (getNearest dataPoints)) ]
           ]
+        , positionHtml plane 4 6 0 0
+            [ Html.Attributes.style "color" "#fc00ff"
+            , Html.Attributes.style "background" "#ffffff"
+            , Html.Attributes.style "border" "1px solid gray"
+            , Html.Attributes.style "padding" "2px 5px"
+            , Html.Attributes.style "font-size" "10px"
+            ]
+            [ Html.text "Arbitrary HTML at (4, 6)!" ]
+        , case model of
+            Just point ->
+              tooltip plane point.x point.y []
+                [ Html.text (String.fromFloat point.x ++ ", " ++ String.fromFloat point.y) ]
+
+            Nothing ->
+              Html.text ""
         ]
     ]
 

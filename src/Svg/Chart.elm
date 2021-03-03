@@ -1,18 +1,22 @@
 module Svg.Chart
   exposing
-    ( responsive, static
+    ( responsive, static, frame
     , Dot, clear, empty, disconnected, aura, full
     , circle, triangle, square, diamond, plus, cross
     , scatter, linear, linearArea, monotone, monotoneArea
     , GroupBar, bars
     , Bar, histogram
-    , line, horizontal, vertical, xAxis, yAxis
+    , xAxis, yAxis, xArrow, yArrow
+    , xGrid, yGrid
     , xTicks, xTick, yTicks, yTick
     , xLabels, yLabels, xLabel, yLabel
+    , line, horizontal, vertical
+    , position, positionHtml
 
     , eventCatcher, container, decodePoint
     , Point, DataPoint, toDataPoints
     , getNearest, getNearestX, getWithin, getWithinX
+    , tooltip, isXPastMiddle, middleOfY
     )
 
 
@@ -21,7 +25,7 @@ module Svg.Chart
 # Series
 
 ## Sizing
-@docs static, responsive
+@docs static, responsive, frame
 
 ## Dots
 @docs Dot, clear, empty, disconnected, aura, full
@@ -34,7 +38,7 @@ module Svg.Chart
 @docs GroupBar, bars, Bar, histogram
 
 # Straight lines
-@docs line, xAxis, yAxis, horizontal, vertical
+@docs line, xAxis, yAxis, xArrow, yArrow, horizontal, vertical
 
 ## Ticks
 ProTip: Passing a negative value as the height/width of a tick renders it
@@ -47,6 +51,10 @@ mirrored on the other side of the axis!
 @docs xLabel, xLabels, yLabel, yLabels
 
 
+## Positioning anything
+@docs position, positionHtml
+
+
 # Events
 
 @docs container, eventCatcher
@@ -55,11 +63,13 @@ mirrored on the other side of the axis!
 
 @docs getNearest, getNearestX, getWithin, getWithinX
 
+@docs tooltip
+
 
 -}
 
-import Html
-import Html.Attributes
+import Html exposing (Html)
+import Html.Attributes as HA
 import Svg exposing (Svg, Attribute, g, path, rect, text)
 import Svg.Attributes as Attributes exposing (class, width, height, stroke, fill, d, transform, viewBox)
 import Svg.Coordinates exposing (Plane, place, toSVGX, toSVGY, toCartesianX, toCartesianY, placeWithOffset)
@@ -84,6 +94,23 @@ static plane =
 responsive : Plane -> Attribute msg
 responsive plane =
   viewBox ("0 0 " ++ String.fromFloat plane.x.length ++ " " ++ String.fromFloat plane.y.length)
+
+
+{-| Create an id to use in a clip path to prevent elements from going into your margins.
+
+    svg []
+      [ frame "some-id" plane
+      , g [ clipPath "url(#some-id)" ] [ stuffThatShouldntGoIntoTheMargin ]
+      ]
+-}
+frame : String -> Plane -> Svg.Svg msg
+frame id plane =
+  Svg.defs []
+    [ Svg.clipPath
+        [ Attributes.id id ]
+        [ Svg.rect (areaAttributes plane) []
+        ]
+    ]
 
 
 
@@ -278,6 +305,13 @@ xAxis plane userAttributes y =
   horizontal plane userAttributes y plane.x.min plane.x.max
 
 
+{-| Renders a horizontal line with the full length of the range.
+-}
+xGrid : Plane -> List (Attribute msg) -> Float -> Svg msg
+xGrid =
+  xAxis
+
+
 {-| Renders a vertical line with the full length of the domain.
 
     myYAxisOrGridLine : Svg msg
@@ -287,6 +321,13 @@ xAxis plane userAttributes y =
 yAxis : Plane -> List (Attribute msg) -> Float -> Svg msg
 yAxis plane userAttributes x =
   vertical plane userAttributes x plane.y.min plane.y.max
+
+
+{-| Renders a horizontal line with the full length of the domain.
+-}
+yGrid : Plane -> List (Attribute msg) -> Float -> Svg msg
+yGrid =
+  yAxis
 
 
 {-| Renders ticks for the horizontal axis.
@@ -412,6 +453,41 @@ viewLabel userAttributes string =
   in
   Svg.text_ attributes
     [ Svg.tspan [] [ Svg.text string ] ]
+
+
+{-| Place an arrow pointing to the right somewhere.
+
+      xArrow plane color x y xOff yOff
+
+-}
+xArrow : Plane -> String -> Float -> Float -> Float -> Float -> Svg msg
+xArrow plane color x y xOff yOff =
+    g [ position plane x y xOff yOff ]
+      [ Svg.polygon
+          [ fill color
+          , Attributes.points "200,10 250,100 150,100"
+          , transform "rotate(90 0 0) scale(0.08)"
+          ]
+          []
+      ]
+
+
+{-| Place an arrow pointing up somewhere.
+
+      yArrow plane color x y xOff yOff
+
+-}
+yArrow : Plane -> String -> Float -> Float -> Float -> Float -> Svg msg
+yArrow plane color x y xOff yOff =
+    g [ position plane x y xOff yOff ]
+      [ Svg.polygon
+          [ fill color
+          , Attributes.points "200,10 250,100 150,100"
+          , transform "scale(0.08)"
+          ]
+          []
+      ]
+
 
 
 -- SERIES
@@ -749,8 +825,12 @@ closestToZero plane =
   clamp plane.y.min plane.y.max 0
 
 
-translate : Plane -> Float -> Float -> Float -> Float -> Svg.Attribute msg
-translate plane x y xOff yOff =
+
+{-| Place some SVG on specific coordinates.
+
+-}
+position : Plane -> Float -> Float -> Float -> Float -> Svg.Attribute msg
+position plane x y xOff yOff =
   transform <| "translate(" ++ String.fromFloat (toSVGX plane x + xOff) ++ "," ++ String.fromFloat (toSVGY plane y + yOff) ++ ")"
 
 
@@ -762,12 +842,7 @@ translate plane x y xOff yOff =
 eventCatcher : Plane -> List (Svg.Attribute msg) -> Svg msg
 eventCatcher plane events =
   Svg.rect
-    ([ Attributes.x (String.fromFloat plane.x.marginLower)
-     , Attributes.y (String.fromFloat plane.y.marginUpper)
-     , Attributes.width (String.fromFloat plane.x.length)
-     , Attributes.height (String.fromFloat plane.y.length)
-     , Attributes.fill "transparent"
-     ] ++ events)
+    (areaAttributes plane ++ events)
     []
 
 
@@ -778,9 +853,9 @@ Without this, your coordinates from the events will be wrong!
 container : Plane -> List (Html.Attribute msg) -> List (Html.Html msg) -> Html.Html msg
 container plane attrs =
   Html.div <|
-    [ Html.Attributes.style "position" "relative"
-    , Html.Attributes.style "width" (String.fromFloat plane.x.length ++ "px")
-    , Html.Attributes.style "height" (String.fromFloat plane.y.length ++ "px")
+    [ HA.style "position" "relative"
+    , HA.style "width" (String.fromFloat plane.x.length ++ "px")
+    , HA.style "height" (String.fromFloat plane.y.length ++ "px")
     ] ++ attrs
 
 
@@ -873,6 +948,71 @@ getWithinX radius points plane searchedSvg =
     getNearestXHelp points plane searched
       |> List.filter keepIfEligible
       |> List.map .org
+
+
+{-| A basic tooltip.
+
+      tooltip plane x y
+        [ style "font-size" "14px" ]
+        [ Html.text "I'm a tooltip!" ]
+-}
+tooltip : Plane -> Float -> Float -> List (Html.Attribute msg) -> List (Html.Html msg) -> Html.Html msg
+tooltip plane x y attrs =
+    let
+        xOff = if isXPastMiddle plane x then -15 else 15
+    in
+    positionHtml plane x y xOff 0 <|
+      [ if isXPastMiddle plane x
+          then HA.style "transform" "translate(-100%, -50%)"
+          else HA.style "transform" "translate(0, -50%)"
+      , HA.style "padding" "5px 10px"
+      , HA.style "background" "rgba(255, 255, 255, 0.8)"
+      , HA.style "border" "1px solid #EFF2FA"
+      , HA.style "border-radius" "3px"
+      , HA.style "pointer-events" "none"
+      ] ++ attrs
+
+
+{-| Place some Html on specific coordinates. You must wrap your chart
+in `container` for it to work! Remember also to put your html elements outside
+your `svg` element, otherwise they won't work!
+
+      positionHtml plane x y xOff yOff
+        [ style "font-size" "14px" ]
+        [ text "Hello!" ]
+
+-}
+positionHtml : Plane -> Float -> Float -> Float -> Float -> List (Html.Attribute msg) -> List (Html msg) -> Html msg
+positionHtml plane x y xOff yOff attrs content =
+    let
+        xPercentage = (toSVGX plane x + xOff) * 100 / plane.x.length
+        yPercentage = (toSVGY plane y + yOff) * 100 / plane.y.length
+
+        posititonStyles =
+            [ HA.style "left" (String.fromFloat xPercentage ++ "%")
+            , HA.style "top" (String.fromFloat yPercentage ++ "%")
+            , HA.style "margin-right" "-400px"
+            , HA.style "position" "absolute"
+            ]
+    in
+    Html.div (posititonStyles ++ attrs) content
+
+
+{-| Is x past the middle of the chart?
+
+-}
+isXPastMiddle : Plane -> Float -> Bool
+isXPastMiddle plane x =
+    x - plane.x.min > plane.x.max - x
+
+
+{-| Get the y coordinate of the middle of the domain.
+
+-}
+middleOfY : Plane -> Float
+middleOfY plane =
+    plane.y.min + (plane.y.max - plane.y.min) / 2
+
 
 
 
@@ -973,18 +1113,30 @@ decodePoint ({x, y} as plane) toMsg =
   Json.map3 handle
     (Json.field "pageX" Json.float)
     (Json.field "pageY" Json.float)
-    (DOM.target position)
+    (DOM.target decodePosition)
 
 
-position : Json.Decoder DOM.Rectangle
-position =
+decodePosition : Json.Decoder DOM.Rectangle
+decodePosition =
   Json.oneOf
     [ DOM.boundingClientRect
-    , Json.lazy (\_ -> DOM.parentElement position)
+    , Json.lazy (\_ -> DOM.parentElement decodePosition)
     ]
 
 
+
 -- HELPERS
+
+
+areaAttributes : Plane -> List (Svg.Attribute msg)
+areaAttributes plane =
+  [ Attributes.x (String.fromFloat plane.x.marginLower)
+  , Attributes.y (String.fromFloat plane.y.marginUpper)
+  , Attributes.width (String.fromFloat (plane.x.length - plane.x.marginLower - plane.x.marginUpper))
+  , Attributes.height (String.fromFloat (plane.y.length - plane.y.marginLower - plane.y.marginUpper))
+  , Attributes.fill "transparent"
+  ]
+
 
 {-| -}
 withFirst : List a -> (a -> List a -> b) -> Maybe b
