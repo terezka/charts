@@ -66,13 +66,13 @@ view hovered =
         if v > 3 then "rgba(5,142,218, 0.8)" else "rgba(5,142,218, 0.5)"
   in
   C.chart
-    [ C.width 500
+    [ C.width 600
     , C.height 300
     , C.marginTop 30
     , C.marginRight 10
     , C.responsive
-    , C.range (C.fromData [.x] data2 |> C.startPad 2 |> C.endPad 1)
-    , C.domain (C.fromData [.y, .z] data2 |> C.startMin 0)
+    , C.range (C.fromData [.x] data2 |> C.startPad 2 |> C.endPad 1.5)
+    , C.domain (C.fromData [.y, .z] data2 |> C.startMin 0 |> C.endPad 0.5)
     , C.id "some-id"
     , C.htmlAttrs
         [ HA.style "font-size" "12px"

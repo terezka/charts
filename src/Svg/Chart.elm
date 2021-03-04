@@ -465,8 +465,8 @@ xArrow plane color x y xOff yOff =
     g [ position plane x y xOff yOff ]
       [ Svg.polygon
           [ fill color
-          , Attributes.points "200,10 250,100 150,100"
-          , transform "rotate(90 0 0) scale(0.08)"
+          , Attributes.points "0,0 50,0 25.0,43.3"
+          , transform "translate(6 0) scale(0.15) rotate(150)"
           ]
           []
       ]
@@ -482,8 +482,8 @@ yArrow plane color x y xOff yOff =
     g [ position plane x y xOff yOff ]
       [ Svg.polygon
           [ fill color
-          , Attributes.points "200,10 250,100 150,100"
-          , transform "scale(0.08)"
+          , Attributes.points "0,0 50,0 25.0,43.3"
+          , transform "translate(0 -6) scale(0.15) rotate(60)"
           ]
           []
       ]

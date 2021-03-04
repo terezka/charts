@@ -123,6 +123,21 @@ area value config =
   { config | area = Just value }
 
 
+noArrow : { a | arrow : Bool } -> { a | arrow : Bool }
+noArrow config =
+  { config | arrow = False }
+
+
+filterX : (Bounds -> List Float) -> { a | filterX : Bounds -> List Float } -> { a | filterX : Bounds -> List Float }
+filterX value config =
+  { config | filterX = value }
+
+
+filterY : (Bounds -> List Float) -> { a | filterY : Bounds -> List Float } -> { a | filterY : Bounds -> List Float }
+filterY value config =
+  { config | filterY = value }
+
+
 
 
 -- ELEMENTS
@@ -334,7 +349,7 @@ type alias Axis msg =
     { start : Bounds -> Float
     , end : Bounds -> Float
     , pinned : Bounds -> Float
-    -- TODO , withArrow : Bool
+    , arrow : Bool
     , color : String -- TODO use Color
     , attrs : List (S.Attribute msg)
     }
@@ -347,13 +362,20 @@ xAxis edits =
         applyAttrs edits
           { start = .min
           , end = .max
-          , pinned = .min
+          , pinned = zero
           , color = "rgb(210, 210, 210)"
+          , arrow = True
           , attrs = []
           }
   in
   SvgElement <| \p ->
-    C.horizontal p ([ SA.stroke config.color ] ++ config.attrs) (config.pinned <| toBounds .y p) (config.start <| toBounds .x p) (config.end <| toBounds .x p)
+    S.g [ SA.class "elm-charts__x-axis" ]
+      [ C.horizontal p ([ SA.stroke config.color ] ++ config.attrs) (config.pinned <| toBounds .y p) (config.start <| toBounds .x p) (config.end <| toBounds .x p)
+      , if config.arrow then
+          C.xArrow p config.color (config.end <| toBounds .x p) (config.pinned <| toBounds .y p) 0 0
+        else
+          S.text ""
+      ]
 
 
 yAxis : List (Axis msg -> Axis msg) -> Element msg
@@ -362,13 +384,20 @@ yAxis edits =
         applyAttrs edits
           { start = .min
           , end = .max
-          , pinned = .min
+          , pinned = zero
           , color = "rgb(210, 210, 210)"
+          , arrow = True
           , attrs = []
           }
   in
   SvgElement <| \p ->
-    C.vertical p ([ SA.stroke config.color ] ++ config.attrs) (config.pinned <| toBounds .x p) (config.start <| toBounds .y p) (config.end <| toBounds .y p)
+    S.g [ SA.class "elm-charts__y-axis" ]
+      [ C.vertical p ([ SA.stroke config.color ] ++ config.attrs) (config.pinned <| toBounds .x p) (config.start <| toBounds .y p) (config.end <| toBounds .y p)
+      , if config.arrow then
+          C.yArrow p config.color (config.pinned <| toBounds .x p) (config.end <| toBounds .y p) 0 0
+        else
+          S.text ""
+      ]
 
 
 ints : Int -> (Int -> String) -> Bounds -> List { value : Float, label : String }
@@ -438,7 +467,7 @@ yTicks edits xs =
         ] ++ config.attrs
   in
   SvgElement <| \p ->
-    C.xTicks p (round config.height) labelAttrs (config.pinned <| toBounds .x p) (List.map .value <| xs <| toBounds .y p)
+    C.yTicks p (round config.height) labelAttrs (config.pinned <| toBounds .x p) (List.map .value <| xs <| toBounds .y p)
 
 
 
@@ -488,8 +517,10 @@ yLabels edits xs =
 type alias Grid msg =
     { color : String -- TODO use Color
     , width : Float
-    , attrs : List (S.Attribute msg)
     , dotted : Bool
+    , filterX : Bounds -> List Float
+    , filterY : Bounds -> List Float
+    , attrs : List (S.Attribute msg)
     }
 
 
@@ -498,6 +529,8 @@ grid edits xs ys =
   let config =
         applyAttrs edits
           { color = "#EFF2FA"
+          , filterX = zero >> List.singleton
+          , filterY = zero >> List.singleton
           , width = 1
           , attrs = []
           , dotted = False
@@ -508,22 +541,32 @@ grid edits xs ys =
         , SA.strokeWidth (String.fromFloat config.width)
         ] ++ config.attrs
 
+      notTheseX p =
+        config.filterX (toBounds .x p)
+
+      notTheseY p =
+        config.filterY (toBounds .y p)
+
       toXGrid p v =
-        C.xGrid p gridAttrs v.value
+        if List.member v.value (notTheseY p)
+        then Nothing else Just <| C.xGrid p gridAttrs v.value
 
       toYGrid p v =
-        C.yGrid p gridAttrs v.value
+        if List.member v.value (notTheseX p)
+        then Nothing else Just <| C.yGrid p gridAttrs v.value
 
       toDot p x y =
-        C.full config.width C.circle config.color p x.value y.value
+        if List.member x.value (notTheseX p) || List.member y.value (notTheseY p)
+        then Nothing
+        else Just <| C.full config.width C.circle config.color p x.value y.value
   in
   SvgElement <| \p ->
     S.g [ SA.class "elm-charts__grid" ] <|
       if config.dotted then
-        List.concatMap (\x -> List.map (toDot p x) (ys <| toBounds .y p)) (xs <| toBounds .x p)
+        List.concatMap (\x -> List.filterMap (toDot p x) (ys <| toBounds .y p)) (xs <| toBounds .x p)
       else
-        [ S.g [ SA.class "elm-charts__x-grid" ] (List.map (toXGrid p) <| ys <| toBounds .y p)
-        , S.g [ SA.class "elm-charts__y-grid" ] (List.map (toYGrid p) <| xs <| toBounds .x p)
+        [ S.g [ SA.class "elm-charts__x-grid" ] (List.filterMap (toXGrid p) <| ys <| toBounds .y p)
+        , S.g [ SA.class "elm-charts__y-grid" ] (List.filterMap (toYGrid p) <| xs <| toBounds .x p)
         ]
 
 
