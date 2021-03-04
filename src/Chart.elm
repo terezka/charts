@@ -13,6 +13,7 @@ import Html as H
 import Html.Attributes as HA
 import Intervals as I
 import Time
+import Dict exposing (Dict)
 
 
 -- ATTRS
@@ -583,53 +584,51 @@ type alias Bars data msg =
 
 bars : List (data -> Float) -> List (Bars data msg -> Bars data msg) -> List data -> Element msg
 bars toYs edits data =
-  -- TODO add clip path
   -- TODO spacing?
   let config =
         applyAttrs edits
-          { color = \_ _ _ -> "rgb(5,142,218)" -- TODO more colors
+          { color = \i _ _ -> Maybe.withDefault blue (Dict.get i defaultColors)
           , width = 0.8
           , attrs = []
           }
 
-      toBar name (i, d) toY =
+      toBar name d i toY =
         { attributes = [ SA.stroke "transparent", SA.fill (config.color i (toY d) d), clipPath name ] ++ config.attrs -- TODO
         , width = config.width / toFloat (List.length toYs)
         , value = toY d
         }
 
-      toBars name x =
-        List.map (toBar name x) toYs
+      toBars name d =
+        List.indexedMap (toBar name d) toYs
   in
   SvgElement <| \name p ->
-    C.bars p (toBars name) (List.indexedMap Tuple.pair data)
+    C.bars p (toBars name) data
 
 
 histogram : (data -> Float) -> List (data -> Float) -> List (Bars data msg -> Bars data msg) -> List data -> Element msg
 histogram toX toYs edits data =
-  -- TODO add clip path
   -- TODO spacing?
   let config =
         applyAttrs edits
-          { color = \_ _ _ -> "rgb(5,142,218)" -- TODO more colors
+          { color = \i _ _ -> Maybe.withDefault blue (Dict.get i defaultColors)
           , width = 1
           , attrs = []
           }
 
-      toBar (i, d) toY =
+      toBar d i toY =
         { attributes = [ SA.stroke "transparent", SA.fill (config.color i (toY d) d) ] ++ config.attrs -- TODO
         , width = config.width / toFloat (List.length toYs)
         , position = toX d - config.width
         , value = toY d
         }
 
-      toBars _ x _ =
-        List.map (toBar x) toYs
+      toBars _ d _ =
+        List.indexedMap (toBar d) toYs
   in
   SvgElement <| \name p ->
     S.g
       [ SA.class "elm-charts__histogram", clipPath name ]
-      [ C.histogram p toBars (List.indexedMap Tuple.pair data) ]
+      [ C.histogram p toBars data ]
 
 
 
@@ -644,7 +643,6 @@ type alias Scatter data msg =
 
 scatter : (data -> Float) -> (data -> Float) -> List (Scatter data msg -> Scatter data msg) -> List data -> Element msg
 scatter toX toY edits data =
-  -- TODO add clip path
   let config =
         applyAttrs edits
           { color = "rgb(5,142,218)" -- TODO
@@ -679,7 +677,6 @@ type Tracked a
 
 monotone : (data -> Float) -> (data -> Float) -> List (Interpolation data msg -> Interpolation data msg) -> List data -> Element msg
 monotone toX toY edits data =
-  -- TODO add clip path
   let config =
         applyAttrs edits
           { color = "rgb(5,142,218)" -- TODO
@@ -796,4 +793,13 @@ clipPath : String -> S.Attribute msg
 clipPath name =
   SA.clipPath <| "url(#" ++ name ++ ")"
 
+
+defaultColors : Dict Int String
+defaultColors =
+  Dict.fromList (List.indexedMap Tuple.pair [ blue, "rgb(244, 149, 69)", "rgb(253, 121, 168)", "rgb(68, 201, 72)", "rgb(215, 31, 10)" ])
+
+
+blue : String
+blue =
+  "rgb(5,142,218)"
 

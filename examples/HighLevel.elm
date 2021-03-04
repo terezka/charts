@@ -13,18 +13,18 @@ import Browser
 
 main =
   Browser.sandbox
-    { init = Nothing
+    { init = []
     , update = \msg model ->
         case msg of
           OnHover p -> p
-          OnLeave -> Nothing
+          OnLeave -> []
 
     , view = view
     }
 
 
 type Msg
-  = OnHover (Maybe Point)
+  = OnHover (List Point)
   | OnLeave
 
 
@@ -55,10 +55,10 @@ data2 =
   ]
 
 
-view : Maybe Point -> Html.Html Msg
+view : List Point -> Html.Html Msg
 view hovered =
   let specialDot p =
-        if Maybe.map .x hovered == Just p.x
+        if Maybe.map .x (List.head hovered) == Just p.x
           then SC.aura 2 8 0.2 SC.circle "rgb(5,142,218)"
           else SC.disconnected 2 1 SC.circle "rgb(5,142,218)"
 
@@ -71,8 +71,8 @@ view hovered =
     , C.marginTop 30
     , C.marginRight 10
     , C.responsive
-    , C.range (C.fromData [.x] data2  |> C.endPad -0.5)
-    , C.domain (C.fromData [.y, .z] data2)
+    , C.range (C.fromData [.x] data2 |> C.startMin 1)
+    , C.domain (C.fromData [.y, .z] data2 |> C.startMin 0)
     , C.id "some-id"
     , C.htmlAttrs
         [ HA.style "font-size" "12px"
@@ -81,27 +81,27 @@ view hovered =
         , HA.style "max-width" "700px"
         ]
     , C.events
-        [ C.event "mousemove" (C.getNearest OnHover .x .y data2)
+        [ C.event "mousemove" (C.getNearestX OnHover (.x >> \x -> x - 0.5) .y data2)
         , C.event "mouseleave" (\_ _ -> OnLeave)
         ]
     ]
     [ C.grid [ C.dotted, C.width 0.4, C.color "rgb(220,220,220)" ] (C.ints 10 String.fromInt) (C.ints 5 String.fromInt)
     , C.xAxis [ C.pinned C.zero ]
     , C.xTicks [ C.pinned C.zero ] (C.ints 10 String.fromInt)
-    , C.xLabels [] (C.floats 10 String.fromFloat)
+    , C.xLabels [] (C.floats 5 String.fromFloat)
     --, C.yAxis [ C.pinned C.zero, C.start (always 1), C.end (always 6), C.noArrow ]
     , C.yTicks [ C.pinned C.zero ] (C.ints 5 String.fromInt << C.endMax 6)
     , C.yLabels [] (C.ints 5 String.fromInt << C.startMax 1)
-    , C.monotone .x .y [ C.dot specialDot, C.area "rgba(5, 142, 218, 0.25)" ] data2
+    --, C.monotone .x .y [ C.dot specialDot, C.area "rgba(5, 142, 218, 0.25)" ] data2
     --, C.bars [ .y, .y ] [ C.barColor specialColor, C.width 0.9 ] data2
-    , C.histogram .x [ .y, .z ] [ C.barColor specialColor ] data2
+    , C.histogram .x [ .y, .z ] [] data2
     --, C.scatter .x .y [ C.dot specialDot ] data2
     , case hovered of
-        Just point ->
+        point :: _ ->
           C.tooltip point.x point.y []
             [ Html.text ("( " ++ String.fromFloat point.x ++ ", " ++ String.fromFloat point.y ++ " )") ]
 
-        Nothing ->
+        [] ->
           C.none
     ]
 
