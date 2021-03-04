@@ -287,12 +287,12 @@ xAxis edits =
           { start = .min
           , end = .max
           , pinned = .min
-          , color = "lightgray"
+          , color = "rgb(210, 210, 210)"
           , attrs = []
           }
   in
   SvgElement <| \p ->
-    C.horizontal p ([ SA.fill config.color ] ++ config.attrs) (config.pinned <| toBounds .y p) (config.start <| toBounds .x p) (config.end <| toBounds .x p)
+    C.horizontal p ([ SA.stroke config.color ] ++ config.attrs) (config.pinned <| toBounds .y p) (config.start <| toBounds .x p) (config.end <| toBounds .x p)
 
 
 yAxis : List (Axis msg -> Axis msg) -> Element msg
@@ -302,12 +302,12 @@ yAxis edits =
           { start = .min
           , end = .max
           , pinned = .min
-          , color = "lightgray"
+          , color = "rgb(210, 210, 210)"
           , attrs = []
           }
   in
   SvgElement <| \p ->
-    C.vertical p ([ SA.fill config.color ] ++ config.attrs) (config.pinned <| toBounds .x p) (config.start <| toBounds .y p) (config.end <| toBounds .y p)
+    C.vertical p ([ SA.stroke config.color ] ++ config.attrs) (config.pinned <| toBounds .x p) (config.start <| toBounds .y p) (config.end <| toBounds .y p)
 
 
 
@@ -342,7 +342,7 @@ xTicks : List (Tick msg -> Tick msg) -> (Bounds -> List { a | value : Float }) -
 xTicks edits xs =
   let config =
         applyAttrs edits
-          { color = "lightgray"
+          { color = "rgb(210, 210, 210)"
           , pinned = .min
           , height = 5
           , width = 1
@@ -364,7 +364,7 @@ yTicks : List (Tick msg -> Tick msg) -> (Bounds -> List { a | value : Float }) -
 yTicks edits xs =
   let config =
         applyAttrs edits
-          { color = "lightgray"
+          { color = "rgb(210, 210, 210)"
           , pinned = .min
           , height = 5
           , width = 1
@@ -395,7 +395,7 @@ xLabels : List (Label msg -> Label msg) -> (Bounds -> List { a | value : Float, 
 xLabels edits xs =
   let config =
         applyAttrs edits
-          { color = "lightgray"
+          { color = "#808BAB"
           , pinned = .min
           , attrs = []
           }
@@ -412,7 +412,7 @@ yLabels : List (Label msg -> Label msg) -> (Bounds -> List { a | value : Float, 
 yLabels edits xs =
   let config =
         applyAttrs edits
-          { color = "lightgray"
+          { color = "#808BAB"
           , pinned = .min
           , attrs = []
           }
@@ -437,7 +437,7 @@ grid : List (Grid msg -> Grid msg) -> (Bounds -> List { a | value : Float }) -> 
 grid edits xs ys =
   let config =
         applyAttrs edits
-          { color = "lightgray"
+          { color = "#EFF2FA"
           , width = 1
           , attrs = []
           -- , dotted = False

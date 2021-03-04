@@ -62,6 +62,11 @@ view hovered =
     , C.range (C.fromData .x data)
     , C.domain (C.fromData .y data)
     , C.id "some-id"
+    , C.htmlAttrs
+        [ HA.style "font-size" "12px"
+        , HA.style "font-family" "monospace"
+        , HA.style "margin" "20px 40px"
+        ]
     , C.events
         [ C.event "mousemove" (C.getNearest OnHover .x .y data)
         , C.event "mouseleave" (\_ _ -> OnLeave)
@@ -69,10 +74,10 @@ view hovered =
     ]
     [ C.grid [] (C.ints 12 String.fromInt) (C.ints 5 String.fromInt)
     , C.xAxis [ C.pinned (always 0) ]
-    , C.xTicks [ C.height 8 ] (C.ints 12 String.fromInt)
+    , C.xTicks [ C.pinned (always 0) ] (C.ints 12 String.fromInt)
     , C.xLabels [] (C.floats 12 String.fromFloat)
     , C.yAxis [ C.pinned (always 0) ]
-    , C.yTicks [] (C.ints 5 String.fromInt)
+    , C.yTicks [ C.pinned (always 0) ] (C.ints 5 String.fromInt)
     , C.yLabels [] (C.ints 5 String.fromInt)
     , C.monotone .x .y [ C.dot specialDot ] data
     , case hovered of
