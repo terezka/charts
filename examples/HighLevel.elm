@@ -81,7 +81,7 @@ view hovered =
         , HA.style "max-width" "700px"
         ]
     , C.events
-        [ C.event "mousemove" (C.getNearestX OnHover (.x >> \x -> x - 0.5) .y data2)
+        [ C.event "mousemove" (C.getNearestX OnHover .x [.y] data2)
         , C.event "mouseleave" (\_ _ -> OnLeave)
         ]
     ]
@@ -96,6 +96,7 @@ view hovered =
     , C.bars [ .y, .y ] [ C.barColor specialColor, C.width 0.9 ] data2
     , C.histogram .x [ .y, .z ] [] data2
     , C.scatter .x .y [ C.dot specialDot ] data2
+    , C.htmlAt (always 3) C.middle 0 0 [] [ Html.text "hello"]
     , case hovered of
         point :: _ ->
           C.tooltip point.x point.y []

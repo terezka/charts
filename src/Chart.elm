@@ -1,6 +1,6 @@
 module Chart exposing
     ( chart, scatter, linear, monotone, bars, histogram
-    , Bounds, fromData, startMin, startMax, endMin, endMax, startPad, endPad, zero
+    , Bounds, fromData, startMin, startMax, endMin, endMax, startPad, endPad, zero, middle
     , xAxis, yAxis, xTicks, yTicks, xLabels, yLabels, grid
     , ints, floats, times
     , event, getNearest, getNearestX, getWithin, getWithinX, tooltip
@@ -16,7 +16,7 @@ module Chart exposing
 @docs chart, scatter, linear, monotone, bars, histogram
 
 ## Work with bounds
-@docs Bounds, fromData, startMin, startMax, endMin, endMax, startPad, endPad, zero
+@docs Bounds, fromData, startMin, startMax, endMin, endMax, startPad, endPad, zero, middle
 
 # Axis
 @docs xAxis, yAxis, xTicks, yTicks, xLabels, yLabels, grid
@@ -348,6 +348,12 @@ zero bounds =
   clamp bounds.min bounds.max 0
 
 
+{-| -}
+middle : Bounds -> Float
+middle bounds =
+    bounds.min + (bounds.max - bounds.min) / 2
+
+
 
 
 -- EVENTS
@@ -367,30 +373,30 @@ event =
 
 
 {-| -}
-getNearest : (Maybe data -> msg) -> (data -> Float) -> (data -> Float) -> List data -> C.Plane -> C.Point -> msg
-getNearest toMsg toX toY data plane point =
-  let points = C.toDataPoints toX toY data in
+getNearest : (Maybe data -> msg) -> (data -> Float) -> List (data -> Float) -> List data -> C.Plane -> C.Point -> msg
+getNearest toMsg toX toYs data plane point =
+  let points = toDataPoints toX toYs data in
   toMsg (C.getNearest points plane point)
 
 
 {-| -}
-getWithin : (Maybe data -> msg) -> Float -> (data -> Float) -> (data -> Float) -> List data -> C.Plane -> C.Point -> msg
-getWithin toMsg radius toX toY data plane point =
-  let points = C.toDataPoints toX toY data in
+getWithin : (Maybe data -> msg) -> Float -> (data -> Float) -> List (data -> Float) -> List data -> C.Plane -> C.Point -> msg
+getWithin toMsg radius toX toYs data plane point =
+  let points = toDataPoints toX toYs data in
   toMsg (C.getWithin radius points plane point)
 
 
 {-| -}
-getNearestX : (List data -> msg) -> (data -> Float) -> (data -> Float) -> List data -> C.Plane -> C.Point -> msg
-getNearestX toMsg toX toY data plane point =
-  let points = C.toDataPoints toX toY data in
+getNearestX : (List data -> msg) -> (data -> Float) -> List (data -> Float) -> List data -> C.Plane -> C.Point -> msg
+getNearestX toMsg toX toYs data plane point =
+  let points = toDataPoints toX toYs data in
   toMsg (C.getNearestX points plane point)
 
 
 {-| -}
-getWithinX : (List data -> msg) -> Float -> (data -> Float) -> (data -> Float) -> List data -> C.Plane -> C.Point -> msg
-getWithinX toMsg radius toX toY data plane point =
-  let points = C.toDataPoints toX toY data in
+getWithinX : (List data -> msg) -> Float -> (data -> Float) -> List (data -> Float) -> List data -> C.Plane -> C.Point -> msg
+getWithinX toMsg radius toX toYs data plane point =
+  let points = toDataPoints toX toYs data in
   toMsg (C.getWithinX radius points plane point)
 
 
@@ -840,17 +846,17 @@ html =
 
 
 {-| -}
-svgAt : Float -> Float -> Float -> Float -> List (S.Svg msg) -> Element msg
-svgAt x y xOff yOff view =
+svgAt : (Bounds -> Float) -> (Bounds -> Float) -> Float -> Float -> List (S.Svg msg) -> Element msg
+svgAt toX toY xOff yOff view =
   SvgElement <| \_ p ->
-    S.g [ C.position p x y xOff yOff ] view
+    S.g [ C.position p (toX <| toBounds .x p) (toY <| toBounds .y p) xOff yOff ] view
 
 
 {-| -}
-htmlAt : Float -> Float -> Float -> Float -> List (H.Attribute msg) -> List (H.Html msg) -> Element msg
-htmlAt x y xOff yOff att view =
+htmlAt : (Bounds -> Float) -> (Bounds -> Float) -> Float -> Float -> List (H.Attribute msg) -> List (H.Html msg) -> Element msg
+htmlAt toX toY xOff yOff att view =
   HtmlElement <| \p ->
-    C.positionHtml p x y xOff yOff att view
+    C.positionHtml p (toX <| toBounds .x p) (toY <| toBounds .y p) xOff yOff att view
 
 
 {-| -}
@@ -888,4 +894,11 @@ defaultColors =
 blue : String
 blue =
   "rgb(5,142,218)"
+
+
+toDataPoints : (data -> Float) -> List (data -> Float) -> List data -> List (C.DataPoint data)
+toDataPoints toX toYs data =
+  List.concatMap (\toY -> C.toDataPoints toX toY data) toYs
+
+
 
