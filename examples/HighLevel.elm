@@ -71,8 +71,8 @@ view hovered =
     , C.marginTop 30
     , C.marginRight 10
     , C.responsive
-    , C.range (C.fromData [.x] data2 |> C.startPad 2 |> C.endPad 1.5)
-    , C.domain (C.fromData [.y, .z] data2 |> C.startMin 0 |> C.endPad 0.5)
+    , C.range (C.fromData [.x] data2  |> C.endPad -0.5)
+    , C.domain (C.fromData [.y, .z] data2)
     , C.id "some-id"
     , C.htmlAttrs
         [ HA.style "font-size" "12px"
@@ -89,9 +89,9 @@ view hovered =
     , C.xAxis [ C.pinned C.zero ]
     , C.xTicks [ C.pinned C.zero ] (C.ints 10 String.fromInt)
     , C.xLabels [] (C.floats 10 String.fromFloat)
-    , C.yAxis [ C.pinned C.zero ]
-    , C.yTicks [ C.pinned C.zero ] (C.ints 5 String.fromInt)
-    , C.yLabels [] (C.ints 5 String.fromInt)
+    --, C.yAxis [ C.pinned C.zero, C.start (always 1), C.end (always 6), C.noArrow ]
+    , C.yTicks [ C.pinned C.zero ] (C.ints 5 String.fromInt << C.endMax 6)
+    , C.yLabels [] (C.ints 5 String.fromInt << C.startMax 1)
     , C.monotone .x .y [ C.dot specialDot, C.area "rgba(5, 142, 218, 0.25)" ] data2
     --, C.bars [ .y, .y ] [ C.barColor specialColor, C.width 0.9 ] data2
     , C.histogram .x [ .y, .z ] [ C.barColor specialColor ] data2

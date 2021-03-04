@@ -203,7 +203,7 @@ chart edits elements =
       buildElement el ( isBeforeChart, ( htmlB, svgE, htmlA ) ) =
         case el of
           SvgElement func ->
-            ( False, ( htmlB, svgE ++ [ func plane ], htmlA ) )
+            ( False, ( htmlB, svgE ++ [ func config.id plane ], htmlA ) )
 
           HtmlElement func ->
             ( isBeforeChart
@@ -336,7 +336,7 @@ tooltip x y att content =
 
 {-| -}
 type Element msg
-    = SvgElement (C.Plane -> S.Svg msg)
+    = SvgElement (String -> C.Plane -> S.Svg msg)
     | HtmlElement (C.Plane -> H.Html msg)
 
 
@@ -368,7 +368,7 @@ xAxis edits =
           , attrs = []
           }
   in
-  SvgElement <| \p ->
+  SvgElement <| \_ p ->
     S.g [ SA.class "elm-charts__x-axis" ]
       [ C.horizontal p ([ SA.stroke config.color ] ++ config.attrs) (config.pinned <| toBounds .y p) (config.start <| toBounds .x p) (config.end <| toBounds .x p)
       , if config.arrow then
@@ -390,7 +390,7 @@ yAxis edits =
           , attrs = []
           }
   in
-  SvgElement <| \p ->
+  SvgElement <| \_ p ->
     S.g [ SA.class "elm-charts__y-axis" ]
       [ C.vertical p ([ SA.stroke config.color ] ++ config.attrs) (config.pinned <| toBounds .x p) (config.start <| toBounds .y p) (config.end <| toBounds .y p)
       , if config.arrow then
@@ -444,7 +444,7 @@ xTicks edits xs =
         , SA.strokeWidth (String.fromFloat config.width)
         ] ++ config.attrs
   in
-  SvgElement <| \p ->
+  SvgElement <| \_ p ->
     C.xTicks p (round config.height) labelAttrs (config.pinned <| toBounds .y p) (List.map .value <| xs <| toBounds .x p)
 
 
@@ -466,7 +466,7 @@ yTicks edits xs =
         , SA.strokeWidth (String.fromFloat config.width)
         ] ++ config.attrs
   in
-  SvgElement <| \p ->
+  SvgElement <| \_ p ->
     C.yTicks p (round config.height) labelAttrs (config.pinned <| toBounds .x p) (List.map .value <| xs <| toBounds .y p)
 
 
@@ -493,7 +493,7 @@ xLabels edits xs =
         [ SA.fill config.color
         ] ++ config.attrs
   in
-  SvgElement <| \p ->
+  SvgElement <| \_ p ->
     C.xLabels p (C.xLabel labelAttrs .value .label) (config.pinned <| toBounds .y p) (xs <| toBounds .x p)
 
 
@@ -510,7 +510,7 @@ yLabels edits xs =
         [ SA.fill config.color
         ] ++ config.attrs
   in
-  SvgElement <| \p ->
+  SvgElement <| \_ p ->
     C.yLabels p (C.yLabel labelAttrs .value .label) (config.pinned <| toBounds .x p) (xs <| toBounds .y p)
 
 
@@ -560,7 +560,7 @@ grid edits xs ys =
         then Nothing
         else Just <| C.full config.width C.circle config.color p x.value y.value
   in
-  SvgElement <| \p ->
+  SvgElement <| \_ p ->
     S.g [ SA.class "elm-charts__grid" ] <|
       if config.dotted then
         List.concatMap (\x -> List.filterMap (toDot p x) (ys <| toBounds .y p)) (xs <| toBounds .x p)
@@ -592,17 +592,17 @@ bars toYs edits data =
           , attrs = []
           }
 
-      toBar (i, d) toY =
-        { attributes = [ SA.stroke "transparent", SA.fill (config.color i (toY d) d) ] ++ config.attrs -- TODO
+      toBar name (i, d) toY =
+        { attributes = [ SA.stroke "transparent", SA.fill (config.color i (toY d) d), clipPath name ] ++ config.attrs -- TODO
         , width = config.width / toFloat (List.length toYs)
         , value = toY d
         }
 
-      toBars x =
-        List.map (toBar x) toYs
+      toBars name x =
+        List.map (toBar name x) toYs
   in
-  SvgElement <| \p ->
-    C.bars p toBars (List.indexedMap Tuple.pair data)
+  SvgElement <| \name p ->
+    C.bars p (toBars name) (List.indexedMap Tuple.pair data)
 
 
 histogram : (data -> Float) -> List (data -> Float) -> List (Bars data msg -> Bars data msg) -> List data -> Element msg
@@ -626,8 +626,10 @@ histogram toX toYs edits data =
       toBars _ x _ =
         List.map (toBar x) toYs
   in
-  SvgElement <| \p ->
-    C.histogram p toBars (List.indexedMap Tuple.pair data)
+  SvgElement <| \name p ->
+    S.g
+      [ SA.class "elm-charts__histogram", clipPath name ]
+      [ C.histogram p toBars (List.indexedMap Tuple.pair data) ]
 
 
 
@@ -654,8 +656,10 @@ scatter toX toY edits data =
           Unchanged _ -> \_ -> C.disconnected 6 1 C.cross config.color
           Changed d -> d
   in
-  SvgElement <| \p ->
-    C.scatter p toX toY finalDot data
+  SvgElement <| \name p ->
+    S.g
+      [ SA.class "elm-charts__scatter" ]
+      [ C.scatter p toX toY finalDot data ]
 
 
 
@@ -695,16 +699,18 @@ monotone toX toY edits data =
           Unchanged _ -> \_ -> C.disconnected 6 1 C.cross config.color
           Changed d -> d
   in
-  SvgElement <| \p ->
+  SvgElement <| \name p ->
     case config.area of
       Just fill ->
-        S.g [ SA.class "elm-charts__linear-area" ]
-          [ C.monotoneArea p toX toY (interAttrs ++ [ SA.stroke "transparent", SA.fill fill ]) finalDot data
+        S.g [ SA.class "elm-charts__monotone-area" ]
+          [ C.monotoneArea p toX toY (interAttrs ++ [ SA.stroke "transparent", SA.fill fill, clipPath name ]) finalDot data
           , C.monotone p toX toY interAttrs finalDot data
           ]
 
       Nothing ->
-        C.monotone p toX toY interAttrs finalDot data
+        S.g
+          [ SA.class "elm-charts__monotone" ]
+          [ C.monotone p toX toY interAttrs finalDot data ]
 
 
 linear : (data -> Float) -> (data -> Float) -> List (Interpolation data msg -> Interpolation data msg) -> List data -> Element msg
@@ -728,22 +734,24 @@ linear toX toY edits data =
           Unchanged _ -> \_ -> C.disconnected 6 1 C.cross config.color
           Changed d -> d
   in
-  SvgElement <| \p ->
+  SvgElement <| \name p ->
     case config.area of
       Just fill ->
         S.g [ SA.class "elm-charts__linear-area" ]
-          [ C.linearArea p toX toY (interAttrs ++ [ SA.stroke "transparent", SA.fill fill ]) finalDot data
+          [ C.linearArea p toX toY (interAttrs ++ [ SA.stroke "transparent", SA.fill fill, clipPath name ]) finalDot data
           , C.linear p toX toY interAttrs finalDot data
           ]
 
       Nothing ->
-        C.linear p toX toY interAttrs finalDot data
+        S.g
+          [ SA.class "elm-charts__linear" ]
+          [ C.linear p toX toY interAttrs finalDot data ]
 
 
 
 svg : (C.Plane -> S.Svg msg) -> Element msg
-svg =
-  SvgElement
+svg func =
+  SvgElement (always func)
 
 
 html : (C.Plane -> H.Html msg) -> Element msg
@@ -753,7 +761,7 @@ html =
 
 svgAt : Float -> Float -> Float -> Float -> List (S.Svg msg) -> Element msg
 svgAt x y xOff yOff view =
-  SvgElement <| \p ->
+  SvgElement <| \_ p ->
     S.g [ C.position p x y xOff yOff ] view
 
 
@@ -782,4 +790,10 @@ applyAttrs : List (a -> a) -> a -> a
 applyAttrs funcs default =
   let apply f a = f a in
   List.foldl apply default funcs
+
+
+clipPath : String -> S.Attribute msg
+clipPath name =
+  SA.clipPath <| "url(#" ++ name ++ ")"
+
 
