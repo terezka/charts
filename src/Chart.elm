@@ -10,6 +10,8 @@ import Svg as S
 import Svg.Attributes as SA
 import Html as H
 import Html.Attributes as HA
+import Intervals as I
+import Time
 
 
 
@@ -241,6 +243,23 @@ yAxis edits =
 
 
 
+ints : Int -> (Int -> String) -> Bounds -> List { value : Float, label : String }
+ints amount format =
+  I.ints (I.around amount) >> List.map (\i -> { value = toFloat i, label = format i })
+
+
+floats : Int -> (Float -> String) -> Bounds -> List { value : Float, label : String }
+floats amount format =
+  I.floats (I.around amount) >> List.map (\i -> { value = i, label = format i })
+
+
+times : Time.Zone -> Int -> (I.Time -> String) -> Bounds -> List { value : Float, label : String }
+times zone amount format bounds =
+  I.times zone amount bounds
+    |> List.map (\i -> { value = toFloat (Time.posixToMillis i.timestamp), label = format i })
+
+
+
 type alias Tick msg =
     { color : String -- TODO use Color -- TODO allow custom color by tick value
     , height : Float
@@ -251,8 +270,8 @@ type alias Tick msg =
     }
 
 
-xTicks : (a -> Float) -> List (Tick msg -> Tick msg) -> List a -> Element msg
-xTicks value edits xs =
+xTicks : List (Tick msg -> Tick msg) -> (Bounds -> List { a | value : Float }) -> Element msg
+xTicks edits xs =
   let config =
         applyAttrs edits
           { color = "lightgray"
@@ -269,12 +288,12 @@ xTicks value edits xs =
         ] ++ config.attrs
   in
   SvgElement <| \p ->
-    C.xTicks p (round config.height) labelAttrs (config.pinned <| toBounds .y p) (List.map value xs)
+    C.xTicks p (round config.height) labelAttrs (config.pinned <| toBounds .y p) (List.map .value <| xs <| toBounds .x p)
 
 
 
-yTicks : (a -> Float) -> List (Tick msg -> Tick msg) -> List a -> Element msg
-yTicks value edits xs =
+yTicks : List (Tick msg -> Tick msg) -> (Bounds -> List { a | value : Float }) -> Element msg
+yTicks edits xs =
   let config =
         applyAttrs edits
           { color = "lightgray"
@@ -291,7 +310,7 @@ yTicks value edits xs =
         ] ++ config.attrs
   in
   SvgElement <| \p ->
-    C.xTicks p (round config.height) labelAttrs (config.pinned <| toBounds .x p) (List.map value xs)
+    C.xTicks p (round config.height) labelAttrs (config.pinned <| toBounds .x p) (List.map .value <| xs <| toBounds .y p)
 
 
 
@@ -304,8 +323,8 @@ type alias Label msg =
     }
 
 
-xLabels : (a -> Float) -> (a -> String) -> List (Label msg -> Label msg) -> List a -> Element msg
-xLabels value format edits xs =
+xLabels : List (Label msg -> Label msg) -> (Bounds -> List { a | value : Float, label : String }) -> Element msg
+xLabels edits xs =
   let config =
         applyAttrs edits
           { color = "lightgray"
@@ -318,11 +337,11 @@ xLabels value format edits xs =
         ] ++ config.attrs
   in
   SvgElement <| \p ->
-    C.xLabels p (C.xLabel labelAttrs value format) (config.pinned <| toBounds .y p) xs
+    C.xLabels p (C.xLabel labelAttrs .value .label) (config.pinned <| toBounds .y p) (xs <| toBounds .x p)
 
 
-yLabels : (a -> Float) -> (a -> String) -> List (Label msg -> Label msg) -> List a -> Element msg
-yLabels value format edits xs =
+yLabels : List (Label msg -> Label msg) -> (Bounds -> List { a | value : Float, label : String }) -> Element msg
+yLabels edits xs =
   let config =
         applyAttrs edits
           { color = "lightgray"
@@ -335,7 +354,7 @@ yLabels value format edits xs =
         ] ++ config.attrs
   in
   SvgElement <| \p ->
-    C.yLabels p (C.yLabel labelAttrs value format) (config.pinned <| toBounds .x p) xs
+    C.yLabels p (C.yLabel labelAttrs .value .label) (config.pinned <| toBounds .x p) (xs <| toBounds .y p)
 
 
 type alias Grid msg =
@@ -346,8 +365,8 @@ type alias Grid msg =
     }
 
 
-grid : (x -> Float) -> (y -> Float) -> List (Grid msg -> Grid msg) -> List x -> List y -> Element msg
-grid toX toY edits xs ys =
+grid : List (Grid msg -> Grid msg) -> (Bounds -> List { a | value : Float }) -> (Bounds -> List { a | value : Float }) -> Element msg
+grid edits xs ys =
   let config =
         applyAttrs edits
           { color = "lightgray"
@@ -362,15 +381,15 @@ grid toX toY edits xs ys =
         ] ++ config.attrs
 
       toXGrid p v =
-        C.xGrid p gridAttrs (toY v)
+        C.xGrid p gridAttrs v.value
 
       toYGrid p v =
-        C.yGrid p gridAttrs (toX v)
+        C.yGrid p gridAttrs v.value
   in
   SvgElement <| \p ->
     S.g [ SA.class "elm-charts__grid" ]
-      [ S.g [ SA.class "elm-charts__x-grid" ] (List.map (toXGrid p) ys)
-      , S.g [ SA.class "elm-charts__y-grid" ] (List.map (toYGrid p) xs)
+      [ S.g [ SA.class "elm-charts__x-grid" ] (List.map (toXGrid p) <| ys <| toBounds .y p)
+      , S.g [ SA.class "elm-charts__y-grid" ] (List.map (toYGrid p) <| xs <| toBounds .x p)
       ]
 
 
@@ -416,6 +435,29 @@ linear toX toY dot edits data =
   in
   SvgElement <| \p ->
     C.linear p toX toY interAttrs dot data
+
+
+
+svg : (C.Plane -> S.Svg msg) -> Element msg
+svg =
+  SvgElement
+
+
+html : (C.Plane -> H.Html msg) -> Element msg
+html =
+  HtmlElement
+
+
+svgAt : Float -> Float -> Float -> Float -> List (S.Svg msg) -> Element msg
+svgAt x y xOff yOff view =
+  SvgElement <| \p ->
+    S.g [ C.position p x y xOff yOff ] view
+
+
+htmlAt : Float -> Float -> Float -> Float -> List (H.Attribute msg) -> List (H.Html msg) -> Element msg
+htmlAt x y xOff yOff att view =
+  HtmlElement <| \p ->
+    C.positionHtml p x y xOff yOff att view
 
 
 
