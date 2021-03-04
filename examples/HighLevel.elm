@@ -72,7 +72,7 @@ view hovered =
         , C.event "mouseleave" (\_ _ -> OnLeave)
         ]
     ]
-    [ C.grid [] (C.ints 12 String.fromInt) (C.ints 5 String.fromInt)
+    [ C.grid [ C.dotted, C.width 0.5, C.color "rgb(220,220,220)" ] (C.ints 12 String.fromInt) (C.ints 5 String.fromInt)
     , C.xAxis [ C.pinned (always 0) ]
     , C.xTicks [ C.pinned (always 0) ] (C.ints 12 String.fromInt)
     , C.xLabels [] (C.floats 12 String.fromFloat)

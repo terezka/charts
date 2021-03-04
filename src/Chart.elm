@@ -117,6 +117,11 @@ dot value config =
   { config | dot = Changed value }
 
 
+dotted : { a | dotted : Bool } -> { a | dotted : Bool }
+dotted config =
+  { config | dotted = True }
+
+
 
 -- ELEMENTS
 
@@ -310,7 +315,6 @@ yAxis edits =
     C.vertical p ([ SA.stroke config.color ] ++ config.attrs) (config.pinned <| toBounds .x p) (config.start <| toBounds .y p) (config.end <| toBounds .y p)
 
 
-
 ints : Int -> (Int -> String) -> Bounds -> List { value : Float, label : String }
 ints amount format =
   I.ints (I.around amount) >> List.map (\i -> { value = toFloat i, label = format i })
@@ -429,7 +433,7 @@ type alias Grid msg =
     { color : String -- TODO use Color
     , width : Float
     , attrs : List (S.Attribute msg)
-    -- TODO , dotted : Bool
+    , dotted : Bool
     }
 
 
@@ -440,7 +444,7 @@ grid edits xs ys =
           { color = "#EFF2FA"
           , width = 1
           , attrs = []
-          -- , dotted = False
+          , dotted = False
           }
 
       gridAttrs =
@@ -453,12 +457,18 @@ grid edits xs ys =
 
       toYGrid p v =
         C.yGrid p gridAttrs v.value
+
+      toDot p x y =
+        C.full config.width C.circle config.color p x.value y.value
   in
   SvgElement <| \p ->
-    S.g [ SA.class "elm-charts__grid" ]
-      [ S.g [ SA.class "elm-charts__x-grid" ] (List.map (toXGrid p) <| ys <| toBounds .y p)
-      , S.g [ SA.class "elm-charts__y-grid" ] (List.map (toYGrid p) <| xs <| toBounds .x p)
-      ]
+    S.g [ SA.class "elm-charts__grid" ] <|
+      if config.dotted then
+        List.concatMap (\x -> List.map (toDot p x) (ys <| toBounds .y p)) (xs <| toBounds .x p)
+      else
+        [ S.g [ SA.class "elm-charts__x-grid" ] (List.map (toXGrid p) <| ys <| toBounds .y p)
+        , S.g [ SA.class "elm-charts__y-grid" ] (List.map (toYGrid p) <| xs <| toBounds .x p)
+        ]
 
 
 type alias Interpolation data msg =
