@@ -31,10 +31,11 @@ type Msg
 type alias Point =
   { x : Float
   , y : Float
+  , z : Float
   }
 
 
-data : List Point
+data : List { x : Float, y : Float }
 data =
   [ { x = -4, y = 4 }
   , { x = -2, y = 3 }
@@ -48,9 +49,9 @@ data =
 
 data2 : List Point
 data2 =
-  [ { x = 2, y = 2 }
-  , { x = 3, y = 1 }
-  , { x = 8, y = 6 }
+  [ { x = 2, y = 2, z = 4 }
+  , { x = 3, y = 1, z = 5 }
+  , { x = 8, y = 6, z = 3 }
   ]
 
 
@@ -70,13 +71,14 @@ view hovered =
     , C.marginTop 30
     , C.marginRight 10
     , C.responsive
-    , C.range (C.fromData .x data2 |> C.startPad 2 |> C.endPad 1)
-    , C.domain (C.fromData .y data2)
+    , C.range (C.fromData [.x] data2 |> C.startPad 2 |> C.endPad 1)
+    , C.domain (C.fromData [.y, .z] data2 |> C.startMin 0)
     , C.id "some-id"
     , C.htmlAttrs
         [ HA.style "font-size" "12px"
         , HA.style "font-family" "monospace"
         , HA.style "margin" "20px 40px"
+        , HA.style "max-width" "700px"
         ]
     , C.events
         [ C.event "mousemove" (C.getNearest OnHover .x .y data2)
@@ -92,7 +94,7 @@ view hovered =
     , C.yLabels [] (C.ints 5 String.fromInt)
     , C.monotone .x .y [ C.dot specialDot, C.area "rgba(5, 142, 218, 0.25)" ] data2
     --, C.bars [ .y, .y ] [ C.barColor specialColor, C.width 0.9 ] data2
-    , C.histogram .x [ .y, .y ] [ C.barColor specialColor ] data2
+    , C.histogram .x [ .y, .z ] [ C.barColor specialColor ] data2
     --, C.scatter .x .y [ C.dot specialDot ] data2
     , case hovered of
         Just point ->

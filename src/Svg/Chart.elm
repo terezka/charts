@@ -854,8 +854,6 @@ container : Plane -> List (Html.Attribute msg) -> List (Html.Html msg) -> Html.H
 container plane attrs =
   Html.div <|
     [ HA.style "position" "relative"
-    , HA.style "width" (String.fromFloat plane.x.length ++ "px")
-    , HA.style "height" (String.fromFloat plane.y.length ++ "px")
     ] ++ attrs
 
 

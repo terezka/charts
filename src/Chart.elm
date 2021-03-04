@@ -221,10 +221,10 @@ type alias Bounds =
     { min : Float, max : Float }
 
 
-fromData : (data -> Float) -> List data -> Bounds
-fromData value data =
-  { min = C.minimum [value] data
-  , max = C.maximum [value] data
+fromData : List (data -> Float) -> List data -> Bounds
+fromData values data =
+  { min = C.minimum values data
+  , max = C.maximum values data
   }
 
 
