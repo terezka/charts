@@ -51,7 +51,7 @@ view hovered =
   let specialDot p =
         if Maybe.map .x hovered == Just p.x
           then SC.full 6 SC.circle "rgb(5,142,218)"
-          else SC.disconnected 9 2 SC.cross "rgb(5,142,218)"
+          else SC.disconnected 6 1 SC.cross "rgb(5,142,218)"
   in
   C.chart
     [ C.width 500
@@ -72,14 +72,14 @@ view hovered =
         , C.event "mouseleave" (\_ _ -> OnLeave)
         ]
     ]
-    [ C.grid [ C.dotted, C.width 0.5, C.color "rgb(220,220,220)" ] (C.ints 12 String.fromInt) (C.ints 5 String.fromInt)
+    [ C.grid [ C.dotted, C.width 0.4, C.color "rgb(220,220,220)" ] (C.ints 12 String.fromInt) (C.ints 5 String.fromInt)
     , C.xAxis [ C.pinned (always 0) ]
     , C.xTicks [ C.pinned (always 0) ] (C.ints 12 String.fromInt)
     , C.xLabels [] (C.floats 12 String.fromFloat)
     , C.yAxis [ C.pinned (always 0) ]
     , C.yTicks [ C.pinned (always 0) ] (C.ints 5 String.fromInt)
     , C.yLabels [] (C.ints 5 String.fromInt)
-    , C.monotone .x .y [ C.dot specialDot ] data
+    , C.monotone .x .y [ C.dot specialDot, C.area "rgba(5, 142, 218, 0.25)" ] data
     , case hovered of
         Just point ->
           C.tooltip point.x point.y []

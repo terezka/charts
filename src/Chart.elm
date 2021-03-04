@@ -122,6 +122,12 @@ dotted config =
   { config | dotted = True }
 
 
+area : String -> { a | area : Maybe String } -> { a | area : Maybe String }
+area value config =
+  { config | area = Just value }
+
+
+
 
 -- ELEMENTS
 
@@ -473,6 +479,7 @@ grid edits xs ys =
 
 type alias Interpolation data msg =
     { color : String -- TODO use Color
+    , area : Maybe String -- TODO use Color
     , width : Float
     , dot : Tracked (data -> C.Dot msg)
     , attrs : List (S.Attribute msg)
@@ -490,8 +497,9 @@ monotone toX toY edits data =
   let config =
         applyAttrs edits
           { color = "rgb(5,142,218)" -- TODO
+          , area = Nothing
           , width = 1
-          , dot = Unchanged (\_ -> C.disconnected 9 2 C.cross "rgb(5,142,218)")
+          , dot = Unchanged (\_ -> C.disconnected 6 1 C.cross "rgb(5,142,218)")
           , attrs = []
           }
 
@@ -502,11 +510,19 @@ monotone toX toY edits data =
 
       finalDot =
         case config.dot of -- TODO use inheritance instead?
-          Unchanged _ -> \_ -> C.disconnected 9 2 C.cross config.color
+          Unchanged _ -> \_ -> C.disconnected 6 1 C.cross config.color
           Changed d -> d
   in
   SvgElement <| \p ->
-    C.monotone p toX toY interAttrs finalDot data
+    case config.area of
+      Just fill ->
+        S.g [ SA.class "elm-charts__linear-area" ]
+          [ C.monotoneArea p toX toY (interAttrs ++ [ SA.stroke "transparent", SA.fill fill ]) finalDot data
+          , C.monotone p toX toY interAttrs finalDot data
+          ]
+
+      Nothing ->
+        C.monotone p toX toY interAttrs finalDot data
 
 
 linear : (data -> Float) -> (data -> Float) -> List (Interpolation data msg -> Interpolation data msg) -> List data -> Element msg
@@ -514,8 +530,9 @@ linear toX toY edits data =
   let config =
         applyAttrs edits
           { color = "rgb(5,142,218)" -- TODO
+          , area = Nothing
           , width = 1
-          , dot = Unchanged (\_ -> C.disconnected 9 2 C.cross "rgb(5,142,218)")
+          , dot = Unchanged (\_ -> C.disconnected 6 1 C.cross "rgb(5,142,218)")
           , attrs = []
           }
 
@@ -526,11 +543,19 @@ linear toX toY edits data =
 
       finalDot =
         case config.dot of
-          Unchanged _ -> \_ -> C.disconnected 9 2 C.cross config.color
+          Unchanged _ -> \_ -> C.disconnected 6 1 C.cross config.color
           Changed d -> d
   in
   SvgElement <| \p ->
-    C.linear p toX toY interAttrs finalDot data
+    case config.area of
+      Just fill ->
+        S.g [ SA.class "elm-charts__linear-area" ]
+          [ C.linearArea p toX toY (interAttrs ++ [ SA.stroke "transparent", SA.fill fill ]) finalDot data
+          , C.linear p toX toY interAttrs finalDot data
+          ]
+
+      Nothing ->
+        C.linear p toX toY interAttrs finalDot data
 
 
 
