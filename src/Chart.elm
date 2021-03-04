@@ -16,7 +16,7 @@ module Chart exposing
 @docs chart, scatter, linear, monotone, bars, histogram
 
 ## Work with bounds
-@docs Bounds, fromData, startMin, endMin, startPad, endPad, zero
+@docs Bounds, fromData, startMin, startMax, endMin, endMax, startPad, endPad, zero
 
 # Axis
 @docs xAxis, yAxis, xTicks, yTicks, xLabels, yLabels, grid
@@ -34,7 +34,7 @@ module Chart exposing
 @docs noArrow, filterX, filterY, attrs
 
 # Interop
-@docs svgAt, htmlAt, svg, html
+@docs svgAt, htmlAt, svg, html, none
 
 -}
 
