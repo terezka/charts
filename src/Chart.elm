@@ -6,7 +6,7 @@ module Chart exposing
     , Event, event, getNearest, getNearestX, getWithin, getWithinX, tooltip
     , svgAt, htmlAt, svg, html, none
     , width, height, marginTop, marginBottom, marginLeft, marginRight, responsive, id, range, domain, events, htmlAttrs
-    , start, end, pinned, color, barColor, margin, dot, dotted, area, noArrow, filterX, filterY, attrs
+    , start, end, pinned, color, margin, dot, dotted, area, noArrow, filterX, filterY, attrs
     , blue, orange, pink, green, red
     )
 
@@ -31,7 +31,7 @@ module Chart exposing
 # Attributes
 @docs width, height, marginTop, marginBottom, marginLeft, marginRight
 @docs responsive, id, range, domain, events, htmlAttrs
-@docs start, end, pinned, color, barColor, dot, dotted, area
+@docs start, end, pinned, color, margin, dot, dotted, area
 @docs noArrow, filterX, filterY, attrs
 
 # Interop
@@ -157,12 +157,6 @@ pinned value config =
 {-| -}
 color : String -> { a | color : String } -> { a | color : String }
 color value config =
-  { config | color = value }
-
-
-{-| -}
-barColor : (Int -> Float -> data -> String) -> { a | color : Int -> Float -> data -> String } -> { a | color : Int -> Float -> data -> String }
-barColor value config =
   { config | color = value }
 
 
@@ -908,26 +902,31 @@ clipPath name =
   SA.clipPath <| "url(#" ++ name ++ ")"
 
 
+{-| -}
 blue : String
 blue =
   "rgb(5,142,218)"
 
 
+{-| -}
 orange : String
 orange =
   "rgb(244, 149, 69)"
 
 
+{-| -}
 pink : String
 pink =
   "rgb(253, 121, 168)"
 
 
+{-| -}
 green : String
 green =
   "rgb(68, 201, 72)"
 
 
+{-| -}
 red : String
 red =
   "rgb(215, 31, 10)"
