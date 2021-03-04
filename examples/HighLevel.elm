@@ -46,6 +46,14 @@ data =
   ]
 
 
+data2 : List Point
+data2 =
+  [ { x = 2, y = 2 }
+  , { x = 3, y = 1 }
+  , { x = 8, y = 6 }
+  ]
+
+
 view : Maybe Point -> Html.Html Msg
 view hovered =
   let specialDot p =
@@ -62,8 +70,8 @@ view hovered =
     , C.marginTop 30
     , C.marginRight 10
     , C.responsive
-    , C.range (C.fromData .x data)
-    , C.domain (C.fromData .y data)
+    , C.range (C.fromData .x data2 |> C.startPad 2 |> C.endPad 1)
+    , C.domain (C.fromData .y data2)
     , C.id "some-id"
     , C.htmlAttrs
         [ HA.style "font-size" "12px"
@@ -71,21 +79,21 @@ view hovered =
         , HA.style "margin" "20px 40px"
         ]
     , C.events
-        [ C.event "mousemove" (C.getNearest OnHover .x .y data)
+        [ C.event "mousemove" (C.getNearest OnHover .x .y data2)
         , C.event "mouseleave" (\_ _ -> OnLeave)
         ]
     ]
-    [ C.grid [ C.dotted, C.width 0.4, C.color "rgb(220,220,220)" ] (C.ints 12 String.fromInt) (C.ints 5 String.fromInt)
-    , C.xAxis [ C.pinned (always 0) ]
-    , C.xTicks [ C.pinned (always 0) ] (C.ints 12 String.fromInt)
-    , C.xLabels [] (C.floats 12 String.fromFloat)
-    , C.yAxis [ C.pinned (always 0) ]
-    , C.yTicks [ C.pinned (always 0) ] (C.ints 5 String.fromInt)
+    [ C.grid [ C.dotted, C.width 0.4, C.color "rgb(220,220,220)" ] (C.ints 10 String.fromInt) (C.ints 5 String.fromInt)
+    , C.xAxis [ C.pinned C.zero ]
+    , C.xTicks [ C.pinned C.zero ] (C.ints 10 String.fromInt)
+    , C.xLabels [] (C.floats 10 String.fromFloat)
+    , C.yAxis [ C.pinned C.zero ]
+    , C.yTicks [ C.pinned C.zero ] (C.ints 5 String.fromInt)
     , C.yLabels [] (C.ints 5 String.fromInt)
-    , C.monotone .x .y [ C.dot specialDot, C.area "rgba(5, 142, 218, 0.25)" ] data
-    --, C.bars [ .y, .y ] [ C.barColor specialColor, C.width 0.9 ] data
-    , C.histogram .x .y [ C.barColor specialColor, C.width 0.9 ] data
-    --, C.scatter .x .y [ C.dot specialDot ] data
+    , C.monotone .x .y [ C.dot specialDot, C.area "rgba(5, 142, 218, 0.25)" ] data2
+    --, C.bars [ .y, .y ] [ C.barColor specialColor, C.width 0.9 ] data2
+    , C.histogram .x [ .y, .y ] [ C.barColor specialColor ] data2
+    --, C.scatter .x .y [ C.dot specialDot ] data2
     , case hovered of
         Just point ->
           C.tooltip point.x point.y []

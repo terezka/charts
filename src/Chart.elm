@@ -15,15 +15,6 @@ import Intervals as I
 import Time
 
 
-
-fromData : (data -> Float) -> List data -> Bounds
-fromData value data =
-  { min = C.minimum [value] data
-  , max = C.maximum [value] data
-  }
-
-
-
 -- ATTRS
 
 
@@ -154,9 +145,6 @@ type alias Container msg =
     }
 
 
-type alias Bounds =
-    { min : Float, max : Float }
-
 
 chart : List (Container msg -> Container msg) -> List (Element msg) -> H.Html msg
 chart edits elements =
@@ -189,8 +177,8 @@ chart edits elements =
             { marginUpper = config.marginTop
             , marginLower = config.marginBottom
             , length = config.height
-            , min = config.range.min
-            , max = config.range.max
+            , min = config.domain.min
+            , max = config.domain.max
             }
         }
 
@@ -226,10 +214,58 @@ chart edits elements =
 
 
 
-{-| -}
-type Element msg
-    = SvgElement (C.Plane -> S.Svg msg)
-    | HtmlElement (C.Plane -> H.Html msg)
+-- BOUNDS
+
+
+type alias Bounds =
+    { min : Float, max : Float }
+
+
+fromData : (data -> Float) -> List data -> Bounds
+fromData value data =
+  { min = C.minimum [value] data
+  , max = C.maximum [value] data
+  }
+
+
+startMin : Float -> Bounds -> Bounds
+startMin value bounds =
+  { bounds | min = min value bounds.min }
+
+
+startMax : Float -> Bounds -> Bounds
+startMax value bounds =
+  { bounds | min = max value bounds.min }
+
+
+endMin : Float -> Bounds -> Bounds
+endMin value bounds =
+  { bounds | max = max value bounds.max }
+
+
+endMax : Float -> Bounds -> Bounds
+endMax value bounds =
+  { bounds | max = min value bounds.max }
+
+
+endPad : Float -> Bounds -> Bounds
+endPad value bounds =
+  { bounds | max = bounds.max + value }
+
+
+startPad : Float -> Bounds -> Bounds
+startPad value bounds =
+  { bounds | min = bounds.min - value }
+
+
+zero : Bounds -> Float
+zero bounds =
+  clamp bounds.min bounds.max 0
+
+
+
+
+-- EVENTS
 
 
 {-| -}
@@ -278,6 +314,15 @@ tooltip : Float -> Float -> List (H.Attribute msg) -> List (H.Html msg) -> Eleme
 tooltip x y att content =
   html <| \p -> C.tooltip p x y att content
 
+
+
+-- ELEMENTS
+
+
+{-| -}
+type Element msg
+    = SvgElement (C.Plane -> S.Svg msg)
+    | HtmlElement (C.Plane -> H.Html msg)
 
 
 
@@ -506,7 +551,7 @@ bars toYs edits data =
 
       toBar (i, d) toY =
         { attributes = [ SA.stroke "transparent", SA.fill (config.color i (toY d) d) ] ++ config.attrs -- TODO
-        , width = config.width / toFloat (List.length toYs) -- TODO
+        , width = config.width / toFloat (List.length toYs)
         , value = toY d
         }
 
@@ -516,6 +561,34 @@ bars toYs edits data =
   SvgElement <| \p ->
     C.bars p toBars (List.indexedMap Tuple.pair data)
 
+
+histogram : (data -> Float) -> List (data -> Float) -> List (Bars data msg -> Bars data msg) -> List data -> Element msg
+histogram toX toYs edits data =
+  -- TODO add clip path
+  -- TODO spacing?
+  let config =
+        applyAttrs edits
+          { color = \_ _ _ -> "rgb(5,142,218)" -- TODO more colors
+          , width = 1
+          , attrs = []
+          }
+
+      toBar (i, d) toY =
+        { attributes = [ SA.stroke "transparent", SA.fill (config.color i (toY d) d) ] ++ config.attrs -- TODO
+        , width = config.width / toFloat (List.length toYs)
+        , position = toX d - config.width
+        , value = toY d
+        }
+
+      toBars _ x _ =
+        List.map (toBar x) toYs
+  in
+  SvgElement <| \p ->
+    C.histogram p toBars (List.indexedMap Tuple.pair data)
+
+
+
+-- DOTTED SERIES
 
 
 type alias Scatter data msg =
