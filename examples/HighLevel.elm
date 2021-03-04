@@ -99,7 +99,7 @@ view hovered =
     , C.htmlAt (always 3) C.middle 0 0 [] [ Html.text "hello"]
     , case hovered of
         point :: _ ->
-          C.tooltip point.x point.y []
+          C.tooltip (always point.x) C.middle []
             [ Html.text ("( " ++ String.fromFloat point.x ++ ", " ++ String.fromFloat point.y ++ " )") ]
 
         [] ->

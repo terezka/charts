@@ -401,9 +401,9 @@ getWithinX toMsg radius toX toYs data plane point =
 
 
 {-| -}
-tooltip : Float -> Float -> List (H.Attribute msg) -> List (H.Html msg) -> Element msg
-tooltip x y att content =
-  html <| \p -> C.tooltip p x y att content
+tooltip : (Bounds -> Float) -> (Bounds -> Float) -> List (H.Attribute msg) -> List (H.Html msg) -> Element msg
+tooltip toX toY att content =
+  html <| \p -> C.tooltip p (toX <| toBounds .x p) (toY <| toBounds .y p) att content
 
 
 
