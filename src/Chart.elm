@@ -8,6 +8,7 @@ import Svg.Chart as C
 import Svg.Coordinates as C
 import Svg as S
 import Svg.Attributes as SA
+import Svg.Events as SE
 import Html as H
 import Html.Attributes as HA
 import Intervals as I
@@ -76,6 +77,11 @@ domain value config =
   { config | domain = value }
 
 
+events : List (Event msg) -> { a | events : List (Event msg) } -> { a | events : List (Event msg) }
+events value config =
+  { config | events = value }
+
+
 attrs : List (S.Attribute msg) -> { a | attrs : List (S.Attribute msg) } -> { a | attrs : List (S.Attribute msg) }
 attrs value config =
   { config | attrs = value }
@@ -120,6 +126,7 @@ type alias Container msg =
     , id : String
     , range : Bounds
     , domain : Bounds
+    , events : List (Event msg)
     , htmlAttrs : List (H.Attribute msg)
     , attrs : List (S.Attribute msg)
     }
@@ -143,6 +150,7 @@ chart edits elements =
           , id = "you-should-really-set-the-id-of-your-chart"
           , range = { min = 1, max = 100 }
           , domain = { min = 1, max = 100 }
+          , events = []
           , attrs = []
           , htmlAttrs = []
           }
@@ -180,7 +188,7 @@ chart edits elements =
             )
 
       svgContainer els =
-        S.svg (sizingAttrs ++ config.attrs) <|
+        S.svg (sizingAttrs ++ List.map toEvent config.events ++ config.attrs) <|
           C.frame config.id plane :: els ++ [ C.eventCatcher plane [] ]
 
       sizingAttrs =
@@ -188,6 +196,8 @@ chart edits elements =
         then [ C.responsive plane ]
         else C.static plane
 
+      toEvent e =
+        SE.on e.name (C.decodePoint plane e.msg)
   in
   C.container plane config.htmlAttrs <|
     htmlElsBefore ++ [ svgContainer svgEls ] ++ htmlElsAfter
@@ -198,6 +208,58 @@ chart edits elements =
 type Element msg
     = SvgElement (C.Plane -> S.Svg msg)
     | HtmlElement (C.Plane -> H.Html msg)
+
+
+{-| -}
+type alias Event msg =
+  { name : String
+  , msg : C.Plane -> C.Point -> msg
+  }
+
+
+{-| -}
+event : String -> (C.Plane -> C.Point -> msg) -> Event msg
+event =
+  Event
+
+
+{-| -}
+getNearest : (Maybe data -> msg) -> (data -> Float) -> (data -> Float) -> List data -> C.Plane -> C.Point -> msg
+getNearest toMsg toX toY data plane point =
+  let points = C.toDataPoints toX toY data in
+  toMsg (C.getNearest points plane point)
+
+
+{-| -}
+getWithin : (Maybe data -> msg) -> Float -> (data -> Float) -> (data -> Float) -> List data -> C.Plane -> C.Point -> msg
+getWithin toMsg radius toX toY data plane point =
+  let points = C.toDataPoints toX toY data in
+  toMsg (C.getWithin radius points plane point)
+
+
+{-| -}
+getNearestX : (List data -> msg) -> (data -> Float) -> (data -> Float) -> List data -> C.Plane -> C.Point -> msg
+getNearestX toMsg toX toY data plane point =
+  let points = C.toDataPoints toX toY data in
+  toMsg (C.getNearestX points plane point)
+
+
+{-| -}
+getWithinX : (List data -> msg) -> Float -> (data -> Float) -> (data -> Float) -> List data -> C.Plane -> C.Point -> msg
+getWithinX toMsg radius toX toY data plane point =
+  let points = C.toDataPoints toX toY data in
+  toMsg (C.getWithinX radius points plane point)
+
+
+{-| -}
+tooltip : Float -> Float -> List (H.Attribute msg) -> List (H.Html msg) -> Element msg
+tooltip x y att content =
+  html <| \p -> C.tooltip p x y att content
+
+
+
+
+-- AXIS
 
 
 {-| -}
@@ -458,6 +520,11 @@ htmlAt : Float -> Float -> Float -> Float -> List (H.Attribute msg) -> List (H.H
 htmlAt x y xOff yOff att view =
   HtmlElement <| \p ->
     C.positionHtml p x y xOff yOff att view
+
+
+none : Element msg
+none =
+  HtmlElement (\_ -> H.text "")
 
 
 
