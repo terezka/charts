@@ -112,6 +112,11 @@ color value config =
   { config | color = value }
 
 
+barColor : (Int -> Float -> data -> String) -> { a | color : Int -> Float -> data -> String } -> { a | color : Int -> Float -> data -> String }
+barColor value config =
+  { config | color = value }
+
+
 dot : (data -> C.Dot msg) -> { a | dot : Tracked (data -> C.Dot msg) } -> { a | dot : Tracked (data -> C.Dot msg) }
 dot value config =
   { config | dot = Changed value }
@@ -479,6 +484,38 @@ grid edits xs ys =
 
 
 -- SERIES
+
+
+type alias Bars data msg =
+    { color : Int -> Float -> data -> String
+    , width : Float
+    , attrs : List (S.Attribute msg)
+    }
+
+
+bars : List (data -> Float) -> List (Bars data msg -> Bars data msg) -> List data -> Element msg
+bars toYs edits data =
+  -- TODO add clip path
+  -- TODO spacing?
+  let config =
+        applyAttrs edits
+          { color = \_ _ _ -> "rgb(5,142,218)" -- TODO more colors
+          , width = 0.8
+          , attrs = []
+          }
+
+      toBar (i, d) toY =
+        { attributes = [ SA.stroke "transparent", SA.fill (config.color i (toY d) d) ] ++ config.attrs -- TODO
+        , width = config.width / toFloat (List.length toYs) -- TODO
+        , value = toY d
+        }
+
+      toBars x =
+        List.map (toBar x) toYs
+  in
+  SvgElement <| \p ->
+    C.bars p toBars (List.indexedMap Tuple.pair data)
+
 
 
 type alias Scatter data msg =
