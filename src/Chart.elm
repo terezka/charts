@@ -477,6 +477,35 @@ grid edits xs ys =
         ]
 
 
+
+-- SERIES
+
+
+type alias Scatter data msg =
+    { color : String -- TODO use Color
+    , dot : Tracked (data -> C.Dot msg)
+    }
+
+
+scatter : (data -> Float) -> (data -> Float) -> List (Scatter data msg -> Scatter data msg) -> List data -> Element msg
+scatter toX toY edits data =
+  -- TODO add clip path
+  let config =
+        applyAttrs edits
+          { color = "rgb(5,142,218)" -- TODO
+          , dot = Unchanged (\_ -> C.disconnected 6 1 C.cross "rgb(5,142,218)")
+          }
+
+      finalDot =
+        case config.dot of -- TODO use inheritance instead?
+          Unchanged _ -> \_ -> C.disconnected 6 1 C.cross config.color
+          Changed d -> d
+  in
+  SvgElement <| \p ->
+    C.scatter p toX toY finalDot data
+
+
+
 type alias Interpolation data msg =
     { color : String -- TODO use Color
     , area : Maybe String -- TODO use Color

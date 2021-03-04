@@ -50,8 +50,8 @@ view : Maybe Point -> Html.Html Msg
 view hovered =
   let specialDot p =
         if Maybe.map .x hovered == Just p.x
-          then SC.full 6 SC.circle "rgb(5,142,218)"
-          else SC.disconnected 6 1 SC.cross "rgb(5,142,218)"
+          then SC.aura 2 8 0.2 SC.circle "rgb(5,142,218)"
+          else SC.disconnected 2 1 SC.circle "rgb(5,142,218)"
   in
   C.chart
     [ C.width 500
@@ -80,6 +80,7 @@ view hovered =
     , C.yTicks [ C.pinned (always 0) ] (C.ints 5 String.fromInt)
     , C.yLabels [] (C.ints 5 String.fromInt)
     , C.monotone .x .y [ C.dot specialDot, C.area "rgba(5, 142, 218, 0.25)" ] data
+    --, C.scatter .x .y [ C.dot specialDot ] data
     , case hovered of
         Just point ->
           C.tooltip point.x point.y []
