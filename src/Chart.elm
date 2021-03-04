@@ -1,7 +1,42 @@
-module Chart exposing (..)
-    --  chart, linear, monotone
-    --, xAxis, yAxis, xTicks, yTicks, xLabels, yLabels, grid
-    --)
+module Chart exposing
+    ( chart, scatter, linear, monotone, bars, histogram
+    , Bounds, fromData, startMin, startMax, endMin, endMax, startPad, endPad, zero
+    , xAxis, yAxis, xTicks, yTicks, xLabels, yLabels, grid
+    , ints, floats, times
+    , event, getNearest, getNearestX, getWithin, getWithinX, tooltip
+    , svgAt, htmlAt, svg, html, none
+    , width, height, marginTop, marginBottom, marginLeft, marginRight, responsive, id, range, domain, events, htmlAttrs
+    , start, end, pinned, color, barColor, dot, dotted, area, noArrow, filterX, filterY, attrs
+    )
+
+
+{-| Make a chart! Documentation is still unfinished!
+
+# Elements
+@docs chart, scatter, linear, monotone, bars, histogram
+
+## Work with bounds
+@docs Bounds, fromData, startMin, endMin, startPad, endPad, zero
+
+# Axis
+@docs xAxis, yAxis, xTicks, yTicks, xLabels, yLabels, grid
+
+## Generate Acis values
+@docs ints, floats, times
+
+# Events
+@docs event, getNearest, getNearestX, getWithin, getWithinX, tooltip
+
+# Attributes
+@docs width, height, marginTop, marginBottom, marginLeft, marginRight
+@docs responsive, id, range, domain, events, htmlAttrs
+@docs start, end, pinned, color, barColor, dot, dotted, area
+@docs noArrow, filterX, filterY, attrs
+
+# Interop
+@docs svgAt, htmlAt, svg, html
+
+-}
 
 
 import Svg.Chart as C
@@ -19,121 +54,145 @@ import Dict exposing (Dict)
 -- ATTRS
 
 
+{-| -}
 width : Float -> { a | width : Float } -> { a | width : Float }
 width value config =
   { config | width = value }
 
 
+{-| -}
 height : Float -> { a | height : Float } -> { a | height : Float }
 height value config =
   { config | height = value }
 
 
+{-| -}
 marginTop : Float -> { a | marginTop : Float } -> { a | marginTop : Float }
 marginTop value config =
   { config | marginTop = value }
 
 
+{-| -}
 marginBottom : Float -> { a | marginBottom : Float } -> { a | marginBottom : Float }
 marginBottom value config =
   { config | marginBottom = value }
 
 
+{-| -}
 marginLeft : Float -> { a | marginLeft : Float } -> { a | marginLeft : Float }
 marginLeft value config =
   { config | marginLeft = value }
 
 
+{-| -}
 marginRight : Float -> { a | marginRight : Float } -> { a | marginRight : Float }
 marginRight value config =
   { config | marginRight = value }
 
 
+{-| -}
 responsive : { a | responsive : Bool } -> { a | responsive : Bool }
 responsive config =
   { config | responsive = True }
 
 
+{-| -}
 id : String -> { a | id : String } -> { a | id : String }
 id value config =
   { config | id = value }
 
 
+{-| -}
 range : Bounds -> { a | range : Bounds } -> { a | range : Bounds }
 range value config =
   { config | range = value }
 
 
+{-| -}
 domain : Bounds -> { a | domain : Bounds } -> { a | domain : Bounds }
 domain value config =
   { config | domain = value }
 
 
+{-| -}
 events : List (Event msg) -> { a | events : List (Event msg) } -> { a | events : List (Event msg) }
 events value config =
   { config | events = value }
 
 
+{-| -}
 attrs : List (S.Attribute msg) -> { a | attrs : List (S.Attribute msg) } -> { a | attrs : List (S.Attribute msg) }
 attrs value config =
   { config | attrs = value }
 
 
+{-| -}
 htmlAttrs : List (H.Attribute msg) -> { a | htmlAttrs : List (H.Attribute msg) } -> { a | htmlAttrs : List (H.Attribute msg) }
 htmlAttrs value config =
   { config | htmlAttrs = value }
 
 
+{-| -}
 start : (Bounds -> Float) -> { a | start : Bounds -> Float } -> { a | start : Bounds -> Float }
 start value config =
   { config | start = value }
 
 
+{-| -}
 end : (Bounds -> Float) -> { a | end : Bounds -> Float } -> { a | end : Bounds -> Float }
 end value config =
   { config | end = value }
 
 
+{-| -}
 pinned : (Bounds -> Float) -> { a | pinned : Bounds -> Float } -> { a | pinned : Bounds -> Float }
 pinned value config =
   { config | pinned = value }
 
 
+{-| -}
 color : String -> { a | color : String } -> { a | color : String }
 color value config =
   { config | color = value }
 
 
+{-| -}
 barColor : (Int -> Float -> data -> String) -> { a | color : Int -> Float -> data -> String } -> { a | color : Int -> Float -> data -> String }
 barColor value config =
   { config | color = value }
 
 
+{-| -}
 dot : (data -> C.Dot msg) -> { a | dot : Tracked (data -> C.Dot msg) } -> { a | dot : Tracked (data -> C.Dot msg) }
 dot value config =
   { config | dot = Changed value }
 
 
+{-| -}
 dotted : { a | dotted : Bool } -> { a | dotted : Bool }
 dotted config =
   { config | dotted = True }
 
 
+{-| -}
 area : String -> { a | area : Maybe String } -> { a | area : Maybe String }
 area value config =
   { config | area = Just value }
 
 
+{-| -}
 noArrow : { a | arrow : Bool } -> { a | arrow : Bool }
 noArrow config =
   { config | arrow = False }
 
 
+{-| -}
 filterX : (Bounds -> List Float) -> { a | filterX : Bounds -> List Float } -> { a | filterX : Bounds -> List Float }
 filterX value config =
   { config | filterX = value }
 
 
+{-| -}
 filterY : (Bounds -> List Float) -> { a | filterY : Bounds -> List Float } -> { a | filterY : Bounds -> List Float }
 filterY value config =
   { config | filterY = value }
@@ -144,6 +203,7 @@ filterY value config =
 -- ELEMENTS
 
 
+{-| -}
 type alias Container msg =
     { width : Float
     , height : Float
@@ -161,7 +221,7 @@ type alias Container msg =
     }
 
 
-
+{-| -}
 chart : List (Container msg -> Container msg) -> List (Element msg) -> H.Html msg
 chart edits elements =
   let config =
@@ -233,10 +293,12 @@ chart edits elements =
 -- BOUNDS
 
 
+{-| -}
 type alias Bounds =
     { min : Float, max : Float }
 
 
+{-| -}
 fromData : List (data -> Float) -> List data -> Bounds
 fromData values data =
   { min = C.minimum values data
@@ -244,36 +306,43 @@ fromData values data =
   }
 
 
+{-| -}
 startMin : Float -> Bounds -> Bounds
 startMin value bounds =
   { bounds | min = min value bounds.min }
 
 
+{-| -}
 startMax : Float -> Bounds -> Bounds
 startMax value bounds =
   { bounds | min = max value bounds.min }
 
 
+{-| -}
 endMin : Float -> Bounds -> Bounds
 endMin value bounds =
   { bounds | max = max value bounds.max }
 
 
+{-| -}
 endMax : Float -> Bounds -> Bounds
 endMax value bounds =
   { bounds | max = min value bounds.max }
 
 
+{-| -}
 endPad : Float -> Bounds -> Bounds
 endPad value bounds =
   { bounds | max = bounds.max + value }
 
 
+{-| -}
 startPad : Float -> Bounds -> Bounds
 startPad value bounds =
   { bounds | min = bounds.min - value }
 
 
+{-| -}
 zero : Bounds -> Float
 zero bounds =
   clamp bounds.min bounds.max 0
@@ -379,6 +448,7 @@ xAxis edits =
       ]
 
 
+{-| -}
 yAxis : List (Axis msg -> Axis msg) -> Element msg
 yAxis edits =
   let config =
@@ -401,16 +471,19 @@ yAxis edits =
       ]
 
 
+{-| -}
 ints : Int -> (Int -> String) -> Bounds -> List { value : Float, label : String }
 ints amount format =
   I.ints (I.around amount) >> List.map (\i -> { value = toFloat i, label = format i })
 
 
+{-| -}
 floats : Int -> (Float -> String) -> Bounds -> List { value : Float, label : String }
 floats amount format =
   I.floats (I.around amount) >> List.map (\i -> { value = i, label = format i })
 
 
+{-| -}
 times : Time.Zone -> Int -> (I.Time -> String) -> Bounds -> List { value : Float, label : String }
 times zone amount format bounds =
   I.times zone amount bounds
@@ -428,6 +501,7 @@ type alias Tick msg =
     }
 
 
+{-| -}
 xTicks : List (Tick msg -> Tick msg) -> (Bounds -> List { a | value : Float }) -> Element msg
 xTicks edits xs =
   let config =
@@ -449,7 +523,7 @@ xTicks edits xs =
     C.xTicks p (round config.height) labelAttrs (config.pinned <| toBounds .y p) (List.map .value <| xs <| toBounds .x p)
 
 
-
+{-| -}
 yTicks : List (Tick msg -> Tick msg) -> (Bounds -> List { a | value : Float }) -> Element msg
 yTicks edits xs =
   let config =
@@ -481,6 +555,7 @@ type alias Label msg =
     }
 
 
+{-| -}
 xLabels : List (Label msg -> Label msg) -> (Bounds -> List { a | value : Float, label : String }) -> Element msg
 xLabels edits xs =
   let config =
@@ -498,6 +573,7 @@ xLabels edits xs =
     C.xLabels p (C.xLabel labelAttrs .value .label) (config.pinned <| toBounds .y p) (xs <| toBounds .x p)
 
 
+{-| -}
 yLabels : List (Label msg -> Label msg) -> (Bounds -> List { a | value : Float, label : String }) -> Element msg
 yLabels edits xs =
   let config =
@@ -525,6 +601,7 @@ type alias Grid msg =
     }
 
 
+{-| -}
 grid : List (Grid msg -> Grid msg) -> (Bounds -> List { a | value : Float }) -> (Bounds -> List { a | value : Float }) -> Element msg
 grid edits xs ys =
   let config =
@@ -582,6 +659,7 @@ type alias Bars data msg =
     }
 
 
+{-| -}
 bars : List (data -> Float) -> List (Bars data msg -> Bars data msg) -> List data -> Element msg
 bars toYs edits data =
   -- TODO spacing?
@@ -605,6 +683,7 @@ bars toYs edits data =
     C.bars p (toBars name) data
 
 
+{-| -}
 histogram : (data -> Float) -> List (data -> Float) -> List (Bars data msg -> Bars data msg) -> List data -> Element msg
 histogram toX toYs edits data =
   -- TODO spacing?
@@ -641,6 +720,7 @@ type alias Scatter data msg =
     }
 
 
+{-| -}
 scatter : (data -> Float) -> (data -> Float) -> List (Scatter data msg -> Scatter data msg) -> List data -> Element msg
 scatter toX toY edits data =
   let config =
@@ -675,6 +755,7 @@ type Tracked a
   | Unchanged a
 
 
+{-| -}
 monotone : (data -> Float) -> (data -> Float) -> List (Interpolation data msg -> Interpolation data msg) -> List data -> Element msg
 monotone toX toY edits data =
   let config =
@@ -710,6 +791,7 @@ monotone toX toY edits data =
           [ C.monotone p toX toY interAttrs finalDot data ]
 
 
+{-| -}
 linear : (data -> Float) -> (data -> Float) -> List (Interpolation data msg -> Interpolation data msg) -> List data -> Element msg
 linear toX toY edits data =
   let config =
@@ -745,29 +827,33 @@ linear toX toY edits data =
           [ C.linear p toX toY interAttrs finalDot data ]
 
 
-
+{-| -}
 svg : (C.Plane -> S.Svg msg) -> Element msg
 svg func =
   SvgElement (always func)
 
 
+{-| -}
 html : (C.Plane -> H.Html msg) -> Element msg
 html =
   HtmlElement
 
 
+{-| -}
 svgAt : Float -> Float -> Float -> Float -> List (S.Svg msg) -> Element msg
 svgAt x y xOff yOff view =
   SvgElement <| \_ p ->
     S.g [ C.position p x y xOff yOff ] view
 
 
+{-| -}
 htmlAt : Float -> Float -> Float -> Float -> List (H.Attribute msg) -> List (H.Html msg) -> Element msg
 htmlAt x y xOff yOff att view =
   HtmlElement <| \p ->
     C.positionHtml p x y xOff yOff att view
 
 
+{-| -}
 none : Element msg
 none =
   HtmlElement (\_ -> H.text "")

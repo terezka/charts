@@ -89,13 +89,13 @@ view hovered =
     , C.xAxis [ C.pinned C.zero ]
     , C.xTicks [ C.pinned C.zero ] (C.ints 10 String.fromInt)
     , C.xLabels [] (C.floats 5 String.fromFloat)
-    --, C.yAxis [ C.pinned C.zero, C.start (always 1), C.end (always 6), C.noArrow ]
+    , C.yAxis [ C.pinned C.zero, C.start (always 1), C.end (always 6), C.noArrow ]
     , C.yTicks [ C.pinned C.zero ] (C.ints 5 String.fromInt << C.endMax 6)
     , C.yLabels [] (C.ints 5 String.fromInt << C.startMax 1)
-    --, C.monotone .x .y [ C.dot specialDot, C.area "rgba(5, 142, 218, 0.25)" ] data2
-    --, C.bars [ .y, .y ] [ C.barColor specialColor, C.width 0.9 ] data2
+    , C.monotone .x .y [ C.dot specialDot, C.area "rgba(5, 142, 218, 0.25)" ] data2
+    , C.bars [ .y, .y ] [ C.barColor specialColor, C.width 0.9 ] data2
     , C.histogram .x [ .y, .z ] [] data2
-    --, C.scatter .x .y [ C.dot specialDot ] data2
+    , C.scatter .x .y [ C.dot specialDot ] data2
     , case hovered of
         point :: _ ->
           C.tooltip point.x point.y []
