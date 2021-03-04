@@ -48,6 +48,11 @@ data =
 
 view : Maybe Point -> Html.Html Msg
 view hovered =
+  let specialDot p =
+        if Maybe.map .x hovered == Just p.x
+          then SC.full 6 SC.circle "rgb(5,142,218)"
+          else SC.disconnected 9 2 SC.cross "rgb(5,142,218)"
+  in
   C.chart
     [ C.width 500
     , C.height 300
@@ -69,8 +74,7 @@ view hovered =
     , C.yAxis [ C.pinned (always 0) ]
     , C.yTicks [] (C.ints 5 String.fromInt)
     , C.yLabels [] (C.ints 5 String.fromInt)
-    , C.monotone .x .y (\_ -> SC.full 6 SC.circle "blue") [ C.color "blue", C.width 1 ] data
-    , C.svgAt 1 1 0 0 [ Svg.text_ [] [ Svg.text "Arbitrary SVG at (1, 1)!" ] ]
+    , C.monotone .x .y [ C.dot specialDot ] data
     , case hovered of
         Just point ->
           C.tooltip point.x point.y []

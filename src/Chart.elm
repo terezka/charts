@@ -112,8 +112,14 @@ color value config =
   { config | color = value }
 
 
+dot : (data -> C.Dot msg) -> { a | dot : Tracked (data -> C.Dot msg) } -> { a | dot : Tracked (data -> C.Dot msg) }
+dot value config =
+  { config | dot = Changed value }
 
-----
+
+
+-- ELEMENTS
+
 
 type alias Container msg =
     { width : Float
@@ -455,20 +461,27 @@ grid edits xs ys =
       ]
 
 
-type alias Interpolation msg =
+type alias Interpolation data msg =
     { color : String -- TODO use Color
     , width : Float
+    , dot : Tracked (data -> C.Dot msg)
     , attrs : List (S.Attribute msg)
     }
 
 
-monotone : (data -> Float) -> (data -> Float) -> (data -> C.Dot msg) -> List (Interpolation msg -> Interpolation msg) -> List data -> Element msg
-monotone toX toY dot edits data =
+type Tracked a
+  = Changed a
+  | Unchanged a
+
+
+monotone : (data -> Float) -> (data -> Float) -> List (Interpolation data msg -> Interpolation data msg) -> List data -> Element msg
+monotone toX toY edits data =
   -- TODO add clip path
   let config =
         applyAttrs edits
-          { color = "blue" -- TODO
+          { color = "rgb(5,142,218)" -- TODO
           , width = 1
+          , dot = Unchanged (\_ -> C.disconnected 9 2 C.cross "rgb(5,142,218)")
           , attrs = []
           }
 
@@ -476,17 +489,23 @@ monotone toX toY dot edits data =
         [ SA.stroke config.color
         , SA.strokeWidth (String.fromFloat config.width)
         ] ++ config.attrs
+
+      finalDot =
+        case config.dot of -- TODO use inheritance instead?
+          Unchanged _ -> \_ -> C.disconnected 9 2 C.cross config.color
+          Changed d -> d
   in
   SvgElement <| \p ->
-    C.monotone p toX toY interAttrs dot data
+    C.monotone p toX toY interAttrs finalDot data
 
 
-linear : (data -> Float) -> (data -> Float) -> (data -> C.Dot msg) -> List (Interpolation msg -> Interpolation msg) -> List data -> Element msg
-linear toX toY dot edits data =
+linear : (data -> Float) -> (data -> Float) -> List (Interpolation data msg -> Interpolation data msg) -> List data -> Element msg
+linear toX toY edits data =
   let config =
         applyAttrs edits
-          { color = "blue" -- TODO
+          { color = "rgb(5,142,218)" -- TODO
           , width = 1
+          , dot = Unchanged (\_ -> C.disconnected 9 2 C.cross "rgb(5,142,218)")
           , attrs = []
           }
 
@@ -494,9 +513,14 @@ linear toX toY dot edits data =
         [ SA.stroke config.color
         , SA.strokeWidth (String.fromFloat config.width)
         ] ++ config.attrs
+
+      finalDot =
+        case config.dot of
+          Unchanged _ -> \_ -> C.disconnected 9 2 C.cross config.color
+          Changed d -> d
   in
   SvgElement <| \p ->
-    C.linear p toX toY interAttrs dot data
+    C.linear p toX toY interAttrs finalDot data
 
 
 
