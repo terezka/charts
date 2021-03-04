@@ -61,9 +61,6 @@ view hovered =
         if Maybe.map .x (List.head hovered) == Just p.x
           then SC.aura 2 8 0.2 SC.circle "rgb(5,142,218)"
           else SC.disconnected 2 1 SC.circle "rgb(5,142,218)"
-
-      specialColor i v d =
-        if v > 3 then "rgba(5,142,218, 0.8)" else "rgba(5,142,218, 0.5)"
   in
   C.chart
     [ C.width 600
@@ -93,8 +90,8 @@ view hovered =
     , C.yTicks [ C.pinned C.zero ] (C.ints 5 String.fromInt << C.endMax 6)
     , C.yLabels [] (C.ints 5 String.fromInt << C.startMax 1)
     , C.monotone .x .y [ C.dot specialDot, C.area "rgba(5, 142, 218, 0.25)" ] data2
-    , C.bars [ .y, .y ] [ C.barColor specialColor, C.width 0.9 ] data2
-    , C.histogram .x [ .y, .z ] [] data2
+    --, C.bars [ C.Metric C.blue .y, C.Metric C.orange .y ] [ C.width 0.9 ] data2
+    , C.histogram .x [ C.Metric C.blue .y, C.Metric C.pink .z ] [] data2
     , C.scatter .x .y [ C.dot specialDot ] data2
     , C.htmlAt (always 3) C.middle 0 0 [] [ Html.text "hello"]
     , case hovered of

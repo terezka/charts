@@ -1,19 +1,20 @@
 module Chart exposing
-    ( chart, scatter, linear, monotone, bars, histogram
+    ( chart, Element, scatter, linear, monotone, Metric, bars, histogram
     , Bounds, fromData, startMin, startMax, endMin, endMax, startPad, endPad, zero, middle
     , xAxis, yAxis, xTicks, yTicks, xLabels, yLabels, grid
     , ints, floats, times
-    , event, getNearest, getNearestX, getWithin, getWithinX, tooltip
+    , Event, event, getNearest, getNearestX, getWithin, getWithinX, tooltip
     , svgAt, htmlAt, svg, html, none
     , width, height, marginTop, marginBottom, marginLeft, marginRight, responsive, id, range, domain, events, htmlAttrs
-    , start, end, pinned, color, barColor, dot, dotted, area, noArrow, filterX, filterY, attrs
+    , start, end, pinned, color, barColor, margin, dot, dotted, area, noArrow, filterX, filterY, attrs
+    , blue, orange, pink, green, red
     )
 
 
 {-| Make a chart! Documentation is still unfinished!
 
 # Elements
-@docs chart, scatter, linear, monotone, bars, histogram
+@docs chart, Element, scatter, linear, monotone, Metric, bars, histogram
 
 ## Work with bounds
 @docs Bounds, fromData, startMin, startMax, endMin, endMax, startPad, endPad, zero, middle
@@ -25,7 +26,7 @@ module Chart exposing
 @docs ints, floats, times
 
 # Events
-@docs event, getNearest, getNearestX, getWithin, getWithinX, tooltip
+@docs Event, event, getNearest, getNearestX, getWithin, getWithinX, tooltip
 
 # Attributes
 @docs width, height, marginTop, marginBottom, marginLeft, marginRight
@@ -35,6 +36,9 @@ module Chart exposing
 
 # Interop
 @docs svgAt, htmlAt, svg, html, none
+
+# Colors
+@docs blue, orange, pink, green, red
 
 -}
 
@@ -160,6 +164,12 @@ color value config =
 barColor : (Int -> Float -> data -> String) -> { a | color : Int -> Float -> data -> String } -> { a | color : Int -> Float -> data -> String }
 barColor value config =
   { config | color = value }
+
+
+{-| -}
+margin : Float -> { a | margin : Float } -> { a | margin : Float }
+margin value config =
+  { config | margin = value }
 
 
 {-| -}
@@ -658,57 +668,69 @@ grid edits xs ys =
 -- SERIES
 
 
-type alias Bars data msg =
-    { color : Int -> Float -> data -> String
-    , width : Float
+type alias Bars msg =
+    { width : Float
     , attrs : List (S.Attribute msg)
     }
 
 
 {-| -}
-bars : List (data -> Float) -> List (Bars data msg -> Bars data msg) -> List data -> Element msg
-bars toYs edits data =
+type alias Metric data =
+  { color : String
+  , value : data -> Float
+  }
+
+
+{-| -}
+bars : List (Metric data) -> List (Bars msg -> Bars msg) -> List data -> Element msg
+bars metrics edits data =
   -- TODO spacing?
   let config =
         applyAttrs edits
-          { color = \i _ _ -> Maybe.withDefault blue (Dict.get i defaultColors)
-          , width = 0.8
+          { width = 0.8
           , attrs = []
           }
 
-      toBar name d i toY =
-        { attributes = [ SA.stroke "transparent", SA.fill (config.color i (toY d) d), clipPath name ] ++ config.attrs -- TODO
-        , width = config.width / toFloat (List.length toYs)
-        , value = toY d
+      toBar name d i metric =
+        { attributes = [ SA.stroke "transparent", SA.fill metric.color, clipPath name ] ++ config.attrs -- TODO
+        , width = config.width / toFloat (List.length metrics)
+        , value = metric.value d
         }
 
       toBars name d =
-        List.indexedMap (toBar name d) toYs
+        List.indexedMap (toBar name d) metrics
   in
   SvgElement <| \name p ->
     C.bars p (toBars name) data
 
 
+type alias Histogram msg =
+    { width : Float
+    , margin : Float
+    , attrs : List (S.Attribute msg)
+    }
+
+
 {-| -}
-histogram : (data -> Float) -> List (data -> Float) -> List (Bars data msg -> Bars data msg) -> List data -> Element msg
-histogram toX toYs edits data =
+histogram : (data -> Float) -> List (Metric data) -> List (Histogram msg -> Histogram msg) -> List data -> Element msg
+histogram toX metrics edits data =
   -- TODO spacing?
   let config =
         applyAttrs edits
-          { color = \i _ _ -> Maybe.withDefault blue (Dict.get i defaultColors)
-          , width = 1
+          { width = 1
+          , margin = 0.25
           , attrs = []
           }
 
-      toBar d i toY =
-        { attributes = [ SA.stroke "transparent", SA.fill (config.color i (toY d) d) ] ++ config.attrs -- TODO
-        , width = config.width / toFloat (List.length toYs)
-        , position = toX d - config.width
-        , value = toY d
+      toBar d i metric =
+        { attributes = [ SA.stroke "transparent", SA.fill metric.color ] ++ config.attrs -- TODO
+        , width = config.width * (1 - config.margin * 2) / toFloat (List.length metrics)
+        , position = toX d - config.width + config.width * config.margin
+        , value = metric.value d
         }
 
       toBars _ d _ =
-        List.indexedMap (toBar d) toYs
+        List.indexedMap (toBar d) metrics
   in
   SvgElement <| \name p ->
     S.g
@@ -886,19 +908,31 @@ clipPath name =
   SA.clipPath <| "url(#" ++ name ++ ")"
 
 
-defaultColors : Dict Int String
-defaultColors =
-  Dict.fromList (List.indexedMap Tuple.pair [ blue, "rgb(244, 149, 69)", "rgb(253, 121, 168)", "rgb(68, 201, 72)", "rgb(215, 31, 10)" ])
-
-
 blue : String
 blue =
   "rgb(5,142,218)"
 
 
+orange : String
+orange =
+  "rgb(244, 149, 69)"
+
+
+pink : String
+pink =
+  "rgb(253, 121, 168)"
+
+
+green : String
+green =
+  "rgb(68, 201, 72)"
+
+
+red : String
+red =
+  "rgb(215, 31, 10)"
+
+
 toDataPoints : (data -> Float) -> List (data -> Float) -> List data -> List (C.DataPoint data)
 toDataPoints toX toYs data =
   List.concatMap (\toY -> C.toDataPoints toX toY data) toYs
-
-
-
