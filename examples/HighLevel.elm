@@ -51,7 +51,7 @@ data =
 data2 : List Point
 data2 =
   [ { x = 1546300800000, y = 2, z = 4 }
-  , { x = 1577840461000, y = -0.9, z = 5 }
+  , { x = 1577840461000, y = 0.9, z = 5 }
   , { x = 1609462861000, y = 6, z = 3 }
   ]
 
@@ -71,6 +71,8 @@ view hovered =
     , C.responsive
     , C.range (C.fromData [.x] data2 |> C.startPad (1000 * 60 * 60 * 24 * 365))
     , C.domain (C.fromData [.y, .z] data2 |> C.startMin 0)
+    , C.paddingX 0 10
+    , C.paddingY 0 20
     , C.id "some-id"
     , C.htmlAttrs
         [ HA.style "font-size" "12px"
@@ -85,17 +87,6 @@ view hovered =
     ]
     [ C.grid [ C.width 0.4, C.color "rgb(220,220,220)" ]
 
-    , C.xAxis [ C.pinned C.zero ]
-    , C.xLabels [ C.pinned C.zero, C.times Time.utc, C.amount 5 ]
-    , C.xTicks [ C.pinned C.zero, C.times Time.utc, C.amount 10 ]
-
-    , C.yAxis [ C.pinned C.zero, C.start (always 1), C.end (always 6), C.noArrow ]
-    , C.yLabels [ C.pinned C.zero, C.amount 5 ]
-    , C.yTicks [ C.pinned C.zero, C.amount 5 ]
-
-
-    --, C.bars [ C.Metric C.blue .y, C.Metric C.orange .y ] [ C.width 0.9 ] data2
-
     , C.histogram .x
         [ C.Metric C.blue .y, C.Metric C.pink .z ]
         [ C.rounded 0.2
@@ -105,7 +96,18 @@ view hovered =
         ]
         data2
 
-    , C.monotone .x .y [ C.dot specialDot, C.area "rgba(5, 142, 218, 0.25)" ] data2
+    --, C.monotone .x .y [ C.dot specialDot, C.area "rgba(5, 142, 218, 0.25)" ] data2
+
+    , C.xAxis   [ C.pinned C.zero ]
+    , C.yAxis   [ C.pinned C.zero ]
+    , C.xLabels [ C.pinned C.zero, C.times Time.utc, C.amount 5 ]
+    , C.xTicks  [ C.pinned C.zero, C.times Time.utc ]
+
+    , C.yLabels [ C.pinned C.zero ]
+    , C.yTicks [  C.pinned C.zero ]
+
+
+    --, C.bars [ C.Metric C.blue .y, C.Metric C.orange .y ] [ C.width 0.9 ] data2
 
     , C.htmlAt (always 3) C.middle 0 0 [] [ Html.text "hello"]
 

@@ -2,11 +2,13 @@ module Chart exposing
     ( chart, Element, scatter, linear, monotone, Metric, bars, histogram
     , Bounds, fromData, startMin, startMax, endMin, endMax, startPad, endPad, zero, middle
     , xAxis, yAxis, xTicks, yTicks, xLabels, yLabels, grid
-    , ints, times, format, amount
+    , ints, times, format, ticks, amount
     , Event, event, getNearest, getNearestX, getWithin, getWithinX, tooltip, formatTimestamp
     , svgAt, htmlAt, svg, html, none
-    , width, height, marginTop, marginBottom, marginLeft, marginRight, responsive, id, range, domain, events, htmlAttrs
-    , start, end, pinned, color, rounded, roundBottom, margin, dot, dotted, area, noArrow, filterX, filterY, attrs
+    , width, height, marginTop, marginBottom, marginLeft, marginRight, responsive, id
+    , range, domain, paddingX, paddingY, events, htmlAttrs
+    , start, end, pinned, color, rounded, roundBottom, margin
+    , dot, dotted, area, noArrow, filterX, filterY, only, attrs
     , blue, orange, pink, green, red
     )
 
@@ -21,18 +23,15 @@ module Chart exposing
 
 # Axis
 @docs xAxis, yAxis, xTicks, yTicks, xLabels, yLabels, grid
-
-## Generate Acis values
-@docs ints, floats, times
+@docs amount, ints, times, ticks, format, noArrow, start, end, pinned, only, filterX, filterY
 
 # Events
 @docs Event, event, getNearest, getNearestX, getWithin, getWithinX, tooltip, formatTimestamp
 
 # Attributes
-@docs width, height, marginTop, marginBottom, marginLeft, marginRight
+@docs width, height, marginTop, marginBottom, marginLeft, marginRight, paddingX, paddingY
 @docs responsive, id, range, domain, events, htmlAttrs
-@docs start, end, pinned, color, rounded, roundBottom, margin, dot, dotted, area
-@docs noArrow, filterX, filterY, attrs
+@docs color, rounded, roundBottom, margin, dot, dotted, area, attrs
 
 # Interop
 @docs svgAt, htmlAt, svg, html, none
@@ -117,6 +116,18 @@ range value config =
 domain : Bounds -> { a | domain : Bounds } -> { a | domain : Bounds }
 domain value config =
   { config | domain = value }
+
+
+{-| -}
+paddingX : Float -> Float -> { a | paddingX : Bounds } -> { a | paddingX : Bounds }
+paddingX a b config =
+  { config | paddingX = Bounds a b }
+
+
+{-| -}
+paddingY : Float -> Float -> { a | paddingY : Bounds } -> { a | paddingY : Bounds }
+paddingY a b config =
+  { config | paddingY = Bounds a b }
 
 
 {-| -}
@@ -215,6 +226,11 @@ filterY value config =
   { config | filterY = value }
 
 
+{-| -}
+only : (b -> Bool) -> { a | only : b -> Bool } -> { a | only : b -> Bool }
+only value config =
+  { config | only = value }
+
 
 {-| -}
 times : Time.Zone -> { a | produce : Tracked (Int -> Bounds -> List I.Time), value : I.Time -> Float, format : I.Time -> String } -> { a | produce : Tracked (Int -> Bounds -> List I.Time), value : I.Time -> Float, format : I.Time -> String }
@@ -265,6 +281,8 @@ type alias Container msg =
     , domain : Bounds
     , events : List (Event msg)
     , htmlAttrs : List (H.Attribute msg)
+    , paddingX : Bounds
+    , paddingY : Bounds
     , attrs : List (S.Attribute msg)
     }
 
@@ -280,6 +298,8 @@ chart edits elements =
           , marginBottom = 30
           , marginLeft = 30
           , marginRight = 5
+          , paddingX = { min = 0, max = 10 }
+          , paddingY = { min = 0, max = 10 }
           , responsive = True
           , id = "you-should-really-set-the-id-of-your-chart"
           , range = { min = 1, max = 100 }
@@ -289,20 +309,38 @@ chart edits elements =
           , htmlAttrs = []
           }
 
+      scalePadX =
+        C.scaleCartesian
+          { marginLower = config.marginLeft
+          , marginUpper = config.marginRight
+          , length = max 1 (config.width - config.paddingX.min - config.paddingX.max)
+          , min = config.range.min
+          , max = config.range.max
+          }
+
+      scalePadY =
+        C.scaleCartesian
+          { marginUpper = config.marginTop
+            , marginLower = config.marginBottom
+            , length = max 1 (config.height - config.paddingY.min - config.paddingY.max)
+            , min = config.domain.min
+            , max = config.domain.max
+            }
+
       plane = -- TODO use config / system directly instead
         { x =
             { marginLower = config.marginLeft
             , marginUpper = config.marginRight
             , length = config.width
-            , min = config.range.min
-            , max = config.range.max
+            , min = config.range.min - scalePadX config.paddingX.min
+            , max = config.range.max + scalePadX config.paddingX.max
             }
         , y =
             { marginUpper = config.marginTop
             , marginLower = config.marginBottom
             , length = config.height
-            , min = config.domain.min
-            , max = config.domain.max
+            , min = config.domain.min - scalePadY config.paddingY.min
+            , max = config.domain.max + scalePadY config.paddingY.max
             }
         }
 
@@ -541,6 +579,9 @@ type alias Tick tick msg =
     , height : Float
     , width : Float
     , pinned : Bounds -> Float
+    , start : Bounds -> Float
+    , end : Bounds -> Float
+    , only : Float -> Bool
     , attrs : List (S.Attribute msg)
     , amount : Int
     , produce : Tracked (Int -> Bounds -> List tick)
@@ -555,8 +596,11 @@ xTicks edits =
   let config =
         applyAttrs edits
           { color = "rgb(210, 210, 210)"
+          , start = .min
+          , end = .max
           , pinned = .min
-          , amount = 10
+          , amount = 8
+          , only = \_ -> True
           , produce = Unchanged (\_ _ -> [])
           , value = \_ -> 0
           , format = \_ -> ""
@@ -565,10 +609,17 @@ xTicks edits =
           , attrs = []
           }
 
+      xBounds p =
+        let b = toBounds .x p in
+        { min = config.start b
+        , max = config.end b
+        }
+
       allTicks p =
-        case config.produce of
-          Changed produce -> List.map config.value (produce config.amount <| toBounds .x p)
-          Unchanged v -> (I.floats (I.around config.amount) <| toBounds .x p)
+        List.filter config.only <|
+          case config.produce of
+            Changed produce -> List.map config.value (produce config.amount <| xBounds p)
+            Unchanged v -> I.floats (I.around config.amount) <| xBounds p
 
       allTickNums p ts =
         { ts | x = ts.x ++ allTicks p }
@@ -588,8 +639,11 @@ yTicks edits =
   let config =
         applyAttrs edits
           { color = "rgb(210, 210, 210)"
+          , start = .min
+          , end = .max
           , pinned = .min
-          , amount = 10
+          , only = \_ -> True
+          , amount = 8
           , produce = Unchanged (\_ _ -> [])
           , value = \_ -> 0
           , format = \_ -> ""
@@ -599,10 +653,17 @@ yTicks edits =
           --, offset = 0
           }
 
+      yBounds p =
+        let b = toBounds .y p in
+        { min = config.start b
+        , max = config.end b
+        }
+
       allTicks p =
-        case config.produce of
-          Changed produce -> List.map config.value (produce config.amount <| toBounds .y p)
-          Unchanged v -> (I.floats (I.around config.amount) <| toBounds .y p)
+        List.filter config.only <|
+          case config.produce of
+            Changed produce -> List.map config.value (produce config.amount <| yBounds p)
+            Unchanged v -> (I.floats (I.around config.amount) <| yBounds p)
 
       allTickNums p ts =
         { ts | y = ts.y ++ allTicks p }
@@ -620,6 +681,9 @@ type alias Label tick msg =
     { color : String -- TODO use Color
     , pinned : Bounds -> Float
     , attrs : List (S.Attribute msg)
+    , start : Bounds -> Float
+    , end : Bounds -> Float
+    , only : Float -> Bool
     , xOffset : Float
     , yOffset : Float
     , amount : Int
@@ -635,9 +699,12 @@ xLabels edits =
   let config =
         applyAttrs edits
           { color = "#808BAB"
+          , start = .min
+          , end = .max
+          , only = \_ -> True
           , pinned = .min
           , attrs = []
-          , amount = 10
+          , amount = 8
           , produce = Unchanged (\_ _ -> [])
           , value = \_ -> 0
           , format = \_ -> ""
@@ -645,10 +712,17 @@ xLabels edits =
           , yOffset = 0
           }
 
+      xBounds p =
+        let b = toBounds .x p in
+        { min = config.start b
+        , max = config.end b
+        }
+
       allTicks p =
-        case config.produce of
-          Changed produce -> List.map (\i -> { value = config.value i, label = config.format i }) (produce config.amount <| toBounds .x p)
-          Unchanged v -> List.map (\i -> { value = i, label = String.fromFloat i }) (I.floats (I.around config.amount) <| toBounds .x p)
+        List.filter (config.only << .value) <|
+          case config.produce of
+            Changed produce -> List.map (\i -> { value = config.value i, label = config.format i }) (produce config.amount <| xBounds p)
+            Unchanged v -> List.map (\i -> { value = i, label = String.fromFloat i }) (I.floats (I.around config.amount) <| xBounds p)
 
       allTickNums p ts =
         { ts | x = ts.x ++ List.map .value (allTicks p) }
@@ -668,8 +742,11 @@ yLabels edits =
   let config =
         applyAttrs edits
           { color = "#808BAB"
+          , start = .min
+          , end = .max
           , pinned = .min
-          , amount = 10 -- TODO
+          , only = \_ -> True
+          , amount = 8 -- TODO
           , produce = Unchanged (\_ _ -> [])
           , value = \_ -> 0
           , format = \_ -> ""
@@ -678,10 +755,17 @@ yLabels edits =
           , attrs = []
           }
 
+      yBounds p =
+        let b = toBounds .y p in
+        { min = config.start b
+        , max = config.end b
+        }
+
       allTicks p =
-        case config.produce of
-          Changed produce -> List.map (\i -> { value = config.value i, label = config.format i }) (produce config.amount <| toBounds .y p)
-          Unchanged v -> List.map (\i -> { value = i, label = String.fromFloat i }) (I.floats (I.around config.amount) <| toBounds .y p)
+        List.filter (config.only << .value) <|
+          case config.produce of
+            Changed produce -> List.map (\i -> { value = config.value i, label = config.format i }) (produce config.amount <| yBounds p)
+            Unchanged v -> List.map (\i -> { value = i, label = String.fromFloat i }) (I.floats (I.around config.amount) <| yBounds p)
 
       allTickNums p ts =
         { ts | y = ts.y ++ List.map .value (allTicks p) }
