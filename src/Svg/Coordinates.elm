@@ -78,6 +78,10 @@ type alias Axis =
   { marginLower : Float
   , marginUpper : Float
   , length : Float
+  , data :
+      { min : Float
+      , max : Float
+      }
   , min : Float
   , max : Float
   }

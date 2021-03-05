@@ -71,8 +71,7 @@ view hovered =
     , C.responsive
     , C.range (C.fromData [.x] data2 |> C.startPad (1000 * 60 * 60 * 24 * 365))
     , C.domain (C.fromData [.y, .z] data2 |> C.startMin 0)
-    , C.paddingX 0 10
-    , C.paddingY 0 20
+    , C.topped 5
     , C.id "some-id"
     , C.htmlAttrs
         [ HA.style "font-size" "12px"
@@ -100,7 +99,7 @@ view hovered =
 
     , C.xAxis   [ C.pinned C.zero ]
     , C.yAxis   [ C.pinned C.zero ]
-    , C.xLabels [ C.pinned C.zero, C.times Time.utc, C.amount 5 ]
+    , C.xLabels [ C.pinned C.zero, C.times Time.utc ]
     , C.xTicks  [ C.pinned C.zero, C.times Time.utc ]
 
     , C.yLabels [ C.pinned C.zero ]

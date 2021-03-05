@@ -5,8 +5,8 @@ module Chart exposing
     , ints, times, format, ticks, amount
     , Event, event, getNearest, getNearestX, getWithin, getWithinX, tooltip, formatTimestamp
     , svgAt, htmlAt, svg, html, none
-    , Attribute, width, height, marginTop, marginBottom, marginLeft, marginRight, responsive, id
-    , range, domain, paddingX, paddingY, events, htmlAttrs
+    , width, height, marginTop, marginBottom, marginLeft, marginRight, responsive, id
+    , range, domain, topped, paddingX, paddingY, events, htmlAttrs
     , start, end, pinned, color, rounded, roundBottom, margin
     , dot, dotted, area, noArrow, filterX, filterY, only, attrs
     , blue, orange, pink, green, red
@@ -29,7 +29,7 @@ module Chart exposing
 @docs Event, event, getNearest, getNearestX, getWithin, getWithinX, tooltip, formatTimestamp
 
 # Attributes
-@docs Attribute, width, height, marginTop, marginBottom, marginLeft, marginRight, paddingX, paddingY
+@docs width, height, marginTop, marginBottom, marginLeft, marginRight, paddingX, paddingY
 @docs responsive, id, range, domain, events, htmlAttrs
 @docs color, rounded, roundBottom, margin, dot, dotted, area, attrs
 
@@ -267,6 +267,12 @@ amount value config =
   { config | amount = value }
 
 
+{-| -}
+topped : Int -> Attribute { a | topped : Maybe Int }
+topped value config =
+  { config | topped = Just value }
+
+
 
 
 -- ELEMENTS
@@ -288,6 +294,7 @@ type alias Container msg =
     , htmlAttrs : List (H.Attribute msg)
     , paddingX : Bounds
     , paddingY : Bounds
+    , topped : Maybe Int
     , attrs : List (S.Attribute msg)
     }
 
@@ -309,6 +316,7 @@ chart edits elements =
           , id = "you-should-really-set-the-id-of-your-chart"
           , range = { min = 1, max = 100 }
           , domain = { min = 1, max = 100 }
+          , topped = Nothing
           , events = []
           , attrs = []
           , htmlAttrs = []
@@ -319,17 +327,35 @@ chart edits elements =
           { marginLower = config.marginLeft
           , marginUpper = config.marginRight
           , length = max 1 (config.width - config.paddingX.min - config.paddingX.max)
+          , data = config.range
           , min = config.range.min
           , max = config.range.max
           }
+
+
+      toppedDomain =
+        case config.topped of
+          Just num ->
+            let domain_ = config.domain
+                fs = I.floats (I.around num) config.domain
+                interval =
+                  case fs of
+                    first :: second :: _ -> second - first
+                    _ -> 0
+            in
+            { domain_ | max = domain_.max + interval }
+
+          Nothing ->
+            config.domain
 
       scalePadY =
         C.scaleCartesian
           { marginUpper = config.marginTop
             , marginLower = config.marginBottom
             , length = max 1 (config.height - config.paddingY.min - config.paddingY.max)
-            , min = config.domain.min
-            , max = config.domain.max
+            , data = toppedDomain
+            , min = toppedDomain.min
+            , max = toppedDomain.max
             }
 
       plane = -- TODO use config / system directly instead
@@ -337,6 +363,7 @@ chart edits elements =
             { marginLower = config.marginLeft
             , marginUpper = config.marginRight
             , length = config.width
+            , data = config.range
             , min = config.range.min - scalePadX config.paddingX.min
             , max = config.range.max + scalePadX config.paddingX.max
             }
@@ -344,8 +371,9 @@ chart edits elements =
             { marginUpper = config.marginTop
             , marginLower = config.marginBottom
             , length = config.height
-            , min = config.domain.min - scalePadY config.paddingY.min
-            , max = config.domain.max + scalePadY config.paddingY.max
+            , data = toppedDomain
+            , min = toppedDomain.min - scalePadY config.paddingY.min
+            , max = toppedDomain.max + scalePadY config.paddingY.max
             }
         }
 
@@ -604,7 +632,7 @@ xTicks edits =
           , start = .min
           , end = .max
           , pinned = .min
-          , amount = 8
+          , amount = 5
           , only = \_ -> True
           , produce = Unchanged (\_ _ -> [])
           , value = \_ -> 0
@@ -648,7 +676,7 @@ yTicks edits =
           , end = .max
           , pinned = .min
           , only = \_ -> True
-          , amount = 8
+          , amount = 5
           , produce = Unchanged (\_ _ -> [])
           , value = \_ -> 0
           , format = \_ -> ""
@@ -709,7 +737,7 @@ xLabels edits =
           , only = \_ -> True
           , pinned = .min
           , attrs = []
-          , amount = 8
+          , amount = 5
           , produce = Unchanged (\_ _ -> [])
           , value = \_ -> 0
           , format = \_ -> ""
@@ -751,7 +779,7 @@ yLabels edits =
           , end = .max
           , pinned = .min
           , only = \_ -> True
-          , amount = 8 -- TODO
+          , amount = 5 -- TODO
           , produce = Unchanged (\_ _ -> [])
           , value = \_ -> 0
           , format = \_ -> ""
@@ -1053,6 +1081,12 @@ toBounds : (C.Plane -> C.Axis) -> C.Plane -> Bounds
 toBounds toA plane =
   let { min, max } = toA plane
   in { min = min, max = max }
+
+
+toDataBounds : (C.Plane -> C.Axis) -> C.Plane -> Bounds
+toDataBounds toA plane =
+  let axis = toA plane
+  in axis.data
 
 
 applyAttrs : List (a -> a) -> a -> a
