@@ -332,7 +332,6 @@ chart edits elements =
           , max = config.range.max
           }
 
-
       toppedDomain =
         case config.topped of
           Just num ->
