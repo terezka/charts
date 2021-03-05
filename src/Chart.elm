@@ -5,7 +5,7 @@ module Chart exposing
     , ints, times, format, ticks, amount
     , Event, event, getNearest, getNearestX, getWithin, getWithinX, tooltip, formatTimestamp
     , svgAt, htmlAt, svg, html, none
-    , width, height, marginTop, marginBottom, marginLeft, marginRight, responsive, id
+    , Attribute, width, height, marginTop, marginBottom, marginLeft, marginRight, responsive, id
     , range, domain, paddingX, paddingY, events, htmlAttrs
     , start, end, pinned, color, rounded, roundBottom, margin
     , dot, dotted, area, noArrow, filterX, filterY, only, attrs
@@ -29,7 +29,7 @@ module Chart exposing
 @docs Event, event, getNearest, getNearestX, getWithin, getWithinX, tooltip, formatTimestamp
 
 # Attributes
-@docs width, height, marginTop, marginBottom, marginLeft, marginRight, paddingX, paddingY
+@docs Attribute, width, height, marginTop, marginBottom, marginLeft, marginRight, paddingX, paddingY
 @docs responsive, id, range, domain, events, htmlAttrs
 @docs color, rounded, roundBottom, margin, dot, dotted, area, attrs
 
@@ -59,205 +59,210 @@ import Dict exposing (Dict)
 
 
 {-| -}
-width : Float -> { a | width : Float } -> { a | width : Float }
+type alias Attribute c =
+  c -> c
+
+
+{-| -}
+width : Float -> Attribute { a | width : Float }
 width value config =
   { config | width = value }
 
 
 {-| -}
-height : Float -> { a | height : Float } -> { a | height : Float }
+height : Float -> Attribute { a | height : Float }
 height value config =
   { config | height = value }
 
 
 {-| -}
-marginTop : Float -> { a | marginTop : Float } -> { a | marginTop : Float }
+marginTop : Float -> Attribute { a | marginTop : Float }
 marginTop value config =
   { config | marginTop = value }
 
 
 {-| -}
-marginBottom : Float -> { a | marginBottom : Float } -> { a | marginBottom : Float }
+marginBottom : Float -> Attribute { a | marginBottom : Float }
 marginBottom value config =
   { config | marginBottom = value }
 
 
 {-| -}
-marginLeft : Float -> { a | marginLeft : Float } -> { a | marginLeft : Float }
+marginLeft : Float -> Attribute { a | marginLeft : Float }
 marginLeft value config =
   { config | marginLeft = value }
 
 
 {-| -}
-marginRight : Float -> { a | marginRight : Float } -> { a | marginRight : Float }
+marginRight : Float -> Attribute { a | marginRight : Float }
 marginRight value config =
   { config | marginRight = value }
 
 
 {-| -}
-responsive : { a | responsive : Bool } -> { a | responsive : Bool }
+responsive : Attribute { a | responsive : Bool }
 responsive config =
   { config | responsive = True }
 
 
 {-| -}
-id : String -> { a | id : String } -> { a | id : String }
+id : String -> Attribute { a | id : String }
 id value config =
   { config | id = value }
 
 
 {-| -}
-range : Bounds -> { a | range : Bounds } -> { a | range : Bounds }
+range : Bounds -> Attribute { a | range : Bounds }
 range value config =
   { config | range = value }
 
 
 {-| -}
-domain : Bounds -> { a | domain : Bounds } -> { a | domain : Bounds }
+domain : Bounds -> Attribute { a | domain : Bounds }
 domain value config =
   { config | domain = value }
 
 
 {-| -}
-paddingX : Float -> Float -> { a | paddingX : Bounds } -> { a | paddingX : Bounds }
+paddingX : Float -> Float -> Attribute { a | paddingX : Bounds }
 paddingX a b config =
   { config | paddingX = Bounds a b }
 
 
 {-| -}
-paddingY : Float -> Float -> { a | paddingY : Bounds } -> { a | paddingY : Bounds }
+paddingY : Float -> Float -> Attribute { a | paddingY : Bounds }
 paddingY a b config =
   { config | paddingY = Bounds a b }
 
 
 {-| -}
-events : List (Event msg) -> { a | events : List (Event msg) } -> { a | events : List (Event msg) }
+events : List (Event msg) -> Attribute { a | events : List (Event msg) }
 events value config =
   { config | events = value }
 
 
 {-| -}
-attrs : List (S.Attribute msg) -> { a | attrs : List (S.Attribute msg) } -> { a | attrs : List (S.Attribute msg) }
+attrs : List (S.Attribute msg) -> Attribute { a | attrs : List (S.Attribute msg) }
 attrs value config =
   { config | attrs = value }
 
 
 {-| -}
-htmlAttrs : List (H.Attribute msg) -> { a | htmlAttrs : List (H.Attribute msg) } -> { a | htmlAttrs : List (H.Attribute msg) }
+htmlAttrs : List (H.Attribute msg) -> Attribute { a | htmlAttrs : List (H.Attribute msg) }
 htmlAttrs value config =
   { config | htmlAttrs = value }
 
 
 {-| -}
-start : (Bounds -> Float) -> { a | start : Bounds -> Float } -> { a | start : Bounds -> Float }
+start : (Bounds -> Float) -> Attribute { a | start : Bounds -> Float }
 start value config =
   { config | start = value }
 
 
 {-| -}
-end : (Bounds -> Float) -> { a | end : Bounds -> Float } -> { a | end : Bounds -> Float }
+end : (Bounds -> Float) -> Attribute { a | end : Bounds -> Float }
 end value config =
   { config | end = value }
 
 
 {-| -}
-pinned : (Bounds -> Float) -> { a | pinned : Bounds -> Float } -> { a | pinned : Bounds -> Float }
+pinned : (Bounds -> Float) -> Attribute { a | pinned : Bounds -> Float }
 pinned value config =
   { config | pinned = value }
 
 
 {-| -}
-color : String -> { a | color : String } -> { a | color : String }
+color : String -> Attribute { a | color : String }
 color value config =
   { config | color = value }
 
 
 {-| -}
-rounded : Float -> { a | rounded : Float } -> { a | rounded : Float }
+rounded : Float -> Attribute { a | rounded : Float }
 rounded value config =
   { config | rounded = value }
 
 
 {-| -}
-roundBottom : { a | roundBottom : Bool } -> { a | roundBottom : Bool }
+roundBottom : Attribute { a | roundBottom : Bool }
 roundBottom config =
   { config | roundBottom = True }
 
 
 {-| -}
-margin : Float -> { a | margin : Float } -> { a | margin : Float }
+margin : Float -> Attribute { a | margin : Float }
 margin value config =
   { config | margin = value }
 
 
 {-| -}
-dot : (data -> C.Dot msg) -> { a | dot : Tracked (data -> C.Dot msg) } -> { a | dot : Tracked (data -> C.Dot msg) }
+dot : (data -> C.Dot msg) -> Attribute { a | dot : Tracked (data -> C.Dot msg) }
 dot value config =
   { config | dot = Changed value }
 
 
 {-| -}
-dotted : { a | dotted : Bool } -> { a | dotted : Bool }
+dotted : Attribute { a | dotted : Bool }
 dotted config =
   { config | dotted = True }
 
 
 {-| -}
-area : String -> { a | area : Maybe String } -> { a | area : Maybe String }
+area : String -> Attribute { a | area : Maybe String }
 area value config =
   { config | area = Just value }
 
 
 {-| -}
-noArrow : { a | arrow : Bool } -> { a | arrow : Bool }
+noArrow : Attribute { a | arrow : Bool }
 noArrow config =
   { config | arrow = False }
 
 
 {-| -}
-filterX : (Bounds -> List Float) -> { a | filterX : Bounds -> List Float } -> { a | filterX : Bounds -> List Float }
+filterX : (Bounds -> List Float) -> Attribute { a | filterX : Bounds -> List Float }
 filterX value config =
   { config | filterX = value }
 
 
 {-| -}
-filterY : (Bounds -> List Float) -> { a | filterY : Bounds -> List Float } -> { a | filterY : Bounds -> List Float }
+filterY : (Bounds -> List Float) -> Attribute { a | filterY : Bounds -> List Float }
 filterY value config =
   { config | filterY = value }
 
 
 {-| -}
-only : (b -> Bool) -> { a | only : b -> Bool } -> { a | only : b -> Bool }
+only : (b -> Bool) -> Attribute { a | only : b -> Bool }
 only value config =
   { config | only = value }
 
 
 {-| -}
-times : Time.Zone -> { a | produce : Tracked (Int -> Bounds -> List I.Time), value : I.Time -> Float, format : I.Time -> String } -> { a | produce : Tracked (Int -> Bounds -> List I.Time), value : I.Time -> Float, format : I.Time -> String }
+times : Time.Zone -> Attribute { a | produce : Tracked (Int -> Bounds -> List I.Time), value : I.Time -> Float, format : I.Time -> String }
 times zone config =
   { config | produce = Changed <| I.times zone, value = .timestamp >> Time.posixToMillis >> toFloat, format = formatTime zone }
 
 
 {-| -}
-ints : { a | produce : Tracked (Int -> Bounds -> List Int), value : Int -> Float, format : Int -> String } -> { a | produce : Tracked (Int -> Bounds -> List Int), value : Int -> Float, format : Int -> String }
+ints : Attribute { a | produce : Tracked (Int -> Bounds -> List Int), value : Int -> Float, format : Int -> String }
 ints config =
   { config | produce = Changed <| \i -> I.ints (I.around i), value = toFloat, format = String.fromInt }
 
 
 {-| -}
-ticks : (Int -> Bounds -> List tick) -> (tick -> Float) -> (tick -> String) -> { a | produce : Tracked (Int -> Bounds -> List tick), value : tick -> Float, format : tick -> String } -> { a | produce : Tracked (Int -> Bounds -> List tick), value : tick -> Float, format : tick -> String }
+ticks : (Int -> Bounds -> List tick) -> (tick -> Float) -> (tick -> String) -> Attribute { a | produce : Tracked (Int -> Bounds -> List tick), value : tick -> Float, format : tick -> String }
 ticks produce value format_ config =
   { config | produce = Changed produce, value = value, format = format_ }
 
 
 {-| -}
-format : (tick -> String) -> { a | format : tick -> String } -> { a | format : tick -> String }
+format : (tick -> String) -> Attribute { a | format : tick -> String }
 format value config =
   { config | format = value }
 
 
 {-| -}
-amount : Int -> { a | amount : Int } -> { a | amount : Int }
+amount : Int -> Attribute { a | amount : Int }
 amount value config =
   { config | amount = value }
 
