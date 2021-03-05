@@ -31,7 +31,7 @@ module Chart exposing
 # Attributes
 @docs width, height, marginTop, marginBottom, marginLeft, marginRight
 @docs responsive, id, range, domain, events, htmlAttrs
-@docs start, end, pinned, color, rounded, margin, dot, dotted, area
+@docs start, end, pinned, color, rounded, roundBottom, margin, dot, dotted, area
 @docs noArrow, filterX, filterY, attrs
 
 # Interop

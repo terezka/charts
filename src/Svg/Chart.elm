@@ -20,7 +20,7 @@ module Svg.Chart
     )
 
 
-{-| This module contains higher-level SVG plotting elements.
+{-| This module contains low-level SVG plotting elements.
 
 # Series
 

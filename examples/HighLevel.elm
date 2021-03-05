@@ -91,7 +91,7 @@ view hovered =
     , C.yLabels [] (C.ints 5 String.fromInt << C.startMax 1)
     , C.monotone .x .y [ C.dot specialDot, C.area "rgba(5, 142, 218, 0.25)" ] data2
     --, C.bars [ C.Metric C.blue .y, C.Metric C.orange .y ] [ C.width 0.9 ] data2
-    , C.histogram .x [ C.Metric C.blue .y, C.Metric C.pink .z ] [ C.rounded 1, C.roundBottom ] data2
+    , C.histogram .x [ C.Metric C.blue .y, C.Metric C.pink .z ] [ C.rounded 0.2, C.roundBottom ] data2
     , C.scatter .x .y [ C.dot specialDot ] data2
     , C.htmlAt (always 3) C.middle 0 0 [] [ Html.text "hello"]
     , case hovered of
