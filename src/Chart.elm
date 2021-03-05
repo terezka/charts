@@ -6,7 +6,7 @@ module Chart exposing
     , Event, event, getNearest, getNearestX, getWithin, getWithinX, tooltip, formatTimestamp
     , svgAt, htmlAt, svg, html, none
     , width, height, marginTop, marginBottom, marginLeft, marginRight, responsive, id
-    , range, domain, topped, paddingX, paddingY, events, htmlAttrs
+    , range, domain, topped, paddingX, paddingY, events, htmlAttrs, binWidth
     , start, end, pinned, color, rounded, roundBottom, margin, spacing
     , dot, dotted, area, noArrow, label, filterX, filterY, only, attrs
     , blue, orange, pink, green, red
@@ -30,7 +30,7 @@ module Chart exposing
 
 # Attributes
 @docs width, height, marginTop, marginBottom, marginLeft, marginRight, paddingX, paddingY
-@docs responsive, id, range, domain, events, htmlAttrs
+@docs responsive, id, range, domain, events, htmlAttrs, binWidth
 @docs color, rounded, roundBottom, margin, dot, dotted, area, attrs
 
 # Interop
@@ -284,6 +284,11 @@ label : (data -> String) -> Attribute { a | label : Maybe (data -> String) }
 label value config =
   { config | label = Just value }
 
+
+{-| -}
+binWidth : (data -> Float) -> Attribute { a | binWidth : Maybe (data -> Float) }
+binWidth value config =
+  { config | binWidth = Just value }
 
 
 
@@ -916,8 +921,8 @@ bars metrics edits data =
     C.bars p (List.indexedMap (toBin name) data)
 
 
-type alias Histogram msg =
-  { width : Float
+type alias Histogram data msg =
+  { binWidth : Maybe (data -> Float)
   , rounded : Float
   , roundBottom : Bool
   , margin : Float
@@ -927,12 +932,12 @@ type alias Histogram msg =
 
 
 {-| -}
-histogram : (data -> Float) -> (data -> String) -> List (Metric data) -> List (Histogram msg -> Histogram msg) -> List data -> Element msg
+histogram : (data -> Float) -> (data -> String) -> List (Metric data) -> List (Histogram data msg -> Histogram data msg) -> List data -> Element msg
 histogram toX toLabel metrics edits data =
   -- TODO spacing?
   let config =
         applyAttrs edits
-          { width = 1
+          { binWidth = Nothing
           , rounded = 0
           , roundBottom = False
           , spacing = 0.01
@@ -949,6 +954,14 @@ histogram toX toLabel metrics edits data =
       barSpacing =
         (numOfBars - 1) * config.spacing
 
+      toBinWidth p d mn =
+        case config.binWidth of
+          Just toWidth -> toWidth d
+          Nothing ->
+            case mn of
+              Just n -> toX n - toX d
+              Nothing -> p.x.max - toX d
+
       toBar name d i metric =
         { attributes = [ SA.stroke "transparent", SA.fill metric.color, clipPath name ] ++ config.attrs
         , width = (1 - barSpacing - barMargin) / numOfBars
@@ -957,18 +970,24 @@ histogram toX toLabel metrics edits data =
         , value = metric.value d
         }
 
-      toBin name d =
+      toBin name p d n =
         { label = toLabel d
         , start = toX d
-        , end = toX d + config.width
+        , end = toX d + toBinWidth p d n
         , spacing = config.spacing
         , tickLength = 4
         , tickWidth = 1
         , bars = List.indexedMap (toBar name d) metrics
         }
+
+      mapWithNext func acc ds =
+        case ds of
+          a :: b :: rs -> mapWithNext func (func a (Just b) :: acc) rs
+          a :: [] -> func a Nothing :: acc
+          [] -> acc
   in
   SvgElement (always identity) <| \name p ->
-    C.histogram p (List.map (toBin name) data)
+    C.histogram p (mapWithNext (toBin name p) [] data)
 
 
 

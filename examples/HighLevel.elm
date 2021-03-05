@@ -69,7 +69,7 @@ view hovered =
     , C.marginLeft 40
     , C.marginRight 15
     , C.responsive
-    , C.range (C.fromData [.x] data |> C.startMin 0 |> C.endPad 2)
+    , C.range (C.fromData [.x] data |> C.startMin 0 |> C.startPad 2 |> C.endPad 2)
     , C.domain (C.fromData [.y] data |> C.startMin 0)
     , C.topped 6
     , C.id "some-id"
@@ -87,7 +87,7 @@ view hovered =
     [ C.grid [ C.width 0.4, C.color "rgb(220,220,220)" ]
     , C.histogram .x (String.fromFloat << .x)
         [ C.Metric C.blue .y, C.Metric C.pink .y ]
-        [ C.rounded 0.2, C.roundBottom, C.width 2 ]
+        [ C.rounded 0.2, C.roundBottom, C.binWidth (always 2) ]
         data
 
     , C.xAxis   [ C.pinned C.zero ]
