@@ -244,7 +244,6 @@ viewBar plane offset bar_ =
             else
               commandsRoundTop True (ry * -1)
 
-
       commandsNoRound =
         [ Move x bs
         , Line x y
