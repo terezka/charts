@@ -50,7 +50,7 @@ data =
 data2 : List Point
 data2 =
   [ { x = 2, y = 2, z = 4 }
-  , { x = 3, y = -1, z = 5 }
+  , { x = 3, y = -0.25, z = 5 }
   , { x = 8, y = 6, z = 3 }
   ]
 

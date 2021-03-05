@@ -225,12 +225,15 @@ viewBar plane offset bar_ =
       w = bar_.width
       bs = closestToZero plane
       b = scaleSVG plane.x w * 0.5 * (clamp 0 1 bar_.rounded)
+      ys = abs (scaleSVG plane.y bar_.value)
       rx = scaleCartesian plane.x b
       ry = scaleCartesian plane.y b
       roundBottom = bar_.roundBottom
 
       commands =
-        if b == 0 then
+        if bs == y then
+          []
+        else if b == 0 || ys < b then
           commandsNoRound
         else
           if y < 0 then
