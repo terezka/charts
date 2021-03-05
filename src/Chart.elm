@@ -2,8 +2,8 @@ module Chart exposing
     ( chart, Element, scatter, linear, monotone, Metric, bars, histogram
     , Bounds, fromData, startMin, startMax, endMin, endMax, startPad, endPad, zero, middle
     , xAxis, yAxis, xTicks, yTicks, xLabels, yLabels, grid
-    , ints, floats, times
-    , Event, event, getNearest, getNearestX, getWithin, getWithinX, tooltip
+    , ints, times, format, amount
+    , Event, event, getNearest, getNearestX, getWithin, getWithinX, tooltip, formatTimestamp
     , svgAt, htmlAt, svg, html, none
     , width, height, marginTop, marginBottom, marginLeft, marginRight, responsive, id, range, domain, events, htmlAttrs
     , start, end, pinned, color, rounded, roundBottom, margin, dot, dotted, area, noArrow, filterX, filterY, attrs
@@ -26,7 +26,7 @@ module Chart exposing
 @docs ints, floats, times
 
 # Events
-@docs Event, event, getNearest, getNearestX, getWithin, getWithinX, tooltip
+@docs Event, event, getNearest, getNearestX, getWithin, getWithinX, tooltip, formatTimestamp
 
 # Attributes
 @docs width, height, marginTop, marginBottom, marginLeft, marginRight
@@ -51,6 +51,7 @@ import Svg.Events as SE
 import Html as H
 import Html.Attributes as HA
 import Intervals as I
+import DateFormat as F
 import Time
 import Dict exposing (Dict)
 
@@ -215,6 +216,37 @@ filterY value config =
 
 
 
+{-| -}
+times : Time.Zone -> { a | produce : Tracked (Int -> Bounds -> List I.Time), value : I.Time -> Float, format : I.Time -> String } -> { a | produce : Tracked (Int -> Bounds -> List I.Time), value : I.Time -> Float, format : I.Time -> String }
+times zone config =
+  { config | produce = Changed <| I.times zone, value = .timestamp >> Time.posixToMillis >> toFloat, format = formatTime zone }
+
+
+{-| -}
+ints : { a | produce : Tracked (Int -> Bounds -> List Int), value : Int -> Float, format : Int -> String } -> { a | produce : Tracked (Int -> Bounds -> List Int), value : Int -> Float, format : Int -> String }
+ints config =
+  { config | produce = Changed <| \i -> I.ints (I.around i), value = toFloat, format = String.fromInt }
+
+
+{-| -}
+ticks : (Int -> Bounds -> List tick) -> (tick -> Float) -> (tick -> String) -> { a | produce : Tracked (Int -> Bounds -> List tick), value : tick -> Float, format : tick -> String } -> { a | produce : Tracked (Int -> Bounds -> List tick), value : tick -> Float, format : tick -> String }
+ticks produce value format_ config =
+  { config | produce = Changed produce, value = value, format = format_ }
+
+
+{-| -}
+format : (tick -> String) -> { a | format : tick -> String } -> { a | format : tick -> String }
+format value config =
+  { config | format = value }
+
+
+{-| -}
+amount : Int -> { a | amount : Int } -> { a | amount : Int }
+amount value config =
+  { config | amount = value }
+
+
+
 
 -- ELEMENTS
 
@@ -274,16 +306,20 @@ chart edits elements =
             }
         }
 
-      ( _, ( htmlElsBefore, svgEls, htmlElsAfter ) ) =
-        List.foldl buildElement ( True, ([], [], []) ) elements
+      ( _, allTicks, ( htmlElsBefore, svgEls, htmlElsAfter ) ) =
+        List.foldl buildElement ( True, { x = [], y = [] }, ([], [], []) ) elements
 
-      buildElement el ( isBeforeChart, ( htmlB, svgE, htmlA ) ) =
+      buildElement el ( isBeforeChart, tickAcc, ( htmlB, svgE, htmlA ) ) =
         case el of
-          SvgElement func ->
-            ( False, ( htmlB, svgE ++ [ func config.id plane ], htmlA ) )
+          GridElement gConfig ->
+            ( False, tickAcc, ( htmlB, svgE ++ [ viewGrid gConfig plane ], htmlA ) )
+
+          SvgElement tickFunc func ->
+            ( False, tickFunc plane tickAcc, ( htmlB, svgE ++ [ \_ -> func config.id plane ], htmlA ) )
 
           HtmlElement func ->
             ( isBeforeChart
+            , tickAcc
             , if isBeforeChart
               then ( htmlB ++ [ func plane ], svgE, htmlA )
               else ( htmlB, svgE, htmlA ++ [ func plane ] )
@@ -302,7 +338,7 @@ chart edits elements =
         SE.on e.name (C.decodePoint plane e.msg)
   in
   C.container plane config.htmlAttrs <|
-    htmlElsBefore ++ [ svgContainer svgEls ] ++ htmlElsAfter
+    htmlElsBefore ++ [ svgContainer (List.map (\e -> e allTicks) svgEls) ] ++ htmlElsAfter
 
 
 
@@ -428,8 +464,15 @@ tooltip toX toY att content =
 
 {-| -}
 type Element msg
-    = SvgElement (String -> C.Plane -> S.Svg msg)
+    = GridElement (Grid msg)
+    | SvgElement (C.Plane -> AllTicks -> AllTicks) (String -> C.Plane -> S.Svg msg)
     | HtmlElement (C.Plane -> H.Html msg)
+
+
+type alias AllTicks =
+  { x : List Float
+  , y : List Float
+  }
 
 
 
@@ -460,7 +503,7 @@ xAxis edits =
           , attrs = []
           }
   in
-  SvgElement <| \_ p ->
+  SvgElement (always identity) <| \_ p ->
     S.g [ SA.class "elm-charts__x-axis" ]
       [ C.horizontal p ([ SA.stroke config.color ] ++ config.attrs) (config.pinned <| toBounds .y p) (config.start <| toBounds .x p) (config.end <| toBounds .x p)
       , if config.arrow then
@@ -483,7 +526,7 @@ yAxis edits =
           , attrs = []
           }
   in
-  SvgElement <| \_ p ->
+  SvgElement (always identity) <| \_ p ->
     S.g [ SA.class "elm-charts__y-axis" ]
       [ C.vertical p ([ SA.stroke config.color ] ++ config.attrs) (config.pinned <| toBounds .x p) (config.start <| toBounds .y p) (config.end <| toBounds .y p)
       , if config.arrow then
@@ -493,124 +536,163 @@ yAxis edits =
       ]
 
 
-{-| -}
-ints : Int -> (Int -> String) -> Bounds -> List { value : Float, label : String }
-ints amount format =
-  I.ints (I.around amount) >> List.map (\i -> { value = toFloat i, label = format i })
-
-
-{-| -}
-floats : Int -> (Float -> String) -> Bounds -> List { value : Float, label : String }
-floats amount format =
-  I.floats (I.around amount) >> List.map (\i -> { value = i, label = format i })
-
-
-{-| -}
-times : Time.Zone -> Int -> (I.Time -> String) -> Bounds -> List { value : Float, label : String }
-times zone amount format bounds =
-  I.times zone amount bounds
-    |> List.map (\i -> { value = toFloat (Time.posixToMillis i.timestamp), label = format i })
-
-
-
-type alias Tick msg =
+type alias Tick tick msg =
     { color : String -- TODO use Color -- TODO allow custom color by tick value
     , height : Float
     , width : Float
     , pinned : Bounds -> Float
     , attrs : List (S.Attribute msg)
-    -- TODO , offset : Float
+    , amount : Int
+    , produce : Tracked (Int -> Bounds -> List tick)
+    , value : tick -> Float
+    , format : tick -> String
     }
 
 
 {-| -}
-xTicks : List (Tick msg -> Tick msg) -> (Bounds -> List { a | value : Float }) -> Element msg
-xTicks edits xs =
+xTicks : List (Tick tick msg -> Tick tick msg) -> Element msg
+xTicks edits =
   let config =
         applyAttrs edits
           { color = "rgb(210, 210, 210)"
           , pinned = .min
+          , amount = 10
+          , produce = Unchanged (\_ _ -> [])
+          , value = \_ -> 0
+          , format = \_ -> ""
           , height = 5
           , width = 1
           , attrs = []
-          -- , offset = 0
           }
 
-      labelAttrs =
+      allTicks p =
+        case config.produce of
+          Changed produce -> List.map config.value (produce config.amount <| toBounds .x p)
+          Unchanged v -> (I.floats (I.around config.amount) <| toBounds .x p)
+
+      allTickNums p ts =
+        { ts | x = ts.x ++ allTicks p }
+
+      tickAttrs =
         [ SA.stroke config.color
         , SA.strokeWidth (String.fromFloat config.width)
         ] ++ config.attrs
   in
-  SvgElement <| \_ p ->
-    C.xTicks p (round config.height) labelAttrs (config.pinned <| toBounds .y p) (List.map .value <| xs <| toBounds .x p)
+  SvgElement allTickNums <| \_ p ->
+    C.xTicks p (round config.height) tickAttrs (config.pinned <| toBounds .y p) (allTicks p)
 
 
 {-| -}
-yTicks : List (Tick msg -> Tick msg) -> (Bounds -> List { a | value : Float }) -> Element msg
-yTicks edits xs =
+yTicks : List (Tick tick msg -> Tick tick msg) -> Element msg
+yTicks edits =
   let config =
         applyAttrs edits
           { color = "rgb(210, 210, 210)"
           , pinned = .min
+          , amount = 10
+          , produce = Unchanged (\_ _ -> [])
+          , value = \_ -> 0
+          , format = \_ -> ""
           , height = 5
           , width = 1
           , attrs = []
           --, offset = 0
           }
 
-      labelAttrs =
+      allTicks p =
+        case config.produce of
+          Changed produce -> List.map config.value (produce config.amount <| toBounds .y p)
+          Unchanged v -> (I.floats (I.around config.amount) <| toBounds .y p)
+
+      allTickNums p ts =
+        { ts | y = ts.y ++ allTicks p }
+
+      tickAttrs =
         [ SA.stroke config.color
         , SA.strokeWidth (String.fromFloat config.width)
         ] ++ config.attrs
   in
-  SvgElement <| \_ p ->
-    C.yTicks p (round config.height) labelAttrs (config.pinned <| toBounds .x p) (List.map .value <| xs <| toBounds .y p)
+  SvgElement allTickNums <| \_ p ->
+    C.yTicks p (round config.height) tickAttrs (config.pinned <| toBounds .x p) (allTicks p)
 
 
-
-type alias Label msg =
+type alias Label tick msg =
     { color : String -- TODO use Color
     , pinned : Bounds -> Float
     , attrs : List (S.Attribute msg)
-    -- TODO , xOffset : Float
-    -- TODO , yOffset : Float
+    , xOffset : Float
+    , yOffset : Float
+    , amount : Int
+    , produce : Tracked (Int -> Bounds -> List tick)
+    , value : tick -> Float
+    , format : tick -> String
     }
 
 
 {-| -}
-xLabels : List (Label msg -> Label msg) -> (Bounds -> List { a | value : Float, label : String }) -> Element msg
-xLabels edits xs =
+xLabels : List (Label tick msg -> Label tick msg) -> Element msg
+xLabels edits =
   let config =
         applyAttrs edits
           { color = "#808BAB"
           , pinned = .min
           , attrs = []
+          , amount = 10
+          , produce = Unchanged (\_ _ -> [])
+          , value = \_ -> 0
+          , format = \_ -> ""
+          , xOffset = 0
+          , yOffset = 0
           }
+
+      allTicks p =
+        case config.produce of
+          Changed produce -> List.map (\i -> { value = config.value i, label = config.format i }) (produce config.amount <| toBounds .x p)
+          Unchanged v -> List.map (\i -> { value = i, label = String.fromFloat i }) (I.floats (I.around config.amount) <| toBounds .x p)
+
+      allTickNums p ts =
+        { ts | x = ts.x ++ List.map .value (allTicks p) }
 
       labelAttrs =
         [ SA.fill config.color
+        , SA.transform ("translate(" ++ String.fromFloat config.xOffset ++ " " ++ String.fromFloat config.yOffset ++ ")")
         ] ++ config.attrs
   in
-  SvgElement <| \_ p ->
-    C.xLabels p (C.xLabel labelAttrs .value .label) (config.pinned <| toBounds .y p) (xs <| toBounds .x p)
+  SvgElement allTickNums <| \_ p ->
+    C.xLabels p (C.xLabel labelAttrs .value .label) (config.pinned <| toBounds .y p) (allTicks p)
 
 
 {-| -}
-yLabels : List (Label msg -> Label msg) -> (Bounds -> List { a | value : Float, label : String }) -> Element msg
-yLabels edits xs =
+yLabels : List (Label tick msg -> Label tick msg) -> Element msg
+yLabels edits =
   let config =
         applyAttrs edits
           { color = "#808BAB"
           , pinned = .min
+          , amount = 10 -- TODO
+          , produce = Unchanged (\_ _ -> [])
+          , value = \_ -> 0
+          , format = \_ -> ""
+          , xOffset = 0
+          , yOffset = 0
           , attrs = []
           }
 
+      allTicks p =
+        case config.produce of
+          Changed produce -> List.map (\i -> { value = config.value i, label = config.format i }) (produce config.amount <| toBounds .y p)
+          Unchanged v -> List.map (\i -> { value = i, label = String.fromFloat i }) (I.floats (I.around config.amount) <| toBounds .y p)
+
+      allTickNums p ts =
+        { ts | y = ts.y ++ List.map .value (allTicks p) }
+
       labelAttrs =
         [ SA.fill config.color
+        , SA.transform ("translate(" ++ String.fromFloat config.xOffset ++ " " ++ String.fromFloat config.yOffset ++ ")")
         ] ++ config.attrs
   in
-  SvgElement <| \_ p ->
-    C.yLabels p (C.yLabel labelAttrs .value .label) (config.pinned <| toBounds .x p) (xs <| toBounds .y p)
+  SvgElement allTickNums <| \_ p ->
+    C.yLabels p (C.yLabel labelAttrs .value .label) (config.pinned <| toBounds .x p) (allTicks p)
 
 
 type alias Grid msg =
@@ -624,8 +706,8 @@ type alias Grid msg =
 
 
 {-| -}
-grid : List (Grid msg -> Grid msg) -> (Bounds -> List { a | value : Float }) -> (Bounds -> List { a | value : Float }) -> Element msg
-grid edits xs ys =
+grid : List (Grid msg -> Grid msg) -> Element msg
+grid edits =
   let config =
         applyAttrs edits
           { color = "#EFF2FA"
@@ -635,39 +717,8 @@ grid edits xs ys =
           , attrs = []
           , dotted = False
           }
-
-      gridAttrs =
-        [ SA.stroke config.color
-        , SA.strokeWidth (String.fromFloat config.width)
-        ] ++ config.attrs
-
-      notTheseX p =
-        config.filterX (toBounds .x p)
-
-      notTheseY p =
-        config.filterY (toBounds .y p)
-
-      toXGrid p v =
-        if List.member v.value (notTheseY p)
-        then Nothing else Just <| C.xGrid p gridAttrs v.value
-
-      toYGrid p v =
-        if List.member v.value (notTheseX p)
-        then Nothing else Just <| C.yGrid p gridAttrs v.value
-
-      toDot p x y =
-        if List.member x.value (notTheseX p) || List.member y.value (notTheseY p)
-        then Nothing
-        else Just <| C.full config.width C.circle config.color p x.value y.value
   in
-  SvgElement <| \_ p ->
-    S.g [ SA.class "elm-charts__grid" ] <|
-      if config.dotted then
-        List.concatMap (\x -> List.filterMap (toDot p x) (ys <| toBounds .y p)) (xs <| toBounds .x p)
-      else
-        [ S.g [ SA.class "elm-charts__x-grid" ] (List.filterMap (toXGrid p) <| ys <| toBounds .y p)
-        , S.g [ SA.class "elm-charts__y-grid" ] (List.filterMap (toYGrid p) <| xs <| toBounds .x p)
-        ]
+  GridElement config
 
 
 
@@ -712,7 +763,7 @@ bars metrics edits data =
       toBars name d =
         List.indexedMap (toBar name d) metrics
   in
-  SvgElement <| \name p ->
+  SvgElement (always identity) <| \name p ->
     C.bars p (toBars name) data
 
 
@@ -750,7 +801,7 @@ histogram toX metrics edits data =
       toBars _ d _ =
         List.indexedMap (toBar d) metrics
   in
-  SvgElement <| \name p ->
+  SvgElement (always identity) <| \name p ->
     S.g
       [ SA.class "elm-charts__histogram", clipPath name ]
       [ C.histogram p toBars data ]
@@ -780,7 +831,7 @@ scatter toX toY edits data =
           Unchanged _ -> \_ -> C.disconnected 6 1 C.cross config.color
           Changed d -> d
   in
-  SvgElement <| \name p ->
+  SvgElement (always identity) <| \name p ->
     S.g
       [ SA.class "elm-charts__scatter" ]
       [ C.scatter p toX toY finalDot data ]
@@ -823,7 +874,7 @@ monotone toX toY edits data =
           Unchanged _ -> \_ -> C.disconnected 6 1 C.cross config.color
           Changed d -> d
   in
-  SvgElement <| \name p ->
+  SvgElement (always identity) <| \name p ->
     case config.area of
       Just fill ->
         S.g [ SA.class "elm-charts__monotone-area" ]
@@ -859,7 +910,7 @@ linear toX toY edits data =
           Unchanged _ -> \_ -> C.disconnected 6 1 C.cross config.color
           Changed d -> d
   in
-  SvgElement <| \name p ->
+  SvgElement (always identity) <| \name p ->
     case config.area of
       Just fill ->
         S.g [ SA.class "elm-charts__linear-area" ]
@@ -876,7 +927,7 @@ linear toX toY edits data =
 {-| -}
 svg : (C.Plane -> S.Svg msg) -> Element msg
 svg func =
-  SvgElement (always func)
+  SvgElement (always identity) (always func)
 
 
 {-| -}
@@ -888,7 +939,7 @@ html =
 {-| -}
 svgAt : (Bounds -> Float) -> (Bounds -> Float) -> Float -> Float -> List (S.Svg msg) -> Element msg
 svgAt toX toY xOff yOff view =
-  SvgElement <| \_ p ->
+  SvgElement (always identity) <| \_ p ->
     S.g [ C.position p (toX <| toBounds .x p) (toY <| toBounds .y p) xOff yOff ] view
 
 
@@ -959,3 +1010,139 @@ red =
 toDataPoints : (data -> Float) -> List (data -> Float) -> List data -> List (C.DataPoint data)
 toDataPoints toX toYs data =
   List.concatMap (\toY -> C.toDataPoints toX toY data) toYs
+
+
+viewGrid : Grid msg -> C.Plane -> AllTicks -> S.Svg msg
+viewGrid config p allTicks =
+  let gridAttrs =
+        [ SA.stroke config.color
+        , SA.strokeWidth (String.fromFloat config.width)
+        ] ++ config.attrs
+
+      notTheseX =
+        config.filterX (toBounds .x p)
+
+      notTheseY =
+        config.filterY (toBounds .y p)
+
+      toXGrid v =
+        if List.member v notTheseY
+        then Nothing else Just <| C.yGrid p gridAttrs v
+
+      toYGrid v =
+        if List.member v notTheseX
+        then Nothing else Just <| C.xGrid p gridAttrs v
+
+      toDot x y =
+        if List.member x notTheseX || List.member y notTheseY
+        then Nothing
+        else Just <| C.full config.width C.circle config.color p x y
+  in
+  S.g [ SA.class "elm-charts__grid" ] <|
+    if config.dotted then
+      List.concatMap (\x -> List.filterMap (toDot x) allTicks.y) allTicks.x
+    else
+      [ S.g [ SA.class "elm-charts__x-grid" ] (List.filterMap toXGrid allTicks.x)
+      , S.g [ SA.class "elm-charts__y-grid" ] (List.filterMap toYGrid allTicks.y)
+      ]
+
+
+
+-- FORMATTING
+
+
+{-| -}
+formatTimestamp : Time.Zone -> Float -> String
+formatTimestamp zone ts =
+  formatFullTime zone (Time.millisToPosix (round ts))
+
+
+formatTime : Time.Zone -> I.Time -> String
+formatTime zone time =
+    case Maybe.withDefault time.unit time.change of
+        I.Millisecond ->
+            formatClock zone time.timestamp
+
+        I.Second ->
+            formatClock zone time.timestamp
+
+        I.Minute ->
+            formatClock zone time.timestamp
+
+        I.Hour ->
+            formatClock zone time.timestamp
+
+        I.Day ->
+            if time.multiple == 7
+            then formatWeekday zone time.timestamp
+            else formatDate zone time.timestamp
+
+        I.Month ->
+            formatMonth zone time.timestamp
+
+        I.Year ->
+            formatYear zone time.timestamp
+
+
+formatFullTime : Time.Zone -> Time.Posix -> String
+formatFullTime =
+    F.format
+        [ F.monthNumber
+        , F.text "/"
+        , F.dayOfMonthNumber
+        , F.text "/"
+        , F.yearNumberLastTwo
+        , F.text " "
+        , F.hourMilitaryFixed
+        , F.text ":"
+        , F.minuteFixed
+        ]
+
+
+formatFullDate : Time.Zone -> Time.Posix -> String
+formatFullDate =
+    F.format
+        [ F.monthNumber
+        , F.text "/"
+        , F.dayOfMonthNumber
+        , F.text "/"
+        , F.yearNumberLastTwo
+        ]
+
+
+formatDate : Time.Zone -> Time.Posix -> String
+formatDate =
+    F.format
+        [ F.monthNumber
+        , F.text "/"
+        , F.dayOfMonthNumber
+        ]
+
+
+formatClock : Time.Zone -> Time.Posix -> String
+formatClock =
+    F.format
+        [ F.hourMilitaryFixed
+        , F.text ":"
+        , F.minuteFixed
+        ]
+
+
+formatMonth : Time.Zone -> Time.Posix -> String
+formatMonth =
+    F.format
+        [ F.monthNameAbbreviated
+        ]
+
+
+formatYear : Time.Zone -> Time.Posix -> String
+formatYear =
+    F.format
+        [ F.yearNumber
+        ]
+
+
+formatWeekday : Time.Zone -> Time.Posix -> String
+formatWeekday =
+    F.format
+        [ F.dayOfWeekNameFull ]

@@ -8,6 +8,7 @@ import Svg.Coordinates as Coordinates
 import Chart as C
 import Svg.Chart as SC
 import Browser
+import Time
 
 
 
@@ -49,9 +50,9 @@ data =
 
 data2 : List Point
 data2 =
-  [ { x = 2, y = 2, z = 4 }
-  , { x = 3, y = -0.25, z = 5 }
-  , { x = 8, y = 6, z = 3 }
+  [ { x = 1546300800000, y = 2, z = 4 }
+  , { x = 1577840461000, y = -0.9, z = 5 }
+  , { x = 1609462861000, y = 6, z = 3 }
   ]
 
 
@@ -66,9 +67,9 @@ view hovered =
     [ C.width 600
     , C.height 300
     , C.marginTop 30
-    , C.marginRight 10
+    , C.marginRight 15
     , C.responsive
-    , C.range (C.fromData [.x] data2 |> C.startMin 1)
+    , C.range (C.fromData [.x] data2 |> C.startPad (1000 * 60 * 60 * 24 * 365))
     , C.domain (C.fromData [.y, .z] data2 |> C.startMin 0)
     , C.id "some-id"
     , C.htmlAttrs
@@ -82,22 +83,36 @@ view hovered =
         , C.event "mouseleave" (\_ _ -> OnLeave)
         ]
     ]
-    [ C.grid [ C.dotted, C.width 0.4, C.color "rgb(220,220,220)" ] (C.ints 10 String.fromInt) (C.ints 5 String.fromInt)
+    [ C.grid [ C.width 0.4, C.color "rgb(220,220,220)" ]
+
     , C.xAxis [ C.pinned C.zero ]
-    , C.xTicks [ C.pinned C.zero ] (C.ints 10 String.fromInt)
-    , C.xLabels [] (C.floats 5 String.fromFloat)
+    , C.xLabels [ C.pinned C.zero, C.times Time.utc, C.amount 5 ]
+    , C.xTicks [ C.pinned C.zero, C.times Time.utc, C.amount 10 ]
+
     , C.yAxis [ C.pinned C.zero, C.start (always 1), C.end (always 6), C.noArrow ]
-    , C.yTicks [ C.pinned C.zero ] (C.ints 5 String.fromInt << C.endMax 6)
-    , C.yLabels [] (C.ints 5 String.fromInt << C.startMax 1)
-    , C.monotone .x .y [ C.dot specialDot, C.area "rgba(5, 142, 218, 0.25)" ] data2
+    , C.yLabels [ C.pinned C.zero, C.amount 5 ]
+    , C.yTicks [ C.pinned C.zero, C.amount 5 ]
+
+
     --, C.bars [ C.Metric C.blue .y, C.Metric C.orange .y ] [ C.width 0.9 ] data2
-    , C.histogram .x [ C.Metric C.blue .y, C.Metric C.pink .z ] [ C.rounded 0.2, C.roundBottom ] data2
-    , C.scatter .x .y [ C.dot specialDot ] data2
+
+    , C.histogram .x
+        [ C.Metric C.blue .y, C.Metric C.pink .z ]
+        [ C.rounded 0.2
+        , C.roundBottom
+        , C.width (1000 * 60 * 60 * 24 * 365)
+        , C.margin 0.1
+        ]
+        data2
+
+    , C.monotone .x .y [ C.dot specialDot, C.area "rgba(5, 142, 218, 0.25)" ] data2
+
     , C.htmlAt (always 3) C.middle 0 0 [] [ Html.text "hello"]
+
     , case hovered of
         point :: _ ->
-          C.tooltip (always point.x) C.middle []
-            [ Html.text ("( " ++ String.fromFloat point.x ++ ", " ++ String.fromFloat point.y ++ " )") ]
+          C.tooltip (always point.x) (always point.y) []
+            [ Html.text (C.formatTimestamp Time.utc point.x ++ ", " ++ String.fromFloat point.y) ]
 
         [] ->
           C.none
