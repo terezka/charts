@@ -4,8 +4,8 @@ module Svg.Chart
     , Dot, clear, empty, disconnected, aura, full
     , circle, triangle, square, diamond, plus, cross
     , scatter, linear, linearArea, monotone, monotoneArea
-    , GroupBar, bars
-    , Bar, histogram
+    , Group, bars
+    , Bin, Bar, histogram
     , xAxis, yAxis, xArrow, yArrow
     , xGrid, yGrid
     , xTicks, xTick, yTicks, yTick
@@ -118,62 +118,44 @@ frame id plane =
 
 
 {-| -}
-type alias GroupBar msg =
-  { attributes : List (Attribute msg)
-  , rounded : Float
-  , roundBottom : Bool
-  , width : Float
-  , value : Float
+type alias Group msg =
+  { label : String
+  , spacing : Float
+  , bars : List (Bar msg)
   }
 
 
-{-| You can draw a bar chart like this:
-
-    main : Svg msg
-    main =
-      let toBars ( a, b ) =
-            [ bar [ fill "red" ] 0.8 a
-            , bar [ fill "blue" ] 0.8 b
-            ]
-      in
-      svg
-        [ width (String.fromFloat plane.x.length)
-        , height (String.fromFloat plane.y.length)
-        ]
-        [ bars plane toBars [ ( 2, 3 ), ( 5, 1 ), ( 1, 5 ) ]
-        ]
-
-Note on `width`: The width takes catersian units, however, should you have
-a width in SVG units, you can use `Svg.Coordinates.scaleCartesian` to
-translate it into cartesian units.
--}
-bars : Plane -> (data -> List (GroupBar msg)) -> List data -> Svg msg
-bars plane toBars data =
-  let viewBars_ i d =
-        let bars_ = List.map (toBar i) (toBars d) in
-        viewBars plane (groupWidth bars_ / 2) bars_
-
-      groupWidth bars_ =
-        List.sum (List.map .width bars_)
-
-      toBar i groupBar =
-        Bar groupBar.attributes groupBar.rounded groupBar.roundBottom groupBar.width (toFloat i + 1) groupBar.value
+{-| -}
+bars : Plane -> List (Group msg) -> Svg msg
+bars plane groups =
+  let viewGroupBin i group =
+        viewBin plane
+          { label = group.label
+          , start = toFloat i + 0.5
+          , end = toFloat i + 1.5
+          , spacing = group.spacing
+          , tickLength = 0
+          , tickWidth = 0
+          , bars = group.bars
+          }
   in
-  g [ class "elm-charts__bars" ] (List.indexedMap viewBars_ data)
-
-
-viewBars : Plane -> Float -> List (Bar msg) -> Svg msg
-viewBars plane offset bars_ =
-  let foldBars bar_ ( acc, pos ) =
-        ( acc ++ [ viewBar plane (pos - offset) bar_ ]
-        , pos + bar_.width
-        )
-  in
-  g [ class "elm-charts__bar" ] (Tuple.first <| List.foldl foldBars ( [], 0 ) bars_)
+  g [ class "elm-charts__bars" ] (List.indexedMap viewGroupBin groups)
 
 
 
 -- HISTOGRAM
+
+
+{-| -}
+type alias Bin msg =
+  { label : String
+  , start : Float
+  , end : Float
+  , spacing : Float
+  , tickLength : Float
+  , tickWidth : Float
+  , bars : List (Bar msg)
+  }
 
 
 {-| -}
@@ -182,45 +164,69 @@ type alias Bar msg =
   , rounded : Float
   , roundBottom : Bool
   , width : Float
-  , position : Float
   , value : Float
   }
 
 
-{-| Make a histogram.
+{-| -}
+histogram : Plane -> List (Bin msg) -> Svg msg
+histogram plane bins =
+  g [ class "elm-charts__histogram" ] (List.map (viewBin plane) bins)
 
-    main : Svg msg
-    main =
-      let toBars _ datum _ =
-            [ Bar [] 10 datum.timestamp datum.score ]
-      in
-      svg
-        [ width (String.fromFloat plane.x.length)
-        , height (String.fromFloat plane.y.length)
-        ]
-        [ histogram plane toBars [ ( 1, 1 ), ( 2, 2 ), ( 3, 6 ) ]
--}
-histogram : Plane -> (Maybe data -> data -> Maybe data -> List (Bar msg)) -> List data -> Svg msg
-histogram plane toBars data =
-  let viewHistogramBar prev datum next =
-        viewBars plane 0 (toBars prev datum next)
 
-      withPrevAndNext prev datum acc =
-        case datum of
-          curr :: next :: rest -> withPrevAndNext (Just curr) (next :: rest) (acc ++ [ viewHistogramBar prev curr (Just next) ])
-          curr :: [] -> acc ++ [ viewHistogramBar prev curr Nothing ]
-          [] -> acc
+viewBin : Plane -> Bin msg -> Svg msg
+viewBin plane bin =
+  let binWidth =
+        bin.end - bin.start
+
+      binOffset =
+        (binWidth - binWidth * usedWidthPer) / 2
+
+      usedWidthPer =
+        List.sum (List.map .width bin.bars) + bin.spacing * toFloat (List.length bin.bars - 1)
+
+      adjustBar barOffset bar =
+        { attributes = bar.attributes
+        , rounded = bar.rounded
+        , roundBottom = bar.roundBottom
+        , position = bin.start + binOffset + barOffset
+        , width = binWidth * bar.width
+        , value = bar.value
+        }
+
+      ( _, adjustedBars ) =
+        List.foldl (\b (w, acc) -> ( w + (binWidth * b.width + bin.spacing), adjustBar w b :: acc )) ( 0, [] ) bin.bars
   in
-    g [ class "elm-charts__histogram" ] (withPrevAndNext Nothing data [])
+  g [ class "elm-charts__histogram-bin" ]
+    [ g [ class "elm-charts__bars" ] (List.map (viewBar plane) adjustedBars)
+    , xTicks plane (round bin.tickLength)
+        [ Attributes.strokeWidth (String.fromFloat bin.tickWidth) ]
+        0 [ bin.start, bin.end ]
+    , Svg.g
+        [ placeWithOffset plane (bin.start + binWidth / 2) (closestToZero plane) 0 15
+        , Attributes.style "text-anchor: middle;"
+        ]
+        [ viewLabel [] bin.label ]
+    ]
 
 
 
 -- BARS INTERNAL
 
 
-viewBar : Plane -> Float -> Bar msg -> Svg msg
-viewBar plane offset bar_ =
-  let x = bar_.position + offset
+type alias InternalBar msg =
+  { attributes : List (Attribute msg)
+  , rounded : Float
+  , roundBottom : Bool
+  , position : Float
+  , width : Float
+  , value : Float
+  }
+
+
+viewBar : Plane ->  InternalBar msg -> Svg msg
+viewBar plane bar_ =
+  let x = bar_.position
       y = bar_.value
       w = bar_.width
       bs = closestToZero plane
@@ -307,7 +313,7 @@ line plane userAttributes x1 y1 x2 y2 =
   let
     attributes =
       concat
-        [ stroke darkGrey ]
+        [ stroke "rgb(210, 210, 210)" ]
         userAttributes
         [ d (description plane [ Move x1 y1, Line x1 y1, Line x2 y2 ]) ]
   in
@@ -326,7 +332,7 @@ horizontal plane userAttributes y x1 x2 =
   let
     attributes =
       concat
-        [ stroke darkGrey ]
+        [ stroke "rgb(210, 210, 210)" ]
         userAttributes
         [ d (description plane [ Move x1 y, Line x1 y, Line x2 y ]) ]
   in
@@ -345,7 +351,7 @@ vertical plane userAttributes x y1 y2 =
   let
     attributes =
       concat
-        [ stroke darkGrey ]
+        [ stroke "rgb(210, 210, 210)" ]
         userAttributes
         [ d (description plane [ Move x y1, Line x y1, Line x y2 ]) ]
   in
@@ -406,7 +412,7 @@ xTick plane height userAttributes y x =
   let
     attributes =
       concat
-        [ class "elm-charts__tick", stroke darkGrey ]
+        [ class "elm-charts__tick", stroke "rgb(210, 210, 210)" ]
         userAttributes
         [ Attributes.x1 <| String.fromFloat (toSVGX plane x)
         , Attributes.x2 <| String.fromFloat (toSVGX plane x)
@@ -435,7 +441,7 @@ yTick plane width userAttributes x y =
   let
     attributes =
       concat
-        [ class "elm-charts__tick", stroke darkGrey ]
+        [ class "elm-charts__tick", stroke "rgb(210, 210, 210)" ]
         userAttributes
         [ Attributes.x1 <| String.fromFloat (toSVGX plane x)
         , Attributes.x2 <| String.fromFloat (toSVGX plane x - toFloat width)
@@ -503,7 +509,7 @@ viewLabel userAttributes string =
   let attributes =
         concat
           [ class "elm-charts__label"
-          , Attributes.fill "#6d6d6d"
+          , Attributes.fill "#808BAB"
           , Attributes.style "pointer-events: none;"
           ]
           userAttributes

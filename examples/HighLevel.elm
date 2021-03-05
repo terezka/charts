@@ -38,13 +38,11 @@ type alias Point =
 
 data : List { x : Float, y : Float }
 data =
-  [ { x = -4, y = 4 }
-  , { x = -2, y = 3 }
-  , { x = 0, y = -4 }
-  , { x = 4, y = -4 }
+  [ { x = 0, y = 4 }
+  , { x = 4, y = 2 }
   , { x = 6, y = 4 }
   , { x = 8, y = 3 }
-  , { x = 10, y = -4 }
+  , { x = 10, y = 4 }
   ]
 
 
@@ -67,12 +65,12 @@ view hovered =
     [ C.width 600
     , C.height 300
     , C.marginTop 30
+    , C.marginBottom 40
     , C.marginLeft 40
     , C.marginRight 15
     , C.responsive
-    , C.range (C.fromData [.x] data2)
-    , C.domain (C.fromData [.y] data2 |> C.startMin 0)
-    , C.paddingY 0 10
+    , C.range (C.fromData [.x] data |> C.startMin 0 |> C.endPad 2)
+    , C.domain (C.fromData [.y] data |> C.startMin 0)
     , C.topped 6
     , C.id "some-id"
     , C.htmlAttrs
@@ -81,37 +79,33 @@ view hovered =
         , HA.style "margin" "20px 40px"
         , HA.style "max-width" "700px"
         ]
-    , C.events
-        [ C.event "mousemove" (C.getNearestX OnHover .x [.y] data2)
-        , C.event "mouseleave" (\_ _ -> OnLeave)
-        ]
+    --, C.events
+    --    [ C.event "mousemove" (C.getNearestX OnHover .x [.y] data)
+    --    , C.event "mouseleave" (\_ _ -> OnLeave)
+    --    ]
     ]
     [ C.grid [ C.width 0.4, C.color "rgb(220,220,220)" ]
-    --, C.histogram .x
-    --    [ C.Metric C.blue .y, C.Metric C.pink .z ]
-    --    [ C.rounded 0.2, C.roundBottom, C.width (1000 * 60 * 60 * 24 * 365), C.margin 0.1 ]
-    --    data2
+    , C.histogram .x (String.fromFloat << .x)
+        [ C.Metric C.blue .y, C.Metric C.pink .y ]
+        [ C.rounded 0.2, C.roundBottom, C.width 2 ]
+        data
 
     , C.xAxis   [ C.pinned C.zero ]
-    , C.yAxis   [ C.pinned C.zero ]
-    , C.xLabels [ C.pinned C.zero, C.times Time.utc ]
-    , C.xTicks  [ C.pinned C.zero, C.times Time.utc ]
-    , C.yLabels [ C.pinned C.zero, C.amount 7 ]
-    , C.yTicks [  C.pinned C.zero, C.amount 7 ]
+    , C.yAxis   [ C.pinned .min ]
+    , C.yLabels [ C.pinned .min, C.amount 7 ]
+    , C.yTicks [  C.pinned .min, C.amount 7 ]
 
-    , C.monotone .x .y [ C.dot specialDot, C.area "rgba(5, 142, 218, 0.25)" ] data2
+    --, C.monotone .x .y [ C.dot specialDot, C.area "rgba(5, 142, 218, 0.25)" ] data
 
-    --, C.bars [ C.Metric C.blue .y, C.Metric C.orange .y ] [ C.width 0.9 ] data2
+    --, C.bars [ C.Metric C.blue .y, C.Metric C.pink .y ] [ C.margin 0.05, C.spacing 0.015, C.rounded 0.2, C.label (.x >> String.fromFloat) ] data
 
-    , C.htmlAt (always 3) C.middle 0 0 [] [ Html.text "hello"]
+    --, case hovered of
+    --    point :: _ ->
+    --      C.tooltip (always point.x) (always point.y) []
+    --        [ Html.text (C.formatTimestamp Time.utc point.x ++ ", " ++ String.fromFloat point.y) ]
 
-    , case hovered of
-        point :: _ ->
-          C.tooltip (always point.x) (always point.y) []
-            [ Html.text (C.formatTimestamp Time.utc point.x ++ ", " ++ String.fromFloat point.y) ]
-
-        [] ->
-          C.none
+    --    [] ->
+    --      C.none
     ]
 
 

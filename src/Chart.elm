@@ -7,8 +7,8 @@ module Chart exposing
     , svgAt, htmlAt, svg, html, none
     , width, height, marginTop, marginBottom, marginLeft, marginRight, responsive, id
     , range, domain, topped, paddingX, paddingY, events, htmlAttrs
-    , start, end, pinned, color, rounded, roundBottom, margin
-    , dot, dotted, area, noArrow, filterX, filterY, only, attrs
+    , start, end, pinned, color, rounded, roundBottom, margin, spacing
+    , dot, dotted, area, noArrow, label, filterX, filterY, only, attrs
     , blue, orange, pink, green, red
     )
 
@@ -196,6 +196,12 @@ margin value config =
 
 
 {-| -}
+spacing : Float -> Attribute { a | spacing : Float }
+spacing value config =
+  { config | spacing = value }
+
+
+{-| -}
 dot : (data -> C.Dot msg) -> Attribute { a | dot : Tracked (data -> C.Dot msg) }
 dot value config =
   { config | dot = Changed value }
@@ -271,6 +277,12 @@ amount value config =
 topped : Int -> Attribute { a | topped : Maybe Int }
 topped value config =
   { config | topped = Just value }
+
+
+{-| -}
+label : (data -> String) -> Attribute { a | label : Maybe (data -> String) }
+label value config =
+  { config | label = Just value }
 
 
 
@@ -841,11 +853,13 @@ grid edits =
 -- SERIES
 
 
-type alias Bars msg =
-  { width : Float
-  , rounded : Float
+type alias Bars data msg =
+  { rounded : Float
   , roundBottom : Bool
   , attrs : List (S.Attribute msg)
+  , margin : Float
+  , spacing : Float
+  , label : Maybe (data -> String)
   }
 
 
@@ -857,30 +871,49 @@ type alias Metric data =
 
 
 {-| -}
-bars : List (Metric data) -> List (Bars msg -> Bars msg) -> List data -> Element msg
+bars : List (Metric data) -> List (Bars data msg -> Bars data msg) -> List data -> Element msg
 bars metrics edits data =
   -- TODO spacing?
   let config =
         applyAttrs edits
-          { width = 0.8
-          , rounded = 0
+          { rounded = 0
           , roundBottom = False
+          , label = Nothing
+          , spacing = 0
+          , margin = 0.05
           , attrs = []
           }
 
-      toBar name d i metric =
-        { attributes = [ SA.stroke "transparent", SA.fill metric.color, clipPath name ] ++ config.attrs -- TODO
-        , width = config.width / toFloat (List.length metrics)
+      toLabel i d =
+        case config.label of
+          Just func -> func d
+          Nothing -> String.fromInt i
+
+      numOfBars =
+        toFloat (List.length metrics)
+
+      binMargin =
+        config.margin * 2
+
+      barSpacing =
+        (numOfBars - 1) * config.spacing
+
+      toBar name d metric =
+        { attributes = [ SA.stroke "transparent", SA.fill metric.color, clipPath name ] ++ config.attrs
+        , width = (1 - barSpacing - binMargin) / numOfBars
         , rounded = config.rounded
         , roundBottom = config.roundBottom
         , value = metric.value d
         }
 
-      toBars name d =
-        List.indexedMap (toBar name d) metrics
+      toBin name i d =
+        { label = toLabel i d
+        , spacing = config.spacing
+        , bars = List.map (toBar name d) metrics
+        }
   in
   SvgElement (always identity) <| \name p ->
-    C.bars p (toBars name) data
+    C.bars p (List.indexedMap (toBin name) data)
 
 
 type alias Histogram msg =
@@ -888,39 +921,54 @@ type alias Histogram msg =
   , rounded : Float
   , roundBottom : Bool
   , margin : Float
+  , spacing : Float
   , attrs : List (S.Attribute msg)
   }
 
 
 {-| -}
-histogram : (data -> Float) -> List (Metric data) -> List (Histogram msg -> Histogram msg) -> List data -> Element msg
-histogram toX metrics edits data =
+histogram : (data -> Float) -> (data -> String) -> List (Metric data) -> List (Histogram msg -> Histogram msg) -> List data -> Element msg
+histogram toX toLabel metrics edits data =
   -- TODO spacing?
   let config =
         applyAttrs edits
           { width = 1
           , rounded = 0
           , roundBottom = False
-          , margin = 0.25
+          , spacing = 0.01
+          , margin = 0.05
           , attrs = []
           }
 
-      toBar d i metric =
-        { attributes = [ SA.stroke "transparent", SA.fill metric.color ] ++ config.attrs -- TODO
-        , width = config.width * (1 - config.margin * 2) / toFloat (List.length metrics)
-        , position = toX d - config.width + config.width * config.margin
+      numOfBars =
+        toFloat (List.length metrics)
+
+      barMargin =
+        config.margin * 2
+
+      barSpacing =
+        (numOfBars - 1) * config.spacing
+
+      toBar name d i metric =
+        { attributes = [ SA.stroke "transparent", SA.fill metric.color, clipPath name ] ++ config.attrs
+        , width = (1 - barSpacing - barMargin) / numOfBars
         , rounded = config.rounded
         , roundBottom = config.roundBottom
         , value = metric.value d
         }
 
-      toBars _ d _ =
-        List.indexedMap (toBar d) metrics
+      toBin name d =
+        { label = toLabel d
+        , start = toX d
+        , end = toX d + config.width
+        , spacing = config.spacing
+        , tickLength = 4
+        , tickWidth = 1
+        , bars = List.indexedMap (toBar name d) metrics
+        }
   in
   SvgElement (always identity) <| \name p ->
-    S.g
-      [ SA.class "elm-charts__histogram", clipPath name ]
-      [ C.histogram p toBars data ]
+    C.histogram p (List.map (toBin name) data)
 
 
 
