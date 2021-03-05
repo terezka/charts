@@ -6,7 +6,7 @@ module Chart exposing
     , Event, event, getNearest, getNearestX, getWithin, getWithinX, tooltip
     , svgAt, htmlAt, svg, html, none
     , width, height, marginTop, marginBottom, marginLeft, marginRight, responsive, id, range, domain, events, htmlAttrs
-    , start, end, pinned, color, margin, dot, dotted, area, noArrow, filterX, filterY, attrs
+    , start, end, pinned, color, rounded, roundBottom, margin, dot, dotted, area, noArrow, filterX, filterY, attrs
     , blue, orange, pink, green, red
     )
 
@@ -31,7 +31,7 @@ module Chart exposing
 # Attributes
 @docs width, height, marginTop, marginBottom, marginLeft, marginRight
 @docs responsive, id, range, domain, events, htmlAttrs
-@docs start, end, pinned, color, margin, dot, dotted, area
+@docs start, end, pinned, color, rounded, margin, dot, dotted, area
 @docs noArrow, filterX, filterY, attrs
 
 # Interop
@@ -158,6 +158,18 @@ pinned value config =
 color : String -> { a | color : String } -> { a | color : String }
 color value config =
   { config | color = value }
+
+
+{-| -}
+rounded : Float -> { a | rounded : Float } -> { a | rounded : Float }
+rounded value config =
+  { config | rounded = value }
+
+
+{-| -}
+roundBottom : { a | roundBottom : Bool } -> { a | roundBottom : Bool }
+roundBottom config =
+  { config | roundBottom = True }
 
 
 {-| -}
@@ -663,9 +675,11 @@ grid edits xs ys =
 
 
 type alias Bars msg =
-    { width : Float
-    , attrs : List (S.Attribute msg)
-    }
+  { width : Float
+  , rounded : Float
+  , roundBottom : Bool
+  , attrs : List (S.Attribute msg)
+  }
 
 
 {-| -}
@@ -682,12 +696,16 @@ bars metrics edits data =
   let config =
         applyAttrs edits
           { width = 0.8
+          , rounded = 0
+          , roundBottom = False
           , attrs = []
           }
 
       toBar name d i metric =
         { attributes = [ SA.stroke "transparent", SA.fill metric.color, clipPath name ] ++ config.attrs -- TODO
         , width = config.width / toFloat (List.length metrics)
+        , rounded = config.rounded
+        , roundBottom = config.roundBottom
         , value = metric.value d
         }
 
@@ -699,10 +717,12 @@ bars metrics edits data =
 
 
 type alias Histogram msg =
-    { width : Float
-    , margin : Float
-    , attrs : List (S.Attribute msg)
-    }
+  { width : Float
+  , rounded : Float
+  , roundBottom : Bool
+  , margin : Float
+  , attrs : List (S.Attribute msg)
+  }
 
 
 {-| -}
@@ -712,6 +732,8 @@ histogram toX metrics edits data =
   let config =
         applyAttrs edits
           { width = 1
+          , rounded = 0
+          , roundBottom = False
           , margin = 0.25
           , attrs = []
           }
@@ -720,6 +742,8 @@ histogram toX metrics edits data =
         { attributes = [ SA.stroke "transparent", SA.fill metric.color ] ++ config.attrs -- TODO
         , width = config.width * (1 - config.margin * 2) / toFloat (List.length metrics)
         , position = toX d - config.width + config.width * config.margin
+        , rounded = config.rounded
+        , roundBottom = config.roundBottom
         , value = metric.value d
         }
 

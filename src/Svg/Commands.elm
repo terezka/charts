@@ -3,7 +3,7 @@ module Svg.Commands exposing (Command(..), description)
 {-| SVG path commands.
 -}
 
-import Svg.Coordinates exposing (Plane, toSVGX, toSVGY)
+import Svg.Coordinates exposing (Plane, toSVGX, toSVGY, scaleSVG)
 
 
 {-| -}
@@ -14,7 +14,7 @@ type Command
   | CubicBeziersShort Float Float Float Float
   | QuadraticBeziers Float Float Float Float
   | QuadraticBeziersShort Float Float
-  | Arc Float Float Bool Bool Bool Float Float
+  | Arc Float Float Int Bool Bool Float Float
   | Close
 
 
@@ -46,7 +46,7 @@ translate plane command =
       QuadraticBeziersShort (toSVGX plane x) (toSVGY plane y)
 
     Arc rx ry xAxisRotation largeArcFlag sweepFlag x y ->
-      Arc (toSVGX plane rx) (toSVGY plane ry) xAxisRotation largeArcFlag sweepFlag (toSVGX plane x) (toSVGY plane y)
+      Arc rx ry xAxisRotation largeArcFlag sweepFlag (toSVGX plane x) (toSVGY plane y)
 
     Close ->
       Close
@@ -74,9 +74,9 @@ stringCommand command =
       "T" ++ stringPoint (x, y)
 
     Arc rx ry xAxisRotation largeArcFlag sweepFlag x y ->
-      "A" ++ joinCommands
+      "A " ++ joinCommands
         [ stringPoint (rx, ry)
-        , stringBool xAxisRotation
+        , String.fromInt xAxisRotation
         , stringBoolInt largeArcFlag
         , stringBoolInt sweepFlag
         , stringPoint (x, y)
@@ -104,9 +104,9 @@ stringPoints points =
 stringBoolInt : Bool -> String
 stringBoolInt bool =
   if bool then
-    "0"
-  else
     "1"
+  else
+    "0"
 
 stringBool : Bool -> String
 stringBool bool =

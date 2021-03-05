@@ -72,7 +72,7 @@ import Html exposing (Html)
 import Html.Attributes as HA
 import Svg exposing (Svg, Attribute, g, path, rect, text)
 import Svg.Attributes as Attributes exposing (class, width, height, stroke, fill, d, transform, viewBox)
-import Svg.Coordinates exposing (Plane, place, toSVGX, toSVGY, toCartesianX, toCartesianY, placeWithOffset)
+import Svg.Coordinates exposing (Plane, place, toSVGX, toSVGY, toCartesianX, toCartesianY, scaleSVG, scaleCartesian, placeWithOffset)
 import Svg.Commands exposing (..)
 import Internal.Colors exposing (..)
 import Internal.Svg exposing (..)
@@ -120,6 +120,8 @@ frame id plane =
 {-| -}
 type alias GroupBar msg =
   { attributes : List (Attribute msg)
+  , rounded : Float
+  , roundBottom : Bool
   , width : Float
   , value : Float
   }
@@ -155,7 +157,7 @@ bars plane toBars data =
         List.sum (List.map .width bars_)
 
       toBar i groupBar =
-        Bar groupBar.attributes groupBar.width (toFloat i + 1) groupBar.value
+        Bar groupBar.attributes groupBar.rounded groupBar.roundBottom groupBar.width (toFloat i + 1) groupBar.value
   in
   g [ class "elm-charts__bars" ] (List.indexedMap viewBars_ data)
 
@@ -177,6 +179,8 @@ viewBars plane offset bars_ =
 {-| -}
 type alias Bar msg =
   { attributes : List (Attribute msg)
+  , rounded : Float
+  , roundBottom : Bool
   , width : Float
   , position : Float
   , value : Float
@@ -217,12 +221,64 @@ histogram plane toBars data =
 viewBar : Plane -> Float -> Bar msg -> Svg msg
 viewBar plane offset bar_ =
   let x = bar_.position + offset
+      y = bar_.value
+      w = bar_.width
+      bs = closestToZero plane
+      b = bar_.rounded
+      rx = scaleCartesian plane.x b
+      ry = scaleCartesian plane.y b
+      roundBottom = bar_.roundBottom
 
       commands =
-        [ Move x (closestToZero plane)
-        , Line x  bar_.value
-        , Line (x + bar_.width) bar_.value
-        , Line (x + bar_.width) (closestToZero plane)
+        if b == 0 then
+          commandsNoRound
+        else
+          if y < 0 then
+            if roundBottom then
+              commandsRoundBoth False (ry * -1)
+            else
+              commandsRoundTop False ry
+          else
+            if roundBottom then
+              commandsRoundBoth True ry
+            else
+              commandsRoundTop True (ry * -1)
+
+
+      commandsNoRound =
+        [ Move x bs
+        , Line x y
+        , Line (x + w) y
+        , Line (x + w) bs
+        ]
+
+      commandsRoundBoth outwards ry_ =
+        [ Move (x + rx) bs
+        , Arc b b -45 False outwards x (bs + ry_)
+        , Line x (y - ry_)
+        , Arc b b -45 False outwards (x + rx) y
+        , Line (x + w - rx) y
+        , Arc b b -45 False outwards (x + w) (y - ry_)
+        , Line (x + w) (bs + ry_)
+        , Arc b b -45 False outwards (x + w - rx) bs
+        ]
+
+      commandsRoundTop outwards ry_ =
+        [ Move x bs
+        , Line x (y + ry_)
+        , Arc b b -45 False outwards (x + rx) y
+        , Line (x + w - rx) y
+        , Arc b b -45 False outwards (x + w) (y + ry_)
+        , Line (x + w) bs
+        ]
+
+      commandsRoundBottom outwards ry_ =
+        [ Move (x + rx) bs
+        , Arc b b -45 False outwards x (bs + ry_)
+        , Line x y
+        , Line (x + w) y
+        , Line (x + w) (bs + ry_)
+        , Arc b b -45 False outwards (x + w - rx) bs
         ]
 
       attributes =

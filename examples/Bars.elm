@@ -10,7 +10,7 @@ import Internal.Colors exposing (..)
 plane : Plane
 plane =
   { x =
-    { marginLower = 30
+    { marginLower = 20
     , marginUpper = 20
     , length = 300
     , min = minimum [.x] data - 0.5
@@ -21,7 +21,7 @@ plane =
     , marginUpper = 20
     , length = 300
     , min = 0
-    , max = maximum [.passed, .failed] data
+    , max = maximum [.passed, .failed] data + 1
     }
   }
 
@@ -37,18 +37,15 @@ data =
   [ { x = 1, passed = 4, failed = 4 }
   , { x = 2, passed = 2, failed = 3 }
   , { x = 3, passed = 4, failed = 4 }
-  , { x = 4, passed = 6, failed = 4 }
-  , { x = 5, passed = 8, failed = 3 }
-  , { x = 6, passed = 10, failed = 4 }
   ]
 
 
 main : Svg msg
 main =
   let toBars datum =
-        [ GroupBar [ stroke "white", fill blueFill ] 0.2 datum.passed
-        , GroupBar [ stroke "white", fill pinkFill ] 0.2 datum.failed
-        , GroupBar [ stroke "white", fill blueFill ] 0.2 datum.passed
+        [ GroupBar [ stroke "white", fill blueFill ] 2 0.2 datum.passed
+        , GroupBar [ stroke "white", fill pinkFill ] 2 0.2 datum.failed
+        , GroupBar [ stroke "white", fill blueFill ] 2 0.2 datum.passed
         ]
   in
   svg
