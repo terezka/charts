@@ -1,13 +1,13 @@
 module Chart exposing
     ( chart, Element, scatter, linear, monotone, Metric, bars, histogram
-    , Bounds, fromData, startMin, startMax, endMin, endMax, startPad, endPad, zero, middle
+    , Bounds, startMin, startMax, endMin, endMax, startPad, endPad, zero, middle
     , xAxis, yAxis, xTicks, yTicks, xLabels, yLabels, grid
     , ints, times, format, ticks, amount
     , Event, event, getNearest, getNearestX, getWithin, getWithinX, tooltip, formatTimestamp
     , svgAt, htmlAt, svg, html, none
     , width, height, marginTop, marginBottom, marginLeft, marginRight, responsive, id
     , range, domain, topped, paddingX, paddingY, events, htmlAttrs, binWidth
-    , start, end, pinned, color, rounded, roundBottom, margin, spacing
+    , start, end, pinned, color, rounded, roundBottom, margin, spacing, rangeEdit, domainEdit
     , dot, dotted, area, noArrow, binLabel, barLabel, filterX, filterY, only, attrs
     , blue, orange, pink, green, red
     )
@@ -19,7 +19,7 @@ module Chart exposing
 @docs chart, Element, scatter, linear, monotone, Metric, bars, histogram
 
 ## Work with bounds
-@docs Bounds, fromData, startMin, startMax, endMin, endMax, startPad, endPad, zero, middle
+@docs Bounds, startMin, startMax, endMin, endMax, startPad, endPad, zero, middle
 
 # Axis
 @docs xAxis, yAxis, xTicks, yTicks, xLabels, yLabels, grid
@@ -112,15 +112,27 @@ id value config =
 
 
 {-| -}
-range : Bounds -> Attribute { a | range : Bounds }
+range : List (data -> Float) -> Attribute { a | range : List (data -> Float) }
 range value config =
   { config | range = value }
 
 
 {-| -}
-domain : Bounds -> Attribute { a | domain : Bounds }
+domain : List (data -> Float) -> Attribute { a | domain : List (data -> Float) }
 domain value config =
   { config | domain = value }
+
+
+{-| -}
+rangeEdit : (Bounds -> Bounds) -> Attribute { a | rangeEdit : Maybe (Bounds -> Bounds) }
+rangeEdit value config =
+  { config | rangeEdit = Just value }
+
+
+{-| -}
+domainEdit : (Bounds -> Bounds) -> Attribute { a | domainEdit : Maybe (Bounds -> Bounds) }
+domainEdit value config =
+  { config | domainEdit = Just value }
 
 
 {-| -}
@@ -302,7 +314,7 @@ binWidth value config =
 
 
 {-| -}
-type alias Container msg =
+type alias Container data msg =
     { width : Float
     , height : Float
     , marginTop : Float
@@ -311,8 +323,10 @@ type alias Container msg =
     , marginRight : Float
     , responsive : Bool
     , id : String
-    , range : Bounds
-    , domain : Bounds
+    , range : List (data -> Float)
+    , rangeEdit : Maybe (Bounds -> Bounds)
+    , domain : List (data -> Float)
+    , domainEdit : Maybe (Bounds -> Bounds)
     , events : List (Event msg)
     , htmlAttrs : List (H.Attribute msg)
     , paddingX : Bounds
@@ -323,7 +337,7 @@ type alias Container msg =
 
 
 {-| -}
-chart : List (Container msg -> Container msg) -> List (Element data msg) -> List data -> H.Html msg
+chart : List (Container data msg -> Container data msg) -> List (Element data msg) -> List data -> H.Html msg
 chart edits elements data =
   let config =
         applyAttrs edits
@@ -337,38 +351,49 @@ chart edits elements data =
           , paddingY = { min = 0, max = 10 }
           , responsive = True
           , id = "you-should-really-set-the-id-of-your-chart"
-          , range = { min = 1, max = 100 }
-          , domain = { min = 1, max = 100 }
+          , range = []
+          , rangeEdit = Nothing
+          , domain = []
+          , domainEdit = Nothing
           , topped = Nothing
           , events = []
           , attrs = []
           , htmlAttrs = []
           }
 
+      calcRange =
+        case config.rangeEdit of
+          Just edit -> edit (fromData config.range data)
+          Nothing -> fromData config.range data
+
+      calcDomain =
+        case config.domainEdit of
+          Just edit -> edit (fromData config.domain data)
+          Nothing -> startMin 0 (fromData config.domain data)
+
       scalePadX =
         C.scaleCartesian
           { marginLower = config.marginLeft
           , marginUpper = config.marginRight
           , length = max 1 (config.width - config.paddingX.min - config.paddingX.max)
-          , data = config.range
-          , min = config.range.min
-          , max = config.range.max
+          , data = calcRange
+          , min = calcRange.min
+          , max = calcRange.max
           }
 
       toppedDomain =
         case config.topped of
           Just num ->
-            let domain_ = config.domain
-                fs = I.floats (I.around num) config.domain
+            let fs = I.floats (I.around num) calcDomain
                 interval =
                   case fs of
                     first :: second :: _ -> second - first
                     _ -> 0
             in
-            { domain_ | max = domain_.max + interval }
+            { calcDomain | max = calcDomain.max + interval }
 
           Nothing ->
-            config.domain
+            calcDomain
 
       scalePadY =
         C.scaleCartesian
@@ -385,9 +410,9 @@ chart edits elements data =
             { marginLower = config.marginLeft
             , marginUpper = config.marginRight
             , length = config.width
-            , data = config.range
-            , min = config.range.min - scalePadX config.paddingX.min
-            , max = config.range.max + scalePadX config.paddingX.max
+            , data = calcRange
+            , min = calcRange.min - scalePadX config.paddingX.min
+            , max = calcRange.max + scalePadX config.paddingX.max
             }
         , y =
             { marginUpper = config.marginTop

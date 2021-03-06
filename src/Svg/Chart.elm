@@ -209,7 +209,7 @@ viewBin plane bin =
   in
   g [ class "elm-charts__bin" ]
     [ g [ class "elm-charts__bars" ] (List.map (viewBar plane) adjustedBars)
-    , xTicks plane (round bin.tickLength) [ Attributes.strokeWidth (String.fromFloat bin.tickWidth) ] 0 [ bin.start, bin.end ]
+    , xTicks plane (round bin.tickLength) [ Attributes.strokeWidth (String.fromFloat bin.tickWidth) ] (closestToZero plane) [ bin.start, bin.end ]
     , viewXLabel plane [ class "elm-charts__bin-label" ] bin.label (bin.start + binWidth / 2) (closestToZero plane) 0 15
     , g [ class "elm-charts__bin-bar-labels" ] (List.map viewValueLabel adjustedBars)
     ]

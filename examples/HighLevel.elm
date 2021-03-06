@@ -36,13 +36,13 @@ type alias Point =
   }
 
 
-data : List { x : Float, y : Float }
+data : List { x : Float, y : Float, label : String }
 data =
-  [ { x = 0, y = 4 }
-  , { x = 4, y = 2 }
-  , { x = 6, y = 4 }
-  , { x = 8, y = 3 }
-  , { x = 10, y = 4 }
+  [ { x = 0, y = 4, label = "DK" }
+  , { x = 4, y = 2, label = "NO" }
+  , { x = 6, y = 4, label = "SE" }
+  , { x = 8, y = 3, label = "FI" }
+  , { x = 10, y = 4, label = "UK" }
   ]
 
 
@@ -74,8 +74,9 @@ view hovered =
     , C.marginLeft 40
     , C.marginRight 15
     , C.responsive
-    , C.range (C.fromData [.x] data |> C.startMin 0 |> C.startPad 2 |> C.endPad 2)
-    , C.domain (C.fromData [.y] data |> C.startMin 0)
+    , C.range [.x]
+    , C.domain [.y]
+    , C.rangeEdit (C.endMin 12)
     , C.topped 6
     , C.id "some-id"
     , C.htmlAttrs
@@ -85,39 +86,41 @@ view hovered =
         , HA.style "max-width" "700px"
         ]
     --, C.events
-    --    [ C.event "mousemove" (C.getNearestX OnHover .x [.y] data)
+    --    [ C.event "mousemove" (C.getNearestX OnHover)
     --    , C.event "mouseleave" (\_ _ -> OnLeave)
     --    ]
     ]
     [ C.grid [ C.width 0.4, C.color "rgb(220,220,220)" ]
-    --, C.histogram .x (String.fromFloat << .x)
-    --    [ C.Metric C.blue .y, C.Metric C.pink .y ]
-    --    [ C.rounded 0.2, C.roundBottom, C.binWidth (always 2) ]
-    --    data
+
+    , C.histogram .x (String.fromFloat << .x)
+        [ C.Metric C.blue .y, C.Metric C.pink .y ]
+        [ C.rounded 0.2, C.roundBottom, C.binWidth (always 2), C.barLabel barLabel ]
 
     , C.xAxis   [ C.pinned C.zero ]
     , C.yAxis   [ C.pinned .min ]
-    , C.yLabels [ C.pinned .min, C.amount 7 ]
-    , C.yTicks [  C.pinned .min, C.amount 7 ]
+    , C.yLabels [ C.pinned .min, C.amount 5 ]
+    , C.yTicks [  C.pinned .min, C.amount 5 ]
 
-    --, C.monotone .x .y [ C.dot specialDot, C.area "rgba(5, 142, 218, 0.25)" ] data
 
-    --, C.series "Ri" C.blue .y
-    --    [ C.dot specialDot, C.area "rgba(5, 142, 218, 0.25)" ]
+    --, C.bars
+    --    [ C.Metric C.blue .y, C.Metric C.pink .y, C.Metric C.orange .y ]
+    --    [ C.margin 0.05, C.spacing 0.015, C.rounded 0.2, C.binLabel .label
+        --, C.barLabel barLabel
+    --    ]
 
-    , C.bars
-        [ C.Metric C.blue .y, C.Metric C.pink .y, C.Metric C.orange .y ]
-        [ C.margin 0.05, C.spacing 0.015, C.rounded 0.2, C.binLabel (.x >> String.fromFloat)
-        , C.barLabel barLabel
-        ]
+    --, C.tooltip model.hovered
+    --    [ C.attrs [ background ]
+    --    , C.title <| \d ->
+    --    , C.each <| \m d ->
+    --    ]
 
-    --, case hovered of
-    --    point :: _ ->
-    --      C.tooltip (always point.x) (always point.y) []
-    --        [ Html.text (C.formatTimestamp Time.utc point.x ++ ", " ++ String.fromFloat point.y) ]
 
-    --    [] ->
-    --      C.none
+    --, C.tooltipMany model.hovered
+    --    [ C.attrs [ background ]
+    --    , C.title <| \d ->
+    --    , C.each <| \m d ->
+    --    ]
+
     ]
     data
 
