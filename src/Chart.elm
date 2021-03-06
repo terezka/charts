@@ -7,7 +7,7 @@ module Chart exposing
     , svgAt, htmlAt, svg, html, none
     , width, height, marginTop, marginBottom, marginLeft, marginRight, responsive, id
     , range, domain, topped, paddingX, paddingY, events, htmlAttrs, binWidth
-    , start, end, pinned, color, rounded, roundBottom, margin, spacing, rangeEdit, domainEdit
+    , start, end, pinned, color, rounded, roundBottom, margin, spacing
     , dot, dotted, area, noArrow, binLabel, barLabel, filterX, filterY, only, attrs
     , blue, orange, pink, green, red
     )
@@ -112,27 +112,15 @@ id value config =
 
 
 {-| -}
-range : List (data -> Float) -> Attribute { a | range : List (data -> Float) }
+range : (Bounds -> Bounds) -> Attribute { a | range : Maybe (Bounds -> Bounds) }
 range value config =
-  { config | range = value }
+  { config | range = Just value }
 
 
 {-| -}
-domain : List (data -> Float) -> Attribute { a | domain : List (data -> Float) }
+domain : (Bounds -> Bounds) -> Attribute { a | domain : Maybe (Bounds -> Bounds) }
 domain value config =
-  { config | domain = value }
-
-
-{-| -}
-rangeEdit : (Bounds -> Bounds) -> Attribute { a | rangeEdit : Maybe (Bounds -> Bounds) }
-rangeEdit value config =
-  { config | rangeEdit = Just value }
-
-
-{-| -}
-domainEdit : (Bounds -> Bounds) -> Attribute { a | domainEdit : Maybe (Bounds -> Bounds) }
-domainEdit value config =
-  { config | domainEdit = Just value }
+  { config | domain = Just value }
 
 
 {-| -}
@@ -314,7 +302,7 @@ binWidth value config =
 
 
 {-| -}
-type alias Container data msg =
+type alias Container msg =
     { width : Float
     , height : Float
     , marginTop : Float
@@ -323,10 +311,8 @@ type alias Container data msg =
     , marginRight : Float
     , responsive : Bool
     , id : String
-    , range : List (data -> Float)
-    , rangeEdit : Maybe (Bounds -> Bounds)
-    , domain : List (data -> Float)
-    , domainEdit : Maybe (Bounds -> Bounds)
+    , range : Maybe (Bounds -> Bounds)
+    , domain : Maybe (Bounds -> Bounds)
     , events : List (Event msg)
     , htmlAttrs : List (H.Attribute msg)
     , paddingX : Bounds
@@ -337,7 +323,7 @@ type alias Container data msg =
 
 
 {-| -}
-chart : List (Container data msg -> Container data msg) -> List (Element data msg) -> List data -> H.Html msg
+chart : List (Container msg -> Container msg) -> List (Element data msg) -> List data -> H.Html msg
 chart edits elements data =
   let config =
         applyAttrs edits
@@ -351,25 +337,34 @@ chart edits elements data =
           , paddingY = { min = 0, max = 10 }
           , responsive = True
           , id = "you-should-really-set-the-id-of-your-chart"
-          , range = []
-          , rangeEdit = Nothing
-          , domain = []
-          , domainEdit = Nothing
+          , range = Nothing
+          , domain = Nothing
           , topped = Nothing
           , events = []
           , attrs = []
           , htmlAttrs = []
           }
 
+      toPrePlaneInfo els acc =
+        case els of
+          el :: rest -> toPrePlaneInfo rest (el.prePlane data acc)
+          [] -> acc
+
+      prePlaneInfo =
+        toPrePlaneInfo elements
+          { xs = []
+          , ys = []
+          }
+
       calcRange =
-        case config.rangeEdit of
-          Just edit -> edit (fromData config.range data)
-          Nothing -> fromData config.range data
+        case config.range of
+          Just edit -> edit (fromData prePlaneInfo.xs data)
+          Nothing -> fromData prePlaneInfo.xs data
 
       calcDomain =
-        case config.domainEdit of
-          Just edit -> edit (fromData config.domain data)
-          Nothing -> startMin 0 (fromData config.domain data)
+        case config.domain of
+          Just edit -> edit (fromData prePlaneInfo.ys data)
+          Nothing -> startMin 0 (fromData prePlaneInfo.ys data)
 
       scalePadX =
         C.scaleCartesian
@@ -398,12 +393,12 @@ chart edits elements data =
       scalePadY =
         C.scaleCartesian
           { marginUpper = config.marginTop
-            , marginLower = config.marginBottom
-            , length = max 1 (config.height - config.paddingY.min - config.paddingY.max)
-            , data = toppedDomain
-            , min = toppedDomain.min
-            , max = toppedDomain.max
-            }
+          , marginLower = config.marginBottom
+          , length = max 1 (config.height - config.paddingY.min - config.paddingY.max)
+          , data = toppedDomain
+          , min = toppedDomain.min
+          , max = toppedDomain.max
+          }
 
       plane = -- TODO use config / system directly instead
         { x =
@@ -424,28 +419,29 @@ chart edits elements data =
             }
         }
 
-      ( _, allTicks, ( htmlElsBefore, svgEls, htmlElsAfter ) ) =
-        List.foldl buildElement ( True, { x = [], y = [] }, ([], [], []) ) elements
+      -- POST PLANE
 
-      buildElement el ( isBeforeChart, tickAcc, ( htmlB, svgE, htmlA ) ) =
-        case el of
-          GridElement gConfig ->
-            ( False, tickAcc, ( htmlB, svgE ++ [ viewGrid gConfig plane ], htmlA ) )
+      toPostPlaneInfo els acc isBeforeChart before svgs after =
+        case els of
+          el :: rest ->
+            if el.isHtml then
+              toPostPlaneInfo rest (el.postPlane plane acc) isBeforeChart
+                (if isBeforeChart then before ++ [ el.view ] else before)
+                svgs
+                (if isBeforeChart then after else after ++ [ el.view ])
 
-          SvgElement tickFunc func ->
-            ( False, tickFunc plane tickAcc, ( htmlB, svgE ++ [ \_ -> func config.id data plane ], htmlA ) )
+            else
+              toPostPlaneInfo rest (el.postPlane plane acc)
+                False before (svgs ++ [ el.view ]) after
 
-          HtmlElement func ->
-            ( isBeforeChart
-            , tickAcc
-            , if isBeforeChart
-              then ( htmlB ++ [ func data plane ], svgE, htmlA )
-              else ( htmlB, svgE, htmlA ++ [ func data plane ] )
-            )
+          [] ->
+            ( acc, ( before, svgs, after ) )
 
-      svgContainer els =
-        S.svg (sizingAttrs ++ List.map toEvent config.events ++ config.attrs) <|
-          C.frame config.id plane :: els ++ [ C.eventCatcher plane [] ]
+      ( info, ( hBefore, chartEls, hAfter ) ) =
+        toPostPlaneInfo elements { xTicks = [], yTicks = [] } True [] [] []
+
+      svgContainer =
+        S.svg (sizingAttrs ++ List.map toEvent config.events ++ config.attrs)
 
       sizingAttrs =
         if config.responsive
@@ -454,9 +450,36 @@ chart edits elements data =
 
       toEvent e =
         SE.on e.name (C.decodePoint plane e.msg)
+
+      allSvgEls =
+        [ C.frame config.id plane ] ++ (List.map applyInfo chartEls) ++ [ C.eventCatcher plane [] ]
+
+      applyInfo v =
+        v config.id data plane info
   in
   C.container plane config.htmlAttrs <|
-    htmlElsBefore ++ [ svgContainer (List.map (\e -> e allTicks) svgEls) ] ++ htmlElsAfter
+    List.map applyInfo hBefore ++ [ svgContainer allSvgEls ] ++ List.map applyInfo hAfter
+
+
+
+type alias PrePlaneInfo data =
+  { xs : List (data -> Float)
+  , ys : List (data -> Float)
+  }
+
+
+type alias PostPlaneInfo =
+  { xTicks : List Float
+  , yTicks : List Float
+  }
+
+
+type alias Element data msg =
+  { isHtml : Bool
+  , prePlane : List data -> PrePlaneInfo data -> PrePlaneInfo data
+  , postPlane : C.Plane -> PostPlaneInfo -> PostPlaneInfo
+  , view : String -> List data -> C.Plane -> PostPlaneInfo -> H.Html msg
+  }
 
 
 
@@ -577,23 +600,6 @@ tooltip toX toY att content =
 
 
 
--- ELEMENTS
-
-
-{-| -}
-type Element data msg
-    = GridElement (Grid msg)
-    | SvgElement (C.Plane -> AllTicks -> AllTicks) (String -> List data -> C.Plane -> S.Svg msg)
-    | HtmlElement (List data -> C.Plane -> H.Html msg)
-
-
-type alias AllTicks =
-  { x : List Float
-  , y : List Float
-  }
-
-
-
 -- AXIS
 
 
@@ -621,14 +627,18 @@ xAxis edits =
           , attrs = []
           }
   in
-  SvgElement (always identity) <| \_ _ p ->
-    S.g [ SA.class "elm-charts__x-axis" ]
-      [ C.horizontal p ([ SA.stroke config.color ] ++ config.attrs) (config.pinned <| toBounds .y p) (config.start <| toBounds .x p) (config.end <| toBounds .x p)
-      , if config.arrow then
-          C.xArrow p config.color (config.end <| toBounds .x p) (config.pinned <| toBounds .y p) 0 0
-        else
-          S.text ""
-      ]
+  { isHtml = False
+  , prePlane = \_ info -> info
+  , postPlane = always identity
+  , view = \_ _ p _ ->
+      S.g [ SA.class "elm-charts__x-axis" ]
+        [ C.horizontal p ([ SA.stroke config.color ] ++ config.attrs) (config.pinned <| toBounds .y p) (config.start <| toBounds .x p) (config.end <| toBounds .x p)
+        , if config.arrow then
+            C.xArrow p config.color (config.end <| toBounds .x p) (config.pinned <| toBounds .y p) 0 0
+          else
+            S.text ""
+        ]
+  }
 
 
 {-| -}
@@ -644,14 +654,18 @@ yAxis edits =
           , attrs = []
           }
   in
-  SvgElement (always identity) <| \_ _ p ->
-    S.g [ SA.class "elm-charts__y-axis" ]
-      [ C.vertical p ([ SA.stroke config.color ] ++ config.attrs) (config.pinned <| toBounds .x p) (config.start <| toBounds .y p) (config.end <| toBounds .y p)
-      , if config.arrow then
-          C.yArrow p config.color (config.pinned <| toBounds .x p) (config.end <| toBounds .y p) 0 0
-        else
-          S.text ""
-      ]
+  { isHtml = False
+  , prePlane = \_ info -> info
+  , postPlane = always identity
+  , view = \_ _ p _ ->
+      S.g [ SA.class "elm-charts__y-axis" ]
+        [ C.vertical p ([ SA.stroke config.color ] ++ config.attrs) (config.pinned <| toBounds .x p) (config.start <| toBounds .y p) (config.end <| toBounds .y p)
+        , if config.arrow then
+            C.yArrow p config.color (config.pinned <| toBounds .x p) (config.end <| toBounds .y p) 0 0
+          else
+            S.text ""
+        ]
+  }
 
 
 type alias Tick tick msg =
@@ -695,22 +709,22 @@ xTicks edits =
         , max = config.end b
         }
 
-      allTicks p =
+      toTicks p =
         List.filter config.only <|
           case config.produce of
             Changed produce -> List.map config.value (produce config.amount <| xBounds p)
             Unchanged v -> I.floats (I.around config.amount) <| xBounds p
-
-      allTickNums p ts =
-        { ts | x = ts.x ++ allTicks p }
 
       tickAttrs =
         [ SA.stroke config.color
         , SA.strokeWidth (String.fromFloat config.width)
         ] ++ config.attrs
   in
-  SvgElement allTickNums <| \_ _ p ->
-    C.xTicks p (round config.height) tickAttrs (config.pinned <| toBounds .y p) (allTicks p)
+  { isHtml = False
+  , prePlane = \_ info -> info
+  , postPlane = \p ts -> { ts | xTicks = ts.xTicks ++ toTicks p }
+  , view = \_ _ p _ -> C.xTicks p (round config.height) tickAttrs (config.pinned <| toBounds .y p) (toTicks p)
+  }
 
 
 {-| -}
@@ -739,22 +753,23 @@ yTicks edits =
         , max = config.end b
         }
 
-      allTicks p =
+      toTicks p =
         List.filter config.only <|
           case config.produce of
             Changed produce -> List.map config.value (produce config.amount <| yBounds p)
             Unchanged v -> (I.floats (I.around config.amount) <| yBounds p)
-
-      allTickNums p ts =
-        { ts | y = ts.y ++ allTicks p }
 
       tickAttrs =
         [ SA.stroke config.color
         , SA.strokeWidth (String.fromFloat config.width)
         ] ++ config.attrs
   in
-  SvgElement allTickNums <| \_ _ p ->
-    C.yTicks p (round config.height) tickAttrs (config.pinned <| toBounds .x p) (allTicks p)
+  { isHtml = False
+  , prePlane = \_ info -> info
+  , postPlane = \p ts -> { ts | yTicks = ts.yTicks ++ toTicks p }
+  , view = \_ _ p _ -> C.yTicks p (round config.height) tickAttrs (config.pinned <| toBounds .x p) (toTicks p)
+  }
+
 
 
 type alias Label tick msg =
@@ -798,22 +813,23 @@ xLabels edits =
         , max = config.end b
         }
 
-      allTicks p =
+      toTicks p =
         List.filter (config.only << .value) <|
           case config.produce of
             Changed produce -> List.map (\i -> { value = config.value i, label = config.format i }) (produce config.amount <| xBounds p)
             Unchanged v -> List.map (\i -> { value = i, label = String.fromFloat i }) (I.floats (I.around config.amount) <| xBounds p)
-
-      allTickNums p ts =
-        { ts | x = ts.x ++ List.map .value (allTicks p) }
 
       labelAttrs =
         [ SA.fill config.color
         , SA.transform ("translate(" ++ String.fromFloat config.xOffset ++ " " ++ String.fromFloat config.yOffset ++ ")")
         ] ++ config.attrs
   in
-  SvgElement allTickNums <| \_ _ p ->
-    C.xLabels p (C.xLabel labelAttrs .value .label) (config.pinned <| toBounds .y p) (allTicks p)
+  { isHtml = False
+  , prePlane = \_ info -> info
+  , postPlane = \p ts -> { ts | xTicks = ts.xTicks ++ List.map .value (toTicks p) }
+  , view = \_ _ p _ -> C.xLabels p (C.xLabel labelAttrs .value .label) (config.pinned <| toBounds .y p) (toTicks p)
+  }
+
 
 
 {-| -}
@@ -841,22 +857,23 @@ yLabels edits =
         , max = config.end b
         }
 
-      allTicks p =
+      toTicks p =
         List.filter (config.only << .value) <|
           case config.produce of
             Changed produce -> List.map (\i -> { value = config.value i, label = config.format i }) (produce config.amount <| yBounds p)
             Unchanged v -> List.map (\i -> { value = i, label = String.fromFloat i }) (I.floats (I.around config.amount) <| yBounds p)
-
-      allTickNums p ts =
-        { ts | y = ts.y ++ List.map .value (allTicks p) }
 
       labelAttrs =
         [ SA.fill config.color
         , SA.transform ("translate(" ++ String.fromFloat config.xOffset ++ " " ++ String.fromFloat config.yOffset ++ ")")
         ] ++ config.attrs
   in
-  SvgElement allTickNums <| \_ _ p ->
-    C.yLabels p (C.yLabel labelAttrs .value .label) (config.pinned <| toBounds .x p) (allTicks p)
+  { isHtml = False
+  , prePlane = \_ info -> info
+  , postPlane = \p ts -> { ts | yTicks = ts.yTicks ++ List.map .value (toTicks p) }
+  , view = \_ _ p _ -> C.yLabels p (C.yLabel labelAttrs .value .label) (config.pinned <| toBounds .x p) (toTicks p)
+  }
+
 
 
 type alias Grid msg =
@@ -881,8 +898,44 @@ grid edits =
           , attrs = []
           , dotted = False
           }
+
+      gridAttrs =
+        [ SA.stroke config.color
+        , SA.strokeWidth (String.fromFloat config.width)
+        ] ++ config.attrs
+
+      notTheseX p =
+        config.filterX (toBounds .x p)
+
+      notTheseY p =
+        config.filterY (toBounds .y p)
+
+      toXGrid p v =
+        if List.member v (notTheseY p)
+        then Nothing else Just <| C.yGrid p gridAttrs v
+
+      toYGrid p v =
+        if List.member v (notTheseX p)
+        then Nothing else Just <| C.xGrid p gridAttrs v
+
+      toDot p x y =
+        if List.member x (notTheseX p) || List.member y (notTheseY p)
+        then Nothing
+        else Just <| C.full config.width C.circle config.color p x y
   in
-  GridElement config
+  { isHtml = False
+  , prePlane = \_ info -> info
+  , postPlane = always identity
+  , view = \_ _ p info ->
+      S.g [ SA.class "elm-charts__grid" ] <|
+        if config.dotted then
+          List.concatMap (\x -> List.filterMap (toDot p x) info.yTicks) info.xTicks
+        else
+          [ S.g [ SA.class "elm-charts__x-grid" ] (List.filterMap (toXGrid p) info.xTicks)
+          , S.g [ SA.class "elm-charts__y-grid" ] (List.filterMap (toYGrid p) info.yTicks)
+          ]
+  }
+
 
 
 
@@ -957,8 +1010,13 @@ bars metrics edits =
         , bars = List.map (toBar name i d) metrics
         }
   in
-  SvgElement (always identity) <| \name data p ->
-    C.bars p (List.indexedMap (toBin name) data)
+  { isHtml = False
+  , prePlane = \data info ->
+      let length = toFloat (List.length data) in
+      { info | xs = (\_ -> 0.5) :: (\_ -> length + 0.5) :: info.xs, ys = List.map .value metrics ++ info.ys }
+  , postPlane = always identity
+  , view = \name data p _ -> C.bars p (List.indexedMap (toBin name) data)
+  }
 
 
 
@@ -1040,9 +1098,17 @@ histogram toX metrics edits =
           a :: b :: rs -> mapWithNext func ( i + 1, func i a (Just b) :: acc) rs
           a :: [] -> func i a Nothing :: acc
           [] -> acc
+
+      toBinWidthX d =
+        case config.binWidth of
+          Just w -> toX d + w d
+          Nothing -> toX d + 1 -- TODO
   in
-  SvgElement (always identity) <| \name data p ->
-    C.histogram p (mapWithNext (toBin name p) (0, []) data)
+  { isHtml = False
+  , prePlane = \data info -> { info | xs = toBinWidthX :: toX :: info.xs, ys = List.map .value metrics ++ info.ys }
+  , postPlane = always identity
+  , view = \name data p _ -> C.histogram p (mapWithNext (toBin name p) (0, []) data)
+  }
 
 
 
@@ -1069,11 +1135,14 @@ scatter toX toY edits =
           Unchanged _ -> \_ -> C.disconnected 6 1 C.cross config.color
           Changed d -> d
   in
-  SvgElement (always identity) <| \name data p ->
-    S.g
-      [ SA.class "elm-charts__scatter" ]
-      [ C.scatter p toX toY finalDot data ]
-
+  { isHtml = False
+  , prePlane = \data info -> { info | xs = toX :: info.xs, ys = toY :: info.ys }
+  , postPlane = always identity
+  , view = \name data p _ ->
+      S.g
+        [ SA.class "elm-charts__scatter" ]
+        [ C.scatter p toX toY finalDot data ]
+  }
 
 
 type alias Interpolation data msg =
@@ -1112,18 +1181,23 @@ monotone toX toY edits =
           Unchanged _ -> \_ -> C.disconnected 6 1 C.cross config.color
           Changed d -> d
   in
-  SvgElement (always identity) <| \name data p ->
-    case config.area of
-      Just fill ->
-        S.g [ SA.class "elm-charts__monotone-area" ]
-          [ C.monotoneArea p toX toY (interAttrs ++ [ SA.stroke "transparent", SA.fill fill, clipPath name ]) finalDot data
-          , C.monotone p toX toY interAttrs finalDot data
-          ]
+  { isHtml = False
+  , prePlane = \data info -> { info | xs = toX :: info.xs, ys = toY :: info.ys }
+  , postPlane = always identity
+  , view = \name data p _ ->
+      case config.area of
+        Just fill ->
+          S.g [ SA.class "elm-charts__monotone-area" ]
+            [ C.monotoneArea p toX toY (interAttrs ++ [ SA.stroke "transparent", SA.fill fill, clipPath name ]) finalDot data
+            , C.monotone p toX toY interAttrs finalDot data
+            ]
 
-      Nothing ->
-        S.g
-          [ SA.class "elm-charts__monotone" ]
-          [ C.monotone p toX toY interAttrs finalDot data ]
+        Nothing ->
+          S.g
+            [ SA.class "elm-charts__monotone" ]
+            [ C.monotone p toX toY interAttrs finalDot data ]
+  }
+
 
 
 {-| -}
@@ -1148,7 +1222,10 @@ linear toX toY edits =
           Unchanged _ -> \_ -> C.disconnected 6 1 C.cross config.color
           Changed d -> d
   in
-  SvgElement (always identity) <| \name data p ->
+  { isHtml = False
+  , prePlane = \data info -> { info | xs = toX :: info.xs, ys = toY :: info.ys }
+  , postPlane = always identity
+  , view = \name data p _ ->
     case config.area of
       Just fill ->
         S.g [ SA.class "elm-charts__linear-area" ]
@@ -1160,38 +1237,59 @@ linear toX toY edits =
         S.g
           [ SA.class "elm-charts__linear" ]
           [ C.linear p toX toY interAttrs finalDot data ]
+  }
 
 
 {-| -}
 svg : (C.Plane -> S.Svg msg) -> Element data msg
 svg func =
-  SvgElement (always identity) (\_ _ -> func)
+  { isHtml = False
+  , prePlane = \_ info -> info
+  , postPlane = always identity
+  , view = \_ _ p _-> func p
+  }
 
 
 {-| -}
 html : (C.Plane -> H.Html msg) -> Element data msg
 html func =
-  HtmlElement (\_ -> func)
+  { isHtml = True
+  , prePlane = \_ info -> info
+  , postPlane = always identity
+  , view = \_ _ p _-> func p
+  }
 
 
 {-| -}
 svgAt : (Bounds -> Float) -> (Bounds -> Float) -> Float -> Float -> List (S.Svg msg) -> Element data msg
 svgAt toX toY xOff yOff view =
-  SvgElement (always identity) <| \_ _ p ->
-    S.g [ C.position p (toX <| toBounds .x p) (toY <| toBounds .y p) xOff yOff ] view
+  { isHtml = False
+  , prePlane = \_ info -> info
+  , postPlane = always identity
+  , view = \_ _ p _ ->
+      S.g [ C.position p (toX <| toBounds .x p) (toY <| toBounds .y p) xOff yOff ] view
+  }
 
 
 {-| -}
 htmlAt : (Bounds -> Float) -> (Bounds -> Float) -> Float -> Float -> List (H.Attribute msg) -> List (H.Html msg) -> Element data msg
 htmlAt toX toY xOff yOff att view =
-  HtmlElement <| \_ p ->
-    C.positionHtml p (toX <| toBounds .x p) (toY <| toBounds .y p) xOff yOff att view
+  { isHtml = True
+  , prePlane = \_ info -> info
+  , postPlane = always identity
+  , view = \_ _ p _ ->
+      C.positionHtml p (toX <| toBounds .x p) (toY <| toBounds .y p) xOff yOff att view
+  }
 
 
 {-| -}
 none : Element data msg
 none =
-  HtmlElement (\_ _ -> H.text "")
+  { isHtml = True
+  , prePlane = \_ info -> info
+  , postPlane = always identity
+  , view = \_ _ _ _ -> H.text ""
+  }
 
 
 
@@ -1254,41 +1352,6 @@ red =
 toDataPoints : (data -> Float) -> List (data -> Float) -> List data -> List (C.DataPoint data)
 toDataPoints toX toYs data =
   List.concatMap (\toY -> C.toDataPoints toX toY data) toYs
-
-
-viewGrid : Grid msg -> C.Plane -> AllTicks -> S.Svg msg
-viewGrid config p allTicks =
-  let gridAttrs =
-        [ SA.stroke config.color
-        , SA.strokeWidth (String.fromFloat config.width)
-        ] ++ config.attrs
-
-      notTheseX =
-        config.filterX (toBounds .x p)
-
-      notTheseY =
-        config.filterY (toBounds .y p)
-
-      toXGrid v =
-        if List.member v notTheseY
-        then Nothing else Just <| C.yGrid p gridAttrs v
-
-      toYGrid v =
-        if List.member v notTheseX
-        then Nothing else Just <| C.xGrid p gridAttrs v
-
-      toDot x y =
-        if List.member x notTheseX || List.member y notTheseY
-        then Nothing
-        else Just <| C.full config.width C.circle config.color p x y
-  in
-  S.g [ SA.class "elm-charts__grid" ] <|
-    if config.dotted then
-      List.concatMap (\x -> List.filterMap (toDot x) allTicks.y) allTicks.x
-    else
-      [ S.g [ SA.class "elm-charts__x-grid" ] (List.filterMap toXGrid allTicks.x)
-      , S.g [ SA.class "elm-charts__y-grid" ] (List.filterMap toYGrid allTicks.y)
-      ]
 
 
 

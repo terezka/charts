@@ -81,10 +81,6 @@ view hovered =
     , C.marginLeft 40
     , C.marginRight 15
     , C.responsive
-    , C.range [.x]
-    , C.domain [.y]
-    , C.rangeEdit (C.endMin 12)
-    , C.topped 6
     , C.id "some-id"
     , C.htmlAttrs
         [ HA.style "font-size" "12px"
@@ -99,23 +95,28 @@ view hovered =
     ]
     [ C.grid [ C.width 0.4, C.color "rgb(220,220,220)" ]
 
-    , C.histogram .x
-        [ C.Metric "speed" "m/s" C.blue .y
-        , C.Metric "weight" "kg" C.pink .y
-        ]
-        [ C.rounded 0.2, C.roundBottom, C.binWidth (always 2)
-        , C.barLabel barLabel
-        ]
+    --, C.histogram .x
+    --    [ C.Metric "speed" "m/s" C.blue .y
+    --    , C.Metric "weight" "kg" C.pink .y
+    --    ]
+    --    [ C.rounded 0.2, C.roundBottom, C.binWidth (always 2)
+    --    , C.barLabel barLabel
+    --    ]
 
     , C.xAxis   [ C.pinned C.zero ]
     , C.yAxis   [ C.pinned .min ]
     , C.yLabels [ C.pinned .min, C.amount 5 ]
     , C.yTicks [  C.pinned .min, C.amount 5 ]
 
+    , C.monotone .x .y [ C.dot specialDot, C.area "rgba(5,142,218, 0.3)" ]
+
 
     --, C.bars
-    --    [ C.Metric C.blue .y, C.Metric C.pink .y, C.Metric C.orange .y ]
-    --    [ C.margin 0.05, C.spacing 0.015, C.rounded 0.2, C.binLabel .label
+    --    [ C.Metric "speed" "m/s" C.blue .y
+    --    , C.Metric "width" "m" C.pink .y
+    --    , C.Metric "weight" "kg" C.orange .y
+    --    ]
+    --    [ C.margin 0.02, C.spacing 0.015, C.rounded 0.2, C.binLabel .label
     --    , C.barLabel barLabel
     --    ]
 
