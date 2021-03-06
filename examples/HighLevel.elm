@@ -80,6 +80,8 @@ view hovered =
     , C.marginBottom 40
     , C.marginLeft 40
     , C.marginRight 15
+    , C.paddingBottom 10
+    , C.paddingLeft 10
     , C.responsive
     , C.id "some-id"
     , C.htmlAttrs
@@ -109,7 +111,6 @@ view hovered =
     , C.yTicks [  C.pinned .min, C.amount 5 ]
 
     , C.monotone .x .y [ C.dot specialDot, C.area "rgba(5,142,218, 0.3)" ]
-
 
     --, C.bars
     --    [ C.Metric "speed" "m/s" C.blue .y

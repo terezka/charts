@@ -5,8 +5,11 @@ module Chart exposing
     , ints, times, format, ticks, amount
     , Event, event, getNearest, getNearestX, getWithin, getWithinX, tooltip, formatTimestamp
     , svgAt, htmlAt, svg, html, none
-    , width, height, marginTop, marginBottom, marginLeft, marginRight, responsive, id
-    , range, domain, topped, paddingX, paddingY, events, htmlAttrs, binWidth
+    , width, height
+    , marginTop, marginBottom, marginLeft, marginRight
+    , paddingTop, paddingBottom, paddingLeft, paddingRight
+    , responsive, id
+    , range, domain, topped, events, htmlAttrs, binWidth
     , start, end, pinned, color, rounded, roundBottom, margin, spacing
     , dot, dotted, area, noArrow, binLabel, barLabel, filterX, filterY, only, attrs
     , blue, orange, pink, green, red
@@ -100,6 +103,30 @@ marginRight value config =
 
 
 {-| -}
+paddingTop : Float -> Attribute { a | paddingTop : Float }
+paddingTop value config =
+  { config | paddingTop = value }
+
+
+{-| -}
+paddingBottom : Float -> Attribute { a | paddingBottom : Float }
+paddingBottom value config =
+  { config | paddingBottom = value }
+
+
+{-| -}
+paddingLeft : Float -> Attribute { a | paddingLeft : Float }
+paddingLeft value config =
+  { config | paddingLeft = value }
+
+
+{-| -}
+paddingRight : Float -> Attribute { a | paddingRight : Float }
+paddingRight value config =
+  { config | paddingRight = value }
+
+
+{-| -}
 responsive : Attribute { a | responsive : Bool }
 responsive config =
   { config | responsive = True }
@@ -121,19 +148,6 @@ range value config =
 domain : (Bounds -> Bounds) -> Attribute { a | domain : Maybe (Bounds -> Bounds) }
 domain value config =
   { config | domain = Just value }
-
-
-{-| -}
-paddingX : Float -> Float -> Attribute { a | paddingX : Bounds }
-paddingX a b config =
-  { config | paddingX = Bounds a b }
-
-
-{-| -}
-paddingY : Float -> Float -> Attribute { a | paddingY : Bounds }
-paddingY a b config =
-  { config | paddingY = Bounds a b }
-
 
 {-| -}
 events : List (Event msg) -> Attribute { a | events : List (Event msg) }
@@ -309,14 +323,16 @@ type alias Container msg =
     , marginBottom : Float
     , marginLeft : Float
     , marginRight : Float
+    , paddingTop : Float
+    , paddingBottom : Float
+    , paddingLeft : Float
+    , paddingRight : Float
     , responsive : Bool
     , id : String
     , range : Maybe (Bounds -> Bounds)
     , domain : Maybe (Bounds -> Bounds)
     , events : List (Event msg)
     , htmlAttrs : List (H.Attribute msg)
-    , paddingX : Bounds
-    , paddingY : Bounds
     , topped : Maybe Int
     , attrs : List (S.Attribute msg)
     }
@@ -333,8 +349,10 @@ chart edits elements data =
           , marginBottom = 30
           , marginLeft = 30
           , marginRight = 5
-          , paddingX = { min = 0, max = 10 }
-          , paddingY = { min = 0, max = 10 }
+          , paddingTop = 10
+          , paddingBottom = 0
+          , paddingLeft = 0
+          , paddingRight = 10
           , responsive = True
           , id = "you-should-really-set-the-id-of-your-chart"
           , range = Nothing
@@ -370,7 +388,7 @@ chart edits elements data =
         C.scaleCartesian
           { marginLower = config.marginLeft
           , marginUpper = config.marginRight
-          , length = max 1 (config.width - config.paddingX.min - config.paddingX.max)
+          , length = max 1 (config.width - config.paddingLeft - config.paddingRight)
           , data = calcRange
           , min = calcRange.min
           , max = calcRange.max
@@ -394,7 +412,7 @@ chart edits elements data =
         C.scaleCartesian
           { marginUpper = config.marginTop
           , marginLower = config.marginBottom
-          , length = max 1 (config.height - config.paddingY.min - config.paddingY.max)
+          , length = max 1 (config.height - config.paddingBottom - config.paddingTop)
           , data = toppedDomain
           , min = toppedDomain.min
           , max = toppedDomain.max
@@ -406,16 +424,16 @@ chart edits elements data =
             , marginUpper = config.marginRight
             , length = config.width
             , data = calcRange
-            , min = calcRange.min - scalePadX config.paddingX.min
-            , max = calcRange.max + scalePadX config.paddingX.max
+            , min = calcRange.min - scalePadX config.paddingLeft
+            , max = calcRange.max + scalePadX config.paddingRight
             }
         , y =
             { marginUpper = config.marginTop
             , marginLower = config.marginBottom
             , length = config.height
             , data = toppedDomain
-            , min = toppedDomain.min - scalePadY config.paddingY.min
-            , max = toppedDomain.max + scalePadY config.paddingY.max
+            , min = toppedDomain.min - scalePadY config.paddingBottom
+            , max = toppedDomain.max + scalePadY config.paddingTop
             }
         }
 
