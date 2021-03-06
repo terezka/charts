@@ -161,6 +161,7 @@ type alias Bin msg =
 {-| -}
 type alias Bar msg =
   { attributes : List (Attribute msg)
+  , label : Maybe String
   , rounded : Float
   , roundBottom : Bool
   , width : Float
@@ -187,6 +188,7 @@ viewBin plane bin =
 
       adjustBar barOffset bar =
         { attributes = bar.attributes
+        , label = bar.label
         , rounded = bar.rounded
         , roundBottom = bar.roundBottom
         , position = bin.start + binOffset + barOffset
@@ -196,17 +198,20 @@ viewBin plane bin =
 
       ( _, adjustedBars ) =
         List.foldl (\b (w, acc) -> ( w + (binWidth * b.width + bin.spacing), adjustBar w b :: acc )) ( 0, [] ) bin.bars
+
+      viewValueLabel bar =
+        case bar.label of
+          Just string ->
+            viewXLabel plane [] string (bar.position + bar.width / 2) bar.value 0 -5
+
+          Nothing ->
+            Svg.text ""
   in
-  g [ class "elm-charts__histogram-bin" ]
+  g [ class "elm-charts__bin" ]
     [ g [ class "elm-charts__bars" ] (List.map (viewBar plane) adjustedBars)
-    , xTicks plane (round bin.tickLength)
-        [ Attributes.strokeWidth (String.fromFloat bin.tickWidth) ]
-        0 [ bin.start, bin.end ]
-    , Svg.g
-        [ placeWithOffset plane (bin.start + binWidth / 2) (closestToZero plane) 0 15
-        , Attributes.style "text-anchor: middle;"
-        ]
-        [ viewLabel [] bin.label ]
+    , xTicks plane (round bin.tickLength) [ Attributes.strokeWidth (String.fromFloat bin.tickWidth) ] 0 [ bin.start, bin.end ]
+    , viewXLabel plane [ class "elm-charts__bin-label" ] bin.label (bin.start + binWidth / 2) (closestToZero plane) 0 15
+    , g [ class "elm-charts__bin-bar-labels" ] (List.map viewValueLabel adjustedBars)
     ]
 
 
@@ -216,6 +221,7 @@ viewBin plane bin =
 
 type alias InternalBar msg =
   { attributes : List (Attribute msg)
+  , label : Maybe String
   , rounded : Float
   , roundBottom : Bool
   , position : Float
@@ -295,7 +301,7 @@ viewBar plane bar_ =
           bar_.attributes
           [ d (description plane commands) ]
   in
-    path attributes []
+  path attributes []
 
 
 
@@ -517,6 +523,15 @@ viewLabel userAttributes string =
   in
   Svg.text_ attributes
     [ Svg.tspan [] [ Svg.text string ] ]
+
+
+viewXLabel : Plane -> List (Attribute msg) -> String -> Float -> Float -> Float -> Float -> Svg msg
+viewXLabel plane userAttributes string x y xOff yOff =
+  Svg.g
+    [ placeWithOffset plane x y xOff yOff
+    , Attributes.style "text-anchor: middle;"
+    ]
+    [ viewLabel [] string ]
 
 
 {-| Place an arrow pointing to the right somewhere.

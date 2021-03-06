@@ -60,6 +60,11 @@ view hovered =
         if Maybe.map .x (List.head hovered) == Just p.x
           then SC.aura 2 8 0.2 SC.circle "rgb(5,142,218)"
           else SC.disconnected 2 1 SC.circle "rgb(5,142,218)"
+
+      barLabel i m d =
+        if i == 1 && m.color == C.blue
+          then Just (String.fromFloat (m.value d))
+          else Nothing
   in
   C.chart
     [ C.width 600
@@ -85,10 +90,10 @@ view hovered =
     --    ]
     ]
     [ C.grid [ C.width 0.4, C.color "rgb(220,220,220)" ]
-    , C.histogram .x (String.fromFloat << .x)
-        [ C.Metric C.blue .y, C.Metric C.pink .y ]
-        [ C.rounded 0.2, C.roundBottom, C.binWidth (always 2) ]
-        data
+    --, C.histogram .x (String.fromFloat << .x)
+    --    [ C.Metric C.blue .y, C.Metric C.pink .y ]
+    --    [ C.rounded 0.2, C.roundBottom, C.binWidth (always 2) ]
+    --    data
 
     , C.xAxis   [ C.pinned C.zero ]
     , C.yAxis   [ C.pinned .min ]
@@ -97,7 +102,14 @@ view hovered =
 
     --, C.monotone .x .y [ C.dot specialDot, C.area "rgba(5, 142, 218, 0.25)" ] data
 
-    --, C.bars [ C.Metric C.blue .y, C.Metric C.pink .y ] [ C.margin 0.05, C.spacing 0.015, C.rounded 0.2, C.label (.x >> String.fromFloat) ] data
+    --, C.series "Ri" C.blue .y
+    --    [ C.dot specialDot, C.area "rgba(5, 142, 218, 0.25)" ]
+
+    , C.bars
+        [ C.Metric C.blue .y, C.Metric C.pink .y, C.Metric C.orange .y ]
+        [ C.margin 0.05, C.spacing 0.015, C.rounded 0.2, C.binLabel (.x >> String.fromFloat)
+        , C.barLabel barLabel
+        ]
 
     --, case hovered of
     --    point :: _ ->
@@ -107,6 +119,8 @@ view hovered =
     --    [] ->
     --      C.none
     ]
+    data
+
 
 
 

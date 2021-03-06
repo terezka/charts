@@ -8,7 +8,7 @@ module Chart exposing
     , width, height, marginTop, marginBottom, marginLeft, marginRight, responsive, id
     , range, domain, topped, paddingX, paddingY, events, htmlAttrs, binWidth
     , start, end, pinned, color, rounded, roundBottom, margin, spacing
-    , dot, dotted, area, noArrow, label, filterX, filterY, only, attrs
+    , dot, dotted, area, noArrow, binLabel, barLabel, filterX, filterY, only, attrs
     , blue, orange, pink, green, red
     )
 
@@ -280,9 +280,15 @@ topped value config =
 
 
 {-| -}
-label : (data -> String) -> Attribute { a | label : Maybe (data -> String) }
-label value config =
-  { config | label = Just value }
+binLabel : (data -> String) -> Attribute { a | binLabel : Maybe (data -> String) }
+binLabel value config =
+  { config | binLabel = Just value }
+
+
+{-| -}
+barLabel : (Int -> Metric data -> data -> Maybe String) -> Attribute { a | barLabel : Maybe (Int -> Metric data -> data -> Maybe String) }
+barLabel value config =
+  { config | barLabel = Just value }
 
 
 {-| -}
@@ -317,8 +323,8 @@ type alias Container msg =
 
 
 {-| -}
-chart : List (Container msg -> Container msg) -> List (Element msg) -> H.Html msg
-chart edits elements =
+chart : List (Container msg -> Container msg) -> List (Element data msg) -> List data -> H.Html msg
+chart edits elements data =
   let config =
         applyAttrs edits
           { width = 500
@@ -402,14 +408,14 @@ chart edits elements =
             ( False, tickAcc, ( htmlB, svgE ++ [ viewGrid gConfig plane ], htmlA ) )
 
           SvgElement tickFunc func ->
-            ( False, tickFunc plane tickAcc, ( htmlB, svgE ++ [ \_ -> func config.id plane ], htmlA ) )
+            ( False, tickFunc plane tickAcc, ( htmlB, svgE ++ [ \_ -> func config.id data plane ], htmlA ) )
 
           HtmlElement func ->
             ( isBeforeChart
             , tickAcc
             , if isBeforeChart
-              then ( htmlB ++ [ func plane ], svgE, htmlA )
-              else ( htmlB, svgE, htmlA ++ [ func plane ] )
+              then ( htmlB ++ [ func data plane ], svgE, htmlA )
+              else ( htmlB, svgE, htmlA ++ [ func data plane ] )
             )
 
       svgContainer els =
@@ -540,7 +546,7 @@ getWithinX toMsg radius toX toYs data plane point =
 
 
 {-| -}
-tooltip : (Bounds -> Float) -> (Bounds -> Float) -> List (H.Attribute msg) -> List (H.Html msg) -> Element msg
+tooltip : (Bounds -> Float) -> (Bounds -> Float) -> List (H.Attribute msg) -> List (H.Html msg) -> Element data msg
 tooltip toX toY att content =
   html <| \p -> C.tooltip p (toX <| toBounds .x p) (toY <| toBounds .y p) att content
 
@@ -550,10 +556,10 @@ tooltip toX toY att content =
 
 
 {-| -}
-type Element msg
+type Element data msg
     = GridElement (Grid msg)
-    | SvgElement (C.Plane -> AllTicks -> AllTicks) (String -> C.Plane -> S.Svg msg)
-    | HtmlElement (C.Plane -> H.Html msg)
+    | SvgElement (C.Plane -> AllTicks -> AllTicks) (String -> List data -> C.Plane -> S.Svg msg)
+    | HtmlElement (List data -> C.Plane -> H.Html msg)
 
 
 type alias AllTicks =
@@ -578,7 +584,7 @@ type alias Axis msg =
 
 
 {-| -}
-xAxis : List (Axis msg -> Axis msg) -> Element msg
+xAxis : List (Axis msg -> Axis msg) -> Element data msg
 xAxis edits =
   let config =
         applyAttrs edits
@@ -590,7 +596,7 @@ xAxis edits =
           , attrs = []
           }
   in
-  SvgElement (always identity) <| \_ p ->
+  SvgElement (always identity) <| \_ _ p ->
     S.g [ SA.class "elm-charts__x-axis" ]
       [ C.horizontal p ([ SA.stroke config.color ] ++ config.attrs) (config.pinned <| toBounds .y p) (config.start <| toBounds .x p) (config.end <| toBounds .x p)
       , if config.arrow then
@@ -601,7 +607,7 @@ xAxis edits =
 
 
 {-| -}
-yAxis : List (Axis msg -> Axis msg) -> Element msg
+yAxis : List (Axis msg -> Axis msg) -> Element data msg
 yAxis edits =
   let config =
         applyAttrs edits
@@ -613,7 +619,7 @@ yAxis edits =
           , attrs = []
           }
   in
-  SvgElement (always identity) <| \_ p ->
+  SvgElement (always identity) <| \_ _ p ->
     S.g [ SA.class "elm-charts__y-axis" ]
       [ C.vertical p ([ SA.stroke config.color ] ++ config.attrs) (config.pinned <| toBounds .x p) (config.start <| toBounds .y p) (config.end <| toBounds .y p)
       , if config.arrow then
@@ -640,7 +646,7 @@ type alias Tick tick msg =
 
 
 {-| -}
-xTicks : List (Tick tick msg -> Tick tick msg) -> Element msg
+xTicks : List (Tick tick msg -> Tick tick msg) -> Element data msg
 xTicks edits =
   let config =
         applyAttrs edits
@@ -678,12 +684,12 @@ xTicks edits =
         , SA.strokeWidth (String.fromFloat config.width)
         ] ++ config.attrs
   in
-  SvgElement allTickNums <| \_ p ->
+  SvgElement allTickNums <| \_ _ p ->
     C.xTicks p (round config.height) tickAttrs (config.pinned <| toBounds .y p) (allTicks p)
 
 
 {-| -}
-yTicks : List (Tick tick msg -> Tick tick msg) -> Element msg
+yTicks : List (Tick tick msg -> Tick tick msg) -> Element data msg
 yTicks edits =
   let config =
         applyAttrs edits
@@ -722,7 +728,7 @@ yTicks edits =
         , SA.strokeWidth (String.fromFloat config.width)
         ] ++ config.attrs
   in
-  SvgElement allTickNums <| \_ p ->
+  SvgElement allTickNums <| \_ _ p ->
     C.yTicks p (round config.height) tickAttrs (config.pinned <| toBounds .x p) (allTicks p)
 
 
@@ -743,7 +749,7 @@ type alias Label tick msg =
 
 
 {-| -}
-xLabels : List (Label tick msg -> Label tick msg) -> Element msg
+xLabels : List (Label tick msg -> Label tick msg) -> Element data msg
 xLabels edits =
   let config =
         applyAttrs edits
@@ -781,12 +787,12 @@ xLabels edits =
         , SA.transform ("translate(" ++ String.fromFloat config.xOffset ++ " " ++ String.fromFloat config.yOffset ++ ")")
         ] ++ config.attrs
   in
-  SvgElement allTickNums <| \_ p ->
+  SvgElement allTickNums <| \_ _ p ->
     C.xLabels p (C.xLabel labelAttrs .value .label) (config.pinned <| toBounds .y p) (allTicks p)
 
 
 {-| -}
-yLabels : List (Label tick msg -> Label tick msg) -> Element msg
+yLabels : List (Label tick msg -> Label tick msg) -> Element data msg
 yLabels edits =
   let config =
         applyAttrs edits
@@ -824,7 +830,7 @@ yLabels edits =
         , SA.transform ("translate(" ++ String.fromFloat config.xOffset ++ " " ++ String.fromFloat config.yOffset ++ ")")
         ] ++ config.attrs
   in
-  SvgElement allTickNums <| \_ p ->
+  SvgElement allTickNums <| \_ _ p ->
     C.yLabels p (C.yLabel labelAttrs .value .label) (config.pinned <| toBounds .x p) (allTicks p)
 
 
@@ -839,7 +845,7 @@ type alias Grid msg =
 
 
 {-| -}
-grid : List (Grid msg -> Grid msg) -> Element msg
+grid : List (Grid msg -> Grid msg) -> Element data msg
 grid edits =
   let config =
         applyAttrs edits
@@ -864,7 +870,8 @@ type alias Bars data msg =
   , attrs : List (S.Attribute msg)
   , margin : Float
   , spacing : Float
-  , label : Maybe (data -> String)
+  , binLabel : Maybe (data -> String)
+  , barLabel : Maybe (Int -> Metric data -> data -> Maybe String)
   }
 
 
@@ -876,23 +883,28 @@ type alias Metric data =
 
 
 {-| -}
-bars : List (Metric data) -> List (Bars data msg -> Bars data msg) -> List data -> Element msg
-bars metrics edits data =
-  -- TODO spacing?
+bars : List (Metric data) -> List (Bars data msg -> Bars data msg) -> Element data msg
+bars metrics edits =
   let config =
         applyAttrs edits
           { rounded = 0
           , roundBottom = False
-          , label = Nothing
           , spacing = 0
           , margin = 0.05
+          , binLabel = Nothing
+          , barLabel = Nothing
           , attrs = []
           }
 
-      toLabel i d =
-        case config.label of
+      toBinLabel i d =
+        case config.binLabel of
           Just func -> func d
           Nothing -> String.fromInt i
+
+      toBarLabel i m d =
+        case config.barLabel of
+          Just func -> func i m d
+          Nothing -> Nothing
 
       numOfBars =
         toFloat (List.length metrics)
@@ -903,8 +915,9 @@ bars metrics edits data =
       barSpacing =
         (numOfBars - 1) * config.spacing
 
-      toBar name d metric =
+      toBar name i d metric =
         { attributes = [ SA.stroke "transparent", SA.fill metric.color, clipPath name ] ++ config.attrs
+        , label = toBarLabel i metric d
         , width = (1 - barSpacing - binMargin) / numOfBars
         , rounded = config.rounded
         , roundBottom = config.roundBottom
@@ -912,13 +925,14 @@ bars metrics edits data =
         }
 
       toBin name i d =
-        { label = toLabel i d
+        { label = toBinLabel i d
         , spacing = config.spacing
-        , bars = List.map (toBar name d) metrics
+        , bars = List.map (toBar name i d) metrics
         }
   in
-  SvgElement (always identity) <| \name p ->
+  SvgElement (always identity) <| \name data p ->
     C.bars p (List.indexedMap (toBin name) data)
+
 
 
 type alias Histogram data msg =
@@ -928,13 +942,13 @@ type alias Histogram data msg =
   , margin : Float
   , spacing : Float
   , attrs : List (S.Attribute msg)
+  , barLabel : Maybe (Int -> Metric data -> data -> Maybe String)
   }
 
 
 {-| -}
-histogram : (data -> Float) -> (data -> String) -> List (Metric data) -> List (Histogram data msg -> Histogram data msg) -> List data -> Element msg
-histogram toX toLabel metrics edits data =
-  -- TODO spacing?
+histogram : (data -> Float) -> (data -> String) -> List (Metric data) -> List (Histogram data msg -> Histogram data msg) -> Element data msg
+histogram toX toLabel metrics edits =
   let config =
         applyAttrs edits
           { binWidth = Nothing
@@ -942,6 +956,7 @@ histogram toX toLabel metrics edits data =
           , roundBottom = False
           , spacing = 0.01
           , margin = 0.05
+          , barLabel = Nothing
           , attrs = []
           }
 
@@ -962,32 +977,38 @@ histogram toX toLabel metrics edits data =
               Just n -> toX n - toX d
               Nothing -> p.x.max - toX d
 
-      toBar name d i metric =
+      toBarLabel i m d =
+        case config.barLabel of
+          Just func -> func i m d
+          Nothing -> Nothing
+
+      toBar name i d metric =
         { attributes = [ SA.stroke "transparent", SA.fill metric.color, clipPath name ] ++ config.attrs
+        , label = toBarLabel i metric d
         , width = (1 - barSpacing - barMargin) / numOfBars
         , rounded = config.rounded
         , roundBottom = config.roundBottom
         , value = metric.value d
         }
 
-      toBin name p d n =
+      toBin name p i d n =
         { label = toLabel d
         , start = toX d
         , end = toX d + toBinWidth p d n
         , spacing = config.spacing
         , tickLength = 4
         , tickWidth = 1
-        , bars = List.indexedMap (toBar name d) metrics
+        , bars = List.map (toBar name i d) metrics
         }
 
-      mapWithNext func acc ds =
+      mapWithNext func (i, acc) ds =
         case ds of
-          a :: b :: rs -> mapWithNext func (func a (Just b) :: acc) rs
-          a :: [] -> func a Nothing :: acc
+          a :: b :: rs -> mapWithNext func ( i + 1, func i a (Just b) :: acc) rs
+          a :: [] -> func i a Nothing :: acc
           [] -> acc
   in
-  SvgElement (always identity) <| \name p ->
-    C.histogram p (mapWithNext (toBin name p) [] data)
+  SvgElement (always identity) <| \name data p ->
+    C.histogram p (mapWithNext (toBin name p) (0, []) data)
 
 
 
@@ -1001,8 +1022,8 @@ type alias Scatter data msg =
 
 
 {-| -}
-scatter : (data -> Float) -> (data -> Float) -> List (Scatter data msg -> Scatter data msg) -> List data -> Element msg
-scatter toX toY edits data =
+scatter : (data -> Float) -> (data -> Float) -> List (Scatter data msg -> Scatter data msg) -> Element data msg
+scatter toX toY edits =
   let config =
         applyAttrs edits
           { color = "rgb(5,142,218)" -- TODO
@@ -1014,7 +1035,7 @@ scatter toX toY edits data =
           Unchanged _ -> \_ -> C.disconnected 6 1 C.cross config.color
           Changed d -> d
   in
-  SvgElement (always identity) <| \name p ->
+  SvgElement (always identity) <| \name data p ->
     S.g
       [ SA.class "elm-charts__scatter" ]
       [ C.scatter p toX toY finalDot data ]
@@ -1036,8 +1057,8 @@ type Tracked a
 
 
 {-| -}
-monotone : (data -> Float) -> (data -> Float) -> List (Interpolation data msg -> Interpolation data msg) -> List data -> Element msg
-monotone toX toY edits data =
+monotone : (data -> Float) -> (data -> Float) -> List (Interpolation data msg -> Interpolation data msg) -> Element data msg
+monotone toX toY edits =
   let config =
         applyAttrs edits
           { color = "rgb(5,142,218)" -- TODO
@@ -1057,7 +1078,7 @@ monotone toX toY edits data =
           Unchanged _ -> \_ -> C.disconnected 6 1 C.cross config.color
           Changed d -> d
   in
-  SvgElement (always identity) <| \name p ->
+  SvgElement (always identity) <| \name data p ->
     case config.area of
       Just fill ->
         S.g [ SA.class "elm-charts__monotone-area" ]
@@ -1072,8 +1093,8 @@ monotone toX toY edits data =
 
 
 {-| -}
-linear : (data -> Float) -> (data -> Float) -> List (Interpolation data msg -> Interpolation data msg) -> List data -> Element msg
-linear toX toY edits data =
+linear : (data -> Float) -> (data -> Float) -> List (Interpolation data msg -> Interpolation data msg) -> Element data msg
+linear toX toY edits =
   let config =
         applyAttrs edits
           { color = "rgb(5,142,218)" -- TODO
@@ -1093,7 +1114,7 @@ linear toX toY edits data =
           Unchanged _ -> \_ -> C.disconnected 6 1 C.cross config.color
           Changed d -> d
   in
-  SvgElement (always identity) <| \name p ->
+  SvgElement (always identity) <| \name data p ->
     case config.area of
       Just fill ->
         S.g [ SA.class "elm-charts__linear-area" ]
@@ -1108,35 +1129,35 @@ linear toX toY edits data =
 
 
 {-| -}
-svg : (C.Plane -> S.Svg msg) -> Element msg
+svg : (C.Plane -> S.Svg msg) -> Element data msg
 svg func =
-  SvgElement (always identity) (always func)
+  SvgElement (always identity) (\_ _ -> func)
 
 
 {-| -}
-html : (C.Plane -> H.Html msg) -> Element msg
-html =
-  HtmlElement
+html : (C.Plane -> H.Html msg) -> Element data msg
+html func =
+  HtmlElement (\_ -> func)
 
 
 {-| -}
-svgAt : (Bounds -> Float) -> (Bounds -> Float) -> Float -> Float -> List (S.Svg msg) -> Element msg
+svgAt : (Bounds -> Float) -> (Bounds -> Float) -> Float -> Float -> List (S.Svg msg) -> Element data msg
 svgAt toX toY xOff yOff view =
-  SvgElement (always identity) <| \_ p ->
+  SvgElement (always identity) <| \_ _ p ->
     S.g [ C.position p (toX <| toBounds .x p) (toY <| toBounds .y p) xOff yOff ] view
 
 
 {-| -}
-htmlAt : (Bounds -> Float) -> (Bounds -> Float) -> Float -> Float -> List (H.Attribute msg) -> List (H.Html msg) -> Element msg
+htmlAt : (Bounds -> Float) -> (Bounds -> Float) -> Float -> Float -> List (H.Attribute msg) -> List (H.Html msg) -> Element data msg
 htmlAt toX toY xOff yOff att view =
-  HtmlElement <| \p ->
+  HtmlElement <| \_ p ->
     C.positionHtml p (toX <| toBounds .x p) (toY <| toBounds .y p) xOff yOff att view
 
 
 {-| -}
-none : Element msg
+none : Element data msg
 none =
-  HtmlElement (\_ -> H.text "")
+  HtmlElement (\_ _ -> H.text "")
 
 
 
