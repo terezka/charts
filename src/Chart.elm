@@ -902,7 +902,9 @@ type alias Bars data msg =
 
 {-| -}
 type alias Metric data =
-  { color : String
+  { label : String
+  , unit : String
+  , color : String
   , value : data -> Float
   }
 
@@ -967,13 +969,14 @@ type alias Histogram data msg =
   , margin : Float
   , spacing : Float
   , attrs : List (S.Attribute msg)
+  , binLabel : Maybe (data -> String)
   , barLabel : Maybe (Int -> Metric data -> data -> Maybe String)
   }
 
 
 {-| -}
-histogram : (data -> Float) -> (data -> String) -> List (Metric data) -> List (Histogram data msg -> Histogram data msg) -> Element data msg
-histogram toX toLabel metrics edits =
+histogram : (data -> Float) -> List (Metric data) -> List (Histogram data msg -> Histogram data msg) -> Element data msg
+histogram toX metrics edits =
   let config =
         applyAttrs edits
           { binWidth = Nothing
@@ -981,6 +984,7 @@ histogram toX toLabel metrics edits =
           , roundBottom = False
           , spacing = 0.01
           , margin = 0.05
+          , binLabel = Nothing
           , barLabel = Nothing
           , attrs = []
           }
@@ -1002,6 +1006,11 @@ histogram toX toLabel metrics edits =
               Just n -> toX n - toX d
               Nothing -> p.x.max - toX d
 
+      toBinLabel d =
+        case config.binLabel of
+          Just func -> func d
+          Nothing -> String.fromFloat (toX d)
+
       toBarLabel i m d =
         case config.barLabel of
           Just func -> func i m d
@@ -1017,7 +1026,7 @@ histogram toX toLabel metrics edits =
         }
 
       toBin name p i d n =
-        { label = toLabel d
+        { label = toBinLabel d
         , start = toX d
         , end = toX d + toBinWidth p d n
         , spacing = config.spacing

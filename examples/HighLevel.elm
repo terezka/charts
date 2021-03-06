@@ -36,7 +36,14 @@ type alias Point =
   }
 
 
-data : List { x : Float, y : Float, label : String }
+type alias BarPoint =
+  { x : Float
+  , y : Float
+  , label : String
+  }
+
+
+data : List BarPoint
 data =
   [ { x = 0, y = 4, label = "DK" }
   , { x = 4, y = 2, label = "NO" }
@@ -62,7 +69,7 @@ view hovered =
           else SC.disconnected 2 1 SC.circle "rgb(5,142,218)"
 
       barLabel i m d =
-        if i == 1 && m.color == C.blue
+        if i == 1 && m.label == "speed"
           then Just (String.fromFloat (m.value d))
           else Nothing
   in
@@ -92,9 +99,13 @@ view hovered =
     ]
     [ C.grid [ C.width 0.4, C.color "rgb(220,220,220)" ]
 
-    , C.histogram .x (String.fromFloat << .x)
-        [ C.Metric C.blue .y, C.Metric C.pink .y ]
-        [ C.rounded 0.2, C.roundBottom, C.binWidth (always 2), C.barLabel barLabel ]
+    , C.histogram .x
+        [ C.Metric "speed" "m/s" C.blue .y
+        , C.Metric "weight" "kg" C.pink .y
+        ]
+        [ C.rounded 0.2, C.roundBottom, C.binWidth (always 2)
+        , C.barLabel barLabel
+        ]
 
     , C.xAxis   [ C.pinned C.zero ]
     , C.yAxis   [ C.pinned .min ]
@@ -105,7 +116,7 @@ view hovered =
     --, C.bars
     --    [ C.Metric C.blue .y, C.Metric C.pink .y, C.Metric C.orange .y ]
     --    [ C.margin 0.05, C.spacing 0.015, C.rounded 0.2, C.binLabel .label
-        --, C.barLabel barLabel
+    --    , C.barLabel barLabel
     --    ]
 
     --, C.tooltip model.hovered
@@ -123,8 +134,4 @@ view hovered =
 
     ]
     data
-
-
-
-
 
