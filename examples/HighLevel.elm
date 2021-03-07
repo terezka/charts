@@ -25,7 +25,7 @@ main =
 
 
 type Msg
-  = OnHover (List SC.Point)
+  = OnHover (List BarPoint)
   | OnLeave
 
 
@@ -62,7 +62,7 @@ data2 =
   ]
 
 
-view : List SC.Point -> Html.Html Msg
+view : List BarPoint -> Html.Html Msg
 view hovered =
   C.chart
     [ C.width 600
@@ -82,7 +82,7 @@ view hovered =
     , C.yAxis []
     , C.yLabels []
     , C.histogram .x
-        []
+        [ C.binLabel .label, C.binWidth (always 2) ]
         [ C.bar .y [ C.color C.pink ]
         , C.bar .z []
         ]

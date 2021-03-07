@@ -150,7 +150,7 @@ domain value config =
   { config | domain = Just value }
 
 {-| -}
-events : List (Event msg) -> Attribute { a | events : List (Event msg) }
+events : List (Event data msg) -> Attribute { a | events : List (Event data msg) }
 events value config =
   { config | events = value }
 
@@ -316,7 +316,7 @@ binWidth value config =
 
 
 {-| -}
-type alias Container msg =
+type alias Container data msg =
     { width : Float
     , height : Float
     , marginTop : Float
@@ -331,7 +331,7 @@ type alias Container msg =
     , id : String
     , range : Maybe (Bounds -> Bounds)
     , domain : Maybe (Bounds -> Bounds)
-    , events : List (Event msg)
+    , events : List (Event data msg)
     , htmlAttrs : List (H.Attribute msg)
     , topped : Maybe Int
     , attrs : List (S.Attribute msg)
@@ -339,7 +339,7 @@ type alias Container msg =
 
 
 {-| -}
-chart : List (Container msg -> Container msg) -> List (Element msg) -> H.Html msg
+chart : List (Container data msg -> Container data msg) -> List (Element data msg) -> H.Html msg
 chart edits elements =
   let config =
         applyAttrs edits
@@ -464,12 +464,9 @@ chart edits elements =
         then [ C.responsive plane ]
         else C.static plane
 
-      dataPoints =
-        C.toDataPoints .x .y info.points
-
       toEvent e =
         let (Decoder func) = e.msg in
-        SE.on e.name (C.decodePoint plane (func dataPoints))
+        SE.on e.name (C.decodePoint plane (func info.points))
 
       allSvgEls =
         [ C.frame config.id plane ] ++ (List.map applyInfo chartEls) ++ [ C.eventCatcher plane [] ]
@@ -487,19 +484,19 @@ type alias PrePlaneInfo =
   }
 
 
-type alias PostPlaneInfo =
+type alias PostPlaneInfo data =
   { xTicks : List Float
   , yTicks : List Float
-  , points : List C.Point
+  , points : List (C.DataPoint data)
   }
 
 
 -- TODO
-type alias Element msg =
+type alias Element data msg =
   { isHtml : Bool
   , prePlane : PrePlaneInfo -> PrePlaneInfo
-  , postPlane : C.Plane -> PostPlaneInfo -> PostPlaneInfo
-  , view : String -> C.Plane -> PostPlaneInfo -> H.Html msg
+  , postPlane : C.Plane -> PostPlaneInfo data -> PostPlaneInfo data
+  , view : String -> C.Plane -> PostPlaneInfo data -> H.Html msg
   }
 
 
@@ -574,52 +571,52 @@ middle bounds =
 
 
 {-| -}
-type alias Event msg =
+type alias Event data msg =
   { name : String
-  , msg : Decoder msg
+  , msg : Decoder data msg
   }
 
 
 {-| -}
-event : String -> Decoder msg -> Event msg
+event : String -> Decoder data msg -> Event data msg
 event =
   Event
 
 
-type Decoder msg
-  = Decoder (List (C.DataPoint C.Point) -> C.Plane -> C.Point -> msg)
+type Decoder data msg
+  = Decoder (List (C.DataPoint data) -> C.Plane -> C.Point -> msg)
 
 
 {-| -}
-getNearest : (Maybe C.Point -> msg) -> Decoder msg
+getNearest : (Maybe data -> msg) -> Decoder data msg
 getNearest toMsg =
   Decoder <| \points plane point ->
     toMsg (C.getNearest points plane point)
 
 
 {-| -}
-getWithin : Float -> (Maybe C.Point -> msg) -> Decoder msg
+getWithin : Float -> (Maybe data -> msg) -> Decoder data msg
 getWithin radius toMsg =
   Decoder <| \points plane point ->
     toMsg (C.getWithin radius points plane point)
 
 
 {-| -}
-getNearestX : (List C.Point -> msg) -> Decoder msg
+getNearestX : (List data -> msg) -> Decoder data msg
 getNearestX toMsg =
   Decoder <| \points plane point ->
     toMsg (C.getNearestX points plane point)
 
 
 {-| -}
-getWithinX : Float -> (List C.Point -> msg) -> Decoder msg
+getWithinX : Float -> (List data -> msg) -> Decoder data msg
 getWithinX radius toMsg =
   Decoder <| \points plane point ->
     toMsg (C.getWithinX radius points plane point)
 
 
 {-| -}
-tooltip : (Bounds -> Float) -> (Bounds -> Float) -> List (H.Attribute msg) -> List (H.Html msg) -> Element msg
+tooltip : (Bounds -> Float) -> (Bounds -> Float) -> List (H.Attribute msg) -> List (H.Html msg) -> Element data msg
 tooltip toX toY att content =
   html <| \p -> C.tooltip p (toX <| toBounds .x p) (toY <| toBounds .y p) att content
 
@@ -640,7 +637,7 @@ type alias Axis msg =
 
 
 {-| -}
-xAxis : List (Axis msg -> Axis msg) -> Element msg
+xAxis : List (Axis msg -> Axis msg) -> Element data msg
 xAxis edits =
   let config =
         applyAttrs edits
@@ -667,7 +664,7 @@ xAxis edits =
 
 
 {-| -}
-yAxis : List (Axis msg -> Axis msg) -> Element msg
+yAxis : List (Axis msg -> Axis msg) -> Element data msg
 yAxis edits =
   let config =
         applyAttrs edits
@@ -710,7 +707,7 @@ type alias Tick tick msg =
 
 
 {-| -}
-xTicks : List (Tick tick msg -> Tick tick msg) -> Element msg
+xTicks : List (Tick tick msg -> Tick tick msg) -> Element data msg
 xTicks edits =
   let config =
         applyAttrs edits
@@ -753,7 +750,7 @@ xTicks edits =
 
 
 {-| -}
-yTicks : List (Tick tick msg -> Tick tick msg) -> Element msg
+yTicks : List (Tick tick msg -> Tick tick msg) -> Element data msg
 yTicks edits =
   let config =
         applyAttrs edits
@@ -814,7 +811,7 @@ type alias Label tick msg =
 
 
 {-| -}
-xLabels : List (Label tick msg -> Label tick msg) -> Element msg
+xLabels : List (Label tick msg -> Label tick msg) -> Element data msg
 xLabels edits =
   let config =
         applyAttrs edits
@@ -857,7 +854,7 @@ xLabels edits =
 
 
 {-| -}
-yLabels : List (Label tick msg -> Label tick msg) -> Element msg
+yLabels : List (Label tick msg -> Label tick msg) -> Element data msg
 yLabels edits =
   let config =
         applyAttrs edits
@@ -911,7 +908,7 @@ type alias Grid msg =
 
 
 {-| -}
-grid : List (Grid msg -> Grid msg) -> Element msg
+grid : List (Grid msg -> Grid msg) -> Element data msg
 grid edits =
   let config =
         applyAttrs edits
@@ -977,7 +974,7 @@ type alias Bars data msg =
 
 
 {-| -}
-bars : List (Bars data msg -> Bars data msg) -> List (Bar data msg) -> List data -> Element msg
+bars : List (Bars data msg -> Bars data msg) -> List (Bar data msg) -> List data -> Element data msg
 bars edits metrics data =
   let config =
         applyAttrs edits
@@ -1026,8 +1023,11 @@ bars edits metrics data =
       toYs =
         List.map (\(Bar value _) -> value) metrics
 
-      toPoints i d =
-        List.map (\(Bar value _) -> { x = toFloat (i + 1), y = value d }) metrics
+      toDataPoints i d =
+        List.map (\(Bar value _) ->
+          { point = { x = toFloat (i + 1), y = value d }
+          , org = d
+          }) metrics
 
       toYMax d = -- TODO
         List.map (\(Bar value _) -> value d) metrics
@@ -1037,12 +1037,11 @@ bars edits metrics data =
   { isHtml = False
   , prePlane = \info ->
       let length = toFloat (List.length data) in
-      { info
-      | fakePoints = info.fakePoints ++
+      { info | fakePoints = info.fakePoints ++
           C.toPoints (\_ -> 0.5) toYMax data ++
           C.toPoints (\_ -> length + 0.5) toYMax data
       }
-  , postPlane = \p info -> { info | points = info.points ++ List.concat (List.indexedMap toPoints data) }
+  , postPlane = \p info -> { info | points = info.points ++ List.concat (List.indexedMap toDataPoints data) }
   , view = \name p _ -> C.bars p (List.indexedMap (toBin name) data)
   }
 
@@ -1055,12 +1054,12 @@ type alias Histogram data msg =
   , margin : Float
   , spacing : Float
   , attrs : List (S.Attribute msg)
-  , label : Maybe (data -> String)
+  , binLabel : Maybe (data -> String)
   }
 
 
 {-| -}
-histogram : (data -> Float) -> List (Histogram data msg -> Histogram data msg) -> List (Bar data msg) -> List data -> Element msg
+histogram : (data -> Float) -> List (Histogram data msg -> Histogram data msg) -> List (Bar data msg) -> List data -> Element data msg
 histogram toX edits metrics data =
   let config =
         applyAttrs edits
@@ -1069,7 +1068,7 @@ histogram toX edits metrics data =
           , roundBottom = False
           , spacing = 0.01
           , margin = 0.05
-          , label = Nothing
+          , binLabel = Nothing
           , attrs = []
           }
 
@@ -1091,7 +1090,7 @@ histogram toX edits metrics data =
               Nothing -> p.x.max - toX d
 
       toBinLabel d =
-        case config.label of
+        case config.binLabel of
           Just func -> func d
           Nothing -> String.fromFloat (toX d)
 
@@ -1135,14 +1134,17 @@ histogram toX edits metrics data =
           |> List.maximum
           |> Maybe.withDefault 1
 
-      toPoints p d maybeN =
+      toDataPoints p d maybeN =
         let width_ = toBinWidth p d maybeN in
-        List.map (\(Bar value _) -> { x = toX d + width_ / 2, y = value d }) metrics
+        List.map (\(Bar value _) ->
+            { point = { x = toX d + width_ / 2, y = value d }
+            , org = d
+            }) metrics
   in
   { isHtml = False
   , prePlane = \info ->
       { info | fakePoints = info.fakePoints ++ C.toPoints toX toYMax data ++ C.toPoints toBinWidthX toYMax data }
-  , postPlane = \p info -> { info | points = info.points ++ List.concat (mapWithNext (toPoints p) [] data) }
+  , postPlane = \p info -> { info | points = info.points ++ List.concat (mapWithNext (toDataPoints p) [] data) }
   , view = \name p _ -> C.histogram p (mapWithNext (toBin name p) [] data)
   }
 
@@ -1179,10 +1181,10 @@ bar toY edits =
 
 
 type Series data msg
-  = Series (List data -> (data -> Float) -> String -> Element msg)
+  = Series (List data -> (data -> Float) -> String -> Element data msg)
 
 
-series : (data -> Float) -> List (Series data msg) -> List data -> Element msg
+series : (data -> Float) -> List (Series data msg) -> List data -> Element data msg
 series toX series_ data =
   let timesOver =
         List.length series_ // List.length colors
@@ -1235,7 +1237,7 @@ scatter toY edits =
     in
     { isHtml = False
     , prePlane = \info -> { info | fakePoints = info.fakePoints ++ C.toPoints toX toY data }
-    , postPlane = \p info -> { info | points = info.points ++ C.toPoints toX toY data }
+    , postPlane = \p info -> { info | points = info.points ++ C.toDataPoints toX toY data }
     , view = \name p _ ->
         S.g
           [ SA.class "elm-charts__scatter" ]
@@ -1282,7 +1284,7 @@ monotone toY edits =
     in
     { isHtml = False
     , prePlane = \info -> { info | fakePoints = info.fakePoints ++ C.toPoints toX toY data }
-    , postPlane = \p info -> { info | points = info.points ++ C.toPoints toX toY data }
+    , postPlane = \p info -> { info | points = info.points ++ C.toDataPoints toX toY data }
     , view = \name p _ ->
         case config.area of
           Just fill ->
@@ -1324,7 +1326,7 @@ linear toY edits =
     in
     { isHtml = False
     , prePlane = \info -> { info | fakePoints = info.fakePoints ++ C.toPoints toX toY data }
-    , postPlane = \p info -> { info | points = info.points ++ C.toPoints toX toY data }
+    , postPlane = \p info -> { info | points = info.points ++ C.toDataPoints toX toY data }
     , view = \name p _ ->
       case config.area of
         Just fill ->
@@ -1341,7 +1343,7 @@ linear toY edits =
 
 
 {-| -}
-svg : (C.Plane -> S.Svg msg) -> Element msg
+svg : (C.Plane -> S.Svg msg) -> Element data msg
 svg func =
   { isHtml = False
   , prePlane = identity
@@ -1351,7 +1353,7 @@ svg func =
 
 
 {-| -}
-html : (C.Plane -> H.Html msg) -> Element msg
+html : (C.Plane -> H.Html msg) -> Element data msg
 html func =
   { isHtml = True
   , prePlane = identity
@@ -1361,7 +1363,7 @@ html func =
 
 
 {-| -}
-svgAt : (Bounds -> Float) -> (Bounds -> Float) -> Float -> Float -> List (S.Svg msg) -> Element msg
+svgAt : (Bounds -> Float) -> (Bounds -> Float) -> Float -> Float -> List (S.Svg msg) -> Element data msg
 svgAt toX toY xOff yOff view =
   { isHtml = False
   , prePlane = identity
@@ -1372,7 +1374,7 @@ svgAt toX toY xOff yOff view =
 
 
 {-| -}
-htmlAt : (Bounds -> Float) -> (Bounds -> Float) -> Float -> Float -> List (H.Attribute msg) -> List (H.Html msg) -> Element msg
+htmlAt : (Bounds -> Float) -> (Bounds -> Float) -> Float -> Float -> List (H.Attribute msg) -> List (H.Html msg) -> Element data msg
 htmlAt toX toY xOff yOff att view =
   { isHtml = True
   , prePlane = identity
@@ -1383,7 +1385,7 @@ htmlAt toX toY xOff yOff att view =
 
 
 {-| -}
-none : Element msg
+none : Element data msg
 none =
   { isHtml = True
   , prePlane = identity
@@ -1460,9 +1462,9 @@ purple =
   "rgb(170, 80, 208)"
 
 
-toDataPoints : (data -> Float) -> List (data -> Float) -> List data -> List (C.DataPoint data)
-toDataPoints toX toYs data =
-  List.concatMap (\toY -> C.toDataPoints toX toY data) toYs
+--toDataPoints : (data -> Float) -> List (data -> Float) -> List data -> List (C.DataPoint data)
+--toDataPoints toX toYs data =
+--  List.concatMap (\toY -> C.toDataPoints toX toY data) toYs
 
 
 
