@@ -339,8 +339,8 @@ type alias Container msg =
 
 
 {-| -}
-chart : List (Container msg -> Container msg) -> List (Element data msg) -> List data -> H.Html msg
-chart edits elements data =
+chart : List (Container msg -> Container msg) -> List (Element msg) -> H.Html msg
+chart edits elements =
   let config =
         applyAttrs edits
           { width = 500
@@ -365,24 +365,23 @@ chart edits elements data =
 
       toPrePlaneInfo els acc =
         case els of
-          el :: rest -> toPrePlaneInfo rest (el.prePlane data acc)
+          el :: rest -> toPrePlaneInfo rest (el.prePlane acc)
           [] -> acc
 
       prePlaneInfo =
         toPrePlaneInfo elements
-          { xs = []
-          , ys = []
+          { points = []
           }
 
       calcRange =
         case config.range of
-          Just edit -> edit (fromData prePlaneInfo.xs data)
-          Nothing -> fromData prePlaneInfo.xs data
+          Just edit -> edit (fromData [.x] prePlaneInfo.points) -- TODO
+          Nothing -> fromData [.x] prePlaneInfo.points
 
       calcDomain =
         case config.domain of
-          Just edit -> edit (fromData prePlaneInfo.ys data)
-          Nothing -> startMin 0 (fromData prePlaneInfo.ys data)
+          Just edit -> edit (fromData [.y] prePlaneInfo.points) -- TODO
+          Nothing -> startMin 0 (fromData [.y] prePlaneInfo.points)
 
       scalePadX =
         C.scaleCartesian
@@ -473,16 +472,15 @@ chart edits elements data =
         [ C.frame config.id plane ] ++ (List.map applyInfo chartEls) ++ [ C.eventCatcher plane [] ]
 
       applyInfo v =
-        v config.id data plane info
+        v config.id plane info
   in
   C.container plane config.htmlAttrs <|
     List.map applyInfo hBefore ++ [ svgContainer allSvgEls ] ++ List.map applyInfo hAfter
 
 
 
-type alias PrePlaneInfo data =
-  { xs : List (data -> Float)
-  , ys : List (data -> Float)
+type alias PrePlaneInfo =
+  { points : List C.Point
   }
 
 
@@ -492,11 +490,12 @@ type alias PostPlaneInfo =
   }
 
 
-type alias Element data msg =
+-- TODO
+type alias Element msg =
   { isHtml : Bool
-  , prePlane : List data -> PrePlaneInfo data -> PrePlaneInfo data
+  , prePlane : PrePlaneInfo -> PrePlaneInfo
   , postPlane : C.Plane -> PostPlaneInfo -> PostPlaneInfo
-  , view : String -> List data -> C.Plane -> PostPlaneInfo -> H.Html msg
+  , view : String -> C.Plane -> PostPlaneInfo -> H.Html msg
   }
 
 
@@ -612,7 +611,7 @@ getWithinX toMsg radius toX toYs data plane point =
 
 
 {-| -}
-tooltip : (Bounds -> Float) -> (Bounds -> Float) -> List (H.Attribute msg) -> List (H.Html msg) -> Element data msg
+tooltip : (Bounds -> Float) -> (Bounds -> Float) -> List (H.Attribute msg) -> List (H.Html msg) -> Element msg
 tooltip toX toY att content =
   html <| \p -> C.tooltip p (toX <| toBounds .x p) (toY <| toBounds .y p) att content
 
@@ -633,7 +632,7 @@ type alias Axis msg =
 
 
 {-| -}
-xAxis : List (Axis msg -> Axis msg) -> Element data msg
+xAxis : List (Axis msg -> Axis msg) -> Element msg
 xAxis edits =
   let config =
         applyAttrs edits
@@ -646,9 +645,9 @@ xAxis edits =
           }
   in
   { isHtml = False
-  , prePlane = \_ info -> info
+  , prePlane = identity
   , postPlane = always identity
-  , view = \_ _ p _ ->
+  , view = \_ p _ ->
       S.g [ SA.class "elm-charts__x-axis" ]
         [ C.horizontal p ([ SA.stroke config.color ] ++ config.attrs) (config.pinned <| toBounds .y p) (config.start <| toBounds .x p) (config.end <| toBounds .x p)
         , if config.arrow then
@@ -660,7 +659,7 @@ xAxis edits =
 
 
 {-| -}
-yAxis : List (Axis msg -> Axis msg) -> Element data msg
+yAxis : List (Axis msg -> Axis msg) -> Element msg
 yAxis edits =
   let config =
         applyAttrs edits
@@ -673,9 +672,9 @@ yAxis edits =
           }
   in
   { isHtml = False
-  , prePlane = \_ info -> info
+  , prePlane = identity
   , postPlane = always identity
-  , view = \_ _ p _ ->
+  , view = \_ p _ ->
       S.g [ SA.class "elm-charts__y-axis" ]
         [ C.vertical p ([ SA.stroke config.color ] ++ config.attrs) (config.pinned <| toBounds .x p) (config.start <| toBounds .y p) (config.end <| toBounds .y p)
         , if config.arrow then
@@ -703,7 +702,7 @@ type alias Tick tick msg =
 
 
 {-| -}
-xTicks : List (Tick tick msg -> Tick tick msg) -> Element data msg
+xTicks : List (Tick tick msg -> Tick tick msg) -> Element msg
 xTicks edits =
   let config =
         applyAttrs edits
@@ -739,14 +738,14 @@ xTicks edits =
         ] ++ config.attrs
   in
   { isHtml = False
-  , prePlane = \_ info -> info
+  , prePlane = identity
   , postPlane = \p ts -> { ts | xTicks = ts.xTicks ++ toTicks p }
-  , view = \_ _ p _ -> C.xTicks p (round config.height) tickAttrs (config.pinned <| toBounds .y p) (toTicks p)
+  , view = \_ p _ -> C.xTicks p (round config.height) tickAttrs (config.pinned <| toBounds .y p) (toTicks p)
   }
 
 
 {-| -}
-yTicks : List (Tick tick msg -> Tick tick msg) -> Element data msg
+yTicks : List (Tick tick msg -> Tick tick msg) -> Element msg
 yTicks edits =
   let config =
         applyAttrs edits
@@ -783,9 +782,9 @@ yTicks edits =
         ] ++ config.attrs
   in
   { isHtml = False
-  , prePlane = \_ info -> info
+  , prePlane = identity
   , postPlane = \p ts -> { ts | yTicks = ts.yTicks ++ toTicks p }
-  , view = \_ _ p _ -> C.yTicks p (round config.height) tickAttrs (config.pinned <| toBounds .x p) (toTicks p)
+  , view = \_ p _ -> C.yTicks p (round config.height) tickAttrs (config.pinned <| toBounds .x p) (toTicks p)
   }
 
 
@@ -807,7 +806,7 @@ type alias Label tick msg =
 
 
 {-| -}
-xLabels : List (Label tick msg -> Label tick msg) -> Element data msg
+xLabels : List (Label tick msg -> Label tick msg) -> Element msg
 xLabels edits =
   let config =
         applyAttrs edits
@@ -843,14 +842,14 @@ xLabels edits =
         ] ++ config.attrs
   in
   { isHtml = False
-  , prePlane = \_ info -> info
+  , prePlane = identity
   , postPlane = \p ts -> { ts | xTicks = ts.xTicks ++ List.map .value (toTicks p) }
-  , view = \_ _ p _ -> C.xLabels p (C.xLabel labelAttrs .value .label) (config.pinned <| toBounds .y p) (toTicks p)
+  , view = \_ p _ -> C.xLabels p (C.xLabel labelAttrs .value .label) (config.pinned <| toBounds .y p) (toTicks p)
   }
 
 
 {-| -}
-yLabels : List (Label tick msg -> Label tick msg) -> Element data msg
+yLabels : List (Label tick msg -> Label tick msg) -> Element msg
 yLabels edits =
   let config =
         applyAttrs edits
@@ -886,9 +885,9 @@ yLabels edits =
         ] ++ config.attrs
   in
   { isHtml = False
-  , prePlane = \_ info -> info
+  , prePlane = identity
   , postPlane = \p ts -> { ts | yTicks = ts.yTicks ++ List.map .value (toTicks p) }
-  , view = \_ _ p _ -> C.yLabels p (C.yLabel labelAttrs .value .label) (config.pinned <| toBounds .x p) (toTicks p)
+  , view = \_ p _ -> C.yLabels p (C.yLabel labelAttrs .value .label) (config.pinned <| toBounds .x p) (toTicks p)
   }
 
 
@@ -904,7 +903,7 @@ type alias Grid msg =
 
 
 {-| -}
-grid : List (Grid msg -> Grid msg) -> Element data msg
+grid : List (Grid msg -> Grid msg) -> Element msg
 grid edits =
   let config =
         applyAttrs edits
@@ -941,9 +940,9 @@ grid edits =
         else Just <| C.full config.width C.circle config.color p x y
   in
   { isHtml = False
-  , prePlane = \_ info -> info
+  , prePlane = identity
   , postPlane = always identity
-  , view = \_ _ p info ->
+  , view = \_ p info ->
       S.g [ SA.class "elm-charts__grid" ] <|
         if config.dotted then
           List.concatMap (\x -> List.filterMap (toDot p x) info.yTicks) info.xTicks
@@ -970,8 +969,8 @@ type alias Bars data msg =
 
 
 {-| -}
-bars : List (Bars data msg -> Bars data msg) -> List (Bar data msg) -> Element data msg
-bars edits metrics =
+bars : List (Bars data msg -> Bars data msg) -> List (Bar data msg) -> List data -> Element msg
+bars edits metrics data =
   let config =
         applyAttrs edits
           { rounded = 0
@@ -1015,15 +1014,22 @@ bars edits metrics =
         , spacing = config.spacing
         , bars = List.map (toBar name i d) metrics
         }
+
+      toYMax d = -- TODO
+        List.map (\(Bar value _) -> value d) metrics
+          |> List.maximum
+          |> Maybe.withDefault 1
   in
   { isHtml = False
-  , prePlane = \data info ->
+  , prePlane = \info ->
       let length = toFloat (List.length data) in
-      { info | xs = (\_ -> 0.5) :: (\_ -> length + 0.5) :: info.xs
-      , ys = List.map (\(Bar value _) -> value) metrics ++ info.ys
+      { info | points =
+          info.points ++
+          C.toPoints (\_ -> 0.5) toYMax data ++
+          C.toPoints (\_ -> length + 0.5) toYMax data
       }
   , postPlane = always identity
-  , view = \name data p _ -> C.bars p (List.indexedMap (toBin name) data)
+  , view = \name p _ -> C.bars p (List.indexedMap (toBin name) data)
   }
 
 
@@ -1040,8 +1046,8 @@ type alias Histogram data msg =
 
 
 {-| -}
-histogram : (data -> Float) -> List (Histogram data msg -> Histogram data msg) -> List (Bar data msg) -> Element data msg
-histogram toX edits metrics =
+histogram : (data -> Float) -> List (Histogram data msg -> Histogram data msg) -> List (Bar data msg) -> List data -> Element msg
+histogram toX edits metrics data =
   let config =
         applyAttrs edits
           { binWidth = Nothing
@@ -1109,14 +1115,21 @@ histogram toX edits metrics =
         case config.binWidth of
           Just w -> toX d + w d
           Nothing -> toX d + 1 -- TODO
+
+      toYMax d = -- TODO
+        List.map (\(Bar value _) -> value d) metrics
+          |> List.maximum
+          |> Maybe.withDefault 1
   in
   { isHtml = False
-  , prePlane = \data info ->
-      { info | xs = toBinWidthX :: toX :: info.xs
-      , ys = List.map (\(Bar value _) -> value) metrics ++ info.ys
+  , prePlane = \info ->
+      { info | points =
+          info.points ++
+          C.toPoints toX toYMax data ++
+          C.toPoints toBinWidthX toYMax data
       }
   , postPlane = always identity
-  , view = \name data p _ -> C.histogram p (mapWithNext (toBin name p) (0, []) data)
+  , view = \name p _ -> C.histogram p (mapWithNext (toBin name p) (0, []) data)
   }
 
 
@@ -1152,12 +1165,29 @@ bar toY edits =
 
 
 type Series data msg
-  = Series ((data -> Float) -> String -> Element data msg)
+  = Series (List data -> (data -> Float) -> String -> Element msg)
 
 
 
-series : (data -> Float) -> List (Series data msg) -> Element data msg
-series toX series_ =
+--type alias SeriesConfig data msg =
+--  { getNearest : Maybe (Metric data -> data -> msg)
+--  , getNearestX : Maybe (List (Metric data) -> data -> msg)
+--  , getWithin : Maybe (Metric data -> data -> msg)
+--  , getWithinX : Maybe (List (Metric data) -> data -> msg)
+--  }
+-- List (SeriesConfig data msg -> SeriesConfig data msg) ->
+
+--config =
+--        applyAttrs edits
+--          { getNearest = Nothing
+--          , getNearestX = Nothing
+--          , getWithin = Nothing
+--          , getWithinX = Nothing
+--          }
+
+
+series : (data -> Float) -> List (Series data msg) -> List data -> Element msg
+series toX series_ data =
   let timesOver =
         List.length series_ // List.length colors
 
@@ -1165,15 +1195,23 @@ series toX series_ =
         List.concat (List.repeat (timesOver + 1) colors)
 
       elements =
-        List.map2 (\(Series s) -> s toX) series_ defaultColors
+        List.map2 (\(Series s) -> s data toX) series_ defaultColors
+
+      --events =
+      --  List.filterMap identity
+      --    [ config.getNearest
+      --    ]
+
+      --toPostPlane info =
+      --  { info | events = info.events ++ List.m }
   in
   { isHtml = False
-  , prePlane = \data info -> List.foldl (\s i -> s.prePlane data i) info elements
+  , prePlane = \info -> List.foldl (\s i -> s.prePlane i) info elements
   , postPlane = \p info -> List.foldl (\s i -> s.postPlane p i) info elements
-  , view = \name data p i ->
+  , view = \name p i ->
       S.g
         [ SA.class "elm-charts__series" ]
-        (List.map (\s -> s.view name data p i) elements)
+        (List.map (\s -> s.view name p i) elements)
   }
 
 
@@ -1188,7 +1226,7 @@ type alias Scatter data msg =
 {-| -}
 scatter : (data -> Float) -> List (Scatter data msg -> Scatter data msg) -> Series data msg
 scatter toY edits =
-  Series <| \toX defaultColor ->
+  Series <| \data toX defaultColor ->
     let config =
           applyAttrs edits
             { color = defaultColor
@@ -1201,9 +1239,9 @@ scatter toY edits =
             Changed d -> d
     in
     { isHtml = False
-    , prePlane = \data info -> { info | xs = toX :: info.xs, ys = toY :: info.ys }
+    , prePlane = \info -> { info | points = info.points ++ C.toPoints toX toY data }
     , postPlane = always identity
-    , view = \name data p _ ->
+    , view = \name p _ ->
         S.g
           [ SA.class "elm-charts__scatter" ]
           [ C.scatter p toX toY finalDot data ]
@@ -1227,7 +1265,7 @@ type Tracked a
 {-| -}
 monotone : (data -> Float) -> List (Interpolation data msg -> Interpolation data msg) -> Series data msg
 monotone toY edits =
-  Series <| \toX defaultColor ->
+  Series <| \data toX defaultColor ->
     let config =
           applyAttrs edits
             { color = defaultColor -- TODO
@@ -1248,9 +1286,9 @@ monotone toY edits =
             Changed d -> d
     in
     { isHtml = False
-    , prePlane = \data info -> { info | xs = toX :: info.xs, ys = toY :: info.ys }
+    , prePlane = \info -> { info | points = info.points ++ C.toPoints toX toY data }
     , postPlane = always identity
-    , view = \name data p _ ->
+    , view = \name p _ ->
         case config.area of
           Just fill ->
             S.g [ SA.class "elm-charts__monotone-area" ]
@@ -1269,7 +1307,7 @@ monotone toY edits =
 {-| -}
 linear : (data -> Float) -> List (Interpolation data msg -> Interpolation data msg) -> Series data msg
 linear toY edits =
-  Series <| \toX defaultColor ->
+  Series <| \data toX defaultColor ->
     let config =
           applyAttrs edits
             { color = defaultColor -- TODO
@@ -1290,9 +1328,9 @@ linear toY edits =
             Changed d -> d
     in
     { isHtml = False
-    , prePlane = \data info -> { info | xs = toX :: info.xs, ys = toY :: info.ys }
+    , prePlane = \info -> { info | points = info.points ++ C.toPoints toX toY data }
     , postPlane = always identity
-    , view = \name data p _ ->
+    , view = \name p _ ->
       case config.area of
         Just fill ->
           S.g [ SA.class "elm-charts__linear-area" ]
@@ -1308,54 +1346,54 @@ linear toY edits =
 
 
 {-| -}
-svg : (C.Plane -> S.Svg msg) -> Element data msg
+svg : (C.Plane -> S.Svg msg) -> Element msg
 svg func =
   { isHtml = False
-  , prePlane = \_ info -> info
+  , prePlane = identity
   , postPlane = always identity
-  , view = \_ _ p _-> func p
+  , view = \_ p _-> func p
   }
 
 
 {-| -}
-html : (C.Plane -> H.Html msg) -> Element data msg
+html : (C.Plane -> H.Html msg) -> Element msg
 html func =
   { isHtml = True
-  , prePlane = \_ info -> info
+  , prePlane = identity
   , postPlane = always identity
-  , view = \_ _ p _-> func p
+  , view = \_ p _-> func p
   }
 
 
 {-| -}
-svgAt : (Bounds -> Float) -> (Bounds -> Float) -> Float -> Float -> List (S.Svg msg) -> Element data msg
+svgAt : (Bounds -> Float) -> (Bounds -> Float) -> Float -> Float -> List (S.Svg msg) -> Element msg
 svgAt toX toY xOff yOff view =
   { isHtml = False
-  , prePlane = \_ info -> info
+  , prePlane = identity
   , postPlane = always identity
-  , view = \_ _ p _ ->
+  , view = \_ p _ ->
       S.g [ C.position p (toX <| toBounds .x p) (toY <| toBounds .y p) xOff yOff ] view
   }
 
 
 {-| -}
-htmlAt : (Bounds -> Float) -> (Bounds -> Float) -> Float -> Float -> List (H.Attribute msg) -> List (H.Html msg) -> Element data msg
+htmlAt : (Bounds -> Float) -> (Bounds -> Float) -> Float -> Float -> List (H.Attribute msg) -> List (H.Html msg) -> Element msg
 htmlAt toX toY xOff yOff att view =
   { isHtml = True
-  , prePlane = \_ info -> info
+  , prePlane = identity
   , postPlane = always identity
-  , view = \_ _ p _ ->
+  , view = \_ p _ ->
       C.positionHtml p (toX <| toBounds .x p) (toY <| toBounds .y p) xOff yOff att view
   }
 
 
 {-| -}
-none : Element data msg
+none : Element msg
 none =
   { isHtml = True
-  , prePlane = \_ info -> info
+  , prePlane = identity
   , postPlane = always identity
-  , view = \_ _ _ _ -> H.text ""
+  , view = \_ _ _-> H.text ""
   }
 
 

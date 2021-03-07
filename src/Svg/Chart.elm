@@ -14,7 +14,7 @@ module Svg.Chart
     , position, positionHtml
 
     , eventCatcher, container, decodePoint
-    , Point, DataPoint, toDataPoints
+    , Point, toPoints, DataPoint, toDataPoints
     , getNearest, getNearestX, getWithin, getWithinX
     , tooltip, isXPastMiddle, middleOfY, middleOfX
     )
@@ -719,11 +719,6 @@ monotoneArea plane toX toY attributes dot data =
 -- INTERNAL
 
 
-toPoints : (data -> Float) -> (data -> Float) -> List data -> List Point
-toPoints toX toY data =
-  List.map (\datum -> Point (toX datum) (toY datum)) data
-
-
 viewSeries : Plane -> (data -> Float) -> (data -> Float) -> (data -> Dot msg) -> List data -> Svg msg -> Svg msg
 viewSeries plane toX toY dot data interpolation =
   g [ class "elm-charts__series" ]
@@ -942,6 +937,12 @@ type alias Point =
   { x : Float
   , y : Float
   }
+
+
+{-| -}
+toPoints : (data -> Float) -> (data -> Float) -> List data -> List Point
+toPoints toX toY =
+  List.map <| \d -> { x = toX d, y = toY d }
 
 
 {-| -}

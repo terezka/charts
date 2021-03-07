@@ -96,14 +96,16 @@ view hovered =
     ]
     [ C.grid []
 
-    , C.bars
+    , C.histogram .x
         [ C.rounded 0.2, C.roundBottom, C.spacing 0.01
+        , C.binWidth (always 2)
         --, C.onNearest OnHover
         ]
         [ C.bar .y [ C.color C.blue ]
         , C.bar .z [ C.color C.pink ]
         , C.bar .y [ C.color C.orange ]
         ]
+        data
 
     --, C.xAxis []
         --[ C.ticks
@@ -127,8 +129,6 @@ view hovered =
     --    , C.scatter .z [] -- [ C.label "weight", C.unit "kg", C.color C.pink, C.shape C.circle ]
     --    ]
 
-    --, C.monotone .x .z [ C.dot specialDot2, C.color C.orange, C.area "rgba(244, 149, 69, 0.3)" ]
-
     --, C.bars
     --    [ C.Metric "speed" "m/s" C.blue .y
     --    , C.Metric "width" "m" C.pink .y
@@ -151,5 +151,4 @@ view hovered =
     --    ]
 
     ]
-    data
 
