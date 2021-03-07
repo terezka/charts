@@ -370,9 +370,7 @@ chart edits elements =
 
       prePlaneInfo =
         toPrePlaneInfo elements
-          { points = []
-          , fakePoints = []
-          }
+          { fakePoints = [] }
 
       calcRange =
         case config.range of
@@ -456,7 +454,7 @@ chart edits elements =
             ( acc, ( before, svgs, after ) )
 
       ( info, ( hBefore, chartEls, hAfter ) ) =
-        toPostPlaneInfo elements { xTicks = [], yTicks = [] } True [] [] []
+        toPostPlaneInfo elements { xTicks = [], yTicks = [], points = [] } True [] [] []
 
       svgContainer =
         S.svg (sizingAttrs ++ List.map toEvent config.events ++ config.attrs)
@@ -467,7 +465,7 @@ chart edits elements =
         else C.static plane
 
       dataPoints =
-        C.toDataPoints .x .y prePlaneInfo.points
+        C.toDataPoints .x .y info.points
 
       toEvent e =
         let (Decoder func) = e.msg in
@@ -485,14 +483,14 @@ chart edits elements =
 
 
 type alias PrePlaneInfo =
-  { points : List C.Point
-  , fakePoints : List C.Point
+  { fakePoints : List C.Point
   }
 
 
 type alias PostPlaneInfo =
   { xTicks : List Float
   , yTicks : List Float
+  , points : List C.Point
   }
 
 
@@ -1040,12 +1038,11 @@ bars edits metrics data =
   , prePlane = \info ->
       let length = toFloat (List.length data) in
       { info
-      | points = info.points ++ List.concat (List.indexedMap toPoints data)
-      , fakePoints = info.fakePoints ++
+      | fakePoints = info.fakePoints ++
           C.toPoints (\_ -> 0.5) toYMax data ++
           C.toPoints (\_ -> length + 0.5) toYMax data
       }
-  , postPlane = always identity
+  , postPlane = \p info -> { info | points = info.points ++ List.concat (List.indexedMap toPoints data) }
   , view = \name p _ -> C.bars p (List.indexedMap (toBin name) data)
   }
 
@@ -1138,25 +1135,14 @@ histogram toX edits metrics data =
           |> List.maximum
           |> Maybe.withDefault 1
 
-      toPoints d maybeN =
-        let width_ =
-               case config.binWidth of
-                Just toWidth -> toWidth d
-                Nothing ->
-                  case maybeN of
-                    Just n -> toX n - toX d
-                    Nothing -> 0
-        in
+      toPoints p d maybeN =
+        let width_ = toBinWidth p d maybeN in
         List.map (\(Bar value _) -> { x = toX d + width_ / 2, y = value d }) metrics
   in
   { isHtml = False
   , prePlane = \info ->
-      { info | points = info.points ++ List.concat (mapWithNext toPoints [] data)
-      , fakePoints =
-          info.fakePoints ++ C.toPoints toX toYMax data ++
-            C.toPoints toBinWidthX toYMax data
-      }
-  , postPlane = always identity
+      { info | fakePoints = info.fakePoints ++ C.toPoints toX toYMax data ++ C.toPoints toBinWidthX toYMax data }
+  , postPlane = \p info -> { info | points = info.points ++ List.concat (mapWithNext (toPoints p) [] data) }
   , view = \name p _ -> C.histogram p (mapWithNext (toBin name p) [] data)
   }
 
@@ -1248,11 +1234,8 @@ scatter toY edits =
             Changed d -> d
     in
     { isHtml = False
-    , prePlane = \info ->
-        { info | points = info.points ++ C.toPoints toX toY data
-        , fakePoints = info.fakePoints ++ C.toPoints toX toY data
-        }
-    , postPlane = always identity
+    , prePlane = \info -> { info | fakePoints = info.fakePoints ++ C.toPoints toX toY data }
+    , postPlane = \p info -> { info | points = info.points ++ C.toPoints toX toY data }
     , view = \name p _ ->
         S.g
           [ SA.class "elm-charts__scatter" ]
@@ -1298,11 +1281,8 @@ monotone toY edits =
             Changed d -> d
     in
     { isHtml = False
-    , prePlane = \info ->
-        { info | points = info.points ++ C.toPoints toX toY data
-        , fakePoints = info.fakePoints ++ C.toPoints toX toY data
-        }
-    , postPlane = always identity
+    , prePlane = \info -> { info | fakePoints = info.fakePoints ++ C.toPoints toX toY data }
+    , postPlane = \p info -> { info | points = info.points ++ C.toPoints toX toY data }
     , view = \name p _ ->
         case config.area of
           Just fill ->
@@ -1343,11 +1323,8 @@ linear toY edits =
             Changed d -> d
     in
     { isHtml = False
-    , prePlane = \info ->
-        { info | points = info.points ++ C.toPoints toX toY data
-        , fakePoints = info.fakePoints ++ C.toPoints toX toY data
-        }
-    , postPlane = always identity
+    , prePlane = \info -> { info | fakePoints = info.fakePoints ++ C.toPoints toX toY data }
+    , postPlane = \p info -> { info | points = info.points ++ C.toPoints toX toY data }
     , view = \name p _ ->
       case config.area of
         Just fill ->
