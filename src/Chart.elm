@@ -1,5 +1,5 @@
 module Chart exposing
-    ( chart, Element, series, scatter, linear, monotone, Metric, bars, histogram
+    ( chart, Element, series, scatter, linear, monotone, bars, histogram, bar
     , Bounds, startMin, startMax, endMin, endMax, startPad, endPad, zero, middle
     , xAxis, yAxis, xTicks, yTicks, xLabels, yLabels, grid
     , ints, times, format, ticks, amount
@@ -300,7 +300,7 @@ binLabel value config =
 
 
 {-| -}
-barLabel : (Int -> Metric data -> data -> Maybe String) -> Attribute { a | barLabel : Maybe (Int -> Metric data -> data -> Maybe String) }
+barLabel : (data -> Maybe String) -> Attribute { a | barLabel : Maybe (data -> Maybe String) }
 barLabel value config =
   { config | barLabel = Just value }
 
@@ -966,30 +966,19 @@ type alias Bars data msg =
   , margin : Float
   , spacing : Float
   , binLabel : Maybe (data -> String)
-  , barLabel : Maybe (Int -> Metric data -> data -> Maybe String)
   }
 
 
 {-| -}
-type alias Metric data =
-  { label : String
-  , unit : String
-  , color : String
-  , value : data -> Float
-  }
-
-
-{-| -}
-bars : List (Metric data) -> List (Bars data msg -> Bars data msg) -> Element data msg
-bars metrics edits =
+bars : List (Bars data msg -> Bars data msg) -> List (Bar data msg) -> Element data msg
+bars edits metrics =
   let config =
         applyAttrs edits
           { rounded = 0
           , roundBottom = False
-          , spacing = 0
+          , spacing = 0.01
           , margin = 0.05
           , binLabel = Nothing
-          , barLabel = Nothing
           , attrs = []
           }
 
@@ -999,8 +988,8 @@ bars metrics edits =
           Nothing -> String.fromInt i
 
       toBarLabel i m d =
-        case config.barLabel of
-          Just func -> func i m d
+        case m.label of
+          Just func -> func d
           Nothing -> Nothing
 
       numOfBars =
@@ -1012,13 +1001,13 @@ bars metrics edits =
       barSpacing =
         (numOfBars - 1) * config.spacing
 
-      toBar name i d metric =
+      toBar name i d (Bar value metric) =
         { attributes = [ SA.stroke "transparent", SA.fill metric.color, clipPath name ] ++ config.attrs
         , label = toBarLabel i metric d
         , width = (1 - barSpacing - binMargin) / numOfBars
         , rounded = config.rounded
         , roundBottom = config.roundBottom
-        , value = metric.value d
+        , value = value d
         }
 
       toBin name i d =
@@ -1030,7 +1019,9 @@ bars metrics edits =
   { isHtml = False
   , prePlane = \data info ->
       let length = toFloat (List.length data) in
-      { info | xs = (\_ -> 0.5) :: (\_ -> length + 0.5) :: info.xs, ys = List.map .value metrics ++ info.ys }
+      { info | xs = (\_ -> 0.5) :: (\_ -> length + 0.5) :: info.xs
+      , ys = List.map (\(Bar value _) -> value) metrics ++ info.ys
+      }
   , postPlane = always identity
   , view = \name data p _ -> C.bars p (List.indexedMap (toBin name) data)
   }
@@ -1044,14 +1035,13 @@ type alias Histogram data msg =
   , margin : Float
   , spacing : Float
   , attrs : List (S.Attribute msg)
-  , binLabel : Maybe (data -> String)
-  , barLabel : Maybe (Int -> Metric data -> data -> Maybe String)
+  , label : Maybe (data -> String)
   }
 
 
 {-| -}
-histogram : (data -> Float) -> List (Metric data) -> List (Histogram data msg -> Histogram data msg) -> Element data msg
-histogram toX metrics edits =
+histogram : (data -> Float) -> List (Histogram data msg -> Histogram data msg) -> List (Bar data msg) -> Element data msg
+histogram toX edits metrics =
   let config =
         applyAttrs edits
           { binWidth = Nothing
@@ -1059,8 +1049,7 @@ histogram toX metrics edits =
           , roundBottom = False
           , spacing = 0.01
           , margin = 0.05
-          , binLabel = Nothing
-          , barLabel = Nothing
+          , label = Nothing
           , attrs = []
           }
 
@@ -1082,22 +1071,22 @@ histogram toX metrics edits =
               Nothing -> p.x.max - toX d
 
       toBinLabel d =
-        case config.binLabel of
+        case config.label of
           Just func -> func d
           Nothing -> String.fromFloat (toX d)
 
       toBarLabel i m d =
-        case config.barLabel of
-          Just func -> func i m d
+        case m.label of
+          Just func -> func d
           Nothing -> Nothing
 
-      toBar name i d metric =
+      toBar name i d (Bar value metric) =
         { attributes = [ SA.stroke "transparent", SA.fill metric.color, clipPath name ] ++ config.attrs
         , label = toBarLabel i metric d
         , width = (1 - barSpacing - barMargin) / numOfBars
         , rounded = config.rounded
         , roundBottom = config.roundBottom
-        , value = metric.value d
+        , value = value d
         }
 
       toBin name p i d n =
@@ -1122,10 +1111,40 @@ histogram toX metrics edits =
           Nothing -> toX d + 1 -- TODO
   in
   { isHtml = False
-  , prePlane = \data info -> { info | xs = toBinWidthX :: toX :: info.xs, ys = List.map .value metrics ++ info.ys }
+  , prePlane = \data info ->
+      { info | xs = toBinWidthX :: toX :: info.xs
+      , ys = List.map (\(Bar value _) -> value) metrics ++ info.ys
+      }
   , postPlane = always identity
   , view = \name data p _ -> C.histogram p (mapWithNext (toBin name p) (0, []) data)
   }
+
+
+
+{-| -}
+type Bar data msg =
+  Bar (data -> Float) (BarConfig data msg)
+
+
+type alias BarConfig data msg =
+  { attrs : List (S.Attribute msg)
+  , color : String
+  , label : Maybe (data -> Maybe String)
+  }
+
+
+{-| -}
+bar : (data -> Float) -> List (BarConfig data msg -> BarConfig data msg) -> Bar data msg
+bar toY edits =
+  let config =
+        applyAttrs edits
+          { label = Nothing
+          , color = blue -- TODO
+          , attrs = []
+          }
+  in
+  Bar toY config
+
 
 
 

@@ -88,6 +88,7 @@ view hovered =
         , HA.style "margin" "20px 40px"
         , HA.style "max-width" "700px"
         ]
+    --, C.onLeave
     --, C.events
     --    [ C.event "mousemove" (C.getNearestX OnHover)
     --    , C.event "mouseleave" (\_ _ -> OnLeave)
@@ -95,11 +96,14 @@ view hovered =
     ]
     [ C.grid []
 
-    --, C.histogram .x
-    --    [ C.binWidth (always 2) ]
-    --    [ C.bar .y [ C.label "speed", C.unit "m/s", C.color C.blue, C.rounded 0.2, C.roundBottom ]
-    --    , C.bar .y [ C.label "weight", C.unit "kg", C.color C.pink, C.label label  ]
-    --    ]
+    , C.bars
+        [ C.rounded 0.2, C.roundBottom, C.spacing 0.01
+        --, C.onNearest OnHover
+        ]
+        [ C.bar .y [ C.color C.blue ]
+        , C.bar .z [ C.color C.pink ]
+        , C.bar .y [ C.color C.orange ]
+        ]
 
     --, C.xAxis []
         --[ C.ticks
@@ -108,23 +112,20 @@ view hovered =
 
 
     , C.xAxis []
-    , C.xLabels []
-    , C.xTicks []
+    --, C.xLabels []
+    --, C.xTicks []
     , C.yAxis []
     , C.yLabels []
     , C.yTicks []
 
-    , C.series .x
-        [ C.monotone .y [] -- [ C.label "speed", C.unit "m/s", C.color C.blue, C.shape C.circle ]
-        , C.linear (.z >> (+) 1) [] -- [ C.label "weight", C.unit "kg", C.color C.pink, C.shape C.circle ]
-        , C.scatter (.z >> (+) 2) [] -- [ C.label "weight", C.unit "kg", C.color C.pink, C.shape C.circle ]
-        , C.scatter (.z >> (+) 3) [] -- [ C.label "weight", C.unit "kg", C.color C.pink, C.shape C.circle ]
-        , C.scatter (.z >> (+) 4) [] -- [ C.label "weight", C.unit "kg", C.color C.pink, C.shape C.circle ]
-        , C.scatter (.z >> (+) 6) [] -- [ C.label "weight", C.unit "kg", C.color C.pink, C.shape C.circle ]
-        , C.scatter (.z >> (+) 7) [] -- [ C.label "weight", C.unit "kg", C.color C.pink, C.shape C.circle ]
-        , C.scatter (.z >> (+) 8) [] -- [ C.label "weight", C.unit "kg", C.color C.pink, C.shape C.circle ]
-        , C.scatter .z [] -- [ C.label "weight", C.unit "kg", C.color C.pink, C.shape C.circle ]
-        ]
+    --, C.series .x
+    --    --[ C.getNearest OnHover
+    --    --, C.getNearestX OnHover
+    --    --, C.getWithin 10 OnHover
+    --    --]
+    --    [ C.monotone .y [] -- [ C.label "speed", C.unit "m/s", C.color C.blue, C.shape C.circle ]
+    --    , C.scatter .z [] -- [ C.label "weight", C.unit "kg", C.color C.pink, C.shape C.circle ]
+    --    ]
 
     --, C.monotone .x .z [ C.dot specialDot2, C.color C.orange, C.area "rgba(244, 149, 69, 0.3)" ]
 
