@@ -1,5 +1,5 @@
 module Chart exposing
-    ( chart, Element, scatter, linear, monotone, Metric, bars, histogram
+    ( chart, Element, series, scatter, linear, monotone, Metric, bars, histogram
     , Bounds, startMin, startMax, endMin, endMax, startPad, endPad, zero, middle
     , xAxis, yAxis, xTicks, yTicks, xLabels, yLabels, grid
     , ints, times, format, ticks, amount
@@ -8,7 +8,7 @@ module Chart exposing
     , width, height
     , marginTop, marginBottom, marginLeft, marginRight
     , paddingTop, paddingBottom, paddingLeft, paddingRight
-    , responsive, id
+    , static, id
     , range, domain, topped, events, htmlAttrs, binWidth
     , start, end, pinned, color, rounded, roundBottom, margin, spacing
     , dot, dotted, area, noArrow, binLabel, barLabel, filterX, filterY, only, attrs
@@ -33,7 +33,7 @@ module Chart exposing
 
 # Attributes
 @docs width, height, marginTop, marginBottom, marginLeft, marginRight, paddingX, paddingY
-@docs responsive, id, range, domain, events, htmlAttrs, binWidth
+@docs static, id, range, domain, events, htmlAttrs, binWidth
 @docs color, rounded, roundBottom, margin, dot, dotted, area, attrs
 
 # Interop
@@ -127,9 +127,9 @@ paddingRight value config =
 
 
 {-| -}
-responsive : Attribute { a | responsive : Bool }
-responsive config =
-  { config | responsive = True }
+static : Attribute { a | responsive : Bool }
+static config =
+  { config | responsive = False }
 
 
 {-| -}
@@ -345,10 +345,10 @@ chart edits elements data =
         applyAttrs edits
           { width = 500
           , height = 200
-          , marginTop = 5
+          , marginTop = 10
           , marginBottom = 30
           , marginLeft = 30
-          , marginRight = 5
+          , marginRight = 10
           , paddingTop = 10
           , paddingBottom = 0
           , paddingLeft = 0
@@ -710,7 +710,7 @@ xTicks edits =
           { color = "rgb(210, 210, 210)"
           , start = .min
           , end = .max
-          , pinned = .min
+          , pinned = zero
           , amount = 5
           , only = \_ -> True
           , produce = Unchanged (\_ _ -> [])
@@ -753,7 +753,7 @@ yTicks edits =
           { color = "rgb(210, 210, 210)"
           , start = .min
           , end = .max
-          , pinned = .min
+          , pinned = zero
           , only = \_ -> True
           , amount = 5
           , produce = Unchanged (\_ _ -> [])
@@ -815,7 +815,7 @@ xLabels edits =
           , start = .min
           , end = .max
           , only = \_ -> True
-          , pinned = .min
+          , pinned = zero
           , attrs = []
           , amount = 5
           , produce = Unchanged (\_ _ -> [])
@@ -849,7 +849,6 @@ xLabels edits =
   }
 
 
-
 {-| -}
 yLabels : List (Label tick msg -> Label tick msg) -> Element data msg
 yLabels edits =
@@ -858,7 +857,7 @@ yLabels edits =
           { color = "#808BAB"
           , start = .min
           , end = .max
-          , pinned = .min
+          , pinned = zero
           , only = \_ -> True
           , amount = 5 -- TODO
           , produce = Unchanged (\_ _ -> [])
@@ -1133,6 +1132,34 @@ histogram toX metrics edits =
 -- DOTTED SERIES
 
 
+type Series data msg
+  = Series ((data -> Float) -> String -> Element data msg)
+
+
+
+series : (data -> Float) -> List (Series data msg) -> Element data msg
+series toX series_ =
+  let timesOver =
+        List.length series_ // List.length colors
+
+      defaultColors =
+        List.concat (List.repeat (timesOver + 1) colors)
+
+      elements =
+        List.map2 (\(Series s) -> s toX) series_ defaultColors
+  in
+  { isHtml = False
+  , prePlane = \data info -> List.foldl (\s i -> s.prePlane data i) info elements
+  , postPlane = \p info -> List.foldl (\s i -> s.postPlane p i) info elements
+  , view = \name data p i ->
+      S.g
+        [ SA.class "elm-charts__series" ]
+        (List.map (\s -> s.view name data p i) elements)
+  }
+
+
+
+
 type alias Scatter data msg =
     { color : String -- TODO use Color
     , dot : Tracked (data -> C.Dot msg)
@@ -1140,27 +1167,28 @@ type alias Scatter data msg =
 
 
 {-| -}
-scatter : (data -> Float) -> (data -> Float) -> List (Scatter data msg -> Scatter data msg) -> Element data msg
-scatter toX toY edits =
-  let config =
-        applyAttrs edits
-          { color = "rgb(5,142,218)" -- TODO
-          , dot = Unchanged (\_ -> C.disconnected 6 1 C.cross "rgb(5,142,218)")
-          }
+scatter : (data -> Float) -> List (Scatter data msg -> Scatter data msg) -> Series data msg
+scatter toY edits =
+  Series <| \toX defaultColor ->
+    let config =
+          applyAttrs edits
+            { color = defaultColor
+            , dot = Unchanged (\_ -> C.disconnected 6 1 C.cross defaultColor)
+            }
 
-      finalDot =
-        case config.dot of -- TODO use inheritance instead?
-          Unchanged _ -> \_ -> C.disconnected 6 1 C.cross config.color
-          Changed d -> d
-  in
-  { isHtml = False
-  , prePlane = \data info -> { info | xs = toX :: info.xs, ys = toY :: info.ys }
-  , postPlane = always identity
-  , view = \name data p _ ->
-      S.g
-        [ SA.class "elm-charts__scatter" ]
-        [ C.scatter p toX toY finalDot data ]
-  }
+        finalDot =
+          case config.dot of -- TODO use inheritance instead?
+            Unchanged _ -> \_ -> C.disconnected 6 1 C.cross config.color
+            Changed d -> d
+    in
+    { isHtml = False
+    , prePlane = \data info -> { info | xs = toX :: info.xs, ys = toY :: info.ys }
+    , postPlane = always identity
+    , view = \name data p _ ->
+        S.g
+          [ SA.class "elm-charts__scatter" ]
+          [ C.scatter p toX toY finalDot data ]
+    }
 
 
 type alias Interpolation data msg =
@@ -1178,84 +1206,86 @@ type Tracked a
 
 
 {-| -}
-monotone : (data -> Float) -> (data -> Float) -> List (Interpolation data msg -> Interpolation data msg) -> Element data msg
-monotone toX toY edits =
-  let config =
-        applyAttrs edits
-          { color = "rgb(5,142,218)" -- TODO
-          , area = Nothing
-          , width = 1
-          , dot = Unchanged (\_ -> C.disconnected 6 1 C.cross "rgb(5,142,218)")
-          , attrs = []
-          }
+monotone : (data -> Float) -> List (Interpolation data msg -> Interpolation data msg) -> Series data msg
+monotone toY edits =
+  Series <| \toX defaultColor ->
+    let config =
+          applyAttrs edits
+            { color = defaultColor -- TODO
+            , area = Nothing
+            , width = 1
+            , dot = Unchanged (\_ -> C.disconnected 6 1 C.cross defaultColor)
+            , attrs = []
+            }
 
-      interAttrs =
-        [ SA.stroke config.color
-        , SA.strokeWidth (String.fromFloat config.width)
-        ] ++ config.attrs
+        interAttrs =
+          [ SA.stroke config.color
+          , SA.strokeWidth (String.fromFloat config.width)
+          ] ++ config.attrs
 
-      finalDot =
-        case config.dot of -- TODO use inheritance instead?
-          Unchanged _ -> \_ -> C.disconnected 6 1 C.cross config.color
-          Changed d -> d
-  in
-  { isHtml = False
-  , prePlane = \data info -> { info | xs = toX :: info.xs, ys = toY :: info.ys }
-  , postPlane = always identity
-  , view = \name data p _ ->
-      case config.area of
-        Just fill ->
-          S.g [ SA.class "elm-charts__monotone-area" ]
-            [ C.monotoneArea p toX toY (interAttrs ++ [ SA.stroke "transparent", SA.fill fill, clipPath name ]) finalDot data
-            , C.monotone p toX toY interAttrs finalDot data
-            ]
+        finalDot =
+          case config.dot of -- TODO use inheritance instead?
+            Unchanged _ -> \_ -> C.disconnected 6 1 C.cross config.color
+            Changed d -> d
+    in
+    { isHtml = False
+    , prePlane = \data info -> { info | xs = toX :: info.xs, ys = toY :: info.ys }
+    , postPlane = always identity
+    , view = \name data p _ ->
+        case config.area of
+          Just fill ->
+            S.g [ SA.class "elm-charts__monotone-area" ]
+              [ C.monotoneArea p toX toY (interAttrs ++ [ SA.stroke "transparent", SA.fill fill, clipPath name ]) finalDot data
+              , C.monotone p toX toY interAttrs finalDot data
+              ]
 
-        Nothing ->
-          S.g
-            [ SA.class "elm-charts__monotone" ]
-            [ C.monotone p toX toY interAttrs finalDot data ]
-  }
+          Nothing ->
+            S.g
+              [ SA.class "elm-charts__monotone" ]
+              [ C.monotone p toX toY interAttrs finalDot data ]
+    }
 
 
 
 {-| -}
-linear : (data -> Float) -> (data -> Float) -> List (Interpolation data msg -> Interpolation data msg) -> Element data msg
-linear toX toY edits =
-  let config =
-        applyAttrs edits
-          { color = "rgb(5,142,218)" -- TODO
-          , area = Nothing
-          , width = 1
-          , dot = Unchanged (\_ -> C.disconnected 6 1 C.cross "rgb(5,142,218)")
-          , attrs = []
-          }
+linear : (data -> Float) -> List (Interpolation data msg -> Interpolation data msg) -> Series data msg
+linear toY edits =
+  Series <| \toX defaultColor ->
+    let config =
+          applyAttrs edits
+            { color = defaultColor -- TODO
+            , area = Nothing
+            , width = 1
+            , dot = Unchanged (\_ -> C.disconnected 6 1 C.cross defaultColor)
+            , attrs = []
+            }
 
-      interAttrs =
-        [ SA.stroke config.color
-        , SA.strokeWidth (String.fromFloat config.width)
-        ] ++ config.attrs
+        interAttrs =
+          [ SA.stroke config.color
+          , SA.strokeWidth (String.fromFloat config.width)
+          ] ++ config.attrs
 
-      finalDot =
-        case config.dot of
-          Unchanged _ -> \_ -> C.disconnected 6 1 C.cross config.color
-          Changed d -> d
-  in
-  { isHtml = False
-  , prePlane = \data info -> { info | xs = toX :: info.xs, ys = toY :: info.ys }
-  , postPlane = always identity
-  , view = \name data p _ ->
-    case config.area of
-      Just fill ->
-        S.g [ SA.class "elm-charts__linear-area" ]
-          [ C.linearArea p toX toY (interAttrs ++ [ SA.stroke "transparent", SA.fill fill, clipPath name ]) finalDot data
-          , C.linear p toX toY interAttrs finalDot data
-          ]
+        finalDot =
+          case config.dot of
+            Unchanged _ -> \_ -> C.disconnected 6 1 C.cross config.color
+            Changed d -> d
+    in
+    { isHtml = False
+    , prePlane = \data info -> { info | xs = toX :: info.xs, ys = toY :: info.ys }
+    , postPlane = always identity
+    , view = \name data p _ ->
+      case config.area of
+        Just fill ->
+          S.g [ SA.class "elm-charts__linear-area" ]
+            [ C.linearArea p toX toY (interAttrs ++ [ SA.stroke "transparent", SA.fill fill, clipPath name ]) finalDot data
+            , C.linear p toX toY interAttrs finalDot data
+            ]
 
-      Nothing ->
-        S.g
-          [ SA.class "elm-charts__linear" ]
-          [ C.linear p toX toY interAttrs finalDot data ]
-  }
+        Nothing ->
+          S.g
+            [ SA.class "elm-charts__linear" ]
+            [ C.linear p toX toY interAttrs finalDot data ]
+    }
 
 
 {-| -}
@@ -1337,6 +1367,11 @@ clipPath name =
   SA.clipPath <| "url(#" ++ name ++ ")"
 
 
+colors : List String
+colors =
+  [ blue, orange, green, pink, purple, red ]
+
+
 {-| -}
 blue : String
 blue =
@@ -1365,6 +1400,12 @@ green =
 red : String
 red =
   "rgb(215, 31, 10)"
+
+
+{-| -}
+purple : String
+purple =
+  "rgb(170, 80, 208)"
 
 
 toDataPoints : (data -> Float) -> List (data -> Float) -> List data -> List (C.DataPoint data)
