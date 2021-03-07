@@ -78,10 +78,10 @@ view hovered =
         ]
     ]
     [ C.xAxis []
-    , C.xLabels []
+    --, C.xLabels []
     , C.yAxis []
     , C.yLabels []
-    , C.bars
+    , C.histogram .x
         []
         [ C.bar .y [ C.color C.pink ]
         , C.bar .z []
@@ -92,6 +92,8 @@ view hovered =
     --    , C.scatter .x []
     --    ]
         data
-
+    , case hovered of
+        [] -> C.none
+        (first :: rest) as points -> C.tooltip (\_ -> first.x) C.middle [] [ Html.text (Debug.toString points) ]
     ]
 

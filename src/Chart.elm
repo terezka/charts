@@ -1029,7 +1029,7 @@ bars edits metrics data =
         List.map (\(Bar value _) -> value) metrics
 
       toPoints i d =
-        List.map (\(Bar value _) -> { x = toFloat i, y = value d }) metrics
+        List.map (\(Bar value _) -> { x = toFloat (i + 1), y = value d }) metrics
 
       toYMax d = -- TODO
         List.map (\(Bar value _) -> value d) metrics
@@ -1098,34 +1098,34 @@ histogram toX edits metrics data =
           Just func -> func d
           Nothing -> String.fromFloat (toX d)
 
-      toBarLabel i m d =
+      toBarLabel m d =
         case m.label of
           Just func -> func d
           Nothing -> Nothing
 
-      toBar name i d (Bar value metric) =
+      toBar name d (Bar value metric) =
         { attributes = [ SA.stroke "transparent", SA.fill metric.color, clipPath name ] ++ config.attrs
-        , label = toBarLabel i metric d
+        , label = toBarLabel metric d
         , width = (1 - barSpacing - barMargin) / numOfBars
         , rounded = config.rounded
         , roundBottom = config.roundBottom
         , value = value d
         }
 
-      toBin name p i d n =
+      toBin name p d n =
         { label = toBinLabel d
         , start = toX d
         , end = toX d + toBinWidth p d n
         , spacing = config.spacing
         , tickLength = 4
         , tickWidth = 1
-        , bars = List.map (toBar name i d) metrics
+        , bars = List.map (toBar name d) metrics
         }
 
-      mapWithNext func (i, acc) ds =
+      mapWithNext func acc ds =
         case ds of
-          a :: b :: rs -> mapWithNext func ( i + 1, func i a (Just b) :: acc) rs
-          a :: [] -> func i a Nothing :: acc
+          a :: b :: rs -> mapWithNext func (func a (Just b) :: acc) rs
+          a :: [] -> func a Nothing :: acc
           [] -> acc
 
       toBinWidthX d =
@@ -1137,18 +1137,27 @@ histogram toX edits metrics data =
         List.map (\(Bar value _) -> value d) metrics
           |> List.maximum
           |> Maybe.withDefault 1
+
+      toPoints d maybeN =
+        let width_ =
+               case config.binWidth of
+                Just toWidth -> toWidth d
+                Nothing ->
+                  case maybeN of
+                    Just n -> toX n - toX d
+                    Nothing -> 0
+        in
+        List.map (\(Bar value _) -> { x = toX d + width_ / 2, y = value d }) metrics
   in
   { isHtml = False
   , prePlane = \info ->
-      let points =
-            C.toPoints toX toYMax data ++
+      { info | points = info.points ++ List.concat (mapWithNext toPoints [] data)
+      , fakePoints =
+          info.fakePoints ++ C.toPoints toX toYMax data ++
             C.toPoints toBinWidthX toYMax data
-      in
-      { info | points = info.points ++ points
-      , fakePoints = info.fakePoints ++ points
       }
   , postPlane = always identity
-  , view = \name p _ -> C.histogram p (mapWithNext (toBin name p) (0, []) data)
+  , view = \name p _ -> C.histogram p (mapWithNext (toBin name p) [] data)
   }
 
 
