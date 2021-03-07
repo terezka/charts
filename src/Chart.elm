@@ -371,17 +371,18 @@ chart edits elements =
       prePlaneInfo =
         toPrePlaneInfo elements
           { points = []
+          , fakePoints = []
           }
 
       calcRange =
         case config.range of
-          Just edit -> edit (fromData [.x] prePlaneInfo.points) -- TODO
-          Nothing -> fromData [.x] prePlaneInfo.points
+          Just edit -> edit (fromData [.x] prePlaneInfo.fakePoints) -- TODO
+          Nothing -> fromData [.x] prePlaneInfo.fakePoints
 
       calcDomain =
         case config.domain of
-          Just edit -> edit (fromData [.y] prePlaneInfo.points) -- TODO
-          Nothing -> startMin 0 (fromData [.y] prePlaneInfo.points)
+          Just edit -> edit (fromData [.y] prePlaneInfo.fakePoints) -- TODO
+          Nothing -> startMin 0 (fromData [.y] prePlaneInfo.fakePoints)
 
       scalePadX =
         C.scaleCartesian
@@ -465,8 +466,12 @@ chart edits elements =
         then [ C.responsive plane ]
         else C.static plane
 
+      dataPoints =
+        C.toDataPoints .x .y prePlaneInfo.points
+
       toEvent e =
-        SE.on e.name (C.decodePoint plane e.msg)
+        let (Decoder func) = e.msg in
+        SE.on e.name (C.decodePoint plane (func dataPoints))
 
       allSvgEls =
         [ C.frame config.id plane ] ++ (List.map applyInfo chartEls) ++ [ C.eventCatcher plane [] ]
@@ -481,6 +486,7 @@ chart edits elements =
 
 type alias PrePlaneInfo =
   { points : List C.Point
+  , fakePoints : List C.Point
   }
 
 
@@ -572,42 +578,46 @@ middle bounds =
 {-| -}
 type alias Event msg =
   { name : String
-  , msg : C.Plane -> C.Point -> msg
+  , msg : Decoder msg
   }
 
 
 {-| -}
-event : String -> (C.Plane -> C.Point -> msg) -> Event msg
+event : String -> Decoder msg -> Event msg
 event =
   Event
 
 
-{-| -}
-getNearest : (Maybe data -> msg) -> (data -> Float) -> List (data -> Float) -> List data -> C.Plane -> C.Point -> msg
-getNearest toMsg toX toYs data plane point =
-  let points = toDataPoints toX toYs data in
-  toMsg (C.getNearest points plane point)
+type Decoder msg
+  = Decoder (List (C.DataPoint C.Point) -> C.Plane -> C.Point -> msg)
 
 
 {-| -}
-getWithin : (Maybe data -> msg) -> Float -> (data -> Float) -> List (data -> Float) -> List data -> C.Plane -> C.Point -> msg
-getWithin toMsg radius toX toYs data plane point =
-  let points = toDataPoints toX toYs data in
-  toMsg (C.getWithin radius points plane point)
+getNearest : (Maybe C.Point -> msg) -> Decoder msg
+getNearest toMsg =
+  Decoder <| \points plane point ->
+    toMsg (C.getNearest points plane point)
 
 
 {-| -}
-getNearestX : (List data -> msg) -> (data -> Float) -> List (data -> Float) -> List data -> C.Plane -> C.Point -> msg
-getNearestX toMsg toX toYs data plane point =
-  let points = toDataPoints toX toYs data in
-  toMsg (C.getNearestX points plane point)
+getWithin : Float -> (Maybe C.Point -> msg) -> Decoder msg
+getWithin radius toMsg =
+  Decoder <| \points plane point ->
+    toMsg (C.getWithin radius points plane point)
 
 
 {-| -}
-getWithinX : (List data -> msg) -> Float -> (data -> Float) -> List (data -> Float) -> List data -> C.Plane -> C.Point -> msg
-getWithinX toMsg radius toX toYs data plane point =
-  let points = toDataPoints toX toYs data in
-  toMsg (C.getWithinX radius points plane point)
+getNearestX : (List C.Point -> msg) -> Decoder msg
+getNearestX toMsg =
+  Decoder <| \points plane point ->
+    toMsg (C.getNearestX points plane point)
+
+
+{-| -}
+getWithinX : Float -> (List C.Point -> msg) -> Decoder msg
+getWithinX radius toMsg =
+  Decoder <| \points plane point ->
+    toMsg (C.getWithinX radius points plane point)
 
 
 {-| -}
@@ -984,7 +994,7 @@ bars edits metrics data =
       toBinLabel i d =
         case config.binLabel of
           Just func -> func d
-          Nothing -> String.fromInt i
+          Nothing -> String.fromInt (i + 1)
 
       toBarLabel i m d =
         case m.label of
@@ -1015,6 +1025,12 @@ bars edits metrics data =
         , bars = List.map (toBar name i d) metrics
         }
 
+      toYs =
+        List.map (\(Bar value _) -> value) metrics
+
+      toPoints i d =
+        List.map (\(Bar value _) -> { x = toFloat i, y = value d }) metrics
+
       toYMax d = -- TODO
         List.map (\(Bar value _) -> value d) metrics
           |> List.maximum
@@ -1023,8 +1039,9 @@ bars edits metrics data =
   { isHtml = False
   , prePlane = \info ->
       let length = toFloat (List.length data) in
-      { info | points =
-          info.points ++
+      { info
+      | points = info.points ++ List.concat (List.indexedMap toPoints data)
+      , fakePoints = info.fakePoints ++
           C.toPoints (\_ -> 0.5) toYMax data ++
           C.toPoints (\_ -> length + 0.5) toYMax data
       }
@@ -1123,10 +1140,12 @@ histogram toX edits metrics data =
   in
   { isHtml = False
   , prePlane = \info ->
-      { info | points =
-          info.points ++
-          C.toPoints toX toYMax data ++
-          C.toPoints toBinWidthX toYMax data
+      let points =
+            C.toPoints toX toYMax data ++
+            C.toPoints toBinWidthX toYMax data
+      in
+      { info | points = info.points ++ points
+      , fakePoints = info.fakePoints ++ points
       }
   , postPlane = always identity
   , view = \name p _ -> C.histogram p (mapWithNext (toBin name p) (0, []) data)
@@ -1168,24 +1187,6 @@ type Series data msg
   = Series (List data -> (data -> Float) -> String -> Element msg)
 
 
-
---type alias SeriesConfig data msg =
---  { getNearest : Maybe (Metric data -> data -> msg)
---  , getNearestX : Maybe (List (Metric data) -> data -> msg)
---  , getWithin : Maybe (Metric data -> data -> msg)
---  , getWithinX : Maybe (List (Metric data) -> data -> msg)
---  }
--- List (SeriesConfig data msg -> SeriesConfig data msg) ->
-
---config =
---        applyAttrs edits
---          { getNearest = Nothing
---          , getNearestX = Nothing
---          , getWithin = Nothing
---          , getWithinX = Nothing
---          }
-
-
 series : (data -> Float) -> List (Series data msg) -> List data -> Element msg
 series toX series_ data =
   let timesOver =
@@ -1209,9 +1210,8 @@ series toX series_ data =
   , prePlane = \info -> List.foldl (\s i -> s.prePlane i) info elements
   , postPlane = \p info -> List.foldl (\s i -> s.postPlane p i) info elements
   , view = \name p i ->
-      S.g
-        [ SA.class "elm-charts__series" ]
-        (List.map (\s -> s.view name p i) elements)
+      S.g [ SA.class "elm-charts__series" ]
+          (List.map (\s -> s.view name p i) elements)
   }
 
 
@@ -1239,7 +1239,10 @@ scatter toY edits =
             Changed d -> d
     in
     { isHtml = False
-    , prePlane = \info -> { info | points = info.points ++ C.toPoints toX toY data }
+    , prePlane = \info ->
+        { info | points = info.points ++ C.toPoints toX toY data
+        , fakePoints = info.fakePoints ++ C.toPoints toX toY data
+        }
     , postPlane = always identity
     , view = \name p _ ->
         S.g
@@ -1286,7 +1289,10 @@ monotone toY edits =
             Changed d -> d
     in
     { isHtml = False
-    , prePlane = \info -> { info | points = info.points ++ C.toPoints toX toY data }
+    , prePlane = \info ->
+        { info | points = info.points ++ C.toPoints toX toY data
+        , fakePoints = info.fakePoints ++ C.toPoints toX toY data
+        }
     , postPlane = always identity
     , view = \name p _ ->
         case config.area of
@@ -1328,7 +1334,10 @@ linear toY edits =
             Changed d -> d
     in
     { isHtml = False
-    , prePlane = \info -> { info | points = info.points ++ C.toPoints toX toY data }
+    , prePlane = \info ->
+        { info | points = info.points ++ C.toPoints toX toY data
+        , fakePoints = info.fakePoints ++ C.toPoints toX toY data
+        }
     , postPlane = always identity
     , view = \name p _ ->
       case config.area of

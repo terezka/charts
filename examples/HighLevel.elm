@@ -25,7 +25,7 @@ main =
 
 
 type Msg
-  = OnHover (List Point)
+  = OnHover (List SC.Point)
   | OnLeave
 
 
@@ -62,23 +62,8 @@ data2 =
   ]
 
 
-view : List Point -> Html.Html Msg
+view : List SC.Point -> Html.Html Msg
 view hovered =
-  let specialDot p =
-        if Maybe.map .x (List.head hovered) == Just p.x
-          then SC.aura 2 8 0.2 SC.circle C.blue
-          else SC.disconnected 2 1 SC.circle C.blue
-
-      specialDot2 p =
-        if Maybe.map .x (List.head hovered) == Just p.x
-          then SC.aura 2 8 0.2 SC.circle C.orange
-          else SC.disconnected 2 1 SC.circle C.orange
-
-      barLabel i m d =
-        if i == 1 && m.label == "speed"
-          then Just (String.fromFloat (m.value d))
-          else Nothing
-  in
   C.chart
     [ C.width 600
     , C.height 300
@@ -88,67 +73,25 @@ view hovered =
         , HA.style "margin" "20px 40px"
         , HA.style "max-width" "700px"
         ]
-    --, C.onLeave
-    --, C.events
-    --    [ C.event "mousemove" (C.getNearestX OnHover)
-    --    , C.event "mouseleave" (\_ _ -> OnLeave)
-    --    ]
+    , C.events
+        [ C.event "mousemove" (C.getNearestX OnHover)
+        ]
     ]
-    [ C.grid []
-
-    , C.histogram .x
-        [ C.rounded 0.2, C.roundBottom, C.spacing 0.01
-        , C.binWidth (always 2)
-        --, C.onNearest OnHover
-        ]
-        [ C.bar .y [ C.color C.blue ]
-        , C.bar .z [ C.color C.pink ]
-        , C.bar .y [ C.color C.orange ]
-        ]
-        data
-
-    --, C.xAxis []
-        --[ C.ticks
-        --, C.labels []
-        --]
-
-
-    , C.xAxis []
-    --, C.xLabels []
-    --, C.xTicks []
+    [ C.xAxis []
+    , C.xLabels []
     , C.yAxis []
     , C.yLabels []
-    , C.yTicks []
-
+    , C.bars
+        []
+        [ C.bar .y [ C.color C.pink ]
+        , C.bar .z []
+        ]
     --, C.series .x
-    --    --[ C.getNearest OnHover
-    --    --, C.getNearestX OnHover
-    --    --, C.getWithin 10 OnHover
-    --    --]
-    --    [ C.monotone .y [] -- [ C.label "speed", C.unit "m/s", C.color C.blue, C.shape C.circle ]
-    --    , C.scatter .z [] -- [ C.label "weight", C.unit "kg", C.color C.pink, C.shape C.circle ]
+    --    [ C.monotone .y []
+    --    , C.linear .z []
+    --    , C.scatter .x []
     --    ]
-
-    --, C.bars
-    --    [ C.Metric "speed" "m/s" C.blue .y
-    --    , C.Metric "width" "m" C.pink .y
-    --    , C.Metric "weight" "kg" C.orange .y
-    --    ]
-    --    [ C.margin 0.02, C.spacing 0.015, C.rounded 0.2, C.binLabel .label
-    --    , C.barLabel barLabel
-    --    ]
-
-    --, C.tooltip model.hovered
-    --    [ C.attrs [ background ]
-    --    , C.title <| \d ->
-    --    , C.each <| \m d ->
-    --    ]
-
-    --, C.tooltipMany model.hovered
-    --    [ C.attrs [ background ]
-    --    , C.title <| \d ->
-    --    , C.each <| \m d ->
-    --    ]
+        data
 
     ]
 
