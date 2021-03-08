@@ -370,17 +370,19 @@ chart edits elements =
 
       prePlaneInfo =
         toPrePlaneInfo elements
-          { fakePoints = [] }
+          { x = { min = 0, max = 1 }
+          , y = { min = 0, max = 1 }
+          }
 
       calcRange =
         case config.range of
-          Just edit -> edit (fromData [.x] prePlaneInfo.fakePoints) -- TODO
-          Nothing -> fromData [.x] prePlaneInfo.fakePoints
+          Just edit -> edit prePlaneInfo.x
+          Nothing -> prePlaneInfo.x
 
       calcDomain =
         case config.domain of
-          Just edit -> edit (fromData [.y] prePlaneInfo.fakePoints) -- TODO
-          Nothing -> startMin 0 (fromData [.y] prePlaneInfo.fakePoints)
+          Just edit -> edit prePlaneInfo.y -- TODO
+          Nothing -> startMin 0 prePlaneInfo.y
 
       scalePadX =
         C.scaleCartesian
@@ -480,7 +482,8 @@ chart edits elements =
 
 
 type alias PrePlaneInfo =
-  { fakePoints : List C.Point
+  { x : Bounds
+  , y : Bounds
   }
 
 
@@ -563,6 +566,11 @@ zero bounds =
 middle : Bounds -> Float
 middle bounds =
     bounds.min + (bounds.max - bounds.min) / 2
+
+
+stretch : Bounds -> Bounds -> Bounds
+stretch a b =
+  { min = min a.min b.min, max = max a.max b.max }
 
 
 
@@ -1022,26 +1030,24 @@ bars edits metrics data =
 
       -- CALC
 
+      ys =
+        List.map (\(Bar value _) -> value) metrics
+
       toYs d =
-        List.map (\(Bar value _) -> value d) metrics
+        List.map (\y -> y d) ys
 
       toDataPoints i d =
         List.map (toDataPoint i d) (toYs d)
 
       toDataPoint i d v =
         C.DataPoint d { x = toFloat (i + 1), y = v }
-
-      toYMax d = -- TODO
-        List.map (\(Bar value _) -> value d) metrics
-          |> List.maximum
-          |> Maybe.withDefault 1
   in
   { isHtml = False
   , prePlane = \info ->
       let length = toFloat (List.length data) in
-      { info | fakePoints = info.fakePoints ++
-          C.toPoints (\_ -> 0.5) toYMax data ++
-          C.toPoints (\_ -> length + 0.5) toYMax data
+      { info
+      | x = stretch info.x { min = 0.5, max = length + 0.5 }
+      , y = stretch info.y (fromData ys data)
       }
   , postPlane = \p info -> { info | points = info.points ++ List.concat (List.indexedMap toDataPoints data) }
   , view = \name p _ -> C.bars p (List.indexedMap (toBin name) data)
@@ -1122,18 +1128,16 @@ histogram toX edits metrics data =
 
       -- CALC
 
-      toBinWidthX d =
+      ys =
+        List.map (\(Bar value _) -> value) metrics
+
+      toYs d =
+        List.map (\y -> y d) ys
+
+      toXEnd d =
         case config.binWidth of
           Just w -> toX d - w d
           Nothing -> toX d - 1
-
-      toYMax d =
-        toYs d
-          |> List.maximum
-          |> Maybe.withDefault 1
-
-      toYs d =
-        List.map (\(Bar value _) -> value d) metrics
 
       toDataPoints p maybePrev d =
         let bw = toBinWidth p d maybePrev in
@@ -1144,7 +1148,10 @@ histogram toX edits metrics data =
   in
   { isHtml = False
   , prePlane = \info ->
-      { info | fakePoints = info.fakePoints ++ C.toPoints toX toYMax data ++ C.toPoints toBinWidthX toYMax data }
+      { info
+      | x = stretch info.x (fromData [toX, toXEnd] data)
+      , y = stretch info.y (fromData ys data)
+      }
   , postPlane = \p info -> { info | points = info.points ++ List.concat (mapWithPrev (toDataPoints p) data) }
   , view = \name p _ -> C.histogram p (mapWithPrev (toBin name p) data)
   }
@@ -1237,7 +1244,11 @@ scatter toY edits =
             Changed d -> d
     in
     { isHtml = False
-    , prePlane = \info -> { info | fakePoints = info.fakePoints ++ C.toPoints toX toY data }
+    , prePlane = \info ->
+        { info
+        | x = stretch info.x (fromData [toX] data)
+        , y = stretch info.y (fromData [toY] data)
+        }
     , postPlane = \p info -> { info | points = info.points ++ C.toDataPoints toX toY data }
     , view = \name p _ ->
         S.g
@@ -1284,7 +1295,11 @@ monotone toY edits =
             Changed d -> d
     in
     { isHtml = False
-    , prePlane = \info -> { info | fakePoints = info.fakePoints ++ C.toPoints toX toY data }
+    , prePlane = \info ->
+        { info
+        | x = stretch info.x (fromData [toX] data)
+        , y = stretch info.y (fromData [toY] data)
+        }
     , postPlane = \p info -> { info | points = info.points ++ C.toDataPoints toX toY data }
     , view = \name p _ ->
         case config.area of
@@ -1326,7 +1341,11 @@ linear toY edits =
             Changed d -> d
     in
     { isHtml = False
-    , prePlane = \info -> { info | fakePoints = info.fakePoints ++ C.toPoints toX toY data }
+    , prePlane = \info ->
+        { info
+        | x = stretch info.x (fromData [toX] data)
+        , y = stretch info.y (fromData [toY] data)
+        }
     , postPlane = \p info -> { info | points = info.points ++ C.toDataPoints toX toY data }
     , view = \name p _ ->
       case config.area of
