@@ -11,7 +11,7 @@ module Chart exposing
     , static, id
     , range, domain, topped, events, htmlAttrs, binWidth
     , start, end, pinned, color, rounded, roundBottom, margin, spacing
-    , dot, dotted, area, noArrow, binLabel, barLabel, tickLength, tickWidth, center
+    , dot, dotted, area, noArrow, binLabel, barLabel, barColor, tickLength, tickWidth, center
     , filterX, filterY, only, attrs
     , blue, orange, pink, green, red
     )
@@ -40,7 +40,7 @@ module Chart exposing
 @docs paddingTop, paddingBottom, paddingLeft, paddingRight
 @docs center
 @docs range, domain, topped, static, id, events, htmlAttrs
-@docs binWidth, binLabel, barLabel, tickLength, tickWidth, margin, spacing, rounded, roundBottom
+@docs binWidth, binLabel, barLabel, barColor, tickLength, tickWidth, margin, spacing, rounded, roundBottom
 @docs dotted, color, dot, area, attrs
 
 # Interop
@@ -346,6 +346,12 @@ barLabel value config =
 binWidth : (data -> Float) -> Attribute { a | binWidth : Maybe (data -> Float) }
 binWidth value config =
   { config | binWidth = Just value }
+
+
+{-| -}
+barColor : (data -> String) -> Attribute { a | color : Maybe (data -> String) }
+barColor value config =
+  { config | color = Just value }
 
 
 {-| -}
@@ -1148,8 +1154,13 @@ bars edits metrics data =
       barSpacing =
         (numOfBars - 1) * config.spacing
 
+      toBarColor m d =
+        case m.color of
+          Just func -> func d
+          Nothing -> blue -- TODO nice default
+
       toBar name i d (Bar value metric) =
-        { attributes = [ SA.stroke "transparent", SA.fill metric.color, clipPath name ] ++ config.attrs
+        { attributes = [ SA.stroke "transparent", SA.fill (toBarColor metric d), clipPath name ] ++ config.attrs
         , label = toBarLabel i metric d
         , width = (1 - barSpacing - binMargin) / numOfBars
         , rounded = config.rounded
@@ -1249,8 +1260,13 @@ histogram toX edits metrics data =
           Just func -> func d
           Nothing -> Nothing
 
+      toBarColor m d =
+        case m.color of
+          Just func -> func d
+          Nothing -> blue
+
       toBar name d (Bar value metric) =
-        { attributes = [ SA.stroke "transparent", SA.fill metric.color, clipPath name ] ++ config.attrs
+        { attributes = [ SA.stroke "transparent", SA.fill (toBarColor metric d), clipPath name ] ++ config.attrs
         , label = toBarLabel metric d
         , width = (1 - barSpacing - barMargin) / numOfBars
         , rounded = config.rounded
@@ -1308,7 +1324,7 @@ type Bar data msg =
 
 type alias BarConfig data msg =
   { attrs : List (S.Attribute msg)
-  , color : String
+  , color : Maybe (data -> String)
   , label : Maybe (data -> Maybe String)
   }
 
@@ -1319,7 +1335,7 @@ bar toY edits =
   let config =
         applyAttrs edits
           { label = Nothing
-          , color = blue -- TODO
+          , color = Nothing
           , attrs = []
           }
   in
