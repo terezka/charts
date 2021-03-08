@@ -2,7 +2,7 @@ module Chart exposing
     ( chart, Element, series, scatter, linear, monotone, bars, histogram, bar
     , Bounds, startMin, startMax, endMin, endMax, startPad, endPad, zero, middle
     , xAxis, yAxis, xTicks, yTicks, xLabels, yLabels, grid
-    , ints, times, format, ticks, amount
+    , ints, floats, times, format, values, amount
     , Event, event, Decoder, map, map2, map3, getPoint, getNearest, getNearestX, getWithin, getWithinX, tooltip, formatTimestamp
     , svgAt, htmlAt, svg, html, none
     , width, height
@@ -29,7 +29,7 @@ module Chart exposing
 
 # Axis
 @docs xAxis, yAxis, xTicks, yTicks, xLabels, yLabels, grid
-@docs amount, ints, times, ticks, format, noArrow, start, end, pinned, only, filterX, filterY
+@docs amount, floats, ints, times, values, format, noArrow, start, end, pinned, only, filterX, filterY
 
 # Events
 @docs Event, event, Decoder, map, map2, map3, getPoint, getNearest, getNearestX, getWithin, getWithinX, tooltip, formatTimestamp
@@ -265,27 +265,57 @@ only value config =
 
 
 {-| -}
-times : Time.Zone -> Attribute { a | produce : Maybe (Int -> Bounds -> List I.Time), value : I.Time -> Float, format : I.Time -> String }
+times : Time.Zone -> Attribute { a | values : Maybe (Values I.Time) }
 times zone config =
-  { config | produce = Just <| I.times zone, value = .timestamp >> Time.posixToMillis >> toFloat, format = formatTime zone }
+  { config | values = Just
+      { produce = I.times zone
+      , value = .timestamp >> Time.posixToMillis >> toFloat
+      , format = formatTime zone
+      }
+  }
 
 
 {-| -}
-ints : Attribute { a | produce : Maybe (Int -> Bounds -> List Int), value : Int -> Float, format : Int -> String }
+ints : Attribute { a | values : Maybe (Values Int) }
 ints config =
-  { config | produce = Just <| \i -> I.ints (I.around i), value = toFloat, format = String.fromInt }
+  { config | values = Just
+      { produce = \i -> I.ints (I.around i)
+      , value = toFloat
+      , format = String.fromInt
+      }
+  }
 
 
 {-| -}
-ticks : (Int -> Bounds -> List tick) -> (tick -> Float) -> (tick -> String) -> Attribute { a | produce : Maybe (Int -> Bounds -> List tick), value : tick -> Float, format : tick -> String }
-ticks produce value format_ config =
-  { config | produce = Just produce, value = value, format = format_ }
+floats : Attribute { a | values : Maybe (Values Float) }
+floats config =
+  { config | values = Just
+      { produce = \i -> I.floats (I.around i)
+      , value = identity
+      , format = String.fromFloat
+      }
+  }
 
 
 {-| -}
-format : (tick -> String) -> Attribute { a | format : tick -> String }
-format value config =
-  { config | format = value }
+values : (Int -> Bounds -> List tick) -> (tick -> Float) -> (tick -> String) -> Attribute { a | values : Maybe (Values tick) }
+values produce value formatter config =
+  { config | values = Just
+      { produce = produce
+      , value = value
+      , format = formatter
+      }
+  }
+
+
+{-| -}
+format : (tick -> String) -> Attribute { a | values : Maybe (Values tick) }
+format formatter config =
+  { config | values =
+      case config.values of
+        Just c -> Just { c | format = formatter }
+        Nothing -> Nothing -- TODO
+  }
 
 
 {-| -}
@@ -542,9 +572,9 @@ type alias Bounds =
 
 {-| -}
 fromData : List (data -> Float) -> List data -> Bounds
-fromData values data =
-  { min = C.minimum values data
-  , max = C.maximum values data
+fromData toValues data =
+  { min = C.minimum toValues data
+  , max = C.maximum toValues data
   }
 
 
@@ -769,12 +799,16 @@ type alias Tick tick msg =
     , start : Bounds -> Float
     , end : Bounds -> Float
     , only : Float -> Bool
-    , attrs : List (S.Attribute msg)
     , amount : Int
-    , produce : Maybe (Int -> Bounds -> List tick)
-    , value : tick -> Float
-    , format : tick -> String
+    , values : Maybe (Values tick)
+    , attrs : List (S.Attribute msg)
     }
+
+type alias Values tick =
+  { produce : Int -> Bounds -> List tick
+  , value : tick -> Float
+  , format : tick -> String
+  }
 
 
 {-| -}
@@ -788,9 +822,7 @@ xTicks edits =
           , pinned = zero
           , amount = 5
           , only = \_ -> True
-          , produce = Nothing
-          , value = \_ -> 0
-          , format = \_ -> ""
+          , values = Nothing
           , height = 5
           , width = 1
           , attrs = []
@@ -804,9 +836,9 @@ xTicks edits =
 
       toTicks p =
         List.filter config.only <|
-          case config.produce of
-            Just produce -> List.map config.value (produce config.amount <| xBounds p)
-            Nothing -> I.floats (I.around config.amount) <| xBounds p
+          case config.values of
+            Just { value, produce } -> List.map value (produce config.amount <| xBounds p)
+            Nothing -> I.floats (I.around config.amount) (xBounds p)
 
       tickAttrs =
         [ SA.stroke config.color
@@ -832,9 +864,7 @@ yTicks edits =
           , pinned = zero
           , only = \_ -> True
           , amount = 5
-          , produce = Nothing
-          , value = \_ -> 0
-          , format = \_ -> ""
+          , values = Nothing
           , height = 5
           , width = 1
           , attrs = []
@@ -849,9 +879,9 @@ yTicks edits =
 
       toTicks p =
         List.filter config.only <|
-          case config.produce of
-            Just produce -> List.map config.value (produce config.amount <| yBounds p)
-            Nothing -> (I.floats (I.around config.amount) <| yBounds p)
+          case config.values of
+            Just { value, produce } -> List.map value (produce config.amount <| yBounds p)
+            Nothing -> I.floats (I.around config.amount) (yBounds p)
 
       tickAttrs =
         [ SA.stroke config.color
@@ -876,9 +906,7 @@ type alias Label tick msg =
     , xOffset : Float
     , yOffset : Float
     , amount : Int
-    , produce : Maybe (Int -> Bounds -> List tick)
-    , value : tick -> Float
-    , format : tick -> String
+    , values : Maybe (Values tick)
     , center : Bool
     , attrs : List (S.Attribute msg)
     }
@@ -901,9 +929,7 @@ xLabels edits =
           , only = \_ -> True
           , pinned = zero
           , amount = 5
-          , produce = Nothing
-          , value = \_ -> 0
-          , format = \_ -> ""
+          , values = Nothing
           , xOffset = 0
           , yOffset = 0
           , center = False
@@ -918,9 +944,14 @@ xLabels edits =
 
       toTicks p =
         List.filter (config.only << .value) <|
-          case config.produce of
-            Just produce -> List.map (\i -> Pair (config.value i) (config.format i)) (produce config.amount <| xBounds p)
-            Nothing -> List.map (\i -> Pair i (String.fromFloat i)) (I.floats (I.around config.amount) <| xBounds p)
+          case config.values of
+            Just c ->
+              c.produce config.amount (xBounds p)
+                |> List.map (\i -> Pair (c.value i) (c.format i))
+
+            Nothing ->
+              I.floats (I.around config.amount) (xBounds p)
+                |> List.map (\i -> Pair i (String.fromFloat i))
 
       repositionIfCenter pairs =
         if config.center
@@ -956,9 +987,7 @@ yLabels edits =
           , pinned = zero
           , only = \_ -> True
           , amount = 5 -- TODO
-          , produce = Nothing
-          , value = \_ -> 0
-          , format = \_ -> ""
+          , values = Nothing
           , xOffset = 0
           , yOffset = 0
           , center = False
@@ -973,12 +1002,14 @@ yLabels edits =
 
       toTicks p =
         List.filter (config.only << .value) <|
-          case config.produce of
-            Just produce ->
-              List.map (\i -> { value = config.value i, label = config.format i }) (produce config.amount <| yBounds p)
+          case config.values of
+            Just c ->
+              c.produce config.amount (yBounds p)
+                |> List.map (\i -> Pair (c.value i) (c.format i))
 
             Nothing ->
-              List.map (\i -> { value = i, label = String.fromFloat i }) (I.floats (I.around config.amount) <| yBounds p)
+              I.floats (I.around config.amount) (yBounds p)
+                |> List.map (\i -> Pair i (String.fromFloat i))
 
       repositionIfCenter pairs =
         if config.center
