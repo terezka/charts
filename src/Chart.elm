@@ -11,7 +11,8 @@ module Chart exposing
     , static, id
     , range, domain, topped, events, htmlAttrs, binWidth
     , start, end, pinned, color, rounded, roundBottom, margin, spacing
-    , dot, dotted, area, noArrow, binLabel, barLabel, filterX, filterY, only, attrs
+    , dot, dotted, area, noArrow, binLabel, barLabel, tickLength, tickWidth, center
+    , filterX, filterY, only, attrs
     , blue, orange, pink, green, red
     )
 
@@ -314,6 +315,25 @@ barLabel value config =
 binWidth : (data -> Float) -> Attribute { a | binWidth : Maybe (data -> Float) }
 binWidth value config =
   { config | binWidth = Just value }
+
+
+{-| -}
+tickLength : Float -> Attribute { a | tickLength : Float }
+tickLength value config =
+  { config | tickLength = value }
+
+
+{-| -}
+tickWidth : Float -> Attribute { a | tickWidth : Float }
+tickWidth value config =
+  { config | tickWidth = value }
+
+
+{-| -}
+center : Attribute { a | center : Bool }
+center config =
+  { config | center = True }
+
 
 
 
@@ -796,7 +816,7 @@ xTicks edits =
     { isHtml = False
     , prePlane = identity
     , postPlane = \p ts -> { ts | xTicks = ts.xTicks ++ toTicks p }
-    , view = \_ p _ -> C.xTicks p (round config.height) tickAttrs (config.pinned <| toBounds .y p) (toTicks p)
+    , view = \_ p _ -> C.xTicks p config.height tickAttrs (config.pinned <| toBounds .y p) (toTicks p)
     }
 
 
@@ -841,7 +861,7 @@ yTicks edits =
     { isHtml = False
     , prePlane = identity
     , postPlane = \p ts -> { ts | yTicks = ts.yTicks ++ toTicks p }
-    , view = \_ p _ -> C.yTicks p (round config.height) tickAttrs (config.pinned <| toBounds .x p) (toTicks p)
+    , view = \_ p _ -> C.yTicks p config.height tickAttrs (config.pinned <| toBounds .x p) (toTicks p)
     }
 
 
@@ -849,7 +869,6 @@ yTicks edits =
 type alias Label tick msg =
     { color : String -- TODO use Color
     , pinned : Bounds -> Float
-    , attrs : List (S.Attribute msg)
     , start : Bounds -> Float
     , end : Bounds -> Float
     , only : Float -> Bool
@@ -859,7 +878,15 @@ type alias Label tick msg =
     , produce : Maybe (Int -> Bounds -> List tick)
     , value : tick -> Float
     , format : tick -> String
+    , center : Bool
+    , attrs : List (S.Attribute msg)
     }
+
+
+type alias Pair =
+  { value : Float
+  , label : String
+  }
 
 
 {-| -}
@@ -872,13 +899,14 @@ xLabels edits =
           , end = .max
           , only = \_ -> True
           , pinned = zero
-          , attrs = []
           , amount = 5
           , produce = Nothing
           , value = \_ -> 0
           , format = \_ -> ""
           , xOffset = 0
           , yOffset = 0
+          , center = False
+          , attrs = []
           }
 
       xBounds p =
@@ -890,8 +918,18 @@ xLabels edits =
       toTicks p =
         List.filter (config.only << .value) <|
           case config.produce of
-            Just produce -> List.map (\i -> { value = config.value i, label = config.format i }) (produce config.amount <| xBounds p)
-            Nothing -> List.map (\i -> { value = i, label = String.fromFloat i }) (I.floats (I.around config.amount) <| xBounds p)
+            Just produce -> List.map (\i -> Pair (config.value i) (config.format i)) (produce config.amount <| xBounds p)
+            Nothing -> List.map (\i -> Pair i (String.fromFloat i)) (I.floats (I.around config.amount) <| xBounds p)
+
+      repositionIfCenter pairs =
+        if config.center
+          then List.filterMap identity (mapWithPrev toCenterTick pairs)
+          else pairs
+
+      toCenterTick maybePrev curr =
+        case maybePrev of
+          Just prev -> Just <| Pair (prev.value + (curr.value - prev.value) / 2) prev.label
+          Nothing -> Nothing
 
       labelAttrs =
         [ SA.fill config.color
@@ -902,7 +940,7 @@ xLabels edits =
     { isHtml = False
     , prePlane = identity
     , postPlane = \p ts -> { ts | xTicks = ts.xTicks ++ List.map .value (toTicks p) }
-    , view = \_ p _ -> C.xLabels p (C.xLabel labelAttrs .value .label) (config.pinned <| toBounds .y p) (toTicks p)
+    , view = \_ p _ -> C.xLabels p (C.xLabel labelAttrs .value .label) (config.pinned <| toBounds .y p) (repositionIfCenter <| toTicks p)
     }
 
 
@@ -922,6 +960,7 @@ yLabels edits =
           , format = \_ -> ""
           , xOffset = 0
           , yOffset = 0
+          , center = False
           , attrs = []
           }
 
@@ -940,6 +979,16 @@ yLabels edits =
             Nothing ->
               List.map (\i -> { value = i, label = String.fromFloat i }) (I.floats (I.around config.amount) <| yBounds p)
 
+      repositionIfCenter pairs =
+        if config.center
+          then List.filterMap identity (mapWithPrev toCenterTick pairs)
+          else pairs
+
+      toCenterTick maybePrev curr =
+        case maybePrev of
+          Just prev -> Just <| Pair (prev.value + (curr.value - prev.value) / 2) prev.label
+          Nothing -> Nothing
+
       labelAttrs =
         [ SA.fill config.color
         , SA.transform ("translate(" ++ String.fromFloat config.xOffset ++ " " ++ String.fromFloat config.yOffset ++ ")")
@@ -949,7 +998,7 @@ yLabels edits =
     { isHtml = False
     , prePlane = identity
     , postPlane = \p ts -> { ts | yTicks = ts.yTicks ++ List.map .value (toTicks p) }
-    , view = \_ p _ -> C.yLabels p (C.yLabel labelAttrs .value .label) (config.pinned <| toBounds .x p) (toTicks p)
+    , view = \_ p _ -> C.yLabels p (C.yLabel labelAttrs .value .label) (config.pinned <| toBounds .x p) (repositionIfCenter <| toTicks p)
     }
 
 
@@ -1027,6 +1076,8 @@ type alias Bars data msg =
   , attrs : List (S.Attribute msg)
   , margin : Float
   , spacing : Float
+  , tickLength : Float
+  , tickWidth : Float
   , binLabel : Maybe (data -> String)
   }
 
@@ -1041,13 +1092,15 @@ bars edits metrics data =
           , spacing = 0.01
           , margin = 0.05
           , binLabel = Nothing
+          , tickLength = 0
+          , tickWidth = 1
           , attrs = []
           }
 
       toBinLabel i d =
         case config.binLabel of
           Just func -> func d
-          Nothing -> String.fromInt (i + 1)
+          Nothing -> ""
 
       toBarLabel i m d =
         case m.label of
@@ -1075,6 +1128,8 @@ bars edits metrics data =
       toBin name i d =
         { label = toBinLabel i d
         , spacing = config.spacing
+        , tickLength = config.tickLength
+        , tickWidth = config.tickWidth
         , bars = List.map (toBar name i d) metrics
         }
 
@@ -1112,8 +1167,10 @@ type alias Histogram data msg =
   , roundBottom : Bool
   , margin : Float
   , spacing : Float
-  , attrs : List (S.Attribute msg)
   , binLabel : Maybe (data -> String)
+  , tickLength : Float
+  , tickWidth : Float
+  , attrs : List (S.Attribute msg)
   }
 
 
@@ -1128,6 +1185,8 @@ histogram toX edits metrics data =
           , spacing = 0.01
           , margin = 0.05
           , binLabel = Nothing
+          , tickLength = 0
+          , tickWidth = 1
           , attrs = []
           }
 
@@ -1151,7 +1210,7 @@ histogram toX edits metrics data =
       toBinLabel d =
         case config.binLabel of
           Just func -> func d
-          Nothing -> String.fromFloat (toX d)
+          Nothing -> ""
 
       toBarLabel m d =
         case m.label of
@@ -1172,8 +1231,8 @@ histogram toX edits metrics data =
         , start = toX d - toBinWidth p d maybePrev
         , end = toX d
         , spacing = config.spacing
-        , tickLength = 4
-        , tickWidth = 1
+        , tickLength = config.tickLength
+        , tickWidth = config.tickWidth
         , bars = List.map (toBar name d) metrics
         }
 
@@ -1261,7 +1320,7 @@ series toX series_ data =
     , prePlane = \info -> List.foldl (\(Element s) i -> s.prePlane i) info elements
     , postPlane = \p info -> List.foldl (\(Element s) i -> s.postPlane p i) info elements
     , view = \name p i ->
-        S.g [ SA.class "elm-charts__series" ]
+        S.g [ SA.class "elm-charts__series", clipPath name ]
             (List.map (\(Element s) -> s.view name p i) elements)
     }
 
@@ -1349,7 +1408,7 @@ monotone toY edits =
           case config.area of
             Just fill ->
               S.g [ SA.class "elm-charts__monotone-area" ]
-                [ C.monotoneArea p toX toY (interAttrs ++ [ SA.stroke "transparent", SA.fill fill, clipPath name ]) finalDot data
+                [ C.monotoneArea p toX toY (interAttrs ++ [ SA.stroke "transparent", SA.fill fill ]) finalDot data
                 , C.monotone p toX toY interAttrs finalDot data
                 ]
 
@@ -1396,7 +1455,7 @@ linear toY edits =
         case config.area of
           Just fill ->
             S.g [ SA.class "elm-charts__linear-area" ]
-              [ C.linearArea p toX toY (interAttrs ++ [ SA.stroke "transparent", SA.fill fill, clipPath name ]) finalDot data
+              [ C.linearArea p toX toY (interAttrs ++ [ SA.stroke "transparent", SA.fill fill ]) finalDot data
               , C.linear p toX toY interAttrs finalDot data
               ]
 

@@ -86,14 +86,16 @@ view model =
         ]
     ]
     [ C.bars
-        [ ]
+        [ C.tickLength 4, C.binLabel (.x >> String.fromFloat) ]
         [ C.bar .y [ C.color C.pink ]
         , C.bar .z []
         ]
         data
     , C.yAxis []
-    , C.yLabels []
+    , C.yTicks []
+    , C.yLabels [ C.center ]
     , C.xAxis []
+    --, C.xTicks []
     --, C.xLabels []
     --, C.series .x
     --    [ C.monotone .y []

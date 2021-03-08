@@ -121,6 +121,8 @@ frame id plane =
 type alias Group msg =
   { label : String
   , spacing : Float
+  , tickLength : Float
+  , tickWidth : Float
   , bars : List (Bar msg)
   }
 
@@ -134,8 +136,8 @@ bars plane groups =
           , start = toFloat i + 0.5
           , end = toFloat i + 1.5
           , spacing = group.spacing
-          , tickLength = 0
-          , tickWidth = 0
+          , tickLength = group.tickLength
+          , tickWidth = group.tickWidth
           , bars = group.bars
           }
   in
@@ -209,7 +211,7 @@ viewBin plane bin =
   in
   g [ class "elm-charts__bin" ]
     [ g [ class "elm-charts__bars" ] (List.map (viewBar plane) adjustedBars)
-    , xTicks plane (round bin.tickLength) [ Attributes.strokeWidth (String.fromFloat bin.tickWidth) ] (closestToZero plane) [ bin.start, bin.end ]
+    , xTicks plane bin.tickLength [ Attributes.strokeWidth (String.fromFloat bin.tickWidth) ] (closestToZero plane) [ bin.start, bin.end ]
     , viewXLabel plane [ class "elm-charts__bin-label" ] bin.label (bin.start + binWidth / 2) (closestToZero plane) 0 20
     , g [ class "elm-charts__bin-bar-labels" ] (List.map viewValueLabel adjustedBars)
     ]
@@ -406,14 +408,14 @@ yGrid =
     horizontalTicks =
       xTicks plane height [ stroke "pink" ] axisYCoordinate tickPositions
 -}
-xTicks : Plane -> Int -> List (Attribute msg) -> Float -> List Float -> Svg msg
+xTicks : Plane -> Float -> List (Attribute msg) -> Float -> List Float -> Svg msg
 xTicks plane height userAttributes y xs =
   g [ class "elm-charts__x-ticks" ] (List.map (xTick plane height userAttributes y) xs)
 
 
 {-| Renders a single tick for the horizontal axis.
 -}
-xTick : Plane -> Int -> List (Attribute msg) -> Float -> Float -> Svg msg
+xTick : Plane -> Float -> List (Attribute msg) -> Float -> Float -> Svg msg
 xTick plane height userAttributes y x =
   let
     attributes =
@@ -423,7 +425,7 @@ xTick plane height userAttributes y x =
         [ Attributes.x1 <| String.fromFloat (toSVGX plane x)
         , Attributes.x2 <| String.fromFloat (toSVGX plane x)
         , Attributes.y1 <| String.fromFloat (toSVGY plane y)
-        , Attributes.y2 <| String.fromFloat (toSVGY plane y + toFloat height)
+        , Attributes.y2 <| String.fromFloat (toSVGY plane y + height)
         ]
   in
     Svg.line attributes []
@@ -435,14 +437,14 @@ xTick plane height userAttributes y x =
     verticalTicks =
       yTicks plane width [ stroke "pink" ] axisXCoordinate tickPositions
 -}
-yTicks : Plane -> Int -> List (Attribute msg) -> Float -> List Float -> Svg msg
+yTicks : Plane -> Float -> List (Attribute msg) -> Float -> List Float -> Svg msg
 yTicks plane width userAttributes x ys =
   g [ class "elm-charts__y-ticks" ] (List.map (yTick plane width userAttributes x) ys)
 
 
 {-| Renders a single tick for the vertical axis.
 -}
-yTick : Plane -> Int -> List (Attribute msg) -> Float -> Float -> Svg msg
+yTick : Plane -> Float -> List (Attribute msg) -> Float -> Float -> Svg msg
 yTick plane width userAttributes x y =
   let
     attributes =
@@ -450,7 +452,7 @@ yTick plane width userAttributes x y =
         [ class "elm-charts__tick", stroke "rgb(210, 210, 210)" ]
         userAttributes
         [ Attributes.x1 <| String.fromFloat (toSVGX plane x)
-        , Attributes.x2 <| String.fromFloat (toSVGX plane x - toFloat width)
+        , Attributes.x2 <| String.fromFloat (toSVGX plane x - width)
         , Attributes.y1 <| String.fromFloat (toSVGY plane y)
         , Attributes.y2 <| String.fromFloat (toSVGY plane y)
         ]
@@ -504,7 +506,7 @@ yLabels plane toLabel x ys =
 yLabel : List (Attribute msg) -> (data -> Float) -> (data -> String) -> Plane -> Float -> data -> Svg msg
 yLabel attrs toY toString plane x datum =
   Svg.g
-    [ placeWithOffset plane x (toY datum) -10 5
+    [ placeWithOffset plane x (toY datum) -10 4
     , Attributes.style "text-anchor: end;"
     ]
     [ viewLabel attrs (toString datum) ]
@@ -723,7 +725,7 @@ monotoneArea plane toX toY attributes dot data =
 
 viewSeries : Plane -> (data -> Float) -> (data -> Float) -> (data -> Dot msg) -> List data -> Svg msg -> Svg msg
 viewSeries plane toX toY dot data interpolation =
-  g [ class "elm-charts__series" ]
+  g [ class "elm-charts__serie" ]
     [ interpolation
     , g [ class "elm-charts__dots" ] (List.map (\datum -> dot datum plane (toX datum) (toY datum)) data)
     ]
