@@ -216,9 +216,9 @@ spacing value config =
 
 
 {-| -}
-dot : (data -> C.Dot msg) -> Attribute { a | dot : Tracked (data -> C.Dot msg) }
+dot : (data -> C.Dot msg) -> Attribute { a | dot : Maybe (data -> C.Dot msg) }
 dot value config =
-  { config | dot = Changed value }
+  { config | dot = Just value }
 
 
 {-| -}
@@ -258,21 +258,21 @@ only value config =
 
 
 {-| -}
-times : Time.Zone -> Attribute { a | produce : Tracked (Int -> Bounds -> List I.Time), value : I.Time -> Float, format : I.Time -> String }
+times : Time.Zone -> Attribute { a | produce : Maybe (Int -> Bounds -> List I.Time), value : I.Time -> Float, format : I.Time -> String }
 times zone config =
-  { config | produce = Changed <| I.times zone, value = .timestamp >> Time.posixToMillis >> toFloat, format = formatTime zone }
+  { config | produce = Just <| I.times zone, value = .timestamp >> Time.posixToMillis >> toFloat, format = formatTime zone }
 
 
 {-| -}
-ints : Attribute { a | produce : Tracked (Int -> Bounds -> List Int), value : Int -> Float, format : Int -> String }
+ints : Attribute { a | produce : Maybe (Int -> Bounds -> List Int), value : Int -> Float, format : Int -> String }
 ints config =
-  { config | produce = Changed <| \i -> I.ints (I.around i), value = toFloat, format = String.fromInt }
+  { config | produce = Just <| \i -> I.ints (I.around i), value = toFloat, format = String.fromInt }
 
 
 {-| -}
-ticks : (Int -> Bounds -> List tick) -> (tick -> Float) -> (tick -> String) -> Attribute { a | produce : Tracked (Int -> Bounds -> List tick), value : tick -> Float, format : tick -> String }
+ticks : (Int -> Bounds -> List tick) -> (tick -> Float) -> (tick -> String) -> Attribute { a | produce : Maybe (Int -> Bounds -> List tick), value : tick -> Float, format : tick -> String }
 ticks produce value format_ config =
-  { config | produce = Changed produce, value = value, format = format_ }
+  { config | produce = Just produce, value = value, format = format_ }
 
 
 {-| -}
@@ -715,7 +715,7 @@ type alias Tick tick msg =
     , only : Float -> Bool
     , attrs : List (S.Attribute msg)
     , amount : Int
-    , produce : Tracked (Int -> Bounds -> List tick)
+    , produce : Maybe (Int -> Bounds -> List tick)
     , value : tick -> Float
     , format : tick -> String
     }
@@ -732,7 +732,7 @@ xTicks edits =
           , pinned = zero
           , amount = 5
           , only = \_ -> True
-          , produce = Unchanged (\_ _ -> [])
+          , produce = Nothing
           , value = \_ -> 0
           , format = \_ -> ""
           , height = 5
@@ -749,8 +749,8 @@ xTicks edits =
       toTicks p =
         List.filter config.only <|
           case config.produce of
-            Changed produce -> List.map config.value (produce config.amount <| xBounds p)
-            Unchanged v -> I.floats (I.around config.amount) <| xBounds p
+            Just produce -> List.map config.value (produce config.amount <| xBounds p)
+            Nothing -> I.floats (I.around config.amount) <| xBounds p
 
       tickAttrs =
         [ SA.stroke config.color
@@ -775,7 +775,7 @@ yTicks edits =
           , pinned = zero
           , only = \_ -> True
           , amount = 5
-          , produce = Unchanged (\_ _ -> [])
+          , produce = Nothing
           , value = \_ -> 0
           , format = \_ -> ""
           , height = 5
@@ -793,8 +793,8 @@ yTicks edits =
       toTicks p =
         List.filter config.only <|
           case config.produce of
-            Changed produce -> List.map config.value (produce config.amount <| yBounds p)
-            Unchanged v -> (I.floats (I.around config.amount) <| yBounds p)
+            Just produce -> List.map config.value (produce config.amount <| yBounds p)
+            Nothing -> (I.floats (I.around config.amount) <| yBounds p)
 
       tickAttrs =
         [ SA.stroke config.color
@@ -819,7 +819,7 @@ type alias Label tick msg =
     , xOffset : Float
     , yOffset : Float
     , amount : Int
-    , produce : Tracked (Int -> Bounds -> List tick)
+    , produce : Maybe (Int -> Bounds -> List tick)
     , value : tick -> Float
     , format : tick -> String
     }
@@ -837,7 +837,7 @@ xLabels edits =
           , pinned = zero
           , attrs = []
           , amount = 5
-          , produce = Unchanged (\_ _ -> [])
+          , produce = Nothing
           , value = \_ -> 0
           , format = \_ -> ""
           , xOffset = 0
@@ -853,8 +853,8 @@ xLabels edits =
       toTicks p =
         List.filter (config.only << .value) <|
           case config.produce of
-            Changed produce -> List.map (\i -> { value = config.value i, label = config.format i }) (produce config.amount <| xBounds p)
-            Unchanged v -> List.map (\i -> { value = i, label = String.fromFloat i }) (I.floats (I.around config.amount) <| xBounds p)
+            Just produce -> List.map (\i -> { value = config.value i, label = config.format i }) (produce config.amount <| xBounds p)
+            Nothing -> List.map (\i -> { value = i, label = String.fromFloat i }) (I.floats (I.around config.amount) <| xBounds p)
 
       labelAttrs =
         [ SA.fill config.color
@@ -879,7 +879,7 @@ yLabels edits =
           , pinned = zero
           , only = \_ -> True
           , amount = 5 -- TODO
-          , produce = Unchanged (\_ _ -> [])
+          , produce = Nothing
           , value = \_ -> 0
           , format = \_ -> ""
           , xOffset = 0
@@ -896,8 +896,11 @@ yLabels edits =
       toTicks p =
         List.filter (config.only << .value) <|
           case config.produce of
-            Changed produce -> List.map (\i -> { value = config.value i, label = config.format i }) (produce config.amount <| yBounds p)
-            Unchanged v -> List.map (\i -> { value = i, label = String.fromFloat i }) (I.floats (I.around config.amount) <| yBounds p)
+            Just produce ->
+              List.map (\i -> { value = config.value i, label = config.format i }) (produce config.amount <| yBounds p)
+
+            Nothing ->
+              List.map (\i -> { value = i, label = String.fromFloat i }) (I.floats (I.around config.amount) <| yBounds p)
 
       labelAttrs =
         [ SA.fill config.color
@@ -1209,14 +1212,6 @@ series toX series_ data =
 
       elements =
         List.map2 (\(Series s) -> s data toX) series_ defaultColors
-
-      --events =
-      --  List.filterMap identity
-      --    [ config.getNearest
-      --    ]
-
-      --toPostPlane info =
-      --  { info | events = info.events ++ List.m }
   in
   { isHtml = False
   , prePlane = \info -> List.foldl (\s i -> s.prePlane i) info elements
@@ -1231,7 +1226,7 @@ series toX series_ data =
 
 type alias Scatter data msg =
     { color : String -- TODO use Color
-    , dot : Tracked (data -> C.Dot msg)
+    , dot : Maybe (data -> C.Dot msg)
     }
 
 
@@ -1242,13 +1237,14 @@ scatter toY edits =
     let config =
           applyAttrs edits
             { color = defaultColor
-            , dot = Unchanged (\_ -> C.disconnected 6 1 C.cross defaultColor)
+            , dot = Nothing
             }
 
         finalDot =
-          case config.dot of -- TODO use inheritance instead?
-            Unchanged _ -> \_ -> C.disconnected 6 1 C.cross config.color
-            Changed d -> d
+           -- TODO use inheritance for color instead?
+          case config.dot of
+            Nothing -> always (C.disconnected 6 1 C.cross config.color)
+            Just d -> d
     in
     { isHtml = False
     , prePlane = \info ->
@@ -1268,14 +1264,9 @@ type alias Interpolation data msg =
     { color : String -- TODO use Color
     , area : Maybe String -- TODO use Color
     , width : Float
-    , dot : Tracked (data -> C.Dot msg)
+    , dot : Maybe (data -> C.Dot msg)
     , attrs : List (S.Attribute msg)
     }
-
-
-type Tracked a
-  = Changed a
-  | Unchanged a
 
 
 {-| -}
@@ -1284,10 +1275,10 @@ monotone toY edits =
   Series <| \data toX defaultColor ->
     let config =
           applyAttrs edits
-            { color = defaultColor -- TODO
+            { color = defaultColor
             , area = Nothing
             , width = 1
-            , dot = Unchanged (\_ -> C.disconnected 6 1 C.cross defaultColor)
+            , dot = Nothing
             , attrs = []
             }
 
@@ -1298,8 +1289,8 @@ monotone toY edits =
 
         finalDot =
           case config.dot of -- TODO use inheritance instead?
-            Unchanged _ -> \_ -> C.disconnected 6 1 C.cross config.color
-            Changed d -> d
+            Nothing -> always (C.disconnected 6 1 C.cross config.color)
+            Just d -> d
     in
     { isHtml = False
     , prePlane = \info ->
@@ -1330,10 +1321,10 @@ linear toY edits =
   Series <| \data toX defaultColor ->
     let config =
           applyAttrs edits
-            { color = defaultColor -- TODO
+            { color = defaultColor
             , area = Nothing
             , width = 1
-            , dot = Unchanged (\_ -> C.disconnected 6 1 C.cross defaultColor)
+            , dot = Nothing
             , attrs = []
             }
 
@@ -1344,8 +1335,8 @@ linear toY edits =
 
         finalDot =
           case config.dot of
-            Unchanged _ -> \_ -> C.disconnected 6 1 C.cross config.color
-            Changed d -> d
+            Nothing -> always (C.disconnected 6 1 C.cross config.color)
+            Just d -> d
     in
     { isHtml = False
     , prePlane = \info ->
