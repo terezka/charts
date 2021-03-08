@@ -515,6 +515,8 @@ viewLabel userAttributes string =
   let attributes =
         concat
           [ class "elm-charts__label"
+          , Attributes.stroke "white"
+          , Attributes.strokeWidth "0.2"
           , Attributes.fill "#808BAB"
           , Attributes.style "pointer-events: none;"
           ]

@@ -1020,14 +1020,16 @@ bars edits metrics data =
         , bars = List.map (toBar name i d) metrics
         }
 
-      toYs =
-        List.map (\(Bar value _) -> value) metrics
+      -- CALC
+
+      toYs d =
+        List.map (\(Bar value _) -> value d) metrics
 
       toDataPoints i d =
-        List.map (\(Bar value _) ->
-          { point = { x = toFloat (i + 1), y = value d }
-          , org = d
-          }) metrics
+        List.map (toDataPoint i d) (toYs d)
+
+      toDataPoint i d v =
+        C.DataPoint d { x = toFloat (i + 1), y = v }
 
       toYMax d = -- TODO
         List.map (\(Bar value _) -> value d) metrics
@@ -1081,13 +1083,13 @@ histogram toX edits metrics data =
       barSpacing =
         (numOfBars - 1) * config.spacing
 
-      toBinWidth p d mn =
+      toBinWidth p d maybePrev =
         case config.binWidth of
           Just toWidth -> toWidth d
           Nothing ->
-            case mn of
-              Just n -> toX n - toX d
-              Nothing -> p.x.max - toX d
+            case maybePrev of
+              Just prev -> toX d - toX prev
+              Nothing -> toX d - p.x.min
 
       toBinLabel d =
         case config.binLabel of
@@ -1108,44 +1110,43 @@ histogram toX edits metrics data =
         , value = value d
         }
 
-      toBin name p d n =
+      toBin name p maybePrev d =
         { label = toBinLabel d
-        , start = toX d
-        , end = toX d + toBinWidth p d n
+        , start = toX d - toBinWidth p d maybePrev
+        , end = toX d
         , spacing = config.spacing
         , tickLength = 4
         , tickWidth = 1
         , bars = List.map (toBar name d) metrics
         }
 
-      mapWithNext func acc ds =
-        case ds of
-          a :: b :: rs -> mapWithNext func (func a (Just b) :: acc) rs
-          a :: [] -> func a Nothing :: acc
-          [] -> acc
+      -- CALC
 
       toBinWidthX d =
         case config.binWidth of
-          Just w -> toX d + w d
-          Nothing -> toX d + 1 -- TODO
+          Just w -> toX d - w d
+          Nothing -> toX d - 1
 
-      toYMax d = -- TODO
-        List.map (\(Bar value _) -> value d) metrics
+      toYMax d =
+        toYs d
           |> List.maximum
           |> Maybe.withDefault 1
 
-      toDataPoints p d maybeN =
-        let width_ = toBinWidth p d maybeN in
-        List.map (\(Bar value _) ->
-            { point = { x = toX d + width_ / 2, y = value d }
-            , org = d
-            }) metrics
+      toYs d =
+        List.map (\(Bar value _) -> value d) metrics
+
+      toDataPoints p maybePrev d =
+        let bw = toBinWidth p d maybePrev in
+        List.map (toDataPoint bw d) (toYs d)
+
+      toDataPoint bw d v =
+        C.DataPoint d { x = toX d - bw / 2, y = v }
   in
   { isHtml = False
   , prePlane = \info ->
       { info | fakePoints = info.fakePoints ++ C.toPoints toX toYMax data ++ C.toPoints toBinWidthX toYMax data }
-  , postPlane = \p info -> { info | points = info.points ++ List.concat (mapWithNext (toDataPoints p) [] data) }
-  , view = \name p _ -> C.histogram p (mapWithNext (toBin name p) [] data)
+  , postPlane = \p info -> { info | points = info.points ++ List.concat (mapWithPrev (toDataPoints p) data) }
+  , view = \name p _ -> C.histogram p (mapWithPrev (toBin name p) data)
   }
 
 
@@ -1410,6 +1411,16 @@ toDataBounds toA plane =
   in axis.data
 
 
+mapWithPrev : (Maybe a -> a -> b) -> List a -> List b
+mapWithPrev =
+  let fold prev acc func ds =
+        case ds of
+          a :: rest -> fold (Just a) (func prev a :: acc) func rest
+          [] -> acc
+  in
+  fold Nothing []
+
+
 applyAttrs : List (a -> a) -> a -> a
 applyAttrs funcs default =
   let apply f a = f a in
@@ -1460,11 +1471,6 @@ red =
 purple : String
 purple =
   "rgb(170, 80, 208)"
-
-
---toDataPoints : (data -> Float) -> List (data -> Float) -> List data -> List (C.DataPoint data)
---toDataPoints toX toYs data =
---  List.concatMap (\toY -> C.toDataPoints toX toY data) toYs
 
 
 

@@ -79,10 +79,8 @@ view hovered =
     ]
     [ C.xAxis []
     --, C.xLabels []
-    , C.yAxis []
-    , C.yLabels []
     , C.histogram .x
-        [ C.binLabel .label, C.binWidth (always 2) ]
+        [ C.binWidth (always 2) ]
         [ C.bar .y [ C.color C.pink ]
         , C.bar .z []
         ]
@@ -92,8 +90,12 @@ view hovered =
     --    , C.scatter .x []
     --    ]
         data
+    , C.yAxis []
+    , C.yLabels []
     , case hovered of
         [] -> C.none
-        (first :: rest) as points -> C.tooltip (\_ -> first.x) C.middle [] [ Html.text (Debug.toString points) ]
+        (first :: rest) as points ->
+          C.tooltip (\_ -> first.x) C.middle [] <|
+            List.map (\a -> Html.div [] [ Html.text a ]) <| String.split "}," (Debug.toString points)
     ]
 
