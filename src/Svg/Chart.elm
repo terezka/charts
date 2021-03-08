@@ -186,7 +186,7 @@ viewBin plane bin =
         (binWidth - binWidth * usedWidthPer) / 2
 
       usedWidthPer =
-        List.sum (List.map .width bin.bars) + bin.spacing * toFloat (List.length bin.bars - 1)
+        min 1 <| List.sum (List.map .width bin.bars) + bin.spacing * toFloat (List.length bin.bars - 1)
 
       adjustBar barOffset bar =
         { attributes = bar.attributes
@@ -198,8 +198,13 @@ viewBin plane bin =
         , value = bar.value
         }
 
+      foldAdjustedBars b ( offset, acc ) =
+        ( offset + binWidth * b.width + binWidth * bin.spacing
+        , adjustBar offset b :: acc
+        )
+
       ( _, adjustedBars ) =
-        List.foldl (\b (w, acc) -> ( w + (binWidth * b.width + bin.spacing), adjustBar w b :: acc )) ( 0, [] ) bin.bars
+        List.foldl foldAdjustedBars ( 0, [] ) bin.bars
 
       viewValueLabel bar =
         case bar.label of

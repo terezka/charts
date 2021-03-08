@@ -85,9 +85,10 @@ view model =
             C.map2 OnHover C.getPoint C.getNearestX
         ]
     ]
-    [ C.bars
-        [ C.tickLength 4, C.binLabel (.x >> String.fromFloat) ]
-        [ C.bar .y [ C.color C.pink ]
+    [ C.histogram .x
+        [ C.tickLength 4, C.binLabel (.x >> String.fromFloat), C.spacing 0.05, C.margin 0.2 ]
+        [ C.bar .y [ C.barColor (\d -> if d.x > 4 then C.pink else C.orange) ]
+        , C.bar .z []
         , C.bar .z []
         ]
         data
