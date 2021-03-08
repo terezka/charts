@@ -14,18 +14,24 @@ import Time
 
 main =
   Browser.sandbox
-    { init = []
+    { init = Model Nothing []
     , update = \msg model ->
         case msg of
-          OnHover p -> p
-          OnLeave -> []
+          OnHover p ps -> { point = Just p, hovering = ps }
+          OnLeave -> { point = Nothing, hovering = [] }
 
     , view = view
     }
 
 
+type alias Model =
+  { point : Maybe SC.Point
+  , hovering : List BarPoint
+  }
+
+
 type Msg
-  = OnHover (List BarPoint)
+  = OnHover SC.Point (List BarPoint)
   | OnLeave
 
 
@@ -62,8 +68,8 @@ data2 =
   ]
 
 
-view : List BarPoint -> Html.Html Msg
-view hovered =
+view : Model -> Html.Html Msg
+view model =
   C.chart
     [ C.width 600
     , C.height 300
@@ -73,29 +79,32 @@ view hovered =
         , HA.style "margin" "20px 40px"
         , HA.style "max-width" "700px"
         ]
+    , C.paddingLeft 10
     , C.events
-        [ C.event "mousemove" (C.getNearestX OnHover)
+        [ C.event "mousemove" <|
+            C.map2 OnHover C.getPoint C.getNearestX
         ]
     ]
-    [ C.xAxis []
-    --, C.xLabels []
-    , C.histogram .x
-        [ C.binWidth (always 2) ]
+    [ C.bars
+        [ ]
         [ C.bar .y [ C.color C.pink ]
         , C.bar .z []
         ]
+        data
+    , C.yAxis []
+    , C.yLabels []
+    , C.xAxis []
+    --, C.xLabels []
     --, C.series .x
     --    [ C.monotone .y []
     --    , C.linear .z []
     --    , C.scatter .x []
     --    ]
-        data
-    , C.yAxis []
-    , C.yLabels []
-    , case hovered of
-        [] -> C.none
-        (first :: rest) as points ->
-          C.tooltip (\_ -> first.x) C.middle [] <|
+    --    data
+    , case ( model.point, model.hovering ) of
+        ( Just point, points ) ->
+          C.tooltip (\_ -> toFloat <| round point.x) C.middle [] <|
             List.map (\a -> Html.div [] [ Html.text a ]) <| String.split "}," (Debug.toString points)
+        ( _, _ ) -> C.none
     ]
 

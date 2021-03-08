@@ -35,7 +35,7 @@ module Svg.Chart
 @docs scatter, linear, linearArea, monotone, monotoneArea
 
 # Bar charts
-@docs GroupBar, bars, Bar, histogram
+@docs Group, bars, Bin, Bar, histogram
 
 # Straight lines
 @docs line, xAxis, yAxis, xArrow, yArrow, xGrid, yGrid, horizontal, vertical
@@ -59,7 +59,7 @@ mirrored on the other side of the axis!
 
 @docs container, eventCatcher
 
-@docs decodePoint, Point, DataPoint, toDataPoints
+@docs decodePoint, Point, toPoints, DataPoint, toDataPoints
 
 @docs getNearest, getNearestX, getWithin, getWithinX
 

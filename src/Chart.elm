@@ -3,7 +3,7 @@ module Chart exposing
     , Bounds, startMin, startMax, endMin, endMax, startPad, endPad, zero, middle
     , xAxis, yAxis, xTicks, yTicks, xLabels, yLabels, grid
     , ints, times, format, ticks, amount
-    , Event, event, getPoint, getNearest, getNearestX, getWithin, getWithinX, tooltip, formatTimestamp
+    , Event, event, Decoder, map, map2, map3, getPoint, getNearest, getNearestX, getWithin, getWithinX, tooltip, formatTimestamp
     , svgAt, htmlAt, svg, html, none
     , width, height
     , marginTop, marginBottom, marginLeft, marginRight
@@ -19,7 +19,9 @@ module Chart exposing
 {-| Make a chart! Documentation is still unfinished!
 
 # Elements
-@docs chart, Element, scatter, linear, monotone, Metric, bars, histogram
+@docs chart, Element
+@docs series, scatter, linear, monotone
+@docs bars, histogram, bar
 
 ## Work with bounds
 @docs Bounds, startMin, startMax, endMin, endMax, startPad, endPad, zero, middle
@@ -29,12 +31,15 @@ module Chart exposing
 @docs amount, ints, times, ticks, format, noArrow, start, end, pinned, only, filterX, filterY
 
 # Events
-@docs Event, event, getNearest, getNearestX, getWithin, getWithinX, tooltip, formatTimestamp
+@docs Event, event, Decoder, map, map2, map3, getPoint, getNearest, getNearestX, getWithin, getWithinX, tooltip, formatTimestamp
 
 # Attributes
-@docs width, height, marginTop, marginBottom, marginLeft, marginRight, paddingX, paddingY
-@docs static, id, range, domain, events, htmlAttrs, binWidth
-@docs color, rounded, roundBottom, margin, dot, dotted, area, attrs
+@docs width, height
+@docs marginTop, marginBottom, marginLeft, marginRight
+@docs paddingTop, paddingBottom, paddingLeft, paddingRight
+@docs range, domain, topped, static, id, events, htmlAttrs
+@docs binWidth, binLabel, barLabel, margin, spacing, rounded, roundBottom
+@docs dotted, color, dot, area, attrs
 
 # Interop
 @docs svgAt, htmlAt, svg, html, none
@@ -365,24 +370,24 @@ chart edits elements =
 
       toPrePlaneInfo els acc =
         case els of
-          el :: rest -> toPrePlaneInfo rest (el.prePlane acc)
+          Element el :: rest -> toPrePlaneInfo rest (el.prePlane acc)
           [] -> acc
 
       prePlaneInfo =
         toPrePlaneInfo elements
-          { x = { min = 0, max = 1 }
-          , y = { min = 0, max = 1 }
+          { x = Nothing
+          , y = Nothing
           }
 
       calcRange =
         case config.range of
-          Just edit -> edit prePlaneInfo.x
-          Nothing -> prePlaneInfo.x
+          Just edit -> edit (Maybe.withDefault { min = 0, max = 1 } prePlaneInfo.x)
+          Nothing -> Maybe.withDefault { min = 0, max = 1 } prePlaneInfo.x
 
       calcDomain =
         case config.domain of
-          Just edit -> edit prePlaneInfo.y -- TODO
-          Nothing -> startMin 0 prePlaneInfo.y
+          Just edit -> edit (Maybe.withDefault { min = 0, max = 1 } prePlaneInfo.y)
+          Nothing -> startMin 0 (Maybe.withDefault { min = 0, max = 1 } prePlaneInfo.y)
 
       scalePadX =
         C.scaleCartesian
@@ -441,7 +446,7 @@ chart edits elements =
 
       toPostPlaneInfo els acc isBeforeChart before svgs after =
         case els of
-          el :: rest ->
+          Element el :: rest ->
             if el.isHtml then
               toPostPlaneInfo rest (el.postPlane plane acc) isBeforeChart
                 (if isBeforeChart then before ++ [ el.view ] else before)
@@ -482,8 +487,8 @@ chart edits elements =
 
 
 type alias PrePlaneInfo =
-  { x : Bounds
-  , y : Bounds
+  { x : Maybe Bounds
+  , y : Maybe Bounds
   }
 
 
@@ -495,12 +500,14 @@ type alias PostPlaneInfo data =
 
 
 -- TODO
-type alias Element data msg =
-  { isHtml : Bool
-  , prePlane : PrePlaneInfo -> PrePlaneInfo
-  , postPlane : C.Plane -> PostPlaneInfo data -> PostPlaneInfo data
-  , view : String -> C.Plane -> PostPlaneInfo data -> H.Html msg
-  }
+{-| -}
+type Element data msg =
+  Element
+    { isHtml : Bool
+    , prePlane : PrePlaneInfo -> PrePlaneInfo
+    , postPlane : C.Plane -> PostPlaneInfo data -> PostPlaneInfo data
+    , view : String -> C.Plane -> PostPlaneInfo data -> H.Html msg
+    }
 
 
 
@@ -568,10 +575,12 @@ middle bounds =
     bounds.min + (bounds.max - bounds.min) / 2
 
 
-stretch : Bounds -> Bounds -> Bounds
-stretch a b =
-  { min = min a.min b.min, max = max a.max b.max }
-
+stretch : Maybe Bounds -> Bounds -> Maybe Bounds
+stretch ma b =
+  Just <|
+    case ma of
+      Just a -> { min = min a.min b.min, max = max a.max b.max }
+      Nothing -> b
 
 
 
@@ -591,43 +600,67 @@ event =
   Event
 
 
+{-| -}
 type Decoder data msg
   = Decoder (List (C.DataPoint data) -> C.Plane -> C.Point -> msg)
 
 
 {-| -}
-getPoint : (C.Point -> msg) -> Decoder data msg
-getPoint toMsg =
-  Decoder <| \_ _ point ->
-    toMsg point
+map : (a -> msg) -> Decoder data a -> Decoder data msg
+map f (Decoder a) =
+  Decoder <| \ps s p -> f (a ps s p)
 
 
 {-| -}
-getNearest : (Maybe data -> msg) -> Decoder data msg
-getNearest toMsg =
-  Decoder <| \points plane point ->
-    toMsg (C.getNearest points plane point)
+map2 : (a -> b -> msg) -> Decoder data a -> Decoder data b -> Decoder data msg
+map2 f (Decoder a) (Decoder b) =
+  Decoder <| \ps s p -> f (a ps s p) (b ps s p)
 
 
 {-| -}
-getWithin : Float -> (Maybe data -> msg) -> Decoder data msg
-getWithin radius toMsg =
-  Decoder <| \points plane point ->
-    toMsg (C.getWithin radius points plane point)
+map3 : (a -> b -> c -> msg) -> Decoder data a -> Decoder data b -> Decoder data c -> Decoder data msg
+map3 f (Decoder a) (Decoder b) (Decoder c) =
+  Decoder <| \ps s p -> f (a ps s p) (b ps s p) (c ps s p)
 
 
 {-| -}
-getNearestX : (List data -> msg) -> Decoder data msg
-getNearestX toMsg =
-  Decoder <| \points plane point ->
-    toMsg (C.getNearestX points plane point)
+getPoint : Decoder data C.Point
+getPoint =
+  Decoder <| \_ plane point ->
+    let searched =
+          { x = C.toCartesianX plane point.x
+          , y = C.toCartesianY plane point.y
+          }
+    in
+    searched
 
 
 {-| -}
-getWithinX : Float -> (List data -> msg) -> Decoder data msg
-getWithinX radius toMsg =
+getNearest : Decoder data (Maybe data)
+getNearest =
   Decoder <| \points plane point ->
-    toMsg (C.getWithinX radius points plane point)
+    C.getNearest points plane point
+
+
+{-| -}
+getWithin : Float -> Decoder data (Maybe data)
+getWithin radius =
+  Decoder <| \points plane point ->
+    C.getWithin radius points plane point
+
+
+{-| -}
+getNearestX : Decoder data (List data)
+getNearestX =
+  Decoder <| \points plane point ->
+    C.getNearestX points plane point
+
+
+{-| -}
+getWithinX : Float -> Decoder data (List data)
+getWithinX radius =
+  Decoder <| \points plane point ->
+    C.getWithinX radius points plane point
 
 
 {-| -}
@@ -664,18 +697,19 @@ xAxis edits =
           , attrs = []
           }
   in
-  { isHtml = False
-  , prePlane = identity
-  , postPlane = always identity
-  , view = \_ p _ ->
-      S.g [ SA.class "elm-charts__x-axis" ]
-        [ C.horizontal p ([ SA.stroke config.color ] ++ config.attrs) (config.pinned <| toBounds .y p) (config.start <| toBounds .x p) (config.end <| toBounds .x p)
-        , if config.arrow then
-            C.xArrow p config.color (config.end <| toBounds .x p) (config.pinned <| toBounds .y p) 0 0
-          else
-            S.text ""
-        ]
-  }
+  Element
+    { isHtml = False
+    , prePlane = identity
+    , postPlane = always identity
+    , view = \_ p _ ->
+        S.g [ SA.class "elm-charts__x-axis" ]
+          [ C.horizontal p ([ SA.stroke config.color ] ++ config.attrs) (config.pinned <| toBounds .y p) (config.start <| toBounds .x p) (config.end <| toBounds .x p)
+          , if config.arrow then
+              C.xArrow p config.color (config.end <| toBounds .x p) (config.pinned <| toBounds .y p) 0 0
+            else
+              S.text ""
+          ]
+    }
 
 
 {-| -}
@@ -691,18 +725,19 @@ yAxis edits =
           , attrs = []
           }
   in
-  { isHtml = False
-  , prePlane = identity
-  , postPlane = always identity
-  , view = \_ p _ ->
-      S.g [ SA.class "elm-charts__y-axis" ]
-        [ C.vertical p ([ SA.stroke config.color ] ++ config.attrs) (config.pinned <| toBounds .x p) (config.start <| toBounds .y p) (config.end <| toBounds .y p)
-        , if config.arrow then
-            C.yArrow p config.color (config.pinned <| toBounds .x p) (config.end <| toBounds .y p) 0 0
-          else
-            S.text ""
-        ]
-  }
+  Element
+    { isHtml = False
+    , prePlane = identity
+    , postPlane = always identity
+    , view = \_ p _ ->
+        S.g [ SA.class "elm-charts__y-axis" ]
+          [ C.vertical p ([ SA.stroke config.color ] ++ config.attrs) (config.pinned <| toBounds .x p) (config.start <| toBounds .y p) (config.end <| toBounds .y p)
+          , if config.arrow then
+              C.yArrow p config.color (config.pinned <| toBounds .x p) (config.end <| toBounds .y p) 0 0
+            else
+              S.text ""
+          ]
+    }
 
 
 type alias Tick tick msg =
@@ -757,11 +792,12 @@ xTicks edits =
         , SA.strokeWidth (String.fromFloat config.width)
         ] ++ config.attrs
   in
-  { isHtml = False
-  , prePlane = identity
-  , postPlane = \p ts -> { ts | xTicks = ts.xTicks ++ toTicks p }
-  , view = \_ p _ -> C.xTicks p (round config.height) tickAttrs (config.pinned <| toBounds .y p) (toTicks p)
-  }
+  Element
+    { isHtml = False
+    , prePlane = identity
+    , postPlane = \p ts -> { ts | xTicks = ts.xTicks ++ toTicks p }
+    , view = \_ p _ -> C.xTicks p (round config.height) tickAttrs (config.pinned <| toBounds .y p) (toTicks p)
+    }
 
 
 {-| -}
@@ -801,11 +837,12 @@ yTicks edits =
         , SA.strokeWidth (String.fromFloat config.width)
         ] ++ config.attrs
   in
-  { isHtml = False
-  , prePlane = identity
-  , postPlane = \p ts -> { ts | yTicks = ts.yTicks ++ toTicks p }
-  , view = \_ p _ -> C.yTicks p (round config.height) tickAttrs (config.pinned <| toBounds .x p) (toTicks p)
-  }
+  Element
+    { isHtml = False
+    , prePlane = identity
+    , postPlane = \p ts -> { ts | yTicks = ts.yTicks ++ toTicks p }
+    , view = \_ p _ -> C.yTicks p (round config.height) tickAttrs (config.pinned <| toBounds .x p) (toTicks p)
+    }
 
 
 
@@ -861,11 +898,12 @@ xLabels edits =
         , SA.transform ("translate(" ++ String.fromFloat config.xOffset ++ " " ++ String.fromFloat config.yOffset ++ ")")
         ] ++ config.attrs
   in
-  { isHtml = False
-  , prePlane = identity
-  , postPlane = \p ts -> { ts | xTicks = ts.xTicks ++ List.map .value (toTicks p) }
-  , view = \_ p _ -> C.xLabels p (C.xLabel labelAttrs .value .label) (config.pinned <| toBounds .y p) (toTicks p)
-  }
+  Element
+    { isHtml = False
+    , prePlane = identity
+    , postPlane = \p ts -> { ts | xTicks = ts.xTicks ++ List.map .value (toTicks p) }
+    , view = \_ p _ -> C.xLabels p (C.xLabel labelAttrs .value .label) (config.pinned <| toBounds .y p) (toTicks p)
+    }
 
 
 {-| -}
@@ -907,11 +945,12 @@ yLabels edits =
         , SA.transform ("translate(" ++ String.fromFloat config.xOffset ++ " " ++ String.fromFloat config.yOffset ++ ")")
         ] ++ config.attrs
   in
-  { isHtml = False
-  , prePlane = identity
-  , postPlane = \p ts -> { ts | yTicks = ts.yTicks ++ List.map .value (toTicks p) }
-  , view = \_ p _ -> C.yLabels p (C.yLabel labelAttrs .value .label) (config.pinned <| toBounds .x p) (toTicks p)
-  }
+  Element
+    { isHtml = False
+    , prePlane = identity
+    , postPlane = \p ts -> { ts | yTicks = ts.yTicks ++ List.map .value (toTicks p) }
+    , view = \_ p _ -> C.yLabels p (C.yLabel labelAttrs .value .label) (config.pinned <| toBounds .x p) (toTicks p)
+    }
 
 
 
@@ -962,18 +1001,19 @@ grid edits =
         then Nothing
         else Just <| C.full config.width C.circle config.color p x y
   in
-  { isHtml = False
-  , prePlane = identity
-  , postPlane = always identity
-  , view = \_ p info ->
-      S.g [ SA.class "elm-charts__grid" ] <|
-        if config.dotted then
-          List.concatMap (\x -> List.filterMap (toDot p x) info.yTicks) info.xTicks
-        else
-          [ S.g [ SA.class "elm-charts__x-grid" ] (List.filterMap (toXGrid p) info.xTicks)
-          , S.g [ SA.class "elm-charts__y-grid" ] (List.filterMap (toYGrid p) info.yTicks)
-          ]
-  }
+  Element
+    { isHtml = False
+    , prePlane = identity
+    , postPlane = always identity
+    , view = \_ p info ->
+        S.g [ SA.class "elm-charts__grid" ] <|
+          if config.dotted then
+            List.concatMap (\x -> List.filterMap (toDot p x) info.yTicks) info.xTicks
+          else
+            [ S.g [ SA.class "elm-charts__x-grid" ] (List.filterMap (toXGrid p) info.xTicks)
+            , S.g [ SA.class "elm-charts__y-grid" ] (List.filterMap (toYGrid p) info.yTicks)
+            ]
+    }
 
 
 
@@ -1052,16 +1092,17 @@ bars edits metrics data =
       toDataPoint i d v =
         C.DataPoint d { x = toFloat (i + 1), y = v }
   in
-  { isHtml = False
-  , prePlane = \info ->
-      let length = toFloat (List.length data) in
-      { info
-      | x = stretch info.x { min = 0.5, max = length + 0.5 }
-      , y = stretch info.y (fromData ys data)
-      }
-  , postPlane = \p info -> { info | points = info.points ++ List.concat (List.indexedMap toDataPoints data) }
-  , view = \name p _ -> C.bars p (List.indexedMap (toBin name) data)
-  }
+  Element
+    { isHtml = False
+    , prePlane = \info ->
+        let length = toFloat (List.length data) in
+        { info
+        | x = stretch info.x { min = 0.5, max = length + 0.5 }
+        , y = stretch info.y (fromData ys data)
+        }
+    , postPlane = \p info -> { info | points = info.points ++ List.concat (List.indexedMap toDataPoints data) }
+    , view = \name p _ -> C.bars p (List.indexedMap (toBin name) data)
+    }
 
 
 
@@ -1156,15 +1197,16 @@ histogram toX edits metrics data =
       toDataPoint bw d v =
         C.DataPoint d { x = toX d - bw / 2, y = v }
   in
-  { isHtml = False
-  , prePlane = \info ->
-      { info
-      | x = stretch info.x (fromData [toX, toXEnd] data)
-      , y = stretch info.y (fromData ys data)
-      }
-  , postPlane = \p info -> { info | points = info.points ++ List.concat (mapWithPrev (toDataPoints p) data) }
-  , view = \name p _ -> C.histogram p (mapWithPrev (toBin name p) data)
-  }
+  Element
+    { isHtml = False
+    , prePlane = \info ->
+        { info
+        | x = stretch info.x (fromData [toX, toXEnd] data)
+        , y = stretch info.y (fromData ys data)
+        }
+    , postPlane = \p info -> { info | points = info.points ++ List.concat (mapWithPrev (toDataPoints p) data) }
+    , view = \name p _ -> C.histogram p (mapWithPrev (toBin name p) data)
+    }
 
 
 
@@ -1202,6 +1244,7 @@ type Series data msg
   = Series (List data -> (data -> Float) -> String -> Element data msg)
 
 
+{-| -}
 series : (data -> Float) -> List (Series data msg) -> List data -> Element data msg
 series toX series_ data =
   let timesOver =
@@ -1213,13 +1256,14 @@ series toX series_ data =
       elements =
         List.map2 (\(Series s) -> s data toX) series_ defaultColors
   in
-  { isHtml = False
-  , prePlane = \info -> List.foldl (\s i -> s.prePlane i) info elements
-  , postPlane = \p info -> List.foldl (\s i -> s.postPlane p i) info elements
-  , view = \name p i ->
-      S.g [ SA.class "elm-charts__series" ]
-          (List.map (\s -> s.view name p i) elements)
-  }
+  Element
+    { isHtml = False
+    , prePlane = \info -> List.foldl (\(Element s) i -> s.prePlane i) info elements
+    , postPlane = \p info -> List.foldl (\(Element s) i -> s.postPlane p i) info elements
+    , view = \name p i ->
+        S.g [ SA.class "elm-charts__series" ]
+            (List.map (\(Element s) -> s.view name p i) elements)
+    }
 
 
 
@@ -1246,18 +1290,19 @@ scatter toY edits =
             Nothing -> always (C.disconnected 6 1 C.cross config.color)
             Just d -> d
     in
-    { isHtml = False
-    , prePlane = \info ->
-        { info
-        | x = stretch info.x (fromData [toX] data)
-        , y = stretch info.y (fromData [toY] data)
-        }
-    , postPlane = \p info -> { info | points = info.points ++ C.toDataPoints toX toY data }
-    , view = \name p _ ->
-        S.g
-          [ SA.class "elm-charts__scatter" ]
-          [ C.scatter p toX toY finalDot data ]
-    }
+    Element
+      { isHtml = False
+      , prePlane = \info ->
+          { info
+          | x = stretch info.x (fromData [toX] data)
+          , y = stretch info.y (fromData [toY] data)
+          }
+      , postPlane = \p info -> { info | points = info.points ++ C.toDataPoints toX toY data }
+      , view = \name p _ ->
+          S.g
+            [ SA.class "elm-charts__scatter" ]
+            [ C.scatter p toX toY finalDot data ]
+      }
 
 
 type alias Interpolation data msg =
@@ -1292,26 +1337,27 @@ monotone toY edits =
             Nothing -> always (C.disconnected 6 1 C.cross config.color)
             Just d -> d
     in
-    { isHtml = False
-    , prePlane = \info ->
-        { info
-        | x = stretch info.x (fromData [toX] data)
-        , y = stretch info.y (fromData [toY] data)
-        }
-    , postPlane = \p info -> { info | points = info.points ++ C.toDataPoints toX toY data }
-    , view = \name p _ ->
-        case config.area of
-          Just fill ->
-            S.g [ SA.class "elm-charts__monotone-area" ]
-              [ C.monotoneArea p toX toY (interAttrs ++ [ SA.stroke "transparent", SA.fill fill, clipPath name ]) finalDot data
-              , C.monotone p toX toY interAttrs finalDot data
-              ]
+    Element
+      { isHtml = False
+      , prePlane = \info ->
+          { info
+          | x = stretch info.x (fromData [toX] data)
+          , y = stretch info.y (fromData [toY] data)
+          }
+      , postPlane = \p info -> { info | points = info.points ++ C.toDataPoints toX toY data }
+      , view = \name p _ ->
+          case config.area of
+            Just fill ->
+              S.g [ SA.class "elm-charts__monotone-area" ]
+                [ C.monotoneArea p toX toY (interAttrs ++ [ SA.stroke "transparent", SA.fill fill, clipPath name ]) finalDot data
+                , C.monotone p toX toY interAttrs finalDot data
+                ]
 
-          Nothing ->
-            S.g
-              [ SA.class "elm-charts__monotone" ]
-              [ C.monotone p toX toY interAttrs finalDot data ]
-    }
+            Nothing ->
+              S.g
+                [ SA.class "elm-charts__monotone" ]
+                [ C.monotone p toX toY interAttrs finalDot data ]
+      }
 
 
 
@@ -1338,78 +1384,84 @@ linear toY edits =
             Nothing -> always (C.disconnected 6 1 C.cross config.color)
             Just d -> d
     in
-    { isHtml = False
-    , prePlane = \info ->
-        { info
-        | x = stretch info.x (fromData [toX] data)
-        , y = stretch info.y (fromData [toY] data)
-        }
-    , postPlane = \p info -> { info | points = info.points ++ C.toDataPoints toX toY data }
-    , view = \name p _ ->
-      case config.area of
-        Just fill ->
-          S.g [ SA.class "elm-charts__linear-area" ]
-            [ C.linearArea p toX toY (interAttrs ++ [ SA.stroke "transparent", SA.fill fill, clipPath name ]) finalDot data
-            , C.linear p toX toY interAttrs finalDot data
-            ]
+    Element
+      { isHtml = False
+      , prePlane = \info ->
+          { info
+          | x = stretch info.x (fromData [toX] data)
+          , y = stretch info.y (fromData [toY] data)
+          }
+      , postPlane = \p info -> { info | points = info.points ++ C.toDataPoints toX toY data }
+      , view = \name p _ ->
+        case config.area of
+          Just fill ->
+            S.g [ SA.class "elm-charts__linear-area" ]
+              [ C.linearArea p toX toY (interAttrs ++ [ SA.stroke "transparent", SA.fill fill, clipPath name ]) finalDot data
+              , C.linear p toX toY interAttrs finalDot data
+              ]
 
-        Nothing ->
-          S.g
-            [ SA.class "elm-charts__linear" ]
-            [ C.linear p toX toY interAttrs finalDot data ]
-    }
+          Nothing ->
+            S.g
+              [ SA.class "elm-charts__linear" ]
+              [ C.linear p toX toY interAttrs finalDot data ]
+      }
 
 
 {-| -}
 svg : (C.Plane -> S.Svg msg) -> Element data msg
 svg func =
-  { isHtml = False
-  , prePlane = identity
-  , postPlane = always identity
-  , view = \_ p _-> func p
-  }
+  Element
+    { isHtml = False
+    , prePlane = identity
+    , postPlane = always identity
+    , view = \_ p _-> func p
+    }
 
 
 {-| -}
 html : (C.Plane -> H.Html msg) -> Element data msg
 html func =
-  { isHtml = True
-  , prePlane = identity
-  , postPlane = always identity
-  , view = \_ p _-> func p
-  }
+  Element
+    { isHtml = True
+    , prePlane = identity
+    , postPlane = always identity
+    , view = \_ p _-> func p
+    }
 
 
 {-| -}
 svgAt : (Bounds -> Float) -> (Bounds -> Float) -> Float -> Float -> List (S.Svg msg) -> Element data msg
 svgAt toX toY xOff yOff view =
-  { isHtml = False
-  , prePlane = identity
-  , postPlane = always identity
-  , view = \_ p _ ->
-      S.g [ C.position p (toX <| toBounds .x p) (toY <| toBounds .y p) xOff yOff ] view
-  }
+  Element
+    { isHtml = False
+    , prePlane = identity
+    , postPlane = always identity
+    , view = \_ p _ ->
+        S.g [ C.position p (toX <| toBounds .x p) (toY <| toBounds .y p) xOff yOff ] view
+    }
 
 
 {-| -}
 htmlAt : (Bounds -> Float) -> (Bounds -> Float) -> Float -> Float -> List (H.Attribute msg) -> List (H.Html msg) -> Element data msg
 htmlAt toX toY xOff yOff att view =
-  { isHtml = True
-  , prePlane = identity
-  , postPlane = always identity
-  , view = \_ p _ ->
-      C.positionHtml p (toX <| toBounds .x p) (toY <| toBounds .y p) xOff yOff att view
-  }
+  Element
+    { isHtml = True
+    , prePlane = identity
+    , postPlane = always identity
+    , view = \_ p _ ->
+        C.positionHtml p (toX <| toBounds .x p) (toY <| toBounds .y p) xOff yOff att view
+    }
 
 
 {-| -}
 none : Element data msg
 none =
-  { isHtml = True
-  , prePlane = identity
-  , postPlane = always identity
-  , view = \_ _ _-> H.text ""
-  }
+  Element
+    { isHtml = True
+    , prePlane = identity
+    , postPlane = always identity
+    , view = \_ _ _-> H.text ""
+    }
 
 
 
