@@ -3,7 +3,7 @@ module Chart exposing
     , Bounds, startMin, startMax, endMin, endMax, startPad, endPad, zero, middle
     , xAxis, yAxis, xTicks, yTicks, xLabels, yLabels, grid
     , ints, times, format, ticks, amount
-    , Event, event, getNearest, getNearestX, getWithin, getWithinX, tooltip, formatTimestamp
+    , Event, event, getPoint, getNearest, getNearestX, getWithin, getWithinX, tooltip, formatTimestamp
     , svgAt, htmlAt, svg, html, none
     , width, height
     , marginTop, marginBottom, marginLeft, marginRight
@@ -593,6 +593,13 @@ event =
 
 type Decoder data msg
   = Decoder (List (C.DataPoint data) -> C.Plane -> C.Point -> msg)
+
+
+{-| -}
+getPoint : (C.Point -> msg) -> Decoder data msg
+getPoint toMsg =
+  Decoder <| \_ _ point ->
+    toMsg point
 
 
 {-| -}
