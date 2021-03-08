@@ -38,8 +38,9 @@ module Chart exposing
 @docs width, height
 @docs marginTop, marginBottom, marginLeft, marginRight
 @docs paddingTop, paddingBottom, paddingLeft, paddingRight
+@docs center
 @docs range, domain, topped, static, id, events, htmlAttrs
-@docs binWidth, binLabel, barLabel, margin, spacing, rounded, roundBottom
+@docs binWidth, binLabel, barLabel, tickLength, tickWidth, margin, spacing, rounded, roundBottom
 @docs dotted, color, dot, area, attrs
 
 # Interop
