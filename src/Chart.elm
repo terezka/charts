@@ -3,7 +3,8 @@ module Chart exposing
     , Bounds, startMin, startMax, endMin, endMax, startPad, endPad, zero, middle
     , xAxis, yAxis, xTicks, yTicks, xLabels, yLabels, grid
     , ints, floats, times, format, values, amount
-    , Event, event, Decoder, map, map2, map3, getPoint, getNearest, getNearestX, getWithin, getWithinX, tooltip, formatTimestamp
+    , Event, event, Decoder, map, map2, map3, getPoint, getNearest, getNearestX, getWithin, getWithinX
+    , tooltip, tooltipOnTop, whenJust, whenNotEmpty, formatTimestamp
     , svgAt, htmlAt, svg, html, none
     , width, height
     , marginTop, marginBottom, marginLeft, marginRight
@@ -32,7 +33,8 @@ module Chart exposing
 @docs amount, floats, ints, times, values, format, noArrow, start, end, pinned, only, filterX, filterY
 
 # Events
-@docs Event, event, Decoder, map, map2, map3, getPoint, getNearest, getNearestX, getWithin, getWithinX, tooltip, formatTimestamp
+@docs Event, event, Decoder, map, map2, map3, getPoint, getNearest, getNearestX, getWithin, getWithinX
+@docs tooltip, tooltipOnTop, formatTimestamp
 
 # Attributes
 @docs width, height
@@ -693,28 +695,28 @@ getPoint =
 
 
 {-| -}
-getNearest : Decoder data (Maybe data)
+getNearest : Decoder data (Maybe (C.DataPoint data))
 getNearest =
   Decoder <| \points plane point ->
     C.getNearest points plane point
 
 
 {-| -}
-getWithin : Float -> Decoder data (Maybe data)
+getWithin : Float -> Decoder data (Maybe (C.DataPoint data))
 getWithin radius =
   Decoder <| \points plane point ->
     C.getWithin radius points plane point
 
 
 {-| -}
-getNearestX : Decoder data (List data)
+getNearestX : Decoder data (List (C.DataPoint data))
 getNearestX =
   Decoder <| \points plane point ->
     C.getNearestX points plane point
 
 
 {-| -}
-getWithinX : Float -> Decoder data (List data)
+getWithinX : Float -> Decoder data (List (C.DataPoint data))
 getWithinX radius =
   Decoder <| \points plane point ->
     C.getWithinX radius points plane point
@@ -724,6 +726,28 @@ getWithinX radius =
 tooltip : (Bounds -> Float) -> (Bounds -> Float) -> List (H.Attribute msg) -> List (H.Html msg) -> Element data msg
 tooltip toX toY att content =
   html <| \p -> C.tooltip p (toX <| toBounds .x p) (toY <| toBounds .y p) att content
+
+
+{-| -}
+tooltipOnTop : (Bounds -> Float) -> (Bounds -> Float) -> List (H.Attribute msg) -> List (H.Html msg) -> Element data msg
+tooltipOnTop toX toY att content =
+  html <| \p -> C.tooltipOnTop p (toX <| toBounds .x p) (toY <| toBounds .y p) att content
+
+
+{-| -}
+whenJust : Maybe a -> (a -> Element data msg) -> Element data msg
+whenJust maybeA view =
+  case maybeA of
+    Just a -> view a
+    Nothing -> none
+
+
+{-| -}
+whenNotEmpty : List a -> (a -> List a -> Element data msg) -> Element data msg
+whenNotEmpty maybeA view =
+  case maybeA of
+    a :: rest -> view a rest
+    [] -> none
 
 
 
@@ -1181,14 +1205,18 @@ bars edits metrics data =
       ys =
         List.map (\(Bar value _) -> value) metrics
 
-      toYs d =
-        List.map (\y -> y d) ys
+      toDataPoint p i d =
+        List.map (C.DataPoint d) (C.toBarPoints p (toDataPointBin i d))
 
-      toDataPoints i d =
-        List.map (toDataPoint i d) (toYs d)
-
-      toDataPoint i d v =
-        C.DataPoint d { x = toFloat (i + 1), y = v }
+      toDataPointBin i d =
+        { label = ""
+        , start = toFloat i + 0.5
+        , end = toFloat i + 1.5
+        , spacing = config.spacing
+        , tickLength = 0
+        , tickWidth = 0
+        , bars = List.map (toBar "" i d) metrics
+        }
   in
   Element
     { isHtml = False
@@ -1198,7 +1226,8 @@ bars edits metrics data =
         | x = stretch info.x { min = 0.5, max = length + 0.5 }
         , y = stretch info.y (fromData ys data)
         }
-    , postPlane = \p info -> { info | points = info.points ++ List.concat (List.indexedMap toDataPoints data) }
+    , postPlane = \p info ->
+        { info | points = info.points ++ List.concat (List.indexedMap (toDataPoint p) data) }
     , view = \name p _ -> C.bars p (List.indexedMap (toBin name) data)
     }
 
@@ -1289,20 +1318,13 @@ histogram toX edits metrics data =
       ys =
         List.map (\(Bar value _) -> value) metrics
 
-      toYs d =
-        List.map (\y -> y d) ys
-
       toXEnd d =
         case config.binWidth of
           Just w -> toX d - w d
           Nothing -> toX d - 1
 
       toDataPoints p maybePrev d =
-        let bw = toBinWidth p d maybePrev in
-        List.map (toDataPoint bw d) (toYs d)
-
-      toDataPoint bw d v =
-        C.DataPoint d { x = toX d - bw / 2, y = v }
+        List.map (C.DataPoint d) (C.toBarPoints p (toBin "" p maybePrev d))
   in
   Element
     { isHtml = False

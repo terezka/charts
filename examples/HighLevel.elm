@@ -14,24 +14,23 @@ import Time
 
 main =
   Browser.sandbox
-    { init = Model Nothing []
+    { init = Model []
     , update = \msg model ->
         case msg of
-          OnHover p ps -> { point = Just p, hovering = ps }
-          OnLeave -> { point = Nothing, hovering = [] }
+          OnHover ps -> { model | hovering = ps }
+          OnLeave -> { model | hovering = [] }
 
     , view = view
     }
 
 
 type alias Model =
-  { point : Maybe SC.Point
-  , hovering : List BarPoint
+  { hovering : List (SC.DataPoint BarPoint)
   }
 
 
 type Msg
-  = OnHover SC.Point (List BarPoint)
+  = OnHover (List (SC.DataPoint BarPoint))
   | OnLeave
 
 
@@ -56,7 +55,7 @@ data =
   , { x = 4, y = 2, z = 2, label = "NO" }
   , { x = 6, y = 4, z = 5, label = "SE" }
   , { x = 8, y = 3, z = 7, label = "FI" }
-  , { x = 10, y = 4, z = 3, label = "UK" }
+  , { x = 10, y = 4, z = 3, label = "IS" }
   ]
 
 
@@ -81,14 +80,13 @@ view model =
         ]
     , C.paddingLeft 10
     , C.events
-        [ C.event "mousemove" <|
-            C.map2 OnHover C.getPoint C.getNearestX
+        [ C.event "mousemove" (C.map OnHover C.getNearestX)
         ]
     ]
     [ C.histogram .x
-        [ C.tickLength 4, C.binLabel (.x >> String.fromFloat), C.spacing 0.05, C.margin 0.2 ]
-        [ C.bar .y [ C.barColor (\d -> if d.x > 4 then C.pink else C.orange) ]
-        , C.bar .z []
+        [ C.tickLength 4, C.spacing 0.05, C.margin 0.1, C.binLabel .label, C.binWidth (always 2) ]
+        [ C.bar .z []
+        , C.bar .y [ C.barColor (\d -> C.pink) ]
         , C.bar .z []
         ]
         data
@@ -96,7 +94,7 @@ view model =
     , C.yTicks []
     , C.yLabels [ C.center ]
     , C.xAxis []
-    --, C.xTicks []
+    --, C.xTicks [ C.amount 20 ]
     --, C.xLabels []
     --, C.series .x
     --    [ C.monotone .y []
@@ -104,10 +102,13 @@ view model =
     --    , C.scatter .x []
     --    ]
     --    data
-    , case ( model.point, model.hovering ) of
-        ( Just point, points ) ->
-          C.tooltip (\_ -> toFloat <| round point.x) C.middle [] <|
-            List.map (\a -> Html.div [] [ Html.text a ]) <| String.split "}," (Debug.toString points)
-        ( _, _ ) -> C.none
+    , C.whenNotEmpty model.hovering <| \hovered _ ->
+        C.tooltipOnTop (\_ -> hovered.point.x) (\_ -> hovered.point.y) [] <|
+          [ Html.span [] [ Html.text hovered.org.label ]
+          , Html.text " : "
+          , Html.span [] [ Html.text (String.fromFloat hovered.org.x) ]
+          , Html.text " , "
+          , Html.span [] [ Html.text (String.fromFloat hovered.point.y) ]
+          ]
     ]
 

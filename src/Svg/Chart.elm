@@ -16,7 +16,9 @@ module Svg.Chart
     , eventCatcher, container, decodePoint
     , Point, toPoints, DataPoint, toDataPoints
     , getNearest, getNearestX, getWithin, getWithinX
-    , tooltip, isXPastMiddle, middleOfY, middleOfX
+    , tooltip, tooltipOnTop, isXPastMiddle, middleOfY, middleOfX
+
+    , toBarPoints
     )
 
 
@@ -220,6 +222,30 @@ viewBin plane bin =
     , viewXLabel plane [ class "elm-charts__bin-label" ] bin.label (bin.start + binWidth / 2) (closestToZero plane) 0 20
     , g [ class "elm-charts__bin-bar-labels" ] (List.map viewValueLabel adjustedBars)
     ]
+
+
+toBarPoints : Plane -> Bin msg -> List Point
+toBarPoints plane bin =
+  let binWidth =
+        bin.end - bin.start
+
+      binOffset =
+        (binWidth - binWidth * usedWidthPer) / 2
+
+      usedWidthPer =
+        min 1 <| List.sum (List.map .width bin.bars) + bin.spacing * toFloat (List.length bin.bars - 1)
+
+      foldAdjustedBars bar ( offset, acc ) =
+        let barWidth = binWidth * bar.width
+            barOffset = offset + barWidth
+        in
+        ( barOffset + binWidth * bin.spacing
+        , { x = bin.start + binOffset + barOffset - barWidth / 2, y = bar.value } :: acc
+        )
+  in
+  List.foldl foldAdjustedBars ( 0, [] ) bin.bars
+    |> Tuple.second
+
 
 
 
@@ -972,7 +998,7 @@ toDataPoints toX toY =
 Returns `Nothing` if you have no data showing.
 
 -}
-getNearest : List (DataPoint data) -> Plane -> Point -> Maybe data
+getNearest : List (DataPoint data) -> Plane -> Point -> Maybe (DataPoint data)
 getNearest points plane searchedSvg =
   let searched =
         { x = toCartesianX plane searchedSvg.x
@@ -980,14 +1006,13 @@ getNearest points plane searchedSvg =
         }
   in
   getNearestHelp points plane searched
-    |> Maybe.map .org
 
 
 {-| Get the data coordinates nearest of the event within the radius
 you provide in the first argument. Returns `Nothing` if you have no data showing.
 
 -}
-getWithin : Float -> List (DataPoint data) -> Plane -> Point -> Maybe data
+getWithin : Float -> List (DataPoint data) -> Plane -> Point -> Maybe (DataPoint data)
 getWithin radius points plane searchedSvg =
     let
       searched =
@@ -997,7 +1022,7 @@ getWithin radius points plane searchedSvg =
 
       keepIfEligible closest =
           if withinRadius plane radius searched closest.point
-            then Just closest.org
+            then Just closest
             else Nothing
     in
     getNearestHelp points plane searched
@@ -1006,7 +1031,7 @@ getWithin radius points plane searchedSvg =
 
 {-| Get the data coordinates horizontally nearest to the event.
 -}
-getNearestX : List (DataPoint data) -> Plane -> Point -> List data
+getNearestX : List (DataPoint data) -> Plane -> Point -> List (DataPoint data)
 getNearestX points plane searchedSvg =
     let
       searched =
@@ -1015,14 +1040,13 @@ getNearestX points plane searchedSvg =
         }
     in
     getNearestXHelp points plane searched
-      |> List.map .org
 
 
 {-| Finds the data coordinates horizontally nearest to the event, within the
 distance you provide in the first argument.
 
 -}
-getWithinX : Float -> List (DataPoint data) -> Plane -> Point -> List data
+getWithinX : Float -> List (DataPoint data) -> Plane -> Point -> List (DataPoint data)
 getWithinX radius points plane searchedSvg =
     let
       searched =
@@ -1035,7 +1059,6 @@ getWithinX radius points plane searchedSvg =
     in
     getNearestXHelp points plane searched
       |> List.filter keepIfEligible
-      |> List.map .org
 
 
 {-| A basic tooltip.
@@ -1059,6 +1082,49 @@ tooltip plane x y attrs =
       , HA.style "border-radius" "3px"
       , HA.style "pointer-events" "none"
       ] ++ attrs
+
+
+{-| -}
+tooltipOnTop : Plane -> Float -> Float -> List (Html.Attribute msg) -> List (Html.Html msg) -> Html.Html msg
+tooltipOnTop plane x y attrs content =
+  let stylesheet =
+        """
+        .elm-charts__tooltip:before, .elm-charts__tooltip:after {
+          content: "";
+          position: absolute;
+          border-left: 5px solid transparent;
+          border-right: 5px solid transparent;
+          top: 100%;
+          left: 50%;
+          margin-left: -5px;
+        }
+
+        .elm-charts__tooltip:after{
+          border-top: 5px solid white;
+          margin-top: -1px;
+          z-index: 1;
+        }
+
+        .elm-charts__tooltip:before {
+          border-top: 5px solid #D8D8D8;
+        }
+
+        """
+
+      attributes =
+        [ HA.class "elm-charts__tooltip"
+        , HA.style "transform" "translate(-50%, -100%)"
+        , HA.style "padding" "5px 10px"
+        , HA.style "background" "white"
+        , HA.style "border" "1px solid #D8D8D8"
+        , HA.style "border-radius" "3px"
+        , HA.style "pointer-events" "none"
+        ] ++ attrs
+
+      children =
+        Html.node "style" [] [ Html.text stylesheet ] :: content
+  in
+    positionHtml plane x y 0 -10 attributes children
 
 
 {-| Place some Html on specific coordinates. You must wrap your chart
