@@ -11,7 +11,7 @@ module Chart exposing
     , paddingTop, paddingBottom, paddingLeft, paddingRight
     , static, id
     , range, domain, topped, events, htmlAttrs, binWidth
-    , start, end, pinned, color, rounded, roundBottom, margin, spacing
+    , start, end, pinned, color, label, unit, rounded, roundBottom, margin, spacing
     , dot, dotted, area, noArrow, binLabel, barLabel, barColor, tickLength, tickWidth, center
     , filterX, filterY, only, attrs
     , blue, orange, pink, green, red
@@ -43,7 +43,7 @@ module Chart exposing
 @docs center
 @docs range, domain, topped, static, id, events, htmlAttrs
 @docs binWidth, binLabel, barLabel, barColor, tickLength, tickWidth, margin, spacing, rounded, roundBottom
-@docs dotted, color, dot, area, attrs
+@docs dotted, color, label, unit, dot, area, attrs
 
 # Interop
 @docs svgAt, htmlAt, svg, html, none
@@ -198,6 +198,18 @@ pinned value config =
 color : String -> Attribute { a | color : String }
 color value config =
   { config | color = value }
+
+
+{-| -}
+label : String -> Attribute { a | label : String }
+label value config =
+  { config | label = value }
+
+
+{-| -}
+unit : String -> Attribute { a | unit : String }
+unit value config =
+  { config | unit = value }
 
 
 {-| -}
@@ -1164,11 +1176,6 @@ bars edits metrics data =
           Just func -> func d
           Nothing -> ""
 
-      toBarLabel i m d =
-        case m.label of
-          Just func -> func d
-          Nothing -> Nothing
-
       numOfBars =
         toFloat (List.length metrics)
 
@@ -1185,7 +1192,7 @@ bars edits metrics data =
 
       toBar name i d (Bar value metric) =
         { attributes = [ SA.stroke "transparent", SA.fill (toBarColor metric d), clipPath name ] ++ config.attrs
-        , label = toBarLabel i metric d
+        , label = Nothing
         , width = (1 - barSpacing - binMargin) / numOfBars
         , rounded = config.rounded
         , roundBottom = config.roundBottom
@@ -1205,8 +1212,8 @@ bars edits metrics data =
       ys =
         List.map (\(Bar value _) -> value) metrics
 
-      toDataPoint p i d =
-        List.map (C.DataPoint d) (C.toBarPoints p (toDataPointBin i d))
+      toDataPoints p i d =
+        List.map2 (toDataPoint d) (C.toBarPoints p (toDataPointBin i d)) metrics
 
       toDataPointBin i d =
         { label = ""
@@ -1217,6 +1224,11 @@ bars edits metrics data =
         , tickWidth = 0
         , bars = List.map (toBar "" i d) metrics
         }
+
+      toDataPoint d point (Bar _ m) =
+        case m.color of
+          Just toColor -> C.DataPoint d m.label (toColor d) m.unit point
+          Nothing -> C.DataPoint d m.label blue m.unit point -- TODO
   in
   Element
     { isHtml = False
@@ -1227,7 +1239,7 @@ bars edits metrics data =
         , y = stretch info.y (fromData ys data)
         }
     , postPlane = \p info ->
-        { info | points = info.points ++ List.concat (List.indexedMap (toDataPoint p) data) }
+        { info | points = info.points ++ List.concat (List.indexedMap (toDataPoints p) data) }
     , view = \name p _ -> C.bars p (List.indexedMap (toBin name) data)
     }
 
@@ -1284,11 +1296,6 @@ histogram toX edits metrics data =
           Just func -> func d
           Nothing -> ""
 
-      toBarLabel m d =
-        case m.label of
-          Just func -> func d
-          Nothing -> Nothing
-
       toBarColor m d =
         case m.color of
           Just func -> func d
@@ -1296,7 +1303,7 @@ histogram toX edits metrics data =
 
       toBar name d (Bar value metric) =
         { attributes = [ SA.stroke "transparent", SA.fill (toBarColor metric d), clipPath name ] ++ config.attrs
-        , label = toBarLabel metric d
+        , label = Nothing
         , width = (1 - barSpacing - barMargin) / numOfBars
         , rounded = config.rounded
         , roundBottom = config.roundBottom
@@ -1324,7 +1331,12 @@ histogram toX edits metrics data =
           Nothing -> toX d - 1
 
       toDataPoints p maybePrev d =
-        List.map (C.DataPoint d) (C.toBarPoints p (toBin "" p maybePrev d))
+        List.map2 (toDataPoint d) (C.toBarPoints p (toBin "" p maybePrev d)) metrics
+
+      toDataPoint d point (Bar _ m) =
+        case m.color of
+          Just toColor -> C.DataPoint d m.label (toColor d) m.unit point
+          Nothing -> C.DataPoint d m.label blue m.unit point -- TODO
   in
   Element
     { isHtml = False
@@ -1345,9 +1357,10 @@ type Bar data msg =
 
 
 type alias BarConfig data msg =
-  { attrs : List (S.Attribute msg)
+  { label : String
+  , unit : String
   , color : Maybe (data -> String)
-  , label : Maybe (data -> Maybe String)
+  , attrs : List (S.Attribute msg)
   }
 
 
@@ -1356,9 +1369,10 @@ bar : (data -> Float) -> List (BarConfig data msg -> BarConfig data msg) -> Bar 
 bar toY edits =
   let config =
         applyAttrs edits
-          { label = Nothing
+          { label = ""
+          , unit = ""
           , color = Nothing
-          , attrs = []
+          , attrs = [] -- TODO use
           }
   in
   Bar toY config
@@ -1399,6 +1413,8 @@ series toX series_ data =
 
 type alias Scatter data msg =
     { color : String -- TODO use Color
+    , label : String
+    , unit : String
     , dot : Maybe (data -> C.Dot msg)
     }
 
@@ -1410,6 +1426,8 @@ scatter toY edits =
     let config =
           applyAttrs edits
             { color = defaultColor
+            , label = ""
+            , unit = ""
             , dot = Nothing
             }
 
@@ -1426,7 +1444,7 @@ scatter toY edits =
           | x = stretch info.x (fromData [toX] data)
           , y = stretch info.y (fromData [toY] data)
           }
-      , postPlane = \p info -> { info | points = info.points ++ C.toDataPoints toX toY data }
+      , postPlane = \p info -> { info | points = info.points ++ C.toDataPoints config.label config.color config.unit toX toY data }
       , view = \name p _ ->
           S.g
             [ SA.class "elm-charts__scatter" ]
@@ -1435,9 +1453,11 @@ scatter toY edits =
 
 
 type alias Interpolation data msg =
-    { color : String -- TODO use Color
-    , area : Maybe String -- TODO use Color
+    { area : Maybe String -- TODO use Color
     , width : Float
+    , color : String -- TODO use Color
+    , label : String
+    , unit : String
     , dot : Maybe (data -> C.Dot msg)
     , attrs : List (S.Attribute msg)
     }
@@ -1453,6 +1473,8 @@ monotone toY edits =
             , area = Nothing
             , width = 1
             , dot = Nothing
+            , label = ""
+            , unit = ""
             , attrs = []
             }
 
@@ -1473,7 +1495,7 @@ monotone toY edits =
           | x = stretch info.x (fromData [toX] data)
           , y = stretch info.y (fromData [toY] data)
           }
-      , postPlane = \p info -> { info | points = info.points ++ C.toDataPoints toX toY data }
+      , postPlane = \p info -> { info | points = info.points ++ C.toDataPoints config.label config.color config.unit toX toY data }
       , view = \name p _ ->
           case config.area of
             Just fill ->
@@ -1499,6 +1521,8 @@ linear toY edits =
             { color = defaultColor
             , area = Nothing
             , width = 1
+            , label = ""
+            , unit = ""
             , dot = Nothing
             , attrs = []
             }
@@ -1520,7 +1544,7 @@ linear toY edits =
           | x = stretch info.x (fromData [toX] data)
           , y = stretch info.y (fromData [toY] data)
           }
-      , postPlane = \p info -> { info | points = info.points ++ C.toDataPoints toX toY data }
+      , postPlane = \p info -> { info | points = info.points ++ C.toDataPoints config.label config.color config.unit toX toY data }
       , view = \name p _ ->
         case config.area of
           Just fill ->

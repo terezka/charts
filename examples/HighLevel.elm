@@ -14,23 +14,23 @@ import Time
 
 main =
   Browser.sandbox
-    { init = Model []
+    { init = Model Nothing
     , update = \msg model ->
         case msg of
           OnHover ps -> { model | hovering = ps }
-          OnLeave -> { model | hovering = [] }
+          OnLeave -> { model | hovering = Nothing }
 
     , view = view
     }
 
 
 type alias Model =
-  { hovering : List (SC.DataPoint BarPoint)
+  { hovering : Maybe (SC.DataPoint BarPoint)
   }
 
 
 type Msg
-  = OnHover (List (SC.DataPoint BarPoint))
+  = OnHover (Maybe (SC.DataPoint BarPoint))
   | OnLeave
 
 
@@ -80,33 +80,38 @@ view model =
         ]
     , C.paddingLeft 10
     , C.events
-        [ C.event "mousemove" (C.map OnHover C.getNearestX)
+        [ C.event "mousemove" (C.map OnHover C.getNearest)
         ]
     ]
-    [ C.histogram .x
-        [ C.tickLength 4, C.spacing 0.05, C.margin 0.1, C.binLabel .label, C.binWidth (always 2) ]
-        [ C.bar .z []
-        , C.bar .y [ C.barColor (\d -> C.pink) ]
-        , C.bar .z []
-        ]
-        data
-    , C.yAxis []
+    [
+    --[ C.histogram .x
+    --    [ C.tickLength 4, C.spacing 0.05, C.margin 0.1, C.binLabel .label, C.binWidth (always 2) ]
+    --    [ C.bar .z []
+    --    , C.bar .y [ C.barColor (\d -> C.pink) ]
+    --    , C.bar .z []
+    --    ]
+    --    data
+    C.yAxis []
     , C.yTicks []
     , C.yLabels [ C.center ]
     , C.xAxis []
-    --, C.xTicks [ C.amount 20 ]
-    --, C.xLabels []
-    --, C.series .x
-    --    [ C.monotone .y []
-    --    , C.linear .z []
-    --    , C.scatter .x []
-    --    ]
-    --    data
-    , C.whenNotEmpty model.hovering <| \hovered _ ->
-        C.tooltipOnTop (\_ -> hovered.point.x) (\_ -> hovered.point.y) [] <|
-          [ Html.span [] [ Html.text hovered.org.label ]
+    , C.xTicks [ C.amount 20 ]
+    , C.xLabels []
+    , C.series .x
+        [ C.monotone .y [ C.label "velocity", C.unit "m/s" ]
+        , C.linear .z []
+        , C.scatter .x []
+        ]
+        data
+    , C.whenJust model.hovering <| \hovered ->
+        C.tooltipOnTop (\_ -> hovered.point.x) (\_ -> hovered.point.y) [ HA.style "color" hovered.color ] <|
+          [ Html.span [] [ Html.text hovered.datum.label ]
+          , Html.text " "
+          , Html.text hovered.label
           , Html.text " : "
-          , Html.span [] [ Html.text (String.fromFloat hovered.org.x) ]
+          , Html.span [] [ Html.text (String.fromFloat hovered.datum.x) ]
+          , Html.text " "
+          , Html.text hovered.unit
           , Html.text " , "
           , Html.span [] [ Html.text (String.fromFloat hovered.point.y) ]
           ]

@@ -982,15 +982,18 @@ toPoints toX toY =
 
 {-| -}
 type alias DataPoint data =
-  { org : data
+  { datum : data
+  , label : String
+  , color : String
+  , unit : String
   , point : Point
   }
 
 
 {-| -}
-toDataPoints : (data -> Float) -> (data -> Float) -> List data -> List (DataPoint data)
-toDataPoints toX toY =
-  List.map <| \d -> DataPoint d { x = toX d, y = toY d }
+toDataPoints : String -> String -> String -> (data -> Float) -> (data -> Float) -> List data -> List (DataPoint data)
+toDataPoints label color unit toX toY =
+  List.map <| \d -> DataPoint d label color unit { x = toX d, y = toY d }
 
 
 
