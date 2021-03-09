@@ -34,7 +34,7 @@ module Chart exposing
 
 # Events
 @docs Event, event, Decoder, map, map2, map3, getPoint, getNearest, getNearestX, getWithin, getWithinX
-@docs tooltip, tooltipOnTop, formatTimestamp
+@docs tooltip, tooltipOnTop, whenNotEmpty, whenJust, formatTimestamp
 
 # Attributes
 @docs width, height

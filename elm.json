@@ -3,7 +3,7 @@
     "name": "terezka/charts",
     "summary": "SVG charts components in Elm.",
     "license": "BSD-3-Clause",
-    "version": "9.1.0",
+    "version": "10.0.0",
     "exposed-modules": [
         "Svg.Coordinates",
         "Svg.Tiles",

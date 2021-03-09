@@ -37,7 +37,7 @@ module Svg.Chart
 @docs scatter, linear, linearArea, monotone, monotoneArea
 
 # Bar charts
-@docs Group, bars, Bin, Bar, histogram
+@docs Group, bars, Bin, Bar, histogram, toBarPoints
 
 # Straight lines
 @docs line, xAxis, yAxis, xArrow, yArrow, xGrid, yGrid, horizontal, vertical
@@ -65,7 +65,7 @@ mirrored on the other side of the axis!
 
 @docs getNearest, getNearestX, getWithin, getWithinX
 
-@docs tooltip, isXPastMiddle, middleOfY, middleOfX
+@docs tooltip, tooltipOnTop, isXPastMiddle, middleOfY, middleOfX
 
 
 -}
@@ -224,6 +224,7 @@ viewBin plane bin =
     ]
 
 
+{-| -}
 toBarPoints : Plane -> Bin msg -> List Point
 toBarPoints plane bin =
   let binWidth =
