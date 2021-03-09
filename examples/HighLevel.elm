@@ -83,16 +83,17 @@ view model =
         [ C.event "mousemove" (C.map OnHover C.getNearestX)
         ]
     ]
-    [ C.histogram .x
-        [ C.tickLength 4, C.spacing 0.05, C.margin 0.1, C.binLabel .label, C.binWidth (always 2) ]
+    [ C.grid []
+    , C.bars
+        [ C.tickLength 4, C.spacing 0.05, C.margin 0.1, C.binLabel .label ]
         [ C.bar .z [ C.unit "m", C.label "height" ]
         , C.bar .y [ C.barColor (\d -> C.pink), C.unit "m/s", C.label "vel" ]
-        , C.bar .z [ C.unit "m2", C.label "area" ]
+        , C.bar .x [ C.barColor (\d -> C.orange), C.unit "m2", C.label "area" ]
         ]
         data
     , C.yAxis []
     , C.yTicks []
-    , C.yLabels [ C.center ]
+    , C.yLabels []
     , C.xAxis []
     --, C.xTicks [ C.amount 20 ]
     --, C.xLabels []
@@ -108,11 +109,9 @@ view model =
           , Html.text " - "
           , Html.text hovered.label
           , Html.text " : "
-          , Html.span [] [ Html.text (String.fromFloat hovered.datum.x) ]
+          , Html.span [] [ Html.text (String.fromFloat hovered.point.y) ]
           , Html.text " "
           , Html.text hovered.unit
-          , Html.text " , "
-          , Html.span [] [ Html.text (String.fromFloat hovered.point.y) ]
           ]
     ]
 

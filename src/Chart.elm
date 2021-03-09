@@ -1213,7 +1213,7 @@ bars edits metrics data =
         List.map (\(Bar value _) -> value) metrics
 
       toDataPoints p i d =
-        List.map2 (toDataPoint d) (C.toBarPoints p (toDataPointBin i d)) metrics
+        List.map2 (toDataPoint d) (C.toBarPoints p (toDataPointBin i d)) (List.reverse metrics)
 
       toDataPointBin i d =
         { label = ""
@@ -1331,7 +1331,7 @@ histogram toX edits metrics data =
           Nothing -> toX d - 1
 
       toDataPoints p maybePrev d =
-        List.map2 (toDataPoint d) (C.toBarPoints p (toBin "" p maybePrev d)) metrics
+        List.map2 (toDataPoint d) (C.toBarPoints p (toBin "" p maybePrev d)) (List.reverse metrics)
 
       toDataPoint d point (Bar _ m) =
         case m.color of
