@@ -89,9 +89,13 @@ type alias Axis =
 
 {-| Helper to extract the minimum value amongst your coordinates.
 -}
-minimum : List (a -> Float) -> List a -> Float
+minimum : List (a -> Maybe Float) -> List a -> Float
 minimum toValues =
-  let fold datum toValue all = toValue datum :: all
+  let fold datum toValue all =
+        case toValue datum of
+          Just v -> v :: all
+          Nothing -> all
+
       eachDatum datum = List.foldl (fold datum) [] toValues
   in
   List.concatMap eachDatum
@@ -101,9 +105,13 @@ minimum toValues =
 
 {-| Helper to extract the maximum value amongst your coordinates.
 -}
-maximum : List (a -> Float) -> List a -> Float
+maximum : List (a -> Maybe Float) -> List a -> Float
 maximum toValues =
-  let fold datum toValue all = toValue datum :: all
+  let fold datum toValue all =
+        case toValue datum of
+          Just v -> v :: all
+          Nothing -> all
+
       eachDatum datum = List.foldl (fold datum) [] toValues
   in
   List.concatMap eachDatum

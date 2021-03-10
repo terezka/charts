@@ -1,5 +1,5 @@
 module Chart exposing
-    ( chart, Element, series, scatter, linear, monotone, bars, histogram, bar
+    ( chart, Element, series, scatter, linear, monotone, bars, histogram, bar, just
     , Bounds, startMin, startMax, endMin, endMax, startPad, endPad, zero, middle
     , xAxis, yAxis, xTicks, yTicks, xLabels, yLabels, grid
     , ints, floats, times, format, values, amount
@@ -591,7 +591,7 @@ type alias Bounds =
 
 
 {-| -}
-fromData : List (data -> Float) -> List data -> Bounds
+fromData : List (data -> Maybe Float) -> List data -> Bounds
 fromData toValues data =
   { min = C.minimum toValues data
   , max = C.maximum toValues data
@@ -707,14 +707,14 @@ getPoint =
 
 
 {-| -}
-getNearest : Decoder data (Maybe (C.DataPoint data))
+getNearest : Decoder data (List (C.DataPoint data))
 getNearest =
   Decoder <| \points plane point ->
     C.getNearest points plane point
 
 
 {-| -}
-getWithin : Float -> Decoder data (Maybe (C.DataPoint data))
+getWithin : Float -> Decoder data (List (C.DataPoint data))
 getWithin radius =
   Decoder <| \points plane point ->
     C.getWithin radius points plane point
@@ -1190,21 +1190,21 @@ bars edits metrics data =
           Just func -> func d
           Nothing -> blue -- TODO nice default
 
-      toBar name i d (Bar value metric) =
+      toBar p name i d (Bar value metric) =
         { attributes = [ SA.stroke "transparent", SA.fill (toBarColor metric d), clipPath name ] ++ config.attrs
         , label = Nothing
         , width = (1 - barSpacing - binMargin) / numOfBars
         , rounded = config.rounded
         , roundBottom = config.roundBottom
-        , value = value d
+        , value = Maybe.withDefault (C.closestToZero p) (value d)
         }
 
-      toBin name i d =
+      toBin p name i d =
         { label = toBinLabel i d
         , spacing = config.spacing
         , tickLength = config.tickLength
         , tickWidth = config.tickWidth
-        , bars = List.map (toBar name i d) metrics
+        , bars = List.map (toBar p name i d) metrics
         }
 
       -- CALC
@@ -1213,22 +1213,22 @@ bars edits metrics data =
         List.map (\(Bar value _) -> value) metrics
 
       toDataPoints p i d =
-        List.map2 (toDataPoint d) (C.toBarPoints p (toDataPointBin i d)) (List.reverse metrics)
+        List.map2 (toDataPoint d i) (C.toBarPoints p (toDataPointBin p i d)) (List.reverse metrics)
 
-      toDataPointBin i d =
+      toDataPointBin p i d =
         { label = ""
         , start = toFloat i + 0.5
         , end = toFloat i + 1.5
         , spacing = config.spacing
         , tickLength = 0
         , tickWidth = 0
-        , bars = List.map (toBar "" i d) metrics
+        , bars = List.map (toBar p "" i d) metrics
         }
 
-      toDataPoint d point (Bar _ m) =
+      toDataPoint d i point (Bar value m) =
         case m.color of
-          Just toColor -> C.DataPoint d m.label (toColor d) m.unit point
-          Nothing -> C.DataPoint d m.label blue m.unit point -- TODO
+          Just toColor -> C.DataPoint d m.label (toColor d) m.unit (\_ -> toFloat i) value point
+          Nothing -> C.DataPoint d m.label blue m.unit (\_ -> toFloat i) value point -- TODO
   in
   Element
     { isHtml = False
@@ -1240,7 +1240,7 @@ bars edits metrics data =
         }
     , postPlane = \p info ->
         { info | points = info.points ++ List.concat (List.indexedMap (toDataPoints p) data) }
-    , view = \name p _ -> C.bars p (List.indexedMap (toBin name) data)
+    , view = \name p _ -> C.bars p (List.indexedMap (toBin p name) data)
     }
 
 
@@ -1301,13 +1301,13 @@ histogram toX edits metrics data =
           Just func -> func d
           Nothing -> blue
 
-      toBar name d (Bar value metric) =
+      toBar name p d (Bar value metric) =
         { attributes = [ SA.stroke "transparent", SA.fill (toBarColor metric d), clipPath name ] ++ config.attrs
         , label = Nothing
         , width = (1 - barSpacing - barMargin) / numOfBars
         , rounded = config.rounded
         , roundBottom = config.roundBottom
-        , value = value d
+        , value = Maybe.withDefault (C.closestToZero p) (value d)
         }
 
       toBin name p maybePrev d =
@@ -1317,7 +1317,7 @@ histogram toX edits metrics data =
         , spacing = config.spacing
         , tickLength = config.tickLength
         , tickWidth = config.tickWidth
-        , bars = List.map (toBar name d) metrics
+        , bars = List.map (toBar name p d) metrics
         }
 
       -- CALC
@@ -1333,16 +1333,16 @@ histogram toX edits metrics data =
       toDataPoints p maybePrev d =
         List.map2 (toDataPoint d) (C.toBarPoints p (toBin "" p maybePrev d)) (List.reverse metrics)
 
-      toDataPoint d point (Bar _ m) =
+      toDataPoint d point (Bar value m) =
         case m.color of
-          Just toColor -> C.DataPoint d m.label (toColor d) m.unit point
-          Nothing -> C.DataPoint d m.label blue m.unit point -- TODO
+          Just toColor -> C.DataPoint d m.label (toColor d) m.unit toX value point
+          Nothing -> C.DataPoint d m.label blue m.unit toX value point -- TODO
   in
   Element
     { isHtml = False
     , prePlane = \info ->
         { info
-        | x = stretch info.x (fromData [toX, toXEnd] data)
+        | x = stretch info.x (fromData [toX >> Just, toXEnd >> Just] data)
         , y = stretch info.y (fromData ys data)
         }
     , postPlane = \p info -> { info | points = info.points ++ List.concat (mapWithPrev (toDataPoints p) data) }
@@ -1353,7 +1353,7 @@ histogram toX edits metrics data =
 
 {-| -}
 type Bar data msg =
-  Bar (data -> Float) (BarConfig data msg)
+  Bar (data -> Maybe Float) (BarConfig data msg)
 
 
 type alias BarConfig data msg =
@@ -1365,7 +1365,7 @@ type alias BarConfig data msg =
 
 
 {-| -}
-bar : (data -> Float) -> List (BarConfig data msg -> BarConfig data msg) -> Bar data msg
+bar : (data -> Maybe Float) -> List (BarConfig data msg -> BarConfig data msg) -> Bar data msg
 bar toY edits =
   let config =
         applyAttrs edits
@@ -1377,6 +1377,11 @@ bar toY edits =
   in
   Bar toY config
 
+
+{-| -}
+just : (data -> Float) -> (data -> Maybe Float)
+just toY =
+  toY >> Just
 
 
 
@@ -1420,7 +1425,7 @@ type alias Scatter data msg =
 
 
 {-| -}
-scatter : (data -> Float) -> List (Scatter data msg -> Scatter data msg) -> Series data msg
+scatter : (data -> Maybe Float) -> List (Scatter data msg -> Scatter data msg) -> Series data msg
 scatter toY edits =
   Series <| \data toX defaultColor ->
     let config =
@@ -1441,7 +1446,7 @@ scatter toY edits =
       { isHtml = False
       , prePlane = \info ->
           { info
-          | x = stretch info.x (fromData [toX] data)
+          | x = stretch info.x (fromData [toX >> Just] data)
           , y = stretch info.y (fromData [toY] data)
           }
       , postPlane = \p info -> { info | points = info.points ++ C.toDataPoints config.label config.color config.unit toX toY data }
@@ -1464,7 +1469,7 @@ type alias Interpolation data msg =
 
 
 {-| -}
-monotone : (data -> Float) -> List (Interpolation data msg -> Interpolation data msg) -> Series data msg
+monotone : (data -> Maybe Float) -> List (Interpolation data msg -> Interpolation data msg) -> Series data msg
 monotone toY edits =
   Series <| \data toX defaultColor ->
     let config =
@@ -1492,7 +1497,7 @@ monotone toY edits =
       { isHtml = False
       , prePlane = \info ->
           { info
-          | x = stretch info.x (fromData [toX] data)
+          | x = stretch info.x (fromData [toX >> Just] data)
           , y = stretch info.y (fromData [toY] data)
           }
       , postPlane = \p info -> { info | points = info.points ++ C.toDataPoints config.label config.color config.unit toX toY data }
@@ -1513,7 +1518,7 @@ monotone toY edits =
 
 
 {-| -}
-linear : (data -> Float) -> List (Interpolation data msg -> Interpolation data msg) -> Series data msg
+linear : (data -> Maybe Float) -> List (Interpolation data msg -> Interpolation data msg) -> Series data msg
 linear toY edits =
   Series <| \data toX defaultColor ->
     let config =
@@ -1541,7 +1546,7 @@ linear toY edits =
       { isHtml = False
       , prePlane = \info ->
           { info
-          | x = stretch info.x (fromData [toX] data)
+          | x = stretch info.x (fromData [toX >> Just] data)
           , y = stretch info.y (fromData [toY] data)
           }
       , postPlane = \p info -> { info | points = info.points ++ C.toDataPoints config.label config.color config.unit toX toY data }

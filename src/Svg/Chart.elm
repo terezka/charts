@@ -16,7 +16,7 @@ module Svg.Chart
     , eventCatcher, container, decodePoint
     , Point, toPoints, DataPoint, toDataPoints
     , getNearest, getNearestX, getWithin, getWithinX
-    , tooltip, tooltipOnTop, isXPastMiddle, middleOfY, middleOfX
+    , tooltip, tooltipOnTop, isXPastMiddle, middleOfY, middleOfX, closestToZero
 
     , toBarPoints
     )
@@ -65,7 +65,7 @@ mirrored on the other side of the axis!
 
 @docs getNearest, getNearestX, getWithin, getWithinX
 
-@docs tooltip, tooltipOnTop, isXPastMiddle, middleOfY, middleOfX
+@docs tooltip, tooltipOnTop, isXPastMiddle, middleOfY, middleOfX, closestToZero
 
 
 -}
@@ -711,56 +711,67 @@ cross =
     someScatter =
       scatter plane .x .y (full 6 circle "blue") points
 -}
-scatter : Plane -> (data -> Float) -> (data -> Float) -> (data -> Dot msg) -> List data -> Svg msg
+scatter : Plane -> (data -> Float) -> (data -> Maybe Float) -> (data -> Dot msg) -> List data -> Svg msg
 scatter plane toX toY dot data =
   viewSeries plane toX toY dot data (text "-- No interpolation --")
 
 
 {-| Series with linear interpolation.
 -}
-linear : Plane -> (data -> Float) -> (data -> Float) -> List (Attribute msg) -> (data -> Dot msg) -> List data -> Svg msg
+linear : Plane -> (data -> Float) -> (data -> Maybe Float) -> List (Attribute msg) -> (data -> Dot msg) -> List data -> Svg msg
 linear plane toX toY attributes dot data =
   let points = toPoints toX toY data in
   viewSeries plane toX toY dot data <|
-    viewInterpolation plane False attributes points (linearInterpolation points)
+    viewInterpolations plane False attributes points (linearInterpolation points)
 
 
 {-| Area series with linear interpolation.
 -}
-linearArea : Plane -> (data -> Float) -> (data -> Float) -> List (Attribute msg) -> (data -> Dot msg) -> List data -> Svg msg
+linearArea : Plane -> (data -> Float) -> (data -> Maybe Float) -> List (Attribute msg) -> (data -> Dot msg) -> List data -> Svg msg
 linearArea plane toX toY attributes dot data =
   let points = toPoints toX toY data in
   viewSeries plane toX toY dot data <|
-      viewInterpolation plane True attributes points (linearInterpolation points)
+    viewInterpolations plane True attributes points (linearInterpolation points)
 
 
 {-| Series with monotone interpolation.
 -}
-monotone : Plane -> (data -> Float) -> (data -> Float) -> List (Attribute msg) -> (data -> Dot msg) -> List data -> Svg msg
+monotone : Plane -> (data -> Float) -> (data -> Maybe Float) -> List (Attribute msg) -> (data -> Dot msg) -> List data -> Svg msg
 monotone plane toX toY attributes dot data =
   let points = toPoints toX toY data in
   viewSeries plane toX toY dot data <|
-    viewInterpolation plane False attributes points (monotoneInterpolation points)
+    viewInterpolations plane False attributes points (monotoneInterpolation points)
 
 
 {-| Area series with monotone interpolation.
 -}
-monotoneArea : Plane -> (data -> Float) -> (data -> Float) -> List (Attribute msg) -> (data -> Dot msg) -> List data -> Svg msg
+monotoneArea : Plane -> (data -> Float) -> (data -> Maybe Float) -> List (Attribute msg) -> (data -> Dot msg) -> List data -> Svg msg
 monotoneArea plane toX toY attributes dot data =
   let points = toPoints toX toY data in
   viewSeries plane toX toY dot data <|
-      viewInterpolation plane True attributes points (monotoneInterpolation points)
+    viewInterpolations plane True attributes points (monotoneInterpolation points)
 
 
 -- INTERNAL
 
 
-viewSeries : Plane -> (data -> Float) -> (data -> Float) -> (data -> Dot msg) -> List data -> Svg msg -> Svg msg
+viewSeries : Plane -> (data -> Float) -> (data -> Maybe Float) -> (data -> Dot msg) -> List data -> Svg msg -> Svg msg
 viewSeries plane toX toY dot data interpolation =
+  let viewDot datum =
+        case toY datum of
+          Just y -> Just (dot datum plane (toX datum) y)
+          Nothing -> Nothing
+  in
   g [ class "elm-charts__serie" ]
     [ interpolation
-    , g [ class "elm-charts__dots" ] (List.map (\datum -> dot datum plane (toX datum) (toY datum)) data)
+    , g [ class "elm-charts__dots" ] (List.filterMap viewDot data)
     ]
+
+
+viewInterpolations : Plane -> Bool -> List (Attribute msg) -> List (List Point) -> List (List Command) -> Svg msg
+viewInterpolations plane hasArea userAttributes points commands =
+  g [ class "elm-charts__interpolations" ] <|
+    List.map2 (\ps cs -> viewInterpolation plane False userAttributes ps cs) points commands
 
 
 viewInterpolation : Plane -> Bool -> List (Attribute msg) -> List Point -> List Command -> Svg msg
@@ -788,7 +799,7 @@ viewLine plane userAttributes interpolation first rest =
         userAttributes
         [ d (description plane commands), fill transparent ]
   in
-    path attributes []
+  path attributes []
 
 
 viewArea : Plane -> List (Attribute msg) -> List Command -> Point -> List Point -> Svg msg
@@ -813,58 +824,90 @@ viewArea plane userAttributes interpolation first rest =
 -- LINEAR INTERPOLATION
 
 
-linearInterpolation : List Point -> List Command
+linearInterpolation : List (List Point) -> List (List Command)
 linearInterpolation =
-  List.map (\{ x, y } -> Line x y)
+  List.map (List.map (\{ x, y } -> Line x y))
 
 
 
 -- MONOTONE INTERPOLATION
 
 
-monotoneInterpolation : List Point -> List Command
-monotoneInterpolation points =
-  case points of
-    p0 :: p1 :: p2 :: rest ->
-      let
-        nextTangent =
-          slope3 p0 p1 p2
+monotoneInterpolation : List (List Point) -> List (List Command)
+monotoneInterpolation sections =
+  List.foldr monotoneSection ( First, [] ) sections
+    |> Tuple.second
 
-        previousTangent =
-          slope2 p0 p1 nextTangent
+
+monotoneSection : List Point -> ( Tangent, List (List Command) ) -> ( Tangent, List (List Command) )
+monotoneSection points ( tangent, acc ) =
+  let
+    ( t0, commands ) =
+      case points of
+        p0 :: rest ->
+          monotonePart (p0 :: rest) ( tangent, [ Line p0.x p0.y ] )
+
+        [] ->
+          ( tangent, [] )
+  in
+  ( t0, commands :: acc )
+
+
+type Tangent
+  = First
+  | Previous Float
+
+
+monotonePart : List Point -> ( Tangent, List Command ) -> ( Tangent, List Command )
+monotonePart points ( tangent, commands ) =
+  case ( tangent, points ) of
+    ( First, p0 :: p1 :: p2 :: rest ) ->
+      let t1 = slope3 p0 p1 p2
+          t0 = slope2 p0 p1 t1
       in
-        monotoneCurve p0 p1 previousTangent nextTangent ++
-        monotoneNext (p1 :: p2 :: rest) nextTangent
+      ( Previous t1
+      , commands ++ [ monotoneCurve p0 p1 t0 t1 ]
+      )
+      |> monotonePart (p1 :: p2 :: rest)
 
-    _ ->
-      []
+    ( Previous t0, p0 :: p1 :: p2 :: rest ) ->
+      let t1 = slope3 p0 p1 p2 in
+      ( Previous t1
+      , commands ++ [ monotoneCurve p0 p1 t0 t1 ]
+      )
+      |> monotonePart (p1 :: p2 :: rest)
+
+    ( First, [ p0, p1 ] ) ->
+      let t1 = slope3 p0 p1 p1 in
+      ( Previous t1
+      , commands ++ [ monotoneCurve p0 p1 t1 t1, Line p1.x p1.y ]
+      )
+
+    ( Previous t0, [ p0, p1 ] ) ->
+      let t1 = slope3 p0 p1 p1 in
+      ( Previous t1
+      , commands ++ [ monotoneCurve p0 p1 t0 t1, Line p1.x p1.y ]
+      )
+
+    ( _, _ ) ->
+      ( tangent
+      , commands
+      )
 
 
-monotoneNext : List Point -> Float -> List Command
-monotoneNext points previousTangent =
-  case points of
-    p0 :: p1 :: p2 :: rest ->
-      let
-        nextTangent =
-          slope3 p0 p1 p2
-      in
-        monotoneCurve p0 p1 previousTangent nextTangent ++
-        monotoneNext (p1 :: p2 :: rest) nextTangent
-
-    [ p0, p1 ] ->
-      monotoneCurve p0 p1 previousTangent (slope3 p0 p1 p1)
-
-    _ ->
-        []
-
-
-monotoneCurve : Point -> Point -> Float -> Float -> List Command
+monotoneCurve : Point -> Point -> Float -> Float -> Command
 monotoneCurve point0 point1 tangent0 tangent1 =
   let
     dx =
       (point1.x - point0.x) / 3
   in
-    [ CubicBeziers (point0.x + dx) (point0.y + dx * tangent0) (point1.x - dx) (point1.y - dx * tangent1) point1.x point1.y ]
+  CubicBeziers
+      (point0.x + dx)
+      (point0.y + dx * tangent0)
+      (point1.x - dx)
+      (point1.y - dx * tangent1)
+      point1.x
+      point1.y
 
 
 {-| Calculate the slopes of the tangents (Hermite-type interpolation) based on
@@ -888,32 +931,26 @@ slope3 point0 point1 point2 =
 
 toH : Float -> Float -> Float
 toH h0 h1 =
-  if h0 == 0 then
-    if h1 < 0 then
-      0 * -1
-    else
-      h1
-  else
-    h0
+  if h0 == 0
+    then if h1 < 0 then 0 * -1 else h1
+    else h0
 
 
 {-| Calculate a one-sided slope.
 -}
 slope2 : Point -> Point -> Float -> Float
 slope2 point0 point1 t =
-  let
-    h =
-      point1.x - point0.x
-  in
-    if h /= 0 then (3 * (point1.y - point0.y) / h - t) / 2 else t
+  let h = point1.x - point0.x in
+    if h /= 0
+      then (3 * (point1.y - point0.y) / h - t) / 2
+      else t
 
 
 sign : Float -> Float
 sign x =
-  if x < 0 then
-    -1
-  else
-    1
+  if x < 0
+    then -1
+    else 1
 
 
 
@@ -976,9 +1013,19 @@ type alias Point =
 
 
 {-| -}
-toPoints : (data -> Float) -> (data -> Float) -> List data -> List Point
+toPoints : (data -> Float) -> (data -> Maybe Float) -> List data -> List (List Point)
 toPoints toX toY =
-  List.map <| \d -> { x = toX d, y = toY d }
+  let fold d acc =
+        case toY d of
+          Just y ->
+            case acc of
+              latest :: rest -> (latest ++ [{ x = toX d, y = y }]) :: acc
+              [] -> ([{ x = toX d, y = y }] :: acc)
+
+          Nothing ->
+            [] :: acc
+  in
+  List.foldl fold [] >> List.reverse
 
 
 {-| -}
@@ -987,14 +1034,19 @@ type alias DataPoint data =
   , label : String
   , color : String
   , unit : String
+  , toX : data -> Float
+  , toY : data -> Maybe Float
   , point : Point
   }
 
 
 {-| -}
-toDataPoints : String -> String -> String -> (data -> Float) -> (data -> Float) -> List data -> List (DataPoint data)
+toDataPoints : String -> String -> String -> (data -> Float) -> (data -> Maybe Float) -> List data -> List (DataPoint data)
 toDataPoints label color unit toX toY =
-  List.map <| \d -> DataPoint d label color unit { x = toX d, y = toY d }
+  List.filterMap <| \d ->
+    case toY d of
+      Just y -> Just <| DataPoint d label color unit toX toY { x = toX d, y = y }
+      Nothing -> Nothing
 
 
 
@@ -1002,7 +1054,7 @@ toDataPoints label color unit toX toY =
 Returns `Nothing` if you have no data showing.
 
 -}
-getNearest : List (DataPoint data) -> Plane -> Point -> Maybe (DataPoint data)
+getNearest : List (DataPoint data) -> Plane -> Point -> List (DataPoint data)
 getNearest points plane searchedSvg =
   let searched =
         { x = toCartesianX plane searchedSvg.x
@@ -1016,7 +1068,7 @@ getNearest points plane searchedSvg =
 you provide in the first argument. Returns `Nothing` if you have no data showing.
 
 -}
-getWithin : Float -> List (DataPoint data) -> Plane -> Point -> Maybe (DataPoint data)
+getWithin : Float -> List (DataPoint data) -> Plane -> Point -> List (DataPoint data)
 getWithin radius points plane searchedSvg =
     let
       searched =
@@ -1025,12 +1077,10 @@ getWithin radius points plane searchedSvg =
         }
 
       keepIfEligible closest =
-          if withinRadius plane radius searched closest.point
-            then Just closest
-            else Nothing
+        withinRadius plane radius searched closest.point
     in
     getNearestHelp points plane searched
-      |> Maybe.andThen keepIfEligible
+      |> List.filter keepIfEligible
 
 
 {-| Get the data coordinates horizontally nearest to the event.
@@ -1185,18 +1235,23 @@ middleOfX plane =
 -- COORDINATE HELPERS
 
 
-getNearestHelp : List (DataPoint data) -> Plane -> Point -> Maybe (DataPoint data)
+getNearestHelp : List (DataPoint data) -> Plane -> Point -> List (DataPoint data)
 getNearestHelp points plane searched =
   let
       distance_ =
           distance plane searched
 
-      getClosest point closest =
-          if distance_ closest.point < distance_ point.point
-            then closest
-            else point
+      getClosest point allClosest =
+        case List.head allClosest of
+          Just closest ->
+            if closest.point == point.point then point :: allClosest
+            else if distance_ closest.point > distance_ point.point  then [ point ]
+            else allClosest
+
+          Nothing ->
+            [ point ]
   in
-  withFirst points (List.foldl getClosest)
+  List.foldl getClosest [] points
 
 
 getNearestXHelp : List (DataPoint data) -> Plane -> Point -> List (DataPoint data)
