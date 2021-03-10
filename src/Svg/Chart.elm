@@ -14,7 +14,7 @@ module Svg.Chart
     , position, positionHtml
 
     , eventCatcher, container, decodePoint
-    , Point, toPoints, DataPoint, toDataPoints
+    , Point, toPoints, DataPoint
     , getNearest, getNearestX, getWithin, getWithinX
     , tooltip, tooltipOnTop, isXPastMiddle, middleOfY, middleOfX, closestToZero
 
@@ -61,7 +61,7 @@ mirrored on the other side of the axis!
 
 @docs container, eventCatcher
 
-@docs decodePoint, Point, toPoints, DataPoint, toDataPoints
+@docs decodePoint, Point, toPoints, DataPoint
 
 @docs getNearest, getNearestX, getWithin, getWithinX
 
@@ -1029,24 +1029,8 @@ toPoints toX toY =
 
 
 {-| -}
-type alias DataPoint data =
-  { datum : data
-  , label : String
-  , color : String
-  , unit : String
-  , toX : data -> Float
-  , toY : data -> Maybe Float
-  , point : Point
-  }
-
-
-{-| -}
-toDataPoints : String -> String -> String -> (data -> Float) -> (data -> Maybe Float) -> List data -> List (DataPoint data)
-toDataPoints label color unit toX toY =
-  List.filterMap <| \d ->
-    case toY d of
-      Just y -> Just <| DataPoint d label color unit toX toY { x = toX d, y = y }
-      Nothing -> Nothing
+type alias DataPoint item =
+  { item | position : Point }
 
 
 
@@ -1054,22 +1038,22 @@ toDataPoints label color unit toX toY =
 Returns `Nothing` if you have no data showing.
 
 -}
-getNearest : List (DataPoint data) -> Plane -> Point -> List (DataPoint data)
-getNearest points plane searchedSvg =
+getNearest : (info -> List (DataPoint item)) -> info -> Plane -> Point -> List (DataPoint item)
+getNearest toItems info plane searchedSvg =
   let searched =
         { x = toCartesianX plane searchedSvg.x
         , y = toCartesianY plane searchedSvg.y
         }
   in
-  getNearestHelp points plane searched
+  getNearestHelp (toItems info) plane searched
 
 
 {-| Get the data coordinates nearest of the event within the radius
-you provide in the first argument. Returns `Nothing` if you have no data showing.
+you provide in the first argument.
 
 -}
-getWithin : Float -> List (DataPoint data) -> Plane -> Point -> List (DataPoint data)
-getWithin radius points plane searchedSvg =
+getWithin : Float -> (info -> List (DataPoint item)) -> info -> Plane -> Point -> List (DataPoint item)
+getWithin radius toItems info plane searchedSvg =
     let
       searched =
         { x = toCartesianX plane searchedSvg.x
@@ -1077,31 +1061,31 @@ getWithin radius points plane searchedSvg =
         }
 
       keepIfEligible closest =
-        withinRadius plane radius searched closest.point
+        withinRadius plane radius searched closest.position
     in
-    getNearestHelp points plane searched
+    getNearestHelp (toItems info) plane searched
       |> List.filter keepIfEligible
 
 
 {-| Get the data coordinates horizontally nearest to the event.
 -}
-getNearestX : List (DataPoint data) -> Plane -> Point -> List (DataPoint data)
-getNearestX points plane searchedSvg =
+getNearestX : (info -> List (DataPoint item)) -> info ->  Plane -> Point -> List (DataPoint item)
+getNearestX toItems info plane searchedSvg =
     let
       searched =
         { x = toCartesianX plane searchedSvg.x
         , y = toCartesianY plane searchedSvg.y
         }
     in
-    getNearestXHelp points plane searched
+    getNearestXHelp (toItems info) plane searched
 
 
 {-| Finds the data coordinates horizontally nearest to the event, within the
 distance you provide in the first argument.
 
 -}
-getWithinX : Float -> List (DataPoint data) -> Plane -> Point -> List (DataPoint data)
-getWithinX radius points plane searchedSvg =
+getWithinX : Float -> (info -> List (DataPoint item)) -> info -> Plane -> Point -> List (DataPoint item)
+getWithinX radius toItems info plane searchedSvg =
     let
       searched =
         { x = toCartesianX plane searchedSvg.x
@@ -1109,10 +1093,128 @@ getWithinX radius points plane searchedSvg =
         }
 
       keepIfEligible =
-          withinRadiusX plane radius searched << .point
+          withinRadiusX plane radius searched << .position
     in
-    getNearestXHelp points plane searched
+    getNearestXHelp (toItems info) plane searched
       |> List.filter keepIfEligible
+
+
+
+-- COORDINATE HELPERS
+
+
+getNearestHelp : List (DataPoint item) -> Plane -> Point -> List (DataPoint item)
+getNearestHelp points plane searched =
+  let
+      distance_ =
+          distance plane searched
+
+      getClosest point allClosest =
+        case List.head allClosest of
+          Just closest ->
+            if closest.position == point.position then point :: allClosest
+            else if distance_ closest.position > distance_ point.position  then [ point ]
+            else allClosest
+
+          Nothing ->
+            [ point ]
+  in
+  List.foldl getClosest [] points
+
+
+getNearestXHelp : List (DataPoint item) -> Plane -> Point -> List (DataPoint item)
+getNearestXHelp points plane searched =
+  let
+      distanceX_ =
+          distanceX plane searched
+
+      getClosest point allClosest =
+        case List.head allClosest of
+          Just closest ->
+              if closest.position.x == point.position.x then point :: allClosest
+              else if distanceX_ closest.position > distanceX_ point.position then [ point ]
+              else allClosest
+
+          Nothing ->
+            [ point ]
+  in
+  List.foldl getClosest [] points
+
+
+distanceX : Plane -> Point -> Point -> Float
+distanceX plane searched dot =
+    abs <| toSVGX plane dot.x - toSVGX plane searched.x
+
+
+distanceY : Plane -> Point -> Point -> Float
+distanceY plane searched dot =
+    abs <| toSVGY plane dot.y - toSVGY plane searched.y
+
+
+distance : Plane -> Point -> Point -> Float
+distance plane searched dot =
+    sqrt <| distanceX plane searched dot ^ 2 + distanceY plane searched dot ^ 2
+
+
+withinRadius : Plane -> Float -> Point -> Point -> Bool
+withinRadius plane radius searched dot =
+    distance plane searched dot <= radius
+
+
+withinRadiusX : Plane -> Float -> Point -> Point -> Bool
+withinRadiusX plane radius searched dot =
+    distanceX plane searched dot <= radius
+
+
+
+-- DECODER
+
+
+{-| Decode position of mouse when tracking events. The `Plane` may
+change due to size changes of the viewport, so make sure to use the
+one given in the second argument. Also, make sure to wrap your chart
+in `container` otherwise your read coordinates maybe wrong!
+
+-}
+decodePoint : Plane -> (Plane -> Point -> msg) -> Json.Decoder msg
+decodePoint ({x, y} as plane) toMsg =
+  let
+    handle mouseX mouseY { left, top, height, width } =
+      let
+        widthPercent = width / plane.x.length
+        heightPercent = height / plane.y.length
+
+        newPlane =
+          { x =
+              { x | length = width
+              , marginLower = plane.x.marginLower * widthPercent
+              , marginUpper = plane.x.marginUpper * widthPercent
+              }
+          , y =
+              { y | length = height
+              , marginLower = plane.y.marginLower * heightPercent
+              , marginUpper = plane.y.marginUpper * heightPercent
+              }
+          }
+      in
+      toMsg newPlane { x = mouseX - left, y = mouseY - top }
+  in
+  Json.map3 handle
+    (Json.field "pageX" Json.float)
+    (Json.field "pageY" Json.float)
+    (DOM.target decodePosition)
+
+
+decodePosition : Json.Decoder DOM.Rectangle
+decodePosition =
+  Json.oneOf
+    [ DOM.boundingClientRect
+    , Json.lazy (\_ -> DOM.parentElement decodePosition)
+    ]
+
+
+
+-- SHOW TOOLTIP
 
 
 {-| A basic tooltip.
@@ -1229,120 +1331,6 @@ middleOfX : Plane -> Float
 middleOfX plane =
     plane.x.min + (plane.x.max - plane.x.min) / 2
 
-
-
-
--- COORDINATE HELPERS
-
-
-getNearestHelp : List (DataPoint data) -> Plane -> Point -> List (DataPoint data)
-getNearestHelp points plane searched =
-  let
-      distance_ =
-          distance plane searched
-
-      getClosest point allClosest =
-        case List.head allClosest of
-          Just closest ->
-            if closest.point == point.point then point :: allClosest
-            else if distance_ closest.point > distance_ point.point  then [ point ]
-            else allClosest
-
-          Nothing ->
-            [ point ]
-  in
-  List.foldl getClosest [] points
-
-
-getNearestXHelp : List (DataPoint data) -> Plane -> Point -> List (DataPoint data)
-getNearestXHelp points plane searched =
-  let
-      distanceX_ =
-          distanceX plane searched
-
-      getClosest point allClosest =
-        case List.head allClosest of
-          Just closest ->
-              if closest.point.x == point.point.x then point :: allClosest
-              else if distanceX_ closest.point > distanceX_ point.point then [ point ]
-              else allClosest
-
-          Nothing ->
-            [ point ]
-  in
-  List.foldl getClosest [] points
-
-
-distanceX : Plane -> Point -> Point -> Float
-distanceX plane searched dot =
-    abs <| toSVGX plane dot.x - toSVGX plane searched.x
-
-
-distanceY : Plane -> Point -> Point -> Float
-distanceY plane searched dot =
-    abs <| toSVGY plane dot.y - toSVGY plane searched.y
-
-
-distance : Plane -> Point -> Point -> Float
-distance plane searched dot =
-    sqrt <| distanceX plane searched dot ^ 2 + distanceY plane searched dot ^ 2
-
-
-withinRadius : Plane -> Float -> Point -> Point -> Bool
-withinRadius plane radius searched dot =
-    distance plane searched dot <= radius
-
-
-withinRadiusX : Plane -> Float -> Point -> Point -> Bool
-withinRadiusX plane radius searched dot =
-    distanceX plane searched dot <= radius
-
-
-
--- DECODER
-
-
-{-| Decode position of mouse when tracking events. The `Plane` may
-change due to size changes of the viewport, so make sure to use the
-one given in the second argument. Also, make sure to wrap your chart
-in `container` otherwise your read coordinates maybe wrong!
-
--}
-decodePoint : Plane -> (Plane -> Point -> msg) -> Json.Decoder msg
-decodePoint ({x, y} as plane) toMsg =
-  let
-    handle mouseX mouseY { left, top, height, width } =
-      let
-        widthPercent = width / plane.x.length
-        heightPercent = height / plane.y.length
-
-        newPlane =
-          { x =
-              { x | length = width
-              , marginLower = plane.x.marginLower * widthPercent
-              , marginUpper = plane.x.marginUpper * widthPercent
-              }
-          , y =
-              { y | length = height
-              , marginLower = plane.y.marginLower * heightPercent
-              , marginUpper = plane.y.marginUpper * heightPercent
-              }
-          }
-      in
-      toMsg newPlane { x = mouseX - left, y = mouseY - top }
-  in
-  Json.map3 handle
-    (Json.field "pageX" Json.float)
-    (Json.field "pageY" Json.float)
-    (DOM.target decodePosition)
-
-
-decodePosition : Json.Decoder DOM.Rectangle
-decodePosition =
-  Json.oneOf
-    [ DOM.boundingClientRect
-    , Json.lazy (\_ -> DOM.parentElement decodePosition)
-    ]
 
 
 

@@ -25,12 +25,12 @@ main =
 
 
 type alias Model =
-  { hovering : List (SC.DataPoint BarPoint)
+  { hovering : List (C.BarItem Float BarPoint)
   }
 
 
 type Msg
-  = OnHover (List (SC.DataPoint BarPoint))
+  = OnHover (List (C.BarItem Float BarPoint))
   | OnLeave
 
 
@@ -72,6 +72,7 @@ view model =
   C.chart
     [ C.width 600
     , C.height 300
+    , C.marginTop 40
     , C.htmlAttrs
         [ HA.style "font-size" "12px"
         , HA.style "font-family" "monospace"
@@ -79,39 +80,49 @@ view model =
         , HA.style "max-width" "700px"
         ]
     , C.paddingLeft 10
+    , C.init []
     , C.events
-        [ C.event "mousemove" (C.map OnHover C.getNearest)
+        [ C.barItem C.withoutUnknowns
+            |> C.getNearestX
+            |> C.map OnHover
+            |> C.event "mousemove"
         ]
     ]
     [ C.grid []
-    , C.histogram .x
-        [ C.tickLength 4, C.spacing 0.05, C.margin 0.1, C.binLabel .label, C.binWidth (always 2) ]
-        [ C.bar .z [ C.barColor (\d -> "lightgray"), C.unit "m", C.label "height" ]
-        , C.bar .y [ C.barColor (\d -> "lightgray"), C.unit "m/s", C.label "vel" ]
-        , C.bar (C.just .x) [ C.barColor (\d -> "lightgray"), C.unit "m2", C.label "area" ]
+    , C.bars
+        [ C.tickLength 4
+        , C.spacing 0.05
+        , C.margin 0.1
+        , C.binLabel .label
+        , C.collectGroups
+        ]
+        [ C.bar .z [ C.barColor (\d -> C.pink), C.label "area" ]
+        , C.bar .y [ C.barColor (\d -> C.blue), C.label "speed" ]
         ]
         data
     , C.yAxis []
     , C.yTicks []
     , C.xAxis []
-    --, C.xTicks [ C.amount 20 ]
-    --, C.xLabels []
     , C.yLabels []
-    , C.series .x
-        [ C.linear .z []
-        --, C.scatter (C.just .x) []
-        ]
-        data
-    , C.whenNotEmpty model.hovering <| \hovered _ ->
-        C.tooltipOnTop (\_ -> hovered.point.x) (\_ -> hovered.point.y) [ HA.style "color" hovered.color ] <|
-          [ Html.span [] [ Html.text hovered.datum.label ]
-          , Html.text " - "
-          , Html.text hovered.label
-          , Html.text " : "
-          , Html.span [] <|
-              case hovered.toY hovered.datum of
-                Just y -> [Html.text (String.fromFloat y), Html.text " ", Html.text hovered.unit ]
-                Nothing -> [Html.text "unknown"]
-          ]
+
+    , C.whenNotEmpty model.hovering <| \bar rest ->
+        C.tooltipOnTop (\_ -> bar.position.x) (\_ -> bar.position.y) [] <|
+          [ tooltipRow bar ]
     ]
 
+
+tooltipRow : C.BarItem Float BarPoint -> Html.Html msg
+tooltipRow bar =
+  Html.div [ HA.style "color" bar.metric.color ]
+    [ Html.span [] [ Html.text bar.datum.label ]
+    , Html.text " - "
+    , Html.text bar.metric.label
+    , Html.text " : "
+    , Html.text (String.fromFloat bar.values.y)
+    , Html.text " "
+    , Html.text bar.metric.unit
+    --, Html.span [] <|
+    --    case maybeY of
+    --      Just y -> [Html.text (String.fromFloat bar.values.y), Html.text " ", Html.text bar.metric.unit ]
+    --      Nothing -> [Html.text "unknown"]
+    ]
