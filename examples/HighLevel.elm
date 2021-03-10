@@ -25,15 +25,15 @@ main =
 
 
 type alias Model =
-  { hoveringBars : List (C.BarItem (Maybe Float) BarPoint)
-  , hoveringDots : List (C.DotItem (Maybe Float) BarPoint)
+  { hoveringBars : List (C.Single Float BarPoint)
+  , hoveringDots : List (C.Single Float BarPoint)
   }
 
 
 type Msg
   = OnHover
-      (List (C.BarItem (Maybe Float) BarPoint))
-      (List (C.DotItem (Maybe Float) BarPoint))
+      (List (C.Single Float BarPoint))
+      (List (C.Single Float BarPoint))
   | OnLeave
 
 
@@ -86,16 +86,16 @@ view model =
     , C.events
         [ C.event "mousemove" <|
             C.map2 OnHover
-              (C.getNearestX (C.barItem C.withUnknowns))
-              (C.getNearest (C.dotItem C.withUnknowns))
+              (C.getNearestX (C.withoutUnknowns >> C.getBars))
+              (C.getNearest (C.withoutUnknowns >> C.getDots))
         ]
     ]
     [ C.grid []
 
     , C.histogram .x
         [ C.tickLength 4
-        , C.spacing 0.05
-        , C.margin 0.1
+        , C.spacing 0
+        , C.margin 0
         , C.binLabel .label
         ]
         [ C.bar .z [ C.barColor (\d -> C.pink), C.label "area", C.unit "m2" ]
@@ -114,15 +114,13 @@ view model =
         ]
         data
 
-    , C.whenNotEmpty model.hoveringDots <| \dot rest ->
-        C.tooltipOnTop (always dot.position.x) (always dot.position.y)
-          []
-          [ tooltipRow dot.datum dot.metric dot.values ]
+    , C.whenNotEmpty model.hoveringDots <| \item rest ->
+        C.tooltipOnTop (always item.position.x) (always item.position.y) []
+          [ tooltipRow item ]
 
-    , C.whenNotEmpty model.hoveringBars <| \bar rest ->
-        C.tooltipOnTop (always bar.position.x) (always bar.position.y)
-          []
-          [ tooltipRow bar.datum bar.metric bar.values ]
+    , C.whenNotEmpty model.hoveringBars <| \item rest ->
+        C.tooltipOnTop (always item.position.x) (always item.position.y) []
+          [ tooltipRow item ]
 
     --, C.whenNotEmpty model.hovering <| \group rest ->
     --    C.tooltipOnTop (\_ -> group.position.x) (\_ -> group.position.y) [] <|
@@ -130,18 +128,18 @@ view model =
     ]
 
 
-tooltipRow : BarPoint -> C.Metric -> { x : Float, y : Maybe Float } -> Html.Html msg
-tooltipRow datum metric values =
-  Html.div [ HA.style "color" metric.color ]
-    [ Html.span [] [ Html.text datum.label ]
+tooltipRow : C.Single Float BarPoint -> Html.Html msg
+tooltipRow hovered =
+  Html.div [ HA.style "color" hovered.metric.color ]
+    [ Html.span [] [ Html.text hovered.datum.label ]
     , Html.text " "
-    , Html.text metric.label
+    , Html.text hovered.metric.label
     , Html.text " : "
-    --, Html.text (String.fromFloat values.y)
-    , Html.text <|
-        case values.y of
-          Just y -> String.fromFloat y
-          Nothing -> "unknown"
+    , Html.text (String.fromFloat hovered.values.y)
+    --, Html.text <|
+    --    case hovered.values.y of
+    --      Just y -> String.fromFloat y
+    --      Nothing -> "unknown"
     , Html.text " "
-    , Html.text metric.unit
+    , Html.text hovered.metric.unit
     ]

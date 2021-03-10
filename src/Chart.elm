@@ -5,9 +5,8 @@ module Chart exposing
     , ints, floats, times, format, values, amount
     -- , getPoint
     , Event, event, Decoder, map, map2, map3, getNearest, getNearestX, getWithin, getWithinX
-    , Metric, Item, BarItem, GroupItem, DotItem
-    , barItem, groupItem, dotItem
-    , withUnknowns, withoutUnknowns
+    , Metric, Item, Single, Group
+    , getBars, getGroups, getDots, withoutUnknowns
     , tooltip, tooltipOnTop, whenJust, whenNotEmpty, formatTimestamp
     , svgAt, htmlAt, svg, html, none
     , width, height
@@ -702,9 +701,9 @@ event =
 
 
 type Item value data
-  = ItemBar (BarItem value data)
-  | ItemGroup (GroupItem value data)
-  | ItemDot (DotItem value data)
+  = ItemBar (Single value data)
+  | ItemDot (Single value data)
+  | ItemGroup (Group value data)
 
 
 type alias Metric =
@@ -714,7 +713,7 @@ type alias Metric =
   }
 
 
-type alias BarItem value data =
+type alias Single value data =
   { datum : data
   , position : C.Point
   , values : { x : Float, y : value }
@@ -722,81 +721,61 @@ type alias BarItem value data =
   }
 
 
-type alias GroupItem value data =
+type alias Group value data =
   { datum : data
   , position : C.Point
-  , bars : List (BarItem value data)
+  , items : List (Single value data)
   }
 
 
-type alias DotItem value data =
-  { datum : data
-  , position : C.Point
-  , values : { x : Float, y : value }
-  , metric : Metric
-  }
+getBars : List (Item value data) -> List (Single value data)
+getBars =
+  let filter item =
+        case item of
+          ItemBar i -> Just [i]
+          ItemGroup i -> Just i.items
+          _ -> Nothing
+  in
+  List.concat << List.filterMap filter
 
 
-barItem : (Maybe Float -> Maybe value) -> List (Item (Maybe Float) data) -> List (BarItem value data)
-barItem filter is =
-  List.concat <| (List.filterMap <| \item ->
+getGroups : List (Item value data) -> List (Group value data)
+getGroups =
+  List.filterMap <| \item ->
+    case item of
+      ItemGroup i -> Just i
+      _ -> Nothing
+
+
+getDots : List (Item value data) -> List (Single value data)
+getDots =
+  List.filterMap <| \item ->
+    case item of
+      ItemDot i -> Just i
+      _ -> Nothing
+
+
+withoutUnknowns : List (Item (Maybe Float) data) -> List (Item Float data)
+withoutUnknowns =
+  let onlyKnowns i =
+        case i.values.y of
+          Just y -> Just (Single i.datum i.position { x = i.values.x, y = y } i.metric)
+          Nothing -> Nothing
+  in
+  List.filterMap <| \item ->
     case item of
       ItemBar i ->
-        case filter i.values.y of
-          Just y -> Just [ BarItem i.datum i.position { x = i.values.x, y = y } i.metric ]
-          Nothing -> Nothing
+        Maybe.map ItemBar (onlyKnowns i)
 
-      ItemGroup i ->
-        let toBar b =
-              case filter b.values.y of
-                Just y -> Just (BarItem b.datum b.position { x = b.values.x, y = y } b.metric)
-                Nothing -> Nothing
-        in
-        Just (List.filterMap toBar i.bars)
-
-      ItemDot _ -> Nothing
-  ) is
-
-
-groupItem : (Maybe Float -> Maybe value) -> List (Item (Maybe Float) data) -> List (GroupItem value data)
-groupItem filter =
-  List.filterMap <| \item ->
-    case item of
-      ItemBar _ -> Nothing
-      ItemGroup i ->
-        let toBar b =
-              case filter b.values.y of
-                Just y -> Just (BarItem b.datum b.position { x = b.values.x, y = y } b.metric)
-                Nothing -> Nothing
-        in
-        Just <| GroupItem i.datum i.position (List.filterMap toBar i.bars)
-
-      ItemDot _ -> Nothing
-
-
-dotItem : (Maybe Float -> Maybe value) -> List (Item (Maybe Float) data) -> List (DotItem value data)
-dotItem filter =
-  List.filterMap <| \item ->
-    case item of
-      ItemBar _ -> Nothing
-      ItemGroup _ -> Nothing
       ItemDot i ->
-        case filter i.values.y of
-          Just y -> Just (DotItem i.datum i.position { x = i.values.x, y = y } i.metric)
-          Nothing -> Nothing
+        Maybe.map ItemDot (onlyKnowns i)
 
-
-{-| -}
-withUnknowns : Maybe Float -> Maybe (Maybe Float)
-withUnknowns maybeY =
-  Just maybeY
-
-
-{-| -}
-withoutUnknowns : Maybe Float -> Maybe Float
-withoutUnknowns maybeY =
-  maybeY
-
+      ItemGroup i ->
+        Just <| ItemGroup
+          { datum = i.datum
+          , position = i.position
+          , items = List.filterMap onlyKnowns i.items
+          }
 
 
 {-| -}
@@ -1327,7 +1306,7 @@ bars edits metrics data =
       toGroupItem p i d =
         { datum = d
         , position = { x = toFloat i + 1, y = .max (fromData ys [d]) }
-        , bars =
+        , items =
             let barPoints = C.toBarPoints p (toDataPointBin p i d) in
             List.map2 (toBarItem d i) barPoints (List.reverse metrics)
         }
@@ -1461,7 +1440,7 @@ histogram toX edits metrics data =
             { x = toX d - (toBinWidth p d maybePrev) / 2
             , y = .max (fromData ys [d])
             }
-        , bars =
+        , items =
             let barPoints = C.toBarPoints p (toBin "" p maybePrev d) in
             List.map2 (toBarItem d) barPoints (List.reverse metrics)
         }
