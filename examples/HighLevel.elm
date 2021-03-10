@@ -25,12 +25,12 @@ main =
 
 
 type alias Model =
-  { hovering : List (C.BarItem Float BarPoint)
+  { hovering : List (C.GroupItem (Maybe Float) BarPoint)
   }
 
 
 type Msg
-  = OnHover (List (C.BarItem Float BarPoint))
+  = OnHover (List (C.GroupItem (Maybe Float) BarPoint))
   | OnLeave
 
 
@@ -52,7 +52,7 @@ type alias BarPoint =
 data : List BarPoint
 data =
   [ { x = 0, y = Just 4, z = Just 4, label = "DK" }
-  , { x = 4, y = Just 2, z = Just 2, label = "NO" }
+  , { x = 4, y = Just 2, z = Nothing, label = "NO" }
   , { x = 6, y = Just 4, z = Just 5, label = "SE" }
   , { x = 8, y = Just 3, z = Just 7, label = "FI" }
   , { x = 10, y = Just 4, z = Just 3, label = "IS" }
@@ -80,24 +80,22 @@ view model =
         , HA.style "max-width" "700px"
         ]
     , C.paddingLeft 10
-    , C.init []
     , C.events
-        [ C.barItem C.withoutUnknowns
+        [ C.groupItem C.withUnknowns
             |> C.getNearestX
             |> C.map OnHover
             |> C.event "mousemove"
         ]
     ]
     [ C.grid []
-    , C.bars
+    , C.histogram .x
         [ C.tickLength 4
         , C.spacing 0.05
         , C.margin 0.1
         , C.binLabel .label
-        , C.collectGroups
         ]
-        [ C.bar .z [ C.barColor (\d -> C.pink), C.label "area" ]
-        , C.bar .y [ C.barColor (\d -> C.blue), C.label "speed" ]
+        [ C.bar .z [ C.barColor (\d -> C.pink), C.label "area", C.unit "m2" ]
+        , C.bar .y [ C.barColor (\d -> C.blue), C.label "speed", C.unit "ms" ]
         ]
         data
     , C.yAxis []
@@ -105,24 +103,28 @@ view model =
     , C.xAxis []
     , C.yLabels []
 
-    , C.whenNotEmpty model.hovering <| \bar rest ->
-        C.tooltipOnTop (\_ -> bar.position.x) (\_ -> bar.position.y) [] <|
-          [ tooltipRow bar ]
+    --, C.whenNotEmpty model.hovering <| \bar rest ->
+    --    C.tooltipOnTop (\_ -> bar.position.x) (\_ -> bar.position.y) [] <|
+    --      [ tooltipRow bar ]
+
+    , C.whenNotEmpty model.hovering <| \group rest ->
+        C.tooltipOnTop (\_ -> group.position.x) (\_ -> group.position.y) [] <|
+          List.map tooltipRow group.bars
     ]
 
 
-tooltipRow : C.BarItem Float BarPoint -> Html.Html msg
+tooltipRow : C.BarItem (Maybe Float) BarPoint -> Html.Html msg
 tooltipRow bar =
   Html.div [ HA.style "color" bar.metric.color ]
     [ Html.span [] [ Html.text bar.datum.label ]
-    , Html.text " - "
+    , Html.text " "
     , Html.text bar.metric.label
     , Html.text " : "
-    , Html.text (String.fromFloat bar.values.y)
+    --, Html.text (String.fromFloat bar.values.y)
+    , Html.text <|
+        case bar.values.y of
+          Just y -> String.fromFloat y
+          Nothing -> "unknown"
     , Html.text " "
     , Html.text bar.metric.unit
-    --, Html.span [] <|
-    --    case maybeY of
-    --      Just y -> [Html.text (String.fromFloat bar.values.y), Html.text " ", Html.text bar.metric.unit ]
-    --      Nothing -> [Html.text "unknown"]
     ]

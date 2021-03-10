@@ -6,8 +6,7 @@ module Chart exposing
     -- , getPoint
     , Event, event, Decoder, map, map2, map3, getNearest, getNearestX, getWithin, getWithinX
     , Metric, Item, BarItem, GroupItem, DotItem
-    , barItem, groupItem, dotItem, collectGroups, collectAs
-    , init
+    , barItem, groupItem, dotItem
     , withUnknowns, withoutUnknowns
     , tooltip, tooltipOnTop, whenJust, whenNotEmpty, formatTimestamp
     , svgAt, htmlAt, svg, html, none
@@ -16,7 +15,7 @@ module Chart exposing
     , paddingTop, paddingBottom, paddingLeft, paddingRight
     , static, id
     , range, domain, topped, events, htmlAttrs, binWidth
-    , start, end, pinned, color, label, unit, rounded, roundBottom, margin, spacing, onEvent
+    , start, end, pinned, color, label, unit, rounded, roundBottom, margin, spacing
     , dot, dotted, area, noArrow, binLabel, barLabel, barColor, tickLength, tickWidth, center
     , filterX, filterY, only, attrs
     , blue, orange, pink, green, red
@@ -398,19 +397,13 @@ center config =
   { config | center = True }
 
 
-{-| -}
-onEvent : Decoder data item -> Attribute { a | onEvent : Maybe (Decoder data item) }
-onEvent value config =
-  { config | onEvent = Just value }
-
-
 
 
 -- ELEMENTS
 
 
 {-| -}
-type alias Container info msg =
+type alias Container data msg =
     { width : Float
     , height : Float
     , marginTop : Float
@@ -425,16 +418,15 @@ type alias Container info msg =
     , id : String
     , range : Maybe (Bounds -> Bounds)
     , domain : Maybe (Bounds -> Bounds)
-    , events : List (Event info msg)
+    , events : List (Event data msg)
     , htmlAttrs : List (H.Attribute msg)
     , topped : Maybe Int
-    , init : Maybe info
     , attrs : List (S.Attribute msg)
     }
 
 
 {-| -}
-chart : List (Container info msg -> Container info msg) -> List (Element info msg) -> H.Html msg
+chart : List (Container data msg -> Container data msg) -> List (Element data msg) -> H.Html msg
 chart edits elements =
   let config =
         applyAttrs edits
@@ -453,7 +445,6 @@ chart edits elements =
           , range = Nothing
           , domain = Nothing
           , topped = Nothing
-          , init = Nothing
           , events = []
           , attrs = []
           , htmlAttrs = []
@@ -552,25 +543,20 @@ chart edits elements =
             ( acc, ( before, svgs, after ) )
 
       ( info, ( hBefore, chartEls, hAfter ) ) =
-        toPostPlaneInfo elements { xTicks = [], yTicks = [], collected = config.init } True [] [] []
+        toPostPlaneInfo elements { xTicks = [], yTicks = [], collected = [] } True [] [] []
 
       svgContainer =
-        S.svg (sizingAttrs ++ allEvents ++ config.attrs)
+        S.svg (sizingAttrs ++ List.map toEvent config.events ++ config.attrs)
 
       sizingAttrs =
         if config.responsive
         then [ C.responsive plane ]
         else C.static plane
 
-      allEvents =
-        case info.collected of
-          Just c -> List.map (toEvent c) config.events
-          Nothing -> []
-
-      toEvent c e =
+      toEvent e =
         let (Decoder func) = e.decoder in
         SE.on e.name <| C.decodePoint plane <| \pl po ->
-          func c pl po
+          func info.collected pl po
 
       allSvgEls =
         [ C.frame config.id plane ] ++ (List.map applyInfo chartEls) ++ [ C.eventCatcher plane [] ]
@@ -589,21 +575,21 @@ type alias PrePlaneInfo =
   }
 
 
-type alias PostPlaneInfo info =
+type alias PostPlaneInfo data =
   { xTicks : List Float
   , yTicks : List Float
-  , collected : Maybe info
+  , collected : List (Item (Maybe Float) data)
   }
 
 
 -- TODO
 {-| -}
-type Element info msg =
+type Element data msg =
   Element
     { isHtml : Bool
     , prePlane : PrePlaneInfo -> PrePlaneInfo
-    , postPlane : C.Plane -> PostPlaneInfo info -> PostPlaneInfo info
-    , view : String -> C.Plane -> PostPlaneInfo info -> H.Html msg
+    , postPlane : C.Plane -> PostPlaneInfo data -> PostPlaneInfo data
+    , view : String -> C.Plane -> PostPlaneInfo data -> H.Html msg
     }
 
 
@@ -685,14 +671,14 @@ stretch ma b =
 
 
 {-| -}
-type alias Event info msg =
+type alias Event data msg =
   { name : String
-  , decoder : Decoder info msg
+  , decoder : Decoder data msg
   }
 
 
 {-| -}
-event : String -> Decoder info msg -> Event info msg
+event : String -> Decoder data msg -> Event data msg
 event =
   Event
 
@@ -701,30 +687,8 @@ event =
 -- EVENT / DECODER
 
 
-{-| -}
-type Decoder info item
-  = Decoder (info -> C.Plane -> C.Point -> item)
 
-
-{-| -}
-map : (a -> item) -> Decoder data a -> Decoder data item
-map f (Decoder a) =
-  Decoder <| \ps s p -> f (a ps s p)
-
-
-{-| -}
-map2 : (a -> b -> item) -> Decoder data a -> Decoder data b -> Decoder data item
-map2 f (Decoder a) (Decoder b) =
-  Decoder <| \ps s p -> f (a ps s p) (b ps s p)
-
-
-{-| -}
-map3 : (a -> b -> c -> item) -> Decoder data a -> Decoder data b -> Decoder data c -> Decoder data item
-map3 f (Decoder a) (Decoder b) (Decoder c) =
-  Decoder <| \ps s p -> f (a ps s p) (b ps s p) (c ps s p)
-
-
---{-| -}
+--{-| -} TODO
 --getPoint : Decoder data C.Point
 --getPoint =
 --  Decoder <| \_ plane point ->
@@ -734,18 +698,6 @@ map3 f (Decoder a) (Decoder b) (Decoder c) =
 --          }
 --    in
 --    searched
-
-
-{-| -}
-collectGroups : Attribute { a | collectAs : Maybe (GroupItem value data -> List (Item value data) -> List (Item value data)) }
-collectGroups config =
-  { config | collectAs = Just (\g i -> ItemGroup g :: i) }
-
-
-{-| -}
-collectAs : (item -> info -> info) -> Attribute { a | collectAs : Maybe (item -> info -> info) }
-collectAs value config =
-  { config | collectAs = Just value }
 
 
 
@@ -841,25 +793,48 @@ withoutUnknowns maybeY =
 
 
 {-| -}
-getNearest : (info -> List (C.DataPoint item)) -> Decoder info (List (C.DataPoint item))
+type Decoder data item
+  = Decoder (List (Item (Maybe Float) data) -> C.Plane -> C.Point -> item)
+
+
+{-| -}
+map : (a -> item) -> Decoder data a -> Decoder data item
+map f (Decoder a) =
+  Decoder <| \ps s p -> f (a ps s p)
+
+
+{-| -}
+map2 : (a -> b -> item) -> Decoder data a -> Decoder data b -> Decoder data item
+map2 f (Decoder a) (Decoder b) =
+  Decoder <| \ps s p -> f (a ps s p) (b ps s p)
+
+
+{-| -}
+map3 : (a -> b -> c -> item) -> Decoder data a -> Decoder data b -> Decoder data c -> Decoder data item
+map3 f (Decoder a) (Decoder b) (Decoder c) =
+  Decoder <| \ps s p -> f (a ps s p) (b ps s p) (c ps s p)
+
+
+{-| -}
+getNearest : (List (Item (Maybe Float) data) -> List (C.DataPoint item)) -> Decoder data (List (C.DataPoint item))
 getNearest filter =
   Decoder (C.getNearest filter)
 
 
 {-| -}
-getWithin : (info -> List (C.DataPoint item)) -> Float -> Decoder info (List (C.DataPoint item))
+getWithin : (List (Item (Maybe Float) data) -> List (C.DataPoint item)) -> Float -> Decoder data (List (C.DataPoint item))
 getWithin filter radius =
   Decoder (C.getWithin radius filter)
 
 
 {-| -}
-getNearestX : (info -> List (C.DataPoint item)) -> Decoder info (List (C.DataPoint item))
+getNearestX : (List (Item (Maybe Float) data) -> List (C.DataPoint item)) -> Decoder data (List (C.DataPoint item))
 getNearestX filter =
   Decoder (C.getNearestX filter)
 
 
 {-| -}
-getWithinX : (info -> List (C.DataPoint item)) -> Float -> Decoder info (List (C.DataPoint item))
+getWithinX : (List (Item (Maybe Float) data) -> List (C.DataPoint item)) -> Float -> Decoder data (List (C.DataPoint item))
 getWithinX filter radius =
   Decoder (C.getWithinX radius filter)
 
@@ -1274,7 +1249,7 @@ grid edits =
 -- SERIES
 
 
-type alias Bars data info msg =
+type alias Bars data msg =
   { rounded : Float
   , roundBottom : Bool
   , attrs : List (S.Attribute msg)
@@ -1283,12 +1258,11 @@ type alias Bars data info msg =
   , tickLength : Float
   , tickWidth : Float
   , binLabel : Maybe (data -> String)
-  , collectAs : Maybe (GroupItem (Maybe Float) data -> info -> info)
   }
 
 
 {-| -}
-bars : List (Bars data info msg -> Bars data info msg) -> List (Bar data msg) -> List data -> Element info msg
+bars : List (Bars data msg -> Bars data msg) -> List (Bar data msg) -> List data -> Element data msg
 bars edits metrics data =
   let config =
         applyAttrs edits
@@ -1300,7 +1274,6 @@ bars edits metrics data =
           , tickLength = 0
           , tickWidth = 1
           , attrs = []
-          , collectAs = Nothing
           }
 
       toBinLabel i d =
@@ -1346,7 +1319,7 @@ bars edits metrics data =
 
       toGroupItem p i d =
         { datum = d
-        , position = { x = toFloat i + 1, y = C.closestToZero p }
+        , position = { x = toFloat i + 1, y = .max (fromData ys [d]) }
         , bars =
             let barPoints = C.toBarPoints p (toDataPointBin p i d) in
             List.map2 (toBarItem d i) barPoints (List.reverse metrics)
@@ -1371,16 +1344,6 @@ bars edits metrics data =
         , values = { x = toFloat i, y = value datum }
         , position = point
         }
-
-      collectedGroup p collected =
-        case config.collectAs of
-          Just func ->
-            data
-              |> List.indexedMap (toGroupItem p)
-              |> List.foldl func collected
-
-          Nothing ->
-            collected
   in
   Element
     { isHtml = False
@@ -1390,9 +1353,11 @@ bars edits metrics data =
           , y = stretch info.y (fromData ys data)
         }
     , postPlane = \p info ->
-        case info.collected of
-          Just c -> { info | collected = Just (collectedGroup p c) }
-          Nothing -> info -- TODO
+        { info | collected =
+            data
+              |> List.indexedMap (toGroupItem p)
+              |> List.foldl (\g a -> a ++ [ItemGroup g]) info.collected
+        }
     , view = \name p _ -> C.bars p (List.indexedMap (toBin p name) data)
     }
 
@@ -1412,7 +1377,7 @@ type alias Histogram data msg =
 
 
 {-| -}
-histogram : (data -> Float) -> List (Histogram data msg -> Histogram data msg) -> List (Bar data msg) -> List data -> Element item msg
+histogram : (data -> Float) -> List (Histogram data msg -> Histogram data msg) -> List (Bar data msg) -> List data -> Element data msg
 histogram toX edits metrics data =
   let config =
         applyAttrs edits
@@ -1483,26 +1448,26 @@ histogram toX edits metrics data =
           Just w -> toX d - w d
           Nothing -> toX d - 1
 
-      toDataPoints p maybePrev d =
-        List.map2 (toDataPoint d) (C.toBarPoints p (toBin "" p maybePrev d)) (List.reverse metrics)
-
-      toDataPoint datum point (Bar value m) =
-        case m.color of
-          Just toColor ->
-            { datum = datum
-            , metric = Metric m.label (toColor datum) m.unit
-            , x = toX datum
-            , y = value datum
-            , position = point
+      toGroupItem p maybePrev d =
+        { datum = d
+        , position =
+            { x = toX d - (toBinWidth p d maybePrev) / 2
+            , y = .max (fromData ys [d])
             }
+        , bars =
+            let barPoints = C.toBarPoints p (toBin "" p maybePrev d) in
+            List.map2 (toBarItem d) barPoints (List.reverse metrics)
+        }
 
-          Nothing ->
-            { datum = datum
-            , metric = Metric m.label blue m.unit
-            , x = toX datum
-            , y = value datum
-            , position = point
-            }
+      toBarItem datum point (Bar value m) =
+        { datum = datum
+        , metric =
+            case m.color of
+              Just toColor -> Metric m.label (toColor datum) m.unit
+              Nothing -> Metric m.label blue m.unit
+        , values = { x = toX datum, y = value datum }
+        , position = point
+        }
   in
   Element
     { isHtml = False
@@ -1511,7 +1476,11 @@ histogram toX edits metrics data =
         | x = stretch info.x (fromData [toX >> Just, toXEnd >> Just] data)
         , y = stretch info.y (fromData ys data)
         }
-    , postPlane = \p info -> info
+    , postPlane = \p info ->
+        { info | collected =
+            mapWithPrev (toGroupItem p) data
+              |> List.foldl (\g a -> a ++ [ItemGroup g]) info.collected
+        }
     , view = \name p _ -> C.histogram p (mapWithPrev (toBin name p) data)
     }
 
