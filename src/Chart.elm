@@ -775,8 +775,15 @@ groupItem filter =
 
 
 dotItem : (Maybe Float -> Maybe value) -> List (Item (Maybe Float) data) -> List (DotItem value data)
-dotItem _ _ =
-  []
+dotItem filter =
+  List.filterMap <| \item ->
+    case item of
+      ItemBar _ -> Nothing
+      ItemGroup _ -> Nothing
+      ItemDot i ->
+        case filter i.values.y of
+          Just y -> Just (DotItem i.datum i.position { x = i.values.x, y = y } i.metric)
+          Nothing -> Nothing
 
 
 {-| -}
@@ -840,19 +847,19 @@ getWithinX filter radius =
 
 
 {-| -}
-tooltip : (Bounds -> Float) -> (Bounds -> Float) -> List (H.Attribute msg) -> List (H.Html msg) -> Element item msg
+tooltip : (Bounds -> Float) -> (Bounds -> Float) -> List (H.Attribute msg) -> List (H.Html msg) -> Element data msg
 tooltip toX toY att content =
   html <| \p -> C.tooltip p (toX <| toBounds .x p) (toY <| toBounds .y p) att content
 
 
 {-| -}
-tooltipOnTop : (Bounds -> Float) -> (Bounds -> Float) -> List (H.Attribute msg) -> List (H.Html msg) -> Element item msg
+tooltipOnTop : (Bounds -> Float) -> (Bounds -> Float) -> List (H.Attribute msg) -> List (H.Html msg) -> Element data msg
 tooltipOnTop toX toY att content =
   html <| \p -> C.tooltipOnTop p (toX <| toBounds .x p) (toY <| toBounds .y p) att content
 
 
 {-| -}
-whenJust : Maybe a -> (a -> Element item msg) -> Element item msg
+whenJust : Maybe a -> (a -> Element data msg) -> Element data msg
 whenJust maybeA view =
   case maybeA of
     Just a -> view a
@@ -860,7 +867,7 @@ whenJust maybeA view =
 
 
 {-| -}
-whenNotEmpty : List a -> (a -> List a -> Element item msg) -> Element item msg
+whenNotEmpty : List a -> (a -> List a -> Element data msg) -> Element data msg
 whenNotEmpty maybeA view =
   case maybeA of
     a :: rest -> view a rest
@@ -1523,12 +1530,12 @@ just toY =
 -- DOTTED SERIES
 
 
-type Series data item msg
-  = Series (List data -> (data -> Float) -> String -> Element item msg)
+type Series data msg
+  = Series (List data -> (data -> Float) -> String -> Element data msg)
 
 
 {-| -}
-series : (data -> Float) -> List (Series data item msg) -> List data -> Element item msg
+series : (data -> Float) -> List (Series data msg) -> List data -> Element data msg
 series toX series_ data =
   let timesOver =
         List.length series_ // List.length colors
@@ -1549,8 +1556,6 @@ series toX series_ data =
     }
 
 
-
-
 type alias Scatter data msg =
     { color : String -- TODO use Color
     , label : String
@@ -1560,7 +1565,7 @@ type alias Scatter data msg =
 
 
 {-| -}
-scatter : (data -> Maybe Float) -> List (Scatter data msg -> Scatter data msg) -> Series data item msg
+scatter : (data -> Maybe Float) -> List (Scatter data msg -> Scatter data msg) -> Series data msg
 scatter toY edits =
   Series <| \data toX defaultColor ->
     let config =
@@ -1584,7 +1589,9 @@ scatter toY edits =
           | x = stretch info.x (fromData [toX >> Just] data)
           , y = stretch info.y (fromData [toY] data)
           }
-      , postPlane = \p info -> info -- { info | points = info.points ++ C.toDataPoints config.label config.color config.unit toX toY data }
+      , postPlane = \p info ->
+          let metric = Metric config.label config.color config.unit in
+          { info | collected = info.collected ++ List.map (toDotItem p metric toX toY) data }
       , view = \name p _ ->
           S.g
             [ SA.class "elm-charts__scatter" ]
@@ -1604,7 +1611,7 @@ type alias Interpolation data msg =
 
 
 {-| -}
-monotone : (data -> Maybe Float) -> List (Interpolation data msg -> Interpolation data msg) -> Series data item msg
+monotone : (data -> Maybe Float) -> List (Interpolation data msg -> Interpolation data msg) -> Series data msg
 monotone toY edits =
   Series <| \data toX defaultColor ->
     let config =
@@ -1635,7 +1642,9 @@ monotone toY edits =
           | x = stretch info.x (fromData [toX >> Just] data)
           , y = stretch info.y (fromData [toY] data)
           }
-      , postPlane = \p info -> info -- { info | points = info.points ++ C.toDataPoints config.label config.color config.unit toX toY data }
+      , postPlane = \p info ->
+          let metric = Metric config.label config.color config.unit in
+          { info | collected = info.collected ++ List.map (toDotItem p metric toX toY) data }
       , view = \name p _ ->
           case config.area of
             Just fill ->
@@ -1653,7 +1662,7 @@ monotone toY edits =
 
 
 {-| -}
-linear : (data -> Maybe Float) -> List (Interpolation data msg -> Interpolation data msg) -> Series data item msg
+linear : (data -> Maybe Float) -> List (Interpolation data msg -> Interpolation data msg) -> Series data msg
 linear toY edits =
   Series <| \data toX defaultColor ->
     let config =
@@ -1684,7 +1693,9 @@ linear toY edits =
           | x = stretch info.x (fromData [toX >> Just] data)
           , y = stretch info.y (fromData [toY] data)
           }
-      , postPlane = \p info -> info -- { info | points = info.points ++ C.toDataPoints config.label config.color config.unit toX toY data }
+      , postPlane = \p info ->
+          let metric = Metric config.label config.color config.unit in
+          { info | collected = info.collected ++ List.map (toDotItem p metric toX toY) data }
       , view = \name p _ ->
         case config.area of
           Just fill ->
@@ -1700,8 +1711,18 @@ linear toY edits =
       }
 
 
+toDotItem : C.Plane -> Metric -> (data -> Float) -> (data -> Maybe Float) -> data -> Item (Maybe Float) data
+toDotItem p metric toX toY datum =
+  ItemDot
+    { datum = datum
+    , position = { x = toX datum, y = Maybe.withDefault (C.closestToZero p) (toY datum) }
+    , values = { x = toX datum, y = toY datum }
+    , metric = metric
+    }
+
+
 {-| -}
-svg : (C.Plane -> S.Svg msg) -> Element item msg
+svg : (C.Plane -> S.Svg msg) -> Element data msg
 svg func =
   Element
     { isHtml = False
@@ -1712,7 +1733,7 @@ svg func =
 
 
 {-| -}
-html : (C.Plane -> H.Html msg) -> Element item msg
+html : (C.Plane -> H.Html msg) -> Element data msg
 html func =
   Element
     { isHtml = True
@@ -1723,7 +1744,7 @@ html func =
 
 
 {-| -}
-svgAt : (Bounds -> Float) -> (Bounds -> Float) -> Float -> Float -> List (S.Svg msg) -> Element item msg
+svgAt : (Bounds -> Float) -> (Bounds -> Float) -> Float -> Float -> List (S.Svg msg) -> Element data msg
 svgAt toX toY xOff yOff view =
   Element
     { isHtml = False
@@ -1735,7 +1756,7 @@ svgAt toX toY xOff yOff view =
 
 
 {-| -}
-htmlAt : (Bounds -> Float) -> (Bounds -> Float) -> Float -> Float -> List (H.Attribute msg) -> List (H.Html msg) -> Element item msg
+htmlAt : (Bounds -> Float) -> (Bounds -> Float) -> Float -> Float -> List (H.Attribute msg) -> List (H.Html msg) -> Element data msg
 htmlAt toX toY xOff yOff att view =
   Element
     { isHtml = True
@@ -1747,7 +1768,7 @@ htmlAt toX toY xOff yOff att view =
 
 
 {-| -}
-none : Element item msg
+none : Element data msg
 none =
   Element
     { isHtml = True
