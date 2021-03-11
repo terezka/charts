@@ -14,7 +14,7 @@ module Chart exposing
     , static, id
     , range, domain, topped, events, htmlAttrs, binWidth
     , start, end, pinned, color, name, unit, rounded, roundBottom, margin, spacing
-    , dot, dotted, area, noArrow, binLabel, onTop, tickLength, tickWidth, center
+    , dot, dotted, area, noArrow, binLabel, tickLength, tickWidth, center
     , filterX, filterY, only, attrs
     , blue, orange, pink, green, red
 
@@ -361,13 +361,6 @@ topped value config =
 binLabel : (data -> String) -> Attribute { a | binLabel : Maybe (data -> String) }
 binLabel value config =
   { config | binLabel = Just value }
-
-
-{-| -}
-onTop : v -> Attribute { a | onTop : Maybe v }
-onTop value config =
-  { config | onTop = Just value }
-
 
 {-| -}
 binWidth : (data -> Float) -> Attribute { a | binWidth : Maybe (data -> Float) }
@@ -1323,20 +1316,12 @@ bars edits metrics data =
           Nothing -> Nothing
 
       toBarLabel p metric d v =
-        case ( v, metric.label, metric.onTop ) of
-          ( Nothing, _, _ ) ->
-            Nothing
-
-          ( Just _, Nothing, Nothing ) ->
-            Nothing
-
-          ( Just v_, Just _, Nothing ) ->
+        case ( v, metric.label ) of
+          ( Just v_, Just _ ) ->
             Just (xLabel (barLabelConfig metric) p (String.fromFloat v_))
 
-          ( Just v_, _, Just formatter ) ->
-            case formatter d v_ of
-              Just string -> Just <| xLabel (barLabelConfig metric) p string
-              Nothing -> Nothing
+          _ ->
+            Nothing
 
       barLabelConfig metric =
         applyAttrs (Maybe.withDefault [] metric.label)
@@ -1490,21 +1475,12 @@ histogram toX edits metrics data =
           }
 
       toBarLabel p metric d v =
-        case ( v, metric.label, metric.onTop ) of
-          ( Nothing, _, _ ) ->
-            Nothing
-
-          ( Just _, Nothing, Nothing ) ->
-            Nothing
-
-          ( Just v_, Just _, Nothing ) ->
+        case ( v, metric.label ) of
+          ( Just v_, Just _ ) ->
             Just (xLabel (barLabelConfig metric) p (String.fromFloat v_))
 
-          ( Just v_, _, Just formatter ) ->
-            case formatter d v_ of
-              Just string -> Just <| xLabel (barLabelConfig metric) p string
-              Nothing -> Nothing
-
+          _ ->
+            Nothing
 
       barLabelConfig metric =
         applyAttrs (Maybe.withDefault [] metric.label)
@@ -1620,7 +1596,6 @@ type alias BarConfig data msg =
   { name : Maybe String
   , unit : String
   , color : Maybe (data -> String)
-  , onTop : Maybe (data -> Float -> Maybe String)
   , label : Maybe (List (Attribute (Label msg)))
   , attrs : List (S.Attribute msg)
   }
@@ -1634,7 +1609,6 @@ bar toY edits =
           { name = Nothing
           , unit = ""
           , color = Nothing
-          , onTop = Nothing
           , label = Nothing
           , attrs = [] -- TODO use
           }

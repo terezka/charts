@@ -106,12 +106,13 @@ view model =
         ]
         [ C.bar .z
             [ C.color (always C.orange)
-            , C.label []
+            , C.label [ C.color C.orange ]
             , C.name "area"
             , C.unit "m2"
             ]
         , C.bar .y
             [ C.color (always C.blue)
+            , C.label [ C.color C.blue ]
             , C.name "speed"
             , C.unit "m/s"
             ]
