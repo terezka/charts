@@ -116,15 +116,15 @@ view model =
         ]
         data
 
-    , C.whenNotEmpty model.hoveringDots <| \item rest ->
+    , C.when model.hoveringDots <| \item rest ->
         C.tooltipOnTop (always item.position.x) (always item.position.y) []
           [ tooltipRow item ]
 
-    , C.whenNotEmpty model.hoveringBars <| \item rest ->
+    , C.when model.hoveringBars <| \item rest ->
         C.tooltipOnTop (always item.position.x) (always item.position.y) []
           [ tooltipRow item ]
 
-    --, C.whenNotEmpty model.hovering <| \group rest ->
+    --, C.when model.hovering <| \group rest ->
     --    C.tooltipOnTop (\_ -> group.position.x) (\_ -> group.position.y) [] <|
     --      List.map tooltipRow group.bars
     ]
