@@ -24,7 +24,7 @@ module Chart exposing
 
 # Elements
 @docs chart, Element
-@docs series, scatter, linear, monotone
+@docs series, scatter, linear, monotone, just
 @docs bars, histogram, bar
 
 ## Work with bounds
@@ -35,7 +35,9 @@ module Chart exposing
 @docs amount, floats, ints, times, values, format, noArrow, start, end, pinned, only, filterX, filterY
 
 # Events
-@docs Event, event, Decoder, map, map2, map3, getCoords, getNearest, getNearestX, getWithin, getWithinX
+@docs Event, event, Decoder, getCoords, getNearest, getNearestX, getWithin, getWithinX, map, map2, map3, map4
+@docs Metric, Item, Single, Group
+@docs getBars, getGroups, getDots, withoutUnknowns
 @docs tooltip, tooltipOnTop, when, formatTimestamp
 
 # Attributes
