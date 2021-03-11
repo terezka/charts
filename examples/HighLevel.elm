@@ -111,7 +111,7 @@ view model =
     , C.yLabels []
 
     , C.series .x
-        [ C.linear .y [ C.color C.blue ]
+        [ C.linear .y [ C.color C.blue, C.name "vel", C.unit "m/s" ]
         , C.linear .z []
         ]
         data

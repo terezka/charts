@@ -47,7 +47,7 @@ module Chart exposing
 @docs center
 @docs range, domain, topped, static, id, events, htmlAttrs
 @docs binWidth, binLabel, topLabel, barColor, tickLength, tickWidth, margin, spacing, rounded, roundBottom
-@docs dotted, color, label, unit, dot, area, attrs
+@docs dotted, color, name, unit, dot, area, attrs
 
 # Interop
 @docs svgAt, htmlAt, svg, html, none
@@ -1545,7 +1545,7 @@ series toX series_ data =
 
 type alias Scatter data msg =
     { color : String -- TODO use Color
-    , label : String
+    , name : String
     , unit : String
     , dot : Maybe (data -> C.Dot msg)
     }
@@ -1558,7 +1558,7 @@ scatter toY edits =
     let config =
           applyAttrs edits
             { color = defaultColor
-            , label = ""
+            , name = ""
             , unit = ""
             , dot = Nothing
             }
@@ -1577,7 +1577,7 @@ scatter toY edits =
           , y = stretch info.y (fromData [toY] data)
           }
       , postPlane = \p info ->
-          let metric = Metric config.label config.color config.unit in
+          let metric = Metric config.name config.color config.unit in
           { info | collected = info.collected ++ List.map (toDotItem p metric toX toY) data }
       , view = \_ p _ ->
           S.g
@@ -1590,7 +1590,7 @@ type alias Interpolation data msg =
     { area : Maybe String -- TODO use Color
     , width : Float
     , color : String -- TODO use Color
-    , label : String
+    , name : String
     , unit : String
     , dot : Maybe (data -> C.Dot msg)
     , attrs : List (S.Attribute msg)
@@ -1607,7 +1607,7 @@ monotone toY edits =
             , area = Nothing
             , width = 1
             , dot = Nothing
-            , label = ""
+            , name = ""
             , unit = ""
             , attrs = []
             }
@@ -1630,7 +1630,7 @@ monotone toY edits =
           , y = stretch info.y (fromData [toY] data)
           }
       , postPlane = \p info ->
-          let metric = Metric config.label config.color config.unit in
+          let metric = Metric config.name config.color config.unit in
           { info | collected = info.collected ++ List.map (toDotItem p metric toX toY) data }
       , view = \_ p _ ->
           case config.area of
@@ -1657,7 +1657,7 @@ linear toY edits =
             { color = defaultColor
             , area = Nothing
             , width = 1
-            , label = ""
+            , name = ""
             , unit = ""
             , dot = Nothing
             , attrs = []
@@ -1681,7 +1681,7 @@ linear toY edits =
           , y = stretch info.y (fromData [toY] data)
           }
       , postPlane = \p info ->
-          let metric = Metric config.label config.color config.unit in
+          let metric = Metric config.name config.color config.unit in
           { info | collected = info.collected ++ List.map (toDotItem p metric toX toY) data }
       , view = \_ p _ ->
         case config.area of
