@@ -364,9 +364,9 @@ binLabel value config =
 
 
 {-| -}
-onTop : v -> Attribute { a | onTop : v }
+onTop : v -> Attribute { a | onTop : Maybe v }
 onTop value config =
-  { config | onTop = value }
+  { config | onTop = Just value }
 
 
 {-| -}
@@ -1302,12 +1302,12 @@ bars edits metrics data =
       binConfig =
         applyAttrs config.bin
           { name = Nothing
-          , label = []
+          , label = Nothing
           , width = Nothing -- TODO
           }
 
       binLabelConfig =
-        applyAttrs binConfig.label
+        applyAttrs (Maybe.withDefault [] binConfig.label)
           { color = Nothing
           , fontSize = Nothing
           , borderWidth = 0.1
@@ -1323,12 +1323,23 @@ bars edits metrics data =
           Nothing -> Nothing
 
       toBarLabel p metric d v =
-        case Maybe.andThen (metric.onTop d) v of
-          Just string -> Just <| xLabel (barLabelConfig metric) p string
-          Nothing -> Nothing
+        case ( v, metric.label, metric.onTop ) of
+          ( Nothing, _, _ ) ->
+            Nothing
+
+          ( Just _, Nothing, Nothing ) ->
+            Nothing
+
+          ( Just v_, Just _, Nothing ) ->
+            Just (xLabel (barLabelConfig metric) p (String.fromFloat v_))
+
+          ( Just v_, _, Just formatter ) ->
+            case formatter d v_ of
+              Just string -> Just <| xLabel (barLabelConfig metric) p string
+              Nothing -> Nothing
 
       barLabelConfig metric =
-        applyAttrs metric.label
+        applyAttrs (Maybe.withDefault [] metric.label)
           { color = Nothing
           , fontSize = Nothing
           , borderWidth = 0.1
@@ -1434,7 +1445,7 @@ type alias Histogram data msg =
 
 type alias Bin data msg =
   { name : Maybe (data -> String)
-  , label : List (Attribute (Label msg))
+  , label : Maybe (List (Attribute (Label msg)))
   , width : Maybe (data -> Float)
   }
 
@@ -1463,12 +1474,12 @@ histogram toX edits metrics data =
       binConfig =
         applyAttrs config.bin
           { name = Nothing
-          , label = []
+          , label = Nothing
           , width = Nothing
           }
 
       binLabelConfig =
-        applyAttrs binConfig.label
+        applyAttrs (Maybe.withDefault [] binConfig.label)
           { color = Nothing
           , fontSize = Nothing
           , borderWidth = 0.1
@@ -1479,12 +1490,24 @@ histogram toX edits metrics data =
           }
 
       toBarLabel p metric d v =
-        case Maybe.andThen (metric.onTop d) v of
-          Just string -> Just <| xLabel (barLabelConfig metric) p string
-          Nothing -> Nothing
+        case ( v, metric.label, metric.onTop ) of
+          ( Nothing, _, _ ) ->
+            Nothing
+
+          ( Just _, Nothing, Nothing ) ->
+            Nothing
+
+          ( Just v_, Just _, Nothing ) ->
+            Just (xLabel (barLabelConfig metric) p (String.fromFloat v_))
+
+          ( Just v_, _, Just formatter ) ->
+            case formatter d v_ of
+              Just string -> Just <| xLabel (barLabelConfig metric) p string
+              Nothing -> Nothing
+
 
       barLabelConfig metric =
-        applyAttrs metric.label
+        applyAttrs (Maybe.withDefault [] metric.label)
           { color = Nothing
           , fontSize = Nothing
           , borderWidth = 0.1
@@ -1597,8 +1620,8 @@ type alias BarConfig data msg =
   { name : Maybe String
   , unit : String
   , color : Maybe (data -> String)
-  , onTop : data -> Float -> Maybe String
-  , label : List (Attribute (Label msg))
+  , onTop : Maybe (data -> Float -> Maybe String)
+  , label : Maybe (List (Attribute (Label msg)))
   , attrs : List (S.Attribute msg)
   }
 
@@ -1611,8 +1634,8 @@ bar toY edits =
           { name = Nothing
           , unit = ""
           , color = Nothing
-          , onTop = \_ _ -> Nothing
-          , label = []
+          , onTop = Nothing
+          , label = Nothing
           , attrs = [] -- TODO use
           }
   in
@@ -2087,9 +2110,9 @@ type alias Label msg =
   }
 
 
-label : value -> Attribute { a | label : value }
+label : value -> Attribute { a | label : Maybe value }
 label value config =
-  { config | label = value }
+  { config | label = Just value }
 
 
 fontSize : value -> Attribute { a | fontSize : Maybe value }

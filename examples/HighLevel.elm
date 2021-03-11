@@ -106,8 +106,7 @@ view model =
         ]
         [ C.bar .z
             [ C.color (always C.orange)
-            , C.onTop (\_ v -> Just (String.fromFloat v))
-            , C.label [ C.color "gray", C.fontSize 11, C.yOffset 2 ]
+            , C.label []
             , C.name "area"
             , C.unit "m2"
             ]
