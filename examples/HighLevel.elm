@@ -95,7 +95,7 @@ view model =
     [ C.grid []
 
     , C.histogram .x
-        [ C.tickLength 4
+        [ C.tick [ C.length 4, C.width 1 ]
         , C.spacing 0.02
         , C.margin 0.1
         , C.bin

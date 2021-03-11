@@ -19,6 +19,7 @@ module Chart exposing
     , blue, orange, pink, green, red
 
     , bin, label, fontSize, borderWidth, borderColor, xOffset, yOffset
+    , tick, length
     )
 
 
@@ -929,7 +930,7 @@ yAxis edits =
     }
 
 
-type alias Tick tick msg =
+type alias Ticks tick msg =
     { color : Maybe String -- TODO use Color -- TODO allow custom color by tick value
     , height : Float
     , width : Maybe Float
@@ -950,7 +951,7 @@ type alias Values tick =
 
 
 {-| -}
-xTicks : List (Tick tick msg -> Tick tick msg) -> Element item msg
+xTicks : List (Ticks tick msg -> Ticks tick msg) -> Element item msg
 xTicks edits =
   let config =
         applyAttrs edits
@@ -997,7 +998,7 @@ xTicks edits =
 
 
 {-| -}
-yTicks : List (Tick tick msg -> Tick tick msg) -> Element item msg
+yTicks : List (Ticks tick msg -> Ticks tick msg) -> Element item msg
 yTicks edits =
   let config =
         applyAttrs edits
@@ -1271,8 +1272,7 @@ type alias Bars data msg =
   , attrs : List (S.Attribute msg)
   , margin : Float
   , spacing : Float
-  , tickLength : Float
-  , tickWidth : Float
+  , tick : List (Attribute (Tick msg))
   , bin : List (Attribute (Bin data msg))
   }
 
@@ -1287,16 +1287,23 @@ bars edits metrics data =
           , spacing = 0.01
           , margin = 0.05
           , bin = []
-          , tickLength = 0
-          , tickWidth = 1
+          , tick = []
           , attrs = []
+          }
+
+      tickConfig =
+        applyAttrs config.tick
+          { color = Nothing
+          , width = Nothing
+          , length = Nothing
+          , attributes = []
           }
 
       binConfig =
         applyAttrs config.bin
           { name = Nothing
           , label = Nothing
-          , width = Nothing -- TODO
+          , width = Nothing
           }
 
       binLabelConfig =
@@ -1360,8 +1367,8 @@ bars edits metrics data =
       toBin p chartName i d =
         { label = toBinLabel p d
         , spacing = config.spacing
-        , tickLength = config.tickLength
-        , tickWidth = config.tickWidth
+        , tickLength = Maybe.withDefault 5 tickConfig.length
+        , tickWidth = Maybe.withDefault 1 tickConfig.width
         , bars = List.map (toBar p chartName i d) metrics
         }
 
@@ -1405,7 +1412,7 @@ bars edits metrics data =
           | x = stretch info.x { min = 0.5, max = toFloat (List.length data) + 0.5 }
           , y = stretch info.y (fromData ys data)
         }
-    , postPlane = \p info ->
+    , postPlane = \p info -> -- TODO add ticks
         { info | collected =
             data
               |> List.indexedMap (toGroupItem p)
@@ -1422,8 +1429,7 @@ type alias Histogram data msg =
   , margin : Float
   , spacing : Float
   , bin : List (Attribute (Bin data msg))
-  , tickLength : Float
-  , tickWidth : Float
+  , tick : List (Attribute (Tick msg))
   , attrs : List (S.Attribute msg)
   }
 
@@ -1451,9 +1457,16 @@ histogram toX edits metrics data =
           , spacing = 0.01
           , margin = 0.05
           , bin = []
-          , tickLength = 0
-          , tickWidth = 1
+          , tick = []
           , attrs = []
+          }
+
+      tickConfig =
+        applyAttrs config.tick
+          { color = Nothing
+          , width = Nothing
+          , length = Nothing
+          , attributes = []
           }
 
       binConfig =
@@ -1534,8 +1547,8 @@ histogram toX edits metrics data =
         , start = toX d - toBinWidth p d maybePrev
         , end = toX d
         , spacing = config.spacing
-        , tickLength = config.tickLength
-        , tickWidth = config.tickWidth
+        , tickLength = Maybe.withDefault 5 tickConfig.length -- TODO
+        , tickWidth = Maybe.withDefault 1 tickConfig.width
         , bars = List.map (toBar chartName p d) metrics
         }
 
@@ -2112,6 +2125,28 @@ xOffset value config =
 yOffset : Float -> Attribute { a | yOffset : Float }
 yOffset value config =
   { config | yOffset = config.yOffset + value }
+
+
+
+-- TICK
+
+
+type alias Tick msg =
+  { color : Maybe String
+  , width : Maybe Float
+  , length : Maybe Float
+  , attributes : List (S.Attribute msg)
+  }
+
+
+tick : value -> Attribute { a | tick : value }
+tick value config =
+  { config | tick = value }
+
+
+length : value -> Attribute { a | length : Maybe value }
+length value config =
+  { config | length = Just value }
 
 
 
