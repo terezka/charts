@@ -96,16 +96,16 @@ view model =
 
     , C.histogram .x
         [ C.tickLength 4
-        , C.spacing 0
-        , C.margin 0
+        , C.spacing 0.02
+        , C.margin 0.1
         , C.bin
             [ C.name .label
             , C.width (always 2)
-            , C.label [ C.color "gray", C.fontSize 10, C.yOffset -2 ]
+            , C.label [ C.color "gray", C.fontSize 12, C.yOffset -2 ]
             ]
         ]
-        [ C.bar .z [ C.barColor (\d -> C.pink), C.name "area", C.unit "m2", C.topLabel (.z >> Maybe.map String.fromFloat) ]
-        , C.bar .y [ C.barColor (\d -> C.blue), C.name "speed", C.unit "ms" ]
+        [ C.bar .z [ C.barColor (always C.pink), C.name "area", C.unit "m2", C.topLabel (.z >> Maybe.map String.fromFloat) ]
+        , C.bar .y [ C.barColor (always C.blue), C.name "speed", C.unit "ms" ]
         ]
         data
 
@@ -120,9 +120,9 @@ view model =
         ]
         data
 
-    , C.when model.hoveringDots <| \item rest ->
-        C.tooltipOnTop (always item.position.x) (always item.position.y) []
-          [ tooltipRow item ]
+    --, C.when model.hoveringDots <| \item rest ->
+    --    C.tooltipOnTop (always item.position.x) (always item.position.y) []
+    --      [ tooltipRow item ]
 
     , C.when model.hoveringBars <| \item rest ->
         C.tooltipOnTop (always item.position.x) (always item.position.y) []
