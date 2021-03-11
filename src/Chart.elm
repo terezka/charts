@@ -18,7 +18,7 @@ module Chart exposing
     , filterX, filterY, only, attrs
     , blue, orange, pink, green, red
 
-    , bin
+    , bin, label, fontSize, borderWidth, borderColor, xOffset, yOffset
     )
 
 
@@ -1277,10 +1277,21 @@ bars edits metrics data =
           , width = Nothing -- TODO
           }
 
-      toBinLabel i d =
+      binLabelConfig =
+        applyAttrs binConfig.label
+          { color = "gray" -- TODO
+          , fontSize = Nothing
+          , borderWidth = 0.1
+          , borderColor = "white"
+          , xOffset = 0
+          , yOffset = 0
+          , attributes = []
+          }
+
+      toBinLabel p d =
         case binConfig.name of
-          Just func -> func d
-          Nothing -> ""
+          Just func -> Just <| xLabel binLabelConfig p (func d)
+          Nothing -> Nothing
 
       numOfBars =
         toFloat (List.length metrics)
@@ -1306,7 +1317,7 @@ bars edits metrics data =
         }
 
       toBin p chartName i d =
-        { label = toBinLabel i d
+        { label = toBinLabel p d
         , spacing = config.spacing
         , tickLength = config.tickLength
         , tickWidth = config.tickWidth
@@ -1327,7 +1338,7 @@ bars edits metrics data =
         }
 
       toDataPointBin p i d =
-        { label = ""
+        { label = Nothing
         , start = toFloat i + 0.5
         , end = toFloat i + 1.5
         , spacing = config.spacing
@@ -1378,7 +1389,7 @@ type alias Histogram data msg =
 
 type alias Bin data msg =
   { name : Maybe (data -> String)
-  , label : List (Attribute (Label String msg))
+  , label : List (Attribute (Label msg))
   , width : Maybe (data -> Float)
   }
 
@@ -1411,6 +1422,17 @@ histogram toX edits metrics data =
           , width = Nothing
           }
 
+      binLabelConfig =
+        applyAttrs binConfig.label
+          { color = "gray" -- TODO
+          , fontSize = Nothing
+          , borderWidth = 0.1
+          , borderColor = "white"
+          , xOffset = 0
+          , yOffset = 0
+          , attributes = []
+          }
+
       numOfBars =
         toFloat (List.length metrics)
 
@@ -1428,10 +1450,10 @@ histogram toX edits metrics data =
               Just prev -> toX d - toX prev
               Nothing -> toX d - p.x.min
 
-      toBinLabel d =
+      toBinLabel p d =
         case binConfig.name of
-          Just func -> func d
-          Nothing -> ""
+          Just func -> Just <| xLabel binLabelConfig p (func d)
+          Nothing -> Nothing
 
       toBarColor m d =
         case m.color of
@@ -1448,7 +1470,7 @@ histogram toX edits metrics data =
         }
 
       toBin chartName p maybePrev d =
-        { label = toBinLabel d
+        { label = toBinLabel p d
         , start = toX d - toBinWidth p d maybePrev
         , end = toX d
         , spacing = config.spacing
@@ -1976,14 +1998,13 @@ formatWeekday =
 -- LABEL
 
 
-type alias Label data msg =
+type alias Label msg =
   { color : String
-  , fontSize : Float
-  , border : Float
+  , fontSize : Maybe Float
+  , borderWidth : Float
+  , borderColor : String
   , xOffset : Float
   , yOffset : Float
-  , flip : Bool
-  , value : Maybe (data -> String)
   , attributes : List (S.Attribute msg)
   }
 
@@ -1991,6 +2012,59 @@ type alias Label data msg =
 label : value -> Attribute { a | label : value }
 label value config =
   { config | label = value }
+
+
+fontSize : value -> Attribute { a | fontSize : Maybe value }
+fontSize value config =
+  { config | fontSize = Just value }
+
+
+borderWidth : value -> Attribute { a | borderWidth : value }
+borderWidth value config =
+  { config | borderWidth = value }
+
+
+borderColor : value -> Attribute { a | borderColor : value }
+borderColor value config =
+  { config | borderColor = value }
+
+
+xOffset : value -> Attribute { a | xOffset : value }
+xOffset value config =
+  { config | xOffset = value }
+
+
+yOffset : value -> Attribute { a | yOffset : value }
+yOffset value config =
+  { config | yOffset = value }
+
+
+
+-- VIEWS
+
+
+xLabel : Label msg -> C.Plane -> String -> Float -> Float -> S.Svg msg
+xLabel config plane value x y =
+  let borderAttrs =
+        if config.borderWidth == 0 then []
+        else [ SA.strokeWidth (String.fromFloat config.borderWidth), SA.stroke config.borderColor ]
+
+      colorAttrs =
+        [ SA.fill config.color ]
+
+      styleAttrs =
+        [ SA.style <| "font-size: " ++ toFontSize ++ ";" ]
+
+      toFontSize =
+        case config.fontSize of
+          Just size_ -> String.fromFloat size_ ++ "px"
+          Nothing -> "inherit"
+  in
+  S.g
+    [ C.position plane x y (0 + config.xOffset) (16 + config.yOffset)
+    , SA.style "text-anchor: middle;"
+    ]
+    [ C.viewLabel (borderAttrs ++ colorAttrs ++ styleAttrs ++ config.attributes) value ]
 
 
 

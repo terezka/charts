@@ -18,7 +18,7 @@ module Svg.Chart
     , getNearest, getNearestX, getWithin, getWithinX
     , tooltip, tooltipOnTop, isXPastMiddle, middleOfY, middleOfX, closestToZero
 
-    , toBarPoints
+    , toBarPoints, viewLabel
     )
 
 
@@ -121,7 +121,7 @@ frame id plane =
 
 {-| -}
 type alias Group msg =
-  { label : String
+  { label : Maybe (Float -> Float -> Svg msg)
   , spacing : Float
   , tickLength : Float
   , tickWidth : Float
@@ -152,7 +152,7 @@ bars plane groups =
 
 {-| -}
 type alias Bin msg =
-  { label : String
+  { label : Maybe (Float -> Float -> Svg msg)
   , start : Float
   , end : Float
   , spacing : Float
@@ -215,11 +215,20 @@ viewBin plane bin =
 
           Nothing ->
             Svg.text ""
+
+      viewBinLabel =
+        case bin.label of
+          Just view ->
+            view (bin.start + binWidth / 2) (closestToZero plane)
+
+          Nothing ->
+            Svg.text ""
+
   in
   g [ class "elm-charts__bin" ]
     [ g [ class "elm-charts__bars" ] (List.map (viewBar plane) adjustedBars)
     , xTicks plane bin.tickLength [ Attributes.strokeWidth (String.fromFloat bin.tickWidth) ] (closestToZero plane) [ bin.start, bin.end ]
-    , viewXLabel plane [ class "elm-charts__bin-label" ] bin.label (bin.start + binWidth / 2) (closestToZero plane) 0 20
+    , viewBinLabel
     , g [ class "elm-charts__bin-bar-labels" ] (List.map viewValueLabel adjustedBars)
     ]
 
