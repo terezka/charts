@@ -2107,6 +2107,7 @@ xLabel config plane value x y =
   S.g
     [ C.position plane x y (0 + config.xOffset) (16 + config.yOffset)
     , SA.style "text-anchor: middle;"
+    , SA.class "elm-charts__x-label"
     ]
     [ C.viewLabel (borderAttrs ++ colorAttrs ++ styleAttrs ++ config.attributes) value ]
 

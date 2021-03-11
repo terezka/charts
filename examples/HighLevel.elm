@@ -101,7 +101,7 @@ view model =
         , C.bin
             [ C.width (always 2)
             , C.name .label
-            , C.label [ C.color "gray", C.fontSize 12, C.yOffset -2 ]
+            , C.label [ C.color "gray", C.fontSize 11, C.yOffset -3 ]
             ]
         ]
         [ C.bar .z
