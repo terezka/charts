@@ -17,6 +17,8 @@ module Chart exposing
     , dot, dotted, area, noArrow, binLabel, topLabel, barColor, tickLength, tickWidth, center
     , filterX, filterY, only, attrs
     , blue, orange, pink, green, red
+
+    , bin
     )
 
 
@@ -212,9 +214,9 @@ color value config =
 
 
 {-| -}
-name : String -> Attribute { a | name : String }
+name : v -> Attribute { a | name : Maybe v }
 name value config =
-  { config | name = value }
+  { config | name = Just value }
 
 
 {-| -}
@@ -1036,7 +1038,7 @@ yTicks edits =
 
 
 
-type alias Label tick msg =
+type alias Labels tick msg =
     { color : String -- TODO use Color
     , pinned : Bounds -> Float
     , start : Bounds -> Float
@@ -1058,7 +1060,7 @@ type alias Pair =
 
 
 {-| -}
-xLabels : List (Label tick msg -> Label tick msg) -> Element item msg
+xLabels : List (Labels tick msg -> Labels tick msg) -> Element item msg
 xLabels edits =
   let config =
         applyAttrs edits
@@ -1116,7 +1118,7 @@ xLabels edits =
 
 
 {-| -}
-yLabels : List (Label tick msg -> Label tick msg) -> Element item msg
+yLabels : List (Labels tick msg -> Labels tick msg) -> Element item msg
 yLabels edits =
   let config =
         applyAttrs edits
@@ -1249,7 +1251,7 @@ type alias Bars data msg =
   , spacing : Float
   , tickLength : Float
   , tickWidth : Float
-  , binLabel : Maybe (data -> String)
+  , bin : List (Attribute (Bin data msg))
   }
 
 
@@ -1262,14 +1264,21 @@ bars edits metrics data =
           , roundBottom = False
           , spacing = 0.01
           , margin = 0.05
-          , binLabel = Nothing
+          , bin = []
           , tickLength = 0
           , tickWidth = 1
           , attrs = []
           }
 
+      binConfig =
+        applyAttrs config.bin
+          { name = Nothing
+          , label = []
+          , width = Nothing -- TODO
+          }
+
       toBinLabel i d =
-        case config.binLabel of
+        case binConfig.name of
           Just func -> func d
           Nothing -> ""
 
@@ -1331,8 +1340,8 @@ bars edits metrics data =
         { datum = datum
         , metric =
             case m.color of
-              Just toColor -> Metric m.name (toColor datum) m.unit
-              Nothing -> Metric m.name blue m.unit
+              Just toColor -> Metric (Maybe.withDefault "" m.name) (toColor datum) m.unit
+              Nothing -> Metric (Maybe.withDefault "" m.name) blue m.unit
         , values = { x = toFloat i, y = value datum }
         , position = point
         }
@@ -1356,16 +1365,28 @@ bars edits metrics data =
 
 
 type alias Histogram data msg =
-  { binWidth : Maybe (data -> Float)
-  , rounded : Float
+  { rounded : Float
   , roundBottom : Bool
   , margin : Float
   , spacing : Float
-  , binLabel : Maybe (data -> String)
+  , bin : List (Attribute (Bin data msg))
   , tickLength : Float
   , tickWidth : Float
   , attrs : List (S.Attribute msg)
   }
+
+
+type alias Bin data msg =
+  { name : Maybe (data -> String)
+  , label : List (Attribute (Label String msg))
+  , width : Maybe (data -> Float)
+  }
+
+
+{-| -}
+bin : v -> Attribute { a | bin : v }
+bin v config =
+  { config | bin = v }
 
 
 {-| -}
@@ -1373,15 +1394,21 @@ histogram : (data -> Float) -> List (Histogram data msg -> Histogram data msg) -
 histogram toX edits metrics data =
   let config =
         applyAttrs edits
-          { binWidth = Nothing
-          , rounded = 0
+          { rounded = 0
           , roundBottom = False
           , spacing = 0.01
           , margin = 0.05
-          , binLabel = Nothing
+          , bin = []
           , tickLength = 0
           , tickWidth = 1
           , attrs = []
+          }
+
+      binConfig =
+        applyAttrs config.bin
+          { name = Nothing
+          , label = []
+          , width = Nothing
           }
 
       numOfBars =
@@ -1394,7 +1421,7 @@ histogram toX edits metrics data =
         (numOfBars - 1) * config.spacing
 
       toBinWidth p d maybePrev =
-        case config.binWidth of
+        case binConfig.width of
           Just toWidth -> toWidth d
           Nothing ->
             case maybePrev of
@@ -1402,7 +1429,7 @@ histogram toX edits metrics data =
               Nothing -> toX d - p.x.min
 
       toBinLabel d =
-        case config.binLabel of
+        case binConfig.name of
           Just func -> func d
           Nothing -> ""
 
@@ -1436,7 +1463,7 @@ histogram toX edits metrics data =
         List.map (\(Bar value _) -> value) metrics
 
       toXEnd d =
-        case config.binWidth of
+        case binConfig.width of
           Just w -> toX d - w d
           Nothing -> toX d - 1
 
@@ -1455,8 +1482,8 @@ histogram toX edits metrics data =
         { datum = datum
         , metric =
             case m.color of
-              Just toColor -> Metric m.name (toColor datum) m.unit
-              Nothing -> Metric m.name blue m.unit
+              Just toColor -> Metric (Maybe.withDefault "" m.name) (toColor datum) m.unit
+              Nothing -> Metric (Maybe.withDefault "" m.name) blue m.unit
         , values = { x = toX datum, y = value datum }
         , position = point
         }
@@ -1484,7 +1511,7 @@ type Bar data msg =
 
 
 type alias BarConfig data msg =
-  { name : String
+  { name : Maybe String
   , unit : String
   , color : Maybe (data -> String)
   , topLabel : data -> Maybe String
@@ -1497,7 +1524,7 @@ bar : (data -> Maybe Float) -> List (BarConfig data msg -> BarConfig data msg) -
 bar toY edits =
   let config =
         applyAttrs edits
-          { name = ""
+          { name = Nothing
           , unit = ""
           , color = Nothing
           , topLabel = \_ -> Nothing
@@ -1545,7 +1572,7 @@ series toX series_ data =
 
 type alias Scatter data msg =
     { color : String -- TODO use Color
-    , name : String
+    , name : Maybe String
     , unit : String
     , dot : Maybe (data -> C.Dot msg)
     }
@@ -1558,7 +1585,7 @@ scatter toY edits =
     let config =
           applyAttrs edits
             { color = defaultColor
-            , name = ""
+            , name = Nothing
             , unit = ""
             , dot = Nothing
             }
@@ -1577,7 +1604,7 @@ scatter toY edits =
           , y = stretch info.y (fromData [toY] data)
           }
       , postPlane = \p info ->
-          let metric = Metric config.name config.color config.unit in
+          let metric = Metric (Maybe.withDefault "" config.name) config.color config.unit in
           { info | collected = info.collected ++ List.map (toDotItem p metric toX toY) data }
       , view = \_ p _ ->
           S.g
@@ -1590,7 +1617,7 @@ type alias Interpolation data msg =
     { area : Maybe String -- TODO use Color
     , width : Float
     , color : String -- TODO use Color
-    , name : String
+    , name : Maybe String
     , unit : String
     , dot : Maybe (data -> C.Dot msg)
     , attrs : List (S.Attribute msg)
@@ -1607,7 +1634,7 @@ monotone toY edits =
             , area = Nothing
             , width = 1
             , dot = Nothing
-            , name = ""
+            , name = Nothing
             , unit = ""
             , attrs = []
             }
@@ -1630,7 +1657,7 @@ monotone toY edits =
           , y = stretch info.y (fromData [toY] data)
           }
       , postPlane = \p info ->
-          let metric = Metric config.name config.color config.unit in
+          let metric = Metric (Maybe.withDefault "" config.name) config.color config.unit in
           { info | collected = info.collected ++ List.map (toDotItem p metric toX toY) data }
       , view = \_ p _ ->
           case config.area of
@@ -1657,7 +1684,7 @@ linear toY edits =
             { color = defaultColor
             , area = Nothing
             , width = 1
-            , name = ""
+            , name = Nothing
             , unit = ""
             , dot = Nothing
             , attrs = []
@@ -1681,7 +1708,7 @@ linear toY edits =
           , y = stretch info.y (fromData [toY] data)
           }
       , postPlane = \p info ->
-          let metric = Metric config.name config.color config.unit in
+          let metric = Metric (Maybe.withDefault "" config.name) config.color config.unit in
           { info | collected = info.collected ++ List.map (toDotItem p metric toX toY) data }
       , view = \_ p _ ->
         case config.area of
@@ -1942,4 +1969,28 @@ formatWeekday : Time.Zone -> Time.Posix -> String
 formatWeekday =
     F.format
         [ F.dayOfWeekNameFull ]
+
+
+
+
+-- LABEL
+
+
+type alias Label data msg =
+  { color : String
+  , fontSize : Float
+  , border : Float
+  , xOffset : Float
+  , yOffset : Float
+  , flip : Bool
+  , value : Maybe (data -> String)
+  , attributes : List (S.Attribute msg)
+  }
+
+
+label : value -> Attribute { a | label : value }
+label value config =
+  { config | label = value }
+
+
 

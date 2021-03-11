@@ -98,7 +98,7 @@ view model =
         [ C.tickLength 4
         , C.spacing 0
         , C.margin 0
-        , C.binLabel .label
+        , C.bin [ C.name .label ] -- , C.label [ C.color "gray" ]
         ]
         [ C.bar .z [ C.barColor (\d -> C.pink), C.name "area", C.unit "m2", C.topLabel (.z >> Maybe.map String.fromFloat) ]
         , C.bar .y [ C.barColor (\d -> C.blue), C.name "speed", C.unit "ms" ]
@@ -145,3 +145,4 @@ tooltipRow hovered =
     , Html.text " "
     , Html.text hovered.metric.unit
     ]
+
