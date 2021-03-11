@@ -3,7 +3,7 @@ module Chart exposing
     , Bounds, startMin, startMax, endMin, endMax, startPad, endPad, zero, middle
     , xAxis, yAxis, xTicks, yTicks, xLabels, yLabels, grid
     , ints, floats, times, format, values, amount
-    , Event, event, Decoder, map, map2, map3, getCoords, getNearest, getNearestX, getWithin, getWithinX
+    , Event, event, Decoder, getCoords, getNearest, getNearestX, getWithin, getWithinX, map, map2, map3, map4,
     , Metric, Item, Single, Group
     , getBars, getGroups, getDots, withoutUnknowns
     , tooltip, tooltipOnTop, whenJust, whenNotEmpty, formatTimestamp
@@ -793,6 +793,12 @@ map2 f (Decoder a) (Decoder b) =
 map3 : (a -> b -> c -> item) -> Decoder data a -> Decoder data b -> Decoder data c -> Decoder data item
 map3 f (Decoder a) (Decoder b) (Decoder c) =
   Decoder <| \ps s p -> f (a ps s p) (b ps s p) (c ps s p)
+
+
+{-| -}
+map4 : (a -> b -> c -> d -> item) -> Decoder data a -> Decoder data b -> Decoder data c -> Decoder data d -> Decoder data item
+map4 f (Decoder a) (Decoder b) (Decoder c) (Decoder d) =
+  Decoder <| \ps s p -> f (a ps s p) (b ps s p) (c ps s p) (d ps s p)
 
 
 {-| -}
