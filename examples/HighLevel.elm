@@ -100,8 +100,8 @@ view model =
         , C.margin 0
         , C.binLabel .label
         ]
-        [ C.bar .z [ C.barColor (\d -> C.pink), C.label "area", C.unit "m2", C.topLabel (.z >> Maybe.map String.fromFloat) ]
-        , C.bar .y [ C.barColor (\d -> C.blue), C.label "speed", C.unit "ms" ]
+        [ C.bar .z [ C.barColor (\d -> C.pink), C.name "area", C.unit "m2", C.topLabel (.z >> Maybe.map String.fromFloat) ]
+        , C.bar .y [ C.barColor (\d -> C.blue), C.name "speed", C.unit "ms" ]
         ]
         data
 
@@ -135,7 +135,7 @@ tooltipRow hovered =
   Html.div [ HA.style "color" hovered.metric.color ]
     [ Html.span [] [ Html.text hovered.datum.label ]
     , Html.text " "
-    , Html.text hovered.metric.label
+    , Html.text hovered.metric.name
     , Html.text " : "
     , Html.text (String.fromFloat hovered.values.y)
     --, Html.text <|

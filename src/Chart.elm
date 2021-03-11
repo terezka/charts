@@ -13,7 +13,7 @@ module Chart exposing
     , paddingTop, paddingBottom, paddingLeft, paddingRight
     , static, id
     , range, domain, topped, events, htmlAttrs, binWidth
-    , start, end, pinned, color, label, unit, rounded, roundBottom, margin, spacing
+    , start, end, pinned, color, name, unit, rounded, roundBottom, margin, spacing
     , dot, dotted, area, noArrow, binLabel, topLabel, barColor, tickLength, tickWidth, center
     , filterX, filterY, only, attrs
     , blue, orange, pink, green, red
@@ -210,9 +210,9 @@ color value config =
 
 
 {-| -}
-label : String -> Attribute { a | label : String }
-label value config =
-  { config | label = value }
+name : String -> Attribute { a | name : String }
+name value config =
+  { config | name = value }
 
 
 {-| -}
@@ -695,7 +695,7 @@ type Item value data
 
 {-| -}
 type alias Metric =
-  { label : String
+  { name : String
   , color : String
   , unit : String
   }
@@ -1293,8 +1293,8 @@ bars edits metrics data =
           Just func -> func d
           Nothing -> blue -- TODO nice default
 
-      toBar p name i d (Bar value metric) =
-        { attributes = [ SA.stroke "transparent", SA.fill (toBarColor metric d), clipPath name ] ++ config.attrs
+      toBar p chartName i d (Bar value metric) =
+        { attributes = [ SA.stroke "transparent", SA.fill (toBarColor metric d), clipPath chartName ] ++ config.attrs
         , label = metric.topLabel d
         , width = (1 - barSpacing - binMargin) / numOfBars
         , rounded = config.rounded
@@ -1302,12 +1302,12 @@ bars edits metrics data =
         , value = Maybe.withDefault (C.closestToZero p) (value d)
         }
 
-      toBin p name i d =
+      toBin p chartName i d =
         { label = toBinLabel i d
         , spacing = config.spacing
         , tickLength = config.tickLength
         , tickWidth = config.tickWidth
-        , bars = List.map (toBar p name i d) metrics
+        , bars = List.map (toBar p chartName i d) metrics
         }
 
       -- CALC
@@ -1337,8 +1337,8 @@ bars edits metrics data =
         { datum = datum
         , metric =
             case m.color of
-              Just toColor -> Metric m.label (toColor datum) m.unit
-              Nothing -> Metric m.label blue m.unit
+              Just toColor -> Metric m.name (toColor datum) m.unit
+              Nothing -> Metric m.name blue m.unit
         , values = { x = toFloat i, y = value datum }
         , position = point
         }
@@ -1356,7 +1356,7 @@ bars edits metrics data =
               |> List.indexedMap (toGroupItem p)
               |> List.foldl (\g a -> a ++ [ItemGroup g]) info.collected
         }
-    , view = \name p _ -> C.bars p (List.indexedMap (toBin p name) data)
+    , view = \chartName p _ -> C.bars p (List.indexedMap (toBin p chartName) data)
     }
 
 
@@ -1417,8 +1417,8 @@ histogram toX edits metrics data =
           Just func -> func d
           Nothing -> blue
 
-      toBar name p d (Bar value metric) =
-        { attributes = [ SA.stroke "transparent", SA.fill (toBarColor metric d), clipPath name ] ++ config.attrs
+      toBar chartName p d (Bar value metric) =
+        { attributes = [ SA.stroke "transparent", SA.fill (toBarColor metric d), clipPath chartName ] ++ config.attrs
         , label = metric.topLabel d
         , width = (1 - barSpacing - barMargin) / numOfBars
         , rounded = config.rounded
@@ -1426,14 +1426,14 @@ histogram toX edits metrics data =
         , value = Maybe.withDefault (C.closestToZero p) (value d)
         }
 
-      toBin name p maybePrev d =
+      toBin chartName p maybePrev d =
         { label = toBinLabel d
         , start = toX d - toBinWidth p d maybePrev
         , end = toX d
         , spacing = config.spacing
         , tickLength = config.tickLength
         , tickWidth = config.tickWidth
-        , bars = List.map (toBar name p d) metrics
+        , bars = List.map (toBar chartName p d) metrics
         }
 
       -- CALC
@@ -1461,8 +1461,8 @@ histogram toX edits metrics data =
         { datum = datum
         , metric =
             case m.color of
-              Just toColor -> Metric m.label (toColor datum) m.unit
-              Nothing -> Metric m.label blue m.unit
+              Just toColor -> Metric m.name (toColor datum) m.unit
+              Nothing -> Metric m.name blue m.unit
         , values = { x = toX datum, y = value datum }
         , position = point
         }
@@ -1479,7 +1479,7 @@ histogram toX edits metrics data =
             mapWithPrev (toGroupItem p) data
               |> List.foldl (\g a -> a ++ [ItemGroup g]) info.collected
         }
-    , view = \name p _ -> C.histogram p (mapWithPrev (toBin name p) data)
+    , view = \chartName p _ -> C.histogram p (mapWithPrev (toBin chartName p) data)
     }
 
 
@@ -1490,7 +1490,7 @@ type Bar data msg =
 
 
 type alias BarConfig data msg =
-  { label : String
+  { name : String
   , unit : String
   , color : Maybe (data -> String)
   , topLabel : data -> Maybe String
@@ -1503,7 +1503,7 @@ bar : (data -> Maybe Float) -> List (BarConfig data msg -> BarConfig data msg) -
 bar toY edits =
   let config =
         applyAttrs edits
-          { label = ""
+          { name = ""
           , unit = ""
           , color = Nothing
           , topLabel = \_ -> Nothing
@@ -1543,9 +1543,9 @@ series toX series_ data =
     { isHtml = False
     , prePlane = \info -> List.foldl (\(Element s) i -> s.prePlane i) info elements
     , postPlane = \p info -> List.foldl (\(Element s) i -> s.postPlane p i) info elements
-    , view = \name p i ->
-        S.g [ SA.class "elm-charts__series", clipPath name ]
-            (List.map (\(Element s) -> s.view name p i) elements)
+    , view = \chartName p i ->
+        S.g [ SA.class "elm-charts__series", clipPath chartName ]
+            (List.map (\(Element s) -> s.view chartName p i) elements)
     }
 
 
@@ -1585,7 +1585,7 @@ scatter toY edits =
       , postPlane = \p info ->
           let metric = Metric config.label config.color config.unit in
           { info | collected = info.collected ++ List.map (toDotItem p metric toX toY) data }
-      , view = \name p _ ->
+      , view = \_ p _ ->
           S.g
             [ SA.class "elm-charts__scatter" ]
             [ C.scatter p toX toY finalDot data ]
@@ -1638,7 +1638,7 @@ monotone toY edits =
       , postPlane = \p info ->
           let metric = Metric config.label config.color config.unit in
           { info | collected = info.collected ++ List.map (toDotItem p metric toX toY) data }
-      , view = \name p _ ->
+      , view = \_ p _ ->
           case config.area of
             Just fill ->
               S.g [ SA.class "elm-charts__monotone-area" ]
@@ -1689,7 +1689,7 @@ linear toY edits =
       , postPlane = \p info ->
           let metric = Metric config.label config.color config.unit in
           { info | collected = info.collected ++ List.map (toDotItem p metric toX toY) data }
-      , view = \name p _ ->
+      , view = \_ p _ ->
         case config.area of
           Just fill ->
             S.g [ SA.class "elm-charts__linear-area" ]
@@ -1804,8 +1804,8 @@ applyAttrs funcs default =
 
 
 clipPath : String -> S.Attribute msg
-clipPath name =
-  SA.clipPath <| "url(#" ++ name ++ ")"
+clipPath chartName =
+  SA.clipPath <| "url(#" ++ chartName ++ ")"
 
 
 colors : List String
@@ -1948,3 +1948,4 @@ formatWeekday : Time.Zone -> Time.Posix -> String
 formatWeekday =
     F.format
         [ F.dayOfWeekNameFull ]
+
