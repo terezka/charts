@@ -165,7 +165,7 @@ type alias Bin msg =
 {-| -}
 type alias Bar msg =
   { attributes : List (Attribute msg)
-  , label : Maybe String
+  , label : Maybe (Float -> Float -> Svg msg)
   , rounded : Float
   , roundBottom : Bool
   , width : Float
@@ -210,8 +210,8 @@ viewBin plane bin =
 
       viewValueLabel bar =
         case bar.label of
-          Just string ->
-            viewXLabel plane [] string (bar.position + bar.width / 2) bar.value 0 -5
+          Just view ->
+            view (bar.position + bar.width / 2) bar.value
 
           Nothing ->
             Svg.text ""
@@ -264,7 +264,7 @@ toBarPoints plane bin =
 
 type alias InternalBar msg =
   { attributes : List (Attribute msg)
-  , label : Maybe String
+  , label : Maybe (Float -> Float -> Svg msg)
   , rounded : Float
   , roundBottom : Bool
   , position : Float

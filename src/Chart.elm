@@ -14,7 +14,7 @@ module Chart exposing
     , static, id
     , range, domain, topped, events, htmlAttrs, binWidth
     , start, end, pinned, color, name, unit, rounded, roundBottom, margin, spacing
-    , dot, dotted, area, noArrow, binLabel, topLabel, tickLength, tickWidth, center
+    , dot, dotted, area, noArrow, binLabel, onTop, tickLength, tickWidth, center
     , filterX, filterY, only, attrs
     , blue, orange, pink, green, red
 
@@ -364,9 +364,9 @@ binLabel value config =
 
 
 {-| -}
-topLabel : (data -> Maybe String) -> Attribute { a | topLabel : data -> Maybe String }
-topLabel value config =
-  { config | topLabel = value }
+onTop : v -> Attribute { a | onTop : v }
+onTop value config =
+  { config | onTop = value }
 
 
 {-| -}
@@ -1322,6 +1322,22 @@ bars edits metrics data =
           Just func -> Just <| xLabel binLabelConfig p (func d)
           Nothing -> Nothing
 
+      toBarLabel p metric d v =
+        case Maybe.andThen (metric.onTop d) v of
+          Just string -> Just <| xLabel (barLabelConfig metric) p string
+          Nothing -> Nothing
+
+      barLabelConfig metric =
+        applyAttrs metric.label
+          { color = Nothing
+          , fontSize = Nothing
+          , borderWidth = 0.1
+          , borderColor = "white"
+          , xOffset = 0
+          , yOffset = -22
+          , attributes = []
+          }
+
       numOfBars =
         toFloat (List.length metrics)
 
@@ -1338,7 +1354,7 @@ bars edits metrics data =
 
       toBar p chartName i d (Bar value metric) =
         { attributes = [ SA.stroke "transparent", SA.fill (toBarColor metric d), clipPath chartName ] ++ config.attrs
-        , label = metric.topLabel d
+        , label = toBarLabel p metric d (value d)
         , width = (1 - barSpacing - binMargin) / numOfBars
         , rounded = config.rounded
         , roundBottom = config.roundBottom
@@ -1462,6 +1478,22 @@ histogram toX edits metrics data =
           , attributes = []
           }
 
+      toBarLabel p metric d v =
+        case Maybe.andThen (metric.onTop d) v of
+          Just string -> Just <| xLabel (barLabelConfig metric) p string
+          Nothing -> Nothing
+
+      barLabelConfig metric =
+        applyAttrs metric.label
+          { color = Nothing
+          , fontSize = Nothing
+          , borderWidth = 0.1
+          , borderColor = "white"
+          , xOffset = 0
+          , yOffset = -22
+          , attributes = []
+          }
+
       numOfBars =
         toFloat (List.length metrics)
 
@@ -1491,7 +1523,7 @@ histogram toX edits metrics data =
 
       toBar chartName p d (Bar value metric) =
         { attributes = [ SA.stroke "transparent", SA.fill (toBarColor metric d), clipPath chartName ] ++ config.attrs
-        , label = metric.topLabel d
+        , label = toBarLabel p metric d (value d)
         , width = (1 - barSpacing - barMargin) / numOfBars
         , rounded = config.rounded
         , roundBottom = config.roundBottom
@@ -1565,7 +1597,8 @@ type alias BarConfig data msg =
   { name : Maybe String
   , unit : String
   , color : Maybe (data -> String)
-  , topLabel : data -> Maybe String
+  , onTop : data -> Float -> Maybe String
+  , label : List (Attribute (Label msg))
   , attrs : List (S.Attribute msg)
   }
 
@@ -1578,7 +1611,8 @@ bar toY edits =
           { name = Nothing
           , unit = ""
           , color = Nothing
-          , topLabel = \_ -> Nothing
+          , onTop = \_ _ -> Nothing
+          , label = []
           , attrs = [] -- TODO use
           }
   in
@@ -2073,14 +2107,14 @@ borderColor value config =
   { config | borderColor = value }
 
 
-xOffset : value -> Attribute { a | xOffset : value }
+xOffset : Float -> Attribute { a | xOffset : Float }
 xOffset value config =
-  { config | xOffset = value }
+  { config | xOffset = config.xOffset + value }
 
 
-yOffset : value -> Attribute { a | yOffset : value }
+yOffset : Float -> Attribute { a | yOffset : Float }
 yOffset value config =
-  { config | yOffset = value }
+  { config | yOffset = config.yOffset + value }
 
 
 

@@ -101,12 +101,13 @@ view model =
         , C.bin
             [ C.width (always 2)
             , C.name .label
-            , C.label [ C.color "gray", C.fontSize 11, C.yOffset -3 ]
+            , C.label [ C.fontSize 11, C.yOffset -3 ]
             ]
         ]
         [ C.bar .z
             [ C.color (always C.orange)
-            , C.topLabel (.z >> Maybe.map String.fromFloat)
+            , C.onTop (\_ v -> Just (String.fromFloat v))
+            , C.label [ C.color "gray", C.fontSize 11, C.yOffset 2 ]
             , C.name "area"
             , C.unit "m2"
             ]
