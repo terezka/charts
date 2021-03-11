@@ -3,7 +3,7 @@ module Chart exposing
     , Bounds, startMin, startMax, endMin, endMax, startPad, endPad, zero, middle
     , xAxis, yAxis, xTicks, yTicks, xLabels, yLabels, grid
     , ints, floats, times, format, values, amount
-    , Event, event, Decoder, getCoords, getNearest, getNearestX, getWithin, getWithinX, map, map2, map3, map4,
+    , Event, event, Decoder, getCoords, getNearest, getNearestX, getWithin, getWithinX, map, map2, map3, map4
     , Metric, Item, Single, Group
     , getBars, getGroups, getDots, withoutUnknowns
     , tooltip, tooltipOnTop, whenJust, whenNotEmpty, formatTimestamp
@@ -14,7 +14,7 @@ module Chart exposing
     , static, id
     , range, domain, topped, events, htmlAttrs, binWidth
     , start, end, pinned, color, label, unit, rounded, roundBottom, margin, spacing
-    , dot, dotted, area, noArrow, binLabel, barLabel, barColor, tickLength, tickWidth, center
+    , dot, dotted, area, noArrow, binLabel, topLabel, barColor, tickLength, tickWidth, center
     , filterX, filterY, only, attrs
     , blue, orange, pink, green, red
     )
@@ -44,7 +44,7 @@ module Chart exposing
 @docs paddingTop, paddingBottom, paddingLeft, paddingRight
 @docs center
 @docs range, domain, topped, static, id, events, htmlAttrs
-@docs binWidth, binLabel, barLabel, barColor, tickLength, tickWidth, margin, spacing, rounded, roundBottom
+@docs binWidth, binLabel, topLabel, barColor, tickLength, tickWidth, margin, spacing, rounded, roundBottom
 @docs dotted, color, label, unit, dot, area, attrs
 
 # Interop
@@ -360,9 +360,9 @@ binLabel value config =
 
 
 {-| -}
-barLabel : (data -> Maybe String) -> Attribute { a | barLabel : Maybe (data -> Maybe String) }
-barLabel value config =
-  { config | barLabel = Just value }
+topLabel : (data -> Maybe String) -> Attribute { a | topLabel : data -> Maybe String }
+topLabel value config =
+  { config | topLabel = value }
 
 
 {-| -}
@@ -1295,7 +1295,7 @@ bars edits metrics data =
 
       toBar p name i d (Bar value metric) =
         { attributes = [ SA.stroke "transparent", SA.fill (toBarColor metric d), clipPath name ] ++ config.attrs
-        , label = Nothing
+        , label = metric.topLabel d
         , width = (1 - barSpacing - binMargin) / numOfBars
         , rounded = config.rounded
         , roundBottom = config.roundBottom
@@ -1419,7 +1419,7 @@ histogram toX edits metrics data =
 
       toBar name p d (Bar value metric) =
         { attributes = [ SA.stroke "transparent", SA.fill (toBarColor metric d), clipPath name ] ++ config.attrs
-        , label = Nothing
+        , label = metric.topLabel d
         , width = (1 - barSpacing - barMargin) / numOfBars
         , rounded = config.rounded
         , roundBottom = config.roundBottom
@@ -1493,6 +1493,7 @@ type alias BarConfig data msg =
   { label : String
   , unit : String
   , color : Maybe (data -> String)
+  , topLabel : data -> Maybe String
   , attrs : List (S.Attribute msg)
   }
 
@@ -1505,6 +1506,7 @@ bar toY edits =
           { label = ""
           , unit = ""
           , color = Nothing
+          , topLabel = \_ -> Nothing
           , attrs = [] -- TODO use
           }
   in

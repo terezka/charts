@@ -100,7 +100,7 @@ view model =
         , C.margin 0
         , C.binLabel .label
         ]
-        [ C.bar .z [ C.barColor (\d -> C.pink), C.label "area", C.unit "m2" ]
+        [ C.bar .z [ C.barColor (\d -> C.pink), C.label "area", C.unit "m2", C.topLabel (.z >> Maybe.map String.fromFloat) ]
         , C.bar .y [ C.barColor (\d -> C.blue), C.label "speed", C.unit "ms" ]
         ]
         data
