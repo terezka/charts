@@ -82,9 +82,9 @@ type alias Attribute c =
 
 
 {-| -}
-width : Float -> Attribute { a | width : Float }
+width : v -> Attribute { a | width : Maybe v }
 width value config =
-  { config | width = value }
+  { config | width = Just value }
 
 
 {-| -}
@@ -406,7 +406,7 @@ center config =
 
 {-| -}
 type alias Container data msg =
-    { width : Float
+    { width : Maybe Float
     , height : Float
     , marginTop : Float
     , marginBottom : Float
@@ -432,7 +432,7 @@ chart : List (Container data msg -> Container data msg) -> List (Element data ms
 chart edits elements =
   let config =
         applyAttrs edits
-          { width = 500
+          { width = Nothing
           , height = 200
           , marginTop = 10
           , marginBottom = 30
@@ -477,7 +477,7 @@ chart edits elements =
         C.scaleCartesian
           { marginLower = config.marginLeft
           , marginUpper = config.marginRight
-          , length = max 1 (config.width - config.paddingLeft - config.paddingRight)
+          , length = max 1 (Maybe.withDefault 500 config.width - config.paddingLeft - config.paddingRight)
           , data = calcRange
           , min = calcRange.min
           , max = calcRange.max
@@ -511,7 +511,7 @@ chart edits elements =
         { x =
             { marginLower = config.marginLeft
             , marginUpper = config.marginRight
-            , length = config.width
+            , length = Maybe.withDefault 500 config.width
             , data = calcRange
             , min = calcRange.min - scalePadX config.paddingLeft
             , max = calcRange.max + scalePadX config.paddingRight
@@ -935,7 +935,7 @@ yAxis edits =
 type alias Tick tick msg =
     { color : String -- TODO use Color -- TODO allow custom color by tick value
     , height : Float
-    , width : Float
+    , width : Maybe Float
     , pinned : Bounds -> Float
     , start : Bounds -> Float
     , end : Bounds -> Float
@@ -965,7 +965,7 @@ xTicks edits =
           , only = \_ -> True
           , values = Nothing
           , height = 5
-          , width = 1
+          , width = Nothing
           , attrs = []
           }
 
@@ -983,7 +983,7 @@ xTicks edits =
 
       tickAttrs =
         [ SA.stroke config.color
-        , SA.strokeWidth (String.fromFloat config.width)
+        , SA.strokeWidth (String.fromFloat (Maybe.withDefault 1 config.width))
         ] ++ config.attrs
   in
   Element
@@ -1007,7 +1007,7 @@ yTicks edits =
           , amount = 5
           , values = Nothing
           , height = 5
-          , width = 1
+          , width = Nothing
           , attrs = []
           --, offset = 0
           }
@@ -1026,7 +1026,7 @@ yTicks edits =
 
       tickAttrs =
         [ SA.stroke config.color
-        , SA.strokeWidth (String.fromFloat config.width)
+        , SA.strokeWidth (String.fromFloat <| Maybe.withDefault 1 config.width)
         ] ++ config.attrs
   in
   Element
@@ -1178,7 +1178,7 @@ yLabels edits =
 
 type alias Grid msg =
     { color : String -- TODO use Color
-    , width : Float
+    , width : Maybe Float
     , dotted : Bool
     , filterX : Bounds -> List Float
     , filterY : Bounds -> List Float
@@ -1194,14 +1194,14 @@ grid edits =
           { color = "#EFF2FA"
           , filterX = zero >> List.singleton
           , filterY = zero >> List.singleton
-          , width = 1
+          , width = Nothing
           , attrs = []
           , dotted = False
           }
 
       gridAttrs =
         [ SA.stroke config.color
-        , SA.strokeWidth (String.fromFloat config.width)
+        , SA.strokeWidth (String.fromFloat <| Maybe.withDefault 1 config.width)
         ] ++ config.attrs
 
       notTheseX p =
@@ -1221,7 +1221,7 @@ grid edits =
       toDot p x y =
         if List.member x (notTheseX p) || List.member y (notTheseY p)
         then Nothing
-        else Just <| C.full config.width C.circle config.color p x y
+        else Just <| C.full (Maybe.withDefault 1 config.width) C.circle config.color p x y
   in
   Element
     { isHtml = False
@@ -1637,7 +1637,7 @@ scatter toY edits =
 
 type alias Interpolation data msg =
     { area : Maybe String -- TODO use Color
-    , width : Float
+    , width : Maybe Float
     , color : String -- TODO use Color
     , name : Maybe String
     , unit : String
@@ -1654,7 +1654,7 @@ monotone toY edits =
           applyAttrs edits
             { color = defaultColor
             , area = Nothing
-            , width = 1
+            , width = Nothing
             , dot = Nothing
             , name = Nothing
             , unit = ""
@@ -1663,7 +1663,7 @@ monotone toY edits =
 
         interAttrs =
           [ SA.stroke config.color
-          , SA.strokeWidth (String.fromFloat config.width)
+          , SA.strokeWidth (String.fromFloat (Maybe.withDefault 1 config.width))
           ] ++ config.attrs
 
         finalDot =
@@ -1705,7 +1705,7 @@ linear toY edits =
           applyAttrs edits
             { color = defaultColor
             , area = Nothing
-            , width = 1
+            , width = Nothing
             , name = Nothing
             , unit = ""
             , dot = Nothing
@@ -1714,7 +1714,7 @@ linear toY edits =
 
         interAttrs =
           [ SA.stroke config.color
-          , SA.strokeWidth (String.fromFloat config.width)
+          , SA.strokeWidth (String.fromFloat (Maybe.withDefault 1 config.width))
           ] ++ config.attrs
 
         finalDot =
