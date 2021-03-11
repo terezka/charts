@@ -14,7 +14,7 @@ module Chart exposing
     , static, id
     , range, domain, topped, events, htmlAttrs, binWidth
     , start, end, pinned, color, name, unit, rounded, roundBottom, margin, spacing
-    , dot, dotted, area, noArrow, binLabel, topLabel, barColor, tickLength, tickWidth, center
+    , dot, dotted, area, noArrow, binLabel, topLabel, tickLength, tickWidth, center
     , filterX, filterY, only, attrs
     , blue, orange, pink, green, red
 
@@ -208,9 +208,9 @@ pinned value config =
 
 
 {-| -}
-color : String -> Attribute { a | color : String }
+color : v -> Attribute { a | color : Maybe v }
 color value config =
-  { config | color = value }
+  { config | color = Just value }
 
 
 {-| -}
@@ -373,12 +373,6 @@ topLabel value config =
 binWidth : (data -> Float) -> Attribute { a | binWidth : Maybe (data -> Float) }
 binWidth value config =
   { config | binWidth = Just value }
-
-
-{-| -}
-barColor : (data -> String) -> Attribute { a | color : Maybe (data -> String) }
-barColor value config =
-  { config | color = Just value }
 
 
 {-| -}
@@ -871,7 +865,7 @@ type alias Axis msg =
     , end : Bounds -> Float
     , pinned : Bounds -> Float
     , arrow : Bool
-    , color : String -- TODO use Color
+    , color : Maybe String -- TODO use Color
     , attrs : List (S.Attribute msg)
     }
 
@@ -884,10 +878,15 @@ xAxis edits =
           { start = .min
           , end = .max
           , pinned = zero
-          , color = "rgb(210, 210, 210)"
+          , color = Nothing
           , arrow = True
           , attrs = []
           }
+
+      finalColor =
+        case config.color of
+          Just v -> v
+          Nothing -> "rgb(210, 210, 210)"
   in
   Element
     { isHtml = False
@@ -895,9 +894,9 @@ xAxis edits =
     , postPlane = always identity
     , view = \_ p _ ->
         S.g [ SA.class "elm-charts__x-axis" ]
-          [ C.horizontal p ([ SA.stroke config.color ] ++ config.attrs) (config.pinned <| toBounds .y p) (config.start <| toBounds .x p) (config.end <| toBounds .x p)
+          [ C.horizontal p ([ SA.stroke finalColor ] ++ config.attrs) (config.pinned <| toBounds .y p) (config.start <| toBounds .x p) (config.end <| toBounds .x p)
           , if config.arrow then
-              C.xArrow p config.color (config.end <| toBounds .x p) (config.pinned <| toBounds .y p) 0 0
+              C.xArrow p finalColor (config.end <| toBounds .x p) (config.pinned <| toBounds .y p) 0 0
             else
               S.text ""
           ]
@@ -912,10 +911,15 @@ yAxis edits =
           { start = .min
           , end = .max
           , pinned = zero
-          , color = "rgb(210, 210, 210)"
+          , color = Nothing
           , arrow = True
           , attrs = []
           }
+
+      finalColor =
+        case config.color of
+          Just v -> v
+          Nothing -> "rgb(210, 210, 210)"
   in
   Element
     { isHtml = False
@@ -923,9 +927,9 @@ yAxis edits =
     , postPlane = always identity
     , view = \_ p _ ->
         S.g [ SA.class "elm-charts__y-axis" ]
-          [ C.vertical p ([ SA.stroke config.color ] ++ config.attrs) (config.pinned <| toBounds .x p) (config.start <| toBounds .y p) (config.end <| toBounds .y p)
+          [ C.vertical p ([ SA.stroke finalColor ] ++ config.attrs) (config.pinned <| toBounds .x p) (config.start <| toBounds .y p) (config.end <| toBounds .y p)
           , if config.arrow then
-              C.yArrow p config.color (config.pinned <| toBounds .x p) (config.end <| toBounds .y p) 0 0
+              C.yArrow p finalColor (config.pinned <| toBounds .x p) (config.end <| toBounds .y p) 0 0
             else
               S.text ""
           ]
@@ -933,7 +937,7 @@ yAxis edits =
 
 
 type alias Tick tick msg =
-    { color : String -- TODO use Color -- TODO allow custom color by tick value
+    { color : Maybe String -- TODO use Color -- TODO allow custom color by tick value
     , height : Float
     , width : Maybe Float
     , pinned : Bounds -> Float
@@ -957,7 +961,7 @@ xTicks : List (Tick tick msg -> Tick tick msg) -> Element item msg
 xTicks edits =
   let config =
         applyAttrs edits
-          { color = "rgb(210, 210, 210)"
+          { color = Nothing
           , start = .min
           , end = .max
           , pinned = zero
@@ -968,6 +972,11 @@ xTicks edits =
           , width = Nothing
           , attrs = []
           }
+
+      finalColor =
+        case config.color of
+          Just v -> v
+          Nothing -> "rgb(210, 210, 210)"
 
       xBounds p =
         let b = toBounds .x p in
@@ -982,7 +991,7 @@ xTicks edits =
             Nothing -> I.floats (I.around config.amount) (xBounds p)
 
       tickAttrs =
-        [ SA.stroke config.color
+        [ SA.stroke finalColor
         , SA.strokeWidth (String.fromFloat (Maybe.withDefault 1 config.width))
         ] ++ config.attrs
   in
@@ -999,7 +1008,7 @@ yTicks : List (Tick tick msg -> Tick tick msg) -> Element item msg
 yTicks edits =
   let config =
         applyAttrs edits
-          { color = "rgb(210, 210, 210)"
+          { color = Nothing
           , start = .min
           , end = .max
           , pinned = zero
@@ -1011,6 +1020,11 @@ yTicks edits =
           , attrs = []
           --, offset = 0
           }
+
+      finalColor =
+        case config.color of
+          Just v -> v
+          Nothing -> "rgb(210, 210, 210)"
 
       yBounds p =
         let b = toBounds .y p in
@@ -1025,7 +1039,7 @@ yTicks edits =
             Nothing -> I.floats (I.around config.amount) (yBounds p)
 
       tickAttrs =
-        [ SA.stroke config.color
+        [ SA.stroke finalColor
         , SA.strokeWidth (String.fromFloat <| Maybe.withDefault 1 config.width)
         ] ++ config.attrs
   in
@@ -1039,7 +1053,7 @@ yTicks edits =
 
 
 type alias Labels tick msg =
-    { color : String -- TODO use Color
+    { color : Maybe String -- TODO use Color
     , pinned : Bounds -> Float
     , start : Bounds -> Float
     , end : Bounds -> Float
@@ -1064,7 +1078,7 @@ xLabels : List (Labels tick msg -> Labels tick msg) -> Element item msg
 xLabels edits =
   let config =
         applyAttrs edits
-          { color = "#808BAB"
+          { color = Nothing
           , start = .min
           , end = .max
           , only = \_ -> True
@@ -1076,6 +1090,11 @@ xLabels edits =
           , center = False
           , attrs = []
           }
+
+      finalColor =
+        case config.color of
+          Just v -> v
+          Nothing -> "#808BAB"
 
       xBounds p =
         let b = toBounds .x p in
@@ -1105,7 +1124,7 @@ xLabels edits =
           Nothing -> Nothing
 
       labelAttrs =
-        [ SA.fill config.color
+        [ SA.fill finalColor
         , SA.transform ("translate(" ++ String.fromFloat config.xOffset ++ " " ++ String.fromFloat config.yOffset ++ ")")
         ] ++ config.attrs
   in
@@ -1122,7 +1141,7 @@ yLabels : List (Labels tick msg -> Labels tick msg) -> Element item msg
 yLabels edits =
   let config =
         applyAttrs edits
-          { color = "#808BAB"
+          { color = Nothing
           , start = .min
           , end = .max
           , pinned = zero
@@ -1134,6 +1153,11 @@ yLabels edits =
           , center = False
           , attrs = []
           }
+
+      finalColor =
+        case config.color of
+          Just v -> v
+          Nothing -> "#808BAB"
 
       yBounds p =
         let b = toBounds .y p in
@@ -1163,7 +1187,7 @@ yLabels edits =
           Nothing -> Nothing
 
       labelAttrs =
-        [ SA.fill config.color
+        [ SA.fill finalColor
         , SA.transform ("translate(" ++ String.fromFloat config.xOffset ++ " " ++ String.fromFloat config.yOffset ++ ")")
         ] ++ config.attrs
   in
@@ -1177,7 +1201,7 @@ yLabels edits =
 
 
 type alias Grid msg =
-    { color : String -- TODO use Color
+    { color : Maybe String -- TODO use Color
     , width : Maybe Float
     , dotted : Bool
     , filterX : Bounds -> List Float
@@ -1191,7 +1215,7 @@ grid : List (Grid msg -> Grid msg) -> Element item msg
 grid edits =
   let config =
         applyAttrs edits
-          { color = "#EFF2FA"
+          { color = Nothing
           , filterX = zero >> List.singleton
           , filterY = zero >> List.singleton
           , width = Nothing
@@ -1199,8 +1223,13 @@ grid edits =
           , dotted = False
           }
 
+      finalColor =
+        case config.color of
+          Just v -> v
+          Nothing -> "#EFF2FA"
+
       gridAttrs =
-        [ SA.stroke config.color
+        [ SA.stroke finalColor
         , SA.strokeWidth (String.fromFloat <| Maybe.withDefault 1 config.width)
         ] ++ config.attrs
 
@@ -1221,7 +1250,7 @@ grid edits =
       toDot p x y =
         if List.member x (notTheseX p) || List.member y (notTheseY p)
         then Nothing
-        else Just <| C.full (Maybe.withDefault 1 config.width) C.circle config.color p x y
+        else Just <| C.full (Maybe.withDefault 1 config.width) C.circle finalColor p x y
   in
   Element
     { isHtml = False
@@ -1279,7 +1308,7 @@ bars edits metrics data =
 
       binLabelConfig =
         applyAttrs binConfig.label
-          { color = "gray" -- TODO
+          { color = Nothing
           , fontSize = Nothing
           , borderWidth = 0.1
           , borderColor = "white"
@@ -1424,7 +1453,7 @@ histogram toX edits metrics data =
 
       binLabelConfig =
         applyAttrs binConfig.label
-          { color = "gray" -- TODO
+          { color = Nothing
           , fontSize = Nothing
           , borderWidth = 0.1
           , borderColor = "white"
@@ -1593,7 +1622,7 @@ series toX series_ data =
 
 
 type alias Scatter data msg =
-    { color : String -- TODO use Color
+    { color : Maybe String -- TODO use Color
     , name : Maybe String
     , unit : String
     , dot : Maybe (data -> C.Dot msg)
@@ -1606,16 +1635,21 @@ scatter toY edits =
   Series <| \data toX defaultColor ->
     let config =
           applyAttrs edits
-            { color = defaultColor
+            { color = Nothing
             , name = Nothing
             , unit = ""
             , dot = Nothing
             }
 
+        finalColor =
+          case config.color of
+            Just v -> v
+            Nothing -> defaultColor
+
         finalDot =
            -- TODO use inheritance for color instead?
           case config.dot of
-            Nothing -> always (C.disconnected 6 1 C.cross config.color)
+            Nothing -> always (C.disconnected 6 1 C.cross finalColor)
             Just d -> d
     in
     Element
@@ -1626,7 +1660,7 @@ scatter toY edits =
           , y = stretch info.y (fromData [toY] data)
           }
       , postPlane = \p info ->
-          let metric = Metric (Maybe.withDefault "" config.name) config.color config.unit in
+          let metric = Metric (Maybe.withDefault "" config.name) finalColor config.unit in
           { info | collected = info.collected ++ List.map (toDotItem p metric toX toY) data }
       , view = \_ p _ ->
           S.g
@@ -1638,7 +1672,7 @@ scatter toY edits =
 type alias Interpolation data msg =
     { area : Maybe String -- TODO use Color
     , width : Maybe Float
-    , color : String -- TODO use Color
+    , color : Maybe String -- TODO use Color
     , name : Maybe String
     , unit : String
     , dot : Maybe (data -> C.Dot msg)
@@ -1652,7 +1686,7 @@ monotone toY edits =
   Series <| \data toX defaultColor ->
     let config =
           applyAttrs edits
-            { color = defaultColor
+            { color = Nothing
             , area = Nothing
             , width = Nothing
             , dot = Nothing
@@ -1661,14 +1695,19 @@ monotone toY edits =
             , attrs = []
             }
 
+        finalColor =
+          case config.color of
+            Just v -> v
+            Nothing -> defaultColor
+
         interAttrs =
-          [ SA.stroke config.color
+          [ SA.stroke finalColor
           , SA.strokeWidth (String.fromFloat (Maybe.withDefault 1 config.width))
           ] ++ config.attrs
 
         finalDot =
           case config.dot of -- TODO use inheritance instead?
-            Nothing -> always (C.disconnected 6 1 C.cross config.color)
+            Nothing -> always (C.disconnected 6 1 C.cross finalColor)
             Just d -> d
     in
     Element
@@ -1679,7 +1718,7 @@ monotone toY edits =
           , y = stretch info.y (fromData [toY] data)
           }
       , postPlane = \p info ->
-          let metric = Metric (Maybe.withDefault "" config.name) config.color config.unit in
+          let metric = Metric (Maybe.withDefault "" config.name) finalColor config.unit in
           { info | collected = info.collected ++ List.map (toDotItem p metric toX toY) data }
       , view = \_ p _ ->
           case config.area of
@@ -1703,7 +1742,7 @@ linear toY edits =
   Series <| \data toX defaultColor ->
     let config =
           applyAttrs edits
-            { color = defaultColor
+            { color = Nothing
             , area = Nothing
             , width = Nothing
             , name = Nothing
@@ -1712,14 +1751,19 @@ linear toY edits =
             , attrs = []
             }
 
+        finalColor =
+          case config.color of
+            Just v -> v
+            Nothing -> defaultColor
+
         interAttrs =
-          [ SA.stroke config.color
+          [ SA.stroke finalColor
           , SA.strokeWidth (String.fromFloat (Maybe.withDefault 1 config.width))
           ] ++ config.attrs
 
         finalDot =
           case config.dot of
-            Nothing -> always (C.disconnected 6 1 C.cross config.color)
+            Nothing -> always (C.disconnected 6 1 C.cross finalColor)
             Just d -> d
     in
     Element
@@ -1730,7 +1774,7 @@ linear toY edits =
           , y = stretch info.y (fromData [toY] data)
           }
       , postPlane = \p info ->
-          let metric = Metric (Maybe.withDefault "" config.name) config.color config.unit in
+          let metric = Metric (Maybe.withDefault "" config.name) finalColor config.unit in
           { info | collected = info.collected ++ List.map (toDotItem p metric toX toY) data }
       , view = \_ p _ ->
         case config.area of
@@ -1999,7 +2043,7 @@ formatWeekday =
 
 
 type alias Label msg =
-  { color : String
+  { color : Maybe String
   , fontSize : Maybe Float
   , borderWidth : Float
   , borderColor : String
@@ -2050,7 +2094,7 @@ xLabel config plane value x y =
         else [ SA.strokeWidth (String.fromFloat config.borderWidth), SA.stroke config.borderColor ]
 
       colorAttrs =
-        [ SA.fill config.color ]
+        [ SA.fill (Maybe.withDefault "#808BAB" config.color) ]
 
       styleAttrs =
         [ SA.style <| "font-size: " ++ toFontSize ++ ";" ]

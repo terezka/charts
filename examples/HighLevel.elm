@@ -99,13 +99,22 @@ view model =
         , C.spacing 0.02
         , C.margin 0.1
         , C.bin
-            [ C.name .label
-            , C.width (always 2)
+            [ C.width (always 2)
+            , C.name .label
             , C.label [ C.color "gray", C.fontSize 12, C.yOffset -2 ]
             ]
         ]
-        [ C.bar .z [ C.barColor (always C.pink), C.name "area", C.unit "m2", C.topLabel (.z >> Maybe.map String.fromFloat) ]
-        , C.bar .y [ C.barColor (always C.blue), C.name "speed", C.unit "ms" ]
+        [ C.bar .z
+            [ C.color (always C.orange)
+            , C.topLabel (.z >> Maybe.map String.fromFloat)
+            , C.name "area"
+            , C.unit "m2"
+            ]
+        , C.bar .y
+            [ C.color (always C.blue)
+            , C.name "speed"
+            , C.unit "m/s"
+            ]
         ]
         data
 
@@ -114,11 +123,11 @@ view model =
     , C.xAxis []
     , C.yLabels []
 
-    , C.series .x
-        [ C.linear .y [ C.color C.blue, C.width 0.5, C.name "vel", C.unit "m/s" ]
-        , C.linear .z []
-        ]
-        data
+    --, C.series .x
+    --    [ C.linear .y [ C.color C.blue, C.width 0.5, C.name "vel", C.unit "m/s" ]
+    --    , C.linear .z []
+    --    ]
+    --    data
 
     --, C.when model.hoveringDots <| \item rest ->
     --    C.tooltipOnTop (always item.position.x) (always item.position.y) []
