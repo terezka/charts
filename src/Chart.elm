@@ -3,8 +3,7 @@ module Chart exposing
     , Bounds, startMin, startMax, endMin, endMax, startPad, endPad, zero, middle
     , xAxis, yAxis, xTicks, yTicks, xLabels, yLabels, grid
     , ints, floats, times, format, values, amount
-    -- , getPoint
-    , Event, event, Decoder, map, map2, map3, getNearest, getNearestX, getWithin, getWithinX
+    , Event, event, Decoder, map, map2, map3, getCoords, getNearest, getNearestX, getWithin, getWithinX
     , Metric, Item, Single, Group
     , getBars, getGroups, getDots, withoutUnknowns
     , tooltip, tooltipOnTop, whenJust, whenNotEmpty, formatTimestamp
@@ -36,7 +35,7 @@ module Chart exposing
 @docs amount, floats, ints, times, values, format, noArrow, start, end, pinned, only, filterX, filterY
 
 # Events
-@docs Event, event, Decoder, map, map2, map3, getPoint, getNearest, getNearestX, getWithin, getWithinX
+@docs Event, event, Decoder, map, map2, map3, getCoords, getNearest, getNearestX, getWithin, getWithinX
 @docs tooltip, tooltipOnTop, whenNotEmpty, whenJust, formatTimestamp
 
 # Attributes
@@ -687,25 +686,14 @@ event =
 
 
 
---{-| -} TODO
---getPoint : Decoder data C.Point
---getPoint =
---  Decoder <| \_ plane point ->
---    let searched =
---          { x = C.toCartesianX plane point.x
---          , y = C.toCartesianY plane point.y
---          }
---    in
---    searched
-
-
-
+{-| -}
 type Item value data
   = ItemBar (Single value data)
   | ItemDot (Single value data)
   | ItemGroup (Group value data)
 
 
+{-| -}
 type alias Metric =
   { label : String
   , color : String
@@ -713,6 +701,7 @@ type alias Metric =
   }
 
 
+{-| -}
 type alias Single value data =
   { datum : data
   , position : C.Point
@@ -721,6 +710,7 @@ type alias Single value data =
   }
 
 
+{-| -}
 type alias Group value data =
   { datum : data
   , position : C.Point
@@ -728,6 +718,7 @@ type alias Group value data =
   }
 
 
+{-| -}
 getBars : List (Item value data) -> List (Single value data)
 getBars =
   let filter item =
@@ -739,6 +730,7 @@ getBars =
   List.concat << List.filterMap filter
 
 
+{-| -}
 getGroups : List (Item value data) -> List (Group value data)
 getGroups =
   List.filterMap <| \item ->
@@ -747,6 +739,7 @@ getGroups =
       _ -> Nothing
 
 
+{-| -}
 getDots : List (Item value data) -> List (Single value data)
 getDots =
   List.filterMap <| \item ->
@@ -755,6 +748,7 @@ getDots =
       _ -> Nothing
 
 
+{-| -}
 withoutUnknowns : List (Item (Maybe Float) data) -> List (Item Float data)
 withoutUnknowns =
   let onlyKnowns i =
@@ -799,6 +793,18 @@ map2 f (Decoder a) (Decoder b) =
 map3 : (a -> b -> c -> item) -> Decoder data a -> Decoder data b -> Decoder data c -> Decoder data item
 map3 f (Decoder a) (Decoder b) (Decoder c) =
   Decoder <| \ps s p -> f (a ps s p) (b ps s p) (c ps s p)
+
+
+{-| -}
+getCoords : Decoder data C.Point
+getCoords =
+  Decoder <| \_ plane point ->
+    let searched =
+          { x = C.toCartesianX plane point.x
+          , y = C.toCartesianY plane point.y
+          }
+    in
+    searched
 
 
 {-| -}

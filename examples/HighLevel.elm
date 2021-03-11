@@ -86,6 +86,8 @@ view model =
     , C.events
         [ C.event "mousemove" <|
             C.map2 OnHover
+              --(C.noUnknowns C.getBars >> C.getNearestX)
+              --(C.noUnknowns C.getDots >> C.getWithin 20)
               (C.getNearestX (C.withoutUnknowns >> C.getBars))
               (C.getNearest (C.withoutUnknowns >> C.getDots))
         ]
