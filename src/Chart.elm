@@ -6,7 +6,7 @@ module Chart exposing
     , Event, event, Decoder, getCoords, getNearest, getNearestX, getWithin, getWithinX, map, map2, map3, map4
     , Metric, Item, Single, Group
     , getBars, getGroups, getDots, withoutUnknowns
-    , tooltip, tooltipOnTop, whenJust, whenNotEmpty, formatTimestamp
+    , tooltip, tooltipOnTop, when, formatTimestamp
     , svgAt, htmlAt, svg, html, none
     , width, height
     , marginTop, marginBottom, marginLeft, marginRight
@@ -36,7 +36,7 @@ module Chart exposing
 
 # Events
 @docs Event, event, Decoder, map, map2, map3, getCoords, getNearest, getNearestX, getWithin, getWithinX
-@docs tooltip, tooltipOnTop, whenNotEmpty, whenJust, formatTimestamp
+@docs tooltip, tooltipOnTop, when, formatTimestamp
 
 # Attributes
 @docs width, height
@@ -850,16 +850,8 @@ tooltipOnTop toX toY att content =
 
 
 {-| -}
-whenJust : Maybe a -> (a -> Element data msg) -> Element data msg
-whenJust maybeA view =
-  case maybeA of
-    Just a -> view a
-    Nothing -> none
-
-
-{-| -}
-whenNotEmpty : List a -> (a -> List a -> Element data msg) -> Element data msg
-whenNotEmpty maybeA view =
+when : List a -> (a -> List a -> Element data msg) -> Element data msg
+when maybeA view =
   case maybeA of
     a :: rest -> view a rest
     [] -> none
