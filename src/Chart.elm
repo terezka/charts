@@ -19,7 +19,7 @@ module Chart exposing
     , blue, orange, pink, green, red
 
     , bin, label, fontSize, borderWidth, borderColor, xOffset, yOffset
-    , tick, length
+    , tick
     )
 
 
@@ -1295,7 +1295,7 @@ bars edits metrics data =
         applyAttrs config.tick
           { color = Nothing
           , width = Nothing
-          , length = Nothing
+          , height = 5
           , attributes = []
           }
 
@@ -1313,7 +1313,20 @@ bars edits metrics data =
           , borderWidth = 0.1
           , borderColor = "white"
           , xOffset = 0
-          , yOffset = 0
+          , yOffset = 15
+          , flipped = False
+          , attributes = []
+          }
+
+      barLabelConfig metric v =
+        applyAttrs (Maybe.withDefault [] metric.label)
+          { color = Nothing
+          , fontSize = Nothing
+          , borderWidth = 0.1
+          , borderColor = "white"
+          , xOffset = 0
+          , yOffset = 10
+          , flipped = v < 0
           , attributes = []
           }
 
@@ -1325,21 +1338,10 @@ bars edits metrics data =
       toBarLabel p metric d v =
         case ( v, metric.label ) of
           ( Just v_, Just _ ) ->
-            Just (xLabel (barLabelConfig metric) p (String.fromFloat v_))
+            Just (xLabel (barLabelConfig metric v_) p (String.fromFloat v_))
 
           _ ->
             Nothing
-
-      barLabelConfig metric =
-        applyAttrs (Maybe.withDefault [] metric.label)
-          { color = Nothing
-          , fontSize = Nothing
-          , borderWidth = 0.1
-          , borderColor = "white"
-          , xOffset = 0
-          , yOffset = -22
-          , attributes = []
-          }
 
       numOfBars =
         toFloat (List.length metrics)
@@ -1367,7 +1369,7 @@ bars edits metrics data =
       toBin p chartName i d =
         { label = toBinLabel p d
         , spacing = config.spacing
-        , tickLength = Maybe.withDefault 5 tickConfig.length
+        , tickLength = tickConfig.height
         , tickWidth = Maybe.withDefault 1 tickConfig.width
         , bars = List.map (toBar p chartName i d) metrics
         }
@@ -1413,7 +1415,8 @@ bars edits metrics data =
           , y = stretch info.y (fromData ys data)
         }
     , postPlane = \p info -> -- TODO add ticks
-        { info | collected =
+        { info | xTicks = info.xTicks ++ List.map (\i -> toFloat i - 0.5) (List.range 1 (List.length data + 1))
+        , collected =
             data
               |> List.indexedMap (toGroupItem p)
               |> List.foldl (\g a -> a ++ [ItemGroup g]) info.collected
@@ -1465,7 +1468,7 @@ histogram toX edits metrics data =
         applyAttrs config.tick
           { color = Nothing
           , width = Nothing
-          , length = Nothing
+          , height = 5
           , attributes = []
           }
 
@@ -1483,26 +1486,28 @@ histogram toX edits metrics data =
           , borderWidth = 0.1
           , borderColor = "white"
           , xOffset = 0
-          , yOffset = 0
+          , yOffset = 15
+          , flipped = False
           , attributes = []
           }
 
       toBarLabel p metric d v =
         case ( v, metric.label ) of
           ( Just v_, Just _ ) ->
-            Just (xLabel (barLabelConfig metric) p (String.fromFloat v_))
+            Just (xLabel (barLabelConfig metric v_) p (String.fromFloat v_))
 
           _ ->
             Nothing
 
-      barLabelConfig metric =
+      barLabelConfig metric v =
         applyAttrs (Maybe.withDefault [] metric.label)
           { color = Nothing
           , fontSize = Nothing
           , borderWidth = 0.1
           , borderColor = "white"
           , xOffset = 0
-          , yOffset = -22
+          , yOffset = if v < 0 then -12 else -4
+          , flipped = v < 0
           , attributes = []
           }
 
@@ -1547,7 +1552,7 @@ histogram toX edits metrics data =
         , start = toX d - toBinWidth p d maybePrev
         , end = toX d
         , spacing = config.spacing
-        , tickLength = Maybe.withDefault 5 tickConfig.length -- TODO
+        , tickLength = tickConfig.height -- TODO
         , tickWidth = Maybe.withDefault 1 tickConfig.width
         , bars = List.map (toBar chartName p d) metrics
         }
@@ -1582,6 +1587,9 @@ histogram toX edits metrics data =
         , values = { x = toX datum, y = value datum }
         , position = point
         }
+
+      toTick p maybePrev d =
+        [ toX d, toX d - (toBinWidth p d maybePrev) ]
   in
   Element
     { isHtml = False
@@ -1591,7 +1599,8 @@ histogram toX edits metrics data =
         , y = stretch info.y (fromData ys data)
         }
     , postPlane = \p info ->
-        { info | collected =
+        { info | xTicks = info.xTicks ++ List.concat (mapWithPrev (toTick p) data)
+        , collected =
             mapWithPrev (toGroupItem p) data
               |> List.foldl (\g a -> a ++ [ItemGroup g]) info.collected
         }
@@ -2093,6 +2102,7 @@ type alias Label msg =
   , borderColor : String
   , xOffset : Float
   , yOffset : Float
+  , flipped : Bool
   , attributes : List (S.Attribute msg)
   }
 
@@ -2134,7 +2144,7 @@ yOffset value config =
 type alias Tick msg =
   { color : Maybe String
   , width : Maybe Float
-  , length : Maybe Float
+  , height : Float
   , attributes : List (S.Attribute msg)
   }
 
@@ -2142,11 +2152,6 @@ type alias Tick msg =
 tick : value -> Attribute { a | tick : value }
 tick value config =
   { config | tick = value }
-
-
-length : value -> Attribute { a | length : Maybe value }
-length value config =
-  { config | length = Just value }
 
 
 
@@ -2171,11 +2176,8 @@ xLabel config plane value x y =
           Nothing -> "inherit"
   in
   S.g
-    [ C.position plane x y (0 + config.xOffset) (16 + config.yOffset)
+    [ C.position plane x y config.xOffset (config.yOffset * if config.flipped then -1 else 1)
     , SA.style "text-anchor: middle;"
     , SA.class "elm-charts__x-label"
     ]
     [ C.viewLabel (borderAttrs ++ colorAttrs ++ styleAttrs ++ config.attributes) value ]
-
-
-

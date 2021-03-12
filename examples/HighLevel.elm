@@ -25,15 +25,15 @@ main =
 
 
 type alias Model =
-  { hoveringBars : List (C.Single Float BarPoint)
-  , hoveringDots : List (C.Single Float BarPoint)
+  { hoveringBars : List (C.Single (Maybe Float) BarPoint)
+  , hoveringDots : List (C.Single (Maybe Float) BarPoint)
   }
 
 
 type Msg
   = OnHover
-      (List (C.Single Float BarPoint))
-      (List (C.Single Float BarPoint))
+      (List (C.Single (Maybe Float) BarPoint))
+      (List (C.Single (Maybe Float) BarPoint))
   | OnLeave
 
 
@@ -54,8 +54,9 @@ type alias BarPoint =
 
 data : List BarPoint
 data =
-  [ { x = 0, y = Just 4, z = Just 5, label = "DK" }
-  , { x = 4, y = Just 2, z = Just 3, label = "NO" }
+  [ { x = -1, y = Just 4, z = Just 5, label = "DK" }
+  , { x = 0, y = Just 7, z = Just -1, label = "FO" }
+  , { x = 4, y = Just 5, z = Just 2, label = "NO" }
   , { x = 6, y = Just 4, z = Nothing, label = "SE" }
   , { x = 8, y = Just 3, z = Just 7, label = "FI" }
   , { x = 10, y = Just 4, z = Just 3, label = "IS" }
@@ -82,31 +83,26 @@ view model =
         , HA.style "margin" "20px 40px"
         , HA.style "max-width" "700px"
         ]
-    , C.paddingLeft 10
     , C.events
         [ C.event "mousemove" <|
             C.map2 OnHover
-              --(C.noUnknowns C.getBars >> C.getNearestX)
-              --(C.noUnknowns C.getDots >> C.getWithin 20)
-              (C.getNearestX (C.withoutUnknowns >> C.getBars))
-              (C.getNearest (C.withoutUnknowns >> C.getDots))
+              (C.getNearestX C.getBars)
+              (C.getNearest C.getDots)
         ]
     ]
     [ C.grid []
-
     , C.histogram .x
-        [ C.tick [ C.length 4, C.width 1 ]
+        [ C.tick [ C.height 4, C.width 1 ]
         , C.spacing 0.02
         , C.margin 0.1
         , C.bin
-            [ C.width (always 2)
-            , C.name .label
-            , C.label [ C.fontSize 11, C.yOffset -3 ]
+            [ C.name .label
+            , C.label [ C.fontSize 11 ]
             ]
         ]
         [ C.bar .z
             [ C.color (always C.orange)
-            , C.label [ C.color C.orange ]
+            , C.label [ C.color C.orange, C.yOffset -2 ]
             , C.name "area"
             , C.unit "m2"
             ]
@@ -119,10 +115,12 @@ view model =
         ]
         data
 
+
     , C.yAxis []
-    , C.yTicks []
+    , C.yTicks [ C.height 0 ]
+    , C.yLabels [ C.only (\i -> i /= 0), C.amount 7 ]
     , C.xAxis []
-    , C.yLabels []
+    --, C.xLabels [ C.only (\i -> i /= 0) ]
 
     --, C.series .x
     --    [ C.linear .y [ C.color C.blue, C.width 0.5, C.name "vel", C.unit "m/s" ]
@@ -133,7 +131,6 @@ view model =
     --, C.when model.hoveringDots <| \item rest ->
     --    C.tooltipOnTop (always item.position.x) (always item.position.y) []
     --      [ tooltipRow item ]
-
     , C.when model.hoveringBars <| \item rest ->
         C.tooltipOnTop (always item.position.x) (always item.position.y) []
           [ tooltipRow item ]
@@ -144,18 +141,18 @@ view model =
     ]
 
 
-tooltipRow : C.Single Float BarPoint -> Html.Html msg
+tooltipRow : C.Single (Maybe Float) BarPoint -> Html.Html msg
 tooltipRow hovered =
   Html.div [ HA.style "color" hovered.metric.color ]
     [ Html.span [] [ Html.text hovered.datum.label ]
     , Html.text " "
     , Html.text hovered.metric.name
     , Html.text " : "
-    , Html.text (String.fromFloat hovered.values.y)
-    --, Html.text <|
-    --    case hovered.values.y of
-    --      Just y -> String.fromFloat y
-    --      Nothing -> "unknown"
+    --, Html.text (String.fromFloat hovered.values.y)
+    , Html.text <|
+        case hovered.values.y of
+          Just y -> String.fromFloat y
+          Nothing -> "unknown"
     , Html.text " "
     , Html.text hovered.metric.unit
     ]
