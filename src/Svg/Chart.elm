@@ -1020,7 +1020,7 @@ toPoints toX toY =
         case toY d of
           Just y ->
             case acc of
-              latest :: rest -> (latest ++ [{ x = toX d, y = y }]) :: acc
+              latest :: rest -> (latest ++ [{ x = toX d, y = y }]) :: rest
               [] -> ([{ x = toX d, y = y }] :: acc)
 
           Nothing ->
