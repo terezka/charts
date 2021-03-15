@@ -1031,8 +1031,20 @@ toPoints toX toY =
 
 {-| -}
 type alias DataPoint item =
-  { item | position : Point }
+  { item | position : Item }
 
+
+type alias Item =
+  { x1 : Float
+  , x2 : Float
+  , y : Float
+  }
+
+
+itemToPoint : Item -> Point
+itemToPoint item =
+  let w = item.x2 - item.x1 in
+  Point (item.x1 + w / 2) item.y
 
 
 {-| Get the data coordinates nearest to the event.
@@ -1062,7 +1074,7 @@ getWithin radius toItems info plane searchedSvg =
         }
 
       keepIfEligible closest =
-        withinRadius plane radius searched closest.position
+        withinRadius plane radius searched (itemToPoint closest.position)
     in
     getNearestHelp (toItems info) plane searched
       |> List.filter keepIfEligible
@@ -1094,7 +1106,7 @@ getWithinX radius toItems info plane searchedSvg =
         }
 
       keepIfEligible =
-          withinRadiusX plane radius searched << .position
+          withinRadiusX plane radius searched << itemToPoint << .position
     in
     getNearestXHelp (toItems info) plane searched
       |> List.filter keepIfEligible
@@ -1114,7 +1126,7 @@ getNearestHelp points plane searched =
         case List.head allClosest of
           Just closest ->
             if closest.position == point.position then point :: allClosest
-            else if distance_ closest.position > distance_ point.position  then [ point ]
+            else if distance_ (itemToPoint closest.position) > distance_ (itemToPoint point.position) then [ point ]
             else allClosest
 
           Nothing ->
@@ -1132,8 +1144,8 @@ getNearestXHelp points plane searched =
       getClosest point allClosest =
         case List.head allClosest of
           Just closest ->
-              if closest.position.x == point.position.x then point :: allClosest
-              else if distanceX_ closest.position > distanceX_ point.position then [ point ]
+              if .x (itemToPoint closest.position) == .x (itemToPoint point.position) then point :: allClosest
+              else if distanceX_ (itemToPoint closest.position) > distanceX_ (itemToPoint point.position) then [ point ]
               else allClosest
 
           Nothing ->

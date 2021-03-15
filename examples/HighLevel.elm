@@ -117,11 +117,11 @@ view model =
         data
 
     , C.when model.hoveringDots <| \item rest ->
-        C.tooltipOnTop (always item.position.x) (always item.position.y) []
+        C.tooltipOnTop (always item.position.x1) (always item.position.y) []
           [ tooltipRow item ]
 
     , C.when model.hoveringBars <| \item rest ->
-        C.tooltipOnTop (always item.position.x) (always item.position.y) []
+        C.tooltipOnTop (always item.position.x1) (always item.position.y) []
           [ tooltipRow item ]
 
     --, C.when model.hovering <| \group rest ->

@@ -206,9 +206,9 @@ pinned value config =
 
 
 {-| -}
-color : String -> Attribute { a | color : String }
+color : String -> Attribute { a | color : Maybe String }
 color value config =
-  { config | color = value }
+  { config | color = Just value }
 
 
 {-| -}
@@ -450,122 +450,34 @@ chart edits elements =
           , htmlAttrs = []
           }
 
-      toPrePlaneInfo els acc =
-        case els of
-          Element el :: rest -> toPrePlaneInfo rest (el.prePlane acc)
-          [] -> acc
+      items =
+        getItems elements
 
-      prePlaneInfo =
-        toPrePlaneInfo elements
-          { x = Nothing
-          , y = Nothing
-          }
+      plane =
+        definePlane config items
 
-      calcRange =
-        case config.range of
-          Just edit -> edit (Maybe.withDefault { min = 0, max = 1 } prePlaneInfo.x)
-          Nothing -> Maybe.withDefault { min = 0, max = 1 } prePlaneInfo.x
+      tickValues =
+        getTickValues plane elements
 
-      calcDomain =
-        case config.domain of
-          Just edit -> edit (Maybe.withDefault { min = 0, max = 1 } prePlaneInfo.y)
-          Nothing -> startMin 0 (Maybe.withDefault { min = 0, max = 1 } prePlaneInfo.y)
-
-      scalePadX =
-        C.scaleCartesian
-          { marginLower = config.marginLeft
-          , marginUpper = config.marginRight
-          , length = max 1 (config.width - config.paddingLeft - config.paddingRight)
-          , data = calcRange
-          , min = calcRange.min
-          , max = calcRange.max
-          }
-
-      toppedDomain =
-        case config.topped of
-          Just num ->
-            let fs = I.floats (I.around num) calcDomain
-                interval =
-                  case fs of
-                    first :: second :: _ -> second - first
-                    _ -> 0
-            in
-            { calcDomain | max = calcDomain.max + interval }
-
-          Nothing ->
-            calcDomain
-
-      scalePadY =
-        C.scaleCartesian
-          { marginUpper = config.marginTop
-          , marginLower = config.marginBottom
-          , length = max 1 (config.height - config.paddingBottom - config.paddingTop)
-          , data = toppedDomain
-          , min = toppedDomain.min
-          , max = toppedDomain.max
-          }
-
-      plane = -- TODO use config / system directly instead
-        { x =
-            { marginLower = config.marginLeft
-            , marginUpper = config.marginRight
-            , length = config.width
-            , data = calcRange
-            , min = calcRange.min - scalePadX config.paddingLeft
-            , max = calcRange.max + scalePadX config.paddingRight
-            }
-        , y =
-            { marginUpper = config.marginTop
-            , marginLower = config.marginBottom
-            , length = config.height
-            , data = toppedDomain
-            , min = toppedDomain.min - scalePadY config.paddingBottom
-            , max = toppedDomain.max + scalePadY config.paddingTop
-            }
-        }
-
-      -- POST PLANE
-
-      toPostPlaneInfo els acc isBeforeChart before svgs after =
-        case els of
-          Element el :: rest ->
-            if el.isHtml then
-              toPostPlaneInfo rest (el.postPlane plane acc) isBeforeChart
-                (if isBeforeChart then before ++ [ el.view ] else before)
-                svgs
-                (if isBeforeChart then after else after ++ [ el.view ])
-
-            else
-              toPostPlaneInfo rest (el.postPlane plane acc)
-                False before (svgs ++ [ el.view ]) after
-
-          [] ->
-            ( acc, ( before, svgs, after ) )
-
-      ( info, ( hBefore, chartEls, hAfter ) ) =
-        toPostPlaneInfo elements { xTicks = [], yTicks = [], collected = [] } True [] [] []
+      ( beforeEls, chartEls, afterEls ) =
+        viewElements config plane tickValues elements
 
       svgContainer =
         S.svg (sizingAttrs ++ List.map toEvent config.events ++ config.attrs)
 
       sizingAttrs =
-        if config.responsive
-        then [ C.responsive plane ]
-        else C.static plane
+        if config.responsive then [ C.responsive plane ] else C.static plane
 
-      toEvent e =
+      toEvent e = -- TODO
         let (Decoder func) = e.decoder in
         SE.on e.name <| C.decodePoint plane <| \pl po ->
-          func info.collected pl po
+          func items pl po
 
       allSvgEls =
-        [ C.frame config.id plane ] ++ (List.map applyInfo chartEls) ++ [ C.eventCatcher plane [] ]
-
-      applyInfo v =
-        v config.id plane info
+        [ C.frame config.id plane ] ++ chartEls ++ [ C.eventCatcher plane [] ]
   in
-  C.container plane config.htmlAttrs <|
-    List.map applyInfo hBefore ++ [ svgContainer allSvgEls ] ++ List.map applyInfo hAfter
+  C.container plane config.htmlAttrs
+    (beforeEls ++ [ svgContainer chartEls ] ++ afterEls)
 
 
 
@@ -582,15 +494,159 @@ type alias PostPlaneInfo data =
   }
 
 
--- TODO
+
+--
+
+
 {-| -}
-type Element data msg =
-  Element
-    { isHtml : Bool
-    , prePlane : PrePlaneInfo -> PrePlaneInfo
-    , postPlane : C.Plane -> PostPlaneInfo data -> PostPlaneInfo data
-    , view : String -> C.Plane -> PostPlaneInfo data -> H.Html msg
-    }
+type Element data msg
+  = SeriesElement
+      (List (Single (Maybe Float) data))
+      (String -> C.Plane -> List (Single (Maybe Float) data) -> S.Svg msg)
+  | BarsElement
+      (List (Group (Maybe Float) data))
+      (String -> C.Plane -> List (Group (Maybe Float) data) -> S.Svg msg)
+  | HistogramElement
+      (List (Group (Maybe Float) data))
+      (String -> C.Plane -> List (Group (Maybe Float) data) -> S.Svg msg)
+  | AxisElement
+      (C.Plane -> S.Svg msg)
+  | TicksElement
+      (C.Plane -> TickValues -> TickValues)
+      (C.Plane -> S.Svg msg)
+  | LabelsElement
+      (C.Plane -> TickValues -> TickValues)
+      (C.Plane -> S.Svg msg)
+  | GridElement
+      (C.Plane -> TickValues -> S.Svg msg)
+  | SvgElement
+      (C.Plane -> S.Svg msg)
+  | HtmlElement
+      (C.Plane -> S.Svg msg)
+
+
+getItems : List (Element data msg) -> List (Item (Maybe Float) data)
+getItems elements =
+  let toItems el acc =
+        case el of
+          SeriesElement items _ -> acc ++ List.map ItemDot items
+          BarsElement items _ -> acc ++ List.map ItemGroup items
+          HistogramElement items _ -> acc ++ List.map ItemGroup items
+          AxisElement _ -> acc
+          TicksElement _ _ -> acc
+          LabelsElement _ _ -> acc
+          GridElement _ -> acc
+          SvgElement _ -> acc
+          HtmlElement _ -> acc
+  in
+  List.foldl toItems [] elements
+
+
+definePlane : Container data msg -> List (Item (Maybe Float) data) -> C.Plane
+definePlane config items =
+  -- TODO apply edits
+  let toPoints item acc =
+        case item of
+          ItemBar value -> value.position :: acc
+          ItemDot value -> value.position :: acc
+          ItemGroup value -> List.map .position value.items ++ acc
+
+      points =
+        List.foldl toPoints [] items
+
+      xRange =
+        { min = C.minimum [.x1 >> Just] points
+        , max = C.maximum [.x1 >> Just] points
+        }
+
+      yRange =
+        { min = C.minimum [.y >> Just] points
+        , max = C.maximum [.y >> Just] points
+        }
+
+      scalePadX =
+        C.scaleCartesian
+          { marginLower = config.marginLeft
+          , marginUpper = config.marginRight
+          , length = max 1 (config.width - config.paddingLeft - config.paddingRight)
+          , data = xRange
+          , min = xRange.min
+          , max = xRange.max
+          }
+
+      scalePadY =
+        C.scaleCartesian
+          { marginUpper = config.marginTop
+          , marginLower = config.marginBottom
+          , length = max 1 (config.height - config.paddingBottom - config.paddingTop)
+          , data = yRange
+          , min = yRange.min
+          , max = yRange.max
+          }
+  in
+  { x =
+      { marginLower = config.marginLeft
+      , marginUpper = config.marginRight
+      , length = config.width
+      , data = xRange
+      , min = xRange.min - scalePadX config.paddingLeft
+      , max = xRange.max + scalePadX config.paddingRight
+      }
+  , y =
+      { marginUpper = config.marginTop
+      , marginLower = config.marginBottom
+      , length = config.height
+      , data = yRange
+      , min = yRange.min - scalePadY config.paddingBottom
+      , max = yRange.max + scalePadY config.paddingTop
+      }
+  }
+
+
+{-| -}
+type alias TickValues =
+  { xs : List Float
+  , ys : List Float
+  }
+
+
+getTickValues : C.Plane -> List (Element data msg) -> TickValues
+getTickValues plane elements =
+  let toValues el acc =
+        case el of
+          SeriesElement _ _ -> acc
+          BarsElement _ _ -> acc
+          HistogramElement _ _ -> acc
+          AxisElement _ -> acc
+          TicksElement func _ -> func plane acc
+          LabelsElement func _ -> func plane acc
+          GridElement _ -> acc
+          SvgElement _ -> acc
+          HtmlElement _ -> acc
+  in
+  List.foldl toValues (TickValues [] []) elements
+
+
+viewElements : Container data msg -> C.Plane -> TickValues -> List (Element data msg) -> ( List (H.Html msg), List (S.Svg msg), List (H.Html msg) )
+viewElements config plane tickValues elements =
+  let viewOne el ( before, chart_, after ) =
+        case el of
+          SeriesElement items view -> ( before, view config.id plane items :: chart_, after )
+          BarsElement items view -> ( before, view config.id plane items :: chart_, after )
+          HistogramElement items view -> ( before, view config.id plane items :: chart_, after )
+          AxisElement view -> ( before, view plane :: chart_, after )
+          TicksElement _ view -> ( before, view plane :: chart_, after )
+          LabelsElement _ view -> ( before, view plane :: chart_, after )
+          GridElement view -> ( before, view plane tickValues :: chart_, after )
+          SvgElement view -> ( before, view plane :: chart_, after )
+          HtmlElement view ->
+            ( if List.length chart_ > 0 then before else view plane :: before
+            , chart_
+            , if List.length chart_ > 0 then view plane :: after else after
+            )
+  in
+  List.foldl viewOne ([], [], []) elements
+    |> \( b, c, a ) -> ( List.reverse b, List.reverse c, List.reverse a )
 
 
 
@@ -706,8 +762,8 @@ type alias Metric =
 {-| -}
 type alias Single value data =
   { datum : data
-  , position : C.Point
-  , values : { x : Float, y : value }
+  , position : { x1 : Float, x2 : Float, y : Float }
+  , values : { x1 : Float, x2 : Float, y : value }
   , metric : Metric
   }
 
@@ -715,7 +771,7 @@ type alias Single value data =
 {-| -}
 type alias Group value data =
   { datum : data
-  , position : C.Point
+  , position : { x1 : Float, x2 : Float, y : Float }
   , items : List (Single value data)
   }
 
@@ -755,7 +811,7 @@ withoutUnknowns : List (Item (Maybe Float) data) -> List (Item Float data)
 withoutUnknowns =
   let onlyKnowns i =
         case i.values.y of
-          Just y -> Just (Single i.datum i.position { x = i.values.x, y = y } i.metric)
+          Just y -> Just (Single i.datum i.position { x1 = i.values.x1, x2 = i.values.x2, y = y } i.metric)
           Nothing -> Nothing
   in
   List.filterMap <| \item ->
@@ -869,7 +925,7 @@ type alias Axis msg =
     , end : Bounds -> Float
     , pinned : Bounds -> Float
     , arrow : Bool
-    , color : String -- TODO use Color
+    , color : Maybe String -- TODO use Color
     , attrs : List (S.Attribute msg)
     }
 
@@ -882,24 +938,22 @@ xAxis edits =
           { start = .min
           , end = .max
           , pinned = zero
-          , color = "rgb(210, 210, 210)"
+          , color = Nothing
           , arrow = True
           , attrs = []
           }
+
+      color_ =
+        Maybe.withDefault "rgb(210, 210, 210)" config.color
   in
-  Element
-    { isHtml = False
-    , prePlane = identity
-    , postPlane = always identity
-    , view = \_ p _ ->
-        S.g [ SA.class "elm-charts__x-axis" ]
-          [ C.horizontal p ([ SA.stroke config.color ] ++ config.attrs) (config.pinned <| toBounds .y p) (config.start <| toBounds .x p) (config.end <| toBounds .x p)
-          , if config.arrow then
-              C.xArrow p config.color (config.end <| toBounds .x p) (config.pinned <| toBounds .y p) 0 0
-            else
-              S.text ""
-          ]
-    }
+  AxisElement <| \p ->
+    S.g [ SA.class "elm-charts__x-axis" ]
+      [ C.horizontal p ([ SA.stroke color_ ] ++ config.attrs) (config.pinned <| toBounds .y p) (config.start <| toBounds .x p) (config.end <| toBounds .x p)
+      , if config.arrow then
+          C.xArrow p color_ (config.end <| toBounds .x p) (config.pinned <| toBounds .y p) 0 0
+        else
+          S.text ""
+      ]
 
 
 {-| -}
@@ -910,28 +964,26 @@ yAxis edits =
           { start = .min
           , end = .max
           , pinned = zero
-          , color = "rgb(210, 210, 210)"
+          , color = Nothing
           , arrow = True
           , attrs = []
           }
+
+      color_ =
+        Maybe.withDefault "rgb(210, 210, 210)" config.color
   in
-  Element
-    { isHtml = False
-    , prePlane = identity
-    , postPlane = always identity
-    , view = \_ p _ ->
-        S.g [ SA.class "elm-charts__y-axis" ]
-          [ C.vertical p ([ SA.stroke config.color ] ++ config.attrs) (config.pinned <| toBounds .x p) (config.start <| toBounds .y p) (config.end <| toBounds .y p)
-          , if config.arrow then
-              C.yArrow p config.color (config.pinned <| toBounds .x p) (config.end <| toBounds .y p) 0 0
-            else
-              S.text ""
-          ]
-    }
+  AxisElement <| \p ->
+    S.g [ SA.class "elm-charts__y-axis" ]
+      [ C.vertical p ([ SA.stroke color_ ] ++ config.attrs) (config.pinned <| toBounds .x p) (config.start <| toBounds .y p) (config.end <| toBounds .y p)
+      , if config.arrow then
+          C.yArrow p color_ (config.pinned <| toBounds .x p) (config.end <| toBounds .y p) 0 0
+        else
+          S.text ""
+      ]
 
 
 type alias Tick tick msg =
-    { color : String -- TODO use Color -- TODO allow custom color by tick value
+    { color : Maybe String -- TODO use Color -- TODO allow custom color by tick value
     , height : Float
     , width : Float
     , pinned : Bounds -> Float
@@ -955,7 +1007,7 @@ xTicks : List (Tick tick msg -> Tick tick msg) -> Element item msg
 xTicks edits =
   let config =
         applyAttrs edits
-          { color = "rgb(210, 210, 210)"
+          { color = Nothing
           , start = .min
           , end = .max
           , pinned = zero
@@ -966,6 +1018,9 @@ xTicks edits =
           , width = 1
           , attrs = []
           }
+
+      color_ =
+        Maybe.withDefault "rgb(210, 210, 210)" config.color
 
       xBounds p =
         let b = toBounds .x p in
@@ -980,16 +1035,15 @@ xTicks edits =
             Nothing -> I.floats (I.around config.amount) (xBounds p)
 
       tickAttrs =
-        [ SA.stroke config.color
+        [ SA.stroke color_
         , SA.strokeWidth (String.fromFloat config.width)
         ] ++ config.attrs
+
+      addTickValues p ts =
+        { ts | xs = ts.xs ++ toTicks p }
   in
-  Element
-    { isHtml = False
-    , prePlane = identity
-    , postPlane = \p ts -> { ts | xTicks = ts.xTicks ++ toTicks p }
-    , view = \_ p _ -> C.xTicks p config.height tickAttrs (config.pinned <| toBounds .y p) (toTicks p)
-    }
+  TicksElement addTickValues <| \p ->
+    C.xTicks p config.height tickAttrs (config.pinned <| toBounds .y p) (toTicks p)
 
 
 {-| -}
@@ -997,7 +1051,7 @@ yTicks : List (Tick tick msg -> Tick tick msg) -> Element item msg
 yTicks edits =
   let config =
         applyAttrs edits
-          { color = "rgb(210, 210, 210)"
+          { color = Nothing
           , start = .min
           , end = .max
           , pinned = zero
@@ -1009,6 +1063,9 @@ yTicks edits =
           , attrs = []
           --, offset = 0
           }
+
+      color_ =
+        Maybe.withDefault "rgb(210, 210, 210)" config.color
 
       yBounds p =
         let b = toBounds .y p in
@@ -1023,21 +1080,20 @@ yTicks edits =
             Nothing -> I.floats (I.around config.amount) (yBounds p)
 
       tickAttrs =
-        [ SA.stroke config.color
+        [ SA.stroke color_
         , SA.strokeWidth (String.fromFloat config.width)
         ] ++ config.attrs
+
+      addTickValues p ts =
+        { ts | ys = ts.ys ++ toTicks p }
   in
-  Element
-    { isHtml = False
-    , prePlane = identity
-    , postPlane = \p ts -> { ts | yTicks = ts.yTicks ++ toTicks p }
-    , view = \_ p _ -> C.yTicks p config.height tickAttrs (config.pinned <| toBounds .x p) (toTicks p)
-    }
+  TicksElement addTickValues <| \p ->
+    C.yTicks p config.height tickAttrs (config.pinned <| toBounds .x p) (toTicks p)
 
 
 
 type alias Label tick msg =
-    { color : String -- TODO use Color
+    { color : Maybe String -- TODO use Color
     , pinned : Bounds -> Float
     , start : Bounds -> Float
     , end : Bounds -> Float
@@ -1062,7 +1118,7 @@ xLabels : List (Label tick msg -> Label tick msg) -> Element item msg
 xLabels edits =
   let config =
         applyAttrs edits
-          { color = "#808BAB"
+          { color = Nothing
           , start = .min
           , end = .max
           , only = \_ -> True
@@ -1074,6 +1130,9 @@ xLabels edits =
           , center = False
           , attrs = []
           }
+
+      color_ =
+        Maybe.withDefault "#808BAB" config.color
 
       xBounds p =
         let b = toBounds .x p in
@@ -1103,16 +1162,15 @@ xLabels edits =
           Nothing -> Nothing
 
       labelAttrs =
-        [ SA.fill config.color
+        [ SA.fill color_
         , SA.transform ("translate(" ++ String.fromFloat config.xOffset ++ " " ++ String.fromFloat config.yOffset ++ ")")
         ] ++ config.attrs
+
+      toTickValues p ts =
+        { ts | xs = ts.xs ++ List.map .value (toTicks p) }
   in
-  Element
-    { isHtml = False
-    , prePlane = identity
-    , postPlane = \p ts -> { ts | xTicks = ts.xTicks ++ List.map .value (toTicks p) }
-    , view = \_ p _ -> C.xLabels p (C.xLabel labelAttrs .value .label) (config.pinned <| toBounds .y p) (repositionIfCenter <| toTicks p)
-    }
+  LabelsElement toTickValues <| \p ->
+    C.xLabels p (C.xLabel labelAttrs .value .label) (config.pinned <| toBounds .y p) (repositionIfCenter <| toTicks p)
 
 
 {-| -}
@@ -1120,7 +1178,7 @@ yLabels : List (Label tick msg -> Label tick msg) -> Element item msg
 yLabels edits =
   let config =
         applyAttrs edits
-          { color = "#808BAB"
+          { color = Nothing
           , start = .min
           , end = .max
           , pinned = zero
@@ -1132,6 +1190,9 @@ yLabels edits =
           , center = False
           , attrs = []
           }
+
+      color_ =
+        Maybe.withDefault "#808BAB" config.color
 
       yBounds p =
         let b = toBounds .y p in
@@ -1161,21 +1222,20 @@ yLabels edits =
           Nothing -> Nothing
 
       labelAttrs =
-        [ SA.fill config.color
+        [ SA.fill color_
         , SA.transform ("translate(" ++ String.fromFloat config.xOffset ++ " " ++ String.fromFloat config.yOffset ++ ")")
         ] ++ config.attrs
+
+      toTickValues p ts =
+        { ts | ys = ts.ys ++ List.map .value (toTicks p) }
   in
-  Element
-    { isHtml = False
-    , prePlane = identity
-    , postPlane = \p ts -> { ts | yTicks = ts.yTicks ++ List.map .value (toTicks p) }
-    , view = \_ p _ -> C.yLabels p (C.yLabel labelAttrs .value .label) (config.pinned <| toBounds .x p) (repositionIfCenter <| toTicks p)
-    }
+  LabelsElement toTickValues <| \p ->
+    C.yLabels p (C.yLabel labelAttrs .value .label) (config.pinned <| toBounds .x p) (repositionIfCenter <| toTicks p)
 
 
 
 type alias Grid msg =
-    { color : String -- TODO use Color
+    { color : Maybe String -- TODO use Color
     , width : Float
     , dotted : Bool
     , filterX : Bounds -> List Float
@@ -1189,7 +1249,7 @@ grid : List (Grid msg -> Grid msg) -> Element item msg
 grid edits =
   let config =
         applyAttrs edits
-          { color = "#EFF2FA"
+          { color = Nothing
           , filterX = zero >> List.singleton
           , filterY = zero >> List.singleton
           , width = 1
@@ -1197,8 +1257,11 @@ grid edits =
           , dotted = False
           }
 
+      color_ =
+        Maybe.withDefault "#EFF2FA" config.color
+
       gridAttrs =
-        [ SA.stroke config.color
+        [ SA.stroke color_
         , SA.strokeWidth (String.fromFloat config.width)
         ] ++ config.attrs
 
@@ -1219,21 +1282,16 @@ grid edits =
       toDot p x y =
         if List.member x (notTheseX p) || List.member y (notTheseY p)
         then Nothing
-        else Just <| C.full config.width C.circle config.color p x y
+        else Just <| C.full config.width C.circle color_ p x y
   in
-  Element
-    { isHtml = False
-    , prePlane = identity
-    , postPlane = always identity
-    , view = \_ p info ->
-        S.g [ SA.class "elm-charts__grid" ] <|
-          if config.dotted then
-            List.concatMap (\x -> List.filterMap (toDot p x) info.yTicks) info.xTicks
-          else
-            [ S.g [ SA.class "elm-charts__x-grid" ] (List.filterMap (toXGrid p) info.xTicks)
-            , S.g [ SA.class "elm-charts__y-grid" ] (List.filterMap (toYGrid p) info.yTicks)
-            ]
-    }
+  GridElement <| \p vs ->
+    S.g [ SA.class "elm-charts__grid" ] <|
+      if config.dotted then
+        List.concatMap (\x -> List.filterMap (toDot p x) vs.ys) vs.xs
+      else
+        [ S.g [ SA.class "elm-charts__x-grid" ] (List.filterMap (toXGrid p) vs.xs)
+        , S.g [ SA.class "elm-charts__y-grid" ] (List.filterMap (toYGrid p) vs.ys)
+        ]
 
 
 
@@ -1306,52 +1364,12 @@ bars edits metrics data =
 
       -- CALC
 
-      ys =
-        List.map (\(Bar value _) -> value) metrics
-
-      toGroupItem p i d =
-        { datum = d
-        , position = { x = toFloat i + 1, y = .max (fromData ys [d]) }
-        , items =
-            let barPoints = C.toBarPoints p (toDataPointBin p i d) in
-            List.map2 (toBarItem d i) barPoints (List.reverse metrics)
-        }
-
-      toDataPointBin p i d =
-        { label = ""
-        , start = toFloat i + 0.5
-        , end = toFloat i + 1.5
-        , spacing = config.spacing
-        , tickLength = 0
-        , tickWidth = 0
-        , bars = List.map (toBar p "" i d) metrics
-        }
-
-      toBarItem datum i point (Bar value m) =
-        { datum = datum
-        , metric =
-            case m.color of
-              Just toColor -> Metric m.label (toColor datum) m.unit
-              Nothing -> Metric m.label blue m.unit
-        , values = { x = toFloat i, y = value datum }
-        , position = point
-        }
+      groupItems =
+        toGroupItems { margin = config.margin, between = config.spacing } metrics data
   in
-  Element
-    { isHtml = False
-    , prePlane = \info ->
-        { info
-          | x = stretch info.x { min = 0.5, max = toFloat (List.length data) + 0.5 }
-          , y = stretch info.y (fromData ys data)
-        }
-    , postPlane = \p info ->
-        { info | collected =
-            data
-              |> List.indexedMap (toGroupItem p)
-              |> List.foldl (\g a -> a ++ [ItemGroup g]) info.collected
-        }
-    , view = \name p _ -> C.bars p (List.indexedMap (toBin p name) data)
-    }
+  BarsElement groupItems <| \name p _ ->
+    -- TODO use items
+    C.bars p (List.indexedMap (toBin p name) data)
 
 
 
@@ -1432,49 +1450,15 @@ histogram toX edits metrics data =
 
       -- CALC
 
-      ys =
-        List.map (\(Bar value _) -> value) metrics
+      binItems =
+        toBinItems { margin = config.margin, between = config.spacing } toX toX2 metrics data
 
-      toXEnd d =
-        case config.binWidth of
-          Just w -> toX d - w d
-          Nothing -> toX d - 1
-
-      toGroupItem p maybePrev d =
-        { datum = d
-        , position =
-            { x = toX d - (toBinWidth p d maybePrev) / 2
-            , y = .max (fromData ys [d])
-            }
-        , items =
-            let barPoints = C.toBarPoints p (toBin "" p maybePrev d) in
-            List.map2 (toBarItem d) barPoints (List.reverse metrics)
-        }
-
-      toBarItem datum point (Bar value m) =
-        { datum = datum
-        , metric =
-            case m.color of
-              Just toColor -> Metric m.label (toColor datum) m.unit
-              Nothing -> Metric m.label blue m.unit
-        , values = { x = toX datum, y = value datum }
-        , position = point
-        }
+      toX2 =
+        Maybe.map (\w d -> toX d + w d) config.binWidth
   in
-  Element
-    { isHtml = False
-    , prePlane = \info ->
-        { info
-        | x = stretch info.x (fromData [toX >> Just, toXEnd >> Just] data)
-        , y = stretch info.y (fromData ys data)
-        }
-    , postPlane = \p info ->
-        { info | collected =
-            mapWithPrev (toGroupItem p) data
-              |> List.foldl (\g a -> a ++ [ItemGroup g]) info.collected
-        }
-    , view = \name p _ -> C.histogram p (mapWithPrev (toBin name p) data)
-    }
+  HistogramElement binItems <| \name p _ ->
+    -- TODO use items
+    C.histogram p (mapWithPrev (toBin name p) data)
 
 
 
@@ -1518,7 +1502,8 @@ just toY =
 
 
 type Series data msg
-  = Series (List data -> (data -> Float) -> String -> Element data msg)
+  = Series (data -> Maybe Float) String String (Maybe String)
+      ((data -> Float) -> List data -> C.Plane -> String -> S.Svg msg)
 
 
 {-| -}
@@ -1530,21 +1515,24 @@ series toX series_ data =
       defaultColors =
         List.concat (List.repeat (timesOver + 1) colors)
 
-      elements =
-        List.map2 (\(Series s) -> s data toX) series_ defaultColors
+      metrics =
+        List.map2 (\(Series toY l u cM _) defaultColor ->
+            ( Metric l (Maybe.withDefault defaultColor cM) u, toY )
+          )
+        series_ defaultColors
+
+      items =
+        toDotItems toX metrics data
   in
-  Element
-    { isHtml = False
-    , prePlane = \info -> List.foldl (\(Element s) i -> s.prePlane i) info elements
-    , postPlane = \p info -> List.foldl (\(Element s) i -> s.postPlane p i) info elements
-    , view = \name p i ->
-        S.g [ SA.class "elm-charts__series", clipPath name ]
-            (List.map (\(Element s) -> s.view name p i) elements)
-    }
+  SeriesElement items <| \name p _ ->
+    -- TODO use items
+    S.g [ SA.class "elm-charts__series", clipPath name ]
+      (List.map2 (\(Series _ _ _ _ view) -> view toX data p) series_ defaultColors)
+
 
 
 type alias Scatter data msg =
-    { color : String -- TODO use Color
+    { color : Maybe String -- TODO use Color
     , label : String
     , unit : String
     , dot : Maybe (data -> C.Dot msg)
@@ -1554,42 +1542,31 @@ type alias Scatter data msg =
 {-| -}
 scatter : (data -> Maybe Float) -> List (Scatter data msg -> Scatter data msg) -> Series data msg
 scatter toY edits =
-  Series <| \data toX defaultColor ->
-    let config =
-          applyAttrs edits
-            { color = defaultColor
-            , label = ""
-            , unit = ""
-            , dot = Nothing
-            }
-
-        finalDot =
-           -- TODO use inheritance for color instead?
-          case config.dot of
-            Nothing -> always (C.disconnected 6 1 C.cross config.color)
-            Just d -> d
-    in
-    Element
-      { isHtml = False
-      , prePlane = \info ->
-          { info
-          | x = stretch info.x (fromData [toX >> Just] data)
-          , y = stretch info.y (fromData [toY] data)
+  -- TODO seperate dot style and color from shape
+  let config =
+        applyAttrs edits
+          { color = Nothing
+          , label = ""
+          , unit = ""
+          , dot = Nothing
           }
-      , postPlane = \p info ->
-          let metric = Metric config.label config.color config.unit in
-          { info | collected = info.collected ++ List.map (toDotItem p metric toX toY) data }
-      , view = \name p _ ->
-          S.g
-            [ SA.class "elm-charts__scatter" ]
-            [ C.scatter p toX toY finalDot data ]
-      }
+
+      finalDot c =
+        -- TODO use inheritance for color instead?
+        case config.dot of
+          Nothing -> always (C.disconnected 6 1 C.cross c)
+          Just d -> d
+  in
+  Series toY config.label config.unit config.color <| \toX data p c ->
+    S.g
+      [ SA.class "elm-charts__scatter" ]
+      [ C.scatter p toX toY (finalDot c) data ]
 
 
 type alias Interpolation data msg =
     { area : Maybe String -- TODO use Color
+    , color : Maybe String -- TODO use Color
     , width : Float
-    , color : String -- TODO use Color
     , label : String
     , unit : String
     , dot : Maybe (data -> C.Dot msg)
@@ -1600,169 +1577,111 @@ type alias Interpolation data msg =
 {-| -}
 monotone : (data -> Maybe Float) -> List (Interpolation data msg -> Interpolation data msg) -> Series data msg
 monotone toY edits =
-  Series <| \data toX defaultColor ->
-    let config =
-          applyAttrs edits
-            { color = defaultColor
-            , area = Nothing
-            , width = 1
-            , dot = Nothing
-            , label = ""
-            , unit = ""
-            , attrs = []
-            }
-
-        interAttrs =
-          [ SA.stroke config.color
-          , SA.strokeWidth (String.fromFloat config.width)
-          ] ++ config.attrs
-
-        finalDot =
-          case config.dot of -- TODO use inheritance instead?
-            Nothing -> always (C.disconnected 6 1 C.cross config.color)
-            Just d -> d
-    in
-    Element
-      { isHtml = False
-      , prePlane = \info ->
-          { info
-          | x = stretch info.x (fromData [toX >> Just] data)
-          , y = stretch info.y (fromData [toY] data)
+  let config =
+        applyAttrs edits
+          { color = Nothing
+          , area = Nothing
+          , width = 1
+          , dot = Nothing
+          , label = ""
+          , unit = ""
+          , attrs = []
           }
-      , postPlane = \p info ->
-          let metric = Metric config.label config.color config.unit in
-          { info | collected = info.collected ++ List.map (toDotItem p metric toX toY) data }
-      , view = \name p _ ->
-          case config.area of
-            Just fill ->
-              S.g [ SA.class "elm-charts__monotone-area" ]
-                [ C.monotoneArea p toX toY (interAttrs ++ [ SA.stroke "transparent", SA.fill fill ]) finalDot data
-                , C.monotone p toX toY interAttrs finalDot data
-                ]
 
-            Nothing ->
-              S.g
-                [ SA.class "elm-charts__monotone" ]
-                [ C.monotone p toX toY interAttrs finalDot data ]
-      }
+      interAttrs c =
+        [ SA.stroke c
+        , SA.strokeWidth (String.fromFloat config.width)
+        ] ++ config.attrs
+
+      finalDot c =
+        case config.dot of -- TODO use inheritance instead?
+          Nothing -> always (C.disconnected 6 1 C.cross c)
+          Just d -> d
+  in
+  Series toY config.label config.unit config.color <| \toX data p c ->
+    case config.area of
+      Just fill ->
+        S.g [ SA.class "elm-charts__monotone-area" ]
+          [ C.monotoneArea p toX toY (interAttrs c ++ [ SA.stroke "transparent", SA.fill fill ]) (finalDot c) data
+            -- TODO what does the area need the dot for?
+          , C.monotone p toX toY (interAttrs c) (finalDot c) data
+          ]
+
+      Nothing ->
+        S.g
+          [ SA.class "elm-charts__monotone" ]
+          [ C.monotone p toX toY (interAttrs c) (finalDot c) data ]
 
 
 
 {-| -}
 linear : (data -> Maybe Float) -> List (Interpolation data msg -> Interpolation data msg) -> Series data msg
 linear toY edits =
-  Series <| \data toX defaultColor ->
-    let config =
-          applyAttrs edits
-            { color = defaultColor
-            , area = Nothing
-            , width = 1
-            , label = ""
-            , unit = ""
-            , dot = Nothing
-            , attrs = []
-            }
-
-        interAttrs =
-          [ SA.stroke config.color
-          , SA.strokeWidth (String.fromFloat config.width)
-          ] ++ config.attrs
-
-        finalDot =
-          case config.dot of
-            Nothing -> always (C.disconnected 6 1 C.cross config.color)
-            Just d -> d
-    in
-    Element
-      { isHtml = False
-      , prePlane = \info ->
-          { info
-          | x = stretch info.x (fromData [toX >> Just] data)
-          , y = stretch info.y (fromData [toY] data)
+  let config =
+        applyAttrs edits
+          { color = Nothing
+          , area = Nothing
+          , width = 1
+          , label = ""
+          , unit = ""
+          , dot = Nothing
+          , attrs = []
           }
-      , postPlane = \p info ->
-          let metric = Metric config.label config.color config.unit in
-          { info | collected = info.collected ++ List.map (toDotItem p metric toX toY) data }
-      , view = \name p _ ->
-        case config.area of
-          Just fill ->
-            S.g [ SA.class "elm-charts__linear-area" ]
-              [ C.linearArea p toX toY (interAttrs ++ [ SA.stroke "transparent", SA.fill fill ]) finalDot data
-              , C.linear p toX toY interAttrs finalDot data
-              ]
 
-          Nothing ->
-            S.g
-              [ SA.class "elm-charts__linear" ]
-              [ C.linear p toX toY interAttrs finalDot data ]
-      }
+      interAttrs c =
+        [ SA.stroke c
+        , SA.strokeWidth (String.fromFloat config.width)
+        ] ++ config.attrs
 
+      finalDot c =
+        case config.dot of
+          Nothing -> always (C.disconnected 6 1 C.cross c)
+          Just d -> d
+  in
+  Series toY config.label config.unit config.color <| \toX data p c ->
+    case config.area of
+      Just fill ->
+        S.g [ SA.class "elm-charts__linear-area" ]
+          [ C.linearArea p toX toY ((interAttrs c) ++ [ SA.stroke "transparent", SA.fill fill ]) (finalDot c) data
+          , C.linear p toX toY (interAttrs c) (finalDot c) data
+          ]
 
-toDotItem : C.Plane -> Metric -> (data -> Float) -> (data -> Maybe Float) -> data -> Item (Maybe Float) data
-toDotItem p metric toX toY datum =
-  ItemDot
-    { datum = datum
-    , position = { x = toX datum, y = Maybe.withDefault (C.closestToZero p) (toY datum) }
-    , values = { x = toX datum, y = toY datum }
-    , metric = metric
-    }
+      Nothing ->
+        S.g
+          [ SA.class "elm-charts__linear" ]
+          [ C.linear p toX toY (interAttrs c) (finalDot c) data ]
 
 
 {-| -}
 svg : (C.Plane -> S.Svg msg) -> Element data msg
 svg func =
-  Element
-    { isHtml = False
-    , prePlane = identity
-    , postPlane = always identity
-    , view = \_ p _-> func p
-    }
+  SvgElement <| \p -> func p
 
 
 {-| -}
 html : (C.Plane -> H.Html msg) -> Element data msg
 html func =
-  Element
-    { isHtml = True
-    , prePlane = identity
-    , postPlane = always identity
-    , view = \_ p _-> func p
-    }
+  HtmlElement <| \p -> func p
 
 
 {-| -}
 svgAt : (Bounds -> Float) -> (Bounds -> Float) -> Float -> Float -> List (S.Svg msg) -> Element data msg
 svgAt toX toY xOff yOff view =
-  Element
-    { isHtml = False
-    , prePlane = identity
-    , postPlane = always identity
-    , view = \_ p _ ->
-        S.g [ C.position p (toX <| toBounds .x p) (toY <| toBounds .y p) xOff yOff ] view
-    }
+  SvgElement <| \p ->
+    S.g [ C.position p (toX <| toBounds .x p) (toY <| toBounds .y p) xOff yOff ] view
 
 
 {-| -}
 htmlAt : (Bounds -> Float) -> (Bounds -> Float) -> Float -> Float -> List (H.Attribute msg) -> List (H.Html msg) -> Element data msg
 htmlAt toX toY xOff yOff att view =
-  Element
-    { isHtml = True
-    , prePlane = identity
-    , postPlane = always identity
-    , view = \_ p _ ->
-        C.positionHtml p (toX <| toBounds .x p) (toY <| toBounds .y p) xOff yOff att view
-    }
+  HtmlElement <| \p ->
+    C.positionHtml p (toX <| toBounds .x p) (toY <| toBounds .y p) xOff yOff att view
 
 
 {-| -}
 none : Element data msg
 none =
-  Element
-    { isHtml = True
-    , prePlane = identity
-    , postPlane = always identity
-    , view = \_ _ _-> H.text ""
-    }
+  HtmlElement <| \_ -> H.text ""
 
 
 
@@ -1942,3 +1861,121 @@ formatWeekday : Time.Zone -> Time.Posix -> String
 formatWeekday =
     F.format
         [ F.dayOfWeekNameFull ]
+
+
+
+
+-- ITEMS
+
+
+toDotItems : (data -> Float) -> List ( Metric, data -> Maybe Float ) -> List data -> List (Single (Maybe Float) data)
+toDotItems toX metrics data =
+  let toDotItem datum (metric, value) =
+        { datum = datum
+        , position =
+            { x1 = toX datum
+            , x2 = toX datum
+            , y = Maybe.withDefault 0 (value datum)
+            }
+        , values =
+            { x1 = toX datum
+            , x2 = toX datum
+            , y = value datum
+            }
+        , metric = metric
+        }
+
+      toLineItems datum =
+        List.map (toDotItem datum) metrics
+  in
+  List.concatMap toLineItems data
+
+
+type alias Space =
+  { between : Float
+  , margin : Float
+  }
+
+
+toGroupItems : Space -> List (Bar data msg) -> List data -> List (Group (Maybe Float) data)
+toGroupItems space bars_ data =
+  let barWidth =
+        1 - space.margin * 2 - toFloat (List.length bars_ - 1) * space.between
+
+      toBarItem binIndex datum barIndex (Bar value metric) =
+        { datum = datum
+        , position =
+            { x1 = toFloat binIndex - 0.5 + space.margin + toFloat barIndex * barWidth
+            , x2 = toFloat binIndex - 0.5 + space.margin + toFloat barIndex * barWidth + barWidth
+            , y = Maybe.withDefault 0 (value datum)
+            }
+        , values =
+            { x1 = toFloat binIndex
+            , x2 = toFloat binIndex
+            , y = value datum
+            }
+        , metric =  Metric metric.label metric.unit <|
+            case metric.color of
+              Just c -> c datum
+              Nothing -> blue
+        }
+
+      toGroupItem binIndex datum =
+        let toYs = List.map (\(Bar value metric) -> value) bars_ in
+        { datum = datum
+        , position =
+            { x1 = toFloat binIndex
+            , x2 = toFloat binIndex
+            , y = C.maximum toYs [datum]
+            }
+        , items = List.indexedMap (toBarItem binIndex datum) bars_
+        }
+  in
+  List.indexedMap toGroupItem data
+
+
+toBinItems : Space -> (data -> Float) -> Maybe (data -> Float) -> List (Bar data msg) -> List data -> List (Group (Maybe Float) data)
+toBinItems space toX1 toX2Maybe bars_ data =
+  let toLength prevMaybe datum =
+        case toX2Maybe of
+          Just toX2 -> toX1 datum - toX2 datum
+          Nothing ->
+            case prevMaybe of
+              Just prev -> toX1 datum - toX1 prev
+              Nothing -> toX1 datum -- TODO use axis.min
+
+      toBarItem prevMaybe datum barIndex (Bar value metric) =
+        let length = toLength prevMaybe datum
+            margin_ = length * space.margin
+            width_ = length - margin_ * 2 - toFloat (List.length bars_ - 1) * space.between
+        in
+        { datum = datum
+        , position =
+            { x1 = toX1 datum + margin_ + toFloat barIndex * width_
+            , x2 = toX1 datum + margin_ + toFloat barIndex * width_ + width_
+            , y = Maybe.withDefault 0 (value datum) -- TODO perhaps leave as Maybe?
+            }
+        , values =
+            { x1 = toX1 datum
+            , x2 = toX1 datum + width_
+            , y = value datum
+            }
+        , metric = Metric metric.label metric.unit <|
+            case metric.color of
+              Just c -> c datum
+              Nothing -> blue
+        }
+
+      toBinItem prevMaybe datum =
+        let toYs = List.map (\(Bar value metric) -> value) bars_ in
+        { datum = datum
+        , position =
+            { x1 = toX1 datum
+            , x2 = toX1 datum + toLength prevMaybe datum
+            , y = C.maximum toYs [datum]
+            }
+        , items = List.indexedMap (toBarItem prevMaybe datum) bars_
+        }
+  in
+  mapWithPrev toBinItem data
+
