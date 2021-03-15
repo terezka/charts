@@ -95,10 +95,11 @@ view model =
     [ C.grid []
 
     , C.histogram .x
-        [ C.tickLength 4
+        [ C.tickLength 0
         , C.spacing 0
         , C.margin 0
-        , C.binLabel .label
+        --, C.binWidth (always 2)
+        --, C.binLabel .label
         ]
         [ C.bar .z [ C.barColor (\d -> C.pink), C.label "area", C.unit "m2", C.topLabel (.z >> Maybe.map String.fromFloat) ]
         , C.bar .y [ C.barColor (\d -> C.blue), C.label "speed", C.unit "ms" ]
@@ -109,6 +110,8 @@ view model =
     , C.yTicks []
     , C.xAxis []
     , C.yLabels []
+    , C.xTicks [ C.amount 10 ]
+    , C.xLabels [ C.amount 10 ]
 
     , C.series .x
         [ C.linear .y [ C.color C.blue ]

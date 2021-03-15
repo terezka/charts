@@ -1942,7 +1942,7 @@ toBinItems space toX1 toX2Maybe bars_ data =
           Nothing ->
             case prevMaybe of
               Just prev -> toX1 datum - toX1 prev
-              Nothing -> toX1 datum -- TODO use axis.min
+              Nothing -> 1 -- toX1 datum -- TODO use axis.min
 
       toBarItem prevMaybe datum barIndex (Bar value metric) =
         let length = toLength prevMaybe datum
@@ -1951,8 +1951,8 @@ toBinItems space toX1 toX2Maybe bars_ data =
         in
         { datum = datum
         , position =
-            { x1 = toX1 datum + margin_ + toFloat barIndex * width_
-            , x2 = toX1 datum + margin_ + toFloat barIndex * width_ + width_
+            { x1 = toX1 datum + margin_ + toFloat barIndex * width_ - width_
+            , x2 = toX1 datum + margin_ + toFloat barIndex * width_
             , y = Maybe.withDefault 0 (value datum) -- TODO perhaps leave as Maybe?
             }
         , values =
