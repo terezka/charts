@@ -17,7 +17,7 @@ main =
     { init = Model [] []
     , update = \msg model ->
         case msg of
-          OnHover bs ds -> { model | hoveringBars = bs, hoveringDots = ds }
+          OnHover bs -> { model | hoveringBars = bs }
           OnLeave -> { model | hoveringBars = [], hoveringDots = [] }
 
     , view = view
@@ -31,9 +31,7 @@ type alias Model =
 
 
 type Msg
-  = OnHover
-      (List (C.Single Float BarPoint))
-      (List (C.Single Float BarPoint))
+  = OnHover (List (C.Single Float BarPoint))
   | OnLeave
 
 
@@ -56,7 +54,7 @@ data : List BarPoint
 data =
   [ { x = 0, y = Just 4, z = Just 5, label = "DK" }
   , { x = 4, y = Just 2, z = Just 3, label = "NO" }
-  , { x = 6, y = Just 4, z = Nothing, label = "SE" }
+  , { x = 6, y = Just 4, z = Just 0, label = "SE" }
   , { x = 8, y = Just 3, z = Just 7, label = "FI" }
   , { x = 10, y = Just 4, z = Just 3, label = "IS" }
   ]
@@ -84,25 +82,31 @@ view model =
         ]
     , C.paddingLeft 10
     , C.events
-        [ C.event "mousemove" <|
-            C.map2 OnHover
+        [ C.event "mouseleave" (C.map (\_ -> OnHover []) C.getCoords)
+        , C.event "mousemove" <|
+            C.map OnHover
               --(C.noUnknowns C.getBars >> C.getNearestX)
               --(C.noUnknowns C.getDots >> C.getWithin 20)
               (C.getNearestX (C.withoutUnknowns >> C.getBars))
-              (C.getNearest (C.withoutUnknowns >> C.getDots))
+              --(C.getNearest (C.withoutUnknowns >> C.getDots))
         ]
     ]
     [ C.grid []
 
-    , C.histogram .x
-        [ C.tickLength 0
+    , C.bars
+        [ C.tickLength 4
         , C.spacing 0
         , C.margin 0
         --, C.binWidth (always 2)
         --, C.binLabel .label
         ]
-        [ C.bar .z [ C.barColor (\d -> C.pink), C.label "area", C.unit "m2", C.topLabel (.z >> Maybe.map String.fromFloat) ]
-        , C.bar .y [ C.barColor (\d -> C.blue), C.label "speed", C.unit "ms" ]
+        [ C.bar .z
+            [ C.barColor (\d -> C.pink)
+            , C.label "area"
+            , C.unit "m2"
+            , C.topLabel (.z >> Maybe.map String.fromFloat)
+            ]
+        --, C.bar .y [ C.barColor (\d -> C.blue), C.label "speed", C.unit "ms" ]
         ]
         data
 
@@ -110,21 +114,21 @@ view model =
     , C.yTicks []
     , C.xAxis []
     , C.yLabels []
-    , C.xTicks [ C.amount 10 ]
-    , C.xLabels [ C.amount 10 ]
+    --, C.xTicks [ C.amount 10 ]
+    , C.xLabels []
 
-    , C.series .x
-        [ C.linear .y [ C.color C.blue ]
-        , C.linear .z []
-        ]
-        data
+    --, C.series .x
+    --    [ C.linear .y [ C.color C.blue ]
+    --    , C.linear .z []
+    --    ]
+    --    data
 
-    , C.when model.hoveringDots <| \item rest ->
-        C.tooltipOnTop (always item.position.x1) (always item.position.y) []
-          [ tooltipRow item ]
+    --, C.when model.hoveringDots <| \item rest ->
+    --    C.tooltipOnTop (always item.position.x1) (always item.position.y) []
+    --      [ tooltipRow item ]
 
     , C.when model.hoveringBars <| \item rest ->
-        C.tooltipOnTop (always item.position.x1) (always item.position.y) []
+        C.tooltipOnTop (always item.center.x) (always item.position.y) []
           [ tooltipRow item ]
 
     --, C.when model.hovering <| \group rest ->

@@ -556,7 +556,7 @@ definePlane config items =
 
       xRange =
         { min = C.minimum [.x1 >> Just] points
-        , max = C.maximum [.x1 >> Just] points
+        , max = C.maximum [.x2 >> Just] points
         }
 
       yRange =
@@ -762,6 +762,7 @@ type alias Metric =
 {-| -}
 type alias Single value data =
   { datum : data
+  , center : { x : Float, y : Float }
   , position : { x1 : Float, x2 : Float, y : Float }
   , values : { x1 : Float, x2 : Float, y : value }
   , metric : Metric
@@ -771,6 +772,7 @@ type alias Single value data =
 {-| -}
 type alias Group value data =
   { datum : data
+  , center : { x : Float, y : Float }
   , position : { x1 : Float, x2 : Float, y : Float }
   , items : List (Single value data)
   }
@@ -811,7 +813,7 @@ withoutUnknowns : List (Item (Maybe Float) data) -> List (Item Float data)
 withoutUnknowns =
   let onlyKnowns i =
         case i.values.y of
-          Just y -> Just (Single i.datum i.position { x1 = i.values.x1, x2 = i.values.x2, y = y } i.metric)
+          Just y -> Just (Single i.datum i.center i.position { x1 = i.values.x1, x2 = i.values.x2, y = y } i.metric)
           Nothing -> Nothing
   in
   List.filterMap <| \item ->
@@ -825,6 +827,7 @@ withoutUnknowns =
       ItemGroup i ->
         Just <| ItemGroup
           { datum = i.datum
+          , center = i.center
           , position = i.position
           , items = List.filterMap onlyKnowns i.items
           }
@@ -1872,6 +1875,10 @@ toDotItems : (data -> Float) -> List ( Metric, data -> Maybe Float ) -> List dat
 toDotItems toX metrics data =
   let toDotItem datum (metric, value) =
         { datum = datum
+        , center =
+            { x = toX datum
+            , y = Maybe.withDefault 0 (value datum)
+            }
         , position =
             { x1 = toX datum
             , x2 = toX datum
@@ -1904,9 +1911,13 @@ toGroupItems space bars_ data =
 
       toBarItem binIndex datum barIndex (Bar value metric) =
         { datum = datum
+        , center =
+            { x = toFloat binIndex + 0.5 + space.margin + toFloat barIndex * barWidth + barWidth / 2
+            , y = Maybe.withDefault 0 (value datum)
+            }
         , position =
-            { x1 = toFloat binIndex - 0.5 + space.margin + toFloat barIndex * barWidth
-            , x2 = toFloat binIndex - 0.5 + space.margin + toFloat barIndex * barWidth + barWidth
+            { x1 = toFloat binIndex + 0.5 + space.margin + toFloat barIndex * barWidth
+            , x2 = toFloat binIndex + 0.5 + space.margin + toFloat barIndex * barWidth + barWidth
             , y = Maybe.withDefault 0 (value datum)
             }
         , values =
@@ -1923,6 +1934,10 @@ toGroupItems space bars_ data =
       toGroupItem binIndex datum =
         let toYs = List.map (\(Bar value metric) -> value) bars_ in
         { datum = datum
+        , center =
+            { x = toFloat binIndex
+            , y = C.maximum toYs [datum]
+            }
         , position =
             { x1 = toFloat binIndex
             , x2 = toFloat binIndex
@@ -1950,6 +1965,10 @@ toBinItems space toX1 toX2Maybe bars_ data =
             width_ = length - margin_ * 2 - toFloat (List.length bars_ - 1) * space.between
         in
         { datum = datum
+        , center =
+            { x = toX1 datum + margin_ + toFloat barIndex * width_ - width_ / 2
+            , y = Maybe.withDefault 0 (value datum)
+            }
         , position =
             { x1 = toX1 datum + margin_ + toFloat barIndex * width_ - width_
             , x2 = toX1 datum + margin_ + toFloat barIndex * width_
@@ -1969,6 +1988,10 @@ toBinItems space toX1 toX2Maybe bars_ data =
       toBinItem prevMaybe datum =
         let toYs = List.map (\(Bar value metric) -> value) bars_ in
         { datum = datum
+        , center =
+            { x = toX1 datum + toLength prevMaybe datum / 2
+            , y = C.maximum toYs [datum]
+            }
         , position =
             { x1 = toX1 datum
             , x2 = toX1 datum + toLength prevMaybe datum
