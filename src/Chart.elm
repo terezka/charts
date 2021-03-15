@@ -1925,10 +1925,14 @@ toGroupItems space bars_ data =
             , x2 = toFloat binIndex
             , y = value datum
             }
-        , metric =  Metric metric.label metric.unit <|
-            case metric.color of
-              Just c -> c datum
-              Nothing -> blue
+        , metric =
+            { label = metric.label
+            , unit = metric.unit
+            , color =
+                case metric.color of
+                  Just c -> c datum
+                  Nothing -> blue
+            }
         }
 
       toGroupItem binIndex datum =
@@ -1979,10 +1983,14 @@ toBinItems space toX1 toX2Maybe bars_ data =
             , x2 = toX1 datum + width_
             , y = value datum
             }
-        , metric = Metric metric.label metric.unit <|
-            case metric.color of
-              Just c -> c datum
-              Nothing -> blue
+        , metric =
+            { label = metric.label
+            , unit = metric.unit
+            , color =
+                case metric.color of
+                  Just c -> c datum
+                  Nothing -> blue
+            }
         }
 
       toBinItem prevMaybe datum =
