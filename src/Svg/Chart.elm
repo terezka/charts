@@ -73,7 +73,7 @@ mirrored on the other side of the axis!
 import Html exposing (Html)
 import Html.Attributes as HA
 import Svg exposing (Svg, Attribute, g, path, rect, text)
-import Svg.Attributes as Attributes exposing (class, width, height, stroke, fill, d, transform, viewBox)
+import Svg.Attributes as Attributes exposing (class, width, height, stroke, fill, fillOpacity, d, transform, viewBox)
 import Svg.Coordinates exposing (Plane, place, toSVGX, toSVGY, toCartesianX, toCartesianY, scaleSVG, scaleCartesian, placeWithOffset)
 import Svg.Commands exposing (..)
 import Internal.Colors exposing (..)
@@ -718,7 +718,7 @@ scatter plane toX toY dot data =
 
 {-| Series with linear interpolation.
 -}
-linear : Plane -> (data -> Float) -> (data -> Maybe Float) -> List (Attribute msg) -> Maybe String -> (data -> Dot msg) -> List data -> Svg msg
+linear : Plane -> (data -> Float) -> (data -> Maybe Float) -> List (Attribute msg) -> Maybe Float -> (data -> Dot msg) -> List data -> Svg msg
 linear plane toX toY attributes areaMaybe dot data =
   let points = toPoints toX toY data in
   viewSeries plane toX toY dot data <|
@@ -727,7 +727,7 @@ linear plane toX toY attributes areaMaybe dot data =
 
 {-| Series with monotone interpolation.
 -}
-monotone : Plane -> (data -> Float) -> (data -> Maybe Float) -> List (Attribute msg) -> Maybe String -> (data -> Dot msg) -> List data -> Svg msg
+monotone : Plane -> (data -> Float) -> (data -> Maybe Float) -> List (Attribute msg) -> Maybe Float -> (data -> Dot msg) -> List data -> Svg msg
 monotone plane toX toY attributes areaMaybe dot data =
   let points = toPoints toX toY data in
   viewSeries plane toX toY dot data <|
@@ -751,13 +751,13 @@ viewSeries plane toX toY dot data interpolation =
     ]
 
 
-viewInterpolations : Plane -> Maybe String -> List (Attribute msg) -> List (List Point) -> List (List Command) -> Svg msg
+viewInterpolations : Plane -> Maybe Float -> List (Attribute msg) -> List (List Point) -> List (List Command) -> Svg msg
 viewInterpolations plane areaMaybe userAttributes points commands =
   g [ class "elm-charts__interpolations" ] <| List.concat <|
     List.map2 (\ps cs -> viewInterpolation plane areaMaybe userAttributes ps cs) points commands
 
 
-viewInterpolation : Plane -> Maybe String -> List (Attribute msg) -> List Point -> List Command -> List (Svg msg)
+viewInterpolation : Plane -> Maybe Float -> List (Attribute msg) -> List Point -> List Command -> List (Svg msg)
 viewInterpolation plane areaMaybe userAttributes points commands =
   case ( points, areaMaybe ) of
     ( [], _ ) ->
@@ -766,9 +766,9 @@ viewInterpolation plane areaMaybe userAttributes points commands =
     ( first :: rest, Nothing ) ->
       [ viewLine plane userAttributes commands first rest ]
 
-    ( first :: rest, Just fillColor ) ->
-      [ viewArea plane (userAttributes ++ [ stroke "transparent", fill fillColor ]) commands first rest
-      , viewLine plane userAttributes commands first rest
+    ( first :: rest, Just opacity ) ->
+      [ viewArea plane (userAttributes ++ [ stroke "transparent", fillOpacity (String.fromFloat opacity) ]) commands first rest
+      , viewLine plane (userAttributes ++ [ fill "transparent" ]) commands first rest
       ]
 
 

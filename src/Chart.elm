@@ -262,7 +262,7 @@ dotted config =
 
 
 {-| -}
-area : String -> Attribute { a | area : Maybe String }
+area : Float -> Attribute { a | area : Maybe Float }
 area value config =
   { config | area = Just value }
 
@@ -1580,7 +1580,7 @@ scatter toY edits =
 
 
 type alias Interpolation data msg =
-    { area : Maybe String -- TODO use Color
+    { area : Maybe Float -- TODO use Color
     , color : Maybe String -- TODO use Color
     , width : Float
     , label : String
@@ -1607,6 +1607,7 @@ monotone toY edits =
       interAttrs c =
         [ SA.stroke c
         , SA.strokeWidth (String.fromFloat config.width)
+        , SA.fill c
         ] ++ config.attrs
 
       finalDot i c =
@@ -1636,6 +1637,7 @@ linear toY edits =
       interAttrs c =
         [ SA.stroke c
         , SA.strokeWidth (String.fromFloat config.width)
+        , SA.fill c
         ] ++ config.attrs
 
       finalDot i c =

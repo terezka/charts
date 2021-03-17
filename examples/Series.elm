@@ -87,7 +87,7 @@ viewBasic =
     , C.yLabels []
 
     , C.series .x
-        [ C.linear .z [ C.area "rgba(5,142,218, 0.25)" ]
+        [ C.linear .z [ C.area 0.2 ]
         , C.monotone .y []
         ]
         data
@@ -124,7 +124,7 @@ viewHover model =
     , C.xLabels []
 
     , C.series .x
-        [ C.linear .z [ C.label "area", C.unit "m2", C.area "rgba(5,142,218, 0.25)" ]
+        [ C.linear .z [ C.label "area", C.unit "m2", C.area 0.25 ]
         , C.monotone .y [ C.label "speed", C.unit "km/h" ]
         ]
         data
