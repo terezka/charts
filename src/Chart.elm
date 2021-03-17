@@ -549,10 +549,10 @@ definePlane config items =
         case item of
           ItemBar value -> value.position :: acc
           ItemDot value -> value.position :: acc
-          ItemGroup value -> List.map .position value.items ++ acc
+          ItemGroup value -> value.position :: acc
 
       points =
-        List.foldl toPoints [] items
+        Debug.log "x"  <| List.foldl toPoints [] items
 
       xRange =
         { min = C.minimum [.x1 >> Just] points
@@ -564,14 +564,24 @@ definePlane config items =
         , max = C.maximum [.y >> Just] points
         }
 
+      calcRange =
+        case config.range of
+          Just edit -> edit xRange
+          Nothing -> xRange
+
+      calcDomain =
+        case config.domain of
+          Just edit -> edit yRange
+          Nothing -> startMin 0 yRange
+
       scalePadX =
         C.scaleCartesian
           { marginLower = config.marginLeft
           , marginUpper = config.marginRight
           , length = max 1 (config.width - config.paddingLeft - config.paddingRight)
-          , data = xRange
-          , min = xRange.min
-          , max = xRange.max
+          , data = calcRange
+          , min = calcRange.min
+          , max = calcRange.max
           }
 
       scalePadY =
@@ -579,9 +589,9 @@ definePlane config items =
           { marginUpper = config.marginTop
           , marginLower = config.marginBottom
           , length = max 1 (config.height - config.paddingBottom - config.paddingTop)
-          , data = yRange
-          , min = yRange.min
-          , max = yRange.max
+          , data = calcDomain
+          , min = calcDomain.min
+          , max = calcDomain.max
           }
   in
   { x =
@@ -589,16 +599,16 @@ definePlane config items =
       , marginUpper = config.marginRight
       , length = config.width
       , data = xRange
-      , min = xRange.min - scalePadX config.paddingLeft
-      , max = xRange.max + scalePadX config.paddingRight
+      , min = calcRange.min - scalePadX config.paddingLeft
+      , max = calcRange.max + scalePadX config.paddingRight
       }
   , y =
       { marginUpper = config.marginTop
       , marginLower = config.marginBottom
       , length = config.height
       , data = yRange
-      , min = yRange.min - scalePadY config.paddingBottom
-      , max = yRange.max + scalePadY config.paddingTop
+      , min = calcDomain.min - scalePadY config.paddingBottom
+      , max = calcDomain.max + scalePadY config.paddingTop
       }
   }
 
@@ -1906,8 +1916,11 @@ type alias Space =
 
 toGroupItems : Space -> List (Bar data msg) -> List data -> List (Group (Maybe Float) data)
 toGroupItems space bars_ data =
-  let barWidth =
-        1 - space.margin * 2 - toFloat (List.length bars_ - 1) * space.between
+  let amountOfBars =
+        toFloat (List.length bars_)
+
+      barWidth =
+        (1 - space.margin * 2 - (amountOfBars - 1) * space.between) / amountOfBars
 
       toBarItem binIndex datum barIndex (Bar value metric) =
         { datum = datum
@@ -1943,8 +1956,8 @@ toGroupItems space bars_ data =
             , y = C.maximum toYs [datum]
             }
         , position =
-            { x1 = toFloat binIndex
-            , x2 = toFloat binIndex
+            { x1 = toFloat binIndex + 0.5
+            , x2 = toFloat binIndex + 1.5
             , y = C.maximum toYs [datum]
             }
         , items = List.indexedMap (toBarItem binIndex datum) bars_
@@ -1957,7 +1970,7 @@ toBinItems : Space -> (data -> Float) -> Maybe (data -> Float) -> List (Bar data
 toBinItems space toX1 toX2Maybe bars_ data =
   let toLength prevMaybe datum =
         case toX2Maybe of
-          Just toX2 -> toX1 datum - toX2 datum
+          Just toX2 -> toX1 datum - toX2 datum -- TODO maybe use actual x2 instead of width?
           Nothing ->
             case prevMaybe of
               Just prev -> toX1 datum - toX1 prev
@@ -1966,7 +1979,8 @@ toBinItems space toX1 toX2Maybe bars_ data =
       toBarItem prevMaybe datum barIndex (Bar value metric) =
         let length = toLength prevMaybe datum
             margin_ = length * space.margin
-            width_ = length - margin_ * 2 - toFloat (List.length bars_ - 1) * space.between
+            amountOfBars = toFloat (List.length bars_)
+            width_ = (length - margin_ * 2 - (amountOfBars - 1) * space.between) / amountOfBars
         in
         { datum = datum
         , center =
