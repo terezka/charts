@@ -2,7 +2,7 @@ module Svg.Chart
   exposing
     ( responsive, static, frame
     , Dot, clear, empty, disconnected, aura, full
-    , circle, triangle, square, diamond, plus, cross
+    , Shape, circle, triangle, square, diamond, plus, cross
     , scatter, linear, monotone
     , Group, bars
     , Bin, Bar, histogram

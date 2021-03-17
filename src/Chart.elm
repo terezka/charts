@@ -1524,7 +1524,7 @@ just toY =
 
 type Series data msg
   = Series (data -> Maybe Float) String String (Maybe String)
-      ((data -> Float) -> List data -> C.Plane -> String -> S.Svg msg)
+      (Int -> (data -> Float) -> List data -> C.Plane -> String -> S.Svg msg)
 
 
 {-| -}
@@ -1543,7 +1543,7 @@ series toX series_ data =
     -- TODO use items
     S.g
       [ SA.class "elm-charts__series", clipPath name ] <|
-      List.indexedMap (\i (Series _ _ _ _ view) -> view toX data p (toDefaultColor i)) series_
+      List.indexedMap (\i (Series _ _ _ _ view) -> view i toX data p (toDefaultColor i)) series_
 
 
 
@@ -1567,16 +1567,14 @@ scatter toY edits =
           , dot = Nothing
           }
 
-      finalDot c =
+      finalDot i c =
         -- TODO use inheritance for color instead?
         case config.dot of
-          Nothing -> always (C.disconnected 6 1 C.cross c)
+          Nothing -> always (C.disconnected 6 1 (toDefaultShape i) c)
           Just d -> d
   in
-  Series toY config.label config.unit config.color <| \toX data p c ->
-    S.g
-      [ SA.class "elm-charts__scatter" ]
-      [ C.scatter p toX toY (finalDot c) data ]
+  Series toY config.label config.unit config.color <| \i toX data p c ->
+    C.scatter p toX toY (finalDot i c) data
 
 
 type alias Interpolation data msg =
@@ -1609,13 +1607,13 @@ monotone toY edits =
         , SA.strokeWidth (String.fromFloat config.width)
         ] ++ config.attrs
 
-      finalDot c =
+      finalDot i c =
         case config.dot of -- TODO use inheritance instead?
-          Nothing -> always (C.disconnected 6 1 C.cross c)
+          Nothing -> always (C.disconnected 6 1 (toDefaultShape i) c)
           Just d -> d
   in
-  Series toY config.label config.unit config.color <| \toX data p c ->
-    C.monotone p toX toY (interAttrs c) config.area (finalDot c) data
+  Series toY config.label config.unit config.color <| \i toX data p c ->
+    C.monotone p toX toY (interAttrs c) config.area (finalDot i c) data
 
 
 
@@ -1638,13 +1636,13 @@ linear toY edits =
         , SA.strokeWidth (String.fromFloat config.width)
         ] ++ config.attrs
 
-      finalDot c =
+      finalDot i c =
         case config.dot of
-          Nothing -> always (C.disconnected 6 1 C.cross c)
+          Nothing -> always (C.disconnected 6 1 (toDefaultShape i) c)
           Just d -> d
   in
-  Series toY config.label config.unit config.color <| \toX data p c ->
-    C.linear p toX toY (interAttrs c) config.area (finalDot c) data
+  Series toY config.label config.unit config.color <| \i toX data p c ->
+    C.linear p toX toY (interAttrs c) config.area (finalDot i c) data
 
 
 {-| -}
@@ -1864,8 +1862,27 @@ toBinItems space toX1 toX2Maybe bars_ data =
   mapWithPrev toBinItem data
 
 
+-- DEFAULTS
 
--- DEFAULT COLORS
+
+toDefaultShape : Int -> C.Shape
+toDefaultShape index =
+  let numOfItems = Dict.size shapes
+      itemIndex = remainderBy numOfItems index
+  in
+  Dict.get itemIndex shapes
+    |> Maybe.withDefault C.circle
+
+
+shapes : Dict Int C.Shape
+shapes =
+  [ C.circle, C.triangle, C.square, C.diamond, C.plus, C.cross ]
+    |> List.indexedMap Tuple.pair
+    |> Dict.fromList
+
+
+
+-- DEFAULTS / COLOR
 
 
 toDefaultColor : Int -> String

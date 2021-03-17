@@ -71,6 +71,7 @@ viewBasic =
     [ C.width 600
     , C.height 300
     , C.marginTop 40
+    , C.paddingLeft 10
     , C.htmlAttrs
         [ HA.style "font-size" "12px"
         , HA.style "font-family" "monospace"
@@ -79,16 +80,19 @@ viewBasic =
         ]
     ]
     [ C.grid []
+
+    , C.yAxis []
+    , C.xAxis []
+    , C.yTicks []
+    , C.yLabels []
+
     , C.series .x
         [ C.linear .z [ C.area "rgba(5,142,218, 0.25)" ]
         , C.monotone .y []
         ]
         data
 
-    , C.yAxis []
-    , C.xAxis []
-    , C.yTicks []
-    , C.yLabels []
+
     ]
 
 
