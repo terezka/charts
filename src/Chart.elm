@@ -505,9 +505,11 @@ type Element data msg
       (String -> C.Plane -> List (Single (Maybe Float) data) -> S.Svg msg)
   | BarsElement
       (List (Group (Maybe Float) data))
+      (C.Plane -> TickValues -> TickValues)
       (String -> C.Plane -> List (Group (Maybe Float) data) -> S.Svg msg)
   | HistogramElement
       (List (Group (Maybe Float) data))
+      (C.Plane -> TickValues -> TickValues)
       (String -> C.Plane -> List (Group (Maybe Float) data) -> S.Svg msg)
   | AxisElement
       (C.Plane -> S.Svg msg)
@@ -530,8 +532,8 @@ getItems elements =
   let toItems el acc =
         case el of
           SeriesElement items _ -> acc ++ List.map ItemDot items
-          BarsElement items _ -> acc ++ List.map ItemGroup items
-          HistogramElement items _ -> acc ++ List.map ItemGroup items
+          BarsElement items _ _ -> acc ++ List.map ItemGroup items
+          HistogramElement items _ _ -> acc ++ List.map ItemGroup items
           AxisElement _ -> acc
           TicksElement _ _ -> acc
           LabelsElement _ _ -> acc
@@ -625,8 +627,8 @@ getTickValues plane elements =
   let toValues el acc =
         case el of
           SeriesElement _ _ -> acc
-          BarsElement _ _ -> acc
-          HistogramElement _ _ -> acc
+          BarsElement _ func _ -> func plane acc
+          HistogramElement _ func _ -> func plane acc
           AxisElement _ -> acc
           TicksElement func _ -> func plane acc
           LabelsElement func _ -> func plane acc
@@ -642,8 +644,8 @@ viewElements config plane tickValues elements =
   let viewOne el ( before, chart_, after ) =
         case el of
           SeriesElement items view -> ( before, view config.id plane items :: chart_, after )
-          BarsElement items view -> ( before, view config.id plane items :: chart_, after )
-          HistogramElement items view -> ( before, view config.id plane items :: chart_, after )
+          BarsElement items _ view -> ( before, view config.id plane items :: chart_, after )
+          HistogramElement items _ view -> ( before, view config.id plane items :: chart_, after )
           AxisElement view -> ( before, view plane :: chart_, after )
           TicksElement _ view -> ( before, view plane :: chart_, after )
           LabelsElement _ view -> ( before, view plane :: chart_, after )
@@ -1379,8 +1381,11 @@ bars edits metrics data =
 
       groupItems =
         toGroupItems { margin = config.margin, between = config.spacing } metrics data
+
+      toTicks p acc =
+        { acc | xs = List.concatMap (\i -> [i.position.x1, i.position.x2]) groupItems }
   in
-  BarsElement groupItems <| \name p _ ->
+  BarsElement groupItems toTicks <| \name p _ ->
     -- TODO use items
     C.bars p (List.indexedMap (toBin p name) data)
 
@@ -1468,8 +1473,11 @@ histogram toX edits metrics data =
 
       toX2 =
         Maybe.map (\w d -> toX d + w d) config.binWidth
+
+      toTicks p acc =
+        { acc | xs = List.concatMap (\i -> [i.position.x1, i.position.x2]) binItems }
   in
-  HistogramElement binItems <| \name p _ ->
+  HistogramElement binItems toTicks <| \name p _ ->
     -- TODO use items
     C.histogram p (mapWithPrev (toBin name p) data)
 

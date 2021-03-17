@@ -87,13 +87,9 @@ viewBasic =
         ] data
 
     , C.yAxis []
-    , C.yTicks []
-
     , C.xAxis []
-    --, C.xTicks []
-
+    , C.yTicks []
     , C.yLabels []
-    --, C.xLabels []
     ]
 
 
