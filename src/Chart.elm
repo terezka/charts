@@ -1,5 +1,7 @@
 module Chart exposing
-    ( chart, Element, series, scatter, linear, monotone, bars, histogram, bar, just
+    ( chart, Element, bars, histogram, bar, just
+    , series, Series, scatter, linear, monotone
+    , Shape, circle, triangle, square, diamond, plus, cross
     , Bounds, startMin, startMax, endMin, endMax, startPad, endPad, zero, middle
     , xAxis, yAxis, xTicks, yTicks, xLabels, yLabels, grid
     , ints, floats, times, format, values, amount
@@ -1879,6 +1881,48 @@ shapes =
   [ C.circle, C.triangle, C.square, C.diamond, C.plus, C.cross ]
     |> List.indexedMap Tuple.pair
     |> Dict.fromList
+
+
+
+{-| -}
+type alias Shape =
+  C.Shape
+
+
+{-| -}
+circle : Shape
+circle =
+  C.circle
+
+
+{-| -}
+triangle : Shape
+triangle =
+  C.triangle
+
+
+{-| -}
+square : Shape
+square =
+  C.square
+
+
+{-| -}
+diamond : Shape
+diamond =
+  C.diamond
+
+
+{-| -}
+plus : Shape
+plus =
+  C.plus
+
+
+{-| -}
+cross : Shape
+cross =
+  C.cross
 
 
 
