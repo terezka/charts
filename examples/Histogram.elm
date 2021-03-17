@@ -1,86 +1,184 @@
 module Histogram exposing (..)
 
+import Html as H
+import Html.Attributes as HA
 import Svg exposing (Svg, svg, g, circle, text_, text)
 import Svg.Attributes exposing (width, height, stroke, fill, r, transform)
-import Svg.Coordinates exposing (..)
-import Svg.Chart exposing (..)
-import Internal.Colors exposing (..)
+import Svg.Coordinates as Coordinates
+import Chart as C
+import Svg.Chart as SC
+import Browser
+import Time
 
 
-plane : Plane
-plane =
-  { x =
-    { marginLower = 40
-    , marginUpper = 20
-    , length = 400
-    , min = 0
-    , max = maximum [.timestamp] data + 10
+
+main =
+  Browser.sandbox
+    { init = init
+    , update = update
+    , view = view
     }
-  , y =
-    { marginLower = 20
-    , marginUpper = 20
-    , length = 300
-    , min = 0
-    , max = maximum [.score] data
-    }
+
+
+type alias Model =
+  { hovering : List (C.Single Float Datum)
   }
 
 
-type alias Point =
-  { timestamp : Float
-  , score : Float
+init : Model
+init =
+  Model []
+
+
+type Msg
+  = OnHover (List (C.Single Float Datum))
+
+
+update : Msg -> Model -> Model
+update msg model =
+  case msg of
+    OnHover bs -> { model | hovering = bs }
+
+
+type alias Datum =
+  { x : Float
+  , y : Maybe Float
+  , z : Maybe Float
+  , label : String
   }
 
 
-data : List Point
+data : List Datum
 data =
-  [ { timestamp = 0, score = 4 }
-  , { timestamp = 10, score = 4 }
-  , { timestamp = 20, score = 2 }
-  , { timestamp = 30, score = 4 }
-  , { timestamp = 40, score = 6 }
-  , { timestamp = 50, score = 8 }
-  , { timestamp = 60, score = 10 }
-  , { timestamp = 70, score = 9 }
-  , { timestamp = 80, score = 7 }
-  , { timestamp = 90, score = 5 }
-  , { timestamp = 100, score = 2 }
-  , { timestamp = 110, score = 3 }
-  , { timestamp = 120, score = 1 }
+  [ { x = 2, y = Just 4, z = Just 5, label = "DK" }
+  , { x = 4, y = Just 2, z = Just 3, label = "NO" }
+  , { x = 6, y = Just 4, z = Just 0, label = "SE" }
+  , { x = 8, y = Just 3, z = Just 7, label = "FI" }
+  , { x = 10, y = Just 4, z = Just 3, label = "IS" }
   ]
 
 
-main : Svg msg
-main =
-  let toSimpleBars _ curr _ =
-        [ Bar [] 10 curr.timestamp curr.score ]
+view : Model -> H.Html Msg
+view model =
+  H.div []
+    [ viewBasic
+    , viewHover model
+    ]
 
-      -- Optional: Adjust width based on previous and next data point
-      toBars prev curr next =
-        case ( prev, next ) of
-          ( Nothing, Just next_ ) ->
-            [ Bar [] ((next_.timestamp - curr.timestamp) / 2) curr.timestamp curr.score
-            , Bar [ fill blueFill ] ((next_.timestamp - curr.timestamp) / 2) curr.timestamp curr.score
+viewBasic : H.Html Msg
+viewBasic =
+  C.chart
+    [ C.width 600
+    , C.height 300
+    , C.marginTop 40
+    , C.htmlAttrs
+        [ HA.style "font-size" "12px"
+        , HA.style "font-family" "monospace"
+        , HA.style "margin" "20px 40px"
+        , HA.style "max-width" "700px"
+        ]
+    ]
+    [ C.grid []
+    , C.bars
+        [ C.tickLength 4, C.binLabel .label ]
+        [ C.bar (C.just .x) [ C.barColor (always C.pink) ]
+        , C.bar .z [ C.barColor (always C.blue) ]
+        , C.bar .y [ C.barColor (always C.orange) ]
+        ] data
+
+    , C.yAxis []
+    , C.yTicks []
+
+    , C.xAxis []
+    --, C.xTicks []
+
+    , C.yLabels []
+    --, C.xLabels []
+    ]
+
+
+
+viewHover : Model -> H.Html Msg
+viewHover model =
+  C.chart
+    [ C.width 600
+    , C.height 300
+    , C.marginTop 40
+    , C.htmlAttrs
+        [ HA.style "font-size" "12px"
+        , HA.style "font-family" "monospace"
+        , HA.style "margin" "20px 40px"
+        , HA.style "max-width" "700px"
+        ]
+    , C.paddingLeft 10
+    , C.events
+        [ C.event "mouseleave" (C.map (\_ -> OnHover []) C.getCoords)
+        , C.event "mousemove" <|
+            C.map OnHover
+              --(C.noUnknowns C.getBars >> C.getNearestX)
+              --(C.noUnknowns C.getDots >> C.getWithin 20)
+              (C.getNearestX (C.withoutUnknowns >> C.getBars))
+              --(C.getNearest (C.withoutUnknowns >> C.getDots))
+        ]
+    ]
+    [ C.grid []
+
+    , C.bars
+        [ C.tickLength 4
+        , C.spacing 0
+        , C.margin 0
+        --, C.binWidth (always 2)
+        --, C.binLabel .label
+        ]
+        [ C.bar .z
+            [ C.barColor (\d -> C.pink)
+            , C.label "area"
+            , C.unit "m2"
+            , C.topLabel (.z >> Maybe.map String.fromFloat)
             ]
+        --, C.bar .y [ C.barColor (\d -> C.blue), C.label "speed", C.unit "ms" ]
+        ]
+        data
 
-          ( Just prev_, Just next_ ) ->
-            [ Bar [] ((curr.timestamp - prev_.timestamp) / 2) curr.timestamp curr.score
-            , Bar [ fill blueFill ] ((curr.timestamp - prev_.timestamp) / 2) curr.timestamp curr.score
-            ]
+    , C.yAxis []
+    , C.yTicks []
+    , C.xAxis []
+    , C.yLabels []
+    --, C.xTicks [ C.amount 10 ]
+    , C.xLabels []
 
-          ( Just prev_, Nothing ) ->
-            [ Bar [] ((plane.x.max - curr.timestamp) / 2) curr.timestamp curr.score
-            , Bar [ fill blueFill ] ((plane.x.max - curr.timestamp) / 2) curr.timestamp curr.score
-            ]
+    --, C.series .x
+    --    [ C.linear .y [ C.color C.blue ]
+    --    , C.linear .z []
+    --    ]
+    --    data
 
-          ( Nothing, Nothing ) ->
-            []
-  in
-  svg (static plane)
-    [ histogram plane toBars data
-    , xAxis plane [] 0
-    , yAxis plane [] 0
-    , xTicks plane 5 [] 0 (List.map .timestamp data)
-    , yTicks plane 5 [] 0 [ 1, 2, 3 ]
-    , xLabels plane (xLabel [] (.timestamp >> (+) 5) (.timestamp >> String.fromFloat)) 0 data
+    --, C.when model.hoveringDots <| \item rest ->
+    --    C.tooltipOnTop (always item.position.x1) (always item.position.y) []
+    --      [ tooltipRow item ]
+
+    , C.when model.hovering <| \item rest ->
+        C.tooltipOnTop (always item.center.x) (always item.position.y) []
+          [ tooltipRow item ]
+
+    --, C.when model.hovering <| \group rest ->
+    --    C.tooltipOnTop (\_ -> group.position.x) (\_ -> group.position.y) [] <|
+    --      List.map tooltipRow group.bars
+    ]
+
+
+tooltipRow : C.Single Float Datum -> H.Html msg
+tooltipRow hovered =
+  H.div [ HA.style "color" hovered.metric.color ]
+    [ H.span [] [ H.text hovered.datum.label ]
+    , H.text " "
+    , H.text hovered.metric.label
+    , H.text " : "
+    , H.text (String.fromFloat hovered.values.y)
+    --, H.text <|
+    --    case hovered.values.y of
+    --      Just y -> String.fromFloat y
+    --      Nothing -> "unknown"
+    , H.text " "
+    , H.text hovered.metric.unit
     ]
