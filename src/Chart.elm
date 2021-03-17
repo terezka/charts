@@ -554,7 +554,7 @@ definePlane config items =
           ItemGroup value -> value.position :: acc
 
       points =
-        Debug.log "x"  <| List.foldl toPoints [] items
+        List.foldl toPoints [] items
 
       xRange =
         { min = C.minimum [.x1 >> Just] points
@@ -1622,16 +1622,10 @@ monotone toY edits =
   Series toY config.label config.unit config.color <| \toX data p c ->
     case config.area of
       Just fill ->
-        S.g [ SA.class "elm-charts__monotone-area" ]
-          [ C.monotoneArea p toX toY (interAttrs c ++ [ SA.stroke "transparent", SA.fill fill ]) (finalDot c) data
-            -- TODO what does the area need the dot for?
-          , C.monotone p toX toY (interAttrs c) (finalDot c) data
-          ]
+        C.monotoneArea p toX toY (interAttrs c ++ [ SA.fill fill ]) (finalDot c) data
 
       Nothing ->
-        S.g
-          [ SA.class "elm-charts__monotone" ]
-          [ C.monotone p toX toY (interAttrs c) (finalDot c) data ]
+        C.monotone p toX toY (interAttrs c) (finalDot c) data
 
 
 
@@ -1662,15 +1656,10 @@ linear toY edits =
   Series toY config.label config.unit config.color <| \toX data p c ->
     case config.area of
       Just fill ->
-        S.g [ SA.class "elm-charts__linear-area" ]
-          [ C.linearArea p toX toY ((interAttrs c) ++ [ SA.stroke "transparent", SA.fill fill ]) (finalDot c) data
-          , C.linear p toX toY (interAttrs c) (finalDot c) data
-          ]
+        C.linearArea p toX toY ((interAttrs c) ++ [ SA.fill fill ]) (finalDot c) data
 
       Nothing ->
-        S.g
-          [ SA.class "elm-charts__linear" ]
-          [ C.linear p toX toY (interAttrs c) (finalDot c) data ]
+        C.linear p toX toY (interAttrs c) (finalDot c) data
 
 
 {-| -}

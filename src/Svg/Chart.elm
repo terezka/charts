@@ -770,21 +770,23 @@ viewSeries plane toX toY dot data interpolation =
 
 viewInterpolations : Plane -> Bool -> List (Attribute msg) -> List (List Point) -> List (List Command) -> Svg msg
 viewInterpolations plane hasArea userAttributes points commands =
-  g [ class "elm-charts__interpolations" ] <|
-    List.map2 (\ps cs -> viewInterpolation plane False userAttributes ps cs) points commands
+  g [ class "elm-charts__interpolations" ] <| List.concat <|
+    List.map2 (\ps cs -> viewInterpolation plane hasArea userAttributes ps cs) points commands
 
 
-viewInterpolation : Plane -> Bool -> List (Attribute msg) -> List Point -> List Command -> Svg msg
+viewInterpolation : Plane -> Bool -> List (Attribute msg) -> List Point -> List Command -> List (Svg msg)
 viewInterpolation plane hasArea userAttributes points commands =
   case ( points, hasArea ) of
     ( [], _ ) ->
-      text "-- No data --"
+      [ text "-- No data --" ]
 
     ( first :: rest, False ) ->
-      viewLine plane userAttributes commands first rest
+      [ viewLine plane userAttributes commands first rest ]
 
     ( first :: rest, True ) ->
-      viewArea plane userAttributes commands first rest
+      [ viewArea plane (userAttributes ++ [ stroke "transparent" ]) commands first rest
+      , viewLine plane userAttributes commands first rest
+      ]
 
 
 viewLine : Plane -> List (Attribute msg) -> List Command -> Point -> List Point -> Svg msg
