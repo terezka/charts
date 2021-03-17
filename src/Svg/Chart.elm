@@ -3,7 +3,7 @@ module Svg.Chart
     ( responsive, static, frame
     , Dot, clear, empty, disconnected, aura, full
     , circle, triangle, square, diamond, plus, cross
-    , scatter, linear, linearArea, monotone, monotoneArea
+    , scatter, linear, monotone
     , Group, bars
     , Bin, Bar, histogram
     , xAxis, yAxis, xArrow, yArrow
@@ -718,38 +718,21 @@ scatter plane toX toY dot data =
 
 {-| Series with linear interpolation.
 -}
-linear : Plane -> (data -> Float) -> (data -> Maybe Float) -> List (Attribute msg) -> (data -> Dot msg) -> List data -> Svg msg
-linear plane toX toY attributes dot data =
+linear : Plane -> (data -> Float) -> (data -> Maybe Float) -> List (Attribute msg) -> Maybe String -> (data -> Dot msg) -> List data -> Svg msg
+linear plane toX toY attributes areaMaybe dot data =
   let points = toPoints toX toY data in
   viewSeries plane toX toY dot data <|
-    viewInterpolations plane False attributes points (linearInterpolation points)
-
-
-{-| Area series with linear interpolation.
--}
-linearArea : Plane -> (data -> Float) -> (data -> Maybe Float) -> List (Attribute msg) -> (data -> Dot msg) -> List data -> Svg msg
-linearArea plane toX toY attributes dot data =
-  let points = toPoints toX toY data in
-  viewSeries plane toX toY dot data <|
-    viewInterpolations plane True attributes points (linearInterpolation points)
+    viewInterpolations plane areaMaybe attributes points (linearInterpolation points)
 
 
 {-| Series with monotone interpolation.
 -}
-monotone : Plane -> (data -> Float) -> (data -> Maybe Float) -> List (Attribute msg) -> (data -> Dot msg) -> List data -> Svg msg
-monotone plane toX toY attributes dot data =
+monotone : Plane -> (data -> Float) -> (data -> Maybe Float) -> List (Attribute msg) -> Maybe String -> (data -> Dot msg) -> List data -> Svg msg
+monotone plane toX toY attributes areaMaybe dot data =
   let points = toPoints toX toY data in
   viewSeries plane toX toY dot data <|
-    viewInterpolations plane False attributes points (monotoneInterpolation points)
+    viewInterpolations plane areaMaybe attributes points (monotoneInterpolation points)
 
-
-{-| Area series with monotone interpolation.
--}
-monotoneArea : Plane -> (data -> Float) -> (data -> Maybe Float) -> List (Attribute msg) -> (data -> Dot msg) -> List data -> Svg msg
-monotoneArea plane toX toY attributes dot data =
-  let points = toPoints toX toY data in
-  viewSeries plane toX toY dot data <|
-    viewInterpolations plane True attributes points (monotoneInterpolation points)
 
 
 -- INTERNAL
@@ -768,23 +751,23 @@ viewSeries plane toX toY dot data interpolation =
     ]
 
 
-viewInterpolations : Plane -> Bool -> List (Attribute msg) -> List (List Point) -> List (List Command) -> Svg msg
-viewInterpolations plane hasArea userAttributes points commands =
+viewInterpolations : Plane -> Maybe String -> List (Attribute msg) -> List (List Point) -> List (List Command) -> Svg msg
+viewInterpolations plane areaMaybe userAttributes points commands =
   g [ class "elm-charts__interpolations" ] <| List.concat <|
-    List.map2 (\ps cs -> viewInterpolation plane hasArea userAttributes ps cs) points commands
+    List.map2 (\ps cs -> viewInterpolation plane areaMaybe userAttributes ps cs) points commands
 
 
-viewInterpolation : Plane -> Bool -> List (Attribute msg) -> List Point -> List Command -> List (Svg msg)
-viewInterpolation plane hasArea userAttributes points commands =
-  case ( points, hasArea ) of
+viewInterpolation : Plane -> Maybe String -> List (Attribute msg) -> List Point -> List Command -> List (Svg msg)
+viewInterpolation plane areaMaybe userAttributes points commands =
+  case ( points, areaMaybe ) of
     ( [], _ ) ->
       [ text "-- No data --" ]
 
-    ( first :: rest, False ) ->
+    ( first :: rest, Nothing ) ->
       [ viewLine plane userAttributes commands first rest ]
 
-    ( first :: rest, True ) ->
-      [ viewArea plane (userAttributes ++ [ stroke "transparent" ]) commands first rest
+    ( first :: rest, Just fillColor ) ->
+      [ viewArea plane (userAttributes ++ [ stroke "transparent", fill fillColor ]) commands first rest
       , viewLine plane userAttributes commands first rest
       ]
 

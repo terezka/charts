@@ -1615,12 +1615,7 @@ monotone toY edits =
           Just d -> d
   in
   Series toY config.label config.unit config.color <| \toX data p c ->
-    case config.area of
-      Just fill ->
-        C.monotoneArea p toX toY (interAttrs c ++ [ SA.fill fill ]) (finalDot c) data
-
-      Nothing ->
-        C.monotone p toX toY (interAttrs c) (finalDot c) data
+    C.monotone p toX toY (interAttrs c) config.area (finalDot c) data
 
 
 
@@ -1649,12 +1644,7 @@ linear toY edits =
           Just d -> d
   in
   Series toY config.label config.unit config.color <| \toX data p c ->
-    case config.area of
-      Just fill ->
-        C.linearArea p toX toY ((interAttrs c) ++ [ SA.fill fill ]) (finalDot c) data
-
-      Nothing ->
-        C.linear p toX toY (interAttrs c) (finalDot c) data
+    C.linear p toX toY (interAttrs c) config.area (finalDot c) data
 
 
 {-| -}
