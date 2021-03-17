@@ -1355,13 +1355,13 @@ bars edits metrics data =
       barSpacing =
         (numOfBars - 1) * config.spacing
 
-      toBarColor m d =
+      toBarColor barIndex m d =
         case m.color of
           Just func -> func d
-          Nothing -> blue -- TODO nice default
+          Nothing -> toDefaultColor barIndex -- TODO nice default
 
-      toBar p name i d (Bar value metric) =
-        { attributes = [ SA.stroke "transparent", SA.fill (toBarColor metric d), clipPath name ] ++ config.attrs
+      toBar p name d barIndex (Bar value metric) =
+        { attributes = [ SA.stroke "transparent", SA.fill (toBarColor barIndex metric d), clipPath name ] ++ config.attrs
         , label = metric.topLabel d
         , width = (1 - barSpacing - binMargin) / numOfBars
         , rounded = config.rounded
@@ -1369,12 +1369,12 @@ bars edits metrics data =
         , value = Maybe.withDefault (C.closestToZero p) (value d)
         }
 
-      toBin p name i d =
-        { label = toBinLabel i d
+      toBin p name binIndex d =
+        { label = toBinLabel binIndex d
         , spacing = config.spacing
         , tickLength = config.tickLength
         , tickWidth = config.tickWidth
-        , bars = List.map (toBar p name i d) metrics
+        , bars = List.indexedMap (toBar p name d) metrics
         }
 
       -- CALC
@@ -1530,25 +1530,20 @@ type Series data msg
 {-| -}
 series : (data -> Float) -> List (Series data msg) -> List data -> Element data msg
 series toX series_ data =
-  let timesOver =
-        List.length series_ // List.length colors
-
-      defaultColors =
-        List.concat (List.repeat (timesOver + 1) colors)
-
-      metrics =
-        List.map2 (\(Series toY l u cM _) defaultColor ->
-            ( Metric l (Maybe.withDefault defaultColor cM) u, toY )
+  let metrics =
+        List.indexedMap (\i (Series toY l u cM _) ->
+            ( Metric l (Maybe.withDefault (toDefaultColor i) cM) u, toY )
           )
-        series_ defaultColors
+        series_
 
       items =
         toDotItems toX metrics data
   in
   SeriesElement items <| \name p _ ->
     -- TODO use items
-    S.g [ SA.class "elm-charts__series", clipPath name ]
-      (List.map2 (\(Series _ _ _ _ view) -> view toX data p) series_ defaultColors)
+    S.g
+      [ SA.class "elm-charts__series", clipPath name ] <|
+      List.indexedMap (\i (Series _ _ _ _ view) -> view toX data p (toDefaultColor i)) series_
 
 
 
@@ -1731,9 +1726,172 @@ clipPath name =
   SA.clipPath <| "url(#" ++ name ++ ")"
 
 
-colors : List String
+
+-- ITEMS
+
+
+toDotItems : (data -> Float) -> List ( Metric, data -> Maybe Float ) -> List data -> List (Single (Maybe Float) data)
+toDotItems toX metrics data =
+  let toDotItem datum (metric, value) =
+        { datum = datum
+        , center =
+            { x = toX datum
+            , y = Maybe.withDefault 0 (value datum)
+            }
+        , position =
+            { x1 = toX datum
+            , x2 = toX datum
+            , y = Maybe.withDefault 0 (value datum)
+            }
+        , values =
+            { x1 = toX datum
+            , x2 = toX datum
+            , y = value datum
+            }
+        , metric = metric
+        }
+
+      toLineItems datum =
+        List.map (toDotItem datum) metrics
+  in
+  List.concatMap toLineItems data
+
+
+type alias Space =
+  { between : Float
+  , margin : Float
+  }
+
+
+toGroupItems : Space -> List (Bar data msg) -> List data -> List (Group (Maybe Float) data)
+toGroupItems space bars_ data =
+  let amountOfBars =
+        toFloat (List.length bars_)
+
+      barWidth =
+        (1 - space.margin * 2 - (amountOfBars - 1) * space.between) / amountOfBars
+
+      toBarItem binIndex datum barIndex (Bar value metric) =
+        { datum = datum
+        , center =
+            { x = toFloat binIndex + 0.5 + space.margin + toFloat barIndex * barWidth + barWidth / 2
+            , y = Maybe.withDefault 0 (value datum)
+            }
+        , position =
+            { x1 = toFloat binIndex + 0.5 + space.margin + toFloat barIndex * barWidth
+            , x2 = toFloat binIndex + 0.5 + space.margin + toFloat barIndex * barWidth + barWidth
+            , y = Maybe.withDefault 0 (value datum)
+            }
+        , values =
+            { x1 = toFloat binIndex
+            , x2 = toFloat binIndex
+            , y = value datum
+            }
+        , metric =
+            { label = metric.label
+            , unit = metric.unit
+            , color =
+                case metric.color of
+                  Just c -> c datum
+                  Nothing -> toDefaultColor barIndex
+            }
+        }
+
+      toGroupItem binIndex datum =
+        let toYs = List.map (\(Bar value metric) -> value) bars_ in
+        { datum = datum
+        , center =
+            { x = toFloat binIndex
+            , y = C.maximum toYs [datum]
+            }
+        , position =
+            { x1 = toFloat binIndex + 0.5
+            , x2 = toFloat binIndex + 1.5
+            , y = C.maximum toYs [datum]
+            }
+        , items = List.indexedMap (toBarItem binIndex datum) bars_
+        }
+  in
+  List.indexedMap toGroupItem data
+
+
+toBinItems : Space -> (data -> Float) -> Maybe (data -> Float) -> List (Bar data msg) -> List data -> List (Group (Maybe Float) data)
+toBinItems space toX1 toX2Maybe bars_ data =
+  let toLength prevMaybe datum =
+        case toX2Maybe of
+          Just toX2 -> toX1 datum - toX2 datum -- TODO maybe use actual x2 instead of width?
+          Nothing ->
+            case prevMaybe of
+              Just prev -> toX1 datum - toX1 prev
+              Nothing -> 1 -- toX1 datum -- TODO use axis.min
+
+      toBarItem prevMaybe datum barIndex (Bar value metric) =
+        let length = toLength prevMaybe datum
+            margin_ = length * space.margin
+            amountOfBars = toFloat (List.length bars_)
+            width_ = (length - margin_ * 2 - (amountOfBars - 1) * space.between) / amountOfBars
+        in
+        { datum = datum
+        , center =
+            { x = toX1 datum + margin_ + toFloat barIndex * width_ - width_ / 2
+            , y = Maybe.withDefault 0 (value datum)
+            }
+        , position =
+            { x1 = toX1 datum + margin_ + toFloat barIndex * width_ - width_
+            , x2 = toX1 datum + margin_ + toFloat barIndex * width_
+            , y = Maybe.withDefault 0 (value datum) -- TODO perhaps leave as Maybe?
+            }
+        , values =
+            { x1 = toX1 datum
+            , x2 = toX1 datum + width_
+            , y = value datum
+            }
+        , metric =
+            { label = metric.label
+            , unit = metric.unit
+            , color =
+                case metric.color of
+                  Just c -> c datum
+                  Nothing -> toDefaultColor barIndex
+            }
+        }
+
+      toBinItem prevMaybe datum =
+        let toYs = List.map (\(Bar value metric) -> value) bars_ in
+        { datum = datum
+        , center =
+            { x = toX1 datum + toLength prevMaybe datum / 2
+            , y = C.maximum toYs [datum]
+            }
+        , position =
+            { x1 = toX1 datum
+            , x2 = toX1 datum + toLength prevMaybe datum
+            , y = C.maximum toYs [datum]
+            }
+        , items = List.indexedMap (toBarItem prevMaybe datum) bars_
+        }
+  in
+  mapWithPrev toBinItem data
+
+
+
+-- DEFAULT COLORS
+
+
+toDefaultColor : Int -> String
+toDefaultColor index =
+  let numOfColors = Dict.size colors
+      colorIndex = remainderBy numOfColors index
+  in
+  Dict.get colorIndex colors
+    |> Maybe.withDefault blue
+
+
+colors : Dict Int String
 colors =
   [ blue, orange, green, pink, purple, red ]
+    |> List.indexedMap Tuple.pair
+    |> Dict.fromList
 
 
 {-| -}
@@ -1873,151 +2031,4 @@ formatWeekday =
         [ F.dayOfWeekNameFull ]
 
 
-
-
--- ITEMS
-
-
-toDotItems : (data -> Float) -> List ( Metric, data -> Maybe Float ) -> List data -> List (Single (Maybe Float) data)
-toDotItems toX metrics data =
-  let toDotItem datum (metric, value) =
-        { datum = datum
-        , center =
-            { x = toX datum
-            , y = Maybe.withDefault 0 (value datum)
-            }
-        , position =
-            { x1 = toX datum
-            , x2 = toX datum
-            , y = Maybe.withDefault 0 (value datum)
-            }
-        , values =
-            { x1 = toX datum
-            , x2 = toX datum
-            , y = value datum
-            }
-        , metric = metric
-        }
-
-      toLineItems datum =
-        List.map (toDotItem datum) metrics
-  in
-  List.concatMap toLineItems data
-
-
-type alias Space =
-  { between : Float
-  , margin : Float
-  }
-
-
-toGroupItems : Space -> List (Bar data msg) -> List data -> List (Group (Maybe Float) data)
-toGroupItems space bars_ data =
-  let amountOfBars =
-        toFloat (List.length bars_)
-
-      barWidth =
-        (1 - space.margin * 2 - (amountOfBars - 1) * space.between) / amountOfBars
-
-      toBarItem binIndex datum barIndex (Bar value metric) =
-        { datum = datum
-        , center =
-            { x = toFloat binIndex + 0.5 + space.margin + toFloat barIndex * barWidth + barWidth / 2
-            , y = Maybe.withDefault 0 (value datum)
-            }
-        , position =
-            { x1 = toFloat binIndex + 0.5 + space.margin + toFloat barIndex * barWidth
-            , x2 = toFloat binIndex + 0.5 + space.margin + toFloat barIndex * barWidth + barWidth
-            , y = Maybe.withDefault 0 (value datum)
-            }
-        , values =
-            { x1 = toFloat binIndex
-            , x2 = toFloat binIndex
-            , y = value datum
-            }
-        , metric =
-            { label = metric.label
-            , unit = metric.unit
-            , color =
-                case metric.color of
-                  Just c -> c datum
-                  Nothing -> blue
-            }
-        }
-
-      toGroupItem binIndex datum =
-        let toYs = List.map (\(Bar value metric) -> value) bars_ in
-        { datum = datum
-        , center =
-            { x = toFloat binIndex
-            , y = C.maximum toYs [datum]
-            }
-        , position =
-            { x1 = toFloat binIndex + 0.5
-            , x2 = toFloat binIndex + 1.5
-            , y = C.maximum toYs [datum]
-            }
-        , items = List.indexedMap (toBarItem binIndex datum) bars_
-        }
-  in
-  List.indexedMap toGroupItem data
-
-
-toBinItems : Space -> (data -> Float) -> Maybe (data -> Float) -> List (Bar data msg) -> List data -> List (Group (Maybe Float) data)
-toBinItems space toX1 toX2Maybe bars_ data =
-  let toLength prevMaybe datum =
-        case toX2Maybe of
-          Just toX2 -> toX1 datum - toX2 datum -- TODO maybe use actual x2 instead of width?
-          Nothing ->
-            case prevMaybe of
-              Just prev -> toX1 datum - toX1 prev
-              Nothing -> 1 -- toX1 datum -- TODO use axis.min
-
-      toBarItem prevMaybe datum barIndex (Bar value metric) =
-        let length = toLength prevMaybe datum
-            margin_ = length * space.margin
-            amountOfBars = toFloat (List.length bars_)
-            width_ = (length - margin_ * 2 - (amountOfBars - 1) * space.between) / amountOfBars
-        in
-        { datum = datum
-        , center =
-            { x = toX1 datum + margin_ + toFloat barIndex * width_ - width_ / 2
-            , y = Maybe.withDefault 0 (value datum)
-            }
-        , position =
-            { x1 = toX1 datum + margin_ + toFloat barIndex * width_ - width_
-            , x2 = toX1 datum + margin_ + toFloat barIndex * width_
-            , y = Maybe.withDefault 0 (value datum) -- TODO perhaps leave as Maybe?
-            }
-        , values =
-            { x1 = toX1 datum
-            , x2 = toX1 datum + width_
-            , y = value datum
-            }
-        , metric =
-            { label = metric.label
-            , unit = metric.unit
-            , color =
-                case metric.color of
-                  Just c -> c datum
-                  Nothing -> blue
-            }
-        }
-
-      toBinItem prevMaybe datum =
-        let toYs = List.map (\(Bar value metric) -> value) bars_ in
-        { datum = datum
-        , center =
-            { x = toX1 datum + toLength prevMaybe datum / 2
-            , y = C.maximum toYs [datum]
-            }
-        , position =
-            { x1 = toX1 datum
-            , x2 = toX1 datum + toLength prevMaybe datum
-            , y = C.maximum toYs [datum]
-            }
-        , items = List.indexedMap (toBarItem prevMaybe datum) bars_
-        }
-  in
-  mapWithPrev toBinItem data
 
