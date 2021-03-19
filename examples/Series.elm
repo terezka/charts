@@ -87,17 +87,26 @@ viewBasic =
     , C.yLabels []
 
     , C.series .x
-        [ C.linear .z [ C.area 0.2 ]
+        [ C.linear .z
+            [ C.area 0.2
+            , C.size (always 3)
+            --, C.dot
+            --    [ C.shape (always C.cross)
+            --    , C.style (\d -> if isHovered d then C.aura 3 6 else C.disconnected 3)
+            --    , C.size (always 6)
+            --    ]
+            ]
         , C.monotone .y []
         ]
         data
-
-
     ]
 
 
 viewHover : Model -> H.Html Msg
 viewHover model =
+  let isHovered d =
+        List.member d (List.map .datum model.hovering)
+  in
   C.chart
     [ C.width 600
     , C.height 300
@@ -124,8 +133,8 @@ viewHover model =
     , C.xLabels []
 
     , C.series .x
-        [ C.linear .z [ C.label "area", C.unit "m2", C.area 0.25 ]
-        , C.monotone .y [ C.label "speed", C.unit "km/h" ]
+        [ C.linear .z [ C.label "area", C.unit "m2", C.area 0.25, C.size (\d -> if isHovered d then 6 else 3) ]
+        , C.monotone .y [ C.label "speed", C.unit "km/h", C.size (\d -> if isHovered d then 6 else 3) ]
         ]
         data
 
@@ -137,7 +146,8 @@ viewHover model =
 
 tooltipRow : C.Single Float Datum -> H.Html msg
 tooltipRow hovered =
-  H.div [ HA.style "color" hovered.metric.color ]
+  H.div
+    [ HA.style "color" hovered.metric.color ]
     [ H.text hovered.metric.label
     , H.text " : "
     , H.text (String.fromFloat hovered.values.y)

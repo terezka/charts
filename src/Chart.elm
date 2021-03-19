@@ -1,7 +1,7 @@
 module Chart exposing
     ( chart, Element, bars, histogram, bar, just
     , series, Series, scatter, linear, monotone
-    , Shape, circle, triangle, square, diamond, plus, cross
+    , Shape, circle, triangle, square, diamond, plus, cross, size
     , Bounds, startMin, startMax, endMin, endMax, startPad, endPad, zero, middle
     , xAxis, yAxis, xTicks, yTicks, xLabels, yLabels, grid
     , ints, floats, times, format, values, amount
@@ -253,6 +253,12 @@ spacing value config =
 dot : (data -> C.Dot msg) -> Attribute { a | dot : Maybe (data -> C.Dot msg) }
 dot value config =
   { config | dot = Just value }
+
+
+{-| -}
+size : b -> Attribute { a | size : Maybe b }
+size value config =
+  { config | size = Just value }
 
 
 {-| -}
@@ -1582,6 +1588,7 @@ scatter toY edits =
 type alias Interpolation data msg =
     { area : Maybe Float -- TODO use Color
     , color : Maybe String -- TODO use Color
+    , size : Maybe (data -> Float)
     , width : Float
     , label : String
     , unit : String
@@ -1597,6 +1604,7 @@ monotone toY edits =
         applyAttrs edits
           { color = Nothing
           , area = Nothing
+          , size = Nothing
           , width = 1
           , dot = Nothing
           , label = ""
@@ -1610,9 +1618,14 @@ monotone toY edits =
         , SA.fill c
         ] ++ config.attrs
 
+      toSize d =
+        case config.size of
+          Just func -> func d
+          Nothing -> 6
+
       finalDot i c =
         case config.dot of -- TODO use inheritance instead?
-          Nothing -> always (C.disconnected 6 1 (toDefaultShape i) c)
+          Nothing -> \d -> (C.disconnected (toSize d) 1 (toDefaultShape i) c)
           Just d -> d
   in
   Series toY config.label config.unit config.color <| \i toX data p c ->
@@ -1627,6 +1640,7 @@ linear toY edits =
         applyAttrs edits
           { color = Nothing
           , area = Nothing
+          , size = Nothing
           , width = 1
           , label = ""
           , unit = ""
@@ -1640,9 +1654,14 @@ linear toY edits =
         , SA.fill c
         ] ++ config.attrs
 
+      toSize d =
+        case config.size of
+          Just func -> func d
+          Nothing -> 6
+
       finalDot i c =
-        case config.dot of
-          Nothing -> always (C.disconnected 6 1 (toDefaultShape i) c)
+        case config.dot of -- TODO use inheritance instead?
+          Nothing -> \d -> (C.disconnected (toSize d) 1 (toDefaultShape i) c)
           Just d -> d
   in
   Series toY config.label config.unit config.color <| \i toX data p c ->
