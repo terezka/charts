@@ -17,9 +17,9 @@ type Shape
 
 {-| -}
 type Variety
-  = Empty Int
-  | Disconnected Int
-  | Aura Int Float
+  = Empty Float
+  | Disconnected Float
+  | Aura Float Float
   | Full
 
 
@@ -168,20 +168,20 @@ varietyAttributes color variety =
   case variety of
     Empty width ->
       [ Attributes.stroke color
-      , Attributes.strokeWidth (String.fromInt width)
+      , Attributes.strokeWidth (String.fromFloat width)
       , Attributes.fill "white"
       ]
 
     Aura width opacity ->
       [ Attributes.stroke color
-      , Attributes.strokeWidth (String.fromInt width)
+      , Attributes.strokeWidth (String.fromFloat width)
       , Attributes.strokeOpacity (String.fromFloat opacity)
       , Attributes.fill color
       ]
 
     Disconnected width ->
       [ Attributes.stroke "white"
-      , Attributes.strokeWidth (String.fromInt width)
+      , Attributes.strokeWidth (String.fromFloat width)
       , Attributes.fill color
       ]
 

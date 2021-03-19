@@ -2,8 +2,8 @@ module Series exposing (..)
 
 import Html as H
 import Html.Attributes as HA
-import Svg exposing (Svg, svg, g, circle, text_, text)
-import Svg.Attributes exposing (width, height, stroke, fill, r, transform)
+import Svg as S exposing (Svg, svg, g, circle, text_, text)
+import Svg.Attributes as SA exposing (width, height, stroke, fill, r, transform)
 import Svg.Coordinates as Coordinates
 import Chart as C
 import Svg.Chart as SC
@@ -133,7 +133,7 @@ viewHover model =
     , C.xLabels []
 
     , C.series .x
-        [ C.linear .z [ C.label "area", C.unit "m2", C.area 0.25, C.size (\d -> if isHovered d then 6 else 3) ]
+        [ C.linear .z [ C.label "area", C.unit "m2", C.area 0.25, C.size (\d -> if isHovered d then 6 else 3), C.style (\_ -> C.empty 1), C.dot customDot ]
         , C.monotone .y [ C.label "speed", C.unit "km/h", C.size (\d -> if isHovered d then 6 else 3) ]
         ]
         data
@@ -142,6 +142,11 @@ viewHover model =
         C.tooltipOnTop (always item.center.x) (always item.center.y) []
           [ tooltipRow item ]
     ]
+
+
+customDot : Datum -> S.Svg msg
+customDot _ =
+  S.rect [ SA.width "10", SA.height "20", SA.fill "lightblue", SA.transform "translate(-5,-10)" ] []
 
 
 tooltipRow : C.Single Float Datum -> H.Html msg

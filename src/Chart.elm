@@ -19,6 +19,8 @@ module Chart exposing
     , dot, dotted, area, noArrow, binLabel, topLabel, barColor, tickLength, tickWidth, center
     , filterX, filterY, only, attrs
     , blue, orange, pink, green, red
+
+    , style, empty, detached, aura, full
     )
 
 
@@ -250,7 +252,7 @@ spacing value config =
 
 
 {-| -}
-dot : (data -> C.Dot msg) -> Attribute { a | dot : Maybe (data -> C.Dot msg) }
+dot : x -> Attribute { a | dot : Maybe x }
 dot value config =
   { config | dot = Just value }
 
@@ -1559,7 +1561,9 @@ type alias Scatter data msg =
     { color : Maybe String -- TODO use Color
     , label : String
     , unit : String
-    , dot : Maybe (data -> C.Dot msg)
+    , size : Maybe (data -> Float)
+    , style : Maybe (data -> Style)
+    , dot : Maybe (data -> S.Svg msg)
     }
 
 
@@ -1572,14 +1576,28 @@ scatter toY edits =
           { color = Nothing
           , label = ""
           , unit = ""
+          , size = Nothing
+          , style = Nothing
           , dot = Nothing
           }
 
-      finalDot i c =
-        -- TODO use inheritance for color instead?
+      toSize d =
+        case config.size of
+          Just func -> func d
+          Nothing -> 6
+
+      finalDot i c d =
         case config.dot of
-          Nothing -> always (C.disconnected 6 1 (toDefaultShape i) c)
-          Just d -> d
+          Just toDot -> \p x y ->
+            S.g [ C.position p x y 0 0 ] [ toDot d ]
+
+          Nothing ->
+            case Maybe.map (\f -> f d) config.style of
+              Nothing -> C.disconnected (toSize d) 1 (toDefaultShape i) c
+              Just Full -> C.full (toSize d) (toDefaultShape i) c
+              Just (Empty s) -> C.empty (toSize d) s (toDefaultShape i) c
+              Just (Aura a b) -> C.aura (toSize d) a b (toDefaultShape i) c
+              Just (Detached a) -> C.disconnected (toSize d) a (toDefaultShape i) c
   in
   Series toY config.label config.unit config.color <| \i toX data p c ->
     C.scatter p toX toY (finalDot i c) data
@@ -1592,7 +1610,8 @@ type alias Interpolation data msg =
     , width : Float
     , label : String
     , unit : String
-    , dot : Maybe (data -> C.Dot msg)
+    , style : Maybe (data -> Style)
+    , dot : Maybe (data -> S.Svg msg)
     , attrs : List (S.Attribute msg)
     }
 
@@ -1607,6 +1626,7 @@ monotone toY edits =
           , size = Nothing
           , width = 1
           , dot = Nothing
+          , style = Nothing
           , label = ""
           , unit = ""
           , attrs = []
@@ -1623,10 +1643,18 @@ monotone toY edits =
           Just func -> func d
           Nothing -> 6
 
-      finalDot i c =
-        case config.dot of -- TODO use inheritance instead?
-          Nothing -> \d -> (C.disconnected (toSize d) 1 (toDefaultShape i) c)
-          Just d -> d
+      finalDot i c d =
+        case config.dot of
+          Just toDot -> \p x y ->
+            S.g [ C.position p x y 0 0 ] [ toDot d ]
+
+          Nothing ->
+            case Maybe.map (\f -> f d) config.style of
+              Nothing -> C.disconnected (toSize d) 1 (toDefaultShape i) c
+              Just Full -> C.full (toSize d) (toDefaultShape i) c
+              Just (Empty s) -> C.empty (toSize d) s (toDefaultShape i) c
+              Just (Aura a b) -> C.aura (toSize d) a b (toDefaultShape i) c
+              Just (Detached a) -> C.disconnected (toSize d) a (toDefaultShape i) c
   in
   Series toY config.label config.unit config.color <| \i toX data p c ->
     C.monotone p toX toY (interAttrs c) config.area (finalDot i c) data
@@ -1645,6 +1673,7 @@ linear toY edits =
           , label = ""
           , unit = ""
           , dot = Nothing
+          , style = Nothing
           , attrs = []
           }
 
@@ -1659,10 +1688,18 @@ linear toY edits =
           Just func -> func d
           Nothing -> 6
 
-      finalDot i c =
-        case config.dot of -- TODO use inheritance instead?
-          Nothing -> \d -> (C.disconnected (toSize d) 1 (toDefaultShape i) c)
-          Just d -> d
+      finalDot i c d =
+        case config.dot of
+          Just toDot -> \p x y ->
+            S.g [ C.position p x y 0 0 ] [ toDot d ]
+
+          Nothing ->
+            case Maybe.map (\f -> f d) config.style of
+              Nothing -> C.disconnected (toSize d) 1 (toDefaultShape i) c
+              Just Full -> C.full (toSize d) (toDefaultShape i) c
+              Just (Empty s) -> C.empty (toSize d) s (toDefaultShape i) c
+              Just (Aura a b) -> C.aura (toSize d) a b (toDefaultShape i) c
+              Just (Detached a) -> C.disconnected (toSize d) a (toDefaultShape i) c
   in
   Series toY config.label config.unit config.color <| \i toX data p c ->
     C.linear p toX toY (interAttrs c) config.area (finalDot i c) data
@@ -1944,6 +1981,48 @@ plus =
 cross : Shape
 cross =
   C.cross
+
+
+
+-- STYLE
+
+
+{-| -}
+type Style
+  = Full
+  | Empty Float
+  | Aura Float Float
+  | Detached Float
+
+
+-- TODO remove this attr
+style : x -> Attribute { a | style : Maybe x }
+style v config =
+  { config | style = Just v }
+
+
+{-| -}
+full : Style
+full =
+  Full
+
+
+{-| -}
+empty : Float -> Style
+empty =
+  Empty
+
+
+{-| -}
+aura : Float -> Float -> Style
+aura =
+  Aura
+
+
+{-| -}
+detached : Float -> Style
+detached =
+  Detached
 
 
 

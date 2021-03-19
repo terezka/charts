@@ -637,7 +637,7 @@ full radius shape color =
     someDot =
       aura radius width opacity circle "blue" plane x y
 -}
-aura : Float -> Int -> Float -> Shape -> String -> Dot msg
+aura : Float -> Float -> Float -> Shape -> String -> Dot msg
 aura radius width opacity shape color =
   viewShape radius (Aura width opacity) shape color
 
@@ -648,7 +648,7 @@ aura radius width opacity shape color =
     someDot =
       disconnected radius width circle "blue" plane x y
 -}
-disconnected : Float -> Int -> Shape -> String -> Dot msg
+disconnected : Float -> Float -> Shape -> String -> Dot msg
 disconnected radius width shape color =
   viewShape radius (Disconnected width) shape color
 
@@ -659,7 +659,7 @@ disconnected radius width shape color =
     someDot =
       empty radius width circle "blue" plane x y
 -}
-empty : Float -> Int -> Shape -> String -> Dot msg
+empty : Float -> Float -> Shape -> String -> Dot msg
 empty radius width shape color =
   viewShape radius (Empty width) shape color
 
