@@ -1522,13 +1522,13 @@ histogram toX edits metrics data =
           Just func -> Just <| xLabel binLabelConfig p (func d)
           Nothing -> Nothing
 
-      toBarColor m d =
+      toBarColor barIndex m d =
         case m.color of
           Just func -> func d
-          Nothing -> blue
+          Nothing -> toDefaultColor barIndex -- TODO nice default
 
-      toBar id_ p d (Bar value metric) =
-        { attributes = [ SA.stroke "transparent", SA.fill (toBarColor metric d), clipPath id_ ] ++ config.attrs
+      toBar id_ p d barIndex (Bar value metric) =
+        { attributes = [ SA.stroke "transparent", SA.fill (toBarColor barIndex metric d), clipPath id_ ] ++ config.attrs
         , label = toBarLabel p metric d (value d)
         , width = (1 - barSpacing - barMargin) / numOfBars
         , rounded = config.rounded
@@ -1543,17 +1543,17 @@ histogram toX edits metrics data =
         , spacing = config.spacing
         , tickLength = tickConfig.height -- TODO add color too
         , tickWidth = Maybe.withDefault 1 tickConfig.width
-        , bars = List.map (toBar id_ p d) metrics
+        , bars = List.indexedMap (toBar id_ p d) metrics
         }
 
       -- CALC
 
       binItems =
-        toBinItems { margin = config.margin, between = config.spacing } toX toX2 metrics data
+        toBinItems { margin = config.margin, between = config.spacing } toX0 toX metrics data
 
-      toX2 =
+      toX0 =
         case binConfig.width of
-          Just toWidth -> Just (\d -> toX d + toWidth d)
+          Just toWidth -> Just (\d -> toX d - toWidth d)
           Nothing -> Nothing
 
       toTicks p acc =
@@ -1935,11 +1935,11 @@ toGroupItems space bars_ data =
   List.indexedMap toGroupItem data
 
 
-toBinItems : Space -> (data -> Float) -> Maybe (data -> Float) -> List (Bar data msg) -> List data -> List (Group (Maybe Float) data)
-toBinItems space toX1 toX2Maybe bars_ data =
+toBinItems : Space -> Maybe (data -> Float) -> (data -> Float) -> List (Bar data msg) -> List data -> List (Group (Maybe Float) data)
+toBinItems space toX0Maybe toX1 bars_ data =
   let toLength prevMaybe datum =
-        case toX2Maybe of
-          Just toX2 -> toX1 datum - toX2 datum -- TODO maybe use actual x2 instead of width?
+        case toX0Maybe of
+          Just toX0 -> toX1 datum - toX0 datum
           Nothing ->
             case prevMaybe of
               Just prev -> toX1 datum - toX1 prev
@@ -1953,17 +1953,17 @@ toBinItems space toX1 toX2Maybe bars_ data =
         in
         { datum = datum
         , center =
-            { x = toX1 datum + margin_ + toFloat barIndex * width_ - width_ / 2
+            { x = toX1 datum - length + margin_ + toFloat barIndex * width_ + width_ / 2
             , y = Maybe.withDefault 0 (value datum)
             }
         , position =
-            { x1 = toX1 datum + margin_ + toFloat barIndex * width_ - width_
-            , x2 = toX1 datum + margin_ + toFloat barIndex * width_
+            { x1 = toX1 datum - length + margin_ + toFloat barIndex * width_
+            , x2 = toX1 datum - length + margin_ + toFloat barIndex * width_ + width_
             , y = Maybe.withDefault 0 (value datum) -- TODO perhaps leave as Maybe?
             }
         , values =
             { x1 = toX1 datum
-            , x2 = toX1 datum + width_
+            , x2 = toX1 datum
             , y = value datum
             }
         , metric =
@@ -1977,21 +1977,24 @@ toBinItems space toX1 toX2Maybe bars_ data =
         }
 
       toBinItem prevMaybe datum =
-        let toYs = List.map (\(Bar value metric) -> value) bars_ in
+        let length = toLength prevMaybe datum
+            toYs = List.map (\(Bar value metric) -> value) bars_
+        in
         { datum = datum
         , center =
-            { x = toX1 datum + toLength prevMaybe datum / 2
+            { x = toX1 datum - length / 2
             , y = C.maximum toYs [datum]
             }
         , position =
-            { x1 = toX1 datum
-            , x2 = toX1 datum + toLength prevMaybe datum
+            { x1 = toX1 datum - length
+            , x2 = toX1 datum
             , y = C.maximum toYs [datum]
             }
         , items = List.indexedMap (toBarItem prevMaybe datum) bars_
         }
   in
   mapWithPrev toBinItem data
+
 
 
 -- DEFAULTS
