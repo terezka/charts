@@ -81,7 +81,7 @@ viewBasic =
     ]
     [ C.grid []
     , C.bars
-        [ C.tickLength 4, C.binLabel .label ]
+        []
         [ C.bar (C.just .x) []
         , C.bar .z []
         , C.bar .y []
@@ -116,22 +116,22 @@ viewHover model =
     [ C.grid []
 
     , C.bars
-        [ C.tickLength 4
+        [ C.tick [ C.height 4, C.color "black" ] -- TODO
         ]
         [ C.bar (C.just .x)
-            [ C.label "area"
+            [ C.name "area"
             , C.unit "m2"
-            --, C.topLabel (.z >> Maybe.map String.fromFloat)
+            , C.label []
             ]
         , C.bar .y
-            [ C.label "speed"
+            [ C.name "speed"
             , C.unit "km/h"
-            --, C.topLabel (.z >> Maybe.map String.fromFloat)
+            , C.label []
             ]
         , C.bar .z
-            [ C.label "volume"
+            [ C.name "volume"
             , C.unit "m3"
-            --, C.topLabel (.z >> Maybe.map String.fromFloat)
+            , C.label []
             ]
         ]
         data

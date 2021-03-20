@@ -15,12 +15,13 @@ module Chart exposing
     , paddingTop, paddingBottom, paddingLeft, paddingRight
     , static, id
     , range, domain, topped, events, htmlAttrs, binWidth
-    , start, end, pinned, color, label, unit, rounded, roundBottom, margin, spacing
+    , start, end, pinned, color, unit, rounded, roundBottom, margin, spacing
     , dot, dotted, area, noArrow, binLabel, topLabel, barColor, tickLength, tickWidth, center
     , filterX, filterY, only, attrs
     , blue, orange, pink, green, red
 
-    , style, empty, detached, aura, full
+    , style, empty, detached, aura, full, name, tick
+    , bin, label, fontSize, borderWidth, borderColor, xOffset, yOffset
     )
 
 
@@ -216,9 +217,9 @@ color value config =
 
 
 {-| -}
-label : String -> Attribute { a | label : String }
-label value config =
-  { config | label = value }
+name : v -> Attribute { a | name : Maybe v }
+name value config =
+  { config | name = Just value }
 
 
 {-| -}
@@ -1007,7 +1008,7 @@ yAxis edits =
       ]
 
 
-type alias Tick tick msg =
+type alias Ticks tick msg =
     { color : Maybe String -- TODO use Color -- TODO allow custom color by tick value
     , height : Float
     , width : Float
@@ -1028,7 +1029,7 @@ type alias Values tick =
 
 
 {-| -}
-xTicks : List (Tick tick msg -> Tick tick msg) -> Element item msg
+xTicks : List (Ticks tick msg -> Ticks tick msg) -> Element item msg
 xTicks edits =
   let config =
         applyAttrs edits
@@ -1072,7 +1073,7 @@ xTicks edits =
 
 
 {-| -}
-yTicks : List (Tick tick msg -> Tick tick msg) -> Element item msg
+yTicks : List (Ticks tick msg -> Ticks tick msg) -> Element item msg
 yTicks edits =
   let config =
         applyAttrs edits
@@ -1117,7 +1118,7 @@ yTicks edits =
 
 
 
-type alias Label tick msg =
+type alias Labels tick msg =
     { color : Maybe String -- TODO use Color
     , pinned : Bounds -> Float
     , start : Bounds -> Float
@@ -1139,7 +1140,7 @@ type alias Pair =
 
 
 {-| -}
-xLabels : List (Label tick msg -> Label tick msg) -> Element item msg
+xLabels : List (Labels tick msg -> Labels tick msg) -> Element item msg
 xLabels edits =
   let config =
         applyAttrs edits
@@ -1199,7 +1200,7 @@ xLabels edits =
 
 
 {-| -}
-yLabels : List (Label tick msg -> Label tick msg) -> Element item msg
+yLabels : List (Labels tick msg -> Labels tick msg) -> Element item msg
 yLabels edits =
   let config =
         applyAttrs edits
@@ -1330,9 +1331,8 @@ type alias Bars data msg =
   , attrs : List (S.Attribute msg)
   , margin : Float
   , spacing : Float
-  , tickLength : Float
-  , tickWidth : Float
-  , binLabel : Maybe (data -> String)
+  , tick : List (Attribute (Tick msg))
+  , bin : List (Attribute (Bin data msg))
   }
 
 
@@ -1345,16 +1345,62 @@ bars edits metrics data =
           , roundBottom = False
           , spacing = 0.01
           , margin = 0.05
-          , binLabel = Nothing
-          , tickLength = 0
-          , tickWidth = 1
+          , bin = []
+          , tick = []
           , attrs = []
           }
 
-      toBinLabel i d =
-        case config.binLabel of
-          Just func -> func d
-          Nothing -> ""
+      tickConfig =
+        applyAttrs config.tick
+          { color = Nothing
+          , width = Nothing
+          , height = 5
+          , attributes = []
+          }
+
+      binConfig =
+        applyAttrs config.bin
+          { name = Nothing
+          , label = Nothing
+          , width = Nothing
+          }
+
+      binLabelConfig =
+        applyAttrs (Maybe.withDefault [] binConfig.label)
+          { color = Nothing
+          , fontSize = Nothing
+          , borderWidth = 0.1
+          , borderColor = "white"
+          , xOffset = 0
+          , yOffset = 15
+          , flipped = False
+          , attributes = []
+          }
+
+      barLabelConfig metric v =
+        applyAttrs (Maybe.withDefault [] metric.label)
+          { color = Nothing
+          , fontSize = Nothing
+          , borderWidth = 0.1
+          , borderColor = "white"
+          , xOffset = 0
+          , yOffset = if v < 0 then -12 else -4
+          , flipped = v < 0
+          , attributes = []
+          }
+
+      toBinLabel p d =
+        case binConfig.name of
+          Just func -> Just <| xLabel binLabelConfig p (func d)
+          Nothing -> Nothing
+
+      toBarLabel p metric d v =
+        case ( v, metric.label ) of
+          ( Just v_, Just _ ) ->
+            Just (xLabel (barLabelConfig metric v_) p (String.fromFloat v_))
+
+          _ ->
+            Nothing
 
       numOfBars =
         toFloat (List.length metrics)
@@ -1370,21 +1416,21 @@ bars edits metrics data =
           Just func -> func d
           Nothing -> toDefaultColor barIndex -- TODO nice default
 
-      toBar p name d barIndex (Bar value metric) =
-        { attributes = [ SA.stroke "transparent", SA.fill (toBarColor barIndex metric d), clipPath name ] ++ config.attrs
-        , label = metric.topLabel d
+      toBar p id_ d barIndex (Bar value metric) =
+        { attributes = [ SA.stroke "transparent", SA.fill (toBarColor barIndex metric d), clipPath id_ ] ++ config.attrs
+        , label = toBarLabel p metric d (value d)
         , width = (1 - barSpacing - binMargin) / numOfBars
         , rounded = config.rounded
         , roundBottom = config.roundBottom
         , value = Maybe.withDefault (C.closestToZero p) (value d)
         }
 
-      toBin p name binIndex d =
-        { label = toBinLabel binIndex d
+      toBin p id_ i d =
+        { label = toBinLabel p d
         , spacing = config.spacing
-        , tickLength = config.tickLength
-        , tickWidth = config.tickWidth
-        , bars = List.indexedMap (toBar p name d) metrics
+        , tickLength = tickConfig.height
+        , tickWidth = Maybe.withDefault 1 tickConfig.width
+        , bars = List.indexedMap (toBar p id_ d) metrics
         }
 
       -- CALC
@@ -1395,23 +1441,34 @@ bars edits metrics data =
       toTicks p acc =
         { acc | xs = List.concatMap (\i -> [i.position.x1, i.position.x2]) groupItems }
   in
-  BarsElement groupItems toTicks <| \name p _ ->
+  BarsElement groupItems toTicks <| \id_ p _ ->
     -- TODO use items
-    C.bars p (List.indexedMap (toBin p name) data)
+    C.bars p (List.indexedMap (toBin p id_) data)
 
 
 
 type alias Histogram data msg =
-  { binWidth : Maybe (data -> Float)
-  , rounded : Float
+  { rounded : Float
   , roundBottom : Bool
   , margin : Float
   , spacing : Float
-  , binLabel : Maybe (data -> String)
-  , tickLength : Float
-  , tickWidth : Float
+  , bin : List (Attribute (Bin data msg))
+  , tick : List (Attribute (Tick msg))
   , attrs : List (S.Attribute msg)
   }
+
+
+type alias Bin data msg =
+  { name : Maybe (data -> String)
+  , label : Maybe (List (Attribute (Label msg)))
+  , width : Maybe (data -> Float)
+  }
+
+
+{-| -}
+bin : v -> Attribute { a | bin : v }
+bin v config =
+  { config | bin = v }
 
 
 {-| -}
@@ -1419,15 +1476,60 @@ histogram : (data -> Float) -> List (Histogram data msg -> Histogram data msg) -
 histogram toX edits metrics data =
   let config =
         applyAttrs edits
-          { binWidth = Nothing
-          , rounded = 0
+          { rounded = 0
           , roundBottom = False
           , spacing = 0.01
           , margin = 0.05
-          , binLabel = Nothing
-          , tickLength = 0
-          , tickWidth = 1
+          , bin = []
+          , tick = []
           , attrs = []
+          }
+
+      tickConfig =
+        applyAttrs config.tick
+          { color = Nothing
+          , width = Nothing
+          , height = 5
+          , attributes = []
+          }
+
+      binConfig =
+        applyAttrs config.bin
+          { name = Nothing
+          , label = Nothing
+          , width = Nothing
+          }
+
+      binLabelConfig =
+        applyAttrs (Maybe.withDefault [] binConfig.label)
+          { color = Nothing
+          , fontSize = Nothing
+          , borderWidth = 0.1
+          , borderColor = "white"
+          , xOffset = 0
+          , yOffset = 15
+          , flipped = False
+          , attributes = []
+          }
+
+      toBarLabel p metric d v =
+        case ( v, metric.label ) of
+          ( Just v_, Just _ ) ->
+            Just (xLabel (barLabelConfig metric v_) p (String.fromFloat v_))
+
+          _ ->
+            Nothing
+
+      barLabelConfig metric v =
+        applyAttrs (Maybe.withDefault [] metric.label)
+          { color = Nothing
+          , fontSize = Nothing
+          , borderWidth = 0.1
+          , borderColor = "white"
+          , xOffset = 0
+          , yOffset = if v < 0 then -12 else -4
+          , flipped = v < 0
+          , attributes = []
           }
 
       numOfBars =
@@ -1440,40 +1542,40 @@ histogram toX edits metrics data =
         (numOfBars - 1) * config.spacing
 
       toBinWidth p d maybePrev =
-        case config.binWidth of
+        case binConfig.width of
           Just toWidth -> toWidth d
           Nothing ->
             case maybePrev of
               Just prev -> toX d - toX prev
               Nothing -> toX d - p.x.min
 
-      toBinLabel d =
-        case config.binLabel of
-          Just func -> func d
-          Nothing -> ""
+      toBinLabel p d =
+        case binConfig.name of
+          Just func -> Just <| xLabel binLabelConfig p (func d)
+          Nothing -> Nothing
 
       toBarColor m d =
         case m.color of
           Just func -> func d
           Nothing -> blue
 
-      toBar name p d (Bar value metric) =
-        { attributes = [ SA.stroke "transparent", SA.fill (toBarColor metric d), clipPath name ] ++ config.attrs
-        , label = metric.topLabel d
+      toBar id_ p d (Bar value metric) =
+        { attributes = [ SA.stroke "transparent", SA.fill (toBarColor metric d), clipPath id_ ] ++ config.attrs
+        , label = toBarLabel p metric d (value d)
         , width = (1 - barSpacing - barMargin) / numOfBars
         , rounded = config.rounded
         , roundBottom = config.roundBottom
         , value = Maybe.withDefault (C.closestToZero p) (value d)
         }
 
-      toBin name p maybePrev d =
-        { label = toBinLabel d
+      toBin id_ p maybePrev d =
+        { label = toBinLabel p d
         , start = toX d - toBinWidth p d maybePrev
         , end = toX d
         , spacing = config.spacing
-        , tickLength = config.tickLength
-        , tickWidth = config.tickWidth
-        , bars = List.map (toBar name p d) metrics
+        , tickLength = tickConfig.height -- TODO add color too
+        , tickWidth = Maybe.withDefault 1 tickConfig.width
+        , bars = List.map (toBar id_ p d) metrics
         }
 
       -- CALC
@@ -1482,14 +1584,16 @@ histogram toX edits metrics data =
         toBinItems { margin = config.margin, between = config.spacing } toX toX2 metrics data
 
       toX2 =
-        Maybe.map (\w d -> toX d + w d) config.binWidth
+        case binConfig.width of
+          Just toWidth -> Just (\d -> toX d + toWidth d)
+          Nothing -> Nothing
 
       toTicks p acc =
         { acc | xs = List.concatMap (\i -> [i.position.x1, i.position.x2]) binItems }
   in
-  HistogramElement binItems toTicks <| \name p _ ->
+  HistogramElement binItems toTicks <| \id_ p _ ->
     -- TODO use items
-    C.histogram p (mapWithPrev (toBin name p) data)
+    C.histogram p (mapWithPrev (toBin id_ p) data)
 
 
 
@@ -1499,10 +1603,10 @@ type Bar data msg =
 
 
 type alias BarConfig data msg =
-  { label : String
+  { name : Maybe String
   , unit : String
   , color : Maybe (data -> String)
-  , topLabel : data -> Maybe String
+  , label : Maybe (List (Attribute (Label msg)))
   , attrs : List (S.Attribute msg)
   }
 
@@ -1512,10 +1616,10 @@ bar : (data -> Maybe Float) -> List (BarConfig data msg -> BarConfig data msg) -
 bar toY edits =
   let config =
         applyAttrs edits
-          { label = ""
+          { name = Nothing
           , unit = ""
           , color = Nothing
-          , topLabel = \_ -> Nothing
+          , label = Nothing
           , attrs = [] -- TODO use
           }
   in
@@ -1549,17 +1653,17 @@ series toX series_ data =
       items =
         toDotItems toX metrics data
   in
-  SeriesElement items <| \name p _ ->
+  SeriesElement items <| \id_ p _ ->
     -- TODO use items
     S.g
-      [ SA.class "elm-charts__series", clipPath name ] <|
+      [ SA.class "elm-charts__series", clipPath id_ ] <|
       List.indexedMap (\i (Series _ _ _ _ view) -> view i toX data p (toDefaultColor i)) series_
 
 
 
 type alias Scatter data msg =
     { color : Maybe String -- TODO use Color
-    , label : String
+    , name : Maybe String
     , unit : String
     , size : Maybe (data -> Float)
     , style : Maybe (data -> Style)
@@ -1574,7 +1678,7 @@ scatter toY edits =
   let config =
         applyAttrs edits
           { color = Nothing
-          , label = ""
+          , name = Nothing
           , unit = ""
           , size = Nothing
           , style = Nothing
@@ -1599,7 +1703,7 @@ scatter toY edits =
               Just (Aura a b) -> C.aura (toSize d) a b (toDefaultShape i) c
               Just (Detached a) -> C.disconnected (toSize d) a (toDefaultShape i) c
   in
-  Series toY config.label config.unit config.color <| \i toX data p c ->
+  Series toY (Maybe.withDefault "" config.name) config.unit config.color <| \i toX data p c ->
     C.scatter p toX toY (finalDot i c) data
 
 
@@ -1608,7 +1712,7 @@ type alias Interpolation data msg =
     , color : Maybe String -- TODO use Color
     , size : Maybe (data -> Float)
     , width : Float
-    , label : String
+    , name : Maybe String
     , unit : String
     , style : Maybe (data -> Style)
     , dot : Maybe (data -> S.Svg msg)
@@ -1627,7 +1731,7 @@ monotone toY edits =
           , width = 1
           , dot = Nothing
           , style = Nothing
-          , label = ""
+          , name = Nothing
           , unit = ""
           , attrs = []
           }
@@ -1656,7 +1760,7 @@ monotone toY edits =
               Just (Aura a b) -> C.aura (toSize d) a b (toDefaultShape i) c
               Just (Detached a) -> C.disconnected (toSize d) a (toDefaultShape i) c
   in
-  Series toY config.label config.unit config.color <| \i toX data p c ->
+  Series toY (Maybe.withDefault "" config.name) config.unit config.color <| \i toX data p c ->
     C.monotone p toX toY (interAttrs c) config.area (finalDot i c) data
 
 
@@ -1670,7 +1774,7 @@ linear toY edits =
           , area = Nothing
           , size = Nothing
           , width = 1
-          , label = ""
+          , name = Nothing
           , unit = ""
           , dot = Nothing
           , style = Nothing
@@ -1701,7 +1805,7 @@ linear toY edits =
               Just (Aura a b) -> C.aura (toSize d) a b (toDefaultShape i) c
               Just (Detached a) -> C.disconnected (toSize d) a (toDefaultShape i) c
   in
-  Series toY config.label config.unit config.color <| \i toX data p c ->
+  Series toY (Maybe.withDefault "" config.name) config.unit config.color <| \i toX data p c ->
     C.linear p toX toY (interAttrs c) config.area (finalDot i c) data
 
 
@@ -1770,8 +1874,8 @@ applyAttrs funcs default =
 
 
 clipPath : String -> S.Attribute msg
-clipPath name =
-  SA.clipPath <| "url(#" ++ name ++ ")"
+clipPath id_ =
+  SA.clipPath <| "url(#" ++ id_ ++ ")"
 
 
 
@@ -1836,7 +1940,7 @@ toGroupItems space bars_ data =
             , y = value datum
             }
         , metric =
-            { label = metric.label
+            { label = Maybe.withDefault "" metric.name
             , unit = metric.unit
             , color =
                 case metric.color of
@@ -1895,7 +1999,7 @@ toBinItems space toX1 toX2Maybe bars_ data =
             , y = value datum
             }
         , metric =
-            { label = metric.label
+            { label = Maybe.withDefault "" metric.name
             , unit = metric.unit
             , color =
                 case metric.color of
@@ -2182,4 +2286,96 @@ formatWeekday =
         [ F.dayOfWeekNameFull ]
 
 
+
+
+
+-- LABEL
+
+
+type alias Label msg =
+  { color : Maybe String
+  , fontSize : Maybe Float
+  , borderWidth : Float
+  , borderColor : String
+  , xOffset : Float
+  , yOffset : Float
+  , flipped : Bool
+  , attributes : List (S.Attribute msg)
+  }
+
+
+label : value -> Attribute { a | label : Maybe value }
+label value config =
+  { config | label = Just value }
+
+
+fontSize : value -> Attribute { a | fontSize : Maybe value }
+fontSize value config =
+  { config | fontSize = Just value }
+
+
+borderWidth : value -> Attribute { a | borderWidth : value }
+borderWidth value config =
+  { config | borderWidth = value }
+
+
+borderColor : value -> Attribute { a | borderColor : value }
+borderColor value config =
+  { config | borderColor = value }
+
+
+xOffset : Float -> Attribute { a | xOffset : Float }
+xOffset value config =
+  { config | xOffset = config.xOffset + value }
+
+
+yOffset : Float -> Attribute { a | yOffset : Float }
+yOffset value config =
+  { config | yOffset = config.yOffset + value }
+
+
+
+-- TICK
+
+
+type alias Tick msg =
+  { color : Maybe String
+  , width : Maybe Float
+  , height : Float
+  , attributes : List (S.Attribute msg)
+  }
+
+
+tick : value -> Attribute { a | tick : value }
+tick value config =
+  { config | tick = value }
+
+
+
+-- VIEWS
+
+
+xLabel : Label msg -> C.Plane -> String -> Float -> Float -> S.Svg msg
+xLabel config plane value x y =
+  let borderAttrs =
+        if config.borderWidth == 0 then []
+        else [ SA.strokeWidth (String.fromFloat config.borderWidth), SA.stroke config.borderColor ]
+
+      colorAttrs =
+        [ SA.fill (Maybe.withDefault "#808BAB" config.color) ]
+
+      styleAttrs =
+        [ SA.style <| "font-size: " ++ toFontSize ++ ";" ]
+
+      toFontSize =
+        case config.fontSize of
+          Just size_ -> String.fromFloat size_ ++ "px"
+          Nothing -> "inherit"
+  in
+  S.g
+    [ C.position plane x y config.xOffset (config.yOffset * if config.flipped then -1 else 1)
+    , SA.style "text-anchor: middle;"
+    , SA.class "elm-charts__x-label"
+    ]
+    [ C.viewLabel (borderAttrs ++ colorAttrs ++ styleAttrs ++ config.attributes) value ]
 

@@ -133,8 +133,8 @@ viewHover model =
     , C.xLabels []
 
     , C.series .x
-        [ C.linear .z [ C.label "area", C.unit "m2", C.area 0.25, C.size (\d -> if isHovered d then 6 else 3), C.style (\_ -> C.empty 1), C.dot customDot ]
-        , C.monotone .y [ C.label "speed", C.unit "km/h", C.size (\d -> if isHovered d then 6 else 3) ]
+        [ C.linear .z [ C.name "area", C.unit "m2", C.area 0.25, C.size (\d -> if isHovered d then 6 else 3), C.style (\_ -> C.empty 1), C.dot customDot ]
+        , C.monotone .y [ C.name "speed", C.unit "km/h", C.size (\d -> if isHovered d then 6 else 3) ]
         ]
         data
 
