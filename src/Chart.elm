@@ -85,9 +85,9 @@ type alias Attribute c =
 
 
 {-| -}
-width : Float -> Attribute { a | width : Float }
+width : x -> Attribute { a | width : Maybe x }
 width value config =
-  { config | width = value }
+  { config | width = Just value }
 
 
 {-| -}
@@ -415,7 +415,7 @@ center config =
 
 {-| -}
 type alias Container data msg =
-    { width : Float
+    { width : Maybe Float
     , height : Float
     , marginTop : Float
     , marginBottom : Float
@@ -441,7 +441,7 @@ chart : List (Container data msg -> Container data msg) -> List (Element data ms
 chart edits elements =
   let config =
         applyAttrs edits
-          { width = 500
+          { width = Nothing
           , height = 200
           , marginTop = 10
           , marginBottom = 30
@@ -591,7 +591,7 @@ definePlane config items =
         C.scaleCartesian
           { marginLower = config.marginLeft
           , marginUpper = config.marginRight
-          , length = max 1 (config.width - config.paddingLeft - config.paddingRight)
+          , length = max 1 (Maybe.withDefault 500 config.width - config.paddingLeft - config.paddingRight)
           , data = calcRange
           , min = calcRange.min
           , max = calcRange.max
@@ -610,7 +610,7 @@ definePlane config items =
   { x =
       { marginLower = config.marginLeft
       , marginUpper = config.marginRight
-      , length = config.width
+      , length = Maybe.withDefault 500 config.width
       , data = xRange
       , min = calcRange.min - scalePadX config.paddingLeft
       , max = calcRange.max + scalePadX config.paddingRight
@@ -1366,28 +1366,12 @@ bars edits metrics data =
           }
 
       binLabelConfig =
-        applyAttrs (Maybe.withDefault [] binConfig.label)
-          { color = Nothing
-          , fontSize = Nothing
-          , borderWidth = 0.1
-          , borderColor = "white"
-          , xOffset = 0
-          , yOffset = 15
-          , flipped = False
-          , attributes = []
-          }
+        yOffset 15 :: Maybe.withDefault [] binConfig.label
 
       barLabelConfig metric v =
-        applyAttrs (Maybe.withDefault [] metric.label)
-          { color = Nothing
-          , fontSize = Nothing
-          , borderWidth = 0.1
-          , borderColor = "white"
-          , xOffset = 0
-          , yOffset = if v < 0 then -12 else -4
-          , flipped = v < 0
-          , attributes = []
-          }
+        (if v < 0 then [ flip ] else []) ++
+        [ yOffset (if v < 0 then -12 else -4) ] ++
+        Maybe.withDefault [] metric.label
 
       toBinLabel p d =
         case binConfig.name of
@@ -1501,16 +1485,7 @@ histogram toX edits metrics data =
           }
 
       binLabelConfig =
-        applyAttrs (Maybe.withDefault [] binConfig.label)
-          { color = Nothing
-          , fontSize = Nothing
-          , borderWidth = 0.1
-          , borderColor = "white"
-          , xOffset = 0
-          , yOffset = 15
-          , flipped = False
-          , attributes = []
-          }
+        yOffset 15 :: Maybe.withDefault [] binConfig.label
 
       toBarLabel p metric d v =
         case ( v, metric.label ) of
@@ -1521,16 +1496,9 @@ histogram toX edits metrics data =
             Nothing
 
       barLabelConfig metric v =
-        applyAttrs (Maybe.withDefault [] metric.label)
-          { color = Nothing
-          , fontSize = Nothing
-          , borderWidth = 0.1
-          , borderColor = "white"
-          , xOffset = 0
-          , yOffset = if v < 0 then -12 else -4
-          , flipped = v < 0
-          , attributes = []
-          }
+        (if v < 0 then [ flip ] else []) ++
+        [ yOffset (if v < 0 then -12 else -4) ] ++
+        Maybe.withDefault [] metric.label
 
       numOfBars =
         toFloat (List.length metrics)
@@ -2299,7 +2267,7 @@ type alias Label msg =
   , borderColor : String
   , xOffset : Float
   , yOffset : Float
-  , flipped : Bool
+  , flip : Bool
   , attributes : List (S.Attribute msg)
   }
 
@@ -2322,6 +2290,11 @@ borderWidth value config =
 borderColor : value -> Attribute { a | borderColor : value }
 borderColor value config =
   { config | borderColor = value }
+
+
+flip : Attribute { a | flip : Bool }
+flip config =
+  { config | flip = True }
 
 
 xOffset : Float -> Attribute { a | xOffset : Float }
@@ -2355,9 +2328,21 @@ tick value config =
 -- VIEWS
 
 
-xLabel : Label msg -> C.Plane -> String -> Float -> Float -> S.Svg msg
-xLabel config plane value x y =
-  let borderAttrs =
+xLabel : List (Attribute (Label msg)) -> C.Plane -> String -> Float -> Float -> S.Svg msg
+xLabel edits plane value x y =
+  let config =
+        applyAttrs edits
+          { color = Nothing
+          , fontSize = Nothing
+          , borderWidth = 0.1
+          , borderColor = "white"
+          , xOffset = 0
+          , yOffset = 0
+          , flip = False
+          , attributes = []
+          }
+
+      borderAttrs =
         if config.borderWidth == 0 then []
         else [ SA.strokeWidth (String.fromFloat config.borderWidth), SA.stroke config.borderColor ]
 
@@ -2365,7 +2350,7 @@ xLabel config plane value x y =
         [ SA.fill (Maybe.withDefault "#808BAB" config.color) ]
 
       styleAttrs =
-        [ SA.style <| "font-size: " ++ toFontSize ++ ";" ]
+        [ SA.style ("font-size: " ++ toFontSize ++ ";") ]
 
       toFontSize =
         case config.fontSize of
@@ -2373,7 +2358,7 @@ xLabel config plane value x y =
           Nothing -> "inherit"
   in
   S.g
-    [ C.position plane x y config.xOffset (config.yOffset * if config.flipped then -1 else 1)
+    [ C.position plane x y config.xOffset (config.yOffset * if config.flip then -1 else 1)
     , SA.style "text-anchor: middle;"
     , SA.class "elm-charts__x-label"
     ]

@@ -115,23 +115,19 @@ viewHover model =
     ]
     [ C.grid []
 
-    , C.bars
-        [ C.tick [ C.height 4, C.color "black" ] -- TODO
-        ]
+    , C.histogram .x
+        []
         [ C.bar (C.just .x)
             [ C.name "area"
             , C.unit "m2"
-            , C.label []
             ]
         , C.bar .y
             [ C.name "speed"
             , C.unit "km/h"
-            , C.label []
             ]
         , C.bar .z
             [ C.name "volume"
             , C.unit "m3"
-            , C.label []
             ]
         ]
         data
@@ -140,7 +136,13 @@ viewHover model =
     , C.yTicks []
     , C.xAxis []
     , C.yLabels []
-    , C.xLabels []
+    --, C.xLabels []
+
+    --, C.with "bars" <| \plane items ->
+    --    List.concatMap (\i -> [ C.xTick [ C.color "blue" ] 0 i.x1, C.xTick [ C.color "blue" ] 0 i.x2 ]) items
+
+    --, C.with "area" <| \plane items ->
+    --    List.map (C.xLabel [ C.color "blue", C.xOffset 2 ] << .center) items
 
     , C.when model.hovering <| \item rest ->
         C.tooltipOnTop (always item.center.x) (always item.position.y) []
