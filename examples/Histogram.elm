@@ -136,7 +136,7 @@ viewHover model =
     , C.yTicks []
     , C.xAxis []
     , C.yLabels []
-    --, C.xLabels []
+    , C.xLabels []
 
     --, C.with "bars" <| \plane items ->
     --    List.concatMap (\i -> [ C.xTick [ C.color "blue" ] 0 i.x1, C.xTick [ C.color "blue" ] 0 i.x2 ]) items

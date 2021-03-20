@@ -1835,6 +1835,17 @@ mapWithPrev =
   fold Nothing []
 
 
+mapSurrounding : (Maybe a -> a -> Maybe a -> b) -> List a -> List b
+mapSurrounding =
+  let fold prev acc func ds =
+        case ds of
+          a :: b :: rest -> fold (Just a) (func prev a (Just b) :: acc) func rest
+          a :: rest -> fold (Just a) (func prev a Nothing :: acc) func rest
+          [] -> acc
+  in
+  fold Nothing []
+
+
 applyAttrs : List (a -> a) -> a -> a
 applyAttrs funcs default =
   let apply f a = f a in
@@ -1937,17 +1948,17 @@ toGroupItems space bars_ data =
 
 toBinItems : Space -> Maybe (data -> Float) -> (data -> Float) -> List (Bar data msg) -> List data -> List (Group (Maybe Float) data)
 toBinItems space toX0Maybe toX1 bars_ data =
-  let toLength prevMaybe datum =
+  let toLength prevMaybe datum nextMaybe =
         case toX0Maybe of
           Just toX0 -> toX1 datum - toX0 datum
           Nothing ->
-            case prevMaybe of
-              Just prev -> toX1 datum - toX1 prev
-              Nothing -> 1 -- toX1 datum -- TODO use axis.min
+            case ( prevMaybe, nextMaybe ) of
+              ( Just prev, _ ) -> toX1 datum - toX1 prev
+              ( Nothing, Just next ) -> toX1 next - toX1 datum
+              ( Nothing, Nothing ) -> 1 -- toX1 datum -- TODO use axis.min
 
-      toBarItem prevMaybe datum barIndex (Bar value metric) =
-        let length = toLength prevMaybe datum
-            margin_ = length * space.margin
+      toBarItem length datum barIndex (Bar value metric) =
+        let margin_ = length * space.margin
             amountOfBars = toFloat (List.length bars_)
             width_ = (length - margin_ * 2 - (amountOfBars - 1) * space.between) / amountOfBars
         in
@@ -1976,8 +1987,8 @@ toBinItems space toX0Maybe toX1 bars_ data =
             }
         }
 
-      toBinItem prevMaybe datum =
-        let length = toLength prevMaybe datum
+      toBinItem prevMaybe datum nextMaybe =
+        let length = toLength prevMaybe datum nextMaybe
             toYs = List.map (\(Bar value metric) -> value) bars_
         in
         { datum = datum
@@ -1990,10 +2001,10 @@ toBinItems space toX0Maybe toX1 bars_ data =
             , x2 = toX1 datum
             , y = C.maximum toYs [datum]
             }
-        , items = List.indexedMap (toBarItem prevMaybe datum) bars_
+        , items = List.indexedMap (toBarItem length datum) bars_
         }
   in
-  mapWithPrev toBinItem data
+  mapSurrounding toBinItem data
 
 
 
