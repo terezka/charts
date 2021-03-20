@@ -172,14 +172,16 @@ toGroupItems space bars_ data =
         (1 - space.margin * 2 - (amountOfBars - 1) * space.between) / amountOfBars
 
       toBarItem binIndex datum barIndex bar =
+        let x1 = toFloat binIndex + 0.5 + space.margin + toFloat barIndex * barWidth + toFloat barIndex * space.between
+        in
         { datum = datum
         , center =
-            { x = toFloat binIndex + 0.5 + space.margin + toFloat barIndex * barWidth + barWidth / 2
+            { x = x1 + barWidth / 2
             , y = Maybe.withDefault 0 (bar.value datum)
             }
         , position =
-            { x1 = toFloat binIndex + 0.5 + space.margin + toFloat barIndex * barWidth
-            , x2 = toFloat binIndex + 0.5 + space.margin + toFloat barIndex * barWidth + barWidth
+            { x1 = x1
+            , x2 = x1 + barWidth
             , y = Maybe.withDefault 0 (bar.value datum)
             }
         , values =
@@ -230,15 +232,16 @@ toBinItems space toX0Maybe toX1 bars_ data =
         let margin_ = length * space.margin
             amountOfBars = toFloat (List.length bars_)
             width_ = (length - margin_ * 2 - (amountOfBars - 1) * space.between) / amountOfBars
+            x1 = toX1 datum - length + margin_ + toFloat barIndex * width_ + toFloat barIndex * space.between
         in
         { datum = datum
         , center =
-            { x = toX1 datum - length + margin_ + toFloat barIndex * width_ + width_ / 2
+            { x = x1 + width_ / 2
             , y = Maybe.withDefault 0 (bar.value datum)
             }
         , position =
-            { x1 = toX1 datum - length + margin_ + toFloat barIndex * width_
-            , x2 = toX1 datum - length + margin_ + toFloat barIndex * width_ + width_
+            { x1 = x1
+            , x2 = x1 + width_
             , y = Maybe.withDefault 0 (bar.value datum) -- TODO perhaps leave as Maybe?
             }
         , values =

@@ -116,7 +116,7 @@ viewHover model =
     [ C.grid []
 
     , C.histogram .x
-        []
+        [ ]
         [ C.bar (C.just .x)
             [ C.name "area"
             , C.unit "m2"
@@ -138,8 +138,9 @@ viewHover model =
     , C.yLabels []
     , C.xLabels []
 
-    --, C.with "bars" <| \plane items ->
-    --    List.concatMap (\i -> [ C.xTick [ C.color "blue" ] 0 i.x1, C.xTick [ C.color "blue" ] 0 i.x2 ]) items
+    --, C.with C.getBins <| \plane items ->
+    --    let view = C.xTick [] (C.zero plane.x) in
+    --    List.concatMap (\i -> [ view i.position.x1, view i.position.x2 ]) items\
 
     --, C.with "area" <| \plane items ->
     --    List.map (C.xLabel [ C.color "blue", C.xOffset 2 ] << .center) items
