@@ -61,7 +61,7 @@ data =
 view : Model -> H.Html Msg
 view model =
   H.div []
-    [ viewBasic
+    [ H.text "" -- viewBasic
     , viewHover model
     ]
 

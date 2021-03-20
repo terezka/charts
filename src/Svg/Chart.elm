@@ -4,8 +4,6 @@ module Svg.Chart
     , Dot, clear, empty, disconnected, aura, full
     , Shape, circle, triangle, square, diamond, plus, cross
     , scatter, linear, monotone
-    , Group, bars
-    , Bin, Bar, histogram
     , xAxis, yAxis, xArrow, yArrow
     , xGrid, yGrid
     , xTicks, xTick, yTicks, yTick
@@ -18,7 +16,9 @@ module Svg.Chart
     , getNearest, getNearestX, getWithin, getWithinX
     , tooltip, tooltipOnTop, isXPastMiddle, middleOfY, middleOfX, closestToZero
 
-    , toBarPoints, viewLabel
+    , viewLabel
+    , Item, Items, Metric, toGroupItems, toBinItems, Bar, BarVisuals
+    , histogram, bars
     )
 
 
@@ -74,12 +74,13 @@ import Html exposing (Html)
 import Html.Attributes as HA
 import Svg exposing (Svg, Attribute, g, path, rect, text)
 import Svg.Attributes as Attributes exposing (class, width, height, stroke, fill, fillOpacity, d, transform, viewBox)
-import Svg.Coordinates exposing (Plane, place, toSVGX, toSVGY, toCartesianX, toCartesianY, scaleSVG, scaleCartesian, placeWithOffset)
+import Svg.Coordinates as Coords exposing (Plane, place, toSVGX, toSVGY, toCartesianX, toCartesianY, scaleSVG, scaleCartesian, placeWithOffset)
 import Svg.Commands exposing (..)
 import Internal.Colors exposing (..)
 import Internal.Svg exposing (..)
 import Json.Decode as Json
 import DOM
+import Dict exposing (Dict)
 
 
 {-| Set the size of your chart.
@@ -116,174 +117,215 @@ frame id plane =
 
 
 
+-- ITEMS
+
+
+{-| -}
+type alias Item value data =
+  { datum : data
+  , center : { x : Float, y : Float }
+  , position : { x1 : Float, x2 : Float, y : Float }
+  , values : { x1 : Float, x2 : Float, y : value }
+  , metric : Metric
+  }
+
+
+{-| -}
+type alias Items value data =
+  { datum : data
+  , center : { x : Float, y : Float }
+  , position : { x1 : Float, x2 : Float, y : Float }
+  , items : List (Item value data)
+  }
+
+
+{-| -}
+type alias Metric =
+  { label : String
+  , color : String
+  , unit : String
+  }
+
+
+{-| -}
+type alias Space =
+  { between : Float
+  , margin : Float
+  }
+
+
+{-| -}
+type alias Bar data =
+  { value : data -> Maybe Float
+  , name : Maybe String
+  , unit : String
+  , color : Maybe (data -> String)
+  }
+
+
+toGroupItems : Space -> List (Bar data) -> List data -> List (Items (Maybe Float) data)
+toGroupItems space bars_ data =
+  let amountOfBars =
+        toFloat (List.length bars_)
+
+      barWidth =
+        (1 - space.margin * 2 - (amountOfBars - 1) * space.between) / amountOfBars
+
+      toBarItem binIndex datum barIndex bar =
+        { datum = datum
+        , center =
+            { x = toFloat binIndex + 0.5 + space.margin + toFloat barIndex * barWidth + barWidth / 2
+            , y = Maybe.withDefault 0 (bar.value datum)
+            }
+        , position =
+            { x1 = toFloat binIndex + 0.5 + space.margin + toFloat barIndex * barWidth
+            , x2 = toFloat binIndex + 0.5 + space.margin + toFloat barIndex * barWidth + barWidth
+            , y = Maybe.withDefault 0 (bar.value datum)
+            }
+        , values =
+            { x1 = toFloat binIndex
+            , x2 = toFloat binIndex
+            , y = bar.value datum
+            }
+        , metric =
+            { label = Maybe.withDefault "" bar.name
+            , unit = bar.unit
+            , color =
+                case bar.color of
+                  Just c -> c datum
+                  Nothing -> toDefaultColor barIndex
+            }
+        }
+
+      toGroupItem binIndex datum =
+        let toYs = List.map .value bars_ in
+        { datum = datum
+        , center =
+            { x = toFloat binIndex
+            , y = Coords.maximum toYs [datum]
+            }
+        , position =
+            { x1 = toFloat binIndex + 0.5
+            , x2 = toFloat binIndex + 1.5
+            , y = Coords.maximum toYs [datum]
+            }
+        , items = List.indexedMap (toBarItem binIndex datum) bars_
+        }
+  in
+  List.indexedMap toGroupItem data
+
+
+toBinItems : Space -> Maybe (data -> Float) -> (data -> Float) -> List (Bar data) -> List data -> List (Items (Maybe Float) data)
+toBinItems space toX0Maybe toX1 bars_ data =
+  let toLength prevMaybe datum nextMaybe =
+        case toX0Maybe of
+          Just toX0 -> toX1 datum - toX0 datum
+          Nothing ->
+            case ( prevMaybe, nextMaybe ) of
+              ( Just prev, _ ) -> toX1 datum - toX1 prev
+              ( Nothing, Just next ) -> toX1 next - toX1 datum
+              ( Nothing, Nothing ) -> 1 -- toX1 datum -- TODO use axis.min
+
+      toBarItem length datum barIndex bar  =
+        let margin_ = length * space.margin
+            amountOfBars = toFloat (List.length bars_)
+            width_ = (length - margin_ * 2 - (amountOfBars - 1) * space.between) / amountOfBars
+        in
+        { datum = datum
+        , center =
+            { x = toX1 datum - length + margin_ + toFloat barIndex * width_ + width_ / 2
+            , y = Maybe.withDefault 0 (bar.value datum)
+            }
+        , position =
+            { x1 = toX1 datum - length + margin_ + toFloat barIndex * width_
+            , x2 = toX1 datum - length + margin_ + toFloat barIndex * width_ + width_
+            , y = Maybe.withDefault 0 (bar.value datum) -- TODO perhaps leave as Maybe?
+            }
+        , values =
+            { x1 = toX1 datum
+            , x2 = toX1 datum
+            , y = bar.value datum
+            }
+        , metric =
+            { label = Maybe.withDefault "" bar.name
+            , unit = bar.unit
+            , color =
+                case bar.color of
+                  Just c -> c datum
+                  Nothing -> toDefaultColor barIndex
+            }
+        }
+
+      toBinItem prevMaybe datum nextMaybe =
+        let length = toLength prevMaybe datum nextMaybe
+            toYs = List.map .value bars_
+        in
+        { datum = datum
+        , center =
+            { x = toX1 datum - length / 2
+            , y = Coords.maximum toYs [datum]
+            }
+        , position =
+            { x1 = toX1 datum - length
+            , x2 = toX1 datum
+            , y = Coords.maximum toYs [datum]
+            }
+        , items = List.indexedMap (toBarItem length datum) bars_
+        }
+  in
+  mapSurrounding toBinItem data
+
+
+mapSurrounding : (Maybe a -> a -> Maybe a -> b) -> List a -> List b
+mapSurrounding =
+  let fold prev acc func ds =
+        case ds of
+          a :: b :: rest -> fold (Just a) (func prev a (Just b) :: acc) func (b :: rest)
+          a :: rest -> fold (Just a) (func prev a Nothing :: acc) func rest
+          [] -> acc
+  in
+  fold Nothing []
+
+
+
 -- BARS
 
 
-{-| -}
-type alias Group msg =
-  { label : Maybe (Float -> Float -> Svg msg)
-  , spacing : Float
-  , tickLength : Float
-  , tickWidth : Float
-  , bars : List (Bar msg)
-  }
-
-
-{-| -}
-bars : Plane -> List (Group msg) -> Svg msg
-bars plane groups =
-  let viewGroupBin i group =
-        viewBin plane
-          { label = group.label
-          , start = toFloat i + 0.5
-          , end = toFloat i + 1.5
-          , spacing = group.spacing
-          , tickLength = group.tickLength
-          , tickWidth = group.tickWidth
-          , bars = group.bars
-          }
-  in
-  g [ class "elm-charts__bars" ] (List.indexedMap viewGroupBin groups)
-
-
-
--- HISTOGRAM
-
-
-{-| -}
-type alias Bin msg =
-  { label : Maybe (Float -> Float -> Svg msg)
-  , start : Float
-  , end : Float
-  , spacing : Float
-  , tickLength : Float
-  , tickWidth : Float
-  , bars : List (Bar msg)
-  }
-
-
-{-| -}
-type alias Bar msg =
-  { attributes : List (Attribute msg)
-  , label : Maybe (Float -> Float -> Svg msg)
-  , rounded : Float
+type alias BarVisuals data msg =
+  { round : Float
   , roundBottom : Bool
-  , width : Float
-  , value : Float
+  , attrs : Int -> data -> List (Attribute msg)
   }
 
 
 {-| -}
-histogram : Plane -> List (Bin msg) -> Svg msg
-histogram plane bins =
-  g [ class "elm-charts__histogram" ] (List.map (viewBin plane) bins)
-
-
-viewBin : Plane -> Bin msg -> Svg msg
-viewBin plane bin =
-  let binWidth =
-        bin.end - bin.start
-
-      binOffset =
-        (binWidth - binWidth * usedWidthPer) / 2
-
-      usedWidthPer =
-        min 1 <| List.sum (List.map .width bin.bars) + bin.spacing * toFloat (List.length bin.bars - 1)
-
-      adjustBar barOffset bar =
-        { attributes = bar.attributes
-        , label = bar.label
-        , rounded = bar.rounded
-        , roundBottom = bar.roundBottom
-        , position = bin.start + binOffset + barOffset
-        , width = binWidth * bar.width
-        , value = bar.value
-        }
-
-      foldAdjustedBars b ( offset, acc ) =
-        ( offset + binWidth * b.width + binWidth * bin.spacing
-        , adjustBar offset b :: acc
-        )
-
-      ( _, adjustedBars ) =
-        List.foldl foldAdjustedBars ( 0, [] ) bin.bars
-
-      viewValueLabel bar =
-        case bar.label of
-          Just view ->
-            view (bar.position + bar.width / 2) bar.value
-
-          Nothing ->
-            Svg.text ""
-
-      viewBinLabel =
-        case bin.label of
-          Just view ->
-            view (bin.start + binWidth / 2) (closestToZero plane)
-
-          Nothing ->
-            Svg.text ""
-
-  in
-  g [ class "elm-charts__bin" ]
-    [ g [ class "elm-charts__bars" ] (List.map (viewBar plane) adjustedBars)
-    , xTicks plane bin.tickLength [ Attributes.strokeWidth (String.fromFloat bin.tickWidth) ] (closestToZero plane) [ bin.start, bin.end ]
-    , viewBinLabel
-    , g [ class "elm-charts__bin-bar-labels" ] (List.map viewValueLabel adjustedBars)
-    ]
+bars : Plane -> BarVisuals data msg -> List (Items (Maybe Float) data) -> Svg msg
+bars plane visuals groups =
+  g [ class "elm-charts__bars" ] (List.map (viewBin plane visuals) groups)
 
 
 {-| -}
-toBarPoints : Plane -> Bin msg -> List Point
-toBarPoints plane bin =
-  let binWidth =
-        bin.end - bin.start
-
-      binOffset =
-        (binWidth - binWidth * usedWidthPer) / 2
-
-      usedWidthPer =
-        min 1 <| List.sum (List.map .width bin.bars) + bin.spacing * toFloat (List.length bin.bars - 1)
-
-      foldAdjustedBars bar ( offset, acc ) =
-        let barWidth = binWidth * bar.width
-            barOffset = offset + barWidth
-        in
-        ( barOffset + binWidth * bin.spacing
-        , { x = bin.start + binOffset + barOffset - barWidth / 2, y = bar.value } :: acc
-        )
-  in
-  List.foldl foldAdjustedBars ( 0, [] ) bin.bars
-    |> Tuple.second
+histogram : Plane -> BarVisuals data msg -> List (Items (Maybe Float) data) -> Svg msg
+histogram plane visuals bins =
+  g [ class "elm-charts__histogram" ] (List.map (viewBin plane visuals) bins)
 
 
+viewBin : Plane -> BarVisuals data msg -> Items (Maybe Float) data -> Svg msg
+viewBin plane visuals bin =
+  g [ class "elm-charts__bin" ] (List.indexedMap (viewBar plane visuals) bin.items)
 
 
--- BARS INTERNAL
-
-
-type alias InternalBar msg =
-  { attributes : List (Attribute msg)
-  , label : Maybe (Float -> Float -> Svg msg)
-  , rounded : Float
-  , roundBottom : Bool
-  , position : Float
-  , width : Float
-  , value : Float
-  }
-
-
-viewBar : Plane ->  InternalBar msg -> Svg msg
-viewBar plane bar_ =
-  let x = bar_.position
-      y = bar_.value
-      w = bar_.width
+viewBar : Plane -> BarVisuals data msg -> Int -> Item (Maybe Float) data -> Svg msg
+viewBar plane visuals barIndex item =
+  let x = item.position.x1
+      y = item.position.y
+      w = item.position.x2 - item.position.x1
       bs = closestToZero plane
-      b = scaleSVG plane.x w * 0.5 * (clamp 0 1 bar_.rounded)
-      ys = abs (scaleSVG plane.y bar_.value)
+      b = scaleSVG plane.x w * 0.5 * (clamp 0 1 visuals.round)
+      ys = abs (scaleSVG plane.y y)
       rx = scaleCartesian plane.x b
       ry = scaleCartesian plane.y b
-      roundBottom = bar_.roundBottom
+      roundBottom = visuals.roundBottom
 
       commands =
         if bs == y then
@@ -340,8 +382,10 @@ viewBar plane bar_ =
 
       attributes =
         concat
-          [ stroke pinkStroke, fill pinkFill ]
-          bar_.attributes
+          [ fill item.metric.color
+          , class "elm-charts__bar"
+          ]
+          (visuals.attrs barIndex item.datum)
           [ d (description plane commands) ]
   in
   path attributes []
@@ -1351,3 +1395,60 @@ withFirst stuff process =
 
     _ ->
       Nothing
+
+
+
+-- DEFAULTS / COLOR
+
+
+toDefaultColor : Int -> String
+toDefaultColor index =
+  let numOfColors = Dict.size colors
+      colorIndex = remainderBy numOfColors index
+  in
+  Dict.get colorIndex colors
+    |> Maybe.withDefault blue
+
+
+colors : Dict Int String
+colors =
+  [ blue, orange, green, pink, purple, red ]
+    |> List.indexedMap Tuple.pair
+    |> Dict.fromList
+
+
+{-| -}
+blue : String
+blue =
+  "rgb(5,142,218)"
+
+
+{-| -}
+orange : String
+orange =
+  "rgb(244, 149, 69)"
+
+
+{-| -}
+pink : String
+pink =
+  "rgb(253, 121, 168)"
+
+
+{-| -}
+green : String
+green =
+  "rgb(68, 201, 72)"
+
+
+{-| -}
+red : String
+red =
+  "rgb(215, 31, 10)"
+
+
+{-| -}
+purple : String
+purple =
+  "rgb(170, 80, 208)"
+

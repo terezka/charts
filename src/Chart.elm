@@ -1337,7 +1337,7 @@ type alias Bars data msg =
 
 
 {-| -}
-bars : List (Bars data msg -> Bars data msg) -> List (Bar data msg) -> List data -> Element data msg
+bars : List (Bars data msg -> Bars data msg) -> List (C.Bar data) -> List data -> Element data msg
 bars edits metrics data =
   let config =
         applyAttrs edits
@@ -1350,84 +1350,20 @@ bars edits metrics data =
           , attrs = []
           }
 
-      tickConfig =
-        applyAttrs config.tick
-          { color = Nothing
-          , width = Nothing
-          , height = 5
-          , attributes = []
-          }
-
-      binConfig =
-        applyAttrs config.bin
-          { name = Nothing
-          , label = Nothing
-          , width = Nothing
-          }
-
-      binLabelConfig =
-        yOffset 15 :: Maybe.withDefault [] binConfig.label
-
-      barLabelConfig metric v =
-        (if v < 0 then [ flip ] else []) ++
-        [ yOffset (if v < 0 then -12 else -4) ] ++
-        Maybe.withDefault [] metric.label
-
-      toBinLabel p d =
-        case binConfig.name of
-          Just func -> Just <| xLabel binLabelConfig p (func d)
-          Nothing -> Nothing
-
-      toBarLabel p metric d v =
-        case ( v, metric.label ) of
-          ( Just v_, Just _ ) ->
-            Just (xLabel (barLabelConfig metric v_) p (String.fromFloat v_))
-
-          _ ->
-            Nothing
-
-      numOfBars =
-        toFloat (List.length metrics)
-
-      binMargin =
-        config.margin * 2
-
-      barSpacing =
-        (numOfBars - 1) * config.spacing
-
-      toBarColor barIndex m d =
-        case m.color of
-          Just func -> func d
-          Nothing -> toDefaultColor barIndex -- TODO nice default
-
-      toBar p id_ d barIndex (Bar value metric) =
-        { attributes = [ SA.stroke "transparent", SA.fill (toBarColor barIndex metric d), clipPath id_ ] ++ config.attrs
-        , label = toBarLabel p metric d (value d)
-        , width = (1 - barSpacing - binMargin) / numOfBars
-        , rounded = config.rounded
-        , roundBottom = config.roundBottom
-        , value = Maybe.withDefault (C.closestToZero p) (value d)
-        }
-
-      toBin p id_ i d =
-        { label = toBinLabel p d
-        , spacing = config.spacing
-        , tickLength = tickConfig.height
-        , tickWidth = Maybe.withDefault 1 tickConfig.width
-        , bars = List.indexedMap (toBar p id_ d) metrics
-        }
-
-      -- CALC
-
       groupItems =
-        toGroupItems { margin = config.margin, between = config.spacing } metrics data
+        C.toGroupItems { margin = config.margin, between = config.spacing } metrics data
 
       toTicks p acc =
         { acc | xs = List.concatMap (\i -> [i.position.x1, i.position.x2]) groupItems }
   in
   BarsElement groupItems toTicks <| \id_ p _ ->
     -- TODO use items
-    C.bars p (List.indexedMap (toBin p id_) data)
+    C.bars p
+      { round = config.rounded
+      , roundBottom = config.roundBottom
+      , attrs = \i d -> [] -- TODO
+      }
+      groupItems
 
 
 
@@ -1456,7 +1392,7 @@ bin v config =
 
 
 {-| -}
-histogram : (data -> Float) -> List (Histogram data msg -> Histogram data msg) -> List (Bar data msg) -> List data -> Element data msg
+histogram : (data -> Float) -> List (Histogram data msg -> Histogram data msg) -> List (C.Bar data) -> List data -> Element data msg
 histogram toX edits metrics data =
   let config =
         applyAttrs edits
@@ -1469,14 +1405,6 @@ histogram toX edits metrics data =
           , attrs = []
           }
 
-      tickConfig =
-        applyAttrs config.tick
-          { color = Nothing
-          , width = Nothing
-          , height = 5
-          , attributes = []
-          }
-
       binConfig =
         applyAttrs config.bin
           { name = Nothing
@@ -1484,72 +1412,8 @@ histogram toX edits metrics data =
           , width = Nothing
           }
 
-      binLabelConfig =
-        yOffset 15 :: Maybe.withDefault [] binConfig.label
-
-      toBarLabel p metric d v =
-        case ( v, metric.label ) of
-          ( Just v_, Just _ ) ->
-            Just (xLabel (barLabelConfig metric v_) p (String.fromFloat v_))
-
-          _ ->
-            Nothing
-
-      barLabelConfig metric v =
-        (if v < 0 then [ flip ] else []) ++
-        [ yOffset (if v < 0 then -12 else -4) ] ++
-        Maybe.withDefault [] metric.label
-
-      numOfBars =
-        toFloat (List.length metrics)
-
-      barMargin =
-        config.margin * 2
-
-      barSpacing =
-        (numOfBars - 1) * config.spacing
-
-      toBinWidth p d maybePrev =
-        case binConfig.width of
-          Just toWidth -> toWidth d
-          Nothing ->
-            case maybePrev of
-              Just prev -> toX d - toX prev
-              Nothing -> toX d - p.x.min
-
-      toBinLabel p d =
-        case binConfig.name of
-          Just func -> Just <| xLabel binLabelConfig p (func d)
-          Nothing -> Nothing
-
-      toBarColor barIndex m d =
-        case m.color of
-          Just func -> func d
-          Nothing -> toDefaultColor barIndex -- TODO nice default
-
-      toBar id_ p d barIndex (Bar value metric) =
-        { attributes = [ SA.stroke "transparent", SA.fill (toBarColor barIndex metric d), clipPath id_ ] ++ config.attrs
-        , label = toBarLabel p metric d (value d)
-        , width = (1 - barSpacing - barMargin) / numOfBars
-        , rounded = config.rounded
-        , roundBottom = config.roundBottom
-        , value = Maybe.withDefault (C.closestToZero p) (value d)
-        }
-
-      toBin id_ p maybePrev d =
-        { label = toBinLabel p d
-        , start = toX d - toBinWidth p d maybePrev
-        , end = toX d
-        , spacing = config.spacing
-        , tickLength = tickConfig.height -- TODO add color too
-        , tickWidth = Maybe.withDefault 1 tickConfig.width
-        , bars = List.indexedMap (toBar id_ p d) metrics
-        }
-
-      -- CALC
-
       binItems =
-        toBinItems { margin = config.margin, between = config.spacing } toX0 toX metrics data
+        C.toBinItems { margin = config.margin, between = config.spacing } toX0 toX metrics data
 
       toX0 =
         case binConfig.width of
@@ -1561,37 +1425,41 @@ histogram toX edits metrics data =
   in
   HistogramElement binItems toTicks <| \id_ p _ ->
     -- TODO use items
-    C.histogram p (mapWithPrev (toBin id_ p) data)
+    C.histogram p
+      { round = config.rounded
+      , roundBottom = config.roundBottom
+      , attrs = \i d -> [] -- TODO
+      }
+      binItems
 
 
 
 {-| -}
-type Bar data msg =
-  Bar (data -> Maybe Float) (BarConfig data msg)
-
-
-type alias BarConfig data msg =
+type alias Bar data msg =
   { name : Maybe String
   , unit : String
   , color : Maybe (data -> String)
-  , label : Maybe (List (Attribute (Label msg)))
   , attrs : List (S.Attribute msg)
   }
 
 
 {-| -}
-bar : (data -> Maybe Float) -> List (BarConfig data msg -> BarConfig data msg) -> Bar data msg
+bar : (data -> Maybe Float) -> List (Bar data msg -> Bar data msg) -> C.Bar data
 bar toY edits =
   let config =
         applyAttrs edits
           { name = Nothing
           , unit = ""
           , color = Nothing
-          , label = Nothing
           , attrs = [] -- TODO use
           }
   in
-  Bar toY config
+  { value = toY
+  , name = config.name
+  , unit = config.unit
+  , color = config.color
+  }
+
 
 
 {-| -}
@@ -1886,126 +1754,6 @@ toDotItems toX metrics data =
         List.map (toDotItem datum) metrics
   in
   List.concatMap toLineItems data
-
-
-type alias Space =
-  { between : Float
-  , margin : Float
-  }
-
-
-toGroupItems : Space -> List (Bar data msg) -> List data -> List (Group (Maybe Float) data)
-toGroupItems space bars_ data =
-  let amountOfBars =
-        toFloat (List.length bars_)
-
-      barWidth =
-        (1 - space.margin * 2 - (amountOfBars - 1) * space.between) / amountOfBars
-
-      toBarItem binIndex datum barIndex (Bar value metric) =
-        { datum = datum
-        , center =
-            { x = toFloat binIndex + 0.5 + space.margin + toFloat barIndex * barWidth + barWidth / 2
-            , y = Maybe.withDefault 0 (value datum)
-            }
-        , position =
-            { x1 = toFloat binIndex + 0.5 + space.margin + toFloat barIndex * barWidth
-            , x2 = toFloat binIndex + 0.5 + space.margin + toFloat barIndex * barWidth + barWidth
-            , y = Maybe.withDefault 0 (value datum)
-            }
-        , values =
-            { x1 = toFloat binIndex
-            , x2 = toFloat binIndex
-            , y = value datum
-            }
-        , metric =
-            { label = Maybe.withDefault "" metric.name
-            , unit = metric.unit
-            , color =
-                case metric.color of
-                  Just c -> c datum
-                  Nothing -> toDefaultColor barIndex
-            }
-        }
-
-      toGroupItem binIndex datum =
-        let toYs = List.map (\(Bar value metric) -> value) bars_ in
-        { datum = datum
-        , center =
-            { x = toFloat binIndex
-            , y = C.maximum toYs [datum]
-            }
-        , position =
-            { x1 = toFloat binIndex + 0.5
-            , x2 = toFloat binIndex + 1.5
-            , y = C.maximum toYs [datum]
-            }
-        , items = List.indexedMap (toBarItem binIndex datum) bars_
-        }
-  in
-  List.indexedMap toGroupItem data
-
-
-toBinItems : Space -> Maybe (data -> Float) -> (data -> Float) -> List (Bar data msg) -> List data -> List (Group (Maybe Float) data)
-toBinItems space toX0Maybe toX1 bars_ data =
-  let toLength prevMaybe datum nextMaybe =
-        case toX0Maybe of
-          Just toX0 -> toX1 datum - toX0 datum
-          Nothing ->
-            case ( prevMaybe, nextMaybe ) of
-              ( Just prev, _ ) -> toX1 datum - toX1 prev
-              ( Nothing, Just next ) -> toX1 next - toX1 datum
-              ( Nothing, Nothing ) -> 1 -- toX1 datum -- TODO use axis.min
-
-      toBarItem length datum barIndex (Bar value metric) =
-        let margin_ = length * space.margin
-            amountOfBars = toFloat (List.length bars_)
-            width_ = (length - margin_ * 2 - (amountOfBars - 1) * space.between) / amountOfBars
-        in
-        { datum = datum
-        , center =
-            { x = toX1 datum - length + margin_ + toFloat barIndex * width_ + width_ / 2
-            , y = Maybe.withDefault 0 (value datum)
-            }
-        , position =
-            { x1 = toX1 datum - length + margin_ + toFloat barIndex * width_
-            , x2 = toX1 datum - length + margin_ + toFloat barIndex * width_ + width_
-            , y = Maybe.withDefault 0 (value datum) -- TODO perhaps leave as Maybe?
-            }
-        , values =
-            { x1 = toX1 datum
-            , x2 = toX1 datum
-            , y = value datum
-            }
-        , metric =
-            { label = Maybe.withDefault "" metric.name
-            , unit = metric.unit
-            , color =
-                case metric.color of
-                  Just c -> c datum
-                  Nothing -> toDefaultColor barIndex
-            }
-        }
-
-      toBinItem prevMaybe datum nextMaybe =
-        let length = toLength prevMaybe datum nextMaybe
-            toYs = List.map (\(Bar value metric) -> value) bars_
-        in
-        { datum = datum
-        , center =
-            { x = toX1 datum - length / 2
-            , y = C.maximum toYs [datum]
-            }
-        , position =
-            { x1 = toX1 datum - length
-            , x2 = toX1 datum
-            , y = C.maximum toYs [datum]
-            }
-        , items = List.indexedMap (toBarItem length datum) bars_
-        }
-  in
-  mapSurrounding toBinItem data
-
 
 
 -- DEFAULTS
