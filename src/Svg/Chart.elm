@@ -177,7 +177,7 @@ toGroupItems space bars_ data =
         { datum = datum
         , center =
             { x = x1 + barWidth / 2
-            , y = Maybe.withDefault 0 (bar.value datum)
+            , y = Maybe.withDefault 0 (bar.value datum) -- TODO
             }
         , position =
             { x1 = x1
@@ -468,8 +468,8 @@ xAxis plane userAttributes y =
 {-| Renders a horizontal line with the full length of the range.
 -}
 xGrid : Plane -> List (Attribute msg) -> Float -> Svg msg
-xGrid =
-  xAxis
+xGrid plane attrs =
+  xAxis plane (stroke "#EFF2FA" :: attrs)
 
 
 {-| Renders a vertical line with the full length of the domain.
@@ -486,8 +486,8 @@ yAxis plane userAttributes x =
 {-| Renders a horizontal line with the full length of the domain.
 -}
 yGrid : Plane -> List (Attribute msg) -> Float -> Svg msg
-yGrid =
-  yAxis
+yGrid plane attrs =
+  yAxis plane (stroke "#EFF2FA" :: attrs)
 
 
 {-| Renders ticks for the horizontal axis.

@@ -11,6 +11,10 @@ import Browser
 import Time
 
 
+-- TODO
+-- labels + ticks + grid automation?
+-- clean up Item / Items
+
 
 main =
   Browser.sandbox
@@ -52,7 +56,7 @@ data : List Datum
 data =
   [ { x = 2, y = Just 4, z = Just 5, label = "DK" }
   , { x = 4, y = Just 2, z = Just 3, label = "NO" }
-  , { x = 6, y = Just 4, z = Just 0, label = "SE" }
+  , { x = 6, y = Just 4, z = Nothing, label = "SE" }
   , { x = 8, y = Just 3, z = Just 7, label = "FI" }
   , { x = 10, y = Just 4, z = Just 3, label = "IS" }
   ]
@@ -112,42 +116,38 @@ viewHover model =
         , C.event "mousemove" <|
             C.map OnHover (C.getNearestX (C.withoutUnknowns >> C.getBars))
         ]
+    --, C.dotted
     ]
-    [ C.grid []
-
-    , C.histogram .x
-        [ ]
-        [ C.bar (C.just .x)
-            [ C.name "area"
-            , C.unit "m2"
-            ]
-        , C.bar .y
-            [ C.name "speed"
-            , C.unit "km/h"
-            ]
-        , C.bar .z
-            [ C.name "volume"
-            , C.unit "m3"
-            ]
+    [ C.histogram .x
+        [ C.name "bars" ]
+        [ C.bar (C.just .x) [ C.name "area", C.unit "m2" ]
+        , C.bar .y [ C.name "speed", C.unit "km/h" ]
+        , C.bar .z [ C.name "volume", C.unit "m3" ]
         ]
         data
 
     , C.yAxis []
-    , C.yTicks []
+    --, C.yTicks [ ] --  C.withGrid
     , C.xAxis []
-    , C.yLabels []
-    , C.xLabels []
+    , C.yLabels [ ] --  C.withGrid
+    --, C.xLabels [ ] --  C.withGrid
 
-    --, C.with C.getBins <| \plane items ->
-    --    let view = C.xTick [] (C.zero plane.x) in
-    --    List.concatMap (\i -> [ view i.position.x1, view i.position.x2 ]) items\
-
-    --, C.with "area" <| \plane items ->
-    --    List.map (C.xLabel [ C.color "blue", C.xOffset 2 ] << .center) items
+    , C.with C.getGroups <| \plane items ->
+        let byItem i = [ i.position.x1, i.position.x2 ]
+            values _ _ = List.concatMap byItem items
+        in
+        [ C.xTicks [ C.pinned C.zero, C.values values identity String.fromFloat ]
+        , C.xLabels [ C.yOffset -5, C.values (\_ _ -> items) (.center >> .x) (.datum >> .label) ]
+        ]
+        --,
+        --, C.xLabels [ C.yOffset 18, C.x (.center >> .x), C.format (.datum >> .label), C.values items ]
+        --]
 
     , C.when model.hovering <| \item rest ->
-        C.tooltipOnTop (always item.center.x) (always item.position.y) []
-          [ tooltipRow item ]
+        C.tooltipOnTop (always item.center.x) (always item.position.y) [] [ tooltipRow item ]
+
+    --, C.when model.hovering <| \item rest ->
+    --    C.line [ C.horizontal 4, C.vertical 5 ]
     ]
 
 

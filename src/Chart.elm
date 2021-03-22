@@ -14,14 +14,14 @@ module Chart exposing
     , marginTop, marginBottom, marginLeft, marginRight
     , paddingTop, paddingBottom, paddingLeft, paddingRight
     , static, id
-    , range, domain, topped, events, htmlAttrs, binWidth
+    , range, domain, topped, events, htmlAttrs
     , start, end, pinned, color, unit, rounded, roundBottom, margin, spacing
-    , dot, dotted, area, noArrow, binLabel, topLabel, barColor, tickLength, tickWidth, center
+    , dot, dotted, area, noArrow, center
     , filterX, filterY, only, attrs
     , blue, orange, pink, green, red
 
-    , style, empty, detached, aura, full, name, tick
-    , bin, label, fontSize, borderWidth, borderColor, xOffset, yOffset
+    , style, empty, detached, aura, full, name, with
+    , fontSize, borderWidth, borderColor, xOffset, yOffset, xLabel, text
     )
 
 
@@ -468,10 +468,10 @@ chart edits elements =
         definePlane config items
 
       tickValues =
-        getTickValues plane elements
+        getTickValues plane items elements
 
       ( beforeEls, chartEls, afterEls ) =
-        viewElements config plane tickValues elements
+        viewElements config plane tickValues items elements
 
       svgContainer =
         S.svg (sizingAttrs ++ List.map toEvent config.events ++ config.attrs)
@@ -532,10 +532,12 @@ type Element data msg
       (C.Plane -> S.Svg msg)
   | GridElement
       (C.Plane -> TickValues -> S.Svg msg)
+  | SubElements
+      (C.Plane -> List (Item (Maybe Float) data) -> List (Element data msg))
   | SvgElement
       (C.Plane -> S.Svg msg)
   | HtmlElement
-      (C.Plane -> S.Svg msg)
+      (C.Plane -> H.Html msg)
 
 
 getItems : List (Element data msg) -> List (Item (Maybe Float) data)
@@ -549,6 +551,7 @@ getItems elements =
           TicksElement _ _ -> acc
           LabelsElement _ _ -> acc
           GridElement _ -> acc
+          SubElements _ -> acc -- TODO add phantom type to only allow decorative els in this
           SvgElement _ -> acc
           HtmlElement _ -> acc
   in
@@ -633,8 +636,8 @@ type alias TickValues =
   }
 
 
-getTickValues : C.Plane -> List (Element data msg) -> TickValues
-getTickValues plane elements =
+getTickValues : C.Plane -> List (Item (Maybe Float) data) -> List (Element data msg) -> TickValues
+getTickValues plane items elements =
   let toValues el acc =
         case el of
           SeriesElement _ _ -> acc
@@ -644,14 +647,15 @@ getTickValues plane elements =
           TicksElement func _ -> func plane acc
           LabelsElement func _ -> func plane acc
           GridElement _ -> acc
+          SubElements func -> List.foldl toValues acc (func plane items)
           SvgElement _ -> acc
           HtmlElement _ -> acc
   in
   List.foldl toValues (TickValues [] []) elements
 
 
-viewElements : Container data msg -> C.Plane -> TickValues -> List (Element data msg) -> ( List (H.Html msg), List (S.Svg msg), List (H.Html msg) )
-viewElements config plane tickValues elements =
+viewElements : Container data msg -> C.Plane -> TickValues -> List (Item (Maybe Float) data) -> List (Element data msg) -> ( List (H.Html msg), List (S.Svg msg), List (H.Html msg) )
+viewElements config plane tickValues allItems elements =
   let viewOne el ( before, chart_, after ) =
         case el of
           SeriesElement items view -> ( before, view config.id plane items :: chart_, after )
@@ -661,6 +665,7 @@ viewElements config plane tickValues elements =
           TicksElement _ view -> ( before, view plane :: chart_, after )
           LabelsElement _ view -> ( before, view plane :: chart_, after )
           GridElement view -> ( before, view plane tickValues :: chart_, after )
+          SubElements func -> List.foldl viewOne ( before, chart_, after ) (func plane allItems)
           SvgElement view -> ( before, view plane :: chart_, after )
           HtmlElement view ->
             ( if List.length chart_ > 0 then before else view plane :: before
@@ -1325,19 +1330,17 @@ grid edits =
 -- SERIES
 
 
-type alias Bars data msg =
+type alias Bars =
   { rounded : Float
   , roundBottom : Bool
-  , attrs : List (S.Attribute msg)
   , margin : Float
   , spacing : Float
-  , tick : List (Attribute (Tick msg))
-  , bin : List (Attribute (Bin data msg))
+  , name : Maybe String
   }
 
 
 {-| -}
-bars : List (Bars data msg -> Bars data msg) -> List (C.Bar data) -> List data -> Element data msg
+bars : List (Bars -> Bars) -> List (C.Bar data) -> List data -> Element data msg
 bars edits metrics data =
   let config =
         applyAttrs edits
@@ -1345,9 +1348,7 @@ bars edits metrics data =
           , roundBottom = False
           , spacing = 0.01
           , margin = 0.05
-          , bin = []
-          , tick = []
-          , attrs = []
+          , name = Nothing
           }
 
       groupItems =
@@ -1367,32 +1368,18 @@ bars edits metrics data =
 
 
 
-type alias Histogram data msg =
+type alias Histogram data =
   { rounded : Float
   , roundBottom : Bool
   , margin : Float
   , spacing : Float
-  , bin : List (Attribute (Bin data msg))
-  , tick : List (Attribute (Tick msg))
-  , attrs : List (S.Attribute msg)
-  }
-
-
-type alias Bin data msg =
-  { name : Maybe (data -> String)
-  , label : Maybe (List (Attribute (Label msg)))
+  , name : Maybe String
   , width : Maybe (data -> Float)
   }
 
 
 {-| -}
-bin : v -> Attribute { a | bin : v }
-bin v config =
-  { config | bin = v }
-
-
-{-| -}
-histogram : (data -> Float) -> List (Histogram data msg -> Histogram data msg) -> List (C.Bar data) -> List data -> Element data msg
+histogram : (data -> Float) -> List (Histogram data -> Histogram data) -> List (C.Bar data) -> List data -> Element data msg
 histogram toX edits metrics data =
   let config =
         applyAttrs edits
@@ -1400,15 +1387,7 @@ histogram toX edits metrics data =
           , roundBottom = False
           , spacing = 0.01
           , margin = 0.05
-          , bin = []
-          , tick = []
-          , attrs = []
-          }
-
-      binConfig =
-        applyAttrs config.bin
-          { name = Nothing
-          , label = Nothing
+          , name = Nothing
           , width = Nothing
           }
 
@@ -1416,7 +1395,7 @@ histogram toX edits metrics data =
         C.toBinItems { margin = config.margin, between = config.spacing } toX0 toX metrics data
 
       toX0 =
-        case binConfig.width of
+        case config.width of
           Just toWidth -> Just (\d -> toX d - toWidth d)
           Nothing -> Nothing
 
@@ -1643,6 +1622,12 @@ linear toY edits =
   in
   Series toY (Maybe.withDefault "" config.name) config.unit config.color <| \i toX data p c ->
     C.linear p toX toY (interAttrs c) config.area (finalDot i c) data
+
+
+{-| -}
+with : (List (Item (Maybe Float) data) -> a) -> (C.Plane -> a -> List (Element data msg)) -> Element data msg
+with filter func =
+  SubElements <| \p is -> func p (filter is)
 
 
 {-| -}
@@ -2030,28 +2015,29 @@ type alias Label msg =
   , xOffset : Float
   , yOffset : Float
   , flip : Bool
+  , text : Maybe String
   , attributes : List (S.Attribute msg)
   }
 
 
-label : value -> Attribute { a | label : Maybe value }
-label value config =
-  { config | label = Just value }
+text : x -> Attribute { a | text : Maybe x }
+text x config =
+  { config | text = Just x }
 
 
-fontSize : value -> Attribute { a | fontSize : Maybe value }
-fontSize value config =
-  { config | fontSize = Just value }
+fontSize : x -> Attribute { a | fontSize : Maybe x }
+fontSize x config =
+  { config | fontSize = Just x }
 
 
-borderWidth : value -> Attribute { a | borderWidth : value }
-borderWidth value config =
-  { config | borderWidth = value }
+borderWidth : x -> Attribute { a | borderWidth : x }
+borderWidth x config =
+  { config | borderWidth = x }
 
 
-borderColor : value -> Attribute { a | borderColor : value }
-borderColor value config =
-  { config | borderColor = value }
+borderColor : x -> Attribute { a | borderColor : x }
+borderColor x config =
+  { config | borderColor = x }
 
 
 flip : Attribute { a | flip : Bool }
@@ -2060,38 +2046,17 @@ flip config =
 
 
 xOffset : Float -> Attribute { a | xOffset : Float }
-xOffset value config =
-  { config | xOffset = config.xOffset + value }
+xOffset x config =
+  { config | xOffset = config.xOffset + x }
 
 
 yOffset : Float -> Attribute { a | yOffset : Float }
-yOffset value config =
-  { config | yOffset = config.yOffset + value }
+yOffset x config =
+  { config | yOffset = config.yOffset + x }
 
 
-
--- TICK
-
-
-type alias Tick msg =
-  { color : Maybe String
-  , width : Maybe Float
-  , height : Float
-  , attributes : List (S.Attribute msg)
-  }
-
-
-tick : value -> Attribute { a | tick : value }
-tick value config =
-  { config | tick = value }
-
-
-
--- VIEWS
-
-
-xLabel : List (Attribute (Label msg)) -> C.Plane -> String -> Float -> Float -> S.Svg msg
-xLabel edits plane value x y =
+xLabel : List (Attribute (Label msg)) -> C.Plane -> Float -> Float -> S.Svg msg
+xLabel edits plane x y =
   let config =
         applyAttrs edits
           { color = Nothing
@@ -2100,6 +2065,7 @@ xLabel edits plane value x y =
           , borderColor = "white"
           , xOffset = 0
           , yOffset = 0
+          , text = Nothing
           , flip = False
           , attributes = []
           }
@@ -2118,11 +2084,30 @@ xLabel edits plane value x y =
         case config.fontSize of
           Just size_ -> String.fromFloat size_ ++ "px"
           Nothing -> "inherit"
+
+      text_ =
+        case config.text of
+          Just v -> v
+          Nothing -> String.fromFloat x
   in
   S.g
     [ C.position plane x y config.xOffset (config.yOffset * if config.flip then -1 else 1)
     , SA.style "text-anchor: middle;"
     , SA.class "elm-charts__x-label"
     ]
-    [ C.viewLabel (borderAttrs ++ colorAttrs ++ styleAttrs ++ config.attributes) value ]
+    [ C.viewLabel (borderAttrs ++ colorAttrs ++ styleAttrs ++ config.attributes) text_ ]
+
+
+
+
+-- TICK
+
+
+type alias Tick msg =
+  { color : Maybe String
+  , width : Maybe Float
+  , height : Float
+  , attributes : List (S.Attribute msg)
+  }
+
 
