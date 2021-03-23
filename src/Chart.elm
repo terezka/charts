@@ -21,7 +21,7 @@ module Chart exposing
     , blue, orange, pink, green, red
 
     , style, empty, detached, aura, full, name, with
-    , fontSize, borderWidth, borderColor, xOffset, yOffset, xLabel, text
+    , fontSize, borderWidth, borderColor, xOffset, yOffset, xLabel, text, value_, at
     )
 
 
@@ -305,6 +305,7 @@ times : Time.Zone -> Attribute { a | values : Maybe (Values I.Time) }
 times zone config =
   { config | values = Just
       { produce = I.times zone
+      , at = \_ -> zero -- TODO
       , value = .timestamp >> Time.posixToMillis >> toFloat
       , format = formatTime zone
       }
@@ -316,6 +317,7 @@ ints : Attribute { a | values : Maybe (Values Int) }
 ints config =
   { config | values = Just
       { produce = \i -> I.ints (I.around i)
+      , at = \_ -> zero -- TODO
       , value = toFloat
       , format = String.fromInt
       }
@@ -327,6 +329,7 @@ floats : Attribute { a | values : Maybe (Values Float) }
 floats config =
   { config | values = Just
       { produce = \i -> I.floats (I.around i)
+      , at = \_ -> zero -- TODO
       , value = identity
       , format = String.fromFloat
       }
@@ -334,12 +337,13 @@ floats config =
 
 
 {-| -}
-values : (Int -> Bounds -> List tick) -> (tick -> Float) -> (tick -> String) -> Attribute { a | values : Maybe (Values tick) }
-values produce value formatter config =
+values : (Int -> Bounds -> List tick) -> Attribute { a | values : Maybe (Values tick) }
+values produce config =
   { config | values = Just
       { produce = produce
-      , value = value
-      , format = formatter
+      , at = \_ -> zero -- TODO
+      , value = \_ -> 0
+      , format = \_ -> ""
       }
   }
 
@@ -350,6 +354,26 @@ format formatter config =
   { config | values =
       case config.values of
         Just c -> Just { c | format = formatter }
+        Nothing -> Nothing -- TODO
+  }
+
+
+{-| -}
+at : (tick -> Bounds -> Float) -> Attribute { a | values : Maybe (Values tick) }
+at value config =
+  { config | values =
+      case config.values of
+        Just c -> Just { c | at = value }
+        Nothing -> Nothing -- TODO
+  }
+
+
+{-| -}
+value_ : (tick -> Float) -> Attribute { a | values : Maybe (Values tick) }
+value_ value config =
+  { config | values =
+      case config.values of
+        Just c -> Just { c | value = value }
         Nothing -> Nothing -- TODO
   }
 
@@ -1028,6 +1052,7 @@ type alias Ticks tick msg =
 
 type alias Values tick =
   { produce : Int -> Bounds -> List tick
+  , at : tick -> Bounds -> Float
   , value : tick -> Float
   , format : tick -> String
   }
@@ -1139,7 +1164,8 @@ type alias Labels tick msg =
 
 
 type alias Pair =
-  { value : Float
+  { at : Bounds -> Float
+  , value : Float
   , label : String
   }
 
@@ -1176,11 +1202,11 @@ xLabels edits =
           case config.values of
             Just c ->
               c.produce config.amount (xBounds p)
-                |> List.map (\i -> Pair (c.value i) (c.format i))
+                |> List.map (\i -> Pair (c.at i) (c.value i) (c.format i))
 
             Nothing ->
               I.floats (I.around config.amount) (xBounds p)
-                |> List.map (\i -> Pair i (String.fromFloat i))
+                |> List.map (\i -> Pair config.pinned i (String.fromFloat i))
 
       repositionIfCenter pairs =
         if config.center
@@ -1189,7 +1215,7 @@ xLabels edits =
 
       toCenterTick maybePrev curr =
         case maybePrev of
-          Just prev -> Just <| Pair (prev.value + (curr.value - prev.value) / 2) prev.label
+          Just prev -> Just <| Pair prev.at (prev.value + (curr.value - prev.value) / 2) prev.label
           Nothing -> Nothing
 
       labelAttrs =
@@ -1201,7 +1227,7 @@ xLabels edits =
         { ts | xs = ts.xs ++ List.map .value (toTicks p) }
   in
   LabelsElement toTickValues <| \p ->
-    C.xLabels p (C.xLabel labelAttrs .value .label) (config.pinned <| toBounds .y p) (repositionIfCenter <| toTicks p)
+    C.xLabels p (C.xLabel labelAttrs .value .label) (\pair -> pair.at (toBounds .y p)) (repositionIfCenter <| toTicks p)
 
 
 {-| -}
@@ -1236,11 +1262,11 @@ yLabels edits =
           case config.values of
             Just c ->
               c.produce config.amount (yBounds p)
-                |> List.map (\i -> Pair (c.value i) (c.format i))
+                |> List.map (\i -> Pair (c.at i) (c.value i) (c.format i))
 
             Nothing ->
               I.floats (I.around config.amount) (yBounds p)
-                |> List.map (\i -> Pair i (String.fromFloat i))
+                |> List.map (\i -> Pair config.pinned i (String.fromFloat i))
 
       repositionIfCenter pairs =
         if config.center
@@ -1249,7 +1275,7 @@ yLabels edits =
 
       toCenterTick maybePrev curr =
         case maybePrev of
-          Just prev -> Just <| Pair (prev.value + (curr.value - prev.value) / 2) prev.label
+          Just prev -> Just <| Pair prev.at (prev.value + (curr.value - prev.value) / 2) prev.label
           Nothing -> Nothing
 
       labelAttrs =
@@ -1261,7 +1287,7 @@ yLabels edits =
         { ts | ys = ts.ys ++ List.map .value (toTicks p) }
   in
   LabelsElement toTickValues <| \p ->
-    C.yLabels p (C.yLabel labelAttrs .value .label) (config.pinned <| toBounds .x p) (repositionIfCenter <| toTicks p)
+    C.yLabels p (C.yLabel labelAttrs .value .label) (\pair -> pair.at (toBounds .y p)) (repositionIfCenter <| toTicks p)
 
 
 

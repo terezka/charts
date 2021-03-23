@@ -554,9 +554,9 @@ yTick plane width userAttributes x y =
     horizontalLabels =
       xLabels plane (xLabel "blue" .timestamp format) axisYCoordinate data
 -}
-xLabels : Plane -> (Plane -> Float -> data -> Svg msg) -> Float -> List data -> Svg msg
-xLabels plane toLabel y xs =
-  g [ class "elm-charts__x-labels" ] (List.map (toLabel plane y) xs)
+xLabels : Plane -> (Plane -> Float -> data -> Svg msg) -> (data -> Float) -> List data -> Svg msg
+xLabels plane toLabel toY ds =
+  g [ class "elm-charts__x-labels" ] (List.map (\d -> toLabel plane (toY d) d) ds)
 
 
 {-| Renders a label for the horizontal axis.
@@ -580,9 +580,9 @@ xLabel attrs toX toString plane y datum =
     verticalLabels =
       yLabels plane (yLabel "blue" .age format) axisXCoordinate data
 -}
-yLabels : Plane -> (Plane -> Float -> data -> Svg msg) -> Float -> List data -> Svg msg
-yLabels plane toLabel x ys =
-  g [ class "elm-charts__y-labels" ] (List.map (toLabel plane x) ys)
+yLabels : Plane -> (Plane -> Float -> data -> Svg msg) -> (data -> Float) -> List data -> Svg msg
+yLabels plane toLabel toX ds =
+  g [ class "elm-charts__y-labels" ] (List.map (\d -> toLabel plane (toX d) d) ds)
 
 
 {-| Renders a label for the vertical axis.

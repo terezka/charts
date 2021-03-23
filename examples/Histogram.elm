@@ -116,9 +116,9 @@ viewHover model =
         , C.event "mousemove" <|
             C.map OnHover (C.getNearestX (C.withoutUnknowns >> C.getBars))
         ]
-    --, C.dotted
     ]
-    [ C.histogram .x
+    [ C.grid []
+    , C.histogram .x
         [ C.name "bars" ]
         [ C.bar (C.just .x) [ C.name "area", C.unit "m2" ]
         , C.bar .y [ C.name "speed", C.unit "km/h" ]
@@ -129,19 +129,33 @@ viewHover model =
     , C.yAxis []
     --, C.yTicks [ ] --  C.withGrid
     , C.xAxis []
-    , C.yLabels [ ] --  C.withGrid
-    --, C.xLabels [ ] --  C.withGrid
+    , C.yLabels [] --  C.withGrid
+    --, C.xLabels [] --  C.withGrid
 
     , C.with C.getGroups <| \plane items ->
         let byItem i = [ i.position.x1, i.position.x2 ]
             values _ _ = List.concatMap byItem items
         in
-        [ C.xTicks [ C.pinned C.zero, C.values values identity String.fromFloat ]
-        , C.xLabels [ C.yOffset -5, C.values (\_ _ -> items) (.center >> .x) (.datum >> .label) ]
+        [ C.xTicks [ C.values values, C.value_ identity ]
+        , C.xLabels
+            [ C.yOffset -5
+            , C.amount 7
+            , C.values (\_ _ -> items)
+            , C.format (.datum >> .label)
+            , C.value_ (.center >> .x >> identity)
+            ]
         ]
-        --,
-        --, C.xLabels [ C.yOffset 18, C.x (.center >> .x), C.format (.datum >> .label), C.values items ]
-        --]
+
+    , C.with C.getBars <| \plane items ->
+        [ C.xLabels
+            [ C.yOffset -25
+            , C.amount 7
+            , C.values (\_ _ -> items)
+            , C.format (.position >> .y >> String.fromFloat)
+            , C.value_ (.center >> .x >> identity)
+            , C.at (\d _ -> d.center.y)
+            ]
+        ]
 
     , C.when model.hovering <| \item rest ->
         C.tooltipOnTop (always item.center.x) (always item.position.y) [] [ tooltipRow item ]
