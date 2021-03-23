@@ -21,7 +21,7 @@ module Chart exposing
     , blue, orange, pink, green, red
 
     , style, empty, detached, aura, full, name, with
-    , fontSize, borderWidth, borderColor, xOffset, yOffset, xLabel, text, at
+    , fontSize, borderWidth, borderColor, xOffset, yOffset, xLabel, text, at, noDot
     )
 
 
@@ -211,7 +211,7 @@ pinned value config =
 
 
 {-| -}
-color : String -> Attribute { a | color : Maybe String }
+color : x -> Attribute { a | color : Maybe x }
 color value config =
   { config | color = Just value }
 
@@ -256,6 +256,12 @@ spacing value config =
 dot : x -> Attribute { a | dot : Maybe x }
 dot value config =
   { config | dot = Just value }
+
+
+{-| -}
+noDot : Attribute { a | dot : Maybe (data -> S.Svg msg) }
+noDot config =
+  { config | dot = Just (\_ -> S.text "") }
 
 
 {-| -}
@@ -1277,7 +1283,7 @@ yLabels edits =
         { ts | ys = ts.ys ++ List.map .value (toTicks p) }
   in
   LabelsElement toTickValues <| \p ->
-    C.yLabels p (C.yLabel labelAttrs .value .label) (\pair -> pair.at (toBounds .y p)) (repositionIfCenter <| toTicks p)
+    C.yLabels p (C.yLabel labelAttrs .value .label) (\pair -> pair.at (toBounds .x p)) (repositionIfCenter <| toTicks p)
 
 
 
@@ -1319,11 +1325,11 @@ grid edits =
         config.filterY (toBounds .y p)
 
       toXGrid p v =
-        if List.member v (notTheseY p)
+        if List.member v (notTheseX p)
         then Nothing else Just <| C.yGrid p gridAttrs v
 
       toYGrid p v =
-        if List.member v (notTheseX p)
+        if List.member v (notTheseY p)
         then Nothing else Just <| C.xGrid p gridAttrs v
 
       toDot p x y =
@@ -1498,6 +1504,7 @@ type alias Scatter data msg =
     , unit : String
     , size : Maybe (data -> Float)
     , style : Maybe (data -> Style)
+    , shape : Maybe Shape
     , dot : Maybe (data -> S.Svg msg)
     }
 
@@ -1513,6 +1520,7 @@ scatter toY edits =
           , unit = ""
           , size = Nothing
           , style = Nothing
+          , shape = Nothing
           , dot = Nothing
           }
 
@@ -1521,6 +1529,11 @@ scatter toY edits =
           Just func -> func d
           Nothing -> 6
 
+      toShape i =
+        case config.shape of
+          Nothing -> toDefaultShape i
+          Just s -> s
+
       finalDot i c d =
         case config.dot of
           Just toDot -> \p x y ->
@@ -1528,11 +1541,11 @@ scatter toY edits =
 
           Nothing ->
             case Maybe.map (\f -> f d) config.style of
-              Nothing -> C.disconnected (toSize d) 1 (toDefaultShape i) c
-              Just Full -> C.full (toSize d) (toDefaultShape i) c
-              Just (Empty s) -> C.empty (toSize d) s (toDefaultShape i) c
-              Just (Aura a b) -> C.aura (toSize d) a b (toDefaultShape i) c
-              Just (Detached a) -> C.disconnected (toSize d) a (toDefaultShape i) c
+              Nothing -> C.disconnected (toSize d) 1 (toShape i) c
+              Just Full -> C.full (toSize d) (toShape i) c
+              Just (Empty s) -> C.empty (toSize d) s (toShape i) c
+              Just (Aura a b) -> C.aura (toSize d) a b (toShape i) c
+              Just (Detached a) -> C.disconnected (toSize d) a (toShape i) c
   in
   Series toY (Maybe.withDefault "" config.name) config.unit config.color <| \i toX data p c ->
     C.scatter p toX toY (finalDot i c) data
@@ -1547,6 +1560,7 @@ type alias Interpolation data msg =
     , unit : String
     , style : Maybe (data -> Style)
     , dot : Maybe (data -> S.Svg msg)
+    , shape : Maybe Shape
     , attrs : List (S.Attribute msg)
     }
 
@@ -1563,6 +1577,7 @@ monotone toY edits =
           , dot = Nothing
           , style = Nothing
           , name = Nothing
+          , shape = Nothing
           , unit = ""
           , attrs = []
           }
@@ -1578,6 +1593,11 @@ monotone toY edits =
           Just func -> func d
           Nothing -> 6
 
+      toShape i =
+        case config.shape of
+          Nothing -> toDefaultShape i
+          Just s -> s
+
       finalDot i c d =
         case config.dot of
           Just toDot -> \p x y ->
@@ -1585,11 +1605,11 @@ monotone toY edits =
 
           Nothing ->
             case Maybe.map (\f -> f d) config.style of
-              Nothing -> C.disconnected (toSize d) 1 (toDefaultShape i) c
-              Just Full -> C.full (toSize d) (toDefaultShape i) c
-              Just (Empty s) -> C.empty (toSize d) s (toDefaultShape i) c
-              Just (Aura a b) -> C.aura (toSize d) a b (toDefaultShape i) c
-              Just (Detached a) -> C.disconnected (toSize d) a (toDefaultShape i) c
+              Nothing -> C.disconnected (toSize d) 1 (toShape i) c
+              Just Full -> C.full (toSize d) (toShape i) c
+              Just (Empty s) -> C.empty (toSize d) s (toShape i) c
+              Just (Aura a b) -> C.aura (toSize d) a b (toShape i) c
+              Just (Detached a) -> C.disconnected (toSize d) a (toShape i) c
   in
   Series toY (Maybe.withDefault "" config.name) config.unit config.color <| \i toX data p c ->
     C.monotone p toX toY (interAttrs c) config.area (finalDot i c) data
@@ -1608,6 +1628,7 @@ linear toY edits =
           , name = Nothing
           , unit = ""
           , dot = Nothing
+          , shape = Nothing
           , style = Nothing
           , attrs = []
           }
@@ -1623,6 +1644,11 @@ linear toY edits =
           Just func -> func d
           Nothing -> 6
 
+      toShape i =
+        case config.shape of
+          Nothing -> toDefaultShape i
+          Just s -> s
+
       finalDot i c d =
         case config.dot of
           Just toDot -> \p x y ->
@@ -1630,11 +1656,11 @@ linear toY edits =
 
           Nothing ->
             case Maybe.map (\f -> f d) config.style of
-              Nothing -> C.disconnected (toSize d) 1 (toDefaultShape i) c
-              Just Full -> C.full (toSize d) (toDefaultShape i) c
-              Just (Empty s) -> C.empty (toSize d) s (toDefaultShape i) c
-              Just (Aura a b) -> C.aura (toSize d) a b (toDefaultShape i) c
-              Just (Detached a) -> C.disconnected (toSize d) a (toDefaultShape i) c
+              Nothing -> C.disconnected (toSize d) 1 (toShape i) c
+              Just Full -> C.full (toSize d) (toShape i) c
+              Just (Empty s) -> C.empty (toSize d) s (toShape i) c
+              Just (Aura a b) -> C.aura (toSize d) a b (toShape i) c
+              Just (Detached a) -> C.disconnected (toSize d) a (toShape i) c
   in
   Series toY (Maybe.withDefault "" config.name) config.unit config.color <| \i toX data p c ->
     C.linear p toX toY (interAttrs c) config.area (finalDot i c) data
@@ -1783,39 +1809,39 @@ type alias Shape =
 
 
 {-| -}
-circle : Shape
-circle =
-  C.circle
+circle : Attribute { a | shape : Maybe Shape }
+circle config =
+  { config | shape = Just C.circle }
 
 
 {-| -}
-triangle : Shape
-triangle =
-  C.triangle
+triangle : Attribute { a | shape : Maybe Shape }
+triangle config =
+  { config | shape = Just C.triangle }
 
 
 {-| -}
-square : Shape
-square =
-  C.square
+square : Attribute { a | shape : Maybe Shape }
+square config =
+  { config | shape = Just C.square }
 
 
 {-| -}
-diamond : Shape
-diamond =
-  C.diamond
+diamond : Attribute { a | shape : Maybe Shape }
+diamond config =
+  { config | shape = Just C.diamond }
 
 
 {-| -}
-plus : Shape
-plus =
-  C.plus
+plus : Attribute { a | shape : Maybe Shape }
+plus config =
+  { config | shape = Just C.plus }
 
 
 {-| -}
-cross : Shape
-cross =
-  C.cross
+cross : Attribute { a | shape : Maybe Shape }
+cross config =
+  { config | shape = Just C.cross }
 
 
 
