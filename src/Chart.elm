@@ -359,11 +359,11 @@ format formatter config =
 
 
 {-| -}
-at : (tick -> Bounds -> Float) -> Attribute { a | values : Maybe (Values tick) }
+at : (tick -> Float) -> Attribute { a | values : Maybe (Values tick) }
 at value config =
   { config | values =
       case config.values of
-        Just c -> Just { c | at = value }
+        Just c -> Just { c | at = \d b -> value d }
         Nothing -> Nothing -- TODO
   }
 

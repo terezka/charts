@@ -133,11 +133,11 @@ viewHover model =
 
     , C.with C.getGroups <| \plane items ->
         let byItem i = [ i.position.x1, i.position.x2 ]
+            values = List.concatMap byItem items
         in
-        [ C.xTicks [ C.values identity (List.concatMap byItem items) ]
+        [ C.xTicks [ C.values identity values ]
         , C.xLabels
             [ C.yOffset -5
-            , C.amount 7
             , C.values (.center >> .x >> identity) items
             , C.format (.datum >> .label)
             ]
@@ -148,7 +148,7 @@ viewHover model =
             [ C.yOffset -25
             , C.values (.center >> .x) items
             , C.format (.position >> .y >> String.fromFloat)
-            , C.at (\d _ -> d.center.y)
+            , C.at (.center >> .y)
             ]
         ]
 
