@@ -21,7 +21,7 @@ module Chart exposing
     , blue, orange, pink, green, red
 
     , style, empty, detached, aura, full, name, with
-    , fontSize, borderWidth, borderColor, xOffset, yOffset, xLabel, text, value_, at
+    , fontSize, borderWidth, borderColor, xOffset, yOffset, xLabel, text, at
     )
 
 
@@ -337,13 +337,13 @@ floats config =
 
 
 {-| -}
-values : (Int -> Bounds -> List tick) -> Attribute { a | values : Maybe (Values tick) }
-values produce config =
+values : (tick -> Float) -> List tick -> Attribute { a | values : Maybe (Values tick) }
+values toValue produce config =
   { config | values = Just
-      { produce = produce
+      { produce = \_ _ -> produce
       , at = \_ -> zero -- TODO
-      , value = \_ -> 0
-      , format = \_ -> ""
+      , value = toValue
+      , format = toValue >> String.fromFloat
       }
   }
 
@@ -364,16 +364,6 @@ at value config =
   { config | values =
       case config.values of
         Just c -> Just { c | at = value }
-        Nothing -> Nothing -- TODO
-  }
-
-
-{-| -}
-value_ : (tick -> Float) -> Attribute { a | values : Maybe (Values tick) }
-value_ value config =
-  { config | values =
-      case config.values of
-        Just c -> Just { c | value = value }
         Nothing -> Nothing -- TODO
   }
 

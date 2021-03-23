@@ -110,7 +110,6 @@ viewHover model =
         , HA.style "margin" "20px 40px"
         , HA.style "max-width" "700px"
         ]
-    , C.paddingLeft 10
     , C.events
         [ C.event "mouseleave" (C.map (\_ -> OnHover []) C.getCoords)
         , C.event "mousemove" <|
@@ -134,25 +133,21 @@ viewHover model =
 
     , C.with C.getGroups <| \plane items ->
         let byItem i = [ i.position.x1, i.position.x2 ]
-            values _ _ = List.concatMap byItem items
         in
-        [ C.xTicks [ C.values values, C.value_ identity ]
+        [ C.xTicks [ C.values identity (List.concatMap byItem items) ]
         , C.xLabels
             [ C.yOffset -5
             , C.amount 7
-            , C.values (\_ _ -> items)
+            , C.values (.center >> .x >> identity) items
             , C.format (.datum >> .label)
-            , C.value_ (.center >> .x >> identity)
             ]
         ]
 
     , C.with C.getBars <| \plane items ->
         [ C.xLabels
             [ C.yOffset -25
-            , C.amount 7
-            , C.values (\_ _ -> items)
+            , C.values (.center >> .x) items
             , C.format (.position >> .y >> String.fromFloat)
-            , C.value_ (.center >> .x >> identity)
             , C.at (\d _ -> d.center.y)
             ]
         ]
