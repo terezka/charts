@@ -96,8 +96,8 @@ viewSaleryStatestic =
     [ C.grid []
     , C.xAxis []
     , C.yAxis []
-    , C.xTicks []
-    , C.xLabels []
+    , C.xTicks [ C.amount 10 ]
+    , C.xLabels [ C.amount 10 ]
     , C.yLabels []
     , C.yTicks []
     , C.series .saleryBoth

@@ -19,7 +19,7 @@ type alias Datum =
 womenSaleryPerc : Datum -> Maybe Float
 womenSaleryPerc datum =
   if datum.saleryWomen == 0 || datum.saleryMen == 0 then Nothing
-  else Just (datum.saleryMen / datum.saleryWomen * 100)
+  else Just (datum.saleryWomen / datum.saleryMen * 100)
 
 
 
