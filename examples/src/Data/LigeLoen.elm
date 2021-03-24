@@ -1,27 +1,100 @@
-module Data.LigeLoen exposing (data)
+module Data.LigeLoen exposing (Datum, womenSaleryPerc, data)
 
 import Csv.Decode as Cvs
 
 
+
 type alias Datum =
-  { gruppe : String
-  , sektor : String
-  , tid : String
-  , arbejde : String
-  , loenmaal : String
-  , koen : String
-  , indhold : String
+  { year : Float
+  , sector : String
+  , numOfBoth : Float
+  , numOfWomen : Float
+  , numOfMen : Float
+  , saleryBoth : Float
+  , saleryWomen : Float
+  , saleryMen : Float
   }
 
 
-data : Result Cvs.Error (List Datum)
+womenSaleryPerc : Datum -> Maybe Float
+womenSaleryPerc datum =
+  if datum.saleryWomen == 0 || datum.saleryMen == 0 then Nothing
+  else Just (datum.saleryMen / datum.saleryWomen * 100)
+
+
+
+-- DATA
+
+
+data : List Datum
 data =
   Cvs.decodeCustom { fieldSeparator = ';' } Cvs.FieldNamesFromFirstRow decoder csv
+    |> Result.map process
+    |> Result.withDefault []
 
 
-decoder : Cvs.Decoder Datum
+process : List Raw -> List Datum
+process =
+  let fold acc list =
+        case list of
+          a :: b :: c :: d :: e :: f :: rest ->
+            case processSet a b c d e f of
+              Just datum -> fold (datum :: acc) rest
+              Nothing -> fold acc rest
+
+          _ ->
+            acc
+
+      processSet a b c d e f =
+        let numbers =
+              [ danishNumber a.year
+              , danishNumber a.contents
+              , danishNumber b.contents
+              , danishNumber c.contents
+              , danishNumber d.contents
+              , danishNumber e.contents
+              , danishNumber f.contents
+              ]
+        in
+        case numbers of
+          [ Just year, Just saleryBoth, Just saleryMen, Just saleryWomen, Just numOfBoth, Just numOfMen, Just numOfWomen ] ->
+            { year = year
+            , sector = a.work
+            , numOfBoth = numOfBoth
+            , numOfWomen = numOfWomen
+            , numOfMen = numOfMen
+            , saleryBoth = saleryBoth
+            , saleryWomen = saleryWomen
+            , saleryMen = saleryMen
+            } |> Just
+
+          _ ->
+            Nothing
+  in
+  fold [] >> List.reverse
+
+
+danishNumber : String -> Maybe Float
+danishNumber str =
+  case str of
+    ".." -> Just 0
+    _ -> String.toFloat (String.replace "," "." str)
+
+
+type alias Raw =
+  { group : String
+  , sector : String
+  , year : String
+  , work : String
+  , salery : String
+  , gender : String
+  , contents : String
+  }
+
+
+decoder : Cvs.Decoder Raw
 decoder =
-  Cvs.into Datum
+  Cvs.into Raw
     |> Cvs.pipeline (Cvs.field "LONGRP" Cvs.string)
     |> Cvs.pipeline (Cvs.field "SEKTOR" Cvs.string)
     |> Cvs.pipeline (Cvs.field "TID" Cvs.string)

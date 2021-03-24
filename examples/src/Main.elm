@@ -68,15 +68,42 @@ data =
 
 view : Model -> H.Html Msg
 view model =
-  let _ = LigeLoen.data in
   H.div
     [ HA.style "font-size" "12px"
     , HA.style "font-family" "monospace"
     , HA.style "margin" "0 auto"
     , HA.style "padding-top" "50px"
     , HA.style "width" "100vw"
+    , HA.style "max-width" "1000px"
     ]
-    [ viewIris
+    [ viewSaleryStatestic
+    --, H.h1 [] [ H.text "Iris" ]
+    --, viewIris
+    ]
+
+
+
+viewSaleryStatestic : H.Html Msg
+viewSaleryStatestic =
+  C.chart
+    [ C.height 400
+    , C.width 800
+    , C.static
+    , C.marginLeft 50
+    , C.range (C.startMax 20000)
+    , C.domain (C.startMax 75)
+    ]
+    [ C.grid []
+    , C.xAxis []
+    , C.yAxis []
+    , C.xTicks []
+    , C.xLabels []
+    , C.yLabels []
+    , C.yTicks []
+    , C.series .saleryBoth
+        [ C.scatter LigeLoen.womenSaleryPerc [ C.size (\d -> d.numOfBoth / 200) ]
+        ]
+        (List.filter (.year >> (==) 2019) LigeLoen.data)
     ]
 
 
@@ -116,7 +143,7 @@ viewIris =
             , C.monotone (count Iris.Versicolor) [ C.area 0.5, C.noDot ]
             , C.monotone (count Iris.Virginica) [ C.area 0.5, C.noDot ]
             ]
-            (binned 0.35 x Iris.data)
+            (C.binned 0.35 x Iris.data)
 
       value species func d =
         if d.species == species then Just (func d) else Nothing
@@ -173,20 +200,6 @@ viewIris =
         --    ]
         --    (binned 0.4 .petalLength Iris.data)
     ]
-
-
-binned : Float -> (data -> Float) -> List data -> List { bin : Float, data : List data }
-binned width value =
-  let fold datum acc =
-        Dict.update (ceiling (value datum)) (Maybe.map (\ds -> datum :: ds) >> Maybe.withDefault [datum] >> Just) acc
-
-      ceiling b =
-        let floored = toFloat (floor (b / width)) * width in
-        b - (b - floored) + width
-  in
-  List.foldr fold Dict.empty
-    >> Dict.toList
-    >> List.map (\(bin, ds) -> { bin = bin, data = ds })
 
 
 viewHover : Model -> H.Html Msg

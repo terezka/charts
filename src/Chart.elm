@@ -21,7 +21,7 @@ module Chart exposing
     , blue, orange, pink, green, red
 
     , style, empty, detached, aura, full, name, with
-    , fontSize, borderWidth, borderColor, xOffset, yOffset, xLabel, text, at, noDot
+    , fontSize, borderWidth, borderColor, xOffset, yOffset, xLabel, text, at, noDot, binned
     )
 
 
@@ -591,7 +591,7 @@ definePlane config items =
         List.foldl toPoints [] items
 
       xRange =
-        { min = C.minimum [.x1 >> Just] points
+        { min = C.minimum [.x1 >> Just] points -- TODO wrong for scatters
         , max = C.maximum [.x2 >> Just] points
         }
 
@@ -2153,3 +2153,19 @@ type alias Tick msg =
   }
 
 
+
+-- HELPERS
+
+
+binned : Float -> (data -> Float) -> List data -> List { bin : Float, data : List data }
+binned w func =
+  let fold datum acc =
+        Dict.update (ceiling (func datum)) (Maybe.map (\ds -> datum :: ds) >> Maybe.withDefault [datum] >> Just) acc
+
+      ceiling b =
+        let floored = toFloat (floor (b / w)) * w in
+        b - (b - floored) + w
+  in
+  List.foldr fold Dict.empty
+    >> Dict.toList
+    >> List.map (\(bin, ds) -> { bin = bin, data = ds })
