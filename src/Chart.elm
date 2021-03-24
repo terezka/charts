@@ -1551,6 +1551,7 @@ scatter toY edits =
     C.scatter p toX toY (finalDot i c) data
 
 
+
 type alias Interpolation data msg =
     { area : Maybe Float -- TODO use Color
     , color : Maybe String -- TODO use Color

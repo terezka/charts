@@ -82,9 +82,11 @@ view model =
     ]
 
 
-
 viewSaleryStatestic : H.Html Msg
 viewSaleryStatestic =
+  let value min max func d =
+        if Debug.log "h" (LigeLoen.womenPerc d) >= min && LigeLoen.womenPerc d < max then func d else Nothing
+  in
   C.chart
     [ C.height 400
     , C.width 800
@@ -101,7 +103,9 @@ viewSaleryStatestic =
     , C.yLabels []
     , C.yTicks []
     , C.series .saleryBoth
-        [ C.scatter LigeLoen.womenSaleryPerc [ C.size (\d -> d.numOfBoth / 200) ]
+        [ C.scatter (value 0 40 LigeLoen.womenSaleryPerc) [ C.size (\d -> d.numOfBoth / 200), C.style (\_ -> C.empty 2), C.circle ]
+        , C.scatter (value 40 60 LigeLoen.womenSaleryPerc) [ C.size (\d -> d.numOfBoth / 200), C.style (\_ -> C.empty 2), C.circle ]
+        , C.scatter (value 60 100 LigeLoen.womenSaleryPerc) [ C.size (\d -> d.numOfBoth / 200), C.style (\_ -> C.empty 2), C.circle ]
         ]
         (List.filter (.year >> (==) 2019) LigeLoen.data)
     ]

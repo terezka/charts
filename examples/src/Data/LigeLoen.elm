@@ -1,4 +1,4 @@
-module Data.LigeLoen exposing (Datum, womenSaleryPerc, data)
+module Data.LigeLoen exposing (Datum, womenPerc, womenSaleryPerc, data)
 
 import Csv.Decode as Cvs
 
@@ -14,6 +14,12 @@ type alias Datum =
   , saleryWomen : Float
   , saleryMen : Float
   }
+
+
+womenPerc : Datum -> Float
+womenPerc datum =
+  if datum.numOfBoth == 0 || datum.numOfWomen == 0 then 0
+  else datum.numOfWomen / datum.numOfBoth * 100
 
 
 womenSaleryPerc : Datum -> Maybe Float
