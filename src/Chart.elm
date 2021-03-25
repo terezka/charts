@@ -21,7 +21,7 @@ module Chart exposing
     , blue, orange, pink, green, red
 
     , style, empty, detached, aura, opaque, full, name, with
-    , fontSize, borderWidth, borderColor, xOffset, yOffset, xLabel, text, at, noDot, binned
+    , fontSize, borderWidth, borderColor, xOffset, yOffset, xLabel, text, at, noDot, binned, purple
     )
 
 
@@ -496,6 +496,14 @@ chart edits elements =
       svgContainer =
         S.svg (sizingAttrs ++ List.map toEvent config.events ++ config.attrs)
 
+      sizingAttrsHtml =
+        if config.responsive then
+          []
+        else
+          [ HA.style "width" (String.fromFloat plane.x.length ++ "px")
+          , HA.style "height" (String.fromFloat plane.y.length ++ "px")
+          ]
+
       sizingAttrs =
         if config.responsive then [ C.responsive plane ] else C.static plane
 
@@ -507,7 +515,7 @@ chart edits elements =
       allSvgEls =
         [ C.frame config.id plane ] ++ chartEls ++ [ C.eventCatcher plane [] ]
   in
-  C.container plane config.htmlAttrs
+  C.container plane (config.htmlAttrs ++ sizingAttrsHtml)
     (beforeEls ++ [ svgContainer chartEls ] ++ afterEls)
 
 
@@ -1483,18 +1491,20 @@ series : (data -> Float) -> List (Series data msg) -> List data -> Element data 
 series toX series_ data =
   let metrics =
         List.indexedMap (\i (Series toY l u cM _) ->
-            ( Metric l (Maybe.withDefault (toDefaultColor i) cM) u, toY )
+            ( Metric l (toColor i cM) u, toY )
           )
         series_
+
+      toColor i cM =
+        Maybe.withDefault (toDefaultColor i) cM
 
       items =
         toDotItems toX metrics data
   in
   SeriesElement items <| \id_ p _ ->
     -- TODO use items
-    S.g
-      [ SA.class "elm-charts__series", clipPath id_ ] <|
-      List.indexedMap (\i (Series _ _ _ _ view) -> view i toX data p (toDefaultColor i)) series_
+    S.g [ SA.class "elm-charts__series", clipPath id_ ] <|
+      List.indexedMap (\i (Series _ _ _ cM view) -> view i toX data p (toColor i cM)) series_
 
 
 

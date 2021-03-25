@@ -2,8 +2,8 @@ module Main exposing (..)
 
 import Html as H
 import Html.Attributes as HA
-import Svg exposing (Svg, svg, g, circle, text_, text)
-import Svg.Attributes exposing (width, height, stroke, fill, r, transform)
+import Svg as S exposing (Svg, svg, g, circle, text_, text)
+import Svg.Attributes as SA exposing (width, height, stroke, fill, r, transform)
 import Svg.Coordinates as Coordinates
 import Chart as C
 import Svg.Chart as SC
@@ -29,23 +29,29 @@ main =
 
 
 type alias Model =
-  { hovering : List (C.Single Float Datum)
+  { hoveringSalery : List (C.Single Float LigeLoen.Datum)
+  , hovering : List (C.Single Float Datum)
+  , point : Maybe SC.Point
   }
 
 
 init : Model
 init =
-  Model []
+  Model [] [] Nothing
 
 
 type Msg
-  = OnHover (List (C.Single Float Datum))
+  = OnHoverSalery (List (C.Single Float LigeLoen.Datum))
+  | OnHover (List (C.Single Float Datum))
+  | OnCoords SC.Point -- TODO
 
 
 update : Msg -> Model -> Model
 update msg model =
   case msg of
+    OnHoverSalery bs -> { model | hoveringSalery = bs }
     OnHover bs -> { model | hovering = bs }
+    OnCoords p -> { model | point = Just p }
 
 
 type alias Datum =
@@ -76,16 +82,16 @@ view model =
     , HA.style "width" "100vw"
     , HA.style "max-width" "1000px"
     ]
-    [ viewSaleryStatestic
+    [ viewSaleryStatestic model
     --, H.h1 [] [ H.text "Iris" ]
     --, viewIris
     ]
 
 
-viewSaleryStatestic : H.Html Msg
-viewSaleryStatestic =
+viewSaleryStatestic : Model -> H.Html Msg
+viewSaleryStatestic model =
   let value min max func d =
-        if Debug.log "h" (LigeLoen.womenPerc d) >= min && LigeLoen.womenPerc d < max then func d else Nothing
+        if LigeLoen.womenPerc d >= min && LigeLoen.womenPerc d < max then func d else Nothing
   in
   C.chart
     [ C.height 400
@@ -94,6 +100,11 @@ viewSaleryStatestic =
     , C.marginLeft 50
     , C.range (C.startMax 20000)
     , C.domain (C.startMax 75)
+    , C.paddingTop 15
+    , C.events
+        [ C.event "mouseleave" (C.map (\_ -> OnHoverSalery []) C.getCoords)
+        , C.event "mousemove" (C.map OnHoverSalery (C.getNearest (C.withoutUnknowns >> C.getDots)))
+        ]
     ]
     [ C.grid []
     , C.xAxis []
@@ -104,10 +115,32 @@ viewSaleryStatestic =
     , C.yTicks []
     , C.series .saleryBoth
         [ C.scatter (value 0 40 LigeLoen.womenSaleryPerc) [ C.size (\d -> d.numOfBoth / 200), C.style (\_ -> C.opaque 1 0.5), C.circle ]
-        , C.scatter (value 40 60 LigeLoen.womenSaleryPerc) [ C.size (\d -> d.numOfBoth / 200), C.style (\_ -> C.opaque 1 0.5), C.circle ]
-        , C.scatter (value 60 100 LigeLoen.womenSaleryPerc) [ C.size (\d -> d.numOfBoth / 200), C.style (\_ -> C.opaque 1 0.5), C.circle ]
+        , C.scatter (value 40 60 LigeLoen.womenSaleryPerc) [ C.size (\d -> d.numOfBoth / 200), C.style (\_ -> C.opaque 1 0.5), C.circle, C.color C.purple ]
+        , C.scatter (value 60 100 LigeLoen.womenSaleryPerc) [ C.size (\d -> d.numOfBoth / 200), C.style (\_ -> C.opaque 1 0.5), C.circle, C.color C.pink ]
         ]
         (List.filter (.year >> (==) 2019) LigeLoen.data)
+
+    , C.when model.hoveringSalery <| \item rest ->
+        C.tooltipOnTop (always item.center.x) (always item.position.y) [] [ saleryTooltip item ]
+    ]
+
+
+saleryTooltip : C.Single Float LigeLoen.Datum -> H.Html msg
+saleryTooltip hovered =
+  H.div []
+    [ H.h4
+        [ HA.style "max-width" "200px"
+        , HA.style "color" hovered.metric.color
+        ]
+        [ H.text hovered.datum.sector ]
+    , H.div []
+        [ H.text "Women: "
+        , H.text (String.fromFloat hovered.datum.saleryWomen)
+        ]
+    , H.div []
+        [ H.text "Men: "
+        , H.text (String.fromFloat hovered.datum.saleryMen)
+        ]
     ]
 
 
