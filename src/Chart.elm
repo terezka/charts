@@ -20,7 +20,7 @@ module Chart exposing
     , filterX, filterY, only, attrs
     , blue, orange, pink, green, red
 
-    , style, empty, detached, aura, full, name, with
+    , style, empty, detached, aura, opaque, full, name, with
     , fontSize, borderWidth, borderColor, xOffset, yOffset, xLabel, text, at, noDot, binned
     )
 
@@ -1546,6 +1546,7 @@ scatter toY edits =
               Just (Empty s) -> C.empty (toSize d) s (toShape i) c
               Just (Aura a b) -> C.aura (toSize d) a b (toShape i) c
               Just (Detached a) -> C.disconnected (toSize d) a (toShape i) c
+              Just (Opaque a b) -> C.opaque (toSize d) a b (toShape i) c
   in
   Series toY (Maybe.withDefault "" config.name) config.unit config.color <| \i toX data p c ->
     C.scatter p toX toY (finalDot i c) data
@@ -1611,6 +1612,7 @@ monotone toY edits =
               Just (Empty s) -> C.empty (toSize d) s (toShape i) c
               Just (Aura a b) -> C.aura (toSize d) a b (toShape i) c
               Just (Detached a) -> C.disconnected (toSize d) a (toShape i) c
+              Just (Opaque a b) -> C.opaque (toSize d) a b (toShape i) c
   in
   Series toY (Maybe.withDefault "" config.name) config.unit config.color <| \i toX data p c ->
     C.monotone p toX toY (interAttrs c) config.area (finalDot i c) data
@@ -1662,6 +1664,7 @@ linear toY edits =
               Just (Empty s) -> C.empty (toSize d) s (toShape i) c
               Just (Aura a b) -> C.aura (toSize d) a b (toShape i) c
               Just (Detached a) -> C.disconnected (toSize d) a (toShape i) c
+              Just (Opaque a b) -> C.opaque (toSize d) a b (toShape i) c
   in
   Series toY (Maybe.withDefault "" config.name) config.unit config.color <| \i toX data p c ->
     C.linear p toX toY (interAttrs c) config.area (finalDot i c) data
@@ -1853,6 +1856,7 @@ cross config =
 type Style
   = Full
   | Empty Float
+  | Opaque Float Float
   | Aura Float Float
   | Detached Float
 
@@ -1873,6 +1877,12 @@ full =
 empty : Float -> Style
 empty =
   Empty
+
+
+{-| -}
+opaque : Float -> Float -> Style
+opaque =
+  Opaque
 
 
 {-| -}

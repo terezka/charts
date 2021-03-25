@@ -20,6 +20,7 @@ type Variety
   = Empty Float
   | Disconnected Float
   | Aura Float Float
+  | Opaque Float Float
   | Full
 
 
@@ -183,6 +184,13 @@ varietyAttributes color variety =
       [ Attributes.stroke "white"
       , Attributes.strokeWidth (String.fromFloat width)
       , Attributes.fill color
+      ]
+
+    Opaque width opacity ->
+      [ Attributes.stroke color
+      , Attributes.strokeWidth (String.fromFloat width)
+      , Attributes.fill color
+      , Attributes.fillOpacity (String.fromFloat opacity)
       ]
 
     Full ->

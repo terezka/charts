@@ -1,7 +1,7 @@
 module Svg.Chart
   exposing
     ( responsive, static, frame
-    , Dot, clear, empty, disconnected, aura, full
+    , Dot, clear, empty, disconnected, aura, full, opaque
     , Shape, circle, triangle, square, diamond, plus, cross
     , scatter, linear, monotone
     , xAxis, yAxis, xArrow, yArrow
@@ -696,6 +696,18 @@ full radius shape color =
 aura : Float -> Float -> Float -> Shape -> String -> Dot msg
 aura radius width opacity shape color =
   viewShape radius (Aura width opacity) shape color
+
+
+
+{-| Make a shape with a little translucent middle.
+
+    someDot : Svg msg
+    someDot =
+      aura radius width borderWidth opacity circle "blue" plane x y
+-}
+opaque : Float -> Float -> Float -> Shape -> String -> Dot msg
+opaque radius width opacity shape color =
+  viewShape radius (Opaque width opacity) shape color
 
 
 {-| Make a shape with a white border.

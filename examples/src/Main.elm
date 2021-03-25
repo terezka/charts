@@ -103,9 +103,9 @@ viewSaleryStatestic =
     , C.yLabels []
     , C.yTicks []
     , C.series .saleryBoth
-        [ C.scatter (value 0 40 LigeLoen.womenSaleryPerc) [ C.size (\d -> d.numOfBoth / 200), C.style (\_ -> C.empty 2), C.circle ]
-        , C.scatter (value 40 60 LigeLoen.womenSaleryPerc) [ C.size (\d -> d.numOfBoth / 200), C.style (\_ -> C.empty 2), C.circle ]
-        , C.scatter (value 60 100 LigeLoen.womenSaleryPerc) [ C.size (\d -> d.numOfBoth / 200), C.style (\_ -> C.empty 2), C.circle ]
+        [ C.scatter (value 0 40 LigeLoen.womenSaleryPerc) [ C.size (\d -> d.numOfBoth / 200), C.style (\_ -> C.opaque 1 0.5), C.circle ]
+        , C.scatter (value 40 60 LigeLoen.womenSaleryPerc) [ C.size (\d -> d.numOfBoth / 200), C.style (\_ -> C.opaque 1 0.5), C.circle ]
+        , C.scatter (value 60 100 LigeLoen.womenSaleryPerc) [ C.size (\d -> d.numOfBoth / 200), C.style (\_ -> C.opaque 1 0.5), C.circle ]
         ]
         (List.filter (.year >> (==) 2019) LigeLoen.data)
     ]
