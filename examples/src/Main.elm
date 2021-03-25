@@ -121,7 +121,7 @@ viewSaleryStatestic model =
         (List.filter (.year >> (==) 2019) LigeLoen.data)
 
     , C.when model.hoveringSalery <| \item rest ->
-        C.tooltipOnTop (always item.center.x) (always item.position.y) [] [ saleryTooltip item ]
+        C.tooltipOnTop (always item.center.x) (always item.center.y) [] [ saleryTooltip item ]
     ]
 
 
@@ -288,13 +288,13 @@ viewHover model =
         [ C.xLabels
             [ C.yOffset -25
             , C.values (.center >> .x) items
-            , C.format (.position >> .y >> String.fromFloat)
+            , C.format (.position >> .y2 >> String.fromFloat)
             , C.at (.center >> .y)
             ]
         ]
 
     , C.when model.hovering <| \item rest ->
-        C.tooltipOnTop (always item.center.x) (always item.position.y) [] [ tooltipRow item ]
+        C.tooltipOnTop (always item.center.x) (always item.center.y) [] [ tooltipRow item ]
 
     --, C.when model.hovering <| \item rest ->
     --    C.line [ C.horizontal 4, C.vertical 5 ]

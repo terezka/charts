@@ -12,12 +12,12 @@ module Svg.Chart
     , position, positionHtml
 
     , eventCatcher, container, decodePoint
-    , Point, toPoints, DataPoint
+    , Point, toBreaks, DataPoint
     , getNearest, getNearestX, getWithin, getWithinX
     , tooltip, tooltipOnTop, isXPastMiddle, middleOfY, middleOfX, closestToZero
 
     , viewLabel
-    , Item, Items, Metric, toGroupItems, toBinItems, Bar, BarVisuals
+    , Item, Items, Metric, toGroupItems, toBinItems, Bar, BarVisuals, toDotItems
     , histogram, bars
     )
 
@@ -61,7 +61,7 @@ mirrored on the other side of the axis!
 
 @docs container, eventCatcher
 
-@docs decodePoint, Point, toPoints, DataPoint
+@docs decodePoint, Point, toBreaks, DataPoint
 
 @docs getNearest, getNearestX, getWithin, getWithinX
 
@@ -124,7 +124,7 @@ frame id plane =
 type alias Item value data =
   { datum : data
   , center : { x : Float, y : Float }
-  , position : { x1 : Float, x2 : Float, y : Float }
+  , position : { x1 : Float, x2 : Float, y1 : Float, y2 : Float }
   , values : { x1 : Float, x2 : Float, y : value }
   , metric : Metric
   }
@@ -134,7 +134,7 @@ type alias Item value data =
 type alias Items value data =
   { datum : data
   , center : { x : Float, y : Float }
-  , position : { x1 : Float, x2 : Float, y : Float }
+  , position : { x1 : Float, x2 : Float, y1 : Float, y2 : Float }
   , items : List (Item value data)
   }
 
@@ -145,6 +145,51 @@ type alias Metric =
   , color : String
   , unit : String
   }
+
+
+
+{-| -}
+type alias LineConfig data =
+  { value : data -> Maybe Float
+  , size : data -> Float
+  , name : String
+  , unit : String
+  , color : Maybe String
+  }
+
+
+toDotItems : (data -> Float) -> List (LineConfig data) -> List data -> List (List (Item (Maybe Float) data))
+toDotItems toX configs data =
+  let toDotItem index config datum =
+        { datum = datum
+        , center =
+            { x = toX datum
+            , y = Maybe.withDefault 0 (config.value datum)
+            }
+        , position =
+            let radius = config.size datum in
+            { x1 = toX datum -- TODO - radius / 2
+            , x2 = toX datum -- TODO + radius / 2
+            , y1 = Maybe.withDefault 0 (config.value datum) -- TODO - radius / 2
+            , y2 = Maybe.withDefault 0 (config.value datum) -- TODO + radius / 2
+            }
+        , values =
+            { x1 = toX datum -- TODO
+            , x2 = toX datum
+            , y = config.value datum
+            }
+        , metric =
+            { label = config.name
+            , unit = config.unit
+            , color = Maybe.withDefault (toDefaultColor index) config.color
+            }
+        }
+
+      toLineItems index config =
+        List.map (toDotItem index config) data
+  in
+  List.indexedMap toLineItems configs
+
 
 
 {-| -}
@@ -182,7 +227,8 @@ toGroupItems space bars_ data =
         , position =
             { x1 = x1
             , x2 = x1 + barWidth
-            , y = Maybe.withDefault 0 (bar.value datum)
+            , y1 = 0 -- TODO
+            , y2 = Maybe.withDefault 0 (bar.value datum)
             }
         , values =
             { x1 = toFloat binIndex
@@ -209,7 +255,8 @@ toGroupItems space bars_ data =
         , position =
             { x1 = toFloat binIndex + 0.5
             , x2 = toFloat binIndex + 1.5
-            , y = Coords.maximum toYs [datum]
+            , y1 = 0
+            , y2 = Coords.maximum toYs [datum]
             }
         , items = List.indexedMap (toBarItem binIndex datum) bars_
         }
@@ -242,7 +289,8 @@ toBinItems space toX0Maybe toX1 bars_ data =
         , position =
             { x1 = x1
             , x2 = x1 + width_
-            , y = Maybe.withDefault 0 (bar.value datum) -- TODO perhaps leave as Maybe?
+            , y1 = 0 -- TODO perhaps leave as Maybe?
+            , y2 = Maybe.withDefault 0 (bar.value datum) -- TODO perhaps leave as Maybe?
             }
         , values =
             { x1 = toX1 datum
@@ -271,7 +319,8 @@ toBinItems space toX0Maybe toX1 bars_ data =
         , position =
             { x1 = toX1 datum - length
             , x2 = toX1 datum
-            , y = Coords.maximum toYs [datum]
+            , y1 = 0
+            , y2 = Coords.maximum toYs [datum]
             }
         , items = List.indexedMap (toBarItem length datum) bars_
         }
@@ -321,7 +370,7 @@ viewBin plane visuals bin =
 viewBar : Plane -> BarVisuals data msg -> Int -> Item (Maybe Float) data -> Svg msg
 viewBar plane visuals barIndex item =
   let x = item.position.x1
-      y = item.position.y
+      y = item.position.y2
       w = item.position.x2 - item.position.x1
       bs = closestToZero plane
       b = scaleSVG plane.x w * 0.5 * (clamp 0 1 visuals.round)
@@ -779,43 +828,43 @@ cross =
     someScatter =
       scatter plane .x .y (full 6 circle "blue") points
 -}
-scatter : Plane -> (data -> Float) -> (data -> Maybe Float) -> (data -> Dot msg) -> List data -> Svg msg
-scatter plane toX toY dot data =
-  viewSeries plane toX toY dot data (text "-- No interpolation --")
+scatter : Plane -> (data -> Dot msg) -> List (Item (Maybe Float) data) -> Svg msg
+scatter plane dot items =
+  viewSeries plane dot items (text "-- No interpolation --")
 
 
 {-| Series with linear interpolation.
 -}
-linear : Plane -> (data -> Float) -> (data -> Maybe Float) -> List (Attribute msg) -> Maybe Float -> (data -> Dot msg) -> List data -> Svg msg
-linear plane toX toY attributes areaMaybe dot data =
-  let points = toPoints toX toY data in
-  viewSeries plane toX toY dot data <|
-    viewInterpolations plane areaMaybe attributes points (linearInterpolation points)
+linear : Plane ->  List (Attribute msg) -> Maybe Float -> (data -> Dot msg) -> List (Item (Maybe Float) data) -> Svg msg
+linear plane attributes areaMaybe dot items =
+  let breaks = toBreaks items in
+  viewSeries plane dot items <|
+    viewInterpolations plane areaMaybe attributes breaks (linearInterpolation breaks)
 
 
 {-| Series with monotone interpolation.
 -}
-monotone : Plane -> (data -> Float) -> (data -> Maybe Float) -> List (Attribute msg) -> Maybe Float -> (data -> Dot msg) -> List data -> Svg msg
-monotone plane toX toY attributes areaMaybe dot data =
-  let points = toPoints toX toY data in
-  viewSeries plane toX toY dot data <|
-    viewInterpolations plane areaMaybe attributes points (monotoneInterpolation points)
+monotone : Plane ->  List (Attribute msg) -> Maybe Float -> (data -> Dot msg) -> List (Item (Maybe Float) data) -> Svg msg
+monotone plane attributes areaMaybe dot items =
+  let breaks = toBreaks items in
+  viewSeries plane dot items <|
+    viewInterpolations plane areaMaybe attributes breaks (monotoneInterpolation breaks)
 
 
 
 -- INTERNAL
 
 
-viewSeries : Plane -> (data -> Float) -> (data -> Maybe Float) -> (data -> Dot msg) -> List data -> Svg msg -> Svg msg
-viewSeries plane toX toY dot data interpolation =
-  let viewDot datum =
-        case toY datum of
-          Just y -> Just (dot datum plane (toX datum) y)
+viewSeries : Plane -> (data -> Dot msg) -> List (Item (Maybe Float) data) -> Svg msg -> Svg msg
+viewSeries plane dot items interpolation =
+  let viewDot item =
+        case item.values.y of
+          Just y -> Just (dot item.datum plane item.center.x y)
           Nothing -> Nothing
   in
   g [ class "elm-charts__serie" ]
     [ interpolation
-    , g [ class "elm-charts__dots" ] (List.filterMap viewDot data)
+    , g [ class "elm-charts__dots" ] (List.filterMap viewDot items)
     ]
 
 
@@ -1067,14 +1116,14 @@ type alias Point =
 
 
 {-| -}
-toPoints : (data -> Float) -> (data -> Maybe Float) -> List data -> List (List Point)
-toPoints toX toY =
-  let fold d acc =
-        case toY d of
+toBreaks : List (Item (Maybe Float) data) -> List (List Point)
+toBreaks =
+  let fold item acc =
+        case item.values.y of
           Just y ->
             case acc of
-              latest :: rest -> (latest ++ [{ x = toX d, y = y }]) :: rest
-              [] -> ([{ x = toX d, y = y }] :: acc)
+              latest :: rest -> (latest ++ [item.center]) :: rest
+              [] -> ([item.center] :: acc)
 
           Nothing ->
             [] :: acc

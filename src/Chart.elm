@@ -534,7 +534,7 @@ type alias PostPlaneInfo data =
 
 
 
---
+-- ELEMENTS
 
 
 {-| -}
@@ -604,8 +604,8 @@ definePlane config items =
         }
 
       yRange =
-        { min = C.minimum [.y >> Just] points
-        , max = C.maximum [.y >> Just] points
+        { min = C.minimum [.y2 >> Just] points
+        , max = C.maximum [.y2 >> Just] points -- TODO
         }
 
       calcRange =
@@ -819,7 +819,7 @@ type alias Metric =
 type alias Single value data =
   { datum : data
   , center : { x : Float, y : Float }
-  , position : { x1 : Float, x2 : Float, y : Float }
+  , position : { x1 : Float, x2 : Float, y1 : Float, y2 : Float }
   , values : { x1 : Float, x2 : Float, y : value }
   , metric : Metric
   }
@@ -829,7 +829,7 @@ type alias Single value data =
 type alias Group value data =
   { datum : data
   , center : { x : Float, y : Float }
-  , position : { x1 : Float, x2 : Float, y : Float }
+  , position : { x1 : Float, x2 : Float, y1 : Float, y2 : Float }
   , items : List (Single value data)
   }
 
@@ -1482,29 +1482,31 @@ just toY =
 
 
 type Series data msg
-  = Series (data -> Maybe Float) String String (Maybe String)
-      (Int -> (data -> Float) -> List data -> C.Plane -> String -> S.Svg msg)
+  = Series (data -> Maybe Float) (data -> Float) String String (Maybe String)
+      (Int -> List (C.Item (Maybe Float) data) -> C.Plane -> String -> S.Svg msg)
 
 
 {-| -}
 series : (data -> Float) -> List (Series data msg) -> List data -> Element data msg
 series toX series_ data =
-  let metrics =
-        List.indexedMap (\i (Series toY l u cM _) ->
-            ( Metric l (toColor i cM) u, toY )
-          )
-        series_
+  let toConfig (Series toY toSize l u cM _) =
+        { value = toY
+        , size = toSize
+        , name = l
+        , unit = u
+        , color = cM
+        }
 
       toColor i cM =
         Maybe.withDefault (toDefaultColor i) cM
 
       items =
-        toDotItems toX metrics data
+        C.toDotItems toX (List.map toConfig series_) data
   in
-  SeriesElement items <| \id_ p _ ->
-    -- TODO use items
-    S.g [ SA.class "elm-charts__series", clipPath id_ ] <|
-      List.indexedMap (\i (Series _ _ _ cM view) -> view i toX data p (toColor i cM)) series_
+  SeriesElement (List.concat items) <| \id_ p _ ->
+    List.map2 Tuple.pair series_ items
+      |> List.indexedMap (\i ( Series _ _ _ _ cM view, items_ ) -> view i items_ p (toColor i cM))
+      |> S.g [ SA.class "elm-charts__series", clipPath id_ ]
 
 
 
@@ -1558,8 +1560,8 @@ scatter toY edits =
               Just (Detached a) -> C.disconnected (toSize d) a (toShape i) c
               Just (Opaque a b) -> C.opaque (toSize d) a b (toShape i) c
   in
-  Series toY (Maybe.withDefault "" config.name) config.unit config.color <| \i toX data p c ->
-    C.scatter p toX toY (finalDot i c) data
+  Series toY toSize (Maybe.withDefault "" config.name) config.unit config.color <| \i items p c ->
+    C.scatter p (finalDot i c) items
 
 
 
@@ -1624,8 +1626,8 @@ monotone toY edits =
               Just (Detached a) -> C.disconnected (toSize d) a (toShape i) c
               Just (Opaque a b) -> C.opaque (toSize d) a b (toShape i) c
   in
-  Series toY (Maybe.withDefault "" config.name) config.unit config.color <| \i toX data p c ->
-    C.monotone p toX toY (interAttrs c) config.area (finalDot i c) data
+  Series toY toSize (Maybe.withDefault "" config.name) config.unit config.color <| \i items p c ->
+    C.monotone p (interAttrs c) config.area (finalDot i c) items
 
 
 
@@ -1676,8 +1678,8 @@ linear toY edits =
               Just (Detached a) -> C.disconnected (toSize d) a (toShape i) c
               Just (Opaque a b) -> C.opaque (toSize d) a b (toShape i) c
   in
-  Series toY (Maybe.withDefault "" config.name) config.unit config.color <| \i toX data p c ->
-    C.linear p toX toY (interAttrs c) config.area (finalDot i c) data
+  Series toY toSize (Maybe.withDefault "" config.name) config.unit config.color <| \i items p c ->
+    C.linear p (interAttrs c) config.area (finalDot i c) items
 
 
 {-| -}
@@ -1765,36 +1767,6 @@ clipPath : String -> S.Attribute msg
 clipPath id_ =
   SA.clipPath <| "url(#" ++ id_ ++ ")"
 
-
-
--- ITEMS
-
-
-toDotItems : (data -> Float) -> List ( Metric, data -> Maybe Float ) -> List data -> List (Single (Maybe Float) data)
-toDotItems toX metrics data =
-  let toDotItem datum (metric, value) =
-        { datum = datum
-        , center =
-            { x = toX datum
-            , y = Maybe.withDefault 0 (value datum)
-            }
-        , position =
-            { x1 = toX datum
-            , x2 = toX datum
-            , y = Maybe.withDefault 0 (value datum)
-            }
-        , values =
-            { x1 = toX datum
-            , x2 = toX datum
-            , y = value datum
-            }
-        , metric = metric
-        }
-
-      toLineItems datum =
-        List.map (toDotItem datum) metrics
-  in
-  List.concatMap toLineItems data
 
 
 -- DEFAULTS
