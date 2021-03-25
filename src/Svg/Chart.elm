@@ -158,8 +158,8 @@ type alias LineConfig data =
   }
 
 
-toDotItems : (data -> Float) -> List (LineConfig data) -> List data -> List (List (Item (Maybe Float) data))
-toDotItems toX configs data =
+toDotItems : (data -> Float) -> List (LineConfig data) -> List data -> Plane -> List (List (Item (Maybe Float) data))
+toDotItems toX configs data plane =
   let toDotItem index config datum =
         { datum = datum
         , center =
@@ -168,10 +168,10 @@ toDotItems toX configs data =
             }
         , position =
             let radius = config.size datum in
-            { x1 = toX datum -- TODO - radius / 2
-            , x2 = toX datum -- TODO + radius / 2
-            , y1 = Maybe.withDefault 0 (config.value datum) -- TODO - radius / 2
-            , y2 = Maybe.withDefault 0 (config.value datum) -- TODO + radius / 2
+            { x1 = toX datum - scaleCartesian plane.x radius
+            , x2 = toX datum + scaleCartesian plane.x radius
+            , y1 = Maybe.withDefault 0 (config.value datum) - scaleCartesian plane.y radius
+            , y2 = Maybe.withDefault 0 (config.value datum) + scaleCartesian plane.y radius
             }
         , values =
             { x1 = toX datum -- TODO

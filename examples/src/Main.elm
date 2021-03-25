@@ -121,7 +121,7 @@ viewSaleryStatestic model =
         (List.filter (.year >> (==) 2019) LigeLoen.data)
 
     , C.when model.hoveringSalery <| \item rest ->
-        C.tooltipOnTop (always item.center.x) (always item.center.y) [] [ saleryTooltip item ]
+        C.tooltipOnTop (always item.center.x) (always item.position.y2) [] [ saleryTooltip item ]
     ]
 
 
@@ -130,6 +130,8 @@ saleryTooltip hovered =
   H.div []
     [ H.h4
         [ HA.style "max-width" "200px"
+        , HA.style "margin-top" "5px"
+        , HA.style "margin-bottom" "8px"
         , HA.style "color" hovered.metric.color
         ]
         [ H.text hovered.datum.sector ]

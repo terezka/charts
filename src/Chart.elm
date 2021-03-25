@@ -71,6 +71,7 @@ import Svg.Events as SE
 import Html as H
 import Html.Attributes as HA
 import Intervals as I
+import Internal.Svg as I
 import DateFormat as F
 import Time
 import Dict exposing (Dict)
@@ -481,11 +482,11 @@ chart edits elements =
           , htmlAttrs = []
           }
 
-      items =
-        getItems elements
-
       plane =
-        definePlane config items
+        definePlane config elements
+
+      items =
+        getItems plane elements
 
       tickValues =
         getTickValues plane items elements
@@ -520,34 +521,23 @@ chart edits elements =
 
 
 
-type alias PrePlaneInfo =
-  { x : Maybe Bounds
-  , y : Maybe Bounds
-  }
-
-
-type alias PostPlaneInfo data =
-  { xTicks : List Float
-  , yTicks : List Float
-  , collected : List (Item (Maybe Float) data)
-  }
-
-
-
 -- ELEMENTS
 
 
 {-| -}
 type Element data msg
   = SeriesElement
-      (List (Single (Maybe Float) data))
-      (String -> C.Plane -> List (Single (Maybe Float) data) -> S.Svg msg)
+      (Maybe XYBounds -> Maybe XYBounds)
+      (C.Plane -> List (List (Single (Maybe Float) data)))
+      (String -> C.Plane -> List (List (Single (Maybe Float) data)) -> S.Svg msg)
   | BarsElement
-      (List (Group (Maybe Float) data))
+      (Maybe XYBounds -> Maybe XYBounds)
+      (C.Plane -> List (Group (Maybe Float) data))
       (C.Plane -> TickValues -> TickValues)
       (String -> C.Plane -> List (Group (Maybe Float) data) -> S.Svg msg)
   | HistogramElement
-      (List (Group (Maybe Float) data))
+      (Maybe XYBounds -> Maybe XYBounds)
+      (C.Plane -> List (Group (Maybe Float) data))
       (C.Plane -> TickValues -> TickValues)
       (String -> C.Plane -> List (Group (Maybe Float) data) -> S.Svg msg)
   | AxisElement
@@ -568,55 +558,44 @@ type Element data msg
       (C.Plane -> H.Html msg)
 
 
-getItems : List (Element data msg) -> List (Item (Maybe Float) data)
-getItems elements =
-  let toItems el acc =
+type alias XYBounds =
+  { x : Bounds
+  , y : Bounds
+  }
+
+
+definePlane : Container data msg -> List (Element data msg) -> C.Plane
+definePlane config elements =
+  let foldBounds el acc =
         case el of
-          SeriesElement items _ -> acc ++ List.map ItemDot items
-          BarsElement items _ _ -> acc ++ List.map ItemGroup items
-          HistogramElement items _ _ -> acc ++ List.map ItemGroup items
+          SeriesElement func _ _ -> func acc
+          BarsElement func _ _ _ -> func acc
+          HistogramElement func _ _ _ -> func acc
           AxisElement _ -> acc
           TicksElement _ _ -> acc
           LabelsElement _ _ -> acc
           GridElement _ -> acc
-          SubElements _ -> acc -- TODO add phantom type to only allow decorative els in this
+          SubElements _ -> acc
           SvgElement _ -> acc
           HtmlElement _ -> acc
-  in
-  List.foldl toItems [] elements
 
+      bounds =
+        List.foldl foldBounds Nothing elements
+          |> Maybe.map (\{ x, y } -> { x = fixSingles x, y = fixSingles y })
+          |> Maybe.withDefault { x = { min = 0, max = 10 }, y = { min = 0, max = 10 } }
 
-definePlane : Container data msg -> List (Item (Maybe Float) data) -> C.Plane
-definePlane config items =
-  -- TODO apply edits
-  let toPoints item acc =
-        case item of
-          ItemBar value -> value.position :: acc
-          ItemDot value -> value.position :: acc
-          ItemGroup value -> value.position :: acc
-
-      points =
-        List.foldl toPoints [] items
-
-      xRange =
-        { min = C.minimum [.x1 >> Just] points -- TODO wrong for scatters
-        , max = C.maximum [.x2 >> Just] points
-        }
-
-      yRange =
-        { min = C.minimum [.y2 >> Just] points
-        , max = C.maximum [.y2 >> Just] points -- TODO
-        }
+      fixSingles bs =
+        if bs.min == bs.max then { bs | max = bs.min + 10 } else bs
 
       calcRange =
         case config.range of
-          Just edit -> edit xRange
-          Nothing -> xRange
+          Just edit -> edit bounds.x
+          Nothing -> bounds.x
 
       calcDomain =
         case config.domain of
-          Just edit -> edit yRange
-          Nothing -> startMin 0 yRange
+          Just edit -> edit bounds.y
+          Nothing -> startMin 0 bounds.y
 
       scalePadX =
         C.scaleCartesian
@@ -642,7 +621,7 @@ definePlane config items =
       { marginLower = config.marginLeft
       , marginUpper = config.marginRight
       , length = Maybe.withDefault 500 config.width
-      , data = xRange
+      , data = bounds.x
       , min = calcRange.min - scalePadX config.paddingLeft
       , max = calcRange.max + scalePadX config.paddingRight
       }
@@ -650,11 +629,29 @@ definePlane config items =
       { marginUpper = config.marginTop
       , marginLower = config.marginBottom
       , length = config.height
-      , data = yRange
+      , data = bounds.y
       , min = calcDomain.min - scalePadY config.paddingBottom
       , max = calcDomain.max + scalePadY config.paddingTop
       }
   }
+
+
+getItems : C.Plane -> List (Element data msg) -> List (Item (Maybe Float) data)
+getItems plane elements =
+  let toItems el acc =
+        case el of
+          SeriesElement _ func _ -> acc ++ List.map ItemDot (func plane |> List.concat)
+          BarsElement _ func _ _ -> acc ++ List.map ItemGroup (func plane)
+          HistogramElement _ func _ _ -> acc ++ List.map ItemGroup (func plane)
+          AxisElement _ -> acc
+          TicksElement _ _ -> acc
+          LabelsElement _ _ -> acc
+          GridElement _ -> acc
+          SubElements _ -> acc -- TODO add phantom type to only allow decorative els in this
+          SvgElement _ -> acc
+          HtmlElement _ -> acc
+  in
+  List.foldl toItems [] elements
 
 
 {-| -}
@@ -668,9 +665,9 @@ getTickValues : C.Plane -> List (Item (Maybe Float) data) -> List (Element data 
 getTickValues plane items elements =
   let toValues el acc =
         case el of
-          SeriesElement _ _ -> acc
-          BarsElement _ func _ -> func plane acc
-          HistogramElement _ func _ -> func plane acc
+          SeriesElement _ _ _ -> acc
+          BarsElement _ _ func _ -> func plane acc
+          HistogramElement _ _ func _ -> func plane acc
           AxisElement _ -> acc
           TicksElement func _ -> func plane acc
           LabelsElement func _ -> func plane acc
@@ -686,9 +683,9 @@ viewElements : Container data msg -> C.Plane -> TickValues -> List (Item (Maybe 
 viewElements config plane tickValues allItems elements =
   let viewOne el ( before, chart_, after ) =
         case el of
-          SeriesElement items view -> ( before, view config.id plane items :: chart_, after )
-          BarsElement items _ view -> ( before, view config.id plane items :: chart_, after )
-          HistogramElement items _ view -> ( before, view config.id plane items :: chart_, after )
+          SeriesElement _ toItems view -> ( before, view config.id plane (toItems plane) :: chart_, after )
+          BarsElement _ toItems _ view -> ( before, view config.id plane (toItems plane) :: chart_, after )
+          HistogramElement _ toItems _ view -> ( before, view config.id plane (toItems plane) :: chart_, after )
           AxisElement view -> ( before, view plane :: chart_, after )
           TicksElement _ view -> ( before, view plane :: chart_, after )
           LabelsElement _ view -> ( before, view plane :: chart_, after )
@@ -1386,8 +1383,37 @@ bars edits metrics data =
 
       toTicks p acc =
         { acc | xs = List.concatMap (\i -> [i.position.x1, i.position.x2]) groupItems }
+
+      toYs =
+        List.map (\b -> b.value) metrics
+
+      toXYBounds prev =
+        case prev of
+          Nothing ->
+            Just
+              { x =
+                  { min = 0.5
+                  , max = toFloat (List.length data) + 0.5
+                  }
+              , y =
+                  { min = C.minimum toYs data
+                  , max = C.maximum toYs data
+                  }
+              }
+
+          Just { x, y } ->
+            Just
+              { x =
+                  { min = min 0.5 x.min
+                  , max = max (toFloat (List.length data) + 0.5) x.max
+                  }
+              , y =
+                  { min = min (C.minimum toYs data) y.min
+                  , max = max (C.maximum toYs data) y.max
+                  }
+              }
   in
-  BarsElement groupItems toTicks <| \id_ p _ ->
+  BarsElement toXYBounds (always groupItems) toTicks <| \id_ p _ ->
     -- TODO use items
     C.bars p
       { round = config.rounded
@@ -1410,7 +1436,7 @@ type alias Histogram data =
 
 {-| -}
 histogram : (data -> Float) -> List (Histogram data -> Histogram data) -> List (C.Bar data) -> List data -> Element data msg
-histogram toX edits metrics data =
+histogram toX1 edits metrics data =
   let config =
         applyAttrs edits
           { rounded = 0
@@ -1422,17 +1448,66 @@ histogram toX edits metrics data =
           }
 
       binItems =
-        C.toBinItems { margin = config.margin, between = config.spacing } toX0 toX metrics data
+        C.toBinItems { margin = config.margin, between = config.spacing } toX0M toX1 metrics data
 
-      toX0 =
+      toX0M =
         case config.width of
-          Just toWidth -> Just (\d -> toX d - toWidth d)
+          Just toWidth -> Just (\d -> toX1 d - toWidth d)
           Nothing -> Nothing
 
       toTicks p acc =
         { acc | xs = List.concatMap (\i -> [i.position.x1, i.position.x2]) binItems }
+
+      toYs =
+        List.map (\b -> b.value) metrics
+
+      toXs prevMaybe datum nextMaybe =
+        case toX0M of
+          Just toX0 ->
+            [ toX1 datum - toX0 datum, toX1 datum ]
+
+          Nothing ->
+            case ( prevMaybe, nextMaybe ) of
+              ( Just prev, _ ) ->
+                [ toX1 datum - toX1 prev, toX1 datum ]
+
+              ( Nothing, Just next ) ->
+                [ toX1 next - toX1 datum, toX1 datum ]
+
+              ( Nothing, Nothing ) ->
+                [ toX1 datum - 1, toX1 datum ]
+
+      toXYBounds prev =
+        let xs = List.concat (mapSurrounding toXs data) in
+        case xs of
+          [] -> prev
+          some ->
+            case prev of
+              Just { x, y } ->
+                Just
+                  { x =
+                      { min = min x.min (Maybe.withDefault 0 (List.minimum xs))
+                      , max = max x.max (Maybe.withDefault 1 (List.maximum xs))
+                      }
+                  , y =
+                      { min = min (C.minimum toYs data) y.min
+                      , max = max (C.maximum toYs data) y.max
+                      }
+                  }
+
+              Nothing ->
+                Just
+                  { x =
+                      { min = Maybe.withDefault 0 (List.minimum xs)
+                      , max = Maybe.withDefault 1 (List.maximum xs)
+                      }
+                  , y =
+                      { min = C.minimum toYs data
+                      , max = C.maximum toYs data
+                      }
+                  }
   in
-  HistogramElement binItems toTicks <| \id_ p _ ->
+  HistogramElement toXYBounds (always binItems) toTicks <| \id_ p _ ->
     -- TODO use items
     C.histogram p
       { round = config.rounded
@@ -1482,16 +1557,16 @@ just toY =
 
 
 type Series data msg
-  = Series (data -> Maybe Float) (data -> Float) String String (Maybe String)
+  = Series (data -> Maybe Float) (Int -> data -> Float) String String (Maybe String)
       (Int -> List (C.Item (Maybe Float) data) -> C.Plane -> String -> S.Svg msg)
 
 
 {-| -}
 series : (data -> Float) -> List (Series data msg) -> List data -> Element data msg
 series toX series_ data =
-  let toConfig (Series toY toSize l u cM _) =
+  let toConfig i (Series toY toRadius l u cM _) =
         { value = toY
-        , size = toSize
+        , size = toRadius i
         , name = l
         , unit = u
         , color = cM
@@ -1500,10 +1575,13 @@ series toX series_ data =
       toColor i cM =
         Maybe.withDefault (toDefaultColor i) cM
 
-      items =
-        C.toDotItems toX (List.map toConfig series_) data
+      toItems plane =
+        C.toDotItems toX (List.indexedMap toConfig series_) data plane
+
+      toYs =
+        List.map (\(Series toY _ _ _ _ _) -> toY) series_
   in
-  SeriesElement (List.concat items) <| \id_ p _ ->
+  SeriesElement (makeBounds [toX >> Just] toYs data) toItems <| \id_ p items ->
     List.map2 Tuple.pair series_ items
       |> List.indexedMap (\i ( Series _ _ _ _ cM view, items_ ) -> view i items_ p (toColor i cM))
       |> S.g [ SA.class "elm-charts__series", clipPath id_ ]
@@ -1546,6 +1624,9 @@ scatter toY edits =
           Nothing -> toDefaultShape i
           Just s -> s
 
+      toRadius i d =
+        I.toRadius (toShape i) (toSize d)
+
       finalDot i c d =
         case config.dot of
           Just toDot -> \p x y ->
@@ -1560,7 +1641,7 @@ scatter toY edits =
               Just (Detached a) -> C.disconnected (toSize d) a (toShape i) c
               Just (Opaque a b) -> C.opaque (toSize d) a b (toShape i) c
   in
-  Series toY toSize (Maybe.withDefault "" config.name) config.unit config.color <| \i items p c ->
+  Series toY toRadius (Maybe.withDefault "" config.name) config.unit config.color <| \i items p c ->
     C.scatter p (finalDot i c) items
 
 
@@ -1612,6 +1693,9 @@ monotone toY edits =
           Nothing -> toDefaultShape i
           Just s -> s
 
+      toRadius i d =
+        I.toRadius (toShape i) (toSize d)
+
       finalDot i c d =
         case config.dot of
           Just toDot -> \p x y ->
@@ -1626,7 +1710,7 @@ monotone toY edits =
               Just (Detached a) -> C.disconnected (toSize d) a (toShape i) c
               Just (Opaque a b) -> C.opaque (toSize d) a b (toShape i) c
   in
-  Series toY toSize (Maybe.withDefault "" config.name) config.unit config.color <| \i items p c ->
+  Series toY toRadius (Maybe.withDefault "" config.name) config.unit config.color <| \i items p c ->
     C.monotone p (interAttrs c) config.area (finalDot i c) items
 
 
@@ -1664,6 +1748,9 @@ linear toY edits =
           Nothing -> toDefaultShape i
           Just s -> s
 
+      toRadius i d =
+        I.toRadius (toShape i) (toSize d)
+
       finalDot i c d =
         case config.dot of
           Just toDot -> \p x y ->
@@ -1678,7 +1765,7 @@ linear toY edits =
               Just (Detached a) -> C.disconnected (toSize d) a (toShape i) c
               Just (Opaque a b) -> C.opaque (toSize d) a b (toShape i) c
   in
-  Series toY toSize (Maybe.withDefault "" config.name) config.unit config.color <| \i items p c ->
+  Series toY toRadius (Maybe.withDefault "" config.name) config.unit config.color <| \i items p c ->
     C.linear p (interAttrs c) config.area (finalDot i c) items
 
 
@@ -1722,6 +1809,49 @@ none =
 
 
 -- HELPERS
+
+
+makeBounds : List (a -> Maybe Float) -> List (a -> Maybe Float) -> List a -> Maybe XYBounds -> Maybe XYBounds
+makeBounds xs ys data prev =
+  let fold vs datum bounds =
+        { min = min (getMin vs datum) bounds.min
+        , max = max (getMax vs datum) bounds.max
+        }
+
+      getMin toValues datum =
+        List.minimum (getValues toValues datum)
+          |> Maybe.withDefault 0
+
+      getMax toValues datum =
+        List.maximum (getValues toValues datum)
+          |> Maybe.withDefault 1
+
+      getValues toValues datum =
+        List.filterMap (\v -> v datum) toValues
+  in
+  case data of
+    [] -> prev
+    first :: rest ->
+      case prev of
+        Just { x, y } ->
+          Just
+            { x = List.foldl (fold xs) x data
+            , y = List.foldl (fold ys) y data
+            }
+
+        Nothing ->
+          Just
+            { x = List.foldl (fold xs)
+                    { min = getMin xs first
+                    , max = getMax xs first
+                    }
+                    rest
+            , y = List.foldl (fold ys)
+                    { min = getMin ys first
+                    , max = getMax ys first
+                    }
+                    rest
+            }
 
 
 toBounds : (C.Plane -> C.Axis) -> C.Plane -> Bounds
@@ -2162,3 +2292,4 @@ binned w func =
   List.foldr fold Dict.empty
     >> Dict.toList
     >> List.map (\(bin, ds) -> { bin = bin, data = ds })
+

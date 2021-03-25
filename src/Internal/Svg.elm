@@ -1,4 +1,4 @@
-module Internal.Svg exposing (Shape(..), Variety(..), viewShape)
+module Internal.Svg exposing (Shape(..), Variety(..), viewShape, toRadius)
 
 import Svg exposing (Svg, Attribute)
 import Svg.Attributes as Attributes
@@ -25,8 +25,8 @@ type Variety
 
 
 viewShape : Float -> Variety -> Shape -> String -> Plane -> Float -> Float -> Svg msg
-viewShape radius variety shape color plane x y =
-  let size = 2 * pi * radius
+viewShape size variety shape color plane x y =
+  let area = 2 * pi * size
       view_ =
         case shape of
           Circle   -> viewCircle
@@ -36,7 +36,7 @@ viewShape radius variety shape color plane x y =
           Cross    -> viewCross
           Plus     -> viewPlus
   in
-  view_ [] variety color size (toSVGX plane x) (toSVGY plane y)
+  view_ [] variety color area (toSVGX plane x) (toSVGY plane y)
 
 
 viewCircle : List (Svg.Attribute msg) -> Variety -> String -> Float -> Float -> Float -> Svg msg
@@ -195,3 +195,20 @@ varietyAttributes color variety =
 
     Full ->
       [ Attributes.fill color ]
+
+
+
+-- INTERNAL
+
+
+toRadius : Shape -> Float -> Float
+toRadius shape size =
+  let area = 2 * pi * size in
+  case shape of
+    Circle   -> sqrt (area / pi)
+    Triangle -> let side = sqrt <| area * 4 / (sqrt 3) in (sqrt 3) * side
+    Square   -> sqrt area / 2
+    Diamond  -> sqrt area / 2
+    Cross    -> sqrt (area / 5)
+    Plus     -> sqrt (area / 5)
+
