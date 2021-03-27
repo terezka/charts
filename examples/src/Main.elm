@@ -10,7 +10,8 @@ import Svg.Chart as SC
 import Browser
 import Time
 import Data.Iris as Iris
-import Data.LigeLoen as LigeLoen
+import Data.Salery as Salery
+import Data.Education as Education
 import Dict
 
 
@@ -18,6 +19,7 @@ import Dict
 -- labels + ticks + grid automation?
 -- clean up Item / Items
 -- Title
+-- seperate areas from lines + dots to fix opacity
 
 
 main =
@@ -29,8 +31,8 @@ main =
 
 
 type alias Model =
-  { hoveringSalery : List (C.Single Float LigeLoen.Datum)
-  , hovering : List (C.Single Float Datum)
+  { hoveringSalery : List (SC.Item Float Salery.Datum)
+  , hovering : List (SC.Item Float Datum)
   , point : Maybe SC.Point
   }
 
@@ -41,8 +43,8 @@ init =
 
 
 type Msg
-  = OnHoverSalery (List (C.Single Float LigeLoen.Datum))
-  | OnHover (List (C.Single Float Datum))
+  = OnHoverSalery (List (SC.Item Float Salery.Datum))
+  | OnHover (List (SC.Item Float Datum))
   | OnCoords SC.Point -- TODO
 
 
@@ -82,25 +84,27 @@ view model =
     , HA.style "width" "100vw"
     , HA.style "max-width" "1000px"
     ]
-    [ viewSaleryStatestic model
+    [ viewSaleryDiscrepancy model
+    , viewEducation model
     --, H.h1 [] [ H.text "Iris" ]
     --, viewIris
     ]
 
 
-viewSaleryStatestic : Model -> H.Html Msg
-viewSaleryStatestic model =
+viewSaleryDiscrepancy : Model -> H.Html Msg
+viewSaleryDiscrepancy model =
   let value min max func d =
-        if LigeLoen.womenPerc d >= min && LigeLoen.womenPerc d < max then func d else Nothing
+        if Salery.womenPerc d >= min && Salery.womenPerc d < max then func d else Nothing
   in
   C.chart
     [ C.height 400
-    , C.width 800
+    , C.width 1000
     , C.static
     , C.marginLeft 50
     , C.range (C.startMax 20000)
     , C.domain (C.startMax 75)
     , C.paddingTop 15
+    , C.id "salery-discrepancy"
     , C.events
         [ C.event "mouseleave" (C.map (\_ -> OnHoverSalery []) C.getCoords)
         , C.event "mousemove" (C.map OnHoverSalery (C.getNearest (C.withoutUnknowns >> C.getDots)))
@@ -114,18 +118,18 @@ viewSaleryStatestic model =
     , C.yLabels []
     , C.yTicks []
     , C.series .saleryBoth
-        [ C.scatter (value 0 40 LigeLoen.womenSaleryPerc) [ C.size (\d -> d.numOfBoth / 200), C.style (\_ -> C.opaque 1 0.5), C.circle ]
-        , C.scatter (value 40 60 LigeLoen.womenSaleryPerc) [ C.size (\d -> d.numOfBoth / 200), C.style (\_ -> C.opaque 1 0.5), C.circle, C.color C.purple ]
-        , C.scatter (value 60 100 LigeLoen.womenSaleryPerc) [ C.size (\d -> d.numOfBoth / 200), C.style (\_ -> C.opaque 1 0.5), C.circle, C.color C.pink ]
+        [ C.scatter (value 0 40 Salery.womenSaleryPerc) [ C.size (\d -> d.numOfBoth / 200), C.style (\_ -> C.opaque 1 0.5), C.circle ]
+        , C.scatter (value 40 60 Salery.womenSaleryPerc) [ C.size (\d -> d.numOfBoth / 200), C.style (\_ -> C.opaque 1 0.5), C.circle, C.color C.purple ]
+        , C.scatter (value 60 100 Salery.womenSaleryPerc) [ C.size (\d -> d.numOfBoth / 200), C.style (\_ -> C.opaque 1 0.5), C.circle, C.color C.pink ]
         ]
-        (List.filter (.year >> (==) 2019) LigeLoen.data)
+        (List.filter (.year >> (==) 2019) Salery.data)
 
     , C.when model.hoveringSalery <| \item rest ->
         C.tooltipOnTop (always item.center.x) (always item.position.y2) [] [ saleryTooltip item ]
     ]
 
 
-saleryTooltip : C.Single Float LigeLoen.Datum -> H.Html msg
+saleryTooltip : SC.Item Float Salery.Datum -> H.Html msg
 saleryTooltip hovered =
   H.div []
     [ H.h4
@@ -143,6 +147,101 @@ saleryTooltip hovered =
         [ H.text "Men: "
         , H.text (String.fromFloat hovered.datum.saleryMen)
         ]
+    ]
+
+
+viewEducation : Model -> H.Html Msg
+viewEducation model =
+  C.chart
+    [ C.height 400
+    , C.width 1000
+    , C.static
+    , C.marginLeft 50
+    , C.range (C.startMax 2004)
+    , C.paddingTop 15
+    , C.id "education"
+    --, C.events
+    --    [ C.event "mouseleave" (C.map (\_ -> OnHoverSalery []) C.getCoords)
+    --    , C.event "mousemove" (C.map OnHoverSalery (C.getNearest (C.withoutUnknowns >> C.getDots)))
+    --    ]
+    ]
+    [ C.grid []
+    , C.xAxis []
+    , C.yAxis []
+    , C.xTicks [ C.amount 10 ]
+    , C.xLabels [ C.amount 10 ]
+    , C.yLabels []
+    , C.yTicks []
+    --
+    , C.histogram .year
+        []
+        [ C.stackedBars
+            [ C.bar (.women >> .done >> Just) [ C.color (always C.pink) ] -- TODO striped etc
+            , C.bar (.women >> .ongoing >> Just) [ C.color (always C.orange) ]
+            ]
+        , C.stackedBars
+            [ C.bar (.men >> .done >> Just) [ C.color (always C.blue) ]
+            , C.bar (.men >> .ongoing >> Just) [ C.color (always C.purple) ]
+            ]
+        ]
+        (Education.reshape Education.data)
+    --
+    , C.when model.hoveringSalery <| \item rest ->
+        C.tooltipOnTop (always item.center.x) (always item.position.y2) [] [ saleryTooltip item ]
+    ]
+
+
+
+-- OLD
+
+
+viewNumberWomen : Model -> H.Html Msg
+viewNumberWomen model =
+  let value_ min max ( _, ds ) =
+        List.filterMap (only min max .saleryBoth) ds
+          |> List.sum
+          |> \s -> s / toFloat (List.length ds)
+          |> Just
+
+      value func ( _, ds ) =
+        List.map func ds
+          |> List.sum
+          |> \s -> s / toFloat (List.length ds)
+          |> Just
+
+      only min max func d =
+        if Salery.womenPerc d >= min && Salery.womenPerc d < max then Just (func d) else Nothing
+  in
+  C.chart
+    [ C.height 200
+    , C.width 1000
+    , C.static
+    , C.marginLeft 50
+    , C.paddingTop 15
+    , C.domain (C.startMin 30000)
+    , C.id "number-of-women"
+    --, C.events
+    --    [ C.event "mouseleave" (C.map (\_ -> OnHoverSalery []) C.getCoords)
+    --    , C.event "mousemove" (C.map OnHoverSalery (C.getNearest (C.withoutUnknowns >> C.getDots)))
+    --    ]
+    ] <|
+    [ C.grid []
+    , C.xAxis []
+    , C.yAxis []
+    , C.xTicks [ C.ints ]
+    , C.xLabels [ C.ints ]
+    , C.yLabels [ C.amount 3 ]
+    , C.yTicks [ C.amount 3 ]
+
+    , C.series Tuple.first
+        [ C.monotone (value .saleryMen) [ C.color C.blue, C.width 2, C.noDot ]
+        , C.monotone (value .saleryWomen) [ C.color C.pink, C.width 2, C.noDot ]
+        , C.monotone (value .saleryBoth) [ C.color C.purple, C.width 2, C.noDot ]
+        ]
+        (Salery.groupBy .year Salery.data)
+
+    , C.when model.hoveringSalery <| \item rest ->
+        C.tooltipOnTop (always item.center.x) (always item.position.y2) [] [ saleryTooltip item ]
     ]
 
 
@@ -303,7 +402,7 @@ viewHover model =
     ]
 
 
-tooltipRow : C.Single Float Datum -> H.Html msg
+tooltipRow : SC.Item Float Datum -> H.Html msg
 tooltipRow hovered =
   H.div [ HA.style "color" hovered.metric.color ]
     [ H.span [] [ H.text hovered.datum.label ]

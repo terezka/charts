@@ -17,7 +17,7 @@ module Svg.Chart
     , tooltip, tooltipOnTop, isXPastMiddle, middleOfY, middleOfX, closestToZero
 
     , viewLabel
-    , Item, Items, Metric, toGroupItems, toBinItems, Bar, BarVisuals, toDotItems
+    , Item, Items, Metric, toGroupItems, toBinItems, Bar, BarVisuals, toDotItems, toStackedDotItems, toStackedBinItems
     , histogram, bars
     )
 
@@ -135,7 +135,7 @@ type alias Items value data =
   { datum : data
   , center : { x : Float, y : Float }
   , position : { x1 : Float, x2 : Float, y1 : Float, y2 : Float }
-  , items : List (Item value data)
+  , items : List (List (Item value data))
   }
 
 
@@ -190,6 +190,48 @@ toDotItems toX configs data plane =
   in
   List.indexedMap toLineItems configs
 
+
+toStackedDotItems : (data -> Float) -> List (LineConfig data) -> List data -> Plane -> List (List (Item (Maybe Float) data))
+toStackedDotItems toX configs data plane =
+  let toDotItem priors index config datum =
+        { datum = datum
+        , center =
+            { x = toX datum
+            , y = Maybe.withDefault 0 (toY priors config datum)
+            }
+        , position =
+            let radius = config.size datum in
+            { x1 = toX datum - scaleCartesian plane.x radius
+            , x2 = toX datum + scaleCartesian plane.x radius
+            , y1 = Maybe.withDefault 0 (toY priors config datum) - scaleCartesian plane.y radius
+            , y2 = Maybe.withDefault 0 (toY priors config datum) + scaleCartesian plane.y radius
+            }
+        , values =
+            { x1 = toX datum -- TODO
+            , x2 = toX datum
+            , y = toY priors config datum
+            }
+        , metric =
+            { label = config.name
+            , unit = config.unit
+            , color = Maybe.withDefault (toDefaultColor index) config.color
+            }
+        }
+
+      toY priors config datum =
+        case List.filterMap (\c -> c.value datum) (config :: priors) of
+          [] -> Nothing
+          vs -> Just (List.sum vs)
+
+      toLineItems priors index config =
+        List.map (toDotItem priors index config) data
+
+      fold list ( acc, priors, index ) =
+        case list of
+          a :: rest -> fold rest ( acc ++ [ toLineItems priors index a ], a :: priors, index + 1 )
+          [] -> acc
+  in
+  fold configs ( [], [], 0 )
 
 
 {-| -}
@@ -258,10 +300,92 @@ toGroupItems space bars_ data =
             , y1 = 0
             , y2 = Coords.maximum toYs [datum]
             }
-        , items = List.indexedMap (toBarItem binIndex datum) bars_
+        , items = List.indexedMap (\i b -> [toBarItem binIndex datum i b]) bars_ -- TODO
         }
   in
   List.indexedMap toGroupItem data
+
+
+toStackedBinItems : Space -> Maybe (data -> Float) -> (data -> Float) -> List (List (Bar data)) -> List data -> List (Items (Maybe Float) data)
+toStackedBinItems space toX0Maybe toX1 bars_ data =
+  let toLength prevMaybe datum nextMaybe =
+        case toX0Maybe of
+          Just toX0 -> toX1 datum - toX0 datum
+          Nothing ->
+            case ( prevMaybe, nextMaybe ) of
+              ( Just prev, _ ) -> toX1 datum - toX1 prev
+              ( Nothing, Just next ) -> toX1 next - toX1 datum
+              ( Nothing, Nothing ) -> 1 -- toX1 datum -- TODO use axis.min
+
+      toBarItem length datum barIndex subBars =
+        let margin_ = length * space.margin
+            amountOfBars = toFloat (List.length bars_)
+            width_ = (length - margin_ * 2 - (amountOfBars - 1) * space.between) / amountOfBars
+            x1 = toX1 datum - length + margin_ + toFloat barIndex * width_ + toFloat barIndex * space.between
+
+            toYs = foldYs [] [] subBars
+            foldYs toY1 res list =
+              case list of
+                [] -> res
+                one :: rest ->
+                  let toY2 = toY1 ++ [one.value] in
+                  foldYs toY2 (res ++ [ ( toY1, toY2 ) ]) rest
+        in
+        List.map2 (toBarPieceItem datum barIndex x1 width_ ) subBars toYs
+          |> List.reverse
+
+      toBarPieceItem datum barIndex x1 width_ bar ( toY1, toY2 ) =
+        let toY ys d =
+              case List.filterMap (\y -> y d) ys of
+                [] -> Nothing
+                some -> Just (List.sum some)
+
+        in
+        { datum = datum
+        , center =
+            { x = x1 + width_ / 2
+            , y = Maybe.withDefault 0 (toY toY2 datum)
+            }
+        , position =
+            { x1 = x1
+            , x2 = x1 + width_
+            , y1 = Maybe.withDefault 0 (toY toY1 datum)
+            , y2 = Maybe.withDefault 0 (toY toY2 datum)
+            }
+        , values =
+            { x1 = toX1 datum
+            , x2 = toX1 datum
+            , y = bar.value datum
+            }
+        , metric =
+            { label = Maybe.withDefault "" bar.name
+            , unit = bar.unit
+            , color =
+                case bar.color of
+                  Just c -> c datum
+                  Nothing -> toDefaultColor barIndex
+            }
+        }
+
+      toBinItem prevMaybe datum nextMaybe =
+        let length = toLength prevMaybe datum nextMaybe
+            toYs = List.concatMap (List.map .value) bars_
+        in
+        { datum = datum
+        , center =
+            { x = toX1 datum - length / 2
+            , y = Coords.maximum toYs [datum]
+            }
+        , position =
+            { x1 = toX1 datum - length
+            , x2 = toX1 datum
+            , y1 = 0
+            , y2 = Coords.maximum toYs [datum]
+            }
+        , items = List.indexedMap (toBarItem length datum) bars_
+        }
+  in
+  mapSurrounding toBinItem data
 
 
 toBinItems : Space -> Maybe (data -> Float) -> (data -> Float) -> List (Bar data) -> List data -> List (Items (Maybe Float) data)
@@ -322,7 +446,7 @@ toBinItems space toX0Maybe toX1 bars_ data =
             , y1 = 0
             , y2 = Coords.maximum toYs [datum]
             }
-        , items = List.indexedMap (toBarItem length datum) bars_
+        , items = List.indexedMap (\i b -> [toBarItem length datum i b]) bars_
         }
   in
   mapSurrounding toBinItem data
@@ -364,7 +488,7 @@ histogram plane visuals bins =
 
 viewBin : Plane -> BarVisuals data msg -> Items (Maybe Float) data -> Svg msg
 viewBin plane visuals bin =
-  g [ class "elm-charts__bin" ] (List.indexedMap (viewBar plane visuals) bin.items)
+  g [ class "elm-charts__bin" ] (List.indexedMap (\i is -> List.map (viewBar plane visuals i) is) bin.items |> List.concat)
 
 
 viewBar : Plane -> BarVisuals data msg -> Int -> Item (Maybe Float) data -> Svg msg

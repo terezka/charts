@@ -6,7 +6,7 @@ module Chart exposing
     , xAxis, yAxis, xTicks, yTicks, xLabels, yLabels, grid
     , ints, floats, times, format, values, amount
     , Event, event, Decoder, getCoords, getNearest, getNearestX, getWithin, getWithinX, map, map2, map3, map4
-    , Metric, Item, Single, Group
+    , Metric, Item
     , getBars, getGroups, getDots, withoutUnknowns
     , tooltip, tooltipOnTop, when, formatTimestamp
     , svgAt, htmlAt, svg, html, none
@@ -20,7 +20,7 @@ module Chart exposing
     , filterX, filterY, only, attrs
     , blue, orange, pink, green, red
 
-    , style, empty, detached, aura, opaque, full, name, with
+    , style, empty, detached, aura, opaque, full, name, with, stacked, stackedBars
     , fontSize, borderWidth, borderColor, xOffset, yOffset, xLabel, text, at, noDot, binned, purple
     )
 
@@ -528,18 +528,18 @@ chart edits elements =
 type Element data msg
   = SeriesElement
       (Maybe XYBounds -> Maybe XYBounds)
-      (C.Plane -> List (List (Single (Maybe Float) data)))
-      (String -> C.Plane -> List (List (Single (Maybe Float) data)) -> S.Svg msg)
+      (C.Plane -> List (List (C.Item (Maybe Float) data)))
+      (String -> C.Plane -> List (List (C.Item (Maybe Float) data)) -> S.Svg msg)
   | BarsElement
       (Maybe XYBounds -> Maybe XYBounds)
-      (C.Plane -> List (Group (Maybe Float) data))
+      (C.Plane -> List (C.Items (Maybe Float) data))
       (C.Plane -> TickValues -> TickValues)
-      (String -> C.Plane -> List (Group (Maybe Float) data) -> S.Svg msg)
+      (String -> C.Plane -> List (C.Items (Maybe Float) data) -> S.Svg msg)
   | HistogramElement
       (Maybe XYBounds -> Maybe XYBounds)
-      (C.Plane -> List (Group (Maybe Float) data))
+      (C.Plane -> List (C.Items (Maybe Float) data))
       (C.Plane -> TickValues -> TickValues)
-      (String -> C.Plane -> List (Group (Maybe Float) data) -> S.Svg msg)
+      (String -> C.Plane -> List (C.Items (Maybe Float) data) -> S.Svg msg)
   | AxisElement
       (C.Plane -> S.Svg msg)
   | TicksElement
@@ -799,9 +799,9 @@ event =
 
 {-| -}
 type Item value data
-  = ItemBar (Single value data)
-  | ItemDot (Single value data)
-  | ItemGroup (Group value data)
+  = ItemBar (C.Item value data)
+  | ItemDot (C.Item value data)
+  | ItemGroup (C.Items value data)
 
 
 {-| -}
@@ -813,38 +813,19 @@ type alias Metric =
 
 
 {-| -}
-type alias Single value data =
-  { datum : data
-  , center : { x : Float, y : Float }
-  , position : { x1 : Float, x2 : Float, y1 : Float, y2 : Float }
-  , values : { x1 : Float, x2 : Float, y : value }
-  , metric : Metric
-  }
-
-
-{-| -}
-type alias Group value data =
-  { datum : data
-  , center : { x : Float, y : Float }
-  , position : { x1 : Float, x2 : Float, y1 : Float, y2 : Float }
-  , items : List (Single value data)
-  }
-
-
-{-| -}
-getBars : List (Item value data) -> List (Single value data)
+getBars : List (Item value data) -> List (C.Item value data)
 getBars =
   let filter item =
         case item of
           ItemBar i -> Just [i]
-          ItemGroup i -> Just i.items
+          ItemGroup i -> Just (List.concat i.items) -- TODO
           _ -> Nothing
   in
   List.concat << List.filterMap filter
 
 
 {-| -}
-getGroups : List (Item value data) -> List (Group value data)
+getGroups : List (Item value data) -> List (C.Items value data)
 getGroups =
   List.filterMap <| \item ->
     case item of
@@ -853,7 +834,7 @@ getGroups =
 
 
 {-| -}
-getDots : List (Item value data) -> List (Single value data)
+getDots : List (Item value data) -> List (C.Item value data)
 getDots =
   List.filterMap <| \item ->
     case item of
@@ -866,7 +847,7 @@ withoutUnknowns : List (Item (Maybe Float) data) -> List (Item Float data)
 withoutUnknowns =
   let onlyKnowns i =
         case i.values.y of
-          Just y -> Just (Single i.datum i.center i.position { x1 = i.values.x1, x2 = i.values.x2, y = y } i.metric)
+          Just y -> Just (C.Item i.datum i.center i.position { x1 = i.values.x1, x2 = i.values.x2, y = y } i.metric)
           Nothing -> Nothing
   in
   List.filterMap <| \item ->
@@ -882,7 +863,7 @@ withoutUnknowns =
           { datum = i.datum
           , center = i.center
           , position = i.position
-          , items = List.filterMap onlyKnowns i.items
+          , items = List.map (List.filterMap onlyKnowns) i.items -- TODO
           }
 
 
@@ -1388,30 +1369,33 @@ bars edits metrics data =
         List.map (\b -> b.value) metrics
 
       toXYBounds prev =
-        case prev of
-          Nothing ->
-            Just
-              { x =
-                  { min = 0.5
-                  , max = toFloat (List.length data) + 0.5
+        case data of
+          [] -> prev
+          _ ->
+            case prev of
+              Nothing ->
+                Just
+                  { x =
+                      { min = 0.5
+                      , max = toFloat (List.length data) + 0.5
+                      }
+                  , y =
+                      { min = C.minimum toYs data
+                      , max = C.maximum toYs data
+                      }
                   }
-              , y =
-                  { min = C.minimum toYs data
-                  , max = C.maximum toYs data
-                  }
-              }
 
-          Just { x, y } ->
-            Just
-              { x =
-                  { min = min 0.5 x.min
-                  , max = max (toFloat (List.length data) + 0.5) x.max
+              Just { x, y } ->
+                Just
+                  { x =
+                      { min = min 0.5 x.min
+                      , max = max (toFloat (List.length data) + 0.5) x.max
+                      }
+                  , y =
+                      { min = min (C.minimum toYs data) y.min
+                      , max = max (C.maximum toYs data) y.max
+                      }
                   }
-              , y =
-                  { min = min (C.minimum toYs data) y.min
-                  , max = max (C.maximum toYs data) y.max
-                  }
-              }
   in
   BarsElement toXYBounds (always groupItems) toTicks <| \id_ p _ ->
     -- TODO use items
@@ -1435,7 +1419,7 @@ type alias Histogram data =
 
 
 {-| -}
-histogram : (data -> Float) -> List (Histogram data -> Histogram data) -> List (C.Bar data) -> List data -> Element data msg
+histogram : (data -> Float) -> List (Histogram data -> Histogram data) -> List (Bar data) -> List data -> Element data msg
 histogram toX1 edits metrics data =
   let config =
         applyAttrs edits
@@ -1447,8 +1431,15 @@ histogram toX1 edits metrics data =
           , width = Nothing
           }
 
+      metricsFlat =
+        List.map (\m ->
+            case m of
+              Single b -> [b]
+              Stacked bs -> bs
+          ) metrics
+
       binItems =
-        C.toBinItems { margin = config.margin, between = config.spacing } toX0M toX1 metrics data
+        C.toStackedBinItems { margin = config.margin, between = config.spacing } toX0M toX1 metricsFlat data
 
       toX0M =
         case config.width of
@@ -1459,7 +1450,8 @@ histogram toX1 edits metrics data =
         { acc | xs = List.concatMap (\i -> [i.position.x1, i.position.x2]) binItems }
 
       toYs =
-        List.map (\b -> b.value) metrics
+        List.concatMap (List.concatMap (List.map (.position >> .y2 >> Just)) << .items) binItems
+          |> List.map (\v -> always v) -- TODO
 
       toXs prevMaybe datum nextMaybe =
         case toX0M of
@@ -1508,7 +1500,6 @@ histogram toX1 edits metrics data =
                   }
   in
   HistogramElement toXYBounds (always binItems) toTicks <| \id_ p _ ->
-    -- TODO use items
     C.histogram p
       { round = config.rounded
       , roundBottom = config.roundBottom
@@ -1517,9 +1508,25 @@ histogram toX1 edits metrics data =
       binItems
 
 
+type Bar data
+  = Single (C.Bar data)
+  | Stacked (List (C.Bar data))
+
+
+
+-- TODO
+stackedBars : List (Bar data) -> Bar data
+stackedBars bars_ =
+  let fold bar_ acc =
+        case bar_ of
+          Single one -> acc ++ [one]
+          Stacked many -> acc ++ many
+  in
+  Stacked (List.foldl fold [] bars_)
+
 
 {-| -}
-type alias Bar data msg =
+type alias BarConfig data msg =
   { name : Maybe String
   , unit : String
   , color : Maybe (data -> String)
@@ -1528,7 +1535,7 @@ type alias Bar data msg =
 
 
 {-| -}
-bar : (data -> Maybe Float) -> List (Bar data msg -> Bar data msg) -> C.Bar data
+bar : (data -> Maybe Float) -> List (BarConfig data msg -> BarConfig data msg) -> Bar data
 bar toY edits =
   let config =
         applyAttrs edits
@@ -1538,11 +1545,12 @@ bar toY edits =
           , attrs = [] -- TODO use
           }
   in
-  { value = toY
-  , name = config.name
-  , unit = config.unit
-  , color = config.color
-  }
+  Single
+    { value = toY
+    , name = config.name
+    , unit = config.unit
+    , color = config.color
+    }
 
 
 
@@ -1584,6 +1592,33 @@ series toX series_ data =
   SeriesElement (makeBounds [toX >> Just] toYs data) toItems <| \id_ p items ->
     List.map2 Tuple.pair series_ items
       |> List.indexedMap (\i ( Series _ _ _ _ cM view, items_ ) -> view i items_ p (toColor i cM))
+      |> S.g [ SA.class "elm-charts__series", clipPath id_ ]
+
+
+stacked : (data -> Float) -> List (Series data msg) -> List data -> Element data msg
+stacked toX series_ data =
+  let toConfig i (Series toY toRadius l u cM _) =
+        { value = toY
+        , size = toRadius i
+        , name = l
+        , unit = u
+        , color = cM
+        }
+
+      toColor i cM =
+        Maybe.withDefault (toDefaultColor i) cM
+
+      toItems plane =
+        C.toStackedDotItems toX (List.indexedMap toConfig series_) data plane
+
+      toYs datum =
+        List.filterMap (\(Series toY _ _ _ _ _) -> toY datum) series_
+          |> List.sum
+  in
+  SeriesElement (makeBounds [toX >> Just] [toYs >> Just] data) toItems <| \id_ p items ->
+    List.map2 Tuple.pair series_ items
+      |> List.indexedMap (\i ( Series _ _ _ _ cM view, items_ ) -> view i items_ p (toColor i cM))
+      |> List.reverse
       |> S.g [ SA.class "elm-charts__series", clipPath id_ ]
 
 
@@ -1650,7 +1685,7 @@ type alias Interpolation data msg =
     { area : Maybe Float -- TODO use Color
     , color : Maybe String -- TODO use Color
     , size : Maybe (data -> Float)
-    , width : Float
+    , width : Maybe Float
     , name : Maybe String
     , unit : String
     , style : Maybe (data -> Style)
@@ -1668,7 +1703,7 @@ monotone toY edits =
           { color = Nothing
           , area = Nothing
           , size = Nothing
-          , width = 1
+          , width = Nothing
           , dot = Nothing
           , style = Nothing
           , name = Nothing
@@ -1679,7 +1714,7 @@ monotone toY edits =
 
       interAttrs c =
         [ SA.stroke c
-        , SA.strokeWidth (String.fromFloat config.width)
+        , SA.strokeWidth (String.fromFloat <| Maybe.withDefault 1 config.width)
         , SA.fill c
         ] ++ config.attrs
 
@@ -1723,7 +1758,7 @@ linear toY edits =
           { color = Nothing
           , area = Nothing
           , size = Nothing
-          , width = 1
+          , width = Nothing
           , name = Nothing
           , unit = ""
           , dot = Nothing
@@ -1734,7 +1769,7 @@ linear toY edits =
 
       interAttrs c =
         [ SA.stroke c
-        , SA.strokeWidth (String.fromFloat config.width)
+        , SA.strokeWidth (String.fromFloat <| Maybe.withDefault 1 config.width)
         , SA.fill c
         ] ++ config.attrs
 

@@ -1,7 +1,7 @@
-module Data.LigeLoen exposing (Datum, womenPerc, womenSaleryPerc, data)
+module Data.Salery exposing (Datum, womenPerc, womenSaleryPerc, groupBy, data)
 
 import Csv.Decode as Cvs
-
+import Dict
 
 
 type alias Datum =
@@ -26,6 +26,14 @@ womenSaleryPerc : Datum -> Maybe Float
 womenSaleryPerc datum =
   if datum.saleryWomen == 0 || datum.saleryMen == 0 then Nothing
   else Just (datum.saleryWomen / datum.saleryMen * 100)
+
+
+groupBy : (Datum -> comparable) -> List Datum -> List ( comparable, List Datum )
+groupBy toV =
+  let fold datum =
+        Dict.update (toV datum) (Maybe.map (\l -> l ++ [datum]) >> Maybe.withDefault [datum] >> Just)
+  in
+  List.foldl fold Dict.empty >> Dict.toList
 
 
 
