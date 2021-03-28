@@ -1,5 +1,5 @@
 module Chart exposing
-    ( chart, Element, bars, histogram, bar, just
+    ( chart, Element, bars, just
     , series, Series, scatter, linear, monotone
     , Shape, circle, triangle, square, diamond, plus, cross, size
     , Bounds, startMin, startMax, endMin, endMax, startPad, endPad, zero, middle
@@ -20,8 +20,8 @@ module Chart exposing
     , filterX, filterY, only, attrs
     , blue, orange, pink, green, red
 
-    , style, empty, detached, aura, opaque, full, name, with, stacked, stackedBars
-    , fontSize, borderWidth, borderColor, xOffset, yOffset, xLabel, text, at, noDot, binned, purple
+    , style, empty, detached, aura, opaque, full, name, with, stacked, stackedDots, property, Property
+    , fontSize, borderWidth, borderColor, xOffset, yOffset, xLabel, text, at, noDot, binned, purple, grouped
     )
 
 
@@ -72,6 +72,8 @@ import Html as H
 import Html.Attributes as HA
 import Intervals as I
 import Internal.Svg as I
+import Internal.Property as P
+import Internal.Default as D
 import DateFormat as F
 import Time
 import Dict exposing (Dict)
@@ -194,15 +196,21 @@ htmlAttrs value config =
 
 
 {-| -}
-start : (Bounds -> Float) -> Attribute { a | start : Bounds -> Float }
-start value config =
-  { config | start = value }
+grouped : Attribute { a | grouped : D.Constant Bool }
+grouped config =
+  { config | grouped = D.Given True }
 
 
 {-| -}
-end : (Bounds -> Float) -> Attribute { a | end : Bounds -> Float }
+start : x -> Attribute { a | start : Maybe x }
+start value config =
+  { config | start = Just value }
+
+
+{-| -}
+end : x -> Attribute { a | end : Maybe x }
 end value config =
-  { config | end = value }
+  { config | end = Just value }
 
 
 {-| -}
@@ -218,39 +226,39 @@ color value config =
 
 
 {-| -}
-name : v -> Attribute { a | name : Maybe v }
+name : x -> Attribute { a | name : D.Constant x }
 name value config =
-  { config | name = Just value }
+  { config | name = D.Given value }
 
 
 {-| -}
-unit : String -> Attribute { a | unit : String }
+unit : x -> Attribute { a | unit : D.Constant x }
 unit value config =
-  { config | unit = value }
+  { config | unit = D.Given value }
 
 
 {-| -}
-rounded : Float -> Attribute { a | rounded : Float }
+rounded : x -> Attribute { a | round : D.Constant x }
 rounded value config =
-  { config | rounded = value }
+  { config | round = D.Given value }
 
 
 {-| -}
-roundBottom : Attribute { a | roundBottom : Bool }
+roundBottom : Attribute { a | roundBottom : D.Constant Bool }
 roundBottom config =
-  { config | roundBottom = True }
+  { config | roundBottom = D.Given True }
 
 
 {-| -}
-margin : Float -> Attribute { a | margin : Float }
+margin : x -> Attribute { a | margin : D.Constant x }
 margin value config =
-  { config | margin = value }
+  { config | margin = D.Given value }
 
 
 {-| -}
-spacing : Float -> Attribute { a | spacing : Float }
+spacing : x -> Attribute { a | spacing : D.Constant x }
 spacing value config =
-  { config | spacing = value }
+  { config | spacing = D.Given value }
 
 
 {-| -}
@@ -1335,223 +1343,24 @@ grid edits =
 
 
 
--- SERIES
-
-
-type alias Bars =
-  { rounded : Float
-  , roundBottom : Bool
-  , margin : Float
-  , spacing : Float
-  , name : Maybe String
-  }
+-- BARS
 
 
 {-| -}
-bars : List (Bars -> Bars) -> List (C.Bar data) -> List data -> Element data msg
-bars edits metrics data =
-  let config =
-        applyAttrs edits
-          { rounded = 0
-          , roundBottom = False
-          , spacing = 0.01
-          , margin = 0.05
-          , name = Nothing
-          }
-
-      groupItems =
-        C.toGroupItems { margin = config.margin, between = config.spacing } metrics data
-
-      toTicks p acc =
-        { acc | xs = List.concatMap (\i -> [i.position.x1, i.position.x2]) groupItems }
-
-      toYs =
-        List.map (\b -> b.value) metrics
-
-      toXYBounds prev =
-        case data of
-          [] -> prev
-          _ ->
-            case prev of
-              Nothing ->
-                Just
-                  { x =
-                      { min = 0.5
-                      , max = toFloat (List.length data) + 0.5
-                      }
-                  , y =
-                      { min = C.minimum toYs data
-                      , max = C.maximum toYs data
-                      }
-                  }
-
-              Just { x, y } ->
-                Just
-                  { x =
-                      { min = min 0.5 x.min
-                      , max = max (toFloat (List.length data) + 0.5) x.max
-                      }
-                  , y =
-                      { min = min (C.minimum toYs data) y.min
-                      , max = max (C.maximum toYs data) y.max
-                      }
-                  }
-  in
-  BarsElement toXYBounds (always groupItems) toTicks <| \id_ p _ ->
-    -- TODO use items
-    C.bars p
-      { round = config.rounded
-      , roundBottom = config.roundBottom
-      , attrs = \i d -> [] -- TODO
-      }
-      groupItems
-
-
-
-type alias Histogram data =
-  { rounded : Float
-  , roundBottom : Bool
-  , margin : Float
-  , spacing : Float
-  , name : Maybe String
-  , width : Maybe (data -> Float)
-  }
+type alias Property data deco =
+  P.Property data deco
 
 
 {-| -}
-histogram : (data -> Float) -> List (Histogram data -> Histogram data) -> List (Bar data) -> List data -> Element data msg
-histogram toX1 edits metrics data =
-  let config =
-        applyAttrs edits
-          { rounded = 0
-          , roundBottom = False
-          , spacing = 0.01
-          , margin = 0.05
-          , name = Nothing
-          , width = Nothing
-          }
-
-      metricsFlat =
-        List.map (\m ->
-            case m of
-              Single b -> [b]
-              Stacked bs -> bs
-          ) metrics
-
-      binItems =
-        C.toStackedBinItems { margin = config.margin, between = config.spacing } toX0M toX1 metricsFlat data
-
-      toX0M =
-        case config.width of
-          Just toWidth -> Just (\d -> toX1 d - toWidth d)
-          Nothing -> Nothing
-
-      toTicks p acc =
-        { acc | xs = List.concatMap (\i -> [i.position.x1, i.position.x2]) binItems }
-
-      toYs =
-        List.concatMap (List.concatMap (List.map (.position >> .y2 >> Just)) << .items) binItems
-          |> List.map (\v -> always v) -- TODO
-
-      toXs prevMaybe datum nextMaybe =
-        case toX0M of
-          Just toX0 ->
-            [ toX1 datum - toX0 datum, toX1 datum ]
-
-          Nothing ->
-            case ( prevMaybe, nextMaybe ) of
-              ( Just prev, _ ) ->
-                [ toX1 datum - toX1 prev, toX1 datum ]
-
-              ( Nothing, Just next ) ->
-                [ toX1 next - toX1 datum, toX1 datum ]
-
-              ( Nothing, Nothing ) ->
-                [ toX1 datum - 1, toX1 datum ]
-
-      toXYBounds prev =
-        let xs = List.concat (mapSurrounding toXs data) in
-        case xs of
-          [] -> prev
-          some ->
-            case prev of
-              Just { x, y } ->
-                Just
-                  { x =
-                      { min = min x.min (Maybe.withDefault 0 (List.minimum xs))
-                      , max = max x.max (Maybe.withDefault 1 (List.maximum xs))
-                      }
-                  , y =
-                      { min = min (C.minimum toYs data) y.min
-                      , max = max (C.maximum toYs data) y.max
-                      }
-                  }
-
-              Nothing ->
-                Just
-                  { x =
-                      { min = Maybe.withDefault 0 (List.minimum xs)
-                      , max = Maybe.withDefault 1 (List.maximum xs)
-                      }
-                  , y =
-                      { min = C.minimum toYs data
-                      , max = C.maximum toYs data
-                      }
-                  }
-  in
-  HistogramElement toXYBounds (always binItems) toTicks <| \id_ p _ ->
-    C.histogram p
-      { round = config.rounded
-      , roundBottom = config.roundBottom
-      , attrs = \i d -> [] -- TODO
-      }
-      binItems
-
-
-type Bar data
-  = Single (C.Bar data)
-  | Stacked (List (C.Bar data))
-
-
-
--- TODO
-stackedBars : List (Bar data) -> Bar data
-stackedBars bars_ =
-  let fold bar_ acc =
-        case bar_ of
-          Single one -> acc ++ [one]
-          Stacked many -> acc ++ many
-  in
-  Stacked (List.foldl fold [] bars_)
+property : (data -> Maybe Float) -> List (Attribute deco) -> (data -> List (Attribute deco)) -> Property data deco
+property =
+  P.property
 
 
 {-| -}
-type alias BarConfig data msg =
-  { name : Maybe String
-  , unit : String
-  , color : Maybe (data -> String)
-  , attrs : List (S.Attribute msg)
-  }
-
-
-{-| -}
-bar : (data -> Maybe Float) -> List (BarConfig data msg -> BarConfig data msg) -> Bar data
-bar toY edits =
-  let config =
-        applyAttrs edits
-          { name = Nothing
-          , unit = ""
-          , color = Nothing
-          , attrs = [] -- TODO use
-          }
-  in
-  Single
-    { value = toY
-    , name = config.name
-    , unit = config.unit
-    , color = config.color
-    }
-
+stacked : List (Property data deco) -> Property data deco
+stacked =
+  P.stacked
 
 
 {-| -}
@@ -1560,8 +1369,75 @@ just toY =
   toY >> Just
 
 
+{-| -}
+type alias Bars data =
+  { round : D.Constant Float
+  , roundBottom : D.Constant Bool
+  , grouped : D.Constant Bool
+  , margin : D.Constant Float
+  , spacing : D.Constant Float
+  , name : D.Constant String
+  , start : Maybe (data -> Float)
+  , end : Maybe (data -> Float)
+  }
 
--- DOTTED SERIES
+
+{-| -}
+type alias Bar =
+  { name : D.Constant String
+  , unit : D.Constant String
+  , color : Maybe String
+  -- TODO , pattern : Constant Pattern
+  }
+
+
+{-| -}
+bars : List (Attribute (Bars data)) -> List (Property data Bar) -> List data -> Element data msg
+bars edits properties data =
+  let config =
+        D.apply edits
+          { round = D.Default 0
+          , roundBottom = D.Default False
+          , grouped = D.Default False
+          , margin = D.Default 0.1
+          , spacing = D.Default 0.01
+          , name = D.Default ""
+          , start = Nothing
+          , end = Nothing
+          }
+
+      bins =
+        C.toBins config.start config.end data
+
+      space =
+        { between = D.value config.spacing
+        , margin = D.value config.margin
+        }
+
+      toItems _ =
+        C.toBarItems (D.value config.grouped) space properties bins
+
+      toTicks plane acc =
+        { acc | xs = List.concatMap (\b -> [b.start, b.end]) bins }
+
+      toYs =
+        List.map (\prop bin -> prop.visual bin.datum) (List.concatMap P.toConfigs properties)
+
+      toXYBounds =
+        makeBounds [.start >> Just, .end >> Just] toYs bins
+  in
+  BarsElement toXYBounds toItems toTicks <| \_ plane items ->
+    -- TODO use cid
+    C.bars plane
+      { round = D.value config.round
+      , roundBottom = D.value config.roundBottom
+      , attrs = \i d -> [] -- TODO
+      }
+      items
+
+
+
+-- SERIES
 
 
 type Series data msg
@@ -1595,8 +1471,8 @@ series toX series_ data =
       |> S.g [ SA.class "elm-charts__series", clipPath id_ ]
 
 
-stacked : (data -> Float) -> List (Series data msg) -> List data -> Element data msg
-stacked toX series_ data =
+stackedDots : (data -> Float) -> List (Series data msg) -> List data -> Element data msg
+stackedDots toX series_ data =
   let toConfig i (Series toY toRadius l u cM _) =
         { value = toY
         , size = toRadius i

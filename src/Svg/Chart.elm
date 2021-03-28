@@ -17,8 +17,8 @@ module Svg.Chart
     , tooltip, tooltipOnTop, isXPastMiddle, middleOfY, middleOfX, closestToZero
 
     , viewLabel
-    , Item, Items, Metric, toGroupItems, toBinItems, Bar, BarVisuals, toDotItems, toStackedDotItems, toStackedBinItems
-    , histogram, bars
+    , Item, Items, Metric, toBarItems, Bar, BarVisuals, toDotItems, toStackedDotItems
+    , histogram, bars, toBins, Bin
     )
 
 
@@ -78,6 +78,8 @@ import Svg.Coordinates as Coords exposing (Plane, place, toSVGX, toSVGY, toCarte
 import Svg.Commands exposing (..)
 import Internal.Colors exposing (..)
 import Internal.Svg exposing (..)
+import Internal.Property as Property
+import Internal.Default as D
 import Json.Decode as Json
 import DOM
 import Dict exposing (Dict)
@@ -234,6 +236,56 @@ toStackedDotItems toX configs data plane =
   fold configs ( [], [], 0 )
 
 
+
+-- BARS
+
+
+{-| -}
+type alias Bin data =
+  { datum : data
+  , start : Float
+  , end : Float
+  }
+
+
+{-| -}
+toBins : Maybe (data -> Float) -> Maybe (data -> Float) -> List data -> List (Bin data)
+toBins start end =
+  let toXs index prevM curr nextM =
+        case ( start, end ) of
+          ( Nothing, Nothing ) ->
+            { datum = curr, start = toFloat (index + 1) - 0.5, end = toFloat (index + 1) + 0.5 }
+
+          ( Just toStart, Nothing ) ->
+            case ( prevM, nextM ) of
+              ( _, Just next ) ->
+                { datum = curr, start = toStart curr, end = toStart next }
+              ( Just prev, Nothing ) ->
+                { datum = curr, start = toStart curr, end = toStart curr + (toStart curr - toStart prev) }
+              ( Nothing, Nothing ) ->
+                { datum = curr, start = toStart curr, end = toStart curr + 1 }
+
+          ( Nothing, Just toEnd ) ->
+            case ( prevM, nextM ) of
+              ( Just prev, _ ) ->
+                { datum = curr, start = toEnd prev, end = toEnd curr }
+              ( Nothing, Just next ) ->
+                { datum = curr, start = toEnd curr - (toEnd next - toEnd curr), end = toEnd curr }
+              ( Nothing, Nothing ) ->
+                { datum = curr, start = toEnd curr - 1, end = toEnd curr }
+
+          ( Just toStart, Just toEnd ) ->
+            { datum = curr, start = toStart curr, end = toEnd curr }
+
+      fold index prev acc list =
+        case list of
+          a :: b :: rest -> fold (index + 1) (Just a) (acc ++ [toXs index prev a (Just b)]) (b :: rest)
+          a :: [] -> acc ++ [toXs index prev a Nothing]
+          [] -> acc
+  in
+  fold 0 Nothing []
+
+
 {-| -}
 type alias Space =
   { between : Float
@@ -242,231 +294,84 @@ type alias Space =
 
 
 {-| -}
-type alias Bar data =
-  { value : data -> Maybe Float
-  , name : Maybe String
-  , unit : String
-  , color : Maybe (data -> String)
+type alias Bar =
+  { name : D.Constant String
+  , unit : D.Constant String
+  , color : Maybe String
+  -- TODO , pattern : Constant Pattern
   }
 
 
-toGroupItems : Space -> List (Bar data) -> List data -> List (Items (Maybe Float) data)
-toGroupItems space bars_ data =
-  let amountOfBars =
-        toFloat (List.length bars_)
+{-| -}
+toBarItems : Bool -> Space -> List (Property.Property data Bar) -> List (Bin data) -> List (Items (Maybe Float) data)
+toBarItems isGrouped space properties bins =
+  let toConfig p d =
+        D.apply (p.attrs ++ p.extra d)
+          { name = D.Default ""
+          , unit = D.Default ""
+          , color = Nothing
+          }
 
-      barWidth =
-        (1 - space.margin * 2 - (amountOfBars - 1) * space.between) / amountOfBars
+      amountOfBars = if isGrouped then toFloat (List.length properties) else 1
 
-      toBarItem binIndex datum barIndex bar =
-        let x1 = toFloat binIndex + 0.5 + space.margin + toFloat barIndex * barWidth + toFloat barIndex * space.between
-        in
-        { datum = datum
-        , center =
-            { x = x1 + barWidth / 2
-            , y = Maybe.withDefault 0 (bar.value datum) -- TODO
-            }
-        , position =
-            { x1 = x1
-            , x2 = x1 + barWidth
-            , y1 = 0 -- TODO
-            , y2 = Maybe.withDefault 0 (bar.value datum)
-            }
-        , values =
-            { x1 = toFloat binIndex
-            , x2 = toFloat binIndex
-            , y = bar.value datum
-            }
-        , metric =
-            { label = Maybe.withDefault "" bar.name
-            , unit = bar.unit
-            , color =
-                case bar.color of
-                  Just c -> c datum
-                  Nothing -> toDefaultColor barIndex
-            }
-        }
-
-      toGroupItem binIndex datum =
-        let toYs = List.map .value bars_ in
-        { datum = datum
-        , center =
-            { x = toFloat binIndex
-            , y = Coords.maximum toYs [datum]
-            }
-        , position =
-            { x1 = toFloat binIndex + 0.5
-            , x2 = toFloat binIndex + 1.5
-            , y1 = 0
-            , y2 = Coords.maximum toYs [datum]
-            }
-        , items = List.indexedMap (\i b -> [toBarItem binIndex datum i b]) bars_ -- TODO
-        }
-  in
-  List.indexedMap toGroupItem data
-
-
-toStackedBinItems : Space -> Maybe (data -> Float) -> (data -> Float) -> List (List (Bar data)) -> List data -> List (Items (Maybe Float) data)
-toStackedBinItems space toX0Maybe toX1 bars_ data =
-  let toLength prevMaybe datum nextMaybe =
-        case toX0Maybe of
-          Just toX0 -> toX1 datum - toX0 datum
-          Nothing ->
-            case ( prevMaybe, nextMaybe ) of
-              ( Just prev, _ ) -> toX1 datum - toX1 prev
-              ( Nothing, Just next ) -> toX1 next - toX1 datum
-              ( Nothing, Nothing ) -> 1 -- toX1 datum -- TODO use axis.min
-
-      toBarItem length datum barIndex subBars =
+      toBarItem length bin barIndex property =
         let margin_ = length * space.margin
-            amountOfBars = toFloat (List.length bars_)
             width_ = (length - margin_ * 2 - (amountOfBars - 1) * space.between) / amountOfBars
-            x1 = toX1 datum - length + margin_ + toFloat barIndex * width_ + toFloat barIndex * space.between
-
-            toYs = foldYs [] [] subBars
-            foldYs toY1 res list =
-              case list of
-                [] -> res
-                one :: rest ->
-                  let toY2 = toY1 ++ [one.value] in
-                  foldYs toY2 (res ++ [ ( toY1, toY2 ) ]) rest
+            x1 =
+              if isGrouped then
+                bin.end - length + margin_ + toFloat barIndex * width_ + toFloat barIndex * space.between
+              else
+                bin.end - length + margin_
         in
-        List.map2 (toBarPieceItem datum barIndex x1 width_ ) subBars toYs
-          |> List.reverse
+        List.map (toBarPieceItem bin barIndex x1 width_) (Property.toConfigs property)
 
-      toBarPieceItem datum barIndex x1 width_ bar ( toY1, toY2 ) =
-        let toY ys d =
-              case List.filterMap (\y -> y d) ys of
-                [] -> Nothing
-                some -> Just (List.sum some)
-
-        in
-        { datum = datum
+      toBarPieceItem bin barIndex x1 width_ property =
+        let config = toConfig property bin.datum in
+        { datum = bin.datum
         , center =
             { x = x1 + width_ / 2
-            , y = Maybe.withDefault 0 (toY toY2 datum)
+            , y = Maybe.withDefault 0 (property.visual bin.datum)
             }
         , position =
             { x1 = x1
             , x2 = x1 + width_
-            , y1 = Maybe.withDefault 0 (toY toY1 datum)
-            , y2 = Maybe.withDefault 0 (toY toY2 datum)
+            , y1 = Maybe.withDefault 0 (property.visual bin.datum) - Maybe.withDefault 0 (property.value bin.datum)
+            , y2 = Maybe.withDefault 0 (property.visual bin.datum)
             }
         , values =
-            { x1 = toX1 datum
-            , x2 = toX1 datum
-            , y = bar.value datum
+            { x1 = bin.start
+            , x2 = bin.end
+            , y = property.value bin.datum
             }
         , metric =
-            { label = Maybe.withDefault "" bar.name
-            , unit = bar.unit
-            , color =
-                case bar.color of
-                  Just c -> c datum
-                  Nothing -> toDefaultColor barIndex
+            { label = D.value config.name
+            , unit = D.value config.unit
+            , color = Maybe.withDefault (toDefaultColor barIndex) config.color
             }
         }
 
-      toBinItem prevMaybe datum nextMaybe =
-        let length = toLength prevMaybe datum nextMaybe
-            toYs = List.concatMap (List.map .value) bars_
+      toBinItem bin =
+        let length = bin.end - bin.start
+            yMax = Coords.maximum (Property.toYs properties) [bin.datum]
         in
-        { datum = datum
+        { datum = bin.datum
         , center =
-            { x = toX1 datum - length / 2
-            , y = Coords.maximum toYs [datum]
+            { x = bin.end - length / 2
+            , y = yMax
             }
         , position =
-            { x1 = toX1 datum - length
-            , x2 = toX1 datum
+            { x1 = bin.end - length
+            , x2 = bin.end
             , y1 = 0
-            , y2 = Coords.maximum toYs [datum]
+            , y2 = yMax
             }
-        , items = List.indexedMap (toBarItem length datum) bars_
+        , items = List.indexedMap (toBarItem length bin) properties
         }
   in
-  mapSurrounding toBinItem data
+  List.map toBinItem bins
 
 
-toBinItems : Space -> Maybe (data -> Float) -> (data -> Float) -> List (Bar data) -> List data -> List (Items (Maybe Float) data)
-toBinItems space toX0Maybe toX1 bars_ data =
-  let toLength prevMaybe datum nextMaybe =
-        case toX0Maybe of
-          Just toX0 -> toX1 datum - toX0 datum
-          Nothing ->
-            case ( prevMaybe, nextMaybe ) of
-              ( Just prev, _ ) -> toX1 datum - toX1 prev
-              ( Nothing, Just next ) -> toX1 next - toX1 datum
-              ( Nothing, Nothing ) -> 1 -- toX1 datum -- TODO use axis.min
-
-      toBarItem length datum barIndex bar  =
-        let margin_ = length * space.margin
-            amountOfBars = toFloat (List.length bars_)
-            width_ = (length - margin_ * 2 - (amountOfBars - 1) * space.between) / amountOfBars
-            x1 = toX1 datum - length + margin_ + toFloat barIndex * width_ + toFloat barIndex * space.between
-        in
-        { datum = datum
-        , center =
-            { x = x1 + width_ / 2
-            , y = Maybe.withDefault 0 (bar.value datum)
-            }
-        , position =
-            { x1 = x1
-            , x2 = x1 + width_
-            , y1 = 0 -- TODO perhaps leave as Maybe?
-            , y2 = Maybe.withDefault 0 (bar.value datum) -- TODO perhaps leave as Maybe?
-            }
-        , values =
-            { x1 = toX1 datum
-            , x2 = toX1 datum
-            , y = bar.value datum
-            }
-        , metric =
-            { label = Maybe.withDefault "" bar.name
-            , unit = bar.unit
-            , color =
-                case bar.color of
-                  Just c -> c datum
-                  Nothing -> toDefaultColor barIndex
-            }
-        }
-
-      toBinItem prevMaybe datum nextMaybe =
-        let length = toLength prevMaybe datum nextMaybe
-            toYs = List.map .value bars_
-        in
-        { datum = datum
-        , center =
-            { x = toX1 datum - length / 2
-            , y = Coords.maximum toYs [datum]
-            }
-        , position =
-            { x1 = toX1 datum - length
-            , x2 = toX1 datum
-            , y1 = 0
-            , y2 = Coords.maximum toYs [datum]
-            }
-        , items = List.indexedMap (\i b -> [toBarItem length datum i b]) bars_
-        }
-  in
-  mapSurrounding toBinItem data
-
-
-mapSurrounding : (Maybe a -> a -> Maybe a -> b) -> List a -> List b
-mapSurrounding =
-  let fold prev acc func ds =
-        case ds of
-          a :: b :: rest -> fold (Just a) (func prev a (Just b) :: acc) func (b :: rest)
-          a :: rest -> fold (Just a) (func prev a Nothing :: acc) func rest
-          [] -> acc
-  in
-  fold Nothing []
-
-
-
--- BARS
-
-
+{-| -}
 type alias BarVisuals data msg =
   { round : Float
   , roundBottom : Bool
@@ -496,7 +401,7 @@ viewBar plane visuals barIndex item =
   let x = item.position.x1
       y = item.position.y2
       w = item.position.x2 - item.position.x1
-      bs = closestToZero plane
+      bs = closestToZero plane -- TODO item.position.y1
       b = scaleSVG plane.x w * 0.5 * (clamp 0 1 visuals.round)
       ys = abs (scaleSVG plane.y y)
       rx = scaleCartesian plane.x b
