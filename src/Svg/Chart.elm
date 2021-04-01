@@ -953,7 +953,7 @@ viewArea plane userAttributes cmds first rest =
 
     attributes =
       concat
-        [ class "elm-charts__area", stroke pinkStroke ]
+        [ class "elm-charts__area" ]
         userAttributes
         [ d (description plane commands) ]
   in
