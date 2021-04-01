@@ -1,6 +1,6 @@
 module Chart exposing
     ( chart, Element, bars, just
-    , series, Series, scatter, linear, monotone
+    , series, Series, linear, monotone
     , Shape, circle, triangle, square, diamond, plus, cross, size
     , Bounds, startMin, startMax, endMin, endMax, startPad, endPad, zero, middle
     , xAxis, yAxis, xTicks, yTicks, xLabels, yLabels, grid
@@ -20,7 +20,7 @@ module Chart exposing
     , filterX, filterY, only, attrs
     , blue, orange, pink, green, red
 
-    , style, empty, detached, aura, opaque, full, name, with, stacked, stackedDots, property, Property
+    , style, empty, detached, aura, opaque, full, name, with, stacked, property, Property
     , fontSize, borderWidth, borderColor, xOffset, yOffset, xLabel, text, at, noDot, binned, purple, grouped
     )
 
@@ -77,6 +77,7 @@ import Internal.Default as D
 import DateFormat as F
 import Time
 import Dict exposing (Dict)
+import Internal.Svg exposing (Variety(..))
 
 
 -- ATTRS
@@ -536,18 +537,13 @@ chart edits elements =
 type Element data msg
   = SeriesElement
       (Maybe XYBounds -> Maybe XYBounds)
-      (C.Plane -> List (List (C.Item (Maybe Float) data)))
-      (String -> C.Plane -> List (List (C.Item (Maybe Float) data)) -> S.Svg msg)
+      (C.Plane -> List (List (C.Item (Maybe Float) C.DotDetails data)))
+      (String -> C.Plane -> List (List (C.Item (Maybe Float) C.DotDetails data)) -> S.Svg msg)
   | BarsElement
       (Maybe XYBounds -> Maybe XYBounds)
-      (C.Plane -> List (C.Items (Maybe Float) data))
+      (C.Plane -> List (C.Items (Maybe Float) C.BarDetails data))
       (C.Plane -> TickValues -> TickValues)
-      (String -> C.Plane -> List (C.Items (Maybe Float) data) -> S.Svg msg)
-  | HistogramElement
-      (Maybe XYBounds -> Maybe XYBounds)
-      (C.Plane -> List (C.Items (Maybe Float) data))
-      (C.Plane -> TickValues -> TickValues)
-      (String -> C.Plane -> List (C.Items (Maybe Float) data) -> S.Svg msg)
+      (String -> C.Plane -> List (C.Items (Maybe Float) C.BarDetails data) -> S.Svg msg)
   | AxisElement
       (C.Plane -> S.Svg msg)
   | TicksElement
@@ -578,7 +574,6 @@ definePlane config elements =
         case el of
           SeriesElement func _ _ -> func acc
           BarsElement func _ _ _ -> func acc
-          HistogramElement func _ _ _ -> func acc
           AxisElement _ -> acc
           TicksElement _ _ -> acc
           LabelsElement _ _ -> acc
@@ -650,7 +645,6 @@ getItems plane elements =
         case el of
           SeriesElement _ func _ -> acc ++ List.map ItemDot (func plane |> List.concat)
           BarsElement _ func _ _ -> acc ++ List.map ItemGroup (func plane)
-          HistogramElement _ func _ _ -> acc ++ List.map ItemGroup (func plane)
           AxisElement _ -> acc
           TicksElement _ _ -> acc
           LabelsElement _ _ -> acc
@@ -675,7 +669,6 @@ getTickValues plane items elements =
         case el of
           SeriesElement _ _ _ -> acc
           BarsElement _ _ func _ -> func plane acc
-          HistogramElement _ _ func _ -> func plane acc
           AxisElement _ -> acc
           TicksElement func _ -> func plane acc
           LabelsElement func _ -> func plane acc
@@ -693,7 +686,6 @@ viewElements config plane tickValues allItems elements =
         case el of
           SeriesElement _ toItems view -> ( before, view config.id plane (toItems plane) :: chart_, after )
           BarsElement _ toItems _ view -> ( before, view config.id plane (toItems plane) :: chart_, after )
-          HistogramElement _ toItems _ view -> ( before, view config.id plane (toItems plane) :: chart_, after )
           AxisElement view -> ( before, view plane :: chart_, after )
           TicksElement _ view -> ( before, view plane :: chart_, after )
           LabelsElement _ view -> ( before, view plane :: chart_, after )
@@ -807,9 +799,9 @@ event =
 
 {-| -}
 type Item value data
-  = ItemBar (C.Item value data)
-  | ItemDot (C.Item value data)
-  | ItemGroup (C.Items value data)
+  = ItemBar (C.Item value C.BarDetails data)
+  | ItemDot (C.Item value C.DotDetails data)
+  | ItemGroup (C.Items value C.BarDetails data)
 
 
 {-| -}
@@ -821,7 +813,7 @@ type alias Metric =
 
 
 {-| -}
-getBars : List (Item value data) -> List (C.Item value data)
+getBars : List (Item value data) -> List (C.Item value C.BarDetails data)
 getBars =
   let filter item =
         case item of
@@ -833,7 +825,7 @@ getBars =
 
 
 {-| -}
-getGroups : List (Item value data) -> List (C.Items value data)
+getGroups : List (Item value data) -> List (C.Items value C.BarDetails data)
 getGroups =
   List.filterMap <| \item ->
     case item of
@@ -842,7 +834,7 @@ getGroups =
 
 
 {-| -}
-getDots : List (Item value data) -> List (C.Item value data)
+getDots : List (Item value data) -> List (C.Item value C.DotDetails data)
 getDots =
   List.filterMap <| \item ->
     case item of
@@ -853,20 +845,30 @@ getDots =
 {-| -}
 withoutUnknowns : List (Item (Maybe Float) data) -> List (Item Float data)
 withoutUnknowns =
-  let onlyKnowns i =
-        case i.values.y of
-          Just y -> Just (C.Item i.datum i.center i.position { x1 = i.values.x1, x2 = i.values.x2, y = y } i.metric)
-          Nothing -> Nothing
-  in
   List.filterMap <| \item ->
     case item of
       ItemBar i ->
+        let onlyKnowns sub =
+              case sub.values.y of
+                Just y -> Just (C.Item sub.datum sub.center sub.position { x1 = sub.values.x1, x2 = sub.values.x2, y = y } sub.details)
+                Nothing -> Nothing
+        in
         Maybe.map ItemBar (onlyKnowns i)
 
       ItemDot i ->
+        let onlyKnowns sub =
+              case sub.values.y of
+                Just y -> Just (C.Item sub.datum sub.center sub.position { x1 = sub.values.x1, x2 = sub.values.x2, y = y } sub.details)
+                Nothing -> Nothing
+        in
         Maybe.map ItemDot (onlyKnowns i)
 
       ItemGroup i ->
+        let onlyKnowns sub =
+              case sub.values.y of
+                Just y -> Just (C.Item sub.datum sub.center sub.position { x1 = sub.values.x1, x2 = sub.values.x2, y = y } sub.details)
+                Nothing -> Nothing
+        in
         Just <| ItemGroup
           { datum = i.datum
           , center = i.center
@@ -1329,7 +1331,7 @@ grid edits =
       toDot p x y =
         if List.member x (notTheseX p) || List.member y (notTheseY p)
         then Nothing
-        else Just <| C.full config.width C.circle color_ p x y
+        else Just <| S.circle [] [] -- TODO
   in
   GridElement <| \p vs ->
     S.g [ SA.class "elm-charts__grid" ] <|
@@ -1442,244 +1444,61 @@ bars edits properties data =
 -- SERIES
 
 
-type Series data msg
-  = Series (data -> Maybe Float) (Int -> data -> Float) String String (Maybe String)
-      (Int -> List (C.Item (Maybe Float) data) -> C.Plane -> String -> S.Svg msg)
-
 
 {-| -}
-series : (data -> Float) -> List (Series data msg) -> List data -> Element data msg
-series toX series_ data =
-  let toConfig i (Series toY toRadius l u cM _) =
-        { value = toY
-        , size = toRadius i
-        , name = l
-        , unit = u
-        , color = cM
-        }
+type alias Series =
+  { interpolation : Maybe C.Interpolation
+  , area : Maybe Float -- TODO use Color
+  , color : Maybe String -- TODO use Color
+  , dot : Maybe C.Dot
+  , size : D.Constant Float
+  , name : D.Constant String
+  , unit : D.Constant String
+  }
 
-      toColor i cM =
-        Maybe.withDefault (toDefaultColor i) cM
 
-      toItems plane =
-        C.toDotItems toX (List.indexedMap toConfig series_) data plane
+linear : Float -> Attribute { a | interpolation : Maybe C.Interpolation }
+linear w config =
+  { config | interpolation = Just (C.linear w) }
 
-      toYs =
-        List.map (\(Series toY _ _ _ _ _) -> toY) series_
+
+monotone : Float -> Attribute { a | interpolation : Maybe C.Interpolation }
+monotone w config =
+  { config | interpolation = Just (C.monotone w) }
+
+
+series : (data -> Float) -> List (Property data Series) -> List data -> Element data msg
+series toX properties data =
+  let toYs =
+        List.map .visual (List.concatMap P.toConfigs properties)
+
+      toItems =
+        C.toSeriesItems toX properties data
+
+      toConfig p =
+        D.apply p.attrs
+          { interpolation = Nothing
+          , area = Nothing
+          , color = Nothing
+          , dot = Nothing
+          , size = D.Default 6
+          , name = D.Default ""
+          , unit = D.Default ""
+          }
+
+      configs =
+        List.concatMap (List.map toConfig << P.toConfigs) properties
   in
   SeriesElement (makeBounds [toX >> Just] toYs data) toItems <| \id_ p items ->
-    List.map2 Tuple.pair series_ items
-      |> List.indexedMap (\i ( Series _ _ _ _ cM view, items_ ) -> view i items_ p (toColor i cM))
-      |> S.g [ SA.class "elm-charts__series", clipPath id_ ]
-
-
-stackedDots : (data -> Float) -> List (Series data msg) -> List data -> Element data msg
-stackedDots toX series_ data =
-  let toConfig i (Series toY toRadius l u cM _) =
-        { value = toY
-        , size = toRadius i
-        , name = l
-        , unit = u
-        , color = cM
-        }
-
-      toColor i cM =
-        Maybe.withDefault (toDefaultColor i) cM
-
-      toItems plane =
-        C.toStackedDotItems toX (List.indexedMap toConfig series_) data plane
-
-      toYs datum =
-        List.filterMap (\(Series toY _ _ _ _ _) -> toY datum) series_
-          |> List.sum
-  in
-  SeriesElement (makeBounds [toX >> Just] [toYs >> Just] data) toItems <| \id_ p items ->
-    List.map2 Tuple.pair series_ items
-      |> List.indexedMap (\i ( Series _ _ _ _ cM view, items_ ) -> view i items_ p (toColor i cM))
-      |> List.reverse
-      |> S.g [ SA.class "elm-charts__series", clipPath id_ ]
+    S.g [ SA.class "elm-charts__series" ]
+      [ S.g [ SA.class "elm-charts__areas", clipPath id_ ] (List.map2 (C.area p) configs items)
+      , S.g [ SA.class "elm-charts__lines", clipPath id_ ] (List.map2 (C.interpolation p) configs items)
+      , S.g [ SA.class "elm-charts__dots" ] (List.map (C.dots p) items)
+      ]
 
 
 
-type alias Scatter data msg =
-    { color : Maybe String -- TODO use Color
-    , name : Maybe String
-    , unit : String
-    , size : Maybe (data -> Float)
-    , style : Maybe (data -> Style)
-    , shape : Maybe Shape
-    , dot : Maybe (data -> S.Svg msg)
-    }
-
-
-{-| -}
-scatter : (data -> Maybe Float) -> List (Scatter data msg -> Scatter data msg) -> Series data msg
-scatter toY edits =
-  -- TODO seperate dot style and color from shape
-  let config =
-        applyAttrs edits
-          { color = Nothing
-          , name = Nothing
-          , unit = ""
-          , size = Nothing
-          , style = Nothing
-          , shape = Nothing
-          , dot = Nothing
-          }
-
-      toSize d =
-        case config.size of
-          Just func -> func d
-          Nothing -> 6
-
-      toShape i =
-        case config.shape of
-          Nothing -> toDefaultShape i
-          Just s -> s
-
-      toRadius i d =
-        I.toRadius (toShape i) (toSize d)
-
-      finalDot i c d =
-        case config.dot of
-          Just toDot -> \p x y ->
-            S.g [ C.position p x y 0 0 ] [ toDot d ]
-
-          Nothing ->
-            case Maybe.map (\f -> f d) config.style of
-              Nothing -> C.disconnected (toSize d) 1 (toShape i) c
-              Just Full -> C.full (toSize d) (toShape i) c
-              Just (Empty s) -> C.empty (toSize d) s (toShape i) c
-              Just (Aura a b) -> C.aura (toSize d) a b (toShape i) c
-              Just (Detached a) -> C.disconnected (toSize d) a (toShape i) c
-              Just (Opaque a b) -> C.opaque (toSize d) a b (toShape i) c
-  in
-  Series toY toRadius (Maybe.withDefault "" config.name) config.unit config.color <| \i items p c ->
-    C.scatter p (finalDot i c) items
-
-
-
-type alias Interpolation data msg =
-    { area : Maybe Float -- TODO use Color
-    , color : Maybe String -- TODO use Color
-    , size : Maybe (data -> Float)
-    , width : Maybe Float
-    , name : Maybe String
-    , unit : String
-    , style : Maybe (data -> Style)
-    , dot : Maybe (data -> S.Svg msg)
-    , shape : Maybe Shape
-    , attrs : List (S.Attribute msg)
-    }
-
-
-{-| -}
-monotone : (data -> Maybe Float) -> List (Interpolation data msg -> Interpolation data msg) -> Series data msg
-monotone toY edits =
-  let config =
-        applyAttrs edits
-          { color = Nothing
-          , area = Nothing
-          , size = Nothing
-          , width = Nothing
-          , dot = Nothing
-          , style = Nothing
-          , name = Nothing
-          , shape = Nothing
-          , unit = ""
-          , attrs = []
-          }
-
-      interAttrs c =
-        [ SA.stroke c
-        , SA.strokeWidth (String.fromFloat <| Maybe.withDefault 1 config.width)
-        , SA.fill c
-        ] ++ config.attrs
-
-      toSize d =
-        case config.size of
-          Just func -> func d
-          Nothing -> 6
-
-      toShape i =
-        case config.shape of
-          Nothing -> toDefaultShape i
-          Just s -> s
-
-      toRadius i d =
-        I.toRadius (toShape i) (toSize d)
-
-      finalDot i c d =
-        case config.dot of
-          Just toDot -> \p x y ->
-            S.g [ C.position p x y 0 0 ] [ toDot d ]
-
-          Nothing ->
-            case Maybe.map (\f -> f d) config.style of
-              Nothing -> C.disconnected (toSize d) 1 (toShape i) c
-              Just Full -> C.full (toSize d) (toShape i) c
-              Just (Empty s) -> C.empty (toSize d) s (toShape i) c
-              Just (Aura a b) -> C.aura (toSize d) a b (toShape i) c
-              Just (Detached a) -> C.disconnected (toSize d) a (toShape i) c
-              Just (Opaque a b) -> C.opaque (toSize d) a b (toShape i) c
-  in
-  Series toY toRadius (Maybe.withDefault "" config.name) config.unit config.color <| \i items p c ->
-    C.monotone p (interAttrs c) config.area (finalDot i c) items
-
-
-
-{-| -}
-linear : (data -> Maybe Float) -> List (Interpolation data msg -> Interpolation data msg) -> Series data msg
-linear toY edits =
-  let config =
-        applyAttrs edits
-          { color = Nothing
-          , area = Nothing
-          , size = Nothing
-          , width = Nothing
-          , name = Nothing
-          , unit = ""
-          , dot = Nothing
-          , shape = Nothing
-          , style = Nothing
-          , attrs = []
-          }
-
-      interAttrs c =
-        [ SA.stroke c
-        , SA.strokeWidth (String.fromFloat <| Maybe.withDefault 1 config.width)
-        , SA.fill c
-        ] ++ config.attrs
-
-      toSize d =
-        case config.size of
-          Just func -> func d
-          Nothing -> 6
-
-      toShape i =
-        case config.shape of
-          Nothing -> toDefaultShape i
-          Just s -> s
-
-      toRadius i d =
-        I.toRadius (toShape i) (toSize d)
-
-      finalDot i c d =
-        case config.dot of
-          Just toDot -> \p x y ->
-            S.g [ C.position p x y 0 0 ] [ toDot d ]
-
-          Nothing ->
-            case Maybe.map (\f -> f d) config.style of
-              Nothing -> C.disconnected (toSize d) 1 (toShape i) c
-              Just Full -> C.full (toSize d) (toShape i) c
-              Just (Empty s) -> C.empty (toSize d) s (toShape i) c
-              Just (Aura a b) -> C.aura (toSize d) a b (toShape i) c
-              Just (Detached a) -> C.disconnected (toSize d) a (toShape i) c
-              Just (Opaque a b) -> C.opaque (toSize d) a b (toShape i) c
-  in
-  Series toY toRadius (Maybe.withDefault "" config.name) config.unit config.color <| \i items p c ->
-    C.linear p (interAttrs c) config.area (finalDot i c) items
+-- OTHER
 
 
 {-| -}
@@ -1877,15 +1696,6 @@ cross config =
 -- STYLE
 
 
-{-| -}
-type Style
-  = Full
-  | Empty Float
-  | Opaque Float Float
-  | Aura Float Float
-  | Detached Float
-
-
 -- TODO remove this attr
 style : x -> Attribute { a | style : Maybe x }
 style v config =
@@ -1893,33 +1703,33 @@ style v config =
 
 
 {-| -}
-full : Style
+full : Variety
 full =
   Full
 
 
 {-| -}
-empty : Float -> Style
+empty : Float -> Variety
 empty =
   Empty
 
 
 {-| -}
-opaque : Float -> Float -> Style
+opaque : Float -> Float -> Variety
 opaque =
   Opaque
 
 
 {-| -}
-aura : Float -> Float -> Style
+aura : Float -> Float -> Variety
 aura =
   Aura
 
 
 {-| -}
-detached : Float -> Style
+detached : Float -> Variety
 detached =
-  Detached
+  Disconnected
 
 
 

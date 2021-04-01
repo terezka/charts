@@ -1,9 +1,9 @@
 module Svg.Chart
   exposing
     ( responsive, static, frame
-    , Dot, clear, empty, disconnected, aura, full, opaque
+    , Dot, Variety
     , Shape, circle, triangle, square, diamond, plus, cross
-    , scatter, linear, monotone
+    , linear, monotone
     , xAxis, yAxis, xArrow, yArrow
     , xGrid, yGrid
     , xTicks, xTick, yTicks, yTick
@@ -17,8 +17,10 @@ module Svg.Chart
     , tooltip, tooltipOnTop, isXPastMiddle, middleOfY, middleOfX, closestToZero
 
     , viewLabel
-    , Item, Items, Metric, toBarItems, Bar, BarVisuals, toDotItems, toStackedDotItems
-    , histogram, bars, toBins, Bin
+    , Item, Items, toBarItems, Bar, BarVisuals, toSeriesItems
+    , bars, toBins, Bin
+
+    , dots, area, interpolation, Interpolation, BarDetails, DotDetails
     )
 
 
@@ -78,7 +80,7 @@ import Svg.Coordinates as Coords exposing (Plane, place, toSVGX, toSVGY, toCarte
 import Svg.Commands exposing (..)
 import Internal.Colors exposing (..)
 import Internal.Svg exposing (..)
-import Internal.Property as Property
+import Internal.Property as Property exposing (Property)
 import Internal.Default as D
 import Json.Decode as Json
 import DOM
@@ -123,117 +125,118 @@ frame id plane =
 
 
 {-| -}
-type alias Item value data =
+type alias Item value details data =
   { datum : data
   , center : { x : Float, y : Float }
   , position : { x1 : Float, x2 : Float, y1 : Float, y2 : Float }
   , values : { x1 : Float, x2 : Float, y : value }
-  , metric : Metric
+  , details : details
   }
 
 
 {-| -}
-type alias Items value data =
+type alias Items value details data =
   { datum : data
   , center : { x : Float, y : Float }
   , position : { x1 : Float, x2 : Float, y1 : Float, y2 : Float }
-  , items : List (List (Item value data))
+  , items : List (List (Item value details data))
   }
 
 
 {-| -}
-type alias Metric =
-  { label : String
+type alias DotDetails =
+  { name : String
+  , unit : String
   , color : String
-  , unit : String
+  , dot : Dot
   }
-
 
 
 {-| -}
-type alias LineConfig data =
-  { value : data -> Maybe Float
-  , size : data -> Float
-  , name : String
+type alias BarDetails =
+  { name : String
   , unit : String
-  , color : Maybe String
+  , color : String
+  -- TODO pattern
   }
 
 
-toDotItems : (data -> Float) -> List (LineConfig data) -> List data -> Plane -> List (List (Item (Maybe Float) data))
-toDotItems toX configs data plane =
-  let toDotItem index config datum =
+
+-- SERIES
+
+
+{-| -}
+type alias Series =
+  { interpolation : Maybe Interpolation
+  , area : Maybe Float -- TODO use Color
+  , color : Maybe String -- TODO use Color
+  , dot : Maybe Dot
+  , size : D.Constant Float
+  , name : D.Constant String
+  , unit : D.Constant String
+  }
+
+
+toSeriesItems : (data -> Float) -> List (Property data Series) -> List data -> Plane -> List (List (Item (Maybe Float) DotDetails data))
+toSeriesItems toX properties data plane =
+  let toConfig p d =
+        D.apply (p.attrs ++ p.extra d)
+          { interpolation = Nothing
+          , area = Nothing
+          , color = Nothing
+          , dot = Nothing
+          , size = D.Default 6
+          , name = D.Default ""
+          , unit = D.Default ""
+          }
+
+      toDot index config =
+        case config.dot of
+          Nothing -> Standard (D.value config.size) (toDefaultShape index) Full
+          Just d -> d
+
+      toRadius_ index config =
+        case config.dot of
+          Nothing -> toRadius (toDefaultShape index) (D.value config.size)
+          Just (Standard _ shape _) -> toRadius shape (D.value config.size)
+          Just (Custom _) -> D.value config.size
+          Just NoDot -> D.value config.size
+
+      toDotItem index property datum =
+        let config = toConfig property datum
+            dot = toDot index config
+            radius = toRadius_ index config
+        in
         { datum = datum
         , center =
             { x = toX datum
-            , y = Maybe.withDefault 0 (config.value datum)
+            , y = Maybe.withDefault 0 (property.visual datum)
             }
         , position =
-            let radius = config.size datum in
             { x1 = toX datum - scaleCartesian plane.x radius
             , x2 = toX datum + scaleCartesian plane.x radius
-            , y1 = Maybe.withDefault 0 (config.value datum) - scaleCartesian plane.y radius
-            , y2 = Maybe.withDefault 0 (config.value datum) + scaleCartesian plane.y radius
+            , y1 = Maybe.withDefault 0 (property.visual datum) - scaleCartesian plane.y radius
+            , y2 = Maybe.withDefault 0 (property.visual datum) + scaleCartesian plane.y radius
             }
         , values =
             { x1 = toX datum -- TODO
             , x2 = toX datum
-            , y = config.value datum
+            , y = property.value datum
             }
-        , metric =
-            { label = config.name
-            , unit = config.unit
+        , details =
+            { name = D.value config.name
+            , unit = D.value config.unit
             , color = Maybe.withDefault (toDefaultColor index) config.color
+            , dot = dot
             }
         }
 
       toLineItems index config =
         List.map (toDotItem index config) data
   in
-  List.indexedMap toLineItems configs
-
-
-toStackedDotItems : (data -> Float) -> List (LineConfig data) -> List data -> Plane -> List (List (Item (Maybe Float) data))
-toStackedDotItems toX configs data plane =
-  let toDotItem priors index config datum =
-        { datum = datum
-        , center =
-            { x = toX datum
-            , y = Maybe.withDefault 0 (toY priors config datum)
-            }
-        , position =
-            let radius = config.size datum in
-            { x1 = toX datum - scaleCartesian plane.x radius
-            , x2 = toX datum + scaleCartesian plane.x radius
-            , y1 = Maybe.withDefault 0 (toY priors config datum) - scaleCartesian plane.y radius
-            , y2 = Maybe.withDefault 0 (toY priors config datum) + scaleCartesian plane.y radius
-            }
-        , values =
-            { x1 = toX datum -- TODO
-            , x2 = toX datum
-            , y = toY priors config datum
-            }
-        , metric =
-            { label = config.name
-            , unit = config.unit
-            , color = Maybe.withDefault (toDefaultColor index) config.color
-            }
-        }
-
-      toY priors config datum =
-        case List.filterMap (\c -> c.value datum) (config :: priors) of
-          [] -> Nothing
-          vs -> Just (List.sum vs)
-
-      toLineItems priors index config =
-        List.map (toDotItem priors index config) data
-
-      fold list ( acc, priors, index ) =
-        case list of
-          a :: rest -> fold rest ( acc ++ [ toLineItems priors index a ], a :: priors, index + 1 )
-          [] -> acc
-  in
-  fold configs ( [], [], 0 )
+  List.map Property.toConfigs properties
+    |> List.concat
+    |> List.indexedMap toLineItems
 
 
 
@@ -303,7 +306,7 @@ type alias Bar =
 
 
 {-| -}
-toBarItems : Bool -> Space -> List (Property.Property data Bar) -> List (Bin data) -> List (Items (Maybe Float) data)
+toBarItems : Bool -> Space -> List (Property data Bar) -> List (Bin data) -> List (Items (Maybe Float) BarDetails data)
 toBarItems isGrouped space properties bins =
   let toConfig p d =
         D.apply (p.attrs ++ p.extra d)
@@ -312,7 +315,8 @@ toBarItems isGrouped space properties bins =
           , color = Nothing
           }
 
-      amountOfBars = if isGrouped then toFloat (List.length properties) else 1
+      amountOfBars =
+        if isGrouped then toFloat (List.length properties) else 1
 
       toBarItem length bin barIndex property =
         let margin_ = length * space.margin
@@ -344,8 +348,8 @@ toBarItems isGrouped space properties bins =
             , x2 = bin.end
             , y = property.value bin.datum
             }
-        , metric =
-            { label = D.value config.name
+        , details =
+            { name = D.value config.name
             , unit = D.value config.unit
             , color = Maybe.withDefault (toDefaultColor barIndex) config.color
             }
@@ -381,24 +385,18 @@ type alias BarVisuals data msg =
 
 
 {-| -}
-bars : Plane -> BarVisuals data msg -> List (Items (Maybe Float) data) -> Svg msg
+bars : Plane -> BarVisuals data msg -> List (Items (Maybe Float) BarDetails data) -> Svg msg
 bars plane visuals groups =
   g [ class "elm-charts__bars" ] (List.map (viewBin plane visuals) groups)
 
 
-{-| -}
-histogram : Plane -> BarVisuals data msg -> List (Items (Maybe Float) data) -> Svg msg
-histogram plane visuals bins =
-  g [ class "elm-charts__histogram" ] (List.map (viewBin plane visuals) bins)
-
-
-viewBin : Plane -> BarVisuals data msg -> Items (Maybe Float) data -> Svg msg
+viewBin : Plane -> BarVisuals data msg -> Items (Maybe Float) BarDetails data -> Svg msg
 viewBin plane visuals bin =
   g [ class "elm-charts__bin" ] <| List.concat <|
       List.indexedMap (\barIndex sections -> List.indexedMap (viewBar plane visuals sections barIndex) sections) bin.items
 
 
-viewBar : Plane -> BarVisuals data msg -> List (Item (Maybe Float) data) -> Int -> Int -> Item (Maybe Float) data -> Svg msg
+viewBar : Plane -> BarVisuals data msg -> List (Item (Maybe Float) BarDetails data) -> Int -> Int -> Item (Maybe Float) BarDetails data -> Svg msg
 viewBar plane visuals sections barIndex sectionIndex item =
   -- TODO round via clipPath
   let x = item.position.x1
@@ -491,7 +489,7 @@ viewBar plane visuals sections barIndex sectionIndex item =
 
       attributes =
         concat
-          [ fill item.metric.color
+          [ fill item.details.color
           , class "elm-charts__bar"
           ]
           (visuals.attrs barIndex item.datum)
@@ -770,72 +768,15 @@ yArrow plane color x y xOff yOff =
 -- SERIES
 
 
+type Dot
+  = Standard Float Shape Variety
+  | Custom (Svg Never)
+  | NoDot
+
+
 {-| -}
-type alias Dot msg =
-  (Plane -> Float -> Float -> Svg msg)
-
-
-{-| A dot without visual representation.
--}
-clear : Dot msg
-clear _ _ _ =
-  Svg.text ""
-
-
-{-| Make a regular shape.
-
-    someDot : Svg msg
-    someDot =
-      full radius circle "blue" plane x y
--}
-full : Float -> Shape -> String -> Dot msg
-full radius shape color =
-  viewShape radius Full shape color
-
-
-{-| Make a shape with a little translucent border.
-
-    someDot : Svg msg
-    someDot =
-      aura radius width opacity circle "blue" plane x y
--}
-aura : Float -> Float -> Float -> Shape -> String -> Dot msg
-aura radius width opacity shape color =
-  viewShape radius (Aura width opacity) shape color
-
-
-
-{-| Make a shape with a little translucent middle.
-
-    someDot : Svg msg
-    someDot =
-      aura radius width borderWidth opacity circle "blue" plane x y
--}
-opaque : Float -> Float -> Float -> Shape -> String -> Dot msg
-opaque radius width opacity shape color =
-  viewShape radius (Opaque width opacity) shape color
-
-
-{-| Make a shape with a white border.
-
-    someDot : Svg msg
-    someDot =
-      disconnected radius width circle "blue" plane x y
--}
-disconnected : Float -> Float -> Shape -> String -> Dot msg
-disconnected radius width shape color =
-  viewShape radius (Disconnected width) shape color
-
-
-{-| Make a shape with a white core.
-
-    someDot : Svg msg
-    someDot =
-      empty radius width circle "blue" plane x y
--}
-empty : Float -> Float -> Shape -> String -> Dot msg
-empty radius width shape color =
-  viewShape radius (Empty width) shape color
+type alias Variety =
+  Internal.Svg.Variety
 
 
 {-| -}
@@ -879,78 +820,118 @@ cross =
   Cross
 
 
-{-| Series with no interpolation.
-
-    someScatter : Svg msg
-    someScatter =
-      scatter plane .x .y (full 6 circle "blue") points
--}
-scatter : Plane -> (data -> Dot msg) -> List (Item (Maybe Float) data) -> Svg msg
-scatter plane dot items =
-  viewSeries plane dot items (text "-- No interpolation --")
+{-| -}
+type Interpolation
+  = None
+  | Linear Float
+  | Monotone Float
+  -- TODO stepped
 
 
-{-| Series with linear interpolation.
--}
-linear : Plane ->  List (Attribute msg) -> Maybe Float -> (data -> Dot msg) -> List (Item (Maybe Float) data) -> Svg msg
-linear plane attributes areaMaybe dot items =
-  let breaks = toBreaks items in
-  viewSeries plane dot items <|
-    viewInterpolations plane areaMaybe attributes breaks (linearInterpolation breaks)
+{-| -}
+scatter : Interpolation
+scatter =
+  None
 
 
-{-| Series with monotone interpolation.
--}
-monotone : Plane ->  List (Attribute msg) -> Maybe Float -> (data -> Dot msg) -> List (Item (Maybe Float) data) -> Svg msg
-monotone plane attributes areaMaybe dot items =
-  let breaks = toBreaks items in
-  viewSeries plane dot items <|
-    viewInterpolations plane areaMaybe attributes breaks (monotoneInterpolation breaks)
+{-| -}
+linear : Float -> Interpolation
+linear =
+  Linear
+
+
+{-| -}
+monotone : Float -> Interpolation
+monotone =
+  Monotone
+
+
+{-| -}
+dots : Plane -> List (Item (Maybe Float) DotDetails data) -> Svg msg
+dots plane items =
+  let viewDot item =
+        case item.values.y of
+          Just y ->
+            case item.details.dot of
+              Custom view ->
+                Just <| g [ place plane item.center.x item.center.y ] [ Svg.map never view ]
+
+              Standard radius shape_ style_ ->
+                Just <| viewShape radius style_ shape_ item.details.color plane item.center.x item.center.y
+
+              NoDot ->
+                Nothing
+
+          Nothing ->
+            Nothing
+  in
+  g [ class "elm-charts__dots" ] (List.filterMap viewDot items)
+
+
+interpolation : Plane -> Series -> List (Item (Maybe Float) DotDetails data) -> Svg msg
+interpolation plane series items =
+  let breaks = toBreaks items
+      toCommands =
+        case series.interpolation of
+          Nothing -> always []
+          Just None -> always []
+          Just (Linear _) -> linearInterpolation
+          Just (Monotone _) -> monotoneInterpolation
+
+      width_ =
+        case series.interpolation of
+          Nothing -> 0
+          Just None -> 0
+          Just (Linear w) -> w
+          Just (Monotone w) -> w
+
+      view_ points commands =
+        case points of
+          [] -> text "-- No data --"
+          first :: rest ->
+            viewLine plane
+              [ Attributes.stroke (Maybe.withDefault "blue" series.color) -- TODO
+              , Attributes.strokeWidth (String.fromFloat width_)
+              , Attributes.fill (Maybe.withDefault "blue" series.color) -- TODO
+              ]
+              commands first rest
+  in
+  g [ class "elm-charts__interpolations" ] (List.map2 view_ breaks (toCommands breaks))
+
+
+area : Plane -> Series -> List (Item (Maybe Float) DotDetails data) -> Svg msg
+area plane series items =
+  let breaks = toBreaks items
+      toCommands =
+        case series.interpolation of
+          Nothing -> always []
+          Just None -> always []
+          Just (Linear _) -> linearInterpolation
+          Just (Monotone _) -> monotoneInterpolation
+
+      view_ points commands =
+        case ( points, series.area ) of
+          ([], _) -> text ""
+          (_, Nothing) -> text ""
+          (first :: rest, Just opacity) ->
+            viewArea plane
+              [ Attributes.fill (Maybe.withDefault "blue" series.color) -- TODO
+              , Attributes.fillOpacity (String.fromFloat opacity)
+              ]
+              commands first rest
+  in
+  g [ class "elm-charts__areas" ] (List.map2 view_ breaks (toCommands breaks))
 
 
 
 -- INTERNAL
 
 
-viewSeries : Plane -> (data -> Dot msg) -> List (Item (Maybe Float) data) -> Svg msg -> Svg msg
-viewSeries plane dot items interpolation =
-  let viewDot item =
-        case item.values.y of
-          Just y -> Just (dot item.datum plane item.center.x y)
-          Nothing -> Nothing
-  in
-  g [ class "elm-charts__serie" ]
-    [ interpolation
-    , g [ class "elm-charts__dots" ] (List.filterMap viewDot items)
-    ]
-
-
-viewInterpolations : Plane -> Maybe Float -> List (Attribute msg) -> List (List Point) -> List (List Command) -> Svg msg
-viewInterpolations plane areaMaybe userAttributes points commands =
-  g [ class "elm-charts__interpolations" ] <| List.concat <|
-    List.map2 (\ps cs -> viewInterpolation plane areaMaybe userAttributes ps cs) points commands
-
-
-viewInterpolation : Plane -> Maybe Float -> List (Attribute msg) -> List Point -> List Command -> List (Svg msg)
-viewInterpolation plane areaMaybe userAttributes points commands =
-  case ( points, areaMaybe ) of
-    ( [], _ ) ->
-      [ text "-- No data --" ]
-
-    ( first :: rest, Nothing ) ->
-      [ viewLine plane userAttributes commands first rest ]
-
-    ( first :: rest, Just opacity ) ->
-      [ viewArea plane (userAttributes ++ [ stroke "transparent", fillOpacity (String.fromFloat opacity) ]) commands first rest
-      , viewLine plane (userAttributes ++ [ fill "transparent" ]) commands first rest
-      ]
-
-
 viewLine : Plane -> List (Attribute msg) -> List Command -> Point -> List Point -> Svg msg
-viewLine plane userAttributes interpolation first rest =
+viewLine plane userAttributes cmds first rest =
   let
     commands =
-      concat [ Move first.x first.y ] interpolation []
+      concat [ Move first.x first.y ] cmds []
 
     attributes =
       concat
@@ -962,12 +943,12 @@ viewLine plane userAttributes interpolation first rest =
 
 
 viewArea : Plane -> List (Attribute msg) -> List Command -> Point -> List Point -> Svg msg
-viewArea plane userAttributes interpolation first rest =
+viewArea plane userAttributes cmds first rest =
   let
     commands =
       concat
         [ Move first.x (closestToZero plane), Line first.x first.y ]
-        interpolation
+        cmds
         [ Line (Maybe.withDefault first (last rest) |> .x) (closestToZero plane) ]
 
     attributes =
@@ -1173,7 +1154,7 @@ type alias Point =
 
 
 {-| -}
-toBreaks : List (Item (Maybe Float) data) -> List (List Point)
+toBreaks : List (Item (Maybe Float) details data) -> List (List Point)
 toBreaks =
   let fold item acc =
         case item.values.y of
@@ -1519,7 +1500,23 @@ withFirst stuff process =
 
 
 
--- DEFAULTS / COLOR
+-- DEFAULTS
+
+
+toDefaultShape : Int -> Shape
+toDefaultShape index =
+  let numOfItems = Dict.size shapes
+      itemIndex = remainderBy numOfItems index
+  in
+  Dict.get itemIndex shapes
+    |> Maybe.withDefault circle
+
+
+shapes : Dict Int Shape
+shapes =
+  [ circle, triangle, square, diamond, plus, cross ]
+    |> List.indexedMap Tuple.pair
+    |> Dict.fromList
 
 
 toDefaultColor : Int -> String

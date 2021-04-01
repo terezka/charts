@@ -31,8 +31,8 @@ main =
 
 
 type alias Model =
-  { hoveringSalery : List (SC.Item Float Salery.Datum)
-  , hovering : List (SC.Item Float Datum)
+  { hoveringSalery : List (SC.Item Float SC.BarDetails Salery.Datum)
+  , hovering : List (SC.Item Float SC.BarDetails Datum)
   , point : Maybe SC.Point
   }
 
@@ -43,8 +43,8 @@ init =
 
 
 type Msg
-  = OnHoverSalery (List (SC.Item Float Salery.Datum))
-  | OnHover (List (SC.Item Float Datum))
+  = OnHoverSalery (List (SC.Item Float SC.BarDetails Salery.Datum))
+  | OnHover (List (SC.Item Float SC.BarDetails Datum))
   | OnCoords SC.Point -- TODO
 
 
@@ -93,20 +93,28 @@ view model =
       , C.id "salery-discrepancy"
       ]
       [ C.grid []
-      , C.bars
-          [ C.start (\d -> d.x - 2), C.end .x, C.rounded 0.2, C.roundBottom ]
-          [ C.stacked
-              [ C.property .y [] (always [])
-              , C.property .z [ C.color C.pink ] (always [])
-              , C.property (C.just .x) [ C.color C.orange ] (always [])
-              ]
-          ]
-          data
+      --, C.bars
+      --    [ C.start (\d -> d.x - 2), C.end .x, C.rounded 0.2, C.roundBottom ]
+      --    [ C.stacked
+      --        [ C.property .y [] (always [])
+      --        , C.property .z [ C.color C.pink ] (always [])
+      --        , C.property (C.just .x) [ C.color C.orange ] (always [])
+      --        ]
+      --    ]
+      --    data
       , C.xAxis []
       , C.yAxis []
       , C.xTicks []
       , C.xLabels []
       , C.yLabels [ C.ints ]
       , C.yTicks [ C.ints ]
+      , C.series .x
+          [ C.stacked
+              [ C.property .y [ C.area 0.5, C.linear 1, C.color C.blue ] (always [])
+              , C.property .z [ C.area 0.5, C.linear 1, C.color C.pink ] (always [])
+              ]
+          , C.property .y [ C.linear 1, C.color C.orange ] (always [])
+          ]
+          data
       ]
     ]
