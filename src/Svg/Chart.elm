@@ -324,6 +324,7 @@ toBarItems isGrouped space properties bins =
                 bin.end - length + margin_
         in
         List.map (toBarPieceItem bin barIndex x1 width_) (Property.toConfigs property)
+          |> List.reverse
 
       toBarPieceItem bin barIndex x1 width_ property =
         let config = toConfig property bin.datum in
@@ -393,37 +394,64 @@ histogram plane visuals bins =
 
 viewBin : Plane -> BarVisuals data msg -> Items (Maybe Float) data -> Svg msg
 viewBin plane visuals bin =
-  g [ class "elm-charts__bin" ] (List.indexedMap (\i is -> List.map (viewBar plane visuals i) is) bin.items |> List.concat)
+  g [ class "elm-charts__bin" ] <| List.concat <|
+      List.indexedMap (\barIndex sections -> List.indexedMap (viewBar plane visuals sections barIndex) sections) bin.items
 
 
-viewBar : Plane -> BarVisuals data msg -> Int -> Item (Maybe Float) data -> Svg msg
-viewBar plane visuals barIndex item =
+viewBar : Plane -> BarVisuals data msg -> List (Item (Maybe Float) data) -> Int -> Int -> Item (Maybe Float) data -> Svg msg
+viewBar plane visuals sections barIndex sectionIndex item =
+  -- TODO round via clipPath
   let x = item.position.x1
       y = item.position.y2
       w = item.position.x2 - item.position.x1
-      bs = closestToZero plane -- TODO item.position.y1
+      bs = item.position.y1
       b = scaleSVG plane.x w * 0.5 * (clamp 0 1 visuals.round)
       ys = abs (scaleSVG plane.y y)
       rx = scaleCartesian plane.x b
       ry = scaleCartesian plane.y b
-      roundBottom = visuals.roundBottom
+
+      hasNoValue it =
+        (it.position.y2 - it.position.y1) == 0
+
+      isLastWithValue =
+        List.all hasNoValue (List.drop (sectionIndex + 1) sections)
+
+      ( allowRoundTop, allowRoundBottom ) =
+        if b == 0 || ys < b then
+          ( False, False )
+        else if List.length sections > 1 && sectionIndex == 0 && isLastWithValue then
+          ( True, True )
+        else if List.length sections > 1 && sectionIndex == 0 then
+          ( False, visuals.roundBottom )
+        else if List.length sections > 1 && sectionIndex == List.length sections - 1 || isLastWithValue then
+          ( True, False )
+        else if List.length sections > 1 then
+          ( False, False )
+        else
+          ( True, visuals.roundBottom )
 
       commands =
         if bs == y then
           []
-        else if b == 0 || ys < b then
-          commandsNoRound
         else
-          if y < 0 then
-            if roundBottom then
-              commandsRoundBoth False (ry * -1)
-            else
-              commandsRoundTop False ry
-          else
-            if roundBottom then
-              commandsRoundBoth True ry
-            else
-              commandsRoundTop True (ry * -1)
+          case ( allowRoundTop, allowRoundBottom ) of
+            ( False, False ) ->
+              commandsNoRound
+
+            ( True, False ) ->
+              if y < 0
+              then commandsRoundTop False ry
+              else commandsRoundTop True (ry * -1)
+
+            ( False, True ) ->
+              if y < 0
+              then commandsRoundBottom False (ry * -1)
+              else commandsRoundBottom True ry
+
+            ( True, True ) ->
+              if y < 0
+              then commandsRoundBoth False (ry * -1)
+              else commandsRoundBoth True ry
 
       commandsNoRound =
         [ Move x bs

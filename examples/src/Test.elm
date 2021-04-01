@@ -94,7 +94,7 @@ view model =
       ]
       [ C.grid []
       , C.bars
-          [ C.start (\d -> d.x - 2), C.end .x ]
+          [ C.start (\d -> d.x - 2), C.end .x, C.rounded 0.2, C.roundBottom ]
           [ C.stacked
               [ C.property .y [] (always [])
               , C.property .z [ C.color C.pink ] (always [])

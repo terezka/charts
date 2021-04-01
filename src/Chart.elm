@@ -525,7 +525,7 @@ chart edits elements =
         [ C.frame config.id plane ] ++ chartEls ++ [ C.eventCatcher plane [] ]
   in
   C.container plane (config.htmlAttrs ++ sizingAttrsHtml)
-    (beforeEls ++ [ svgContainer chartEls ] ++ afterEls)
+    (beforeEls ++ [ svgContainer allSvgEls ] ++ afterEls)
 
 
 
@@ -1426,14 +1426,16 @@ bars edits properties data =
       toXYBounds =
         makeBounds [.start >> Just, .end >> Just] toYs bins
   in
-  BarsElement toXYBounds toItems toTicks <| \_ plane items ->
-    -- TODO use cid
-    C.bars plane
-      { round = D.value config.round
-      , roundBottom = D.value config.roundBottom
-      , attrs = \i d -> [] -- TODO
-      }
-      items
+  BarsElement toXYBounds toItems toTicks <| \id_ plane items ->
+    S.g
+      [ SA.class "elm-charts__series", clipPath id_ ]
+      [ C.bars plane
+          { round = D.value config.round
+          , roundBottom = D.value config.roundBottom
+          , attrs = \i d -> [] -- TODO
+          }
+          items
+      ]
 
 
 
