@@ -68,7 +68,7 @@ data : List Datum
 data =
   [ { x = 2, y = Just 6, z = Just 5, label = "DK" }
   , { x = 4, y = Just 4, z = Just 3, label = "NO" }
-  , { x = 6, y = Just 2, z = Just 4, label = "SE" }
+  , { x = 6, y = Just 10, z = Just 13, label = "SE" }
   , { x = 8, y = Just 3, z = Just 2, label = "FI" }
   , { x = 10, y = Just 4, z = Just 3, label = "IS" }
   ]
@@ -111,9 +111,8 @@ view model =
       , C.series .x
           [ C.stacked
               [ C.property .y [ C.area 0.5, C.linear 1, C.color C.blue ] (always [])
-              , C.property .z [ C.area 0.5, C.linear 1, C.color C.pink ] (always [])
+              , C.property .z [ C.area 0.2, C.linear 1, C.color C.pink ] (always [])
               ]
-          , C.property .y [ C.linear 1, C.color C.orange ] (always [])
           ]
           data
       ]

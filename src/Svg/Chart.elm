@@ -899,28 +899,63 @@ interpolation plane series items =
   g [ class "elm-charts__interpolations" ] (List.map2 view_ breaks (toCommands breaks))
 
 
-area : Plane -> Series -> List (Item (Maybe Float) DotDetails data) -> Svg msg
-area plane series items =
-  let breaks = toBreaks items
-      toCommands =
-        case series.interpolation of
+area : Plane -> List ( Series, List (Item (Maybe Float) DotDetails data) ) -> List (Svg msg)
+area plane series =
+  let toCommands config =
+        case config.interpolation of
           Nothing -> always []
           Just None -> always []
           Just (Linear _) -> linearInterpolation
           Just (Monotone _) -> monotoneInterpolation
 
-      view_ points commands =
-        case ( points, series.area ) of
-          ([], _) -> text ""
-          (_, Nothing) -> text ""
-          (first :: rest, Just opacity) ->
-            viewArea plane
-              [ Attributes.fill (Maybe.withDefault "blue" series.color) -- TODO
-              , Attributes.fillOpacity (String.fromFloat opacity)
-              ]
-              commands first rest
   in
-  g [ class "elm-charts__areas" ] (List.map2 view_ breaks (toCommands breaks))
+  withSurround series <| \index prevM (currC, currI) nextM ->
+    case currC.area of
+      Nothing ->
+        text ""
+
+      Just opacity ->
+        let currPoints =
+              toBreaks currI
+
+            currCmds =
+              toCommands currC currPoints
+
+            nextCmds =
+              case nextM of
+                Just (nextC, nextI) ->
+                  withBorder (List.concat (toBreaks nextI)) <| \start end ->
+                    [ Move plane.x.min plane.y.max, Line plane.x.min start.y ]
+                    ++ (List.concat <| toCommands nextC [List.concat <| toBreaks nextI])
+                    ++ [ Line plane.x.max end.y, Line plane.x.max plane.y.max ]
+
+                Nothing ->
+                  Nothing
+
+            view ps cs =
+              withBorder ps <| \start end ->
+                path
+                  [ Attributes.clipPath ("url(#area-def" ++ String.fromInt index ++ ")")
+                  , Attributes.fill (Maybe.withDefault "blue" currC.color) -- TODO
+                  , Attributes.fillOpacity (String.fromFloat opacity)
+                  , d (description plane <| [ Move start.x 0, Line start.x start.y ] ++ cs ++ [ Line end.x 0 ])
+                  ]
+                  []
+        in
+        g [ class "elm-charts__area" ] <|
+          case nextCmds of
+            Just clipper ->
+              [ Svg.defs []
+                  [ Svg.clipPath
+                      [ Attributes.id ("area-def" ++ String.fromInt index) ]
+                      [ path [ d (description plane clipper) ] []
+                      ]
+                  ]
+              , g [] <| List.filterMap identity (List.map2 view currPoints currCmds)
+              ]
+
+            Nothing ->
+              List.filterMap identity (List.map2 view currPoints currCmds)
 
 
 
@@ -1497,6 +1532,29 @@ withFirst stuff process =
 
     _ ->
       Nothing
+
+
+{-| -}
+withBorder : List a -> (a -> a -> b) -> Maybe b
+withBorder stuff func =
+  case stuff of
+    first :: rest ->
+      Just (func first (Maybe.withDefault first (last rest)))
+
+    _ ->
+      Nothing
+
+
+{-| -}
+withSurround : List a -> (Int -> Maybe a -> a -> Maybe a -> b) -> List b
+withSurround all func =
+  let fold index prev acc list =
+        case list of
+          a :: b :: rest -> fold (index + 1) (Just a) (acc ++ [func index prev a (Just b)]) (b :: rest)
+          a :: [] -> acc ++ [func index prev a Nothing]
+          [] -> acc
+  in
+  fold 0 Nothing [] all
 
 
 

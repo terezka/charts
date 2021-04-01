@@ -1491,7 +1491,7 @@ series toX properties data =
   in
   SeriesElement (makeBounds [toX >> Just] toYs data) toItems <| \id_ p items ->
     S.g [ SA.class "elm-charts__series" ]
-      [ S.g [ SA.class "elm-charts__areas", clipPath id_ ] (List.map2 (C.area p) configs items)
+      [ S.g [ SA.class "elm-charts__areas", clipPath id_ ] (List.map2 Tuple.pair configs items |> C.area p)
       , S.g [ SA.class "elm-charts__lines", clipPath id_ ] (List.map2 (C.interpolation p) configs items)
       , S.g [ SA.class "elm-charts__dots" ] (List.map (C.dots p) items)
       ]
