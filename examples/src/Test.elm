@@ -110,8 +110,8 @@ view model =
       , C.yTicks [ C.ints ]
       , C.series .x
           [ C.stacked
-              [ C.property .y [ C.area 0.5, C.linear 1, C.color C.blue ] (always [])
-              , C.property .z [ C.area 0.2, C.linear 1, C.color C.pink ] (always [])
+              [ C.property .y [ C.area 0.2, C.linear 0, C.color C.blue ] (always [])
+              , C.property .z [ C.area 0.5, C.linear 1, C.color C.pink ] (always [])
               ]
           ]
           data
