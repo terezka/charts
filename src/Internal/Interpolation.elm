@@ -1,7 +1,14 @@
-module Internal.Interpolation exposing (linear, monotone)
+module Internal.Interpolation exposing (Interpolation(..), linear, monotone)
 
 
 import Svg.Commands exposing (..)
+
+
+{-| -}
+type Interpolation
+  = Linear Float
+  | Monotone Float
+  -- TODO stepped
 
 
 {-| -}

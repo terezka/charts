@@ -78,7 +78,7 @@ import Svg exposing (Svg, Attribute, g, path, rect, text)
 import Svg.Attributes as Attributes exposing (class, width, height, stroke, fill, fillOpacity, d, transform, viewBox)
 import Svg.Coordinates as Coords exposing (Plane, place, toSVGX, toSVGY, toCartesianX, toCartesianY, scaleSVG, scaleCartesian, placeWithOffset)
 import Svg.Commands exposing (..)
-import Internal.Interpolation as Interpolation
+import Internal.Interpolation as Interpolation exposing (Interpolation)
 import Internal.Colors exposing (..)
 import Internal.Svg exposing (..)
 import Internal.Property as Property exposing (Property)
@@ -822,29 +822,20 @@ cross =
 
 
 {-| -}
-type Interpolation
-  = None
-  | Linear Float
-  | Monotone Float
-  -- TODO stepped
-
-
-{-| -}
-scatter : Interpolation
-scatter =
-  None
+type alias Interpolation =
+  Interpolation.Interpolation
 
 
 {-| -}
 linear : Float -> Interpolation
 linear =
-  Linear
+  Interpolation.Linear
 
 
 {-| -}
 monotone : Float -> Interpolation
 monotone =
-  Monotone
+  Interpolation.Monotone
 
 
 {-| -}
@@ -875,16 +866,14 @@ interpolation plane series items =
       toCommands =
         case series.interpolation of
           Nothing -> always []
-          Just None -> always []
-          Just (Linear _) -> Interpolation.linear
-          Just (Monotone _) -> Interpolation.monotone
+          Just (Interpolation.Linear _) -> Interpolation.linear
+          Just (Interpolation.Monotone _) -> Interpolation.monotone
 
       width_ =
         case series.interpolation of
           Nothing -> 0
-          Just None -> 0
-          Just (Linear w) -> w
-          Just (Monotone w) -> w
+          Just (Interpolation.Linear w) -> w
+          Just (Interpolation.Monotone w) -> w
 
       view_ points commands =
         case points of
@@ -905,9 +894,8 @@ area plane series =
   let toCommands config =
         case config.interpolation of
           Nothing -> always []
-          Just None -> always []
-          Just (Linear _) -> Interpolation.linear
-          Just (Monotone _) -> Interpolation.monotone
+          Just (Interpolation.Linear _) -> Interpolation.linear
+          Just (Interpolation.Monotone _) -> Interpolation.monotone
 
   in
   withSurround series <| \index prevM (currC, currI) nextM ->
