@@ -86,6 +86,7 @@ import Internal.Default as D
 import Json.Decode as Json
 import DOM
 import Dict exposing (Dict)
+import Internal.Chart
 
 
 {-| Set the size of your chart.
