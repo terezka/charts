@@ -1444,7 +1444,6 @@ bars edits properties data =
 -- SERIES
 
 
-
 {-| -}
 type alias Series =
   { interpolation : Maybe C.Interpolation
@@ -1656,7 +1655,7 @@ type alias Shape =
   C.Shape
 
 
-{-| -}
+{-| -} -- TODO
 circle : Attribute { a | shape : Maybe Shape }
 circle config =
   { config | shape = Just C.circle }

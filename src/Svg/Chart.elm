@@ -422,7 +422,7 @@ viewBar plane visuals sections barIndex sectionIndex item =
           ( True, True )
         else if List.length sections > 1 && sectionIndex == 0 then
           ( False, visuals.roundBottom )
-        else if List.length sections > 1 && sectionIndex == List.length sections - 1 || isLastWithValue then
+        else if List.length sections > 1 && (sectionIndex == List.length sections - 1 || isLastWithValue) then
           ( True, False )
         else if List.length sections > 1 then
           ( False, False )
