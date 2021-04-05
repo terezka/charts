@@ -579,7 +579,7 @@ type alias Series =
   , color : String
   , width : Float
   , points : List (List Point)
-  , area : Float
+  , opacity : Float
   }
 
 
@@ -590,97 +590,112 @@ type Method
 
 
 {-| -}
-linear : Method
-linear =
-  Linear
+linear : Attribute { a | interpolation : Maybe Method }
+linear config =
+  { config | interpolation = Just Linear }
 
 
 {-| -}
-monotone : Method
-monotone =
-  Monotone
+monotone : Attribute { a | interpolation : Maybe Method }
+monotone config =
+  { config | interpolation = Just Monotone }
 
 
 {-| -}
-interpolation : Plane -> List (Attribute Series) -> Svg msg
-interpolation plane edits =
+interpolation : Plane -> (data -> Float) -> (data -> Maybe Float) -> List (Attribute Series) -> List data -> Svg msg
+interpolation plane toX toY edits data =
   let config =
         apply edits
-          { interpolation = Nothing
+          { interpolation = Just Linear
           , color = "rgb(5, 142, 218)"
           , width = 1
           , points = []
-          , area = 0
+          , opacity = 0
           }
 
-      view ps cmds =
-        withBorder ps <| \first rest ->
-          S.path
-            [ SA.class "elm-charts__interpolation"
-            , SA.fill "transparent"
-            , SA.stroke config.color
-            , SA.strokeWidth (String.fromFloat config.width)
-            , SA.d (C.description plane (Move first.x first.y :: cmds))
-            ]
-            []
-
-      pieces =
-        List.map2 view config.points (seriesCommands config)
+      view ( first, cmds, _ ) =
+        S.path
+          [ SA.class "elm-charts__interpolation"
+          , SA.fill "transparent"
+          , SA.stroke config.color
+          , SA.strokeWidth (String.fromFloat config.width)
+          , SA.d (C.description plane (Move first.x first.y :: cmds))
+          ]
+          []
   in
-  S.g [ SA.class "elm-charts__interpolations" ] (List.filterMap identity pieces)
+  S.g [ SA.class "elm-charts__interpolations" ] <|
+    case config.interpolation of
+      Just method -> List.map view (toCommands method toX toY data)
+      Nothing -> []
 
 
 {-| -}
-area : Plane -> Maybe Series -> String -> Series -> Svg msg
-area plane nextMaybe id series =
-  let clipperId =
-        "area-clipper-" ++ id
+area : Plane -> (data -> Float) -> Maybe (data -> Maybe Float) -> (data -> Maybe Float) -> List (Attribute Series) -> List data -> Svg msg
+area plane toX toY2M toY edits data =
+  let config =
+        apply edits
+          { interpolation = Just Linear
+          , color = "rgb(5, 142, 218)"
+          , width = 1
+          , points = []
+          , opacity = 0.1
+          }
 
-      defsMaybe =
-        case nextMaybe of
-          -- TODO make sure missing data doesn't cut wrong
-          -- TODO make sure monotone w missing data works correct
-          -- TODO don't use clip path
-          Just next ->
-            let nextPs = List.concat next.points
-                nextCmds = List.concat (seriesCommands next)
-                startCmds start = [ C.Move plane.x.min plane.y.max, C.Line plane.x.min start.y ]
-                endCmds end = [ C.Line plane.x.max end.y, C.Line plane.x.max plane.y.max ]
-                toPath start end = C.description plane (startCmds start ++ nextCmds ++ endCmds end)
-            in
-            withBorder nextPs <| \start end ->
-              S.defs []
-                [ S.clipPath
-                    [ SA.id clipperId ]
-                    [ S.path [ SA.d (toPath start end) ] [] ]
-                ]
+      view cmds =
+        S.path
+          [ SA.class "elm-charts__area"
+          , SA.fill config.color
+          , SA.fillOpacity (String.fromFloat config.opacity)
+          , SA.strokeWidth "0"
+          , SA.fillRule "evenodd"
+          , SA.d (C.description plane cmds)
+          ]
+          []
 
-          Nothing ->
-            Nothing
+      withoutUnder ( first, cmds, end ) =
+        view <|
+          [ C.Move first.x 0, C.Line first.x first.y ] ++ cmds ++ [ C.Line end.x 0 ]
 
-      toArea points cmds =
-        withBorder points <| \start end ->
-          let startCmds = [ C.Move start.x 0, C.Line start.x start.y ]
-              endCmds = [ C.Line end.x 0 ]
-              path = C.description plane (startCmds ++ cmds ++ endCmds)
-          in
-          S.path
-            [ SA.class "elm-charts__area"
-            , SA.clipPath ("url(#" ++ clipperId ++ ")")
-            , SA.fill series.color
-            , SA.fillOpacity (String.fromFloat series.area)
-            , SA.d path
-            ]
-            []
-
-      areas =
-        List.map2 toArea series.points (seriesCommands series)
-          |> List.filterMap identity
+      withUnder ( firstBottom, cmdsBottom, endBottom ) ( firstTop, cmdsTop, endTop ) =
+        view <|
+          [ C.Move firstBottom.x firstBottom.y, C.Line firstTop.x firstTop.y ] ++ cmdsTop ++
+          [ C.Move firstBottom.x firstBottom.y ] ++ cmdsBottom ++ [ C.Line endTop.x endTop.y ]
   in
   S.g [ SA.class "elm-charts__areas" ] <|
-    case defsMaybe of
-      Just defs -> [ defs, S.g [] areas ]
-      Nothing -> areas
+    case config.interpolation of
+      Just method ->
+        case toY2M of
+          Nothing -> List.map withoutUnder (toCommands method toX toY data)
+          Just toY2 -> List.map2 withUnder (toCommands method toX toY2 data) (toCommands method toX toY data)
+
+      Nothing -> []
+
+
+toCommands : Method -> (data -> Float) -> (data -> Maybe Float) -> List data -> List ( Point, List C.Command, Point )
+toCommands method toX toY data =
+  let fold datum acc =
+        case toY datum of
+          Just y_ ->
+            case acc of
+              latest :: rest -> (latest ++ [ { x = toX datum, y = y_ } ]) :: rest
+              [] -> [ { x = toX datum, y = y_ } ] :: acc
+
+          Nothing ->
+            [] :: acc
+
+      points =
+        List.reverse (List.foldl fold [] data)
+
+      commands =
+        case method of
+          Linear -> Interpolation.linear points
+          Monotone -> Interpolation.monotone points
+
+      toSets ps cmds =
+        withBorder ps <| \first last_ -> ( first, cmds, last_ )
+  in
+  List.map2 toSets points commands
+    |> List.filterMap identity
 
 
 seriesCommands : Series -> List (List C.Command)

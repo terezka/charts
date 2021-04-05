@@ -13,6 +13,7 @@ import Data.Iris as Iris
 import Data.Salery as Salery
 import Data.Education as Education
 import Dict
+import Internal.Chart as I
 
 
 -- TODO
@@ -67,8 +68,7 @@ type alias Datum =
 data : List Datum
 data =
   [ { x = 2, y = Just 6, z = Just 5, label = "DK" }
-  , { x = 4, y = Just 4, z = Just 3, label = "NO" }
-  , { x = 6, y = Just 10, z = Just 13, label = "SE" }
+  , { x = 6, y = Just 5, z = Just 5, label = "SE" }
   , { x = 8, y = Just 3, z = Just 2, label = "FI" }
   , { x = 10, y = Just 4, z = Just 3, label = "IS" }
   ]
@@ -90,30 +90,97 @@ view model =
       , C.static
       , C.marginLeft 50
       , C.paddingTop 15
+      , C.range (C.startMin 0 >> C.endMax 10)
+      , C.domain (C.startMin 0 >> C.endMin 20)
       , C.id "salery-discrepancy"
       ]
       [ C.grid []
+
       --, C.bars
-      --    [ C.start (\d -> d.x - 2), C.end .x, C.rounded 0.2, C.roundBottom ]
+      --    [ C.start (\d -> d.x - 2)
+      --    , C.end .x
+      --    , C.rounded 0.2
+      --    , C.roundBottom
+      --    , C.grouped
+      --    ]
       --    [ C.stacked
       --        [ C.property .y [] (always [])
       --        , C.property .z [ C.color C.pink ] (always [])
-      --        , C.property (C.just .x) [ C.color C.orange ] (always [])
+      --        , C.property (C.just .x) [ C.color C.purple ] (always [])
       --        ]
+      --    , C.property .z [ C.color C.purple ] (always [])
       --    ]
       --    data
-      , C.xAxis []
-      , C.yAxis []
+
+      , C.yAxis [ C.noArrow ]
       , C.xTicks []
       , C.xLabels []
       , C.yLabels [ C.ints ]
       , C.yTicks [ C.ints ]
-      , C.series .x
-          [ C.stacked
-              [ C.property .y [ C.area 0.2, C.linear 0, C.color C.blue ] (always [])
-              , C.property .z [ C.area 0.5, C.linear 1, C.color C.pink ] (always [])
-              ]
-          ]
-          data
+
+
+      --, C.series .x
+      --    [ C.stacked
+      --        [ C.property .y [ C.area 0.2, C.monotone 1, C.color C.purple ] (always [])
+      --            --(\d -> if hovered d then [ C.aura 5 0.5 ] else [])
+      --        , C.property .z [ C.monotone 1, C.color C.purple ] (always [])
+      --        ]
+      --    ]
+      --    data
+
+      , C.svg <| \p ->
+          S.g []
+            -- I.label p [ I.x 2, I.y 15, I.yOff -5, I.xOff 5, I.border "blue", I.fontSize 60, I.borderWidth 2, I.color "pink" ] "hello"
+            [
+            -- I.line p [ I.x1 4, I.x2 6, I.color "blue", I.width 2 ]
+            --, I.arrow p [ I.x p.x.max, I.y p.y.min ]
+            --, I.bar p [ I.x1 2.5, I.x2 3, I.y2 2, I.color "#6761ff", I.borderWidth 1, I.border "white", I.roundBottom 0.1, I.roundTop 0.1 ]
+            --, I.bar p [ I.x1 2.5, I.x2 3, I.y1 2, I.y2 10, I.color "#fa55f0", I.borderWidth 10, I.border "#fa55f087", I.roundBottom 0.1, I.roundTop 0.1 ]
+            --, I.cross p [ I.x 2, I.y 15, I.border "rgb(5, 142, 218)", I.opacity 1, I.size 40, I.borderWidth 1, I.border "white", I.aura 0.5, I.auraWidth 5 ]
+            --,
+              I.interpolation p .x .y
+                [ I.linear ]
+                [ { x = 0, y = Just 14 }
+                , { x = 0.5, y = Just 15 }
+                , { x = 0.75, y = Just 14 }
+                , { x = 1, y = Just 15 }
+                , { x = 1.4, y = Just 13 }
+                , { x = 2, y = Just 14 }
+                , { x = 3, y = Just 16 }
+                , { x = 4, y = Just 13 }
+                , { x = 5, y = Just 14 }
+                , { x = 6, y = Just 10 }
+                ]
+
+            , I.interpolation p .x (.y >> Maybe.map (\d -> if remainderBy 2 (round d) == 0 then d - 1 else d - 2))
+                [ I.linear ]
+                [ { x = 0, y = Just 14 }
+                , { x = 0.5, y = Just 15 }
+                , { x = 0.75, y = Just 14 }
+                , { x = 1, y = Just 15 }
+                , { x = 1.4, y = Just 13 }
+                , { x = 2, y = Just 14 }
+                , { x = 3, y = Just 16 }
+                , { x = 4, y = Just 13 }
+                , { x = 5, y = Just 14 }
+                , { x = 6, y = Just 10 }
+                ]
+
+            , I.area p .x (Just (.y >> Maybe.map (\d -> if remainderBy 2 (round d) == 0 then d - 1 else d - 2))) .y --
+                [ I.linear ]
+                [ { x = 0, y = Just 14 }
+                , { x = 0.5, y = Just 15 }
+                , { x = 0.75, y = Just 14 }
+                , { x = 1, y = Just 15 }
+                , { x = 1.4, y = Just 13 }
+                , { x = 2, y = Just 14 }
+                , { x = 3, y = Just 16 }
+                , { x = 4, y = Just 13 }
+                , { x = 5, y = Just 14 }
+                , { x = 6, y = Just 10 }
+                ]
+            ]
+
+      , C.xAxis [ C.noArrow ]
       ]
     ]
