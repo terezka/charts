@@ -8,7 +8,7 @@ module Internal.Chart exposing
   , Dot, circle, triangle, square, diamond, plus, cross
   --, tooltip
   , x, x1, x2, y, y1, y2, xOff, yOff, border, borderWidth, fontSize, color, width, leftAlign, rightAlign
-  , rotate, length, roundTop, roundBottom
+  , rotate, length, roundTop, roundBottom, opacity, size, aura, auraWidth
   )
 
 import Html as H exposing (Html)
@@ -105,6 +105,30 @@ fontSize value config =
 color : String -> Attribute { a | color : String }
 color value config =
   { config | color = value }
+
+
+{-| -}
+opacity : Float -> Attribute { a | opacity : Float }
+opacity value config =
+  { config | opacity = value }
+
+
+{-| -}
+aura : Float -> Attribute { a | aura : Float }
+aura value config =
+  { config | aura = value }
+
+
+{-| -}
+auraWidth : Float -> Attribute { a | auraWidth : Float }
+auraWidth value config =
+  { config | auraWidth = value }
+
+
+{-| -}
+size : Float -> Attribute { a | size : Float }
+size value config =
+  { config | size = value }
 
 
 {-| -}
@@ -680,100 +704,216 @@ type alias Dot =
   , size : Float
   , border : String
   , borderWidth : Float
-  -- TODO, auraColor : String
-  -- TODO, auraOpacity : Float
-  -- TODO, auraWidth : Float
+  , aura : Float
+  , auraWidth : Float
   }
 
 
 {-| -}
-circle : Plane -> Dot -> Svg msg
-circle plane dot =
-  let x_ = toSVGX plane dot.x
-      y_ = toSVGY plane dot.y
-      area_ = 2 * pi * dot.size
+circle : Plane -> List (Attribute Dot) -> Svg msg
+circle plane edits =
+  let config =
+        apply edits
+          { x = plane.x.min
+          , y = plane.y.max
+          , color = "rgb(5, 142, 218)"
+          , opacity = 1
+          , size = 6
+          , border = "white"
+          , borderWidth = 1
+          , aura = 0
+          , auraWidth = 10
+          }
+
+      x_ = toSVGX plane config.x
+      y_ = toSVGY plane config.y
+      area_ = 2 * pi * config.size
       radius = sqrt (area_ / pi)
-      attrs =
+      attrs r =
         [ SA.cx (String.fromFloat x_)
         , SA.cy (String.fromFloat y_)
-        , SA.r (String.fromFloat radius)
+        , SA.r (String.fromFloat r)
         ]
   in
-  S.circle (attrs ++ styleAttrs dot) []
+  if config.aura > 0 then
+    S.g [] -- TODO use path instead of circle
+      [ S.circle (attrs (radius + config.auraWidth / 2) ++ toAuraAttrs config) []
+      , S.circle (attrs radius ++ toStyleAttrs config) []
+      ]
+  else
+    S.circle (attrs radius ++ toStyleAttrs config) []
+
 
 
 {-| -}
-triangle : Plane -> Dot -> Svg msg
-triangle plane dot =
-  let x_ = toSVGX plane dot.x
-      y_ = toSVGY plane dot.y
-      area_ = 2 * pi * dot.size
-      attrs = [ SA.d (trianglePath area_ x_ y_) ]
+triangle : Plane -> List (Attribute Dot) -> Svg msg
+triangle plane edits =
+  let config =
+        apply edits
+          { x = plane.x.min
+          , y = plane.y.max
+          , color = "rgb(5, 142, 218)"
+          , opacity = 1
+          , size = 6
+          , border = "white"
+          , borderWidth = 1
+          , aura = 0
+          , auraWidth = 10
+          }
+
+      x_ = toSVGX plane config.x
+      y_ = toSVGY plane config.y
+      area_ = 2 * pi * config.size
+      attrs off = [ SA.d (trianglePath area_ off x_ y_) ]
   in
-  S.path (attrs ++ styleAttrs dot) []
+  if config.aura > 0 then
+    S.g []
+      [ S.path (attrs config.auraWidth ++ toAuraAttrs config) []
+      , S.path (attrs 0 ++ toStyleAttrs config) []
+      ]
+  else
+    S.path (attrs 0 ++ toStyleAttrs config) []
 
 
 {-| -}
-square : Plane -> Dot -> Svg msg
-square plane dot =
-  let x_ = toSVGX plane dot.x
-      y_ = toSVGY plane dot.y
-      area_ = 2 * pi * dot.size
+square : Plane -> List (Attribute Dot) -> Svg msg
+square plane edits =
+  let config =
+        apply edits
+          { x = plane.x.min
+          , y = plane.y.max
+          , color = "rgb(5, 142, 218)"
+          , opacity = 1
+          , size = 6
+          , border = "white"
+          , borderWidth = 1
+          , aura = 0
+          , auraWidth = 10
+          }
+
+      x_ = toSVGX plane config.x
+      y_ = toSVGY plane config.y
+      area_ = 2 * pi * config.size
       side = sqrt area_
-      attrs =
-        [ SA.x <| String.fromFloat (x_ - side / 2)
-        , SA.y <| String.fromFloat (y_ - side / 2)
-        , SA.width (String.fromFloat side)
-        , SA.height (String.fromFloat side)
+      attrs s =
+        [ SA.x <| String.fromFloat (x_ - s / 2)
+        , SA.y <| String.fromFloat (y_ - s / 2)
+        , SA.width (String.fromFloat s)
+        , SA.height (String.fromFloat s)
         ]
   in
-  S.rect (attrs ++ styleAttrs dot) []
+  if config.aura > 0 then
+    S.g []
+      [ S.rect (attrs (side + config.auraWidth) ++ toAuraAttrs config) []
+      , S.rect (attrs side ++ toStyleAttrs config) []
+      ]
+  else
+    S.rect (attrs side ++ toStyleAttrs config) []
 
 
 {-| -}
-diamond : Plane -> Dot -> Svg msg
-diamond plane dot =
-  let x_ = toSVGX plane dot.x
-      y_ = toSVGY plane dot.y
-      area_ = 2 * pi * dot.size
+diamond : Plane -> List (Attribute Dot) -> Svg msg
+diamond plane edits =
+  let config =
+        apply edits
+          { x = plane.x.min
+          , y = plane.y.max
+          , color = "rgb(5, 142, 218)"
+          , opacity = 1
+          , size = 6
+          , border = "white"
+          , borderWidth = 1
+          , aura = 0
+          , auraWidth = 10
+          }
+
+      x_ = toSVGX plane config.x
+      y_ = toSVGY plane config.y
+      area_ = 2 * pi * config.size
       side = sqrt area_
       rotation = "rotate(45 " ++ String.fromFloat x_ ++ " " ++ String.fromFloat y_ ++ ")"
-      attrs =
-        [ SA.x <| String.fromFloat (x_ - side / 2)
-        , SA.y <| String.fromFloat (y_ - side / 2)
-        , SA.width (String.fromFloat side)
-        , SA.height (String.fromFloat side)
+      attrs s =
+        [ SA.x <| String.fromFloat (x_ - s / 2)
+        , SA.y <| String.fromFloat (y_ - s / 2)
+        , SA.width (String.fromFloat s)
+        , SA.height (String.fromFloat s)
         , SA.transform rotation
         ]
   in
-  S.rect (attrs ++ styleAttrs dot) []
+  if config.aura > 0 then
+    S.g []
+      [ S.rect (attrs (side + config.auraWidth) ++ toAuraAttrs config) []
+      , S.rect (attrs side ++ toStyleAttrs config) []
+      ]
+  else
+    S.rect (attrs side ++ toStyleAttrs config) []
+
 
 {-| -}
-plus : Plane -> Dot -> Svg msg
-plus plane dot =
-  let x_ = toSVGX plane dot.x
-      y_ = toSVGY plane dot.y
-      area_ = 2 * pi * dot.size
-      attrs = [ SA.d (plusPath area_ x_ y_) ]
+plus : Plane -> List (Attribute Dot) -> Svg msg
+plus plane edits =
+  let config =
+        apply edits
+          { x = plane.x.min
+          , y = plane.y.max
+          , color = "rgb(5, 142, 218)"
+          , opacity = 1
+          , size = 6
+          , border = "white"
+          , borderWidth = 1
+          , aura = 0
+          , auraWidth = 10
+          }
+
+      x_ = toSVGX plane config.x
+      y_ = toSVGY plane config.y
+      area_ = 2 * pi * config.size
+      attrs off = [ SA.d (plusPath area_ off x_ y_) ]
   in
-  S.path (attrs ++ styleAttrs dot) []
+  if config.aura > 0 then
+    S.g []
+      [ S.path (attrs config.auraWidth ++ toAuraAttrs config) []
+      , S.path (attrs 0 ++ toStyleAttrs config) []
+      ]
+  else
+    S.path (attrs 0 ++ toStyleAttrs config) []
+
 
 
 {-| -}
-cross : Plane -> Dot -> Svg msg
-cross plane dot =
-  let x_ = toSVGX plane dot.x
-      y_ = toSVGY plane dot.y
-      area_ = 2 * pi * dot.size
+cross : Plane -> List (Attribute Dot) -> Svg msg
+cross plane edits =
+  let config =
+        apply edits
+          { x = plane.x.min
+          , y = plane.y.max
+          , color = "rgb(5, 142, 218)"
+          , opacity = 1
+          , size = 6
+          , border = "white"
+          , borderWidth = 1
+          , aura = 0
+          , auraWidth = 10
+          }
+
+      x_ = toSVGX plane config.x
+      y_ = toSVGY plane config.y
+      area_ = 2 * pi * config.size
       rotation = "rotate(45 " ++ String.fromFloat x_ ++ " " ++ String.fromFloat y_ ++ ")"
-      attrs = [ SA.d (plusPath area_ x_ y_), SA.transform rotation ]
+      attrs off = [ SA.d (plusPath area_ off x_ y_), SA.transform rotation ]
   in
-  S.path (attrs ++ styleAttrs dot) []
+  if config.aura > 0 then
+    S.g []
+      [ S.path (attrs config.auraWidth ++ toAuraAttrs config) []
+      , S.path (attrs 0 ++ toStyleAttrs config) []
+      ]
+  else
+    S.path (attrs 0 ++ toStyleAttrs config) []
 
 
-trianglePath : Float -> Float -> Float -> String
-trianglePath area_ x_ y_ =
-  let side = sqrt <| area_ * 4 / (sqrt 3)
+trianglePath : Float -> Float -> Float -> Float -> String
+trianglePath area_ off x_ y_ =
+  let side = sqrt (area_ * 4 / sqrt 3) + off * sqrt 3
       height = (sqrt 3) * side / 2
       fromMiddle = height - tan (degrees 30) * side / 2
   in
@@ -785,36 +925,45 @@ trianglePath area_ x_ y_ =
     ]
 
 
-plusPath : Float -> Float -> Float ->  String
-plusPath area_ x_ y_ =
-  let side = sqrt (area_ / 5)
+plusPath : Float -> Float -> Float -> Float ->  String
+plusPath area_ off x_ y_ =
+  let side = sqrt (area_ / 5) + off
       r3 = side
       r6 = side / 2
   in
   String.join " "
-    [ "M" ++ String.fromFloat (x_ - r6) ++ " " ++ String.fromFloat (y_ - r3 - r6)
+    [ "M" ++ String.fromFloat (x_ - r6) ++ " " ++ String.fromFloat (y_ - r3 - r6 + off)
+    , "v" ++ String.fromFloat (r3 - off)
+    , "h" ++ String.fromFloat (-r3 + off)
     , "v" ++ String.fromFloat r3
-    , "h" ++ String.fromFloat -r3
-    , "v" ++ String.fromFloat r3
+    , "h" ++ String.fromFloat (r3 - off)
+    , "v" ++ String.fromFloat (r3 - off)
     , "h" ++ String.fromFloat r3
-    , "v" ++ String.fromFloat r3
-    , "h" ++ String.fromFloat r3
+    , "v" ++ String.fromFloat (-r3 + off)
+    , "h" ++ String.fromFloat (r3 - off)
     , "v" ++ String.fromFloat -r3
-    , "h" ++ String.fromFloat r3
-    , "v" ++ String.fromFloat -r3
+    , "h" ++ String.fromFloat (-r3 + off)
+    , "v" ++ String.fromFloat (-r3 + off)
     , "h" ++ String.fromFloat -r3
-    , "v" ++ String.fromFloat -r3
-    , "h" ++ String.fromFloat -r3
-    , "v" ++ String.fromFloat r3
+    , "v" ++ String.fromFloat (r3 - off)
     ]
 
 
-styleAttrs : Dot -> List (S.Attribute msg)
-styleAttrs dot =
-  [ SA.stroke dot.border
-  , SA.strokeWidth (String.fromFloat dot.borderWidth)
-  , SA.fillOpacity (String.fromFloat dot.opacity)
-  , SA.fill dot.color
+toStyleAttrs : Dot -> List (S.Attribute msg)
+toStyleAttrs config =
+  [ SA.stroke config.border
+  , SA.strokeWidth (String.fromFloat config.borderWidth)
+  , SA.fillOpacity (String.fromFloat config.opacity)
+  , SA.fill config.color
+  ]
+
+
+toAuraAttrs : Dot -> List (S.Attribute msg)
+toAuraAttrs config =
+  [ SA.stroke config.color
+  , SA.strokeWidth (String.fromFloat config.auraWidth)
+  , SA.strokeOpacity (String.fromFloat config.aura)
+  , SA.fill "transparent"
   ]
 
 
