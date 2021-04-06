@@ -5,7 +5,7 @@ module Internal.Chart exposing
   , position
   , Bar, bar
   , Method, linear, monotone, Interpolation, interpolation, Area, area
-  , Dot, circle, triangle, square, diamond, plus, cross
+  , dot, Shape(..), Dot, circle, triangle, square, diamond, plus, cross
   --, tooltip
   , x, x1, x2, y, y1, y2, xOff, yOff, border, borderWidth, fontSize, color, width, leftAlign, rightAlign
   , rotate, length, roundTop, roundBottom, opacity, size, aura, auraWidth
@@ -868,6 +868,28 @@ toCommands method toX toY data =
 
 
 -- DOTS
+
+
+{-| -}
+type Shape
+  = Circle
+  | Triangle
+  | Square
+  | Diamond
+  | Cross
+  | Plus
+
+
+{-| -}
+dot : Plane -> Shape -> List (Attribute Dot) -> Svg msg
+dot plane shape =
+  case shape of
+    Circle -> circle plane
+    Triangle -> triangle plane
+    Square -> square plane
+    Diamond -> diamond plane
+    Cross -> cross plane
+    Plus -> plus plane
 
 
 {-| -}
