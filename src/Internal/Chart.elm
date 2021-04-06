@@ -589,9 +589,8 @@ type alias Bin data =
 
 
 {-| -}
-toBinsFromConstant : (data -> Float) -> Float -> List data -> List (Bin data)
+toBinsFromConstant : (data -> Float) -> Float -> List data -> List (Bin (List data))
 toBinsFromConstant toX width_ data =
-  -- TODO useless without collected List data ?
   let fold datum_ acc =
         Dict.update (ceiling (toX datum_)) (updateDict datum_) acc
 
@@ -609,7 +608,7 @@ toBinsFromConstant toX width_ data =
   data
     |> List.foldr fold Dict.empty
     |> Dict.toList
-    |> List.concatMap (\( bin, ds ) -> List.map (\d -> { start = bin, end = bin + width_, datum = d }) ds)
+    |> List.map (\( bin, ds ) -> { start = bin, end = bin + width_, datum = ds })
 
 
 {-| -}
