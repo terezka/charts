@@ -21,6 +21,11 @@ import Svg.Commands as C exposing (..)
 import Internal.Interpolation as Interpolation
 import Json.Decode as Json
 import DOM
+import Dict exposing (Dict)
+
+
+-- TODO clean up plane
+-- TODO clean up property
 
 
 {-| -}
@@ -37,128 +42,128 @@ type alias Attribute c =
 
 {-| -}
 x : Float -> Attribute { a | x : Float }
-x value config =
-  { config | x = value }
+x v config =
+  { config | x = v }
 
 
 {-| -}
 x1 : Float -> Attribute { a | x1 : Maybe Float }
-x1 value config =
-  { config | x1 = Just value }
+x1 v config =
+  { config | x1 = Just v }
 
 
 {-| -}
 x2 : Float -> Attribute { a | x2 : Maybe Float }
-x2 value config =
-  { config | x2 = Just value }
+x2 v config =
+  { config | x2 = Just v }
 
 
 {-| -}
 y : Float -> Attribute { a | y : Float }
-y value config =
-  { config | y = value }
+y v config =
+  { config | y = v }
 
 
 {-| -}
 y1 : Float -> Attribute { a | y1 : Maybe Float }
-y1 value config =
-  { config | y1 = Just value }
+y1 v config =
+  { config | y1 = Just v }
 
 
 {-| -}
 y2 : Float -> Attribute { a | y2 : Maybe Float }
-y2 value config =
-  { config | y2 = Just value }
+y2 v config =
+  { config | y2 = Just v }
 
 
 {-| -}
 xOff : Float -> Attribute { a | xOff : Float }
-xOff value config =
-  { config | xOff = value }
+xOff v config =
+  { config | xOff = v }
 
 
 {-| -}
 yOff : Float -> Attribute { a | yOff : Float }
-yOff value config =
-  { config | yOff = value }
+yOff v config =
+  { config | yOff = v }
 
 
 {-| -}
 border : String -> Attribute { a | border : String }
-border value config =
-  { config | border = value }
+border v config =
+  { config | border = v }
 
 
 {-| -}
 borderWidth : Float -> Attribute { a | borderWidth : Float }
-borderWidth value config =
-  { config | borderWidth = value }
+borderWidth v config =
+  { config | borderWidth = v }
 
 
 {-| -}
 fontSize : Int -> Attribute { a | fontSize : Maybe Int }
-fontSize value config =
-  { config | fontSize = Just value }
+fontSize v config =
+  { config | fontSize = Just v }
 
 
 {-| -}
 color : String -> Attribute { a | color : String }
-color value config =
-  { config | color = value }
+color v config =
+  { config | color = v }
 
 
 {-| -}
 opacity : Float -> Attribute { a | opacity : Float }
-opacity value config =
-  { config | opacity = value }
+opacity v config =
+  { config | opacity = v }
 
 
 {-| -}
 aura : Float -> Attribute { a | aura : Float }
-aura value config =
-  { config | aura = value }
+aura v config =
+  { config | aura = v }
 
 
 {-| -}
 auraWidth : Float -> Attribute { a | auraWidth : Float }
-auraWidth value config =
-  { config | auraWidth = value }
+auraWidth v config =
+  { config | auraWidth = v }
 
 
 {-| -}
 size : Float -> Attribute { a | size : Float }
-size value config =
-  { config | size = value }
+size v config =
+  { config | size = v }
 
 
 {-| -}
 width : Float -> Attribute { a | width : Float }
-width value config =
-  { config | width = value }
+width v config =
+  { config | width = v }
 
 
 {-| -}
 length : Float -> Attribute { a | length : Float }
-length value config =
-  { config | length = value }
+length v config =
+  { config | length = v }
 
 
 {-| -}
 rotate : Float -> Attribute { a | rotate : Float }
-rotate value config =
-  { config | rotate = config.rotate + value }
+rotate v config =
+  { config | rotate = config.rotate + v }
 
 
 {-| -}
 roundTop : Float -> Attribute { a | roundTop : Float }
-roundTop value config =
-  { config | roundTop = value }
+roundTop v config =
+  { config | roundTop = v }
 
 
 {-| -}
 roundBottom : Float -> Attribute { a | roundBottom : Float }
-roundBottom value config =
-  { config | roundBottom = value }
+roundBottom v config =
+  { config | roundBottom = v }
 
 
 {-| -}
@@ -171,6 +176,18 @@ rightAlign config =
 leftAlign : Attribute { a | anchor : Anchor }
 leftAlign config =
   { config | anchor = End }
+
+
+{-| -}
+linear : Attribute { a | method : Method }
+linear config =
+  { config | method = Linear }
+
+
+{-| -}
+monotone : Attribute { a | method : Method }
+monotone config =
+  { config | method = Monotone }
 
 
 
@@ -463,7 +480,174 @@ arrow plane edits =
 
 
 
+-- ITEMS
+
+
+{-| -}
+type Item datum a =
+  Item
+    { a | datum : datum
+    , x1 : Float
+    , x2 : Float
+    , y1 : Float
+    , y2 : Float
+    }
+
+
+{-| -}
+type alias BinItem datum value =
+  Item datum
+    { items : List (BarItem datum value) }
+
+
+{-| -}
+type alias BarItem datum value =
+  Item datum
+    { x : Float
+    , y : value
+    , color : String
+    , name : String -- TODO id instead?
+    , unit : String
+    }
+
+
+{-| -}
+type alias DotItem value datum =
+  Item datum
+    { x : Float
+    , y : value
+    , color : String
+    , name : String -- TODO id instead?
+    , unit : String
+    , dot : Dot
+    }
+
+
+{-| -}
+top : Item datum x -> Point
+top (Item config) =
+  { x = config.x1 + (config.x2 - config.x1)
+  , y = config.y2
+  }
+
+
+{-| -}
+bottom : Item datum x -> Point
+bottom (Item config) =
+  { x = config.x1 + (config.x2 - config.x1)
+  , y = config.y1
+  }
+
+
+{-| -}
+left : Item datum x -> Point
+left (Item config) =
+  { x = config.x1
+  , y = config.y1 + (config.y2 - config.y1)
+  }
+
+
+{-| -}
+right : Item datum x -> Point
+right (Item config) =
+  { x = config.x2
+  , y = config.y1 + (config.y2 - config.y1)
+  }
+
+
+{-| -}
+center : Item datum x -> Point
+center (Item config) =
+  { x = config.x1 + (config.x2 - config.x1)
+  , y = config.y1 + (config.y2 - config.y1)
+  }
+
+
+{-| -}
+datum : Item datum x -> datum
+datum (Item config) =
+  config.datum
+
+
+{-| -}
+value : Item datum { config | y : value } -> value
+value (Item config) =
+  config.y
+
+
+
+
 -- BAR
+
+
+{-| -}
+type alias Bin data =
+  { datum : data
+  , start : Float
+  , end : Float
+  }
+
+
+{-| -}
+toBinsFromConstant : (data -> Float) -> Float -> List data -> List (Bin data)
+toBinsFromConstant toX width_ data =
+  -- TODO useless without collected List data ?
+  let fold datum_ acc =
+        Dict.update (ceiling (toX datum_)) (updateDict datum_) acc
+
+      updateDict datum_ prev =
+        prev
+          |> Maybe.map (\ds -> datum_ :: ds)
+          |> Maybe.withDefault [ datum_ ]
+          |> Just
+
+      ceiling b =
+        -- TODO
+        let floored = toFloat (floor (b / width_)) * width_ in
+        b - (b - floored) + width_
+  in
+  data
+    |> List.foldr fold Dict.empty
+    |> Dict.toList
+    |> List.concatMap (\( bin, ds ) -> List.map (\d -> { start = bin, end = bin + width_, datum = d }) ds)
+
+
+{-| -}
+toBinsFromVariable : Maybe (data -> Float) -> Maybe (data -> Float) -> List data -> List (Bin data)
+toBinsFromVariable start end =
+  let toXs index prevM curr nextM =
+        case ( start, end ) of
+          ( Nothing, Nothing ) ->
+            { datum = curr, start = toFloat (index + 1) - 0.5, end = toFloat (index + 1) + 0.5 }
+
+          ( Just toStart, Nothing ) ->
+            case ( prevM, nextM ) of
+              ( _, Just next ) ->
+                { datum = curr, start = toStart curr, end = toStart next }
+              ( Just prev, Nothing ) ->
+                { datum = curr, start = toStart curr, end = toStart curr + (toStart curr - toStart prev) }
+              ( Nothing, Nothing ) ->
+                { datum = curr, start = toStart curr, end = toStart curr + 1 }
+
+          ( Nothing, Just toEnd ) ->
+            case ( prevM, nextM ) of
+              ( Just prev, _ ) ->
+                { datum = curr, start = toEnd prev, end = toEnd curr }
+              ( Nothing, Just next ) ->
+                { datum = curr, start = toEnd curr - (toEnd next - toEnd curr), end = toEnd curr }
+              ( Nothing, Nothing ) ->
+                { datum = curr, start = toEnd curr - 1, end = toEnd curr }
+
+          ( Just toStart, Just toEnd ) ->
+            { datum = curr, start = toStart curr, end = toEnd curr }
+
+      fold index prev acc list =
+        case list of
+          a :: b :: rest -> fold (index + 1) (Just a) (acc ++ [toXs index prev a (Just b)]) (b :: rest)
+          a :: [] -> acc ++ [toXs index prev a Nothing]
+          [] -> acc
+  in
+  fold 0 Nothing []
 
 
 {-| -}
@@ -478,6 +662,7 @@ type alias Bar =
   , y2 : Maybe Float
   , border : String
   , borderWidth : Float
+  -- TODO aura
   }
 
 
@@ -580,19 +765,6 @@ type Method
 
 
 {-| -}
-linear : Attribute { a | method : Method }
-linear config =
-  { config | method = Linear }
-
-
-{-| -}
-monotone : Attribute { a | method : Method }
-monotone config =
-  { config | method = Monotone }
-
-
-
-{-| -}
 type alias Interpolation =
   { method : Method
   , color : String
@@ -612,7 +784,7 @@ interpolation plane toX toY edits data =
 
       view ( first, cmds, _ ) =
         S.path
-          [ SA.class "elm-charts__interpolation"
+          [ SA.class "elm-charts__interpolation-section"
           , SA.fill "transparent"
           , SA.stroke config.color
           , SA.strokeWidth (String.fromFloat config.width)
@@ -620,7 +792,7 @@ interpolation plane toX toY edits data =
           ]
           []
   in
-  S.g [ SA.class "elm-charts__interpolations" ] <|
+  S.g [ SA.class "elm-charts__interpolation-sections" ] <|
     List.map view (toCommands config.method toX toY data)
 
 
@@ -644,7 +816,7 @@ area plane toX toY2M toY edits data =
 
       view cmds =
         S.path
-          [ SA.class "elm-charts__area"
+          [ SA.class "elm-charts__area-section"
           , SA.fill config.color
           , SA.fillOpacity (String.fromFloat config.opacity)
           , SA.strokeWidth "0"
@@ -662,7 +834,7 @@ area plane toX toY2M toY edits data =
           [ C.Move firstBottom.x firstBottom.y, C.Line firstTop.x firstTop.y ] ++ cmdsTop ++
           [ C.Move firstBottom.x firstBottom.y ] ++ cmdsBottom ++ [ C.Line endTop.x endTop.y ]
   in
-  S.g [ SA.class "elm-charts__areas" ] <|
+  S.g [ SA.class "elm-charts__area-sections" ] <|
     case toY2M of
       Nothing -> List.map withoutUnder (toCommands config.method toX toY data)
       Just toY2 -> List.map2 withUnder (toCommands config.method toX toY2 data) (toCommands config.method toX toY data)
@@ -670,12 +842,12 @@ area plane toX toY2M toY edits data =
 
 toCommands : Method -> (data -> Float) -> (data -> Maybe Float) -> List data -> List ( Point, List C.Command, Point )
 toCommands method toX toY data =
-  let fold datum acc =
-        case toY datum of
+  let fold datum_ acc =
+        case toY datum_ of
           Just y_ ->
             case acc of
-              latest :: rest -> (latest ++ [ { x = toX datum, y = y_ } ]) :: rest
-              [] -> [ { x = toX datum, y = y_ } ] :: acc
+              latest :: rest -> (latest ++ [ { x = toX datum_, y = y_ } ]) :: rest
+              [] -> [ { x = toX datum_, y = y_ } ] :: acc
 
           Nothing ->
             [] :: acc

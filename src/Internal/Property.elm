@@ -1,13 +1,13 @@
 module Internal.Property exposing (..)
 
 
-
+{-| -}
 type Property data deco
   = Property (Config data deco)
   | Stacked (List (Config data deco))
 
 
-
+{-| -}
 type alias Config data deco =
   { value : data -> Maybe Float
   , visual : data -> Maybe Float
@@ -16,6 +16,7 @@ type alias Config data deco =
   }
 
 
+{-| -}
 property : (data -> Maybe Float) -> List (deco -> deco) -> (data -> List (deco -> deco)) -> Property data deco
 property value attrs extra =
   Property
@@ -26,6 +27,7 @@ property value attrs extra =
     }
 
 
+{-| -}
 stacked : List (Property data deco) -> Property data deco
 stacked properties =
   let configs =
@@ -39,26 +41,27 @@ stacked properties =
           [] ->
             result
 
-      toVisual prev datum =
-        case List.filterMap (\toY -> toY datum) prev of
-          [] -> Nothing
-          ys -> Just (List.sum ys)
+      toVisual toYs_ datum =
+        let vs = List.filterMap (\toY -> toY datum) toYs_ in
+        if List.length vs /= List.length toYs_ then Nothing else Just (List.sum vs)
   in
   Stacked (stack configs [] [])
 
 
+{-| -}
 toYs : List (Property data deco) -> List (data -> Maybe Float)
 toYs properties =
   let each prop =
         case prop of
-          Property config -> [config.visual]
+          Property config -> [ config.visual ]
           Stacked configs -> List.map .visual configs
   in
   List.concatMap each properties
 
 
+{-| -}
 toConfigs : Property data deco -> List (Config data deco)
 toConfigs prop =
   case prop of
-    Property config -> [config]
+    Property config -> [ config ]
     Stacked configs -> configs
