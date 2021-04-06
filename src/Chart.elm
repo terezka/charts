@@ -1430,7 +1430,7 @@ bars edits properties data =
   in
   BarsElement toXYBounds toItems toTicks <| \id_ plane items ->
     S.g
-      [ SA.class "elm-charts__series", clipPath id_ ]
+      [ SA.class "elm-charts__bars", clipPath id_ ]
       [ C.bars plane
           { round = D.value config.round
           , roundBottom = D.value config.roundBottom

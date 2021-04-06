@@ -90,8 +90,8 @@ view model =
       , C.static
       , C.marginLeft 50
       , C.paddingTop 15
-      , C.range (C.startMin 0 >> C.endMax 10)
-      , C.domain (C.startMin 0 >> C.endMin 20)
+      , C.range (C.startMin 0 >> C.endMax 6)
+      , C.domain (C.startMax 8 >> C.endMin 18)
       , C.id "salery-discrepancy"
       ]
       [ C.grid []
@@ -120,6 +120,7 @@ view model =
 
 
       --, C.series .x
+      --    --[ C.monotone ]
       --    [ C.stacked
       --        [ C.property .y [ C.area 0.2, C.monotone 1, C.color C.purple ] (always [])
       --            --(\d -> if hovered d then [ C.aura 5 0.5 ] else [])
@@ -139,11 +140,11 @@ view model =
             --, I.cross p [ I.x 2, I.y 15, I.border "rgb(5, 142, 218)", I.opacity 1, I.size 40, I.borderWidth 1, I.border "white", I.aura 0.5, I.auraWidth 5 ]
             --,
               I.interpolation p .x .y
-                [ I.linear ]
+                [ I.monotone ]
                 [ { x = 0, y = Just 14 }
-                , { x = 0.5, y = Just 15 }
+                , { x = 0.5, y = Just 16 }
                 , { x = 0.75, y = Just 14 }
-                , { x = 1, y = Just 15 }
+                , { x = 1, y = Nothing }
                 , { x = 1.4, y = Just 13 }
                 , { x = 2, y = Just 14 }
                 , { x = 3, y = Just 16 }
@@ -153,11 +154,11 @@ view model =
                 ]
 
             , I.interpolation p .x (.y >> Maybe.map (\d -> if remainderBy 2 (round d) == 0 then d - 1 else d - 2))
-                [ I.linear ]
+                [ I.monotone ]
                 [ { x = 0, y = Just 14 }
-                , { x = 0.5, y = Just 15 }
+                , { x = 0.5, y = Just 16 }
                 , { x = 0.75, y = Just 14 }
-                , { x = 1, y = Just 15 }
+                , { x = 1, y = Nothing }
                 , { x = 1.4, y = Just 13 }
                 , { x = 2, y = Just 14 }
                 , { x = 3, y = Just 16 }
@@ -167,11 +168,11 @@ view model =
                 ]
 
             , I.area p .x (Just (.y >> Maybe.map (\d -> if remainderBy 2 (round d) == 0 then d - 1 else d - 2))) .y --
-                [ I.linear ]
+                [ I.monotone ]
                 [ { x = 0, y = Just 14 }
-                , { x = 0.5, y = Just 15 }
+                , { x = 0.5, y = Just 16 }
                 , { x = 0.75, y = Just 14 }
-                , { x = 1, y = Just 15 }
+                , { x = 1, y = Nothing }
                 , { x = 1.4, y = Just 13 }
                 , { x = 2, y = Just 14 }
                 , { x = 3, y = Just 16 }

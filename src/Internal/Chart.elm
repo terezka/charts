@@ -4,7 +4,7 @@ module Internal.Chart exposing
   , Line, line, Label, label, Arrow, arrow
   , position
   , Bar, bar
-  , Series, Method, linear, monotone, interpolation, area
+  , Method, linear, monotone, Interpolation, interpolation, Area, area
   , Dot, circle, triangle, square, diamond, plus, cross
   --, tooltip
   , x, x1, x2, y, y1, y2, xOff, yOff, border, borderWidth, fontSize, color, width, leftAlign, rightAlign
@@ -574,43 +574,40 @@ bar plane edits =
 
 
 {-| -}
-type alias Series =
-  { interpolation : Maybe Method
-  , color : String
-  , width : Float
-  , points : List (List Point)
-  , opacity : Float
-  }
-
-
-{-| -}
 type Method
   = Linear
   | Monotone
 
 
 {-| -}
-linear : Attribute { a | interpolation : Maybe Method }
+linear : Attribute { a | method : Method }
 linear config =
-  { config | interpolation = Just Linear }
+  { config | method = Linear }
 
 
 {-| -}
-monotone : Attribute { a | interpolation : Maybe Method }
+monotone : Attribute { a | method : Method }
 monotone config =
-  { config | interpolation = Just Monotone }
+  { config | method = Monotone }
+
 
 
 {-| -}
-interpolation : Plane -> (data -> Float) -> (data -> Maybe Float) -> List (Attribute Series) -> List data -> Svg msg
+type alias Interpolation =
+  { method : Method
+  , color : String
+  , width : Float
+  }
+
+
+{-| -}
+interpolation : Plane -> (data -> Float) -> (data -> Maybe Float) -> List (Attribute Interpolation) -> List data -> Svg msg
 interpolation plane toX toY edits data =
   let config =
         apply edits
-          { interpolation = Just Linear
+          { method = Linear
           , color = "rgb(5, 142, 218)"
           , width = 1
-          , points = []
-          , opacity = 0
           }
 
       view ( first, cmds, _ ) =
@@ -624,21 +621,25 @@ interpolation plane toX toY edits data =
           []
   in
   S.g [ SA.class "elm-charts__interpolations" ] <|
-    case config.interpolation of
-      Just method -> List.map view (toCommands method toX toY data)
-      Nothing -> []
+    List.map view (toCommands config.method toX toY data)
 
 
 {-| -}
-area : Plane -> (data -> Float) -> Maybe (data -> Maybe Float) -> (data -> Maybe Float) -> List (Attribute Series) -> List data -> Svg msg
+type alias Area =
+  { method : Method
+  , color : String
+  , opacity : Float
+  }
+
+
+{-| -}
+area : Plane -> (data -> Float) -> Maybe (data -> Maybe Float) -> (data -> Maybe Float) -> List (Attribute Area) -> List data -> Svg msg
 area plane toX toY2M toY edits data =
   let config =
         apply edits
-          { interpolation = Just Linear
+          { method = Linear
           , color = "rgb(5, 142, 218)"
-          , width = 1
-          , points = []
-          , opacity = 0.1
+          , opacity = 0.2
           }
 
       view cmds =
@@ -662,13 +663,9 @@ area plane toX toY2M toY edits data =
           [ C.Move firstBottom.x firstBottom.y ] ++ cmdsBottom ++ [ C.Line endTop.x endTop.y ]
   in
   S.g [ SA.class "elm-charts__areas" ] <|
-    case config.interpolation of
-      Just method ->
-        case toY2M of
-          Nothing -> List.map withoutUnder (toCommands method toX toY data)
-          Just toY2 -> List.map2 withUnder (toCommands method toX toY2 data) (toCommands method toX toY data)
-
-      Nothing -> []
+    case toY2M of
+      Nothing -> List.map withoutUnder (toCommands config.method toX toY data)
+      Just toY2 -> List.map2 withUnder (toCommands config.method toX toY2 data) (toCommands config.method toX toY data)
 
 
 toCommands : Method -> (data -> Float) -> (data -> Maybe Float) -> List data -> List ( Point, List C.Command, Point )
@@ -696,14 +693,6 @@ toCommands method toX toY data =
   in
   List.map2 toSets points commands
     |> List.filterMap identity
-
-
-seriesCommands : Series -> List (List C.Command)
-seriesCommands series =
-  case series.interpolation of
-    Nothing -> []
-    Just Linear -> Interpolation.linear series.points
-    Just Monotone -> Interpolation.monotone series.points
 
 
 
