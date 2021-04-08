@@ -91,7 +91,7 @@ view model =
       , C.marginLeft 50
       , C.paddingTop 15
       , C.range (C.startMin 0 >> C.endMax 6)
-      , C.domain (C.startMax 0 >> C.endMin 18)
+      , C.domain (C.startMax 0 >> C.endMin 19)
       , C.id "salery-discrepancy"
       ]
       [ C.grid []
@@ -131,40 +131,58 @@ view model =
 
       , C.svg <| \p ->
           S.g []
-            [ I.label p [ I.x 3, I.y 5, I.yOff -5, I.xOff 5, I.border I.blue, I.fontSize 60, I.borderWidth 2, I.color I.pink ] "hello"
-            , I.line p [ I.x1 4, I.x2 6, I.color I.blue, I.width 2 ]
-            , I.arrow p [ I.x p.x.max, I.y p.y.min ]
+            --I.label p [ I.x 3, I.y 5, I.yOff -5, I.xOff 5, I.border I.blue, I.fontSize 60, I.borderWidth 2, I.color I.pink ] "hello"
+            --,
+            --[ I.line p [ I.x1 4, I.x2 6, I.color I.blue, I.width 2 ]
+            --, I.arrow p [ I.x p.x.max, I.y p.y.min ]
 
-            , I.bar p .x1 .y1 .x2 .y2
-                  [ I.roundBottom 0.2
-                  , I.roundTop 0.2
-                  --, I.aura 0.3
-                  ]
-                  { x1 = 2.5, y1 = 10, x2 = 2.75, y2 = 13 }
+            --, I.bar p .x1 .y1 .x2 .y2
+            --      [ I.roundBottom 0.2
+            --      , I.roundTop 0.2
+            --      --, I.aura 0.3
+            --      ]
+            --      { x1 = 2.5, y1 = 10, x2 = 2.75, y2 = 13 }
 
-            , I.dot p
-                [ I.x 2
-                , I.y 15
-                , I.border "rgb(5, 142, 218)"
-                , I.opacity 1
-                , I.size 10
-                , I.borderWidth 1
-                , I.border "white"
-                , I.aura 0.5
-                , I.auraWidth 5
-                , I.plus
+            --, I.dot p .x .y
+            --    [ I.border "rgb(5, 142, 218)"
+            --    , I.opacity 1
+            --    , I.size 10
+            --    , I.borderWidth 1
+            --    , I.border "white"
+            --    --, I.aura 0.5
+            --    --, I.auraWidth 5
+            --    , I.plus
+            --    ]
+            --    { x = 2, y = 15 }
+
+            --, I.dot p .x .y
+            --    [ I.border "rgb(5, 142, 218)"
+            --    , I.opacity 1
+            --    , I.size 6
+            --    , I.borderWidth 1
+            --    , I.border "white"
+            --    , I.aura 0.5
+            --    , I.auraWidth 5
+            --    ]
+            --    { x = 1.5, y = 10 }
+
+
+            [ I.series p .x
+                [ I.stacked
+                    [ I.property .z "dogs" "km/s" [ I.monotone, I.area 0.25, I.color I.blue, I.size 0 ] (always [])
+                    , I.property .y "cats" "m/s" [ I.monotone, I.color I.blue, I.size 0 ] (always [])
+                    ]
                 ]
-
-            , I.dot p
-                [ I.x 1.5
-                , I.y 15
-                , I.border "rgb(5, 142, 218)"
-                , I.opacity 1
-                , I.size 10
-                , I.borderWidth 1
-                , I.border "white"
-                --, I.aura 0.5
-                --, I.auraWidth 5
+                [ { x = 0, y = Just 14, z = Just 2 }
+                , { x = 0.5, y = Just 16, z = Just 3.2 }
+                , { x = 0.75, y = Just 14, z = Just 3.8 }
+                , { x = 1, y = Nothing, z = Just 2.3 }
+                , { x = 1.4, y = Just 13, z = Just 2.1 }
+                , { x = 2, y = Just 14, z = Just 2.7 }
+                , { x = 3, y = Just 16, z = Just 3.2 }
+                , { x = 4, y = Just 13, z = Just 0.9 }
+                , { x = 5, y = Just 14, z = Just 3.3 }
+                , { x = 6, y = Just 10, z = Just 3.9 }
                 ]
 
             --, I.cross p [ I.x 2, I.y 15, I.border "rgb(5, 142, 218)", I.opacity 1, I.size 40, I.borderWidth 1, I.border "white", I.aura 0.5, I.auraWidth 5 ]
@@ -177,11 +195,11 @@ view model =
                 , I.roundBottom 0.15
                 , I.grouped
                 ]
-                [ I.property .y "cats" "m/s" [] (always [])
-                , I.property .z "cats" "m/s" [] (always [])
+                [ I.property .y "cats" "m/s" [] (always [ I.borderWidth 1 ])
+                , I.property .z "cats" "m/s" [] (always [ I.borderWidth 1 ])
                 , I.stacked
-                    [ I.property .y "cats" "m/s" [] (always [])
-                    , I.property .z "dogs" "km/s" [] (always [])
+                    [ I.property .y "cats" "m/s" [ I.borderWidth 1 ] (always [])
+                    , I.property .z "dogs" "km/s" [ I.borderWidth 1 ] (always [])
                     ]
                 ]
                 [ { x1 = 0, x2 = 1, y = Just 2, z = Just 3 }
@@ -211,46 +229,6 @@ view model =
               --        ]
               --    |> List.map C.render
 
-            , I.interpolation p .x .y [ I.monotone ]
-                [ { x = 0, y = Just 14 }
-                , { x = 0.5, y = Just 16 }
-                , { x = 0.75, y = Just 14 }
-                , { x = 1, y = Nothing }
-                , { x = 1.4, y = Just 13 }
-                , { x = 2, y = Just 14 }
-                , { x = 3, y = Just 16 }
-                , { x = 4, y = Just 13 }
-                , { x = 5, y = Just 14 }
-                , { x = 6, y = Just 10 }
-                ]
-
-            , I.interpolation p .x (.y >> Maybe.map (\d -> if remainderBy 2 (round d) == 0 then d - 1 else d - 2))
-                [ I.monotone ]
-                [ { x = 0, y = Just 14 }
-                , { x = 0.5, y = Just 16 }
-                , { x = 0.75, y = Just 14 }
-                , { x = 1, y = Nothing }
-                , { x = 1.4, y = Just 13 }
-                , { x = 2, y = Just 14 }
-                , { x = 3, y = Just 16 }
-                , { x = 4, y = Just 13 }
-                , { x = 5, y = Just 14 }
-                , { x = 6, y = Just 10 }
-                ]
-
-            , I.area p .x (Just (.y >> Maybe.map (\d -> if remainderBy 2 (round d) == 0 then d - 1 else d - 2))) .y --
-                [ I.monotone ]
-                [ { x = 0, y = Just 14 }
-                , { x = 0.5, y = Just 16 }
-                , { x = 0.75, y = Just 14 }
-                , { x = 1, y = Nothing }
-                , { x = 1.4, y = Just 13 }
-                , { x = 2, y = Just 14 }
-                , { x = 3, y = Just 16 }
-                , { x = 4, y = Just 13 }
-                , { x = 5, y = Just 14 }
-                , { x = 6, y = Just 10 }
-                ]
             ]
 
       , C.xAxis [ C.noArrow ]

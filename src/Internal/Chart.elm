@@ -12,7 +12,7 @@ module Internal.Chart exposing
   , x, x1, x2, y, y1, y2, xOff, yOff, border, borderWidth, fontSize, color, width, leftAlign, rightAlign
   , rotate, length, roundTop, roundBottom, opacity, size, aura, auraWidth, grouped, margin, spacing
 
-  , toBinsFromVariable, toBinItems
+  , toBinsFromVariable, toBinItems, series, areaFill
   )
 
 import Html as H exposing (Html)
@@ -203,15 +203,15 @@ leftAlign config =
 
 
 {-| -}
-linear : Attribute { a | method : Method }
+linear : Attribute { a | method : Maybe Method }
 linear config =
-  { config | method = Linear }
+  { config | method = Just Linear }
 
 
 {-| -}
-monotone : Attribute { a | method : Method }
+monotone : Attribute { a | method : Maybe Method }
 monotone config =
-  { config | method = Monotone }
+  { config | method = Just Monotone }
 
 
 {-| -}
@@ -248,6 +248,12 @@ plus config =
 cross : Attribute { a | shape : Shape }
 cross config =
   { config | shape = Cross }
+
+
+{-| -}
+area : Float -> Attribute { a | area : Float }
+area v config =
+  { config | area = v }
 
 
 
@@ -544,10 +550,9 @@ arrow plane edits =
 
 
 {-| -}
-type Item datum a =
+type Item a =
   Item
-    { a | datum : datum
-    , render : () -> Svg Never
+    { a | render : Plane -> Svg Never
     , x1 : Float
     , x2 : Float
     , y1 : Float
@@ -557,14 +562,17 @@ type Item datum a =
 
 {-| -}
 type alias BinItem datum value =
-  Item datum
-    { items : List (BarItem datum value) }
+  Item
+    { datum : datum
+    , items : List (BarItem datum value)
+    }
 
 
 {-| -}
 type alias BarItem datum value =
-  Item datum
-    { start : Float
+  Item
+    { datum : datum
+    , start : Float
     , end : Float
     , y : value
     , color : String
@@ -572,21 +580,32 @@ type alias BarItem datum value =
     , unit : String
     }
 
-
 {-| -}
-type alias DotItem value datum =
-  Item datum
-    { x : Float
-    , y : value
+type alias SeriesItem datum value =
+  Item
+    { items : List (DotItem datum value)
+    , method : Maybe Method
+    , area : Float
+    , width : Float
     , color : String
-    , name : String -- TODO id instead?
-    , unit : String
-    , dot : Dot
     }
 
 
 {-| -}
-top : Item datum x -> Point
+type alias DotItem datum value =
+  Item
+    { datum : datum
+    , x : Float
+    , y : value
+    , color : String
+    , name : String -- TODO id instead?
+    , unit : String
+    , dot : List (Attribute Dot)
+    }
+
+
+{-| -}
+top : Item x -> Point
 top (Item config) =
   { x = config.x1 + (config.x2 - config.x1)
   , y = config.y2
@@ -594,7 +613,7 @@ top (Item config) =
 
 
 {-| -}
-bottom : Item datum x -> Point
+bottom : Item x -> Point
 bottom (Item config) =
   { x = config.x1 + (config.x2 - config.x1)
   , y = config.y1
@@ -602,7 +621,7 @@ bottom (Item config) =
 
 
 {-| -}
-left : Item datum x -> Point
+left : Item x -> Point
 left (Item config) =
   { x = config.x1
   , y = config.y1 + (config.y2 - config.y1)
@@ -610,7 +629,7 @@ left (Item config) =
 
 
 {-| -}
-right : Item datum x -> Point
+right : Item x -> Point
 right (Item config) =
   { x = config.x2
   , y = config.y1 + (config.y2 - config.y1)
@@ -618,7 +637,7 @@ right (Item config) =
 
 
 {-| -}
-center : Item datum x -> Point
+center : Item x -> Point
 center (Item config) =
   { x = config.x1 + (config.x2 - config.x1)
   , y = config.y1 + (config.y2 - config.y1)
@@ -626,21 +645,21 @@ center (Item config) =
 
 
 {-| -}
-datum : Item datum x -> datum
+datum : Item { config | datum : datum } -> datum
 datum (Item config) =
   config.datum
 
 
 {-| -}
-value : Item datum { config | y : value } -> value
+value : Item { config | y : value } -> value
 value (Item config) =
   config.y
 
 
 {-| -}
-render : Item datum x -> Svg Never
-render (Item config) =
-  config.render ()
+render : Plane -> Item x -> Svg Never
+render plane (Item config) =
+  config.render plane
 
 
 
@@ -738,8 +757,8 @@ toBinsFromVariable start end =
 
 
 {-| -}
-toBinItems : Plane -> List (Attribute Bars) -> List (Property data Bar) -> List (Bin data) -> List (BinItem data (Maybe Float))
-toBinItems plane barsEdits properties bins =
+toBinItems : List (Attribute Bars) -> List (Property data Bar) -> List (Bin data) -> List (BinItem data (Maybe Float))
+toBinItems barsEdits properties bins =
   let barsConfig =
         apply barsEdits
           { spacing = 0.01
@@ -769,7 +788,7 @@ toBinItems plane barsEdits properties bins =
         in
         Item
           { datum = bin.datum
-          , render = \() -> S.map never <| S.g [ SA.class "elm-charts__bin" ] (List.map render items)
+          , render = \plane -> S.g [ SA.class "elm-charts__bin" ] (List.map (render plane) items)
           , x1 = bin.start
           , x2 = bin.end
           , y1 = 0
@@ -811,7 +830,7 @@ toBinItems plane barsEdits properties bins =
         in
         Item
           { datum = bin.datum
-          , render = \_ ->
+          , render = \plane ->
               bar plane .x1 .y1 .x2 .y2
                 [ color color_
                 , border config.border
@@ -850,8 +869,8 @@ bars : Plane -> Maybe (data -> Float) -> Maybe (data -> Float) -> List (Attribut
 bars plane toStart toEnd barsEdits properties data =
   data
     |> toBinsFromVariable toStart toEnd
-    |> toBinItems plane barsEdits properties
-    |> List.map render
+    |> toBinItems barsEdits properties
+    |> List.map (render plane)
     |> S.g [ SA.class "elm-charts__bins" ]
     |> S.map never
 
@@ -956,6 +975,153 @@ bar plane toX1 toY1 toX2 toY2 edits datum_ =
 -- SERIES
 
 
+{-| -}
+type alias Series =
+  { method : Maybe Method
+  , area : Float
+  , color : String
+  , width : Float
+  , size : Float
+  , opacity : Float
+  , border : String
+  , borderWidth : Float
+  , aura : Float
+  , auraWidth : Float
+  , shape : Shape  -- TODO Maybe
+  }
+
+
+{-| -}
+toSeriesItems : (data -> Float) -> List (Property data Series) -> List data -> Plane -> List (SeriesItem data (Maybe Float))
+toSeriesItems toX properties data plane =
+  let toConfig : List (Attribute Series) -> Series
+      toConfig propAttrs =
+        apply propAttrs
+          { method = Nothing
+          , area = 0
+          , color = ""
+          , width = 1
+          , size = 6
+          , opacity = 1
+          , border = "white"
+          , borderWidth = 0
+          , aura = 0.25
+          , auraWidth = 0
+          , shape = Circle -- TODO Maybe
+          }
+
+      toDotItem : Int -> P.Config data Series -> data -> DotItem data (Maybe Float)
+      toDotItem index prop datum_ =
+        let config = toConfig (prop.attrs ++ prop.extra datum_)
+            -- TODO toDefaultShape index
+
+            x_ = toX datum_
+            y_ = Maybe.withDefault 0 (prop.visual datum_)
+
+            radius = toRadius config.shape config.size
+            radiusX_ = scaleCartesian plane.x radius
+            radiusY_ = scaleCartesian plane.y radius
+
+            color_ = if config.color == "" then toDefaultColor index else config.color
+            name_ = if prop.name == "" then String.fromInt index else prop.name
+        in
+        Item
+          { datum = datum_
+          , render = \plane_ ->
+              case prop.value datum_ of
+                Nothing ->
+                  S.text ""
+
+                Just _ ->
+                  dot plane_ .x .y
+                    [ color color_
+                    , border config.border
+                    , borderWidth config.borderWidth
+                    , opacity config.opacity
+                    , aura config.aura
+                    , auraWidth config.auraWidth
+                    , size config.size
+                    -- TODO other props
+                    ]
+                    { x = x_, y = y_ }
+          , x1 = x_ - radiusX_
+          , x2 = x_ + radiusX_
+          , y1 = y_ - radiusY_
+          , y2 = y_ + radiusY_
+          , x = x_
+          , y = prop.value datum_
+          , name = name_
+          , unit = prop.unit
+          , color = color_
+          , dot = -- TODO
+              [ color color_
+              , border config.border
+              , borderWidth config.borderWidth
+              , opacity config.opacity
+              , aura config.aura
+              , auraWidth config.auraWidth
+              , size config.size
+              -- TODO other props
+              ]
+          }
+
+      toLineItem : Int -> P.Config data Series -> SeriesItem data (Maybe Float)
+      toLineItem index prop =
+        let config = toConfig prop.attrs
+            dotItems = Debug.log "what" <| List.map (toDotItem index prop) data
+            color_ = if config.color == "" then toDefaultColor index else config.color
+        in
+        Item
+          { render = \plane_ ->
+              let toBottom datum_ =
+                    Maybe.map2 (\real visual -> Debug.log prop.name visual - Debug.log (prop.name ++ "2") real) (prop.value datum_) (prop.visual datum_)
+
+                  viewArea =
+                    case config.method of
+                      Just Linear   -> areaFill plane_ toX (Just toBottom) prop.visual [ linear, opacity config.area, color color_ ] data
+                      Just Monotone -> areaFill plane_ toX (Just toBottom) prop.visual [ monotone, opacity config.area, color color_ ] data
+                      Nothing       -> S.text ""
+
+                  viewLine =
+                    case config.method of
+                      Just Linear   -> interpolation plane_ toX prop.visual [ linear, width config.width, color color_ ] data
+                      Just Monotone -> interpolation plane_ toX prop.visual [ monotone, width config.width, color color_ ] data
+                      Nothing       -> S.text ""
+
+                  viewDots =
+                    S.g [ SA.class "elm-charts__dots" ] (List.map (render plane_) dotItems)
+              in
+              S.g
+                [ SA.class "elm-charts__series" ]
+                [ viewArea
+                , viewLine
+                , viewDots
+                ]
+
+          , x1 = 0 -- TODO
+          , x2 = 0 -- TODO
+          , y1 = 0 -- TODO
+          , y2 = 0 -- TODO
+          , items = [] -- dotItems
+          , method = config.method
+          , color = config.color
+          , area = config.area
+          , width = config.width
+          }
+  in
+  List.map P.toConfigs properties
+    |> List.indexedMap (\i ps -> List.reverse <| List.map (toLineItem i) ps)
+    |> List.concat
+
+
+{-| -}
+series : Plane -> (data -> Float) -> List (Property data Series) -> List data -> Svg msg
+series plane toX properties data =
+  toSeriesItems toX properties data plane
+    |> List.map (render plane)
+    |> S.g [ SA.class "elm-charts__series-group" ]
+    |> S.map never
+
 
 {-| -}
 type Method
@@ -965,7 +1131,7 @@ type Method
 
 {-| -}
 type alias Interpolation =
-  { method : Method
+  { method : Maybe Method
   , color : String
   , width : Float
   }
@@ -976,7 +1142,7 @@ interpolation : Plane -> (data -> Float) -> (data -> Maybe Float) -> List (Attri
 interpolation plane toX toY edits data =
   let config =
         apply edits
-          { method = Linear
+          { method = Nothing
           , color = blue
           , width = 1
           }
@@ -991,24 +1157,27 @@ interpolation plane toX toY edits data =
           ]
           []
   in
-  S.g [ SA.class "elm-charts__interpolation-sections" ] <|
-    List.map view (toCommands config.method toX toY data)
+  case config.method of
+    Nothing -> S.text ""
+    Just method ->
+      S.g [ SA.class "elm-charts__interpolation-sections" ] <|
+        List.map view (toCommands method toX toY data)
 
 
 {-| -}
 type alias Area =
-  { method : Method
+  { method : Maybe Method
   , color : String
   , opacity : Float
   }
 
 
 {-| -}
-area : Plane -> (data -> Float) -> Maybe (data -> Maybe Float) -> (data -> Maybe Float) -> List (Attribute Area) -> List data -> Svg msg
-area plane toX toY2M toY edits data =
+areaFill : Plane -> (data -> Float) -> Maybe (data -> Maybe Float) -> (data -> Maybe Float) -> List (Attribute Area) -> List data -> Svg msg
+areaFill plane toX toY2M toY edits data =
   let config =
         apply edits
-          { method = Linear
+          { method = Nothing
           , color = blue
           , opacity = 0.2
           }
@@ -1033,10 +1202,13 @@ area plane toX toY2M toY edits data =
           [ C.Move firstBottom.x firstBottom.y, C.Line firstTop.x firstTop.y ] ++ cmdsTop ++
           [ C.Move firstBottom.x firstBottom.y ] ++ cmdsBottom ++ [ C.Line endTop.x endTop.y ]
   in
-  S.g [ SA.class "elm-charts__area-sections" ] <|
-    case toY2M of
-      Nothing -> List.map withoutUnder (toCommands config.method toX toY data)
-      Just toY2 -> List.map2 withUnder (toCommands config.method toX toY2 data) (toCommands config.method toX toY data)
+  case config.method of
+    Nothing -> S.text ""
+    Just method ->
+      S.g [ SA.class "elm-charts__area-sections" ] <|
+        case toY2M of
+          Nothing -> List.map withoutUnder (toCommands method toX toY data)
+          Just toY2 -> List.map2 withUnder (toCommands method toX toY2 data) (toCommands method toX toY data)
 
 
 toCommands : Method -> (data -> Float) -> (data -> Maybe Float) -> List data -> List ( Point, List C.Command, Point )
@@ -1072,9 +1244,7 @@ toCommands method toX toY data =
 
 {-| -}
 type alias Dot =
-  { x : Float
-  , y : Float
-  , color : String
+  { color : String
   , opacity : Float
   , size : Float
   , border : String
@@ -1096,13 +1266,11 @@ type Shape
 
 
 {-| -}
-dot : Plane -> List (Attribute Dot) -> Svg msg
-dot plane edits =
+dot : Plane -> (data -> Float) -> (data -> Float) -> List (Attribute Dot) -> data -> Svg msg
+dot plane toX toY edits datum_ =
   let config =
         apply edits
-          { x = plane.x.min
-          , y = plane.y.max
-          , color = blue
+          { color = blue
           , opacity = 1
           , size = 6
           , border = "white"
@@ -1112,8 +1280,8 @@ dot plane edits =
           , shape = Circle
           }
 
-      x_ = toSVGX plane config.x
-      y_ = toSVGY plane config.y
+      x_ = toSVGX plane (toX datum_)
+      y_ = toSVGY plane (toY datum_)
       area_ = 2 * pi * config.size
 
       styleAttrs =
@@ -1202,6 +1370,17 @@ dot plane edits =
       in
       view S.path config.auraWidth toAttrs
 
+
+toRadius : Shape -> Float -> Float
+toRadius shape size_ =
+  let area_ = 2 * pi * size_ in
+  case shape of
+    Circle   -> sqrt (area_ / pi)
+    Triangle -> let side = sqrt <| area_ * 4 / (sqrt 3) in (sqrt 3) * side
+    Square   -> sqrt area_ / 2
+    Diamond  -> sqrt area_ / 2
+    Cross    -> sqrt (area_ / 4)
+    Plus     -> sqrt (area_ / 4)
 
 
 trianglePath : Float -> Float -> Float -> Float -> String
