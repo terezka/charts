@@ -150,8 +150,8 @@ view model =
                 , I.size 10
                 , I.borderWidth 1
                 , I.border "white"
-                --, I.aura 0.5
-                --, I.auraWidth 5
+                , I.aura 0.5
+                , I.auraWidth 5
                 , I.plus
                 ]
 

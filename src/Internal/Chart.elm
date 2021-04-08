@@ -1116,15 +1116,31 @@ dot plane edits =
       y_ = toSVGY plane config.y
       area_ = 2 * pi * config.size
 
+      styleAttrs =
+        [ SA.stroke config.border
+        , SA.strokeWidth (String.fromFloat config.borderWidth)
+        , SA.fillOpacity (String.fromFloat config.opacity)
+        , SA.fill config.color
+        , SA.class "elm-charts__dot"
+        ]
+
+      auraAttrs =
+        [ SA.stroke config.color
+        , SA.strokeWidth (String.fromFloat config.auraWidth)
+        , SA.strokeOpacity (String.fromFloat config.aura)
+        , SA.fill "transparent"
+        , SA.class "elm-charts__dot-aura"
+        ]
+
       view toEl auraOff toAttrs =
         if config.aura > 0 then
           S.g
             [ SA.class "elm-charts__dot-container" ]
-            [ toEl (toAttrs auraOff ++ toAuraAttrs config ++ [ SA.class "elm-charts__dot-aura" ]) []
-            , toEl (toAttrs 0 ++ toStyleAttrs config ++ [ SA.class "elm-charts__dot" ]) []
+            [ toEl (toAttrs auraOff ++ auraAttrs) []
+            , toEl (toAttrs 0 ++ styleAttrs) []
             ]
         else
-          toEl (toAttrs 0 ++ toStyleAttrs config ++ [ SA.class "elm-charts__dot" ]) []
+          toEl (toAttrs 0 ++ styleAttrs) []
   in
   case config.shape of
     Circle ->
@@ -1224,24 +1240,6 @@ plusPath area_ off x_ y_ =
     , "h" ++ String.fromFloat -r3
     , "v" ++ String.fromFloat (r3 - off)
     ]
-
-
-toStyleAttrs : Dot -> List (S.Attribute msg)
-toStyleAttrs config =
-  [ SA.stroke config.border
-  , SA.strokeWidth (String.fromFloat config.borderWidth)
-  , SA.fillOpacity (String.fromFloat config.opacity)
-  , SA.fill config.color
-  ]
-
-
-toAuraAttrs : Dot -> List (S.Attribute msg)
-toAuraAttrs config =
-  [ SA.stroke config.color
-  , SA.strokeWidth (String.fromFloat config.auraWidth)
-  , SA.strokeOpacity (String.fromFloat config.aura)
-  , SA.fill "transparent"
-  ]
 
 
 
