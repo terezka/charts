@@ -164,8 +164,10 @@ view model =
                 , I.roundBottom 0.15
                 , I.grouped
                 ]
-                [ I.stacked
-                    [ I.property .y "cats" "m/s" [ I.color I.pink ] (always [])
+                [ I.property .y "cats" "m/s" [] (always [])
+                , I.property .z "cats" "m/s" [] (always [])
+                , I.stacked
+                    [ I.property .y "cats" "m/s" [] (always [])
                     , I.property .z "dogs" "km/s" [] (always [])
                     ]
                 ]

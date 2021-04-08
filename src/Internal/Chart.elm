@@ -769,8 +769,9 @@ toBinItems plane barsEdits properties bins =
             x2_ = x1_ + width_
             y1_ = Maybe.withDefault 0 (prop.visual bin.datum) - Maybe.withDefault 0 (prop.value bin.datum)
             y2_ = Maybe.withDefault 0 (prop.visual bin.datum)
-            color_ = if config.color == "" then toDefaultColor barIndex else config.color
-            name_ = if prop.name == "" then String.fromInt barIndex else prop.name
+            index = barIndex + pieceIndex
+            color_ = if config.color == "" then toDefaultColor index else config.color
+            name_ = if prop.name == "" then String.fromInt index else prop.name
         in
         Item
           { datum = bin.datum
