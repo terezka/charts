@@ -214,6 +214,42 @@ monotone config =
   { config | method = Monotone }
 
 
+{-| -}
+circle : Attribute { a | shape : Shape }
+circle config =
+  { config | shape = Circle }
+
+
+{-| -}
+triangle : Attribute { a | shape : Shape }
+triangle config =
+  { config | shape = Triangle }
+
+
+{-| -}
+square : Attribute { a | shape : Shape }
+square config =
+  { config | shape = Square }
+
+
+{-| -}
+diamond : Attribute { a | shape : Shape }
+diamond config =
+  { config | shape = Diamond }
+
+
+{-| -}
+plus : Attribute { a | shape : Shape }
+plus config =
+  { config | shape = Plus }
+
+
+{-| -}
+cross : Attribute { a | shape : Shape }
+cross config =
+  { config | shape = Cross }
+
+
 
 -- CONTAINER
 
@@ -842,7 +878,7 @@ bar plane toX1 toY1 toX2 toY2 edits datum_ =
           , roundBottom = 0
           , border = "white"
           , borderWidth = 0
-          , color = "rgb(5, 142, 218)"
+          , color = blue
           }
 
       x1_ = toX1 datum_
@@ -920,6 +956,7 @@ bar plane toX1 toY1 toX2 toY2 edits datum_ =
 -- SERIES
 
 
+
 {-| -}
 type Method
   = Linear
@@ -940,7 +977,7 @@ interpolation plane toX toY edits data =
   let config =
         apply edits
           { method = Linear
-          , color = "rgb(5, 142, 218)"
+          , color = blue
           , width = 1
           }
 
@@ -972,7 +1009,7 @@ area plane toX toY2M toY edits data =
   let config =
         apply edits
           { method = Linear
-          , color = "rgb(5, 142, 218)"
+          , color = blue
           , opacity = 0.2
           }
 
@@ -1034,28 +1071,6 @@ toCommands method toX toY data =
 
 
 {-| -}
-type Shape
-  = Circle
-  | Triangle
-  | Square
-  | Diamond
-  | Cross
-  | Plus
-
-
-{-| -}
-dot : Plane -> Shape -> List (Attribute Dot) -> Svg msg
-dot plane shape =
-  case shape of
-    Circle -> circle plane
-    Triangle -> triangle plane
-    Square -> square plane
-    Diamond -> diamond plane
-    Cross -> cross plane
-    Plus -> plus plane
-
-
-{-| -}
 type alias Dot =
   { x : Float
   , y : Float
@@ -1066,210 +1081,111 @@ type alias Dot =
   , borderWidth : Float
   , aura : Float
   , auraWidth : Float
-  -- TODO shape
+  , shape : Shape
   }
 
 
 {-| -}
-circle : Plane -> List (Attribute Dot) -> Svg msg
-circle plane edits =
-  let config =
-        apply edits
-          { x = plane.x.min
-          , y = plane.y.max
-          , color = "rgb(5, 142, 218)"
-          , opacity = 1
-          , size = 6
-          , border = "white"
-          , borderWidth = 1
-          , aura = 0
-          , auraWidth = 10
-          }
-
-      x_ = toSVGX plane config.x
-      y_ = toSVGY plane config.y
-      area_ = 2 * pi * config.size
-      radius = sqrt (area_ / pi)
-      attrs r =
-        [ SA.cx (String.fromFloat x_)
-        , SA.cy (String.fromFloat y_)
-        , SA.r (String.fromFloat r)
-        ]
-  in
-  if config.aura > 0 then
-    S.g [] -- TODO use path instead of circle
-      [ S.circle (attrs (radius + config.auraWidth / 2) ++ toAuraAttrs config) []
-      , S.circle (attrs radius ++ toStyleAttrs config) []
-      ]
-  else
-    S.circle (attrs radius ++ toStyleAttrs config) []
-
+type Shape
+  = Circle
+  | Triangle
+  | Square
+  | Diamond
+  | Cross
+  | Plus
 
 
 {-| -}
-triangle : Plane -> List (Attribute Dot) -> Svg msg
-triangle plane edits =
+dot : Plane -> List (Attribute Dot) -> Svg msg
+dot plane edits =
   let config =
         apply edits
           { x = plane.x.min
           , y = plane.y.max
-          , color = "rgb(5, 142, 218)"
+          , color = blue
           , opacity = 1
           , size = 6
           , border = "white"
           , borderWidth = 1
           , aura = 0
           , auraWidth = 10
+          , shape = Circle
           }
 
       x_ = toSVGX plane config.x
       y_ = toSVGY plane config.y
       area_ = 2 * pi * config.size
-      attrs off = [ SA.d (trianglePath area_ off x_ y_) ]
+
+      view toEl auraOff toAttrs =
+        if config.aura > 0 then
+          S.g
+            [ SA.class "elm-charts__dot-container" ]
+            [ toEl (toAttrs auraOff ++ toAuraAttrs config ++ [ SA.class "elm-charts__dot-aura" ]) []
+            , toEl (toAttrs 0 ++ toStyleAttrs config ++ [ SA.class "elm-charts__dot" ]) []
+            ]
+        else
+          toEl (toAttrs 0 ++ toStyleAttrs config ++ [ SA.class "elm-charts__dot" ]) []
   in
-  if config.aura > 0 then
-    S.g []
-      [ S.path (attrs config.auraWidth ++ toAuraAttrs config) []
-      , S.path (attrs 0 ++ toStyleAttrs config) []
-      ]
-  else
-    S.path (attrs 0 ++ toStyleAttrs config) []
+  case config.shape of
+    Circle ->
+      let radius = sqrt (area_ / pi)
+          radiusAura = config.auraWidth / 2
+          toAttrs off =
+            [ SA.cx (String.fromFloat x_)
+            , SA.cy (String.fromFloat y_)
+            , SA.r (String.fromFloat (radius + off))
+            ]
+      in
+      -- TODO use path instead of circle
+      view S.circle radiusAura toAttrs
 
+    Triangle ->
+      let toAttrs off =
+            [ SA.d (trianglePath area_ off x_ y_) ]
+      in
+      view S.path config.auraWidth toAttrs
 
-{-| -}
-square : Plane -> List (Attribute Dot) -> Svg msg
-square plane edits =
-  let config =
-        apply edits
-          { x = plane.x.min
-          , y = plane.y.max
-          , color = "rgb(5, 142, 218)"
-          , opacity = 1
-          , size = 6
-          , border = "white"
-          , borderWidth = 1
-          , aura = 0
-          , auraWidth = 10
-          }
+    Square ->
+      let side = sqrt area_
+          toAttrs off =
+            let sideOff = side + off in
+            [ SA.x <| String.fromFloat (x_ - sideOff / 2)
+            , SA.y <| String.fromFloat (y_ - sideOff / 2)
+            , SA.width (String.fromFloat sideOff)
+            , SA.height (String.fromFloat sideOff)
+            ]
+      in
+      view S.rect (config.auraWidth) toAttrs
 
-      x_ = toSVGX plane config.x
-      y_ = toSVGY plane config.y
-      area_ = 2 * pi * config.size
-      side = sqrt area_
-      attrs s =
-        [ SA.x <| String.fromFloat (x_ - s / 2)
-        , SA.y <| String.fromFloat (y_ - s / 2)
-        , SA.width (String.fromFloat s)
-        , SA.height (String.fromFloat s)
-        ]
-  in
-  if config.aura > 0 then
-    S.g []
-      [ S.rect (attrs (side + config.auraWidth) ++ toAuraAttrs config) []
-      , S.rect (attrs side ++ toStyleAttrs config) []
-      ]
-  else
-    S.rect (attrs side ++ toStyleAttrs config) []
+    Diamond ->
+      let side = sqrt area_
+          rotation = "rotate(45 " ++ String.fromFloat x_ ++ " " ++ String.fromFloat y_ ++ ")"
+          toAttrs off =
+            let sideOff = side + off in
+            [ SA.x <| String.fromFloat (x_ - sideOff / 2)
+            , SA.y <| String.fromFloat (y_ - sideOff / 2)
+            , SA.width (String.fromFloat sideOff)
+            , SA.height (String.fromFloat sideOff)
+            , SA.transform rotation
+            ]
+      in
+      view S.rect config.auraWidth toAttrs
 
+    Cross ->
+      let rotation = "rotate(45 " ++ String.fromFloat x_ ++ " " ++ String.fromFloat y_ ++ ")"
+          toAttrs off =
+            [ SA.d (plusPath area_ off x_ y_)
+            , SA.transform rotation
+            ]
+      in
+      view S.path config.auraWidth toAttrs
 
-{-| -}
-diamond : Plane -> List (Attribute Dot) -> Svg msg
-diamond plane edits =
-  let config =
-        apply edits
-          { x = plane.x.min
-          , y = plane.y.max
-          , color = "rgb(5, 142, 218)"
-          , opacity = 1
-          , size = 6
-          , border = "white"
-          , borderWidth = 1
-          , aura = 0
-          , auraWidth = 10
-          }
+    Plus ->
+      let toAttrs off =
+            [ SA.d (plusPath area_ off x_ y_) ]
+      in
+      view S.path config.auraWidth toAttrs
 
-      x_ = toSVGX plane config.x
-      y_ = toSVGY plane config.y
-      area_ = 2 * pi * config.size
-      side = sqrt area_
-      rotation = "rotate(45 " ++ String.fromFloat x_ ++ " " ++ String.fromFloat y_ ++ ")"
-      attrs s =
-        [ SA.x <| String.fromFloat (x_ - s / 2)
-        , SA.y <| String.fromFloat (y_ - s / 2)
-        , SA.width (String.fromFloat s)
-        , SA.height (String.fromFloat s)
-        , SA.transform rotation
-        ]
-  in
-  if config.aura > 0 then
-    S.g []
-      [ S.rect (attrs (side + config.auraWidth) ++ toAuraAttrs config) []
-      , S.rect (attrs side ++ toStyleAttrs config) []
-      ]
-  else
-    S.rect (attrs side ++ toStyleAttrs config) []
-
-
-{-| -}
-plus : Plane -> List (Attribute Dot) -> Svg msg
-plus plane edits =
-  let config =
-        apply edits
-          { x = plane.x.min
-          , y = plane.y.max
-          , color = "rgb(5, 142, 218)"
-          , opacity = 1
-          , size = 6
-          , border = "white"
-          , borderWidth = 1
-          , aura = 0
-          , auraWidth = 10
-          }
-
-      x_ = toSVGX plane config.x
-      y_ = toSVGY plane config.y
-      area_ = 2 * pi * config.size
-      attrs off = [ SA.d (plusPath area_ off x_ y_) ]
-  in
-  if config.aura > 0 then
-    S.g []
-      [ S.path (attrs config.auraWidth ++ toAuraAttrs config) []
-      , S.path (attrs 0 ++ toStyleAttrs config) []
-      ]
-  else
-    S.path (attrs 0 ++ toStyleAttrs config) []
-
-
-
-{-| -}
-cross : Plane -> List (Attribute Dot) -> Svg msg
-cross plane edits =
-  let config =
-        apply edits
-          { x = plane.x.min
-          , y = plane.y.max
-          , color = "rgb(5, 142, 218)"
-          , opacity = 1
-          , size = 6
-          , border = "white"
-          , borderWidth = 1
-          , aura = 0
-          , auraWidth = 10
-          }
-
-      x_ = toSVGX plane config.x
-      y_ = toSVGY plane config.y
-      area_ = 2 * pi * config.size
-      rotation = "rotate(45 " ++ String.fromFloat x_ ++ " " ++ String.fromFloat y_ ++ ")"
-      attrs off = [ SA.d (plusPath area_ off x_ y_), SA.transform rotation ]
-  in
-  if config.aura > 0 then
-    S.g []
-      [ S.path (attrs config.auraWidth ++ toAuraAttrs config) []
-      , S.path (attrs 0 ++ toStyleAttrs config) []
-      ]
-  else
-    S.path (attrs 0 ++ toStyleAttrs config) []
 
 
 trianglePath : Float -> Float -> Float -> Float -> String
@@ -1288,7 +1204,7 @@ trianglePath area_ off x_ y_ =
 
 plusPath : Float -> Float -> Float -> Float ->  String
 plusPath area_ off x_ y_ =
-  let side = sqrt (area_ / 5) + off
+  let side = sqrt (area_ / 4) + off
       r3 = side
       r6 = side / 2
   in

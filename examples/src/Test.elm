@@ -142,16 +142,29 @@ view model =
                   ]
                   { x1 = 2.5, y1 = 10, x2 = 2.75, y2 = 13 }
 
-            , I.dot p I.Circle
+            , I.dot p
                 [ I.x 2
                 , I.y 15
                 , I.border "rgb(5, 142, 218)"
                 , I.opacity 1
-                , I.size 5
+                , I.size 10
                 , I.borderWidth 1
                 , I.border "white"
-                , I.aura 0.5
-                , I.auraWidth 5
+                --, I.aura 0.5
+                --, I.auraWidth 5
+                , I.plus
+                ]
+
+            , I.dot p
+                [ I.x 1.5
+                , I.y 15
+                , I.border "rgb(5, 142, 218)"
+                , I.opacity 1
+                , I.size 10
+                , I.borderWidth 1
+                , I.border "white"
+                --, I.aura 0.5
+                --, I.auraWidth 5
                 ]
 
             --, I.cross p [ I.x 2, I.y 15, I.border "rgb(5, 142, 218)", I.opacity 1, I.size 40, I.borderWidth 1, I.border "white", I.aura 0.5, I.auraWidth 5 ]
