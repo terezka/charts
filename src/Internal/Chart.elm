@@ -6,7 +6,8 @@ module Internal.Chart exposing
   , Bars, bars, Bar, bar
   , Method, linear, monotone, Interpolation, interpolation, Area, area
   , dot, Shape(..), Dot, circle, triangle, square, diamond, plus, cross
-  , render, blue, pink, property
+  , render, blue, pink
+  , property, stacked
   --, tooltip
   , x, x1, x2, y, y1, y2, xOff, yOff, border, borderWidth, fontSize, color, width, leftAlign, rightAlign
   , rotate, length, roundTop, roundBottom, opacity, size, aura, auraWidth, grouped, margin, spacing
@@ -606,10 +607,25 @@ render (Item config) =
   config.render ()
 
 
+
+-- PROPERTY
+
+
+{-| -}
+type alias Property data deco =
+  P.Property data deco
+
+
 {-| -}
 property : (data -> Maybe Float) -> String -> String -> List (Attribute deco) -> (data -> List (Attribute deco)) -> Property data deco
 property =
   P.property
+
+
+{-| -}
+stacked : List (Property data deco) -> Property data deco
+stacked =
+  P.stacked
 
 
 
@@ -734,8 +750,8 @@ toBinItems plane barsEdits properties bins =
             pieceProperties = P.toConfigs prop
         in
         pieceProperties
-          |> List.indexedMap (toBarPieceItem bin barIndex x1_ width_ (List.length pieceProperties))
           |> List.reverse
+          |> List.indexedMap (toBarPieceItem bin barIndex x1_ width_ (List.length pieceProperties))
 
       toBarPieceItem : Bin data -> Int -> Float -> Float -> Int -> Int -> P.Config data Bar -> BarItem data (Maybe Float)
       toBarPieceItem bin barIndex x1_ width_ piecesTotal pieceIndex prop =

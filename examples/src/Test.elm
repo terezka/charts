@@ -164,11 +164,13 @@ view model =
                 , I.roundBottom 0.15
                 , I.grouped
                 ]
-                [ I.property .y "cats" "m/s" [] (always [])
-                , I.property .z "dogs" "km/s" [] (always [])
+                [ I.stacked
+                    [ I.property .y "cats" "m/s" [ I.color I.pink ] (always [])
+                    , I.property .z "dogs" "km/s" [] (always [])
+                    ]
                 ]
                 [ { x1 = 0, x2 = 1, y = Just 2, z = Just 3 }
-                , { x1 = 1, x2 = 2, y = Just 1, z = Just 4 }
+                , { x1 = 1, x2 = 2, y = Just 3, z = Just 4 }
                 ]
 
               --, I.bar [ C.color C.blue ] .x1 .x2 .y1 .y2 datum
