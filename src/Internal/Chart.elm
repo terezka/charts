@@ -655,10 +655,6 @@ type alias Bar =
   , roundBottom : Float
   , color : String
   -- TODO , pattern : Pattern
-  , x1 : Maybe Float
-  , x2 : Maybe Float
-  , y1 : Maybe Float
-  , y2 : Maybe Float
   , border : String
   , borderWidth : Float
   -- TODO aura
@@ -666,8 +662,8 @@ type alias Bar =
 
 
 {-| -}
-bar : Plane -> List (Attribute Bar) -> Svg msg
-bar plane edits =
+bar : Plane -> (data -> Float) -> (data -> Float) -> (data -> Float) -> (data -> Float) -> List (Attribute Bar) -> data -> Svg msg
+bar plane toX1 toY1 toX2 toY2 edits datum_ =
   -- TODO round via clipPath
   let config =
         apply edits
@@ -676,16 +672,12 @@ bar plane edits =
           , border = "white"
           , borderWidth = 0
           , color = "rgb(5, 142, 218)"
-          , x1 = Nothing
-          , x2 = Nothing
-          , y1 = Nothing
-          , y2 = Nothing
           }
 
-      x1_ = Maybe.withDefault plane.x.min config.x1
-      x2_ = Maybe.withDefault plane.x.max config.x2
-      y1_ = Maybe.withDefault plane.y.max config.y2
-      y2_ = Maybe.withDefault (closestToZero plane) config.y1
+      x1_ = toX1 datum_
+      x2_ = toX2 datum_
+      y1_ = toY1 datum_
+      y2_ = toY2 datum_
 
       x_ = x1_
       y_ = max y1_ y2_
