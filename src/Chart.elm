@@ -1355,8 +1355,8 @@ type alias Property data deco =
 
 {-| -}
 property : (data -> Maybe Float) -> List (Attribute deco) -> (data -> List (Attribute deco)) -> Property data deco
-property =
-  P.property
+property y_ =
+  P.property y_ "" "" -- TODO
 
 
 {-| -}

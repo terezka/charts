@@ -11,17 +11,21 @@ type Property data deco
 type alias Config data deco =
   { value : data -> Maybe Float
   , visual : data -> Maybe Float
+  , name : String
+  , unit : String
   , attrs : List (deco -> deco)
   , extra : data -> List (deco -> deco) -- TODO
   }
 
 
 {-| -}
-property : (data -> Maybe Float) -> List (deco -> deco) -> (data -> List (deco -> deco)) -> Property data deco
-property value attrs extra =
+property : (data -> Maybe Float) -> String -> String -> List (deco -> deco) -> (data -> List (deco -> deco)) -> Property data deco
+property value name unit attrs extra =
   Property
     { value = value
     , visual = value
+    , name = name
+    , unit = unit
     , attrs = attrs
     , extra = extra
     }
@@ -36,7 +40,8 @@ stacked properties =
       stack list prev result =
         case list of
           one :: rest ->
-            stack rest (one.value :: prev) ({ one | visual = toVisual (one.value :: prev) } :: result)
+            let toYs_ = one.value :: prev in
+            stack rest toYs_ ({ one | visual = toVisual toYs_ } :: result)
 
           [] ->
             result

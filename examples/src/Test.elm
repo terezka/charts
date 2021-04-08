@@ -91,7 +91,7 @@ view model =
       , C.marginLeft 50
       , C.paddingTop 15
       , C.range (C.startMin 0 >> C.endMax 6)
-      , C.domain (C.startMax 8 >> C.endMin 18)
+      , C.domain (C.startMax 0 >> C.endMin 18)
       , C.id "salery-discrepancy"
       ]
       [ C.grid []
@@ -104,9 +104,9 @@ view model =
       --    , C.grouped
       --    ]
       --    [ C.stacked
-      --        [ C.property .y [] (always [])
-      --        , C.property .z [ C.color C.pink ] (always [])
-      --        , C.property (C.just .x) [ C.color C.purple ] (always [])
+      --        [ C.property .y "cats" "m/s" [] (always [])
+      --        , C.property .z "dogs" "m/s" [ C.color C.pink ] (always [])
+      --        , C.property (C.just .x) "fish" "m/s" [ C.color C.purple ] (always [])
       --        ]
       --    , C.property .z [ C.color C.purple ] (always [])
       --    ]
@@ -131,16 +131,70 @@ view model =
 
       , C.svg <| \p ->
           S.g []
-            -- I.label p [ I.x 2, I.y 15, I.yOff -5, I.xOff 5, I.border "blue", I.fontSize 60, I.borderWidth 2, I.color "pink" ] "hello"
-            [
-            -- I.line p [ I.x1 4, I.x2 6, I.color "blue", I.width 2 ]
-            --, I.arrow p [ I.x p.x.max, I.y p.y.min ]
-            --, I.bar p [ I.x1 2.5, I.x2 3, I.y2 2, I.color "#6761ff", I.borderWidth 1, I.border "white", I.roundBottom 0.1, I.roundTop 0.1 ]
-            --, I.bar p [ I.x1 2.5, I.x2 3, I.y1 2, I.y2 10, I.color "#fa55f0", I.borderWidth 10, I.border "#fa55f087", I.roundBottom 0.1, I.roundTop 0.1 ]
+            [ I.label p [ I.x 3, I.y 5, I.yOff -5, I.xOff 5, I.border I.blue, I.fontSize 60, I.borderWidth 2, I.color I.pink ] "hello"
+            , I.line p [ I.x1 4, I.x2 6, I.color I.blue, I.width 2 ]
+            , I.arrow p [ I.x p.x.max, I.y p.y.min ]
+
+            , I.bar p .x1 .y1 .x2 .y2
+                  [ I.roundBottom 0.2
+                  , I.roundTop 0.2
+                  --, I.aura 0.3
+                  ]
+                  { x1 = 2.5, y1 = 10, x2 = 2.75, y2 = 13 }
+
+            , I.dot p I.Circle
+                [ I.x 2
+                , I.y 15
+                , I.border "rgb(5, 142, 218)"
+                , I.opacity 1
+                , I.size 5
+                , I.borderWidth 1
+                , I.border "white"
+                , I.aura 0.5
+                , I.auraWidth 5
+                ]
+
             --, I.cross p [ I.x 2, I.y 15, I.border "rgb(5, 142, 218)", I.opacity 1, I.size 40, I.borderWidth 1, I.border "white", I.aura 0.5, I.auraWidth 5 ]
             --,
-              I.interpolation p .x .y
-                [ I.monotone ]
+
+            , I.bars p (Just .x1) (Just .x2)
+                [ I.margin 0.1
+                , I.spacing 0.01
+                , I.roundTop 0.15
+                , I.roundBottom 0.15
+                , I.grouped
+                ]
+                [ I.property .y "cats" "m/s" [] (always [])
+                , I.property .z "dogs" "km/s" [] (always [])
+                ]
+                [ { x1 = 0, x2 = 1, y = Just 2, z = Just 3 }
+                , { x1 = 1, x2 = 2, y = Just 1, z = Just 4 }
+                ]
+
+              --, I.bar [ C.color C.blue ] .x1 .x2 .y1 .y2 datum
+
+            --, [ { x1 = 0, x2 = 1, y = Just 2, z = Just 3 }
+            --  , { x1 = 1, x2 = 2, y = Just 1, z = Just 4 }
+            --  ]
+            --    |> I.toBinsFromVariable (Just .x1) (Just .x2)
+            --    |> I.toBinItems p [ I.grouped ]
+            --          [ I.property .z "z" "" [ I.color I.pink ] (always [])
+            --          , I.property .y "y" "" [ I.color I.blue ] (always [])
+            --          ]
+            --    |> List.map I.render
+            --    |> S.g []
+            --    |> S.map never
+
+
+              --, data
+              --    |> I.toSeriesItems .x
+              --        [ I.monotone ]
+              --        [ C.property .y [ C.color C.blue, C.circle, C.borderWidth 2 ]
+              --        , C.property .z [ C.color C.pink, C.circle ]
+              --        ]
+              --    |> List.map C.render
+
+            , I.interpolation p .x .y [ I.monotone ]
                 [ { x = 0, y = Just 14 }
                 , { x = 0.5, y = Just 16 }
                 , { x = 0.75, y = Just 14 }

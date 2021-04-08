@@ -3,12 +3,15 @@ module Internal.Chart exposing
   , Container, container
   , Line, line, Label, label, Arrow, arrow
   , position
-  , Bar, bar
+  , Bars, bars, Bar, bar
   , Method, linear, monotone, Interpolation, interpolation, Area, area
   , dot, Shape(..), Dot, circle, triangle, square, diamond, plus, cross
+  , render, blue, pink, property
   --, tooltip
   , x, x1, x2, y, y1, y2, xOff, yOff, border, borderWidth, fontSize, color, width, leftAlign, rightAlign
-  , rotate, length, roundTop, roundBottom, opacity, size, aura, auraWidth
+  , rotate, length, roundTop, roundBottom, opacity, size, aura, auraWidth, grouped, margin, spacing
+
+  , toBinsFromVariable, toBinItems
   )
 
 import Html as H exposing (Html)
@@ -22,6 +25,8 @@ import Internal.Interpolation as Interpolation
 import Json.Decode as Json
 import DOM
 import Dict exposing (Dict)
+-- TODO property?
+import Internal.Property as P exposing (Property)
 
 
 -- TODO clean up plane
@@ -155,6 +160,18 @@ rotate v config =
 
 
 {-| -}
+margin : Float -> Attribute { a | margin : Float }
+margin v config =
+  { config | margin = v }
+
+
+{-| -}
+spacing : Float -> Attribute { a | spacing : Float }
+spacing v config =
+  { config | spacing = v }
+
+
+{-| -}
 roundTop : Float -> Attribute { a | roundTop : Float }
 roundTop v config =
   { config | roundTop = v }
@@ -164,6 +181,12 @@ roundTop v config =
 roundBottom : Float -> Attribute { a | roundBottom : Float }
 roundBottom v config =
   { config | roundBottom = v }
+
+
+{-| -}
+grouped : Attribute { a | grouped : Bool }
+grouped config =
+  { config | grouped = True }
 
 
 {-| -}
@@ -487,6 +510,7 @@ arrow plane edits =
 type Item datum a =
   Item
     { a | datum : datum
+    , render : () -> Svg Never
     , x1 : Float
     , x2 : Float
     , y1 : Float
@@ -503,7 +527,8 @@ type alias BinItem datum value =
 {-| -}
 type alias BarItem datum value =
   Item datum
-    { x : Float
+    { start : Float
+    , end : Float
     , y : value
     , color : String
     , name : String -- TODO id instead?
@@ -574,6 +599,17 @@ value : Item datum { config | y : value } -> value
 value (Item config) =
   config.y
 
+
+{-| -}
+render : Item datum x -> Svg Never
+render (Item config) =
+  config.render ()
+
+
+{-| -}
+property : (data -> Maybe Float) -> String -> String -> List (Attribute deco) -> (data -> List (Attribute deco)) -> Property data deco
+property =
+  P.property
 
 
 
@@ -650,13 +686,131 @@ toBinsFromVariable start end =
 
 
 {-| -}
+toBinItems : Plane -> List (Attribute Bars) -> List (Property data Bar) -> List (Bin data) -> List (BinItem data (Maybe Float))
+toBinItems plane barsEdits properties bins =
+  let barsConfig =
+        apply barsEdits
+          { spacing = 0.01
+          , margin = 0.1
+          , roundTop = 0
+          , roundBottom = 0
+          , grouped = False
+          }
+
+      toBarConfig defaultRoundTop defaultRoundBottom prop datum_  =
+        apply (prop.attrs ++ prop.extra datum_)
+          { color = ""
+          , border = "white"
+          , roundTop = defaultRoundTop
+          , roundBottom = defaultRoundBottom
+          , borderWidth = 0
+          -- TODO aura
+          -- TODO pattern
+          }
+
+      amountOfBars =
+        if barsConfig.grouped then toFloat (List.length properties) else 1
+
+      toBinItem bin =
+        let yMax = Coord.maximum (P.toYs properties) [ bin.datum ]
+            items = List.concat (List.indexedMap (toBarItem bin) properties)
+        in
+        Item
+          { datum = bin.datum
+          , render = \() -> S.map never <| S.g [ SA.class "elm-charts__bin" ] (List.map render items)
+          , x1 = bin.start
+          , x2 = bin.end
+          , y1 = 0
+          , y2 = yMax
+          , items = items
+          }
+
+      toBarItem bin barIndex prop =
+        let length_ = bin.end - bin.start
+            margin_ = length_ * barsConfig.margin
+            width_ = (length_ - margin_ * 2 - (amountOfBars - 1) * barsConfig.spacing) / amountOfBars
+            offset = if barsConfig.grouped then toFloat barIndex * width_ + toFloat barIndex * barsConfig.spacing else 0
+            x1_ = bin.end - length_ + margin_ + offset
+            pieceProperties = P.toConfigs prop
+        in
+        pieceProperties
+          |> List.indexedMap (toBarPieceItem bin barIndex x1_ width_ (List.length pieceProperties))
+          |> List.reverse
+
+      toBarPieceItem : Bin data -> Int -> Float -> Float -> Int -> Int -> P.Config data Bar -> BarItem data (Maybe Float)
+      toBarPieceItem bin barIndex x1_ width_ piecesTotal pieceIndex prop =
+        -- TODO check next / prev piece for null values for rounding
+        let roundTop_ =
+              if barsConfig.roundTop > 0 && (pieceIndex == piecesTotal - 1 || piecesTotal == 1)
+              then barsConfig.roundTop else 0
+
+            roundBottom_ =
+              if barsConfig.roundBottom > 0 && (pieceIndex == 0 || piecesTotal == 1)
+              then barsConfig.roundBottom else 0
+
+            config = toBarConfig roundTop_ roundBottom_ prop bin.datum
+
+            x2_ = x1_ + width_
+            y1_ = Maybe.withDefault 0 (prop.visual bin.datum) - Maybe.withDefault 0 (prop.value bin.datum)
+            y2_ = Maybe.withDefault 0 (prop.visual bin.datum)
+            color_ = if config.color == "" then toDefaultColor barIndex else config.color
+            name_ = if prop.name == "" then String.fromInt barIndex else prop.name
+        in
+        Item
+          { datum = bin.datum
+          , render = \_ ->
+              bar plane .x1 .y1 .x2 .y2
+                [ color color_
+                , border config.border
+                , borderWidth config.borderWidth
+                , roundTop config.roundTop
+                , roundBottom config.roundBottom
+                ]
+                { x1 = x1_, x2 = x2_, y1 = y1_, y2 = y2_ }
+          , x1 = x1_
+          , x2 = x2_
+          , y1 = y1_
+          , y2 = y2_
+          , start = bin.start
+          , end = bin.end
+          , y = prop.value bin.datum
+          , name = name_
+          , unit = prop.unit
+          , color = color_
+          }
+  in
+  List.map toBinItem bins
+
+
+{-| -}
+type alias Bars =
+  { spacing : Float
+  , margin : Float
+  , roundTop : Float
+  , roundBottom : Float
+  , grouped : Bool
+  }
+
+
+{-| -}
+bars : Plane -> Maybe (data -> Float) -> Maybe (data -> Float) -> List (Attribute Bars) -> List (Property data Bar) -> List data -> Svg msg
+bars plane toStart toEnd barsEdits properties data =
+  data
+    |> toBinsFromVariable toStart toEnd
+    |> toBinItems plane barsEdits properties
+    |> List.map render
+    |> S.g [ SA.class "elm-charts__bins" ]
+    |> S.map never
+
+
+{-| -}
 type alias Bar =
   { roundTop : Float
   , roundBottom : Float
   , color : String
-  -- TODO , pattern : Pattern
   , border : String
   , borderWidth : Float
+  -- TODO pattern
   -- TODO aura
   }
 
@@ -895,6 +1049,7 @@ type alias Dot =
   , borderWidth : Float
   , aura : Float
   , auraWidth : Float
+  -- TODO shape
   }
 
 
@@ -1243,5 +1398,65 @@ apply funcs default =
   let apply_ f a = f a in
   List.foldl apply_ default funcs
 
+
+
+-- DEFAULTS
+
+
+toDefaultShape : Int -> Shape
+toDefaultShape =
+  toDefault Circle [ Circle, Triangle, Square, Diamond, Plus, Cross ]
+
+
+toDefaultColor : Int -> String
+toDefaultColor =
+  toDefault blue [ blue, pink, orange, green, purple, red ]
+
+
+toDefault : a -> List a -> Int -> a
+toDefault default items index =
+  let dict = Dict.fromList (List.indexedMap Tuple.pair items)
+      numOfItems = Dict.size dict
+      itemIndex = remainderBy numOfItems index
+  in
+  Dict.get itemIndex dict
+    |> Maybe.withDefault default
+
+
+
+{-| -}
+blue : String
+blue =
+  "rgb(5,142,218)"
+
+
+{-| -}
+orange : String
+orange =
+  "rgb(244, 149, 69)"
+
+
+{-| -}
+pink : String
+pink =
+  "rgb(253, 121, 168)"
+
+
+{-| -}
+green : String
+green =
+  "rgb(68, 201, 72)"
+
+
+{-| -}
+red : String
+red =
+  "rgb(215, 31, 10)"
+
+
+{-| -}
+purple : String
+purple =
+  "rgb(170, 80, 208)"
 
 
