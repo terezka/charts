@@ -251,9 +251,9 @@ cross config =
 
 
 {-| -}
-area : Float -> Attribute { a | area : Float }
+area : Float -> Attribute { a | area : Float, method : Maybe Method }
 area v config =
-  { config | area = v }
+  { config | area = v, method = Just Linear }
 
 
 
@@ -1120,7 +1120,7 @@ interpolation : Plane -> (data -> Float) -> (data -> Maybe Float) -> List (Attri
 interpolation plane toX toY edits data =
   let config =
         apply edits
-          { method = Nothing
+          { method = Just Linear
           , color = blue
           , width = 1
           }
@@ -1155,7 +1155,7 @@ areaFill : Plane -> (data -> Float) -> Maybe (data -> Maybe Float) -> (data -> M
 areaFill plane toX toY2M toY edits data =
   let config =
         apply edits
-          { method = Nothing
+          { method = Just Linear
           , color = blue
           , opacity = 0.2
           }
