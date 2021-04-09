@@ -987,7 +987,7 @@ type alias Series =
   , borderWidth : Float
   , aura : Float
   , auraWidth : Float
-  , shape : Shape  -- TODO Maybe
+  , shape : Maybe Shape
   }
 
 
@@ -1007,62 +1007,7 @@ toSeriesItems toX properties data plane =
           , borderWidth = 0
           , aura = 0.25
           , auraWidth = 0
-          , shape = Circle -- TODO Maybe
-          }
-
-      toDotItem : Int -> P.Config data Series -> data -> DotItem data (Maybe Float)
-      toDotItem index prop datum_ =
-        let config = toConfig (prop.attrs ++ prop.extra datum_)
-            -- TODO toDefaultShape index
-
-            x_ = toX datum_
-            y_ = Maybe.withDefault 0 (prop.visual datum_)
-
-            radius = toRadius config.shape config.size
-            radiusX_ = scaleCartesian plane.x radius
-            radiusY_ = scaleCartesian plane.y radius
-
-            color_ = if config.color == "" then toDefaultColor index else config.color
-            name_ = if prop.name == "" then String.fromInt index else prop.name
-        in
-        Item
-          { datum = datum_
-          , render = \plane_ ->
-              case prop.value datum_ of
-                Nothing ->
-                  S.text ""
-
-                Just _ ->
-                  dot plane_ .x .y
-                    [ color color_
-                    , border config.border
-                    , borderWidth config.borderWidth
-                    , opacity config.opacity
-                    , aura config.aura
-                    , auraWidth config.auraWidth
-                    , size config.size
-                    -- TODO other props
-                    ]
-                    { x = x_, y = y_ }
-          , x1 = x_ - radiusX_
-          , x2 = x_ + radiusX_
-          , y1 = y_ - radiusY_
-          , y2 = y_ + radiusY_
-          , x = x_
-          , y = prop.value datum_
-          , name = name_
-          , unit = prop.unit
-          , color = color_
-          , dot = -- TODO
-              [ color color_
-              , border config.border
-              , borderWidth config.borderWidth
-              , opacity config.opacity
-              , aura config.aura
-              , auraWidth config.auraWidth
-              , size config.size
-              -- TODO other props
-              ]
+          , shape = Nothing
           }
 
       toLineItem : Int -> P.Config data Series -> SeriesItem data (Maybe Float)
@@ -1102,15 +1047,85 @@ toSeriesItems toX properties data plane =
           , x2 = 0 -- TODO
           , y1 = 0 -- TODO
           , y2 = 0 -- TODO
-          , items = [] -- dotItems
+          , items = dotItems
           , method = config.method
           , color = config.color
           , area = config.area
           , width = config.width
           }
+
+      toDotItem : Int -> P.Config data Series -> data -> DotItem data (Maybe Float)
+      toDotItem index prop datum_ =
+        let config = toConfig (prop.attrs ++ prop.extra datum_)
+            -- TODO toDefaultShape index
+
+            x_ = toX datum_
+            y_ = Maybe.withDefault 0 (prop.visual datum_)
+
+            radius = Maybe.withDefault 0 <| Maybe.map (toRadius config.size) config.shape
+            radiusX_ = scaleCartesian plane.x radius
+            radiusY_ = scaleCartesian plane.y radius
+
+            color_ = if config.color == "" then toDefaultColor index else config.color
+            name_ = if prop.name == "" then String.fromInt index else prop.name
+        in
+        Item
+          { datum = datum_
+          , render = \plane_ ->
+              case prop.value datum_ of
+                Nothing ->
+                  S.text ""
+
+                Just _ ->
+                  dot plane_ .x .y
+                    [ color color_
+                    , border config.border
+                    , borderWidth config.borderWidth
+                    , opacity config.opacity
+                    , aura config.aura
+                    , auraWidth config.auraWidth
+                    , size config.size
+                    , case config.shape of
+                        Just Circle -> circle
+                        Just Triangle -> triangle
+                        Just Square -> square
+                        Just Diamond -> diamond
+                        Just Cross -> cross
+                        Just Plus -> plus
+                        Nothing -> identity
+                    ]
+
+                    { x = x_, y = y_ }
+          , x1 = x_ - radiusX_
+          , x2 = x_ + radiusX_
+          , y1 = y_ - radiusY_
+          , y2 = y_ + radiusY_
+          , x = x_
+          , y = prop.value datum_
+          , name = name_
+          , unit = prop.unit
+          , color = color_
+          , dot = -- TODO
+              [ color color_
+              , border config.border
+              , borderWidth config.borderWidth
+              , opacity config.opacity
+              , aura config.aura
+              , auraWidth config.auraWidth
+              , size config.size
+              , case config.shape of
+                  Just Circle -> circle
+                  Just Triangle -> triangle
+                  Just Square -> square
+                  Just Diamond -> diamond
+                  Just Cross -> cross
+                  Just Plus -> plus
+                  Nothing -> identity
+              ]
+          }
   in
   List.map P.toConfigs properties
-    |> List.indexedMap (\i ps -> List.reverse <| List.map (toLineItem i) ps)
+    |> List.indexedMap (\i ps -> List.map (toLineItem i) ps)
     |> List.concat
 
 
@@ -1371,8 +1386,8 @@ dot plane toX toY edits datum_ =
       view S.path config.auraWidth toAttrs
 
 
-toRadius : Shape -> Float -> Float
-toRadius shape size_ =
+toRadius : Float -> Shape -> Float
+toRadius size_ shape =
   let area_ = 2 * pi * size_ in
   case shape of
     Circle   -> sqrt (area_ / pi)
