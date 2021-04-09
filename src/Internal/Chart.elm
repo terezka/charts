@@ -215,39 +215,39 @@ monotone config =
 
 
 {-| -}
-circle : Attribute { a | shape : Shape }
+circle : Attribute { a | shape : Maybe Shape }
 circle config =
-  { config | shape = Circle }
+  { config | shape = Just Circle }
 
 
 {-| -}
-triangle : Attribute { a | shape : Shape }
+triangle : Attribute { a | shape : Maybe Shape }
 triangle config =
-  { config | shape = Triangle }
+  { config | shape = Just Triangle }
 
 
 {-| -}
-square : Attribute { a | shape : Shape }
+square : Attribute { a | shape : Maybe Shape }
 square config =
-  { config | shape = Square }
+  { config | shape = Just Square }
 
 
 {-| -}
-diamond : Attribute { a | shape : Shape }
+diamond : Attribute { a | shape : Maybe Shape }
 diamond config =
-  { config | shape = Diamond }
+  { config | shape = Just Diamond }
 
 
 {-| -}
-plus : Attribute { a | shape : Shape }
+plus : Attribute { a | shape : Maybe Shape }
 plus config =
-  { config | shape = Plus }
+  { config | shape = Just Plus }
 
 
 {-| -}
-cross : Attribute { a | shape : Shape }
+cross : Attribute { a | shape : Maybe Shape }
 cross config =
-  { config | shape = Cross }
+  { config | shape = Just Cross }
 
 
 {-| -}
@@ -1019,28 +1019,18 @@ toSeriesItems toX properties data plane =
               let toBottom datum_ =
                     Maybe.map2 (\real visual -> visual - real) (prop.value datum_) (prop.visual datum_)
 
-                  viewArea =
+                  methodAttr =
                     case config.method of
-                      Just Linear   -> areaFill plane_ toX (Just toBottom) prop.visual [ linear, opacity config.area, color color_ ] data
-                      Just Monotone -> areaFill plane_ toX (Just toBottom) prop.visual [ monotone, opacity config.area, color color_ ] data
-                      Nothing       -> S.text ""
-
-                  viewLine =
-                    case config.method of
-                      Just Linear   -> interpolation plane_ toX prop.visual [ linear, width config.width, color color_ ] data
-                      Just Monotone -> interpolation plane_ toX prop.visual [ monotone, width config.width, color color_ ] data
-                      Nothing       -> S.text ""
-
-                  viewDots =
-                    S.g [ SA.class "elm-charts__dots" ] (List.map (render plane_) dotItems)
+                      Just Linear   -> linear
+                      Just Monotone -> monotone
+                      Nothing       -> \c -> { c | method = Nothing }
               in
               S.g
                 [ SA.class "elm-charts__series" ]
-                [ viewArea
-                , viewLine
-                , viewDots
+                [ areaFill plane_ toX (Just toBottom) prop.visual [ methodAttr, opacity config.area, color color_ ] data
+                , interpolation plane_ toX prop.visual [ methodAttr, width config.width, color color_ ] data
+                , S.g [ SA.class "elm-charts__dots" ] (List.map (render plane_) dotItems)
                 ]
-
           , x1 = 0 -- TODO
           , x2 = 0 -- TODO
           , y1 = 0 -- TODO
@@ -1076,7 +1066,7 @@ toSeriesItems toX properties data plane =
                   Just Diamond -> diamond
                   Just Cross -> cross
                   Just Plus -> plus
-                  Nothing -> identity
+                  Nothing -> \c -> { c | shape = Nothing }
               ]
         in
         Item
@@ -1239,7 +1229,7 @@ type alias Dot =
   , borderWidth : Float
   , aura : Float
   , auraWidth : Float
-  , shape : Shape
+  , shape : Maybe Shape
   }
 
 
@@ -1265,7 +1255,7 @@ dot plane toX toY edits datum_ =
           , borderWidth = 1
           , aura = 0
           , auraWidth = 10
-          , shape = Circle
+          , shape = Just Circle
           }
 
       x_ = toSVGX plane (toX datum_)
@@ -1299,7 +1289,10 @@ dot plane toX toY edits datum_ =
           toEl (toAttrs 0 ++ styleAttrs) []
   in
   case config.shape of
-    Circle ->
+    Nothing ->
+      S.text ""
+
+    Just Circle ->
       let radius = sqrt (area_ / pi)
           radiusAura = config.auraWidth / 2
           toAttrs off =
@@ -1311,13 +1304,13 @@ dot plane toX toY edits datum_ =
       -- TODO use path instead of circle
       view S.circle radiusAura toAttrs
 
-    Triangle ->
+    Just Triangle ->
       let toAttrs off =
             [ SA.d (trianglePath area_ off x_ y_) ]
       in
       view S.path config.auraWidth toAttrs
 
-    Square ->
+    Just Square ->
       let side = sqrt area_
           toAttrs off =
             let sideOff = side + off in
@@ -1329,7 +1322,7 @@ dot plane toX toY edits datum_ =
       in
       view S.rect (config.auraWidth) toAttrs
 
-    Diamond ->
+    Just Diamond ->
       let side = sqrt area_
           rotation = "rotate(45 " ++ String.fromFloat x_ ++ " " ++ String.fromFloat y_ ++ ")"
           toAttrs off =
@@ -1343,7 +1336,7 @@ dot plane toX toY edits datum_ =
       in
       view S.rect config.auraWidth toAttrs
 
-    Cross ->
+    Just Cross ->
       let rotation = "rotate(45 " ++ String.fromFloat x_ ++ " " ++ String.fromFloat y_ ++ ")"
           toAttrs off =
             [ SA.d (plusPath area_ off x_ y_)
@@ -1352,7 +1345,7 @@ dot plane toX toY edits datum_ =
       in
       view S.path config.auraWidth toAttrs
 
-    Plus ->
+    Just Plus ->
       let toAttrs off =
             [ SA.d (plusPath area_ off x_ y_) ]
       in

@@ -169,8 +169,8 @@ view model =
 
             [ I.series p .x
                 [ I.stacked
-                    [ I.property .z "dogs" "km/s" [ I.monotone, I.area 0.25, I.color I.blue, I.size 2, I.borderWidth 1 ] (always [])
-                    , I.property .y "cats" "m/s" [ I.monotone, I.color I.blue, I.size 2, I.borderWidth 1 ] (always [])
+                    [ I.property .z "dogs" "km/s" [ I.monotone, I.area 0.25, I.color I.blue, I.size 2, I.borderWidth 1, I.circle ] (always [])
+                    , I.property .y "cats" "m/s" [ I.monotone, I.color I.blue, I.size 2, I.borderWidth 1, I.diamond ] (always [])
                     ]
                 ]
                 [ { x = 0, y = Just 14, z = Just 2 }
