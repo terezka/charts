@@ -1180,6 +1180,7 @@ areaFill plane toX toY2M toY edits data =
           [ C.Move firstBottom.x firstBottom.y, C.Line firstTop.x firstTop.y ] ++ cmdsTop ++
           [ C.Move firstBottom.x firstBottom.y ] ++ cmdsBottom ++ [ C.Line endTop.x endTop.y ]
   in
+  if config.opacity <= 0 then S.text "" else
   case config.method of
     Nothing -> S.text ""
     Just method ->
