@@ -1074,7 +1074,7 @@ toSeriesItems toX properties data plane =
         Item
           { render = \plane_ ->
               let toBottom datum_ =
-                    Maybe.map2 (\real visual -> Debug.log prop.name visual - Debug.log (prop.name ++ "2") real) (prop.value datum_) (prop.visual datum_)
+                    Maybe.map2 (\real visual -> visual - real) (prop.value datum_) (prop.visual datum_)
 
                   viewArea =
                     case config.method of
