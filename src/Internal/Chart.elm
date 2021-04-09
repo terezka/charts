@@ -1068,7 +1068,7 @@ toSeriesItems toX properties data plane =
       toLineItem : Int -> P.Config data Series -> SeriesItem data (Maybe Float)
       toLineItem index prop =
         let config = toConfig prop.attrs
-            dotItems = Debug.log "what" <| List.map (toDotItem index prop) data
+            dotItems = List.map (toDotItem index prop) data
             color_ = if config.color == "" then toDefaultColor index else config.color
         in
         Item
