@@ -994,8 +994,7 @@ type alias Series =
 {-| -}
 toSeriesItems : (data -> Float) -> List (Property data Series) -> List data -> Plane -> List (SeriesItem data (Maybe Float))
 toSeriesItems toX properties data plane =
-  let toConfig : List (Attribute Series) -> Series
-      toConfig propAttrs =
+  let toConfig propAttrs =
         apply propAttrs
           { method = Nothing
           , area = 0
@@ -1010,7 +1009,6 @@ toSeriesItems toX properties data plane =
           , shape = Nothing
           }
 
-      toLineItem : Int -> P.Config data Series -> SeriesItem data (Maybe Float)
       toLineItem index prop =
         let config = toConfig prop.attrs
             dotItems = List.map (toDotItem index prop) data
@@ -1054,58 +1052,16 @@ toSeriesItems toX properties data plane =
           , width = config.width
           }
 
-      toDotItem : Int -> P.Config data Series -> data -> DotItem data (Maybe Float)
       toDotItem index prop datum_ =
         let config = toConfig (prop.attrs ++ prop.extra datum_)
-            -- TODO toDefaultShape index
-
             x_ = toX datum_
             y_ = Maybe.withDefault 0 (prop.visual datum_)
-
             radius = Maybe.withDefault 0 <| Maybe.map (toRadius config.size) config.shape
             radiusX_ = scaleCartesian plane.x radius
             radiusY_ = scaleCartesian plane.y radius
-
             color_ = if config.color == "" then toDefaultColor index else config.color
             name_ = if prop.name == "" then String.fromInt index else prop.name
-        in
-        Item
-          { datum = datum_
-          , render = \plane_ ->
-              case prop.value datum_ of
-                Nothing ->
-                  S.text ""
-
-                Just _ ->
-                  dot plane_ .x .y
-                    [ color color_
-                    , border config.border
-                    , borderWidth config.borderWidth
-                    , opacity config.opacity
-                    , aura config.aura
-                    , auraWidth config.auraWidth
-                    , size config.size
-                    , case config.shape of
-                        Just Circle -> circle
-                        Just Triangle -> triangle
-                        Just Square -> square
-                        Just Diamond -> diamond
-                        Just Cross -> cross
-                        Just Plus -> plus
-                        Nothing -> identity
-                    ]
-
-                    { x = x_, y = y_ }
-          , x1 = x_ - radiusX_
-          , x2 = x_ + radiusX_
-          , y1 = y_ - radiusY_
-          , y2 = y_ + radiusY_
-          , x = x_
-          , y = prop.value datum_
-          , name = name_
-          , unit = prop.unit
-          , color = color_
-          , dot = -- TODO
+            attrs =
               [ color color_
               , border config.border
               , borderWidth config.borderWidth
@@ -1122,6 +1078,23 @@ toSeriesItems toX properties data plane =
                   Just Plus -> plus
                   Nothing -> identity
               ]
+        in
+        Item
+          { datum = datum_
+          , render = \plane_ ->
+              case prop.value datum_ of
+                Nothing -> S.text ""
+                Just _ -> dot plane_ .x .y attrs { x = x_, y = y_ }
+          , x1 = x_ - radiusX_
+          , x2 = x_ + radiusX_
+          , y1 = y_ - radiusY_
+          , y2 = y_ + radiusY_
+          , x = x_
+          , y = prop.value datum_
+          , name = name_
+          , unit = prop.unit
+          , color = color_
+          , dot = attrs
           }
   in
   List.map P.toConfigs properties
