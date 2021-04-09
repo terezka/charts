@@ -282,7 +282,7 @@ container plane edits below chartEls above =
   -- TODO seperate plane from container size
   let config =
         apply edits
-          { id = "you-should-add-a-unique-id-here"
+          { id = "set-unique-id"
           , attrs = []
           , htmlAttrs = []
           , responsive = True
