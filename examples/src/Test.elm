@@ -34,18 +34,20 @@ main =
 type alias Model =
   { hoveringSalery : List (SC.Item Float SC.BarDetails Salery.Datum)
   , hovering : List (SC.Item Float SC.BarDetails Datum)
+  , hoveringNew : List (I.BarItem Datum (Maybe Float))
   , point : Maybe SC.Point
   }
 
 
 init : Model
 init =
-  Model [] [] Nothing
+  Model [] [] [] Nothing
 
 
 type Msg
   = OnHoverSalery (List (SC.Item Float SC.BarDetails Salery.Datum))
   | OnHover (List (SC.Item Float SC.BarDetails Datum))
+  | OnHoverNew (List (I.BarItem Datum (Maybe Float)))
   | OnCoords SC.Point -- TODO
 
 
@@ -53,6 +55,7 @@ update : Msg -> Model -> Model
 update msg model =
   case msg of
     OnHoverSalery bs -> { model | hoveringSalery = bs }
+    OnHoverNew bs -> { model | hoveringNew = bs }
     OnHover bs -> { model | hovering = bs }
     OnCoords p -> { model | point = Just p }
 
@@ -88,29 +91,36 @@ view model =
       [ C.height 400
       , C.width 1000
       , C.static
-      , C.marginLeft 50
+      --, C.marginLeft 0
       , C.paddingTop 15
-      , C.range (C.startMin 0 >> C.endMax 6)
-      , C.domain (C.startMax 0 >> C.endMin 19)
+      --, C.range (C.startMin 0 >> C.endMax 6)
+      --, C.domain (C.startMax 0 >> C.endMin 19)
+      , C.events
+          [ C.decoder (\is -> I.getNearest I.center (C.getBars is))
+              |> C.map OnHoverNew
+              |> C.event "mousemove"
+          ]
       , C.id "salery-discrepancy"
       ]
       [ C.grid []
 
-      --, C.bars
-      --    [ C.start (\d -> d.x - 2)
-      --    , C.end .x
-      --    , C.rounded 0.2
-      --    , C.roundBottom
-      --    , C.grouped
-      --    ]
-      --    [ C.stacked
-      --        [ C.property .y "cats" "m/s" [] (always [])
-      --        , C.property .z "dogs" "m/s" [ C.color C.pink ] (always [])
-      --        , C.property (C.just .x) "fish" "m/s" [ C.color C.purple ] (always [])
-      --        ]
-      --    , C.property .z [ C.color C.purple ] (always [])
-      --    ]
-      --    data
+      , C.bars
+          [ C.start (\d -> d.x - 2)
+          , C.end .x
+          , I.roundTop 0.2
+          , I.roundBottom 0.2
+          , I.grouped
+          --, I.margin 0
+          --, I.spacing 0
+          ]
+          [ C.stacked
+              [ C.property .y [] (always [])
+              , C.property .z [] (always [])
+              , C.property (C.just .x) [] (always [])
+              ]
+          , C.property .z [] (always [])
+          ]
+          data
 
       , C.yAxis [ C.noArrow ]
       , C.xTicks []
@@ -188,23 +198,23 @@ view model =
             --, I.cross p [ I.x 2, I.y 15, I.border "rgb(5, 142, 218)", I.opacity 1, I.size 40, I.borderWidth 1, I.border "white", I.aura 0.5, I.auraWidth 5 ]
             --,
 
-            , I.bars p (Just .x1) (Just .x2)
-                [ I.margin 0.1
-                , I.spacing 0.01
-                , I.roundTop 0.15
-                , I.roundBottom 0.15
-                , I.grouped
-                ]
-                [ I.property .y "cats" "m/s" [] (always [ I.borderWidth 1 ])
-                , I.property .z "cats" "m/s" [] (always [ I.borderWidth 1 ])
-                , I.stacked
-                    [ I.property .y "cats" "m/s" [ I.borderWidth 1 ] (always [])
-                    , I.property .z "dogs" "km/s" [ I.borderWidth 1 ] (always [])
-                    ]
-                ]
-                [ { x1 = 0, x2 = 1, y = Just 2, z = Just 3 }
-                , { x1 = 1, x2 = 2, y = Just 3, z = Just 4 }
-                ]
+            --, I.bars p (Just .x1) (Just .x2)
+            --    [ I.margin 0.1
+            --    , I.spacing 0.01
+            --    , I.roundTop 0.15
+            --    , I.roundBottom 0.15
+            --    , I.grouped
+            --    ]
+            --    [ I.property .y "cats" "m/s" [] (always [ I.borderWidth 1 ])
+            --    , I.property .z "cats" "m/s" [] (always [ I.borderWidth 1 ])
+            --    , I.stacked
+            --        [ I.property .y "cats" "m/s" [ I.borderWidth 1 ] (always [])
+            --        , I.property .z "dogs" "km/s" [ I.borderWidth 1 ] (always [])
+            --        ]
+            --    ]
+            --    [ { x1 = 0, x2 = 1, y = Just 2, z = Just 3 }
+            --    , { x1 = 1, x2 = 2, y = Just 3, z = Just 4 }
+            --    ]
 
               --, I.bar [ C.color C.blue ] .x1 .x2 .y1 .y2 datum
 
@@ -232,5 +242,29 @@ view model =
             ]
 
       , C.xAxis [ C.noArrow ]
+
+      , C.when model.hoveringNew <| \item rest ->
+          C.tooltipOnTop (\_ -> (I.top item).x) (\_ -> (I.top item).y) [] [ tooltip item ]
       ]
+    ]
+
+
+tooltip : I.BarItem Datum (Maybe Float) -> H.Html msg
+tooltip hovered =
+  H.div []
+    [ H.h4
+        [ HA.style "max-width" "200px"
+        , HA.style "margin-top" "5px"
+        , HA.style "margin-bottom" "8px"
+        , HA.style "color" (I.getColor hovered)
+        ]
+        [ H.text (I.getName hovered) ]
+    , H.div []
+        [ H.text "X: "
+        , H.text <| Debug.toString <| .x <| I.datum hovered
+        ]
+    , H.div []
+        [ H.text "Y: "
+        , H.text <| Debug.toString <| .y <| I.datum hovered
+        ]
     ]

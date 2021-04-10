@@ -8,11 +8,14 @@ module Internal.Chart exposing
   , dot, Shape(..), Dot, circle, triangle, square, diamond, plus, cross
   , render, blue, pink
   , property, stacked
+  , Item(..), BinItem, BarItem, value, center
   --, tooltip
   , x, x1, x2, y, y1, y2, xOff, yOff, border, borderWidth, fontSize, color, width, leftAlign, rightAlign
   , rotate, length, roundTop, roundBottom, opacity, size, aura, auraWidth, grouped, margin, spacing
 
-  , toBinsFromVariable, toBinItems, series, areaFill
+  , toBinsFromVariable, toBinItems, series, areaFill, getBars, getColor, getName, datum, top
+
+  , getNearest, getNearestX, getWithin, getWithinX
   )
 
 import Html as H exposing (Html)
@@ -580,6 +583,7 @@ type alias BarItem datum value =
     , unit : String
     }
 
+
 {-| -}
 type alias SeriesItem datum value =
   Item
@@ -607,7 +611,7 @@ type alias DotItem datum value =
 {-| -}
 top : Item x -> Point
 top (Item config) =
-  { x = config.x1 + (config.x2 - config.x1)
+  { x = config.x1 + (config.x2 - config.x1) / 2
   , y = config.y2
   }
 
@@ -615,7 +619,7 @@ top (Item config) =
 {-| -}
 bottom : Item x -> Point
 bottom (Item config) =
-  { x = config.x1 + (config.x2 - config.x1)
+  { x = config.x1 + (config.x2 - config.x1) / 2
   , y = config.y1
   }
 
@@ -624,7 +628,7 @@ bottom (Item config) =
 left : Item x -> Point
 left (Item config) =
   { x = config.x1
-  , y = config.y1 + (config.y2 - config.y1)
+  , y = config.y1 + (config.y2 - config.y1) / 2
   }
 
 
@@ -632,15 +636,15 @@ left (Item config) =
 right : Item x -> Point
 right (Item config) =
   { x = config.x2
-  , y = config.y1 + (config.y2 - config.y1)
+  , y = config.y1 + (config.y2 - config.y1) / 2
   }
 
 
 {-| -}
 center : Item x -> Point
 center (Item config) =
-  { x = config.x1 + (config.x2 - config.x1)
-  , y = config.y1 + (config.y2 - config.y1)
+  { x = config.x1 + (config.x2 - config.x1) / 2
+  , y = config.y1 + (config.y2 - config.y1) / 2
   }
 
 
@@ -656,10 +660,29 @@ value (Item config) =
   config.y
 
 
+-- TODO everything should be getX
+{-| -}
+getColor : Item { config | color : String } -> String
+getColor (Item config) =
+  config.color
+
+
+{-| -}
+getName : Item { config | name : String } -> String
+getName (Item config) =
+  config.name
+
+
 {-| -}
 render : Plane -> Item x -> Svg Never
 render plane (Item config) =
   config.render plane
+
+
+{-| -}
+getBars : BinItem datum value -> List (BarItem datum value)
+getBars (Item config) =
+  config.items
 
 
 
@@ -1409,6 +1432,124 @@ plusPath area_ off x_ y_ =
 --type alias Tooltip
 
 --tooltip : Tooltip -> Html msg
+
+
+{-| -}
+getNearest : (a -> Point) -> List a -> Plane -> Point -> List a
+getNearest toPoint items plane searchedSvg =
+  let searched =
+        { x = toCartesianX plane searchedSvg.x
+        , y = toCartesianY plane searchedSvg.y
+        }
+  in
+  getNearestHelp toPoint items plane searched
+
+
+{-| -}
+getWithin : Float -> (a -> Point) -> List a -> Plane -> Point -> List a
+getWithin radius toPoint items plane searchedSvg =
+    let
+      searched =
+        { x = toCartesianX plane searchedSvg.x
+        , y = toCartesianY plane searchedSvg.y
+        }
+
+      keepIfEligible closest =
+        withinRadius plane radius searched (toPoint closest)
+    in
+    getNearestHelp toPoint items plane searched
+      |> List.filter keepIfEligible
+
+
+{-| -}
+getNearestX : (a -> Point) -> List a -> Plane -> Point -> List a
+getNearestX toPoint items plane searchedSvg =
+    let
+      searched =
+        { x = toCartesianX plane searchedSvg.x
+        , y = toCartesianY plane searchedSvg.y
+        }
+    in
+    getNearestXHelp toPoint items plane searched
+
+
+{-| -}
+getWithinX : Float -> (a -> Point) -> List a -> Plane -> Point -> List a
+getWithinX radius toPoint items plane searchedSvg =
+    let
+      searched =
+        { x = toCartesianX plane searchedSvg.x
+        , y = toCartesianY plane searchedSvg.y
+        }
+
+      keepIfEligible =
+          withinRadiusX plane radius searched << toPoint
+    in
+    getNearestXHelp toPoint items plane searched
+      |> List.filter keepIfEligible
+
+
+getNearestHelp : (a -> Point) -> List a -> Plane -> Point -> List a
+getNearestHelp toPoint items plane searched =
+  let
+      distance_ =
+          distance plane searched
+
+      getClosest item allClosest =
+        case List.head allClosest of
+          Just closest ->
+            if toPoint closest == toPoint item then item :: allClosest
+            else if distance_ (toPoint closest) > distance_ (toPoint item) then [ item ]
+            else allClosest
+
+          Nothing ->
+            [ item ]
+  in
+  List.foldl getClosest [] items
+
+
+getNearestXHelp : (a -> Point) -> List a ->Plane -> Point -> List a
+getNearestXHelp toPoint items plane searched =
+  let
+      distanceX_ =
+          distanceX plane searched
+
+      getClosest item allClosest =
+        case List.head allClosest of
+          Just closest ->
+              if (toPoint closest).x == (toPoint item).x then item :: allClosest
+              else if distanceX_ (toPoint closest) > distanceX_ (toPoint item) then [ item ]
+              else allClosest
+
+          Nothing ->
+            [ item ]
+  in
+  List.foldl getClosest [] items
+
+
+distanceX : Plane -> Point -> Point -> Float
+distanceX plane searched point =
+    abs <| toSVGX plane point.x - toSVGX plane searched.x
+
+
+distanceY : Plane -> Point -> Point -> Float
+distanceY plane searched point =
+    abs <| toSVGY plane point.y - toSVGY plane searched.y
+
+
+distance : Plane -> Point -> Point -> Float
+distance plane searched point =
+    sqrt <| distanceX plane searched point ^ 2 + distanceY plane searched point ^ 2
+
+
+withinRadius : Plane -> Float -> Point -> Point -> Bool
+withinRadius plane radius searched point =
+    distance plane searched point <= radius
+
+
+withinRadiusX : Plane -> Float -> Point -> Point -> Bool
+withinRadiusX plane radius searched point =
+    distanceX plane searched point <= radius
 
 
 {-| -}

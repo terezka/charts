@@ -22,6 +22,8 @@ module Chart exposing
 
     , style, empty, detached, aura, opaque, full, name, with, stacked, property, Property
     , fontSize, borderWidth, borderColor, xOffset, yOffset, xLabel, text, at, noDot, binned, purple, grouped
+
+    , decoder
     )
 
 
@@ -78,6 +80,7 @@ import DateFormat as F
 import Time
 import Dict exposing (Dict)
 import Internal.Svg exposing (Variety(..))
+import Internal.Chart as C2
 
 
 -- ATTRS
@@ -487,7 +490,7 @@ chart edits elements =
           , domain = Nothing
           , topped = Nothing
           , events = []
-          , attrs = []
+          , attrs = [ SA.style "overflow: visible;" ]
           , htmlAttrs = []
           }
 
@@ -541,9 +544,9 @@ type Element data msg
       (String -> C.Plane -> List (List (C.Item (Maybe Float) C.DotDetails data)) -> S.Svg msg)
   | BarsElement
       (Maybe XYBounds -> Maybe XYBounds)
-      (C.Plane -> List (C.Items (Maybe Float) C.BarDetails data))
+      (C.Plane -> List (C2.BinItem data (Maybe Float)))
       (C.Plane -> TickValues -> TickValues)
-      (String -> C.Plane -> List (C.Items (Maybe Float) C.BarDetails data) -> S.Svg msg)
+      (String -> C.Plane -> List (C2.BinItem data (Maybe Float)) -> S.Svg msg)
   | AxisElement
       (C.Plane -> S.Svg msg)
   | TicksElement
@@ -644,7 +647,7 @@ getItems plane elements =
   let toItems el acc =
         case el of
           SeriesElement _ func _ -> acc ++ List.map ItemDot (func plane |> List.concat)
-          BarsElement _ func _ _ -> acc ++ List.map ItemGroup (func plane)
+          BarsElement _ func _ _ -> acc ++ [ ItemGroup (func plane) ]
           AxisElement _ -> acc
           TicksElement _ _ -> acc
           LabelsElement _ _ -> acc
@@ -799,9 +802,8 @@ event =
 
 {-| -}
 type Item value data
-  = ItemBar (C.Item value C.BarDetails data)
-  | ItemDot (C.Item value C.DotDetails data)
-  | ItemGroup (C.Items value C.BarDetails data)
+  = ItemDot (C.Item value C.DotDetails data)
+  | ItemGroup (List (C2.BinItem data value))
 
 
 {-| -}
@@ -813,23 +815,22 @@ type alias Metric =
 
 
 {-| -}
-getBars : List (Item value data) -> List (C.Item value C.BarDetails data)
+getBars : List (Item value data) -> List (C2.BarItem data value)
 getBars =
   let filter item =
         case item of
-          ItemBar i -> Just [i]
-          ItemGroup i -> Just (List.concat i.items) -- TODO
+          ItemGroup i -> Just (List.concatMap C2.getBars i)
           _ -> Nothing
   in
   List.concat << List.filterMap filter
 
 
 {-| -}
-getGroups : List (Item value data) -> List (C.Items value C.BarDetails data)
+getGroups : List (Item value data) -> List (List (C2.BinItem data value))
 getGroups =
   List.filterMap <| \item ->
     case item of
-      ItemGroup i -> Just i
+      ItemGroup i -> Just i -- TODO
       _ -> Nothing
 
 
@@ -847,14 +848,6 @@ withoutUnknowns : List (Item (Maybe Float) data) -> List (Item Float data)
 withoutUnknowns =
   List.filterMap <| \item ->
     case item of
-      ItemBar i ->
-        let onlyKnowns sub =
-              case sub.values.y of
-                Just y -> Just (C.Item sub.datum sub.center sub.position { x1 = sub.values.x1, x2 = sub.values.x2, y = y } sub.details)
-                Nothing -> Nothing
-        in
-        Maybe.map ItemBar (onlyKnowns i)
-
       ItemDot i ->
         let onlyKnowns sub =
               case sub.values.y of
@@ -863,18 +856,41 @@ withoutUnknowns =
         in
         Maybe.map ItemDot (onlyKnowns i)
 
-      ItemGroup i ->
-        let onlyKnowns sub =
-              case sub.values.y of
-                Just y -> Just (C.Item sub.datum sub.center sub.position { x1 = sub.values.x1, x2 = sub.values.x2, y = y } sub.details)
-                Nothing -> Nothing
+      ItemGroup is ->
+        let onlyKnowns (C2.Item i) =
+              C2.Item
+                { datum = i.datum
+                , render = i.render
+                , items = List.filterMap onlyKnownBars i.items
+                , x1 = i.x1
+                , x2 = i.x2
+                , y1 = i.y1
+                , y2 = i.y2
+                }
+
+            onlyKnownBars : C2.BarItem data (Maybe Float) -> Maybe (C2.BarItem data Float)
+            onlyKnownBars (C2.Item sub) =
+              case sub.y of
+                Just y ->
+                  Just <| C2.Item
+                    { datum = sub.datum
+                    , start = sub.start
+                    , end = sub.end
+                    , y = y
+                    , color = sub.color
+                    , name = sub.name
+                    , unit = sub.unit
+                    , render = sub.render
+                    , x1 = sub.x1
+                    , x2 = sub.x2
+                    , y1 = sub.y1
+                    , y2 = sub.y2
+                    }
+
+                Nothing ->
+                  Nothing
         in
-        Just <| ItemGroup
-          { datum = i.datum
-          , center = i.center
-          , position = i.position
-          , items = List.map (List.filterMap onlyKnowns) i.items -- TODO
-          }
+        Just <| ItemGroup <| List.map onlyKnowns is
 
 
 {-| -}
@@ -916,6 +932,12 @@ getCoords =
           }
     in
     searched
+
+
+{-| -}
+decoder : (List (Item (Maybe Float) data) -> C.Plane -> C.Point -> List a) -> Decoder data (List a)
+decoder func =
+  Decoder func
 
 
 {-| -}
@@ -1373,12 +1395,11 @@ just toY =
 
 {-| -}
 type alias Bars data =
-  { round : D.Constant Float
-  , roundBottom : D.Constant Bool
-  , grouped : D.Constant Bool
-  , margin : D.Constant Float
-  , spacing : D.Constant Float
-  , name : D.Constant String
+  { spacing : Float
+  , margin : Float
+  , roundTop : Float
+  , roundBottom : Float
+  , grouped : Bool
   , start : Maybe (data -> Float)
   , end : Maybe (data -> Float)
   }
@@ -1386,10 +1407,13 @@ type alias Bars data =
 
 {-| -}
 type alias Bar =
-  { name : D.Constant String
-  , unit : D.Constant String
-  , color : Maybe String
-  -- TODO , pattern : Constant Pattern
+  { roundTop : Float
+  , roundBottom : Float
+  , color : String
+  , border : String
+  , borderWidth : Float
+  -- TODO pattern
+  -- TODO aura
   }
 
 
@@ -1398,29 +1422,31 @@ bars : List (Attribute (Bars data)) -> List (Property data Bar) -> List data -> 
 bars edits properties data =
   let config =
         D.apply edits
-          { round = D.Default 0
-          , roundBottom = D.Default False
-          , grouped = D.Default False
-          , margin = D.Default 0.1
-          , spacing = D.Default 0.01
-          , name = D.Default ""
+          { spacing = 0.01
+          , margin = 0.1
+          , roundTop = 0
+          , roundBottom = 0
+          , grouped = False
           , start = Nothing
           , end = Nothing
           }
 
       bins =
-        C.toBins config.start config.end data
-
-      space =
-        { between = D.value config.spacing
-        , margin = D.value config.margin
-        }
+        C2.toBinsFromVariable config.start config.end data
 
       toItems _ =
-        C.toBarItems (D.value config.grouped) space properties bins
+        C2.toBinItems
+          [ C2.spacing config.spacing
+          , C2.margin config.margin
+          , C2.roundTop config.roundTop
+          , C2.roundBottom config.roundBottom
+          , if config.grouped then C2.grouped else identity
+          ]
+          properties
+          bins
 
       toTicks plane acc =
-        { acc | xs = List.concatMap (\b -> [b.start, b.end]) bins }
+        { acc | xs = List.concatMap (\b -> [ b.start, b.end ]) bins }
 
       toYs =
         List.map (\prop bin -> prop.visual bin.datum) (List.concatMap P.toConfigs properties)
@@ -1429,15 +1455,10 @@ bars edits properties data =
         makeBounds [.start >> Just, .end >> Just] toYs bins
   in
   BarsElement toXYBounds toItems toTicks <| \id_ plane items ->
-    S.g
-      [ SA.class "elm-charts__bars", clipPath id_ ]
-      [ C.bars plane
-          { round = D.value config.round
-          , roundBottom = D.value config.roundBottom
-          , attrs = \i d -> [] -- TODO
-          }
-          items
-      ]
+    items
+      |> List.map (C2.render plane)
+      |> S.g [ SA.class "elm-charts__bins", clipPath id_ ]
+      |> S.map never
 
 
 
