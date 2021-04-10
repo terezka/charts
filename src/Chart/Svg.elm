@@ -1,21 +1,19 @@
-module Internal.Chart exposing
-  ( Point
-  , Container, container
-  , Line, line, Label, label, Arrow, arrow
-  , position
-  , Bars, bars, Bar, bar
-  , Method, linear, monotone, Interpolation, interpolation, Area, area
-  , dot, Shape(..), Dot, circle, triangle, square, diamond, plus, cross
-  , render, blue, pink
-  , property, stacked
-  , Item(..), BinItem, BarItem, value, center
+module Chart.Svg exposing
+  ( Container, container
+  , Line, line
+  , Label, label
+  , Arrow, arrow
+  , Bar, bar
+  , Interpolation, interpolation
+  , Area, area
+  , Dot, dot, toRadius
+
   --, tooltip
-  , x, x1, x2, y, y1, y2, xOff, yOff, border, borderWidth, fontSize, color, width, leftAlign, rightAlign
-  , rotate, length, roundTop, roundBottom, opacity, size, aura, auraWidth, grouped, margin, spacing
 
-  , toBinsFromVariable, toBinItems, series, areaFill, getBars, getColor, getName, datum, top
+  , decoder, getNearest, getNearestX, getWithin, getWithinX
 
-  , getNearest, getNearestX, getWithin, getWithinX
+  , position
+  , blue, pink, orange, green, purple, red
   )
 
 import Html as H exposing (Html)
@@ -23,240 +21,17 @@ import Html.Attributes as HA
 import Svg as S exposing (Svg)
 import Svg.Attributes as SA
 import Svg.Events as SE
-import Svg.Coordinates as Coord exposing (Plane, place, toSVGX, toSVGY, toCartesianX, toCartesianY, scaleSVG, scaleCartesian, placeWithOffset)
+import Svg.Coordinates as Coord exposing (Point, Plane, place, toSVGX, toSVGY, toCartesianX, toCartesianY, scaleSVG, scaleCartesian, placeWithOffset)
 import Svg.Commands as C exposing (..)
+import Chart.Attributes as CA
 import Internal.Interpolation as Interpolation
 import Json.Decode as Json
 import DOM
 import Dict exposing (Dict)
--- TODO property?
-import Internal.Property as P exposing (Property)
 
 
 -- TODO clean up plane
 -- TODO clean up property
-
-
-{-| -}
-type alias Point =
-  { x : Float
-  , y : Float
-  }
-
-
-{-| -}
-type alias Attribute c =
-  c -> c
-
-
-{-| -}
-x : Float -> Attribute { a | x : Float }
-x v config =
-  { config | x = v }
-
-
-{-| -}
-x1 : Float -> Attribute { a | x1 : Maybe Float }
-x1 v config =
-  { config | x1 = Just v }
-
-
-{-| -}
-x2 : Float -> Attribute { a | x2 : Maybe Float }
-x2 v config =
-  { config | x2 = Just v }
-
-
-{-| -}
-y : Float -> Attribute { a | y : Float }
-y v config =
-  { config | y = v }
-
-
-{-| -}
-y1 : Float -> Attribute { a | y1 : Maybe Float }
-y1 v config =
-  { config | y1 = Just v }
-
-
-{-| -}
-y2 : Float -> Attribute { a | y2 : Maybe Float }
-y2 v config =
-  { config | y2 = Just v }
-
-
-{-| -}
-xOff : Float -> Attribute { a | xOff : Float }
-xOff v config =
-  { config | xOff = v }
-
-
-{-| -}
-yOff : Float -> Attribute { a | yOff : Float }
-yOff v config =
-  { config | yOff = v }
-
-
-{-| -}
-border : String -> Attribute { a | border : String }
-border v config =
-  { config | border = v }
-
-
-{-| -}
-borderWidth : Float -> Attribute { a | borderWidth : Float }
-borderWidth v config =
-  { config | borderWidth = v }
-
-
-{-| -}
-fontSize : Int -> Attribute { a | fontSize : Maybe Int }
-fontSize v config =
-  { config | fontSize = Just v }
-
-
-{-| -}
-color : String -> Attribute { a | color : String }
-color v config =
-  { config | color = v }
-
-
-{-| -}
-opacity : Float -> Attribute { a | opacity : Float }
-opacity v config =
-  { config | opacity = v }
-
-
-{-| -}
-aura : Float -> Attribute { a | aura : Float }
-aura v config =
-  { config | aura = v }
-
-
-{-| -}
-auraWidth : Float -> Attribute { a | auraWidth : Float }
-auraWidth v config =
-  { config | auraWidth = v }
-
-
-{-| -}
-size : Float -> Attribute { a | size : Float }
-size v config =
-  { config | size = v }
-
-
-{-| -}
-width : Float -> Attribute { a | width : Float }
-width v config =
-  { config | width = v }
-
-
-{-| -}
-length : Float -> Attribute { a | length : Float }
-length v config =
-  { config | length = v }
-
-
-{-| -}
-rotate : Float -> Attribute { a | rotate : Float }
-rotate v config =
-  { config | rotate = config.rotate + v }
-
-
-{-| -}
-margin : Float -> Attribute { a | margin : Float }
-margin v config =
-  { config | margin = v }
-
-
-{-| -}
-spacing : Float -> Attribute { a | spacing : Float }
-spacing v config =
-  { config | spacing = v }
-
-
-{-| -}
-roundTop : Float -> Attribute { a | roundTop : Float }
-roundTop v config =
-  { config | roundTop = v }
-
-
-{-| -}
-roundBottom : Float -> Attribute { a | roundBottom : Float }
-roundBottom v config =
-  { config | roundBottom = v }
-
-
-{-| -}
-grouped : Attribute { a | grouped : Bool }
-grouped config =
-  { config | grouped = True }
-
-
-{-| -}
-rightAlign : Attribute { a | anchor : Anchor }
-rightAlign config =
-  { config | anchor = Start }
-
-
-{-| -}
-leftAlign : Attribute { a | anchor : Anchor }
-leftAlign config =
-  { config | anchor = End }
-
-
-{-| -}
-linear : Attribute { a | method : Maybe Method }
-linear config =
-  { config | method = Just Linear }
-
-
-{-| -}
-monotone : Attribute { a | method : Maybe Method }
-monotone config =
-  { config | method = Just Monotone }
-
-
-{-| -}
-circle : Attribute { a | shape : Maybe Shape }
-circle config =
-  { config | shape = Just Circle }
-
-
-{-| -}
-triangle : Attribute { a | shape : Maybe Shape }
-triangle config =
-  { config | shape = Just Triangle }
-
-
-{-| -}
-square : Attribute { a | shape : Maybe Shape }
-square config =
-  { config | shape = Just Square }
-
-
-{-| -}
-diamond : Attribute { a | shape : Maybe Shape }
-diamond config =
-  { config | shape = Just Diamond }
-
-
-{-| -}
-plus : Attribute { a | shape : Maybe Shape }
-plus config =
-  { config | shape = Just Plus }
-
-
-{-| -}
-cross : Attribute { a | shape : Maybe Shape }
-cross config =
-  { config | shape = Just Cross }
-
-
-{-| -}
-area : Float -> Attribute { a | area : Float, method : Maybe Method }
-area v config =
-  { config | area = v, method = Just Linear }
 
 
 
@@ -280,7 +55,7 @@ type alias Event msg =
   }
 
 
-container : Plane -> List (Attribute (Container msg)) -> List (Html msg) -> List (Svg msg) -> List (Html msg) -> Html msg
+container : Plane -> List (CA.Attribute (Container msg)) -> List (Html msg) -> List (Svg msg) -> List (Html msg) -> Html msg
 container plane edits below chartEls above =
   -- TODO seperate plane from container size
   let config =
@@ -328,7 +103,7 @@ container plane edits below chartEls above =
         S.rect (chartPosition ++ List.map toEvent config.events) []
 
       toEvent event =
-        SE.on event.name (decodePoint plane event.handler)
+        SE.on event.name (decoder plane event.handler)
 
       chartPosition =
         [ SA.x (String.fromFloat plane.x.marginLower)
@@ -357,7 +132,7 @@ type alias Line =
 
 
 {-| -}
-line : Plane -> List (Attribute Line) -> Svg msg
+line : Plane -> List (CA.Attribute Line) -> Svg msg
 line plane edits =
   let config =
         apply edits
@@ -447,20 +222,13 @@ type alias Label =
   , borderWidth : Float
   , fontSize : Maybe Int
   , color : String
-  , anchor : Anchor
+  , anchor : CA.Anchor
   -- TODO rotate
   }
 
 
 {-| -}
-type Anchor
-  = End
-  | Start
-  | Middle
-
-
-{-| -}
-label : Plane -> List (Attribute Label) -> String -> Svg msg
+label : Plane -> List (CA.Attribute Label) -> String -> Svg msg
 label plane edits string =
   let config =
         apply edits
@@ -472,7 +240,7 @@ label plane edits string =
           , borderWidth = 0.1
           , fontSize = Nothing
           , color = "rgb(210, 210, 210)"
-          , anchor = Middle
+          , anchor = CA.Middle
           }
 
       fontStyle =
@@ -482,9 +250,9 @@ label plane edits string =
 
       anchorStyle =
         case config.anchor of
-        End -> "text-anchor: end;"
-        Start -> "text-anchor: start;"
-        Middle -> "text-anchor: middle;"
+          CA.End -> "text-anchor: end;"
+          CA.Start -> "text-anchor: start;"
+          CA.Middle -> "text-anchor: middle;"
   in
   S.text_
     [ SA.class "elm-charts__label"
@@ -515,7 +283,7 @@ type alias Arrow =
 
 
 {-| -}
-arrow : Plane -> List (Attribute Arrow) -> Svg msg
+arrow : Plane -> List (CA.Attribute Arrow) -> Svg msg
 arrow plane edits =
   let config =
         apply edits
@@ -549,353 +317,7 @@ arrow plane edits =
 
 
 
--- ITEMS
-
-
-{-| -}
-type Item a =
-  Item
-    { a | render : Plane -> Svg Never
-    , x1 : Float
-    , x2 : Float
-    , y1 : Float
-    , y2 : Float
-    }
-
-
-{-| -}
-type alias BinItem datum value =
-  Item
-    { datum : datum
-    , items : List (BarItem datum value)
-    }
-
-
-{-| -}
-type alias BarItem datum value =
-  Item
-    { datum : datum
-    , start : Float
-    , end : Float
-    , y : value
-    , color : String
-    , name : String -- TODO id instead?
-    , unit : String
-    }
-
-
-{-| -}
-type alias SeriesItem datum value =
-  Item
-    { items : List (DotItem datum value)
-    , method : Maybe Method
-    , area : Float
-    , width : Float
-    , color : String
-    }
-
-
-{-| -}
-type alias DotItem datum value =
-  Item
-    { datum : datum
-    , x : Float
-    , y : value
-    , color : String
-    , name : String -- TODO id instead?
-    , unit : String
-    , dot : List (Attribute Dot)
-    }
-
-
-{-| -}
-top : Item x -> Point
-top (Item config) =
-  { x = config.x1 + (config.x2 - config.x1) / 2
-  , y = config.y2
-  }
-
-
-{-| -}
-bottom : Item x -> Point
-bottom (Item config) =
-  { x = config.x1 + (config.x2 - config.x1) / 2
-  , y = config.y1
-  }
-
-
-{-| -}
-left : Item x -> Point
-left (Item config) =
-  { x = config.x1
-  , y = config.y1 + (config.y2 - config.y1) / 2
-  }
-
-
-{-| -}
-right : Item x -> Point
-right (Item config) =
-  { x = config.x2
-  , y = config.y1 + (config.y2 - config.y1) / 2
-  }
-
-
-{-| -}
-center : Item x -> Point
-center (Item config) =
-  { x = config.x1 + (config.x2 - config.x1) / 2
-  , y = config.y1 + (config.y2 - config.y1) / 2
-  }
-
-
-{-| -}
-datum : Item { config | datum : datum } -> datum
-datum (Item config) =
-  config.datum
-
-
-{-| -}
-value : Item { config | y : value } -> value
-value (Item config) =
-  config.y
-
-
--- TODO everything should be getX
-{-| -}
-getColor : Item { config | color : String } -> String
-getColor (Item config) =
-  config.color
-
-
-{-| -}
-getName : Item { config | name : String } -> String
-getName (Item config) =
-  config.name
-
-
-{-| -}
-render : Plane -> Item x -> Svg Never
-render plane (Item config) =
-  config.render plane
-
-
-{-| -}
-getBars : BinItem datum value -> List (BarItem datum value)
-getBars (Item config) =
-  config.items
-
-
-
--- PROPERTY
-
-
-{-| -}
-type alias Property data deco =
-  P.Property data deco
-
-
-{-| -}
-property : (data -> Maybe Float) -> String -> String -> List (Attribute deco) -> (data -> List (Attribute deco)) -> Property data deco
-property =
-  P.property
-
-
-{-| -}
-stacked : List (Property data deco) -> Property data deco
-stacked =
-  P.stacked
-
-
-
 -- BAR
-
-
-{-| -}
-type alias Bin data =
-  { datum : data
-  , start : Float
-  , end : Float
-  }
-
-
-{-| -}
-toBinsFromConstant : (data -> Float) -> Float -> List data -> List (Bin (List data))
-toBinsFromConstant toX width_ data =
-  let fold datum_ acc =
-        Dict.update (ceiling (toX datum_)) (updateDict datum_) acc
-
-      updateDict datum_ prev =
-        prev
-          |> Maybe.map (\ds -> datum_ :: ds)
-          |> Maybe.withDefault [ datum_ ]
-          |> Just
-
-      ceiling b =
-        -- TODO
-        let floored = toFloat (floor (b / width_)) * width_ in
-        b - (b - floored) + width_
-  in
-  data
-    |> List.foldr fold Dict.empty
-    |> Dict.toList
-    |> List.map (\( bin, ds ) -> { start = bin, end = bin + width_, datum = ds })
-
-
-{-| -}
-toBinsFromVariable : Maybe (data -> Float) -> Maybe (data -> Float) -> List data -> List (Bin data)
-toBinsFromVariable start end =
-  let toXs index prevM curr nextM =
-        case ( start, end ) of
-          ( Nothing, Nothing ) ->
-            { datum = curr, start = toFloat (index + 1) - 0.5, end = toFloat (index + 1) + 0.5 }
-
-          ( Just toStart, Nothing ) ->
-            case ( prevM, nextM ) of
-              ( _, Just next ) ->
-                { datum = curr, start = toStart curr, end = toStart next }
-              ( Just prev, Nothing ) ->
-                { datum = curr, start = toStart curr, end = toStart curr + (toStart curr - toStart prev) }
-              ( Nothing, Nothing ) ->
-                { datum = curr, start = toStart curr, end = toStart curr + 1 }
-
-          ( Nothing, Just toEnd ) ->
-            case ( prevM, nextM ) of
-              ( Just prev, _ ) ->
-                { datum = curr, start = toEnd prev, end = toEnd curr }
-              ( Nothing, Just next ) ->
-                { datum = curr, start = toEnd curr - (toEnd next - toEnd curr), end = toEnd curr }
-              ( Nothing, Nothing ) ->
-                { datum = curr, start = toEnd curr - 1, end = toEnd curr }
-
-          ( Just toStart, Just toEnd ) ->
-            { datum = curr, start = toStart curr, end = toEnd curr }
-
-      fold index prev acc list =
-        case list of
-          a :: b :: rest -> fold (index + 1) (Just a) (acc ++ [toXs index prev a (Just b)]) (b :: rest)
-          a :: [] -> acc ++ [toXs index prev a Nothing]
-          [] -> acc
-  in
-  fold 0 Nothing []
-
-
-{-| -}
-toBinItems : List (Attribute Bars) -> List (Property data Bar) -> List (Bin data) -> List (BinItem data (Maybe Float))
-toBinItems barsEdits properties bins =
-  let barsConfig =
-        apply barsEdits
-          { spacing = 0.01
-          , margin = 0.1
-          , roundTop = 0
-          , roundBottom = 0
-          , grouped = False
-          }
-
-      toBarConfig defaultRoundTop defaultRoundBottom prop datum_  =
-        apply (prop.attrs ++ prop.extra datum_)
-          { color = ""
-          , border = "white"
-          , roundTop = defaultRoundTop
-          , roundBottom = defaultRoundBottom
-          , borderWidth = 0
-          -- TODO aura
-          -- TODO pattern
-          }
-
-      amountOfBars =
-        if barsConfig.grouped then toFloat (List.length properties) else 1
-
-      toBinItem bin =
-        let yMax = Coord.maximum (P.toYs properties) [ bin.datum ]
-            items = List.concat (List.indexedMap (toBarItem bin) properties)
-        in
-        Item
-          { datum = bin.datum
-          , render = \plane -> S.g [ SA.class "elm-charts__bin" ] (List.map (render plane) items)
-          , x1 = bin.start
-          , x2 = bin.end
-          , y1 = 0
-          , y2 = yMax
-          , items = items
-          }
-
-      toBarItem bin barIndex prop =
-        let length_ = bin.end - bin.start
-            margin_ = length_ * barsConfig.margin
-            width_ = (length_ - margin_ * 2 - (amountOfBars - 1) * barsConfig.spacing) / amountOfBars
-            offset = if barsConfig.grouped then toFloat barIndex * width_ + toFloat barIndex * barsConfig.spacing else 0
-            x1_ = bin.end - length_ + margin_ + offset
-            pieceProperties = P.toConfigs prop
-        in
-        pieceProperties
-          |> List.reverse
-          |> List.indexedMap (toBarPieceItem bin barIndex x1_ width_ (List.length pieceProperties))
-
-      toBarPieceItem : Bin data -> Int -> Float -> Float -> Int -> Int -> P.Config data Bar -> BarItem data (Maybe Float)
-      toBarPieceItem bin barIndex x1_ width_ piecesTotal pieceIndex prop =
-        -- TODO check next / prev piece for null values for rounding
-        let roundTop_ =
-              if barsConfig.roundTop > 0 && (pieceIndex == piecesTotal - 1 || piecesTotal == 1)
-              then barsConfig.roundTop else 0
-
-            roundBottom_ =
-              if barsConfig.roundBottom > 0 && (pieceIndex == 0 || piecesTotal == 1)
-              then barsConfig.roundBottom else 0
-
-            config = toBarConfig roundTop_ roundBottom_ prop bin.datum
-
-            x2_ = x1_ + width_
-            y1_ = Maybe.withDefault 0 (prop.visual bin.datum) - Maybe.withDefault 0 (prop.value bin.datum)
-            y2_ = Maybe.withDefault 0 (prop.visual bin.datum)
-            index = barIndex + pieceIndex
-            color_ = if config.color == "" then toDefaultColor index else config.color
-            name_ = if prop.name == "" then String.fromInt index else prop.name
-        in
-        Item
-          { datum = bin.datum
-          , render = \plane ->
-              bar plane .x1 .y1 .x2 .y2
-                [ color color_
-                , border config.border
-                , borderWidth config.borderWidth
-                , roundTop config.roundTop
-                , roundBottom config.roundBottom
-                ]
-                { x1 = x1_, x2 = x2_, y1 = y1_, y2 = y2_ }
-          , x1 = x1_
-          , x2 = x2_
-          , y1 = y1_
-          , y2 = y2_
-          , start = bin.start
-          , end = bin.end
-          , y = prop.value bin.datum
-          , name = name_
-          , unit = prop.unit
-          , color = color_
-          }
-  in
-  List.map toBinItem bins
-
-
-{-| -}
-type alias Bars =
-  { spacing : Float
-  , margin : Float
-  , roundTop : Float
-  , roundBottom : Float
-  , grouped : Bool
-  }
-
-
-{-| -}
-bars : Plane -> Maybe (data -> Float) -> Maybe (data -> Float) -> List (Attribute Bars) -> List (Property data Bar) -> List data -> Svg msg
-bars plane toStart toEnd barsEdits properties data =
-  data
-    |> toBinsFromVariable toStart toEnd
-    |> toBinItems barsEdits properties
-    |> List.map (render plane)
-    |> S.g [ SA.class "elm-charts__bins" ]
-    |> S.map never
 
 
 {-| -}
@@ -911,7 +333,7 @@ type alias Bar =
 
 
 {-| -}
-bar : Plane -> (data -> Float) -> (data -> Float) -> (data -> Float) -> (data -> Float) -> List (Attribute Bar) -> data -> Svg msg
+bar : Plane -> (data -> Float) -> (data -> Float) -> (data -> Float) -> (data -> Float) -> List (CA.Attribute Bar) -> data -> Svg msg
 bar plane toX1 toY1 toX2 toY2 edits datum_ =
   -- TODO round via clipPath
   let config =
@@ -994,156 +416,20 @@ bar plane toX1 toY1 toX2 toY2 edits datum_ =
     []
 
 
-
--- SERIES
-
-
-{-| -}
-type alias Series =
-  { method : Maybe Method
-  , area : Float
-  , color : String
-  , width : Float
-  , size : Float
-  , opacity : Float
-  , border : String
-  , borderWidth : Float
-  , aura : Float
-  , auraWidth : Float
-  , shape : Maybe Shape
-  }
-
-
-{-| -}
-toSeriesItems : (data -> Float) -> List (Property data Series) -> List data -> Plane -> List (SeriesItem data (Maybe Float))
-toSeriesItems toX properties data plane =
-  let toConfig propAttrs =
-        apply propAttrs
-          { method = Nothing
-          , area = 0
-          , color = ""
-          , width = 1
-          , size = 6
-          , opacity = 1
-          , border = "white"
-          , borderWidth = 0
-          , aura = 0.25
-          , auraWidth = 0
-          , shape = Nothing
-          }
-
-      toLineItem index prop =
-        let config = toConfig prop.attrs
-            dotItems = List.map (toDotItem index prop) data
-            color_ = if config.color == "" then toDefaultColor index else config.color
-        in
-        Item
-          { render = \plane_ ->
-              let toBottom datum_ =
-                    Maybe.map2 (\real visual -> visual - real) (prop.value datum_) (prop.visual datum_)
-
-                  methodAttr =
-                    case config.method of
-                      Just Linear   -> linear
-                      Just Monotone -> monotone
-                      Nothing       -> \c -> { c | method = Nothing }
-              in
-              S.g
-                [ SA.class "elm-charts__series" ]
-                [ areaFill plane_ toX (Just toBottom) prop.visual [ methodAttr, opacity config.area, color color_ ] data
-                , interpolation plane_ toX prop.visual [ methodAttr, width config.width, color color_ ] data
-                , S.g [ SA.class "elm-charts__dots" ] (List.map (render plane_) dotItems)
-                ]
-          , x1 = 0 -- TODO
-          , x2 = 0 -- TODO
-          , y1 = 0 -- TODO
-          , y2 = 0 -- TODO
-          , items = dotItems
-          , method = config.method
-          , color = config.color
-          , area = config.area
-          , width = config.width
-          }
-
-      toDotItem index prop datum_ =
-        let config = toConfig (prop.attrs ++ prop.extra datum_)
-            x_ = toX datum_
-            y_ = Maybe.withDefault 0 (prop.visual datum_)
-            radius = Maybe.withDefault 0 <| Maybe.map (toRadius config.size) config.shape
-            radiusX_ = scaleCartesian plane.x radius
-            radiusY_ = scaleCartesian plane.y radius
-            color_ = if config.color == "" then toDefaultColor index else config.color
-            name_ = if prop.name == "" then String.fromInt index else prop.name
-            attrs =
-              [ color color_
-              , border config.border
-              , borderWidth config.borderWidth
-              , opacity config.opacity
-              , aura config.aura
-              , auraWidth config.auraWidth
-              , size config.size
-              , case config.shape of
-                  Just Circle -> circle
-                  Just Triangle -> triangle
-                  Just Square -> square
-                  Just Diamond -> diamond
-                  Just Cross -> cross
-                  Just Plus -> plus
-                  Nothing -> \c -> { c | shape = Nothing }
-              ]
-        in
-        Item
-          { datum = datum_
-          , render = \plane_ ->
-              case prop.value datum_ of
-                Nothing -> S.text ""
-                Just _ -> dot plane_ .x .y attrs { x = x_, y = y_ }
-          , x1 = x_ - radiusX_
-          , x2 = x_ + radiusX_
-          , y1 = y_ - radiusY_
-          , y2 = y_ + radiusY_
-          , x = x_
-          , y = prop.value datum_
-          , name = name_
-          , unit = prop.unit
-          , color = color_
-          , dot = attrs
-          }
-  in
-  List.map P.toConfigs properties
-    |> List.indexedMap (\i ps -> List.map (toLineItem i) ps)
-    |> List.concat
-
-
-{-| -}
-series : Plane -> (data -> Float) -> List (Property data Series) -> List data -> Svg msg
-series plane toX properties data =
-  toSeriesItems toX properties data plane
-    |> List.map (render plane)
-    |> S.g [ SA.class "elm-charts__series-group" ]
-    |> S.map never
-
-
-{-| -}
-type Method
-  = Linear
-  | Monotone
-
-
 {-| -}
 type alias Interpolation =
-  { method : Maybe Method
+  { method : Maybe CA.Method
   , color : String
   , width : Float
   }
 
 
 {-| -}
-interpolation : Plane -> (data -> Float) -> (data -> Maybe Float) -> List (Attribute Interpolation) -> List data -> Svg msg
+interpolation : Plane -> (data -> Float) -> (data -> Maybe Float) -> List (CA.Attribute Interpolation) -> List data -> Svg msg
 interpolation plane toX toY edits data =
   let config =
         apply edits
-          { method = Just Linear
+          { method = Just CA.Linear
           , color = blue
           , width = 1
           }
@@ -1167,18 +453,18 @@ interpolation plane toX toY edits data =
 
 {-| -}
 type alias Area =
-  { method : Maybe Method
+  { method : Maybe CA.Method
   , color : String
   , opacity : Float
   }
 
 
 {-| -}
-areaFill : Plane -> (data -> Float) -> Maybe (data -> Maybe Float) -> (data -> Maybe Float) -> List (Attribute Area) -> List data -> Svg msg
-areaFill plane toX toY2M toY edits data =
+area : Plane -> (data -> Float) -> Maybe (data -> Maybe Float) -> (data -> Maybe Float) -> List (CA.Attribute Area) -> List data -> Svg msg
+area plane toX toY2M toY edits data =
   let config =
         apply edits
-          { method = Just Linear
+          { method = Just CA.Linear
           , color = blue
           , opacity = 0.2
           }
@@ -1213,7 +499,7 @@ areaFill plane toX toY2M toY edits data =
           Just toY2 -> List.map2 withUnder (toCommands method toX toY2 data) (toCommands method toX toY data)
 
 
-toCommands : Method -> (data -> Float) -> (data -> Maybe Float) -> List data -> List ( Point, List C.Command, Point )
+toCommands : CA.Method -> (data -> Float) -> (data -> Maybe Float) -> List data -> List ( Point, List C.Command, Point )
 toCommands method toX toY data =
   let fold datum_ acc =
         case toY datum_ of
@@ -1230,8 +516,8 @@ toCommands method toX toY data =
 
       commands =
         case method of
-          Linear -> Interpolation.linear points
-          Monotone -> Interpolation.monotone points
+          CA.Linear -> Interpolation.linear points
+          CA.Monotone -> Interpolation.monotone points
 
       toSets ps cmds =
         withBorder ps <| \first last_ -> ( first, cmds, last_ )
@@ -1253,22 +539,12 @@ type alias Dot =
   , borderWidth : Float
   , aura : Float
   , auraWidth : Float
-  , shape : Maybe Shape
+  , shape : Maybe CA.Shape
   }
 
 
 {-| -}
-type Shape
-  = Circle
-  | Triangle
-  | Square
-  | Diamond
-  | Cross
-  | Plus
-
-
-{-| -}
-dot : Plane -> (data -> Float) -> (data -> Float) -> List (Attribute Dot) -> data -> Svg msg
+dot : Plane -> (data -> Float) -> (data -> Float) -> List (CA.Attribute Dot) -> data -> Svg msg
 dot plane toX toY edits datum_ =
   let config =
         apply edits
@@ -1279,7 +555,7 @@ dot plane toX toY edits datum_ =
           , borderWidth = 1
           , aura = 0
           , auraWidth = 10
-          , shape = Just Circle
+          , shape = Just CA.Circle
           }
 
       x_ = toSVGX plane (toX datum_)
@@ -1316,7 +592,7 @@ dot plane toX toY edits datum_ =
     Nothing ->
       S.text ""
 
-    Just Circle ->
+    Just CA.Circle ->
       let radius = sqrt (area_ / pi)
           radiusAura = config.auraWidth / 2
           toAttrs off =
@@ -1328,13 +604,13 @@ dot plane toX toY edits datum_ =
       -- TODO use path instead of circle
       view S.circle radiusAura toAttrs
 
-    Just Triangle ->
+    Just CA.Triangle ->
       let toAttrs off =
             [ SA.d (trianglePath area_ off x_ y_) ]
       in
       view S.path config.auraWidth toAttrs
 
-    Just Square ->
+    Just CA.Square ->
       let side = sqrt area_
           toAttrs off =
             let sideOff = side + off in
@@ -1346,7 +622,7 @@ dot plane toX toY edits datum_ =
       in
       view S.rect (config.auraWidth) toAttrs
 
-    Just Diamond ->
+    Just CA.Diamond ->
       let side = sqrt area_
           rotation = "rotate(45 " ++ String.fromFloat x_ ++ " " ++ String.fromFloat y_ ++ ")"
           toAttrs off =
@@ -1360,7 +636,7 @@ dot plane toX toY edits datum_ =
       in
       view S.rect config.auraWidth toAttrs
 
-    Just Cross ->
+    Just CA.Cross ->
       let rotation = "rotate(45 " ++ String.fromFloat x_ ++ " " ++ String.fromFloat y_ ++ ")"
           toAttrs off =
             [ SA.d (plusPath area_ off x_ y_)
@@ -1369,23 +645,23 @@ dot plane toX toY edits datum_ =
       in
       view S.path config.auraWidth toAttrs
 
-    Just Plus ->
+    Just CA.Plus ->
       let toAttrs off =
             [ SA.d (plusPath area_ off x_ y_) ]
       in
       view S.path config.auraWidth toAttrs
 
 
-toRadius : Float -> Shape -> Float
+toRadius : Float -> CA.Shape -> Float
 toRadius size_ shape =
   let area_ = 2 * pi * size_ in
   case shape of
-    Circle   -> sqrt (area_ / pi)
-    Triangle -> let side = sqrt <| area_ * 4 / (sqrt 3) in (sqrt 3) * side
-    Square   -> sqrt area_ / 2
-    Diamond  -> sqrt area_ / 2
-    Cross    -> sqrt (area_ / 4)
-    Plus     -> sqrt (area_ / 4)
+    CA.Circle   -> sqrt (area_ / pi)
+    CA.Triangle -> let side = sqrt <| area_ * 4 / (sqrt 3) in (sqrt 3) * side
+    CA.Square   -> sqrt area_ / 2
+    CA.Diamond  -> sqrt area_ / 2
+    CA.Cross    -> sqrt (area_ / 4)
+    CA.Plus     -> sqrt (area_ / 4)
 
 
 trianglePath : Float -> Float -> Float -> Float -> String
@@ -1553,8 +829,8 @@ withinRadiusX plane radius searched point =
 
 
 {-| -}
-decodePoint : Plane -> (Plane -> Point -> msg) -> Json.Decoder msg
-decodePoint plane toMsg =
+decoder : Plane -> (Plane -> Point -> msg) -> Json.Decoder msg
+decoder plane toMsg =
   let
     handle mouseX mouseY rect =
       let
@@ -1633,28 +909,7 @@ apply funcs default =
 
 
 
--- DEFAULTS
-
-
-toDefaultShape : Int -> Shape
-toDefaultShape =
-  toDefault Circle [ Circle, Triangle, Square, Diamond, Plus, Cross ]
-
-
-toDefaultColor : Int -> String
-toDefaultColor =
-  toDefault blue [ blue, pink, orange, green, purple, red ]
-
-
-toDefault : a -> List a -> Int -> a
-toDefault default items index =
-  let dict = Dict.fromList (List.indexedMap Tuple.pair items)
-      numOfItems = Dict.size dict
-      itemIndex = remainderBy numOfItems index
-  in
-  Dict.get itemIndex dict
-    |> Maybe.withDefault default
-
+-- COLOR
 
 
 {-| -}

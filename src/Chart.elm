@@ -80,7 +80,9 @@ import DateFormat as F
 import Time
 import Dict exposing (Dict)
 import Internal.Svg exposing (Variety(..))
-import Internal.Chart as C2
+import Chart.Item as Item
+import Chart.Svg as CS
+import Chart.Attributes as CA
 
 
 -- ATTRS
@@ -544,9 +546,9 @@ type Element data msg
       (String -> C.Plane -> List (List (C.Item (Maybe Float) C.DotDetails data)) -> S.Svg msg)
   | BarsElement
       (Maybe XYBounds -> Maybe XYBounds)
-      (C.Plane -> List (C2.BinItem data (Maybe Float)))
+      (C.Plane -> List (Item.BinItem data (Maybe Float)))
       (C.Plane -> TickValues -> TickValues)
-      (String -> C.Plane -> List (C2.BinItem data (Maybe Float)) -> S.Svg msg)
+      (String -> C.Plane -> List (Item.BinItem data (Maybe Float)) -> S.Svg msg)
   | AxisElement
       (C.Plane -> S.Svg msg)
   | TicksElement
@@ -803,7 +805,7 @@ event =
 {-| -}
 type Item value data
   = ItemDot (C.Item value C.DotDetails data)
-  | ItemGroup (List (C2.BinItem data value))
+  | ItemGroup (List (Item.BinItem data value))
 
 
 {-| -}
@@ -815,18 +817,18 @@ type alias Metric =
 
 
 {-| -}
-getBars : List (Item value data) -> List (C2.BarItem data value)
+getBars : List (Item value data) -> List (Item.BarItem data value)
 getBars =
   let filter item =
         case item of
-          ItemGroup i -> Just (List.concatMap C2.getBars i)
+          ItemGroup i -> Just (List.concatMap Item.getBars i)
           _ -> Nothing
   in
   List.concat << List.filterMap filter
 
 
 {-| -}
-getGroups : List (Item value data) -> List (List (C2.BinItem data value))
+getGroups : List (Item value data) -> List (List (Item.BinItem data value))
 getGroups =
   List.filterMap <| \item ->
     case item of
@@ -857,8 +859,8 @@ withoutUnknowns =
         Maybe.map ItemDot (onlyKnowns i)
 
       ItemGroup is ->
-        let onlyKnowns (C2.Item i) =
-              C2.Item
+        let onlyKnowns (Item.Item i) =
+              Item.Item
                 { datum = i.datum
                 , render = i.render
                 , items = List.filterMap onlyKnownBars i.items
@@ -868,11 +870,11 @@ withoutUnknowns =
                 , y2 = i.y2
                 }
 
-            onlyKnownBars : C2.BarItem data (Maybe Float) -> Maybe (C2.BarItem data Float)
-            onlyKnownBars (C2.Item sub) =
+            onlyKnownBars : Item.BarItem data (Maybe Float) -> Maybe (Item.BarItem data Float)
+            onlyKnownBars (Item.Item sub) =
               case sub.y of
                 Just y ->
-                  Just <| C2.Item
+                  Just <| Item.Item
                     { datum = sub.datum
                     , start = sub.start
                     , end = sub.end
@@ -1432,15 +1434,15 @@ bars edits properties data =
           }
 
       bins =
-        C2.toBinsFromVariable config.start config.end data
+        Item.toBinsFromVariable config.start config.end data
 
       toItems _ =
-        C2.toBinItems
-          [ C2.spacing config.spacing
-          , C2.margin config.margin
-          , C2.roundTop config.roundTop
-          , C2.roundBottom config.roundBottom
-          , if config.grouped then C2.grouped else identity
+        Item.toBinItems
+          [ CA.spacing config.spacing
+          , CA.margin config.margin
+          , CA.roundTop config.roundTop
+          , CA.roundBottom config.roundBottom
+          , if config.grouped then CA.grouped else identity
           ]
           properties
           bins
@@ -1456,7 +1458,7 @@ bars edits properties data =
   in
   BarsElement toXYBounds toItems toTicks <| \id_ plane items ->
     items
-      |> List.map (C2.render plane)
+      |> List.map (Item.render plane)
       |> S.g [ SA.class "elm-charts__bins", clipPath id_ ]
       |> S.map never
 

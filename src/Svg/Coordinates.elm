@@ -1,6 +1,6 @@
 module Svg.Coordinates
   exposing
-    ( Plane, Axis, minimum, maximum
+    ( Point, Plane, Axis, minimum, maximum
     , scaleSVG, toSVGX, toSVGY
     , scaleCartesian, toCartesianX, toCartesianY
     , place, placeWithOffset
@@ -51,6 +51,12 @@ the domain and range.
 import Svg exposing (Attribute)
 import Svg.Attributes exposing (transform)
 
+
+
+type alias Point =
+  { x : Float
+  , y : Float
+  }
 
 
 -- Plane

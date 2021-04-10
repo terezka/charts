@@ -12,7 +12,7 @@ module Svg.Chart
     , position, positionHtml
 
     , eventCatcher, container, decodePoint
-    , Point, toBreaks, DataPoint
+    , toBreaks, DataPoint
     , getNearest, getNearestX, getWithin, getWithinX
     , tooltip, tooltipOnTop, isXPastMiddle, middleOfY, middleOfX, closestToZero
 
@@ -86,7 +86,6 @@ import Internal.Default as D
 import Json.Decode as Json
 import DOM
 import Dict exposing (Dict)
-import Internal.Chart
 
 
 {-| Set the size of your chart.

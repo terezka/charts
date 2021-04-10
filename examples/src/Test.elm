@@ -13,7 +13,9 @@ import Data.Iris as Iris
 import Data.Salery as Salery
 import Data.Education as Education
 import Dict
-import Internal.Chart as I
+import Chart.Svg as CS
+import Chart.Attributes as CA
+import Chart.Item as Item
 
 
 -- TODO
@@ -34,8 +36,8 @@ main =
 type alias Model =
   { hoveringSalery : List (SC.Item Float SC.BarDetails Salery.Datum)
   , hovering : List (SC.Item Float SC.BarDetails Datum)
-  , hoveringNew : List (I.BarItem Datum (Maybe Float))
-  , point : Maybe SC.Point
+  , hoveringNew : List (Item.BarItem Datum (Maybe Float))
+  , point : Maybe Coordinates.Point
   }
 
 
@@ -47,8 +49,8 @@ init =
 type Msg
   = OnHoverSalery (List (SC.Item Float SC.BarDetails Salery.Datum))
   | OnHover (List (SC.Item Float SC.BarDetails Datum))
-  | OnHoverNew (List (I.BarItem Datum (Maybe Float)))
-  | OnCoords SC.Point -- TODO
+  | OnHoverNew (List (Item.BarItem Datum (Maybe Float)))
+  | OnCoords Coordinates.Point -- TODO
 
 
 update : Msg -> Model -> Model
@@ -96,7 +98,7 @@ view model =
       --, C.range (C.startMin 0 >> C.endMax 6)
       --, C.domain (C.startMax 0 >> C.endMin 19)
       , C.events
-          [ C.decoder (\is -> I.getNearest I.center (C.getBars is))
+          [ C.decoder (\is -> CS.getNearest Item.center (C.getBars is))
               |> C.map OnHoverNew
               |> C.event "mousemove"
           ]
@@ -107,11 +109,11 @@ view model =
       , C.bars
           [ C.start (\d -> d.x - 2)
           , C.end .x
-          , I.roundTop 0.2
-          , I.roundBottom 0.2
-          , I.grouped
-          --, I.margin 0
-          --, I.spacing 0
+          , CA.roundTop 0.2
+          , CA.roundBottom 0.2
+          , CA.grouped
+          --, CA.margin 0
+          --, CA.spacing 0
           ]
           [ C.stacked
               [ C.property .y [] (always [])
@@ -177,10 +179,10 @@ view model =
             --    { x = 1.5, y = 10 }
 
 
-            [ I.series p .x
-                [ I.stacked
-                    [ I.property .z "dogs" "km/s" [ I.area 0.25, I.color I.blue, I.size 2, I.borderWidth 1, I.circle ] (always [])
-                    , I.property .y "cats" "m/s" [ I.linear, I.color I.blue, I.size 2, I.borderWidth 1, I.diamond ] (always [])
+            [ Item.series p .x
+                [ Item.stacked
+                    [ Item.property .z "dogs" "km/s" [ CA.area 0.25, CA.color CS.blue, CA.size 2, CA.borderWidth 1, CA.circle ] (always [])
+                    , Item.property .y "cats" "m/s" [ CA.linear, CA.color CS.blue, CA.size 2, CA.borderWidth 1, CA.diamond ] (always [])
                     ]
                 ]
                 [ { x = 0, y = Just 14, z = Just 2 }
@@ -244,27 +246,27 @@ view model =
       , C.xAxis [ C.noArrow ]
 
       , C.when model.hoveringNew <| \item rest ->
-          C.tooltipOnTop (\_ -> (I.top item).x) (\_ -> (I.top item).y) [] [ tooltip item ]
+          C.tooltipOnTop (\_ -> (Item.top item).x) (\_ -> (Item.top item).y) [] [ tooltip item ]
       ]
     ]
 
 
-tooltip : I.BarItem Datum (Maybe Float) -> H.Html msg
+tooltip : Item.BarItem Datum (Maybe Float) -> H.Html msg
 tooltip hovered =
   H.div []
     [ H.h4
         [ HA.style "max-width" "200px"
         , HA.style "margin-top" "5px"
         , HA.style "margin-bottom" "8px"
-        , HA.style "color" (I.getColor hovered)
+        , HA.style "color" (Item.getColor hovered)
         ]
-        [ H.text (I.getName hovered) ]
+        [ H.text (Item.getName hovered) ]
     , H.div []
         [ H.text "X: "
-        , H.text <| Debug.toString <| .x <| I.datum hovered
+        , H.text <| Debug.toString <| .x <| Item.datum hovered
         ]
     , H.div []
         [ H.text "Y: "
-        , H.text <| Debug.toString <| .y <| I.datum hovered
+        , H.text <| Debug.toString <| .y <| Item.datum hovered
         ]
     ]
