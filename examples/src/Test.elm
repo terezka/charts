@@ -34,9 +34,9 @@ main =
 
 
 type alias Model =
-  { hoveringSalery : List (SC.Item Float SC.BarDetails Salery.Datum)
-  , hovering : List (SC.Item Float SC.BarDetails Datum)
-  , hoveringNew : List (Item.BarItem Datum (Maybe Float))
+  { hoveringSalery : List (Item.BarItem Salery.Datum)
+  , hovering : List (Item.BarItem Datum)
+  , hoveringNew : List (Item.BarItem Datum)
   , point : Maybe Coordinates.Point
   }
 
@@ -47,9 +47,9 @@ init =
 
 
 type Msg
-  = OnHoverSalery (List (SC.Item Float SC.BarDetails Salery.Datum))
-  | OnHover (List (SC.Item Float SC.BarDetails Datum))
-  | OnHoverNew (List (Item.BarItem Datum (Maybe Float)))
+  = OnHoverSalery (List (Item.BarItem Salery.Datum))
+  | OnHover (List (Item.BarItem Datum))
+  | OnHoverNew (List (Item.BarItem Datum))
   | OnCoords Coordinates.Point -- TODO
 
 
@@ -97,32 +97,30 @@ view model =
       , C.paddingTop 15
       --, C.range (C.startMin 0 >> C.endMax 6)
       --, C.domain (C.startMax 0 >> C.endMin 19)
-      , C.events
-          [ C.decoder (\is pl ps -> CS.getNearest Item.center (C.getBars is) pl ps)
-              |> C.map OnHoverNew
-              |> C.event "mousemove"
-          ]
+      --, C.events
+      --    [ C.decoder (\is pl ps -> CS.getNearest Item.center (C.getBars is) pl ps)
+      --        |> C.map OnHoverNew
+      --        |> C.event "mousemove"
+      --    ]
       , C.id "salery-discrepancy"
       ]
       [ C.grid []
 
-      , C.bars
-          [ C.start (\d -> d.x - 2)
-          , C.end .x
-          , CA.roundTop 0.2
-          , CA.roundBottom 0.2
-          , CA.grouped
-          --, CA.margin 0
-          --, CA.spacing 0
-          ]
-          [ C.stacked
-              [ C.property .y [] [] (always [])
-              , C.property .z [] [] (always [])
-              , C.property (C.just .x) [] [] (always [])
-              ]
-          , C.property .z [] [] (always [])
-          ]
-          data
+      --, C.bars
+      --    [ CA.roundTop 0.2
+      --    , CA.roundBottom 0.2
+      --    , CA.grouped
+      --    --, CA.margin 0
+      --    --, CA.spacing 0
+      --    ]
+      --    [ C.stacked
+      --        [ C.property .y [] [] (always [])
+      --        , C.property .z [] [] (always [])
+      --        , C.property (C.just .x) [] [] (always [])
+      --        ]
+      --    , C.property .z [] [] (always [])
+      --    ]
+      --    data
 
       , C.yAxis [ C.noArrow ]
       , C.xTicks []
@@ -134,9 +132,9 @@ view model =
       , C.series .x
           --[ C.monotone ]
           [ C.stacked
-              [ C.property .y [] [ C.area 0.2, C.monotone 1, C.color C.purple ] (always [])
+              [ C.property .y [] [ CA.circle, CA.linear, CA.area 0.25 ] (always [])
                   --(\d -> if hovered d then [ C.aura 5 0.5 ] else [])
-              , C.property .z [] [ C.monotone 1, C.color C.purple ] (always [])
+              , C.property .z [] [ CA.circle, CA.linear, CA.area 0.25, CA.color CS.purple ] (always [])
               ]
           ]
           data
@@ -178,24 +176,27 @@ view model =
             --    ]
             --    { x = 1.5, y = 10 }
 
-
-            [ Item.series p .x
-                [ Item.stacked
-                    [ Item.property .z { name = "dogs", unit = "km/s" } [] [ CA.area 0.25, CA.color CS.blue, CA.size 2, CA.borderWidth 1, CA.circle ] (always [])
-                    , Item.property .y { name = "cats", unit = "km/s" } [] [ CA.linear, CA.color CS.blue, CA.size 2, CA.borderWidth 1, CA.diamond ] (always [])
-                    ]
-                ]
-                [ { x = 0, y = Just 14, z = Just 2 }
-                , { x = 0.5, y = Just 16, z = Just 3.2 }
-                , { x = 0.75, y = Just 14, z = Just 3.8 }
-                , { x = 1, y = Nothing, z = Just 2.3 }
-                , { x = 1.4, y = Just 13, z = Just 2.1 }
-                , { x = 2, y = Just 14, z = Just 2.7 }
-                , { x = 3, y = Just 16, z = Just 3.2 }
-                , { x = 4, y = Just 13, z = Just 0.9 }
-                , { x = 5, y = Just 14, z = Just 3.3 }
-                , { x = 6, y = Just 10, z = Just 3.9 }
-                ]
+            [
+            --[ Item.toSeriesItems .x
+            --    [ Item.stacked
+            --        [ Item.property .z { name = "dogs", unit = "km/s" } [] [ CA.area 0.25, CA.color CS.blue, CA.size 2, CA.borderWidth 1, CA.circle ] (always [])
+            --        , Item.property .y { name = "cats", unit = "km/s" } [] [ CA.linear, CA.color CS.blue, CA.size 2, CA.borderWidth 1, CA.diamond ] (always [])
+            --        ]
+            --    ]
+            --    [ { x = 0, y = Just 14, z = Just 2 }
+            --    , { x = 0.5, y = Just 16, z = Just 3.2 }
+            --    , { x = 0.75, y = Just 14, z = Just 3.8 }
+            --    , { x = 1, y = Nothing, z = Just 2.3 }
+            --    , { x = 1.4, y = Just 13, z = Just 2.1 }
+            --    , { x = 2, y = Just 14, z = Just 2.7 }
+            --    , { x = 3, y = Just 16, z = Just 3.2 }
+            --    , { x = 4, y = Just 13, z = Just 0.9 }
+            --    , { x = 5, y = Just 14, z = Just 3.3 }
+            --    , { x = 6, y = Just 10, z = Just 3.9 }
+            --    ]
+            --    |> List.map (Item.render p)
+            --    |> S.g []
+            --    |> S.map never
 
             --, I.cross p [ I.x 2, I.y 15, I.border "rgb(5, 142, 218)", I.opacity 1, I.size 40, I.borderWidth 1, I.border "white", I.aura 0.5, I.auraWidth 5 ]
             --,
@@ -245,27 +246,39 @@ view model =
 
       , C.xAxis [ C.noArrow ]
 
-      --, C.tooltip model.hoveringNew [ C.center, C.horizontal, C.content tooltip ]
+      --, C.when model.hoveringNew <| \first rest ->
+      --    C.tooltipOnTop (\_ -> Item.getTop first |> .x) (\_ -> Item.getTop first |> .y) [] [ tooltip first rest ]
       ]
     ]
 
 
-tooltip : Item.BarItem Datum (Maybe Float) -> List (Item.BarItem Datum (Maybe Float)) -> H.Html msg
+tooltip : Item.BarItem Datum -> List (Item.BarItem Datum) -> H.Html msg
 tooltip hovered _ =
   H.div []
     [ H.h4
         [ HA.style "max-width" "200px"
         , HA.style "margin-top" "5px"
         , HA.style "margin-bottom" "8px"
-        , HA.style "color" (Item.getColor hovered)
+        , hovered
+            |> Item.getItems
+            |> List.head
+            |> Maybe.map Item.getColor
+            |> Maybe.withDefault "blue"
+            |> HA.style "color"
         ]
-        [ H.text (Item.getName hovered) ]
+        [ hovered
+            |> Item.getItems
+            |> List.head
+            |> Maybe.map Item.getName
+            |> Maybe.withDefault "WHAT"
+            |> H.text
+        ]
     , H.div []
         [ H.text "X: "
-        , H.text <| Debug.toString <| .x <| Item.datum hovered
+        , H.text <| Debug.toString <| .x <| Item.getDatum hovered
         ]
     , H.div []
         [ H.text "Y: "
-        , H.text <| Debug.toString <| .y <| Item.datum hovered
+        , H.text <| Debug.toString <| .y <| Item.getDatum hovered
         ]
     ]

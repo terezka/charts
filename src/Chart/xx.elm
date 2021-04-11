@@ -7,11 +7,11 @@
 -- ITEM API
 
 
-type Item details =
+type Item a =
   Item
-    { details : details
-    , position : Plane -> details -> Position
-    , render : Plane -> details -> Position -> Svg Never
+    { a | bounds : Position
+    , position : Plane -> a -> Position
+    , render : Plane -> a -> Position -> Svg Never
     }
 
 
@@ -20,9 +20,15 @@ render plane (Item item) =
   item.render plane item.details (item.position plane item.details)
 
 
-center : Plane -> Item details -> Svg msg
-center plane (Item item) =
+getCenter : Plane -> Item details -> Point
+getCenter plane (Item item) =
   let pos = item.position plane item.details in ..
+
+
+getBounds : Maybe Bounds -> Item details -> Bounds
+
+getColor : Item { x | config : { y | color : String } } -> Bounds
+
 
 
 type alias BarsItem meta datum =
@@ -175,32 +181,36 @@ toBarItems barsAttrs properties data =
             attrs = defaultAttrs ++ section.attrs ++ section.extra bin.datum
         in
         Item
-          { details =
-              { meta = meta
-              , datum = datum
-              , start = start
-              , end = end
-              , value = value
-              , visual = visual
-              , config =
-                  apply attrs
-                    { roundTop = 0
-                    , roundBottom = 0
-                    , color = CA.blue
-                    , border = CA.white
-                    , borderWidth = 0
-                    }
-              }
+          { meta = meta
+          , datum = datum
+          , start = start
+          , end = end
+          , value = value
+          , visual = visual
+          , config =
+              apply attrs
+                { roundTop = 0
+                , roundBottom = 0
+                , color = CA.blue
+                , border = CA.white
+                , borderWidth = 0
+                }
+          , bounds = \c ->
+              { x1 = x1, x2 = x2, y1 = y1, y2 = y2 }
           , position = \_ _ ->
               { x1 = x1, x2 = x2, y1 = y1, y2 = y2 }
-          , render = \plane config position ->
-              S.bar plane config.attrs position
+          , render = \plane c position ->
+              S.bar plane c.attrs position
           }
   in
   Item
-    { details =
-        { properties = properties
-        , bins = List.map toBinItem (withSurround data toBin)
+    { properties = properties
+    , bins = List.map toBinItem (withSurround data toBin)
+    , bounds = \config ->
+        { x1 = C.minimum (List.map (.bounds >> .x1) config.bins)
+        , x2 = C.maximum (List.map (.bounds >> .x2) config.bins)
+        , y1 = C.minimum (List.map (.bounds >> .y1) config.bins)
+        , y2 = C.maximum (List.map (.bounds >> .y2) config.bins)
         }
     , position = \plane config ->
         { x1 = C.minimum (List.map (getX1 plane) config.bins)
@@ -289,7 +299,6 @@ toSeriesItems toX properties data plane =
     |> List.concat
 
 
-series : (data -> Float) -> List (Property data meta Series) -> List data -> List (SeriesItem data meta)
 
 dot : data -> (data -> Float) -> (data -> Float) -> List (Attribute Dot) -> meta -> Item data Dot meta
 
@@ -355,3 +364,60 @@ main =
 
 
 bar : Plane -> Item datum config meta -> Svg msg
+
+
+
+
+{-| -}
+toBinsFromConstant : (data -> Float) -> Float -> List data -> List (Bin (List data))
+toBinsFromConstant toX width_ data =
+  let fold datum_ acc =
+        Dict.update (ceiling (toX datum_)) (updateDict datum_) acc
+
+      updateDict datum_ prev =
+        prev
+          |> Maybe.map (\ds -> datum_ :: ds)
+          |> Maybe.withDefault [ datum_ ]
+          |> Just
+
+      ceiling b =
+        -- TODO
+        let floored = toFloat (floor (b / width_)) * width_ in
+        b - (b - floored) + width_
+  in
+  data
+    |> List.foldr fold Dict.empty
+    |> Dict.toList
+    |> List.map (\( bin, ds ) -> { start = bin, end = bin + width_, datum = ds })
+
+
+
+
+{-| -}
+type Decoder x item
+  = Decoder (List (Item x) -> C.Plane -> C.Point -> item)
+
+
+{-| -}
+map : (a -> item) -> Decoder data a -> Decoder data item
+map f (Decoder a) =
+  Decoder <| \ps s p -> f (a ps s p)
+
+
+{-| -}
+map2 : (a -> b -> item) -> Decoder data a -> Decoder data b -> Decoder data item
+map2 f (Decoder a) (Decoder b) =
+  Decoder <| \ps s p -> f (a ps s p) (b ps s p)
+
+
+{-| -}
+map3 : (a -> b -> c -> item) -> Decoder data a -> Decoder data b -> Decoder data c -> Decoder data item
+map3 f (Decoder a) (Decoder b) (Decoder c) =
+  Decoder <| \ps s p -> f (a ps s p) (b ps s p) (c ps s p)
+
+
+{-| -}
+map4 : (a -> b -> c -> d -> item) -> Decoder data a -> Decoder data b -> Decoder data c -> Decoder data d -> Decoder data item
+map4 f (Decoder a) (Decoder b) (Decoder c) (Decoder d) =
+  Decoder <| \ps s p -> f (a ps s p) (b ps s p) (c ps s p) (d ps s p)
+

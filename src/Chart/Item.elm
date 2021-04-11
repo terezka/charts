@@ -1,9 +1,10 @@
 module Chart.Item exposing
-  ( Item(..), BinItem, BarItem
-  , render, value, center, datum, top, getColor, getName, getBars
+  ( Item(..), BinItem, BarItem, SectionItem, DotItem, SeriesItem, BarsItem
+  , render, getValue, getCenter, getDatum, getTop, getColor, getName, getItems, getBounds
+  , getX1, getX2, getY2, getY1
   , Property, property, stacked, Metric
-  , Bars, bars, toBinsFromVariable, toBinItems
-  , Series, series, toSeriesItems
+  , Bars, toBarItems
+  , Series, toSeriesItems
   )
 
 
@@ -11,7 +12,7 @@ import Html as H exposing (Html)
 import Html.Attributes as HA
 import Svg as S exposing (Svg)
 import Svg.Attributes as SA
-import Svg.Coordinates as Coord exposing (Point, Plane, scaleCartesian)
+import Svg.Coordinates as Coord exposing (Point, Position, Plane, scaleCartesian)
 import Dict exposing (Dict)
 import Internal.Property as P exposing (Property)
 import Chart.Svg as S
@@ -25,39 +26,54 @@ import Chart.Attributes as CA
 {-| -}
 type Item a =
   Item
-    { a | render : Plane -> Svg Never
-    , x1 : Float
-    , x2 : Float
-    , y1 : Float
-    , y2 : Float
+    { details : a
+    , render : Plane -> a -> Position -> Svg Never
+    , bounds : a -> Position
+    , position : Plane -> a -> Position
     }
 
 
 {-| -}
-type alias BinItem datum value =
+type alias BarsItem datum =
+  Item
+    { properties : List (Property datum Metric () S.Bar)
+    , items : List (BinItem datum)
+    }
+
+
+{-| -}
+type alias BinItem datum =
   Item
     { datum : datum
-    , items : List (BarItem datum value)
+    , items : List (BarItem datum)
     }
 
 
 {-| -}
-type alias BarItem datum value =
+type alias BarItem datum =
+  Item
+    { datum : datum
+    , items : List (SectionItem datum)
+    }
+
+
+{-| -}
+type alias SectionItem datum =
   Item
     { datum : datum
     , start : Float
     , end : Float
-    , y : value
-    , color : String
-    , name : String -- TODO id instead?
+    , y : Maybe Float
+    , config : S.Bar
+    , name : String
     , unit : String
     }
 
 
 {-| -}
-type alias SeriesItem datum value =
+type alias SeriesItem datum =
   Item
-    { items : List (DotItem datum value)
+    { items : List (DotItem datum)
     , method : Maybe CA.Method
     , area : Float
     , width : Float
@@ -66,93 +82,126 @@ type alias SeriesItem datum value =
 
 
 {-| -}
-type alias DotItem datum value =
+type alias DotItem datum =
   Item
     { datum : datum
     , x : Float
-    , y : value
+    , y : Maybe Float
     , color : String
-    , name : String -- TODO id instead?
+    , name : String
     , unit : String
     , dot : List (CA.Attribute S.Dot)
     }
 
 
 {-| -}
-top : Item x -> Point
-top (Item config) =
-  { x = config.x1 + (config.x2 - config.x1) / 2
-  , y = config.y2
+getTop : Plane -> Item x -> Point
+getTop plane (Item config) =
+  let pos = config.position plane config.details in
+  { x = pos.x1 + (pos.x2 - pos.x1) / 2
+  , y = pos.y2
   }
 
 
 {-| -}
-bottom : Item x -> Point
-bottom (Item config) =
-  { x = config.x1 + (config.x2 - config.x1) / 2
-  , y = config.y1
+getBottom : Plane -> Item x -> Point
+getBottom plane (Item config) =
+  let pos = config.position plane config.details in
+  { x = pos.x1 + (pos.x2 - pos.x1) / 2
+  , y = pos.y1
   }
 
 
 {-| -}
-left : Item x -> Point
-left (Item config) =
-  { x = config.x1
-  , y = config.y1 + (config.y2 - config.y1) / 2
+getLeft : Plane -> Item x -> Point
+getLeft plane (Item config) =
+  let pos = config.position plane config.details in
+  { x = pos.x1
+  , y = pos.y1 + (pos.y2 - pos.y1) / 2
   }
 
 
 {-| -}
-right : Item x -> Point
-right (Item config) =
-  { x = config.x2
-  , y = config.y1 + (config.y2 - config.y1) / 2
+getRight : Plane -> Item x -> Point
+getRight plane (Item config) =
+  let pos = config.position plane config.details in
+  { x = pos.x2
+  , y = pos.y1 + (pos.y2 - pos.y1) / 2
   }
 
 
 {-| -}
-center : Item x -> Point
-center (Item config) =
-  { x = config.x1 + (config.x2 - config.x1) / 2
-  , y = config.y1 + (config.y2 - config.y1) / 2
+getCenter : Plane -> Item x -> Point
+getCenter plane (Item config) =
+  let pos = config.position plane config.details in
+  { x = pos.x1 + (pos.x2 - pos.x1) / 2
+  , y = pos.y1 + (pos.y2 - pos.y1) / 2
   }
 
 
-{-| -}
-datum : Item { config | datum : datum } -> datum
-datum (Item config) =
-  config.datum
+getX1 : Plane -> Item x -> Float
+getX1 plane (Item config) =
+  let pos = config.position plane config.details in
+  pos.x1
+
+
+getX2 : Plane -> Item x -> Float
+getX2 plane (Item config) =
+  let pos = config.position plane config.details in
+  pos.x2
+
+
+getY1 : Plane -> Item x -> Float
+getY1 plane (Item config) =
+  let pos = config.position plane config.details in
+  pos.y1
+
+
+getY2 : Plane -> Item x -> Float
+getY2 plane (Item config) =
+  let pos = config.position plane config.details in
+  pos.y2
+
+
+getBounds : Item x -> Position
+getBounds (Item config) =
+  config.bounds config.details
 
 
 {-| -}
-value : Item { config | y : value } -> value
-value (Item config) =
-  config.y
+getDatum : Item { config | datum : datum } -> datum
+getDatum (Item config) =
+  config.details.datum
 
 
--- TODO everything should be getX
 {-| -}
-getColor : Item { config | color : String } -> String
+getValue : Item { config | y : value } -> value
+getValue (Item config) =
+  config.details.y
+
+
+{-| -}
+getColor : Item { config | config : { a | color : String } } -> String
 getColor (Item config) =
-  config.color
+  config.details.config.color
 
 
 {-| -}
 getName : Item { config | name : String } -> String
 getName (Item config) =
-  config.name
+  config.details.name
 
 
 {-| -}
 render : Plane -> Item x -> Svg Never
 render plane (Item config) =
-  config.render plane
+  config.render plane config.details (config.position plane config.details)
 
 
 {-| -}
-getBars : BinItem datum value -> List (BarItem datum value)
-getBars (Item config) =
-  config.items
+getItems : Item { x | items : List a } -> List a
+getItems (Item config) =
+  config.details.items
 
 
 
@@ -195,33 +244,34 @@ type alias Bin data =
 
 
 {-| -}
-toBinsFromConstant : (data -> Float) -> Float -> List data -> List (Bin (List data))
-toBinsFromConstant toX width_ data =
-  let fold datum_ acc =
-        Dict.update (ceiling (toX datum_)) (updateDict datum_) acc
-
-      updateDict datum_ prev =
-        prev
-          |> Maybe.map (\ds -> datum_ :: ds)
-          |> Maybe.withDefault [ datum_ ]
-          |> Just
-
-      ceiling b =
-        -- TODO
-        let floored = toFloat (floor (b / width_)) * width_ in
-        b - (b - floored) + width_
-  in
-  data
-    |> List.foldr fold Dict.empty
-    |> Dict.toList
-    |> List.map (\( bin, ds ) -> { start = bin, end = bin + width_, datum = ds })
+type alias Bars data =
+  { spacing : Float
+  , margin : Float
+  , roundTop : Float
+  , roundBottom : Float
+  , grouped : Bool
+  , x1 : Maybe (data -> Float)
+  , x2 : Maybe (data -> Float)
+  }
 
 
-{-| -}
-toBinsFromVariable : Maybe (data -> Float) -> Maybe (data -> Float) -> List data -> List (Bin data)
-toBinsFromVariable start end =
-  let toXs index prevM curr nextM =
-        case ( start, end ) of
+toBarItems : List (CA.Attribute (Bars data)) -> List (Property data Metric () S.Bar) -> List data -> BarsItem data
+toBarItems barsAttrs properties data =
+  let barsConfig : Bars data
+      barsConfig =
+        apply barsAttrs
+          { spacing = 0.01
+          , margin = 0.1
+          , roundTop = 0
+          , roundBottom = 0
+          , grouped = False
+          , x1 = Nothing
+          , x2 = Nothing
+          }
+
+      toBin : Int -> Maybe data -> data -> Maybe data -> Bin data
+      toBin index prevM curr nextM =
+        case ( barsConfig.x1, barsConfig.x2 ) of
           ( Nothing, Nothing ) ->
             { datum = curr, start = toFloat (index + 1) - 0.5, end = toFloat (index + 1) + 0.5 }
 
@@ -246,130 +296,128 @@ toBinsFromVariable start end =
           ( Just toStart, Just toEnd ) ->
             { datum = curr, start = toStart curr, end = toEnd curr }
 
-      fold index prev acc list =
-        case list of
-          a :: b :: rest -> fold (index + 1) (Just a) (acc ++ [toXs index prev a (Just b)]) (b :: rest)
-          a :: [] -> acc ++ [toXs index prev a Nothing]
-          [] -> acc
-  in
-  fold 0 Nothing []
-
-
-{-| -}
-toBinItems : List (CA.Attribute Bars) -> List (Property data Metric () S.Bar) -> List (Bin data) -> List (BinItem data (Maybe Float))
-toBinItems barsEdits properties bins =
-  let barsConfig =
-        apply barsEdits
-          { spacing = 0.01
-          , margin = 0.1
-          , roundTop = 0
-          , roundBottom = 0
-          , grouped = False
-          }
-
-      toBarConfig defaultRoundTop defaultRoundBottom prop datum_  =
-        apply (prop.attrs ++ prop.extra datum_)
-          { color = ""
-          , border = "white"
-          , roundTop = defaultRoundTop
-          , roundBottom = defaultRoundBottom
-          , borderWidth = 0
-          -- TODO aura
-          -- TODO pattern
-          }
-
-      amountOfBars =
-        if barsConfig.grouped then toFloat (List.length properties) else 1
-
+      toBinItem : Bin data -> BinItem data
       toBinItem bin =
-        let yMax = Coord.maximum (P.toYs properties) [ bin.datum ]
-            items = List.concat (List.indexedMap (toBarItem bin) properties)
-        in
         Item
-          { datum = bin.datum
-          , render = \plane -> S.g [ SA.class "elm-charts__bin" ] (List.map (render plane) items)
-          , x1 = bin.start
-          , x2 = bin.end
-          , y1 = 0
-          , y2 = yMax
-          , items = items
+          { details =
+              { datum = bin.datum
+              , items = List.indexedMap (toBarItem bin) properties
+              }
+          , bounds = \config ->
+              { x1 = bin.start
+              , x2 = bin.end
+              , y1 = 0
+              , y2 = Coord.maximum [ getBounds >> .y2 >> Just] config.items
+              }
+          , position = \plane config ->
+              { x1 = bin.start
+              , x2 = bin.end
+              , y1 = 0
+              , y2 = Coord.maximum [ getY2 plane >> Just ] config.items
+              }
+          , render = \plane config _ ->
+              S.g [ SA.class "elm-charts__bin" ] (List.map (render plane) config.items)
           }
 
+      toBarItem : Bin data -> Int -> Property data Metric () S.Bar -> BarItem data
       toBarItem bin barIndex prop =
-        let length_ = bin.end - bin.start
-            margin_ = length_ * barsConfig.margin
-            width_ = (length_ - margin_ * 2 - (amountOfBars - 1) * barsConfig.spacing) / amountOfBars
-            offset = if barsConfig.grouped then toFloat barIndex * width_ + toFloat barIndex * barsConfig.spacing else 0
-            x1_ = bin.end - length_ + margin_ + offset
-            pieceProperties = P.toConfigs prop
-        in
-        pieceProperties
-          |> List.reverse
-          |> List.indexedMap (toBarPieceItem bin barIndex x1_ width_ (List.length pieceProperties))
+        let sections = P.toConfigs prop in
+        Item
+          { details =
+              { datum = bin.datum
+              , items = List.indexedMap (toSectionItem bin sections barIndex) (List.reverse sections)
+              }
+          , bounds = \config ->
+              { x1 = bin.start
+              , x2 = bin.end
+              , y1 = 0
+              , y2 = Coord.maximum [ getBounds >> .y2 >> Just ] config.items
+              }
+          , position = \plane config ->
+              { x1 = bin.start
+              , x2 = bin.end
+              , y1 = 0
+              , y2 = Coord.maximum [ getY2 plane >> Just ] config.items
+              }
+          , render = \plane config _ ->
+              S.g [ SA.class "elm-charts__bar" ] (List.map (render plane) config.items)
+          }
 
-      toBarPieceItem bin barIndex x1_ width_ piecesTotal pieceIndex prop =
-        -- TODO check next / prev piece for null values for rounding
-        let roundTop_ =
-              if barsConfig.roundTop > 0 && (pieceIndex == piecesTotal - 1 || piecesTotal == 1)
-              then barsConfig.roundTop else 0
+      toSectionItem : Bin data -> List (P.Config data Metric () S.Bar) -> Int -> Int -> P.Config data Metric () S.Bar -> SectionItem data
+      toSectionItem bin sections barIndex sectionIndex section =
+        let numOfBars = if barsConfig.grouped then toFloat (List.length properties) else 1
+            numOfSections = toFloat (List.length sections)
 
-            roundBottom_ =
-              if barsConfig.roundBottom > 0 && (pieceIndex == 0 || piecesTotal == 1)
-              then barsConfig.roundBottom else 0
+            start = bin.start
+            end = bin.end
+            visual = section.visual bin.datum
+            value = section.value bin.datum
 
-            config = toBarConfig roundTop_ roundBottom_ prop bin.datum
+            length = end - start
+            margin = length * barsConfig.margin
+            width = (length - margin * 2 - (numOfBars - 1) * barsConfig.spacing) / numOfBars
+            offset = toFloat barIndex * width + toFloat barIndex * barsConfig.spacing
 
-            x2_ = x1_ + width_
-            y1_ = Maybe.withDefault 0 (prop.visual bin.datum) - Maybe.withDefault 0 (prop.value bin.datum)
-            y2_ = Maybe.withDefault 0 (prop.visual bin.datum)
-            index = barIndex + pieceIndex
-            color_ = if config.color == "" then toDefaultColor index else config.color
-            name_ = if prop.meta.name == "" then String.fromInt index else prop.meta.name
+            x1 = start + margin + offset
+            x2 = start + margin + offset + width
+            y1 = Maybe.withDefault 0 visual - Maybe.withDefault 0 value
+            y2 = Maybe.withDefault 0 visual
+
+            isFirst = sectionIndex == 0
+            isLast = toFloat sectionIndex == numOfSections - 1
+            isSingle = numOfSections == 1
+
+            roundTop = if isSingle || isLast then barsConfig.roundTop else 0
+            roundBottom = if isSingle || isFirst then barsConfig.roundBottom else 0
+            color = toDefaultColor (barIndex + sectionIndex)
+            defaultAttrs = [ CA.roundTop roundTop, CA.roundBottom roundBottom, CA.color color ]
+            attrs = defaultAttrs ++ section.attrs ++ section.extra bin.datum
         in
         Item
-          { datum = bin.datum
-          , render = \plane ->
-              S.bar plane (
-                [ CA.roundTop roundTop_
-                , CA.roundBottom roundBottom_
-                , CA.color (toDefaultColor index)
-                ] ++ prop.attrs ++ prop.extra bin.datum
-                )
-                { x1 = x1_, x2 = x2_, y1 = y1_, y2 = y2_ }
-          , x1 = x1_
-          , x2 = x2_
-          , y1 = y1_
-          , y2 = y2_
-          , start = bin.start
-          , end = bin.end
-          , y = prop.value bin.datum
-          , name = name_
-          , unit = prop.meta.unit
-          , color = color_
+          { details =
+              { name = section.meta.name
+              , unit = section.meta.unit
+              , datum = bin.datum
+              , start = start
+              , end = end
+              , y = value
+              , config =
+                  apply attrs
+                    { roundTop = 0
+                    , roundBottom = 0
+                    , color = "blue" -- TODO
+                    , border = "white"
+                    , borderWidth = 0
+                    }
+              }
+          , bounds = \config ->
+              { x1 = x1, x2 = x2, y1 = y1, y2 = y2 }
+          , position = \_ config ->
+              { x1 = x1, x2 = x2, y1 = y1, y2 = y2 }
+          , render = \plane config position ->
+              S.bar plane attrs position
           }
   in
-  List.map toBinItem bins
-
-
-{-| -}
-type alias Bars =
-  { spacing : Float
-  , margin : Float
-  , roundTop : Float
-  , roundBottom : Float
-  , grouped : Bool
-  }
-
-
-{-| -}
-bars : Plane -> Maybe (data -> Float) -> Maybe (data -> Float) -> List (CA.Attribute Bars) -> List (Property data Metric () S.Bar) -> List data -> Svg msg
-bars plane toStart toEnd barsEdits properties data =
-  data
-    |> toBinsFromVariable toStart toEnd
-    |> toBinItems barsEdits properties
-    |> List.map (render plane)
-    |> S.g [ SA.class "elm-charts__bins" ]
-    |> S.map never
+  Item
+    { details =
+        { properties = properties
+        , items = List.map toBinItem (withSurround data toBin)
+        }
+    , bounds = \config ->
+        { x1 = Coord.minimum [ getBounds >> .x1 >> Just ] config.items
+        , x2 = Coord.maximum [ getBounds >> .x2 >> Just ] config.items
+        , y1 = Coord.minimum [ getBounds >> .y1 >> Just ] config.items
+        , y2 = Coord.maximum [ getBounds >> .y2 >> Just ] config.items
+        }
+    , position = \plane config ->
+        { x1 = Coord.minimum [ getX1 plane >> Just ] config.items
+        , x2 = Coord.maximum [ getX2 plane >> Just ] config.items
+        , y1 = Coord.minimum [ getY1 plane >> Just ] config.items
+        , y2 = Coord.maximum [ getY2 plane >> Just ] config.items
+        }
+    , render = \plane config _ ->
+        S.g [ SA.class "elm-charts__bins" ] (List.map (render plane) config.items)
+    }
 
 
 
@@ -393,8 +441,8 @@ type alias Series =
 
 
 {-| -}
-toSeriesItems : (data -> Float) -> List (Property data Metric () Series) -> List data -> Plane -> List (SeriesItem data (Maybe Float))
-toSeriesItems toX properties data plane =
+toSeriesItems : (data -> Float) -> List (Property data Metric () Series) -> List data -> List (SeriesItem data)
+toSeriesItems toX properties data =
   let toConfig propAttrs =
         apply propAttrs
           { method = Nothing
@@ -416,40 +464,48 @@ toSeriesItems toX properties data plane =
             color_ = if config.color == "" then toDefaultColor index else config.color
         in
         Item
-          { render = \plane_ ->
+          { render = \plane _ _ ->
               let toBottom datum_ =
                     Maybe.map2 (\real visual -> visual - real) (prop.value datum_) (prop.visual datum_)
 
                   methodAttr =
-                    case config.method of
-                      Just CA.Linear   -> CA.linear
-                      Just CA.Monotone -> CA.monotone
-                      Nothing       -> \c -> { c | method = Nothing }
+                    case ( config.method, config.shape ) of
+                      ( Just CA.Linear  , _ ) -> CA.linear
+                      ( Just CA.Monotone, _ ) -> CA.monotone
+                      ( Nothing, Nothing ) -> CA.linear
+                      ( Nothing, _ ) -> \c -> { c | method = Nothing }
               in
               S.g
                 [ SA.class "elm-charts__series" ]
-                [ S.area plane_ toX (Just toBottom) prop.visual [ methodAttr, CA.opacity config.area, CA.color color_ ] data
-                , S.interpolation plane_ toX prop.visual [ methodAttr, CA.width config.width, CA.color color_ ] data
-                , S.g [ SA.class "elm-charts__dots" ] (List.map (render plane_) dotItems)
+                [ S.area plane toX (Just toBottom) prop.visual [ methodAttr, CA.opacity config.area, CA.color color_ ] data
+                , S.interpolation plane toX prop.visual [ methodAttr, CA.width config.width, CA.color color_ ] data
+                , S.g [ SA.class "elm-charts__dots" ] (List.map (render plane) dotItems)
                 ]
-          , x1 = 0 -- TODO
-          , x2 = 0 -- TODO
-          , y1 = 0 -- TODO
-          , y2 = 0 -- TODO
-          , items = dotItems
-          , method = config.method
-          , color = config.color
-          , area = config.area
-          , width = config.width
+          , bounds = \c ->
+              { x1 = Coord.minimum [ getBounds >> .x1 >> Just ] c.items
+              , x2 = Coord.maximum [ getBounds >> .x2 >> Just ] c.items
+              , y1 = Coord.minimum [ getBounds >> .y1 >> Just ] c.items
+              , y2 = Coord.maximum [ getBounds >> .y2 >> Just ] c.items
+              }
+          , position = \plane c ->
+              { x1 = Coord.minimum [ getX1 plane >> Just ] c.items
+              , x2 = Coord.maximum [ getX2 plane >> Just ] c.items
+              , y1 = Coord.minimum [ getY1 plane >> Just ] c.items
+              , y2 = Coord.maximum [ getY2 plane >> Just ] c.items
+              }
+          , details =
+              { items = dotItems
+              , method = config.method
+              , color = config.color
+              , area = config.area
+              , width = config.width
+              }
           }
 
       toDotItem index prop datum_ =
         let config = toConfig (prop.attrs ++ prop.extra datum_)
             x_ = toX datum_
             y_ = Maybe.withDefault 0 (prop.visual datum_)
-            radius = Maybe.withDefault 0 <| Maybe.map (S.toRadius config.size) config.shape
-            radiusX_ = scaleCartesian plane.x radius
-            radiusY_ = scaleCartesian plane.y radius
             color_ = if config.color == "" then toDefaultColor index else config.color
             name_ = if prop.meta.name == "" then String.fromInt index else prop.meta.name
             attrs =
@@ -471,35 +527,41 @@ toSeriesItems toX properties data plane =
               ]
         in
         Item
-          { datum = datum_
-          , render = \plane_ ->
+          { render = \plane _ _ ->
               case prop.value datum_ of
                 Nothing -> S.text ""
-                Just _ -> S.dot plane_ .x .y attrs { x = x_, y = y_ }
-          , x1 = x_ - radiusX_
-          , x2 = x_ + radiusX_
-          , y1 = y_ - radiusY_
-          , y2 = y_ + radiusY_
-          , x = x_
-          , y = prop.value datum_
-          , name = name_
-          , unit = prop.meta.unit
-          , color = color_
-          , dot = attrs
+                Just _ -> S.dot plane .x .y attrs { x = x_, y = y_ }
+          , bounds = \_ ->
+              { x1 = x_
+              , x2 = x_
+              , y1 = y_
+              , y2 = y_
+              }
+          , position = \plane _ ->
+              let radius = Maybe.withDefault 0 <| Maybe.map (S.toRadius config.size) config.shape
+                  radiusX_ = scaleCartesian plane.x radius
+                  radiusY_ = scaleCartesian plane.y radius
+              in
+              { x1 = x_ - radiusX_
+              , x2 = x_ + radiusX_
+              , y1 = y_ - radiusY_
+              , y2 = y_ + radiusY_
+              }
+          , details =
+              { datum = datum_
+              , x = x_
+              , y = prop.value datum_
+              , name = name_
+              , unit = prop.meta.unit
+              , color = color_
+              , dot = attrs
+              }
           }
   in
   List.map P.toConfigs properties
     |> List.indexedMap (\i ps -> List.map (toLineItem i) ps)
     |> List.concat
 
-
-{-| -}
-series : Plane -> (data -> Float) -> List (Property data Metric () Series) -> List data -> Svg msg
-series plane toX properties data =
-  toSeriesItems toX properties data plane
-    |> List.map (render plane)
-    |> S.g [ SA.class "elm-charts__series-group" ]
-    |> S.map never
 
 
 -- TOOLTIP
@@ -517,6 +579,17 @@ apply funcs default =
   let apply_ f a = f a in
   List.foldl apply_ default funcs
 
+
+
+withSurround : List a -> (Int -> Maybe a -> a -> Maybe a -> b) -> List b
+withSurround all func =
+  let fold index prev acc list =
+        case list of
+          a :: b :: rest -> fold (index + 1) (Just a) (acc ++ [func index prev a (Just b)]) (b :: rest)
+          a :: [] -> acc ++ [func index prev a Nothing]
+          [] -> acc
+  in
+  fold 0 Nothing [] all
 
 
 -- DEFAULTS
