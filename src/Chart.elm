@@ -1,7 +1,7 @@
 module Chart exposing
     ( chart, Element, bars, just
-    , series, Series, linear, monotone
-    , Shape, circle, triangle, square, diamond, plus, cross, size
+    , series, Series
+    , size
     , Bounds, startMin, startMax, endMin, endMax, startPad, endPad, zero, middle
     , xAxis, yAxis, xTicks, yTicks, xLabels, yLabels, grid
     , ints, floats, times, format, values, amount
@@ -1274,15 +1274,6 @@ type alias Series =
   }
 
 
-linear : Float -> Attribute { a | interpolation : Maybe C.Interpolation }
-linear w config =
-  { config | interpolation = Just (C.linear w) }
-
-
-monotone : Float -> Attribute { a | interpolation : Maybe C.Interpolation }
-monotone w config =
-  { config | interpolation = Just (C.monotone w) }
-
 
 series : (data -> Float) -> List (Property data Item.Metric () Series) -> List data -> Element data msg
 series toX properties data =
@@ -1300,7 +1291,7 @@ series toX properties data =
           items
   in
   SeriesElement toXYBounds (always items) <| \id_ p _ ->
-    S.g [ SA.class "elm-charts__series" ] (List.map (Item.render p) items) -- clipPath id_
+    S.g [ SA.class "elm-charts__series" ] (List.map (Item.render p) items) -- TODO clipPath id_
       |> S.map never
 
 
@@ -1435,69 +1426,6 @@ applyAttrs funcs default =
 clipPath : String -> S.Attribute msg
 clipPath id_ =
   SA.clipPath <| "url(#" ++ id_ ++ ")"
-
-
-
--- DEFAULTS
-
-
-toDefaultShape : Int -> C.Shape
-toDefaultShape index =
-  let numOfItems = Dict.size shapes
-      itemIndex = remainderBy numOfItems index
-  in
-  Dict.get itemIndex shapes
-    |> Maybe.withDefault C.circle
-
-
-shapes : Dict Int C.Shape
-shapes =
-  [ C.circle, C.triangle, C.square, C.diamond, C.plus, C.cross ]
-    |> List.indexedMap Tuple.pair
-    |> Dict.fromList
-
-
-
-{-| -}
-type alias Shape =
-  C.Shape
-
-
-{-| -} -- TODO
-circle : Attribute { a | shape : Maybe Shape }
-circle config =
-  { config | shape = Just C.circle }
-
-
-{-| -}
-triangle : Attribute { a | shape : Maybe Shape }
-triangle config =
-  { config | shape = Just C.triangle }
-
-
-{-| -}
-square : Attribute { a | shape : Maybe Shape }
-square config =
-  { config | shape = Just C.square }
-
-
-{-| -}
-diamond : Attribute { a | shape : Maybe Shape }
-diamond config =
-  { config | shape = Just C.diamond }
-
-
-{-| -}
-plus : Attribute { a | shape : Maybe Shape }
-plus config =
-  { config | shape = Just C.plus }
-
-
-{-| -}
-cross : Attribute { a | shape : Maybe Shape }
-cross config =
-  { config | shape = Just C.cross }
-
 
 
 -- STYLE

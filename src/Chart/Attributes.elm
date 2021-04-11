@@ -19,13 +19,13 @@ x v config =
 
 
 {-| -}
-x1 : Float -> Attribute { a | x1 : Maybe Float }
+x1 : x -> Attribute { a | x1 : Maybe x }
 x1 v config =
   { config | x1 = Just v }
 
 
 {-| -}
-x2 : Float -> Attribute { a | x2 : Maybe Float }
+x2 : x -> Attribute { a | x2 : Maybe x }
 x2 v config =
   { config | x2 = Just v }
 
