@@ -1373,18 +1373,18 @@ grid edits =
 
 
 {-| -}
-type alias Property data deco =
-  P.Property data deco
+type alias Property data meta inter deco =
+  P.Property data meta inter deco
 
 
 {-| -}
-property : (data -> Maybe Float) -> List (Attribute deco) -> (data -> List (Attribute deco)) -> Property data deco
+property : (data -> Maybe Float) -> List (Attribute inter) -> List (Attribute deco) -> (data -> List (Attribute deco)) -> Property data Item.Metric inter deco
 property y_ =
-  P.property y_ "" "" -- TODO
+  P.property y_ { name = "", unit = "" } -- TODO
 
 
 {-| -}
-stacked : List (Property data deco) -> Property data deco
+stacked : List (Property data meta inter deco) -> Property data meta inter deco
 stacked =
   P.stacked
 
@@ -1420,7 +1420,7 @@ type alias Bar =
 
 
 {-| -}
-bars : List (Attribute (Bars data)) -> List (Property data Bar) -> List data -> Element data msg
+bars : List (Attribute (Bars data)) -> List (Property data Item.Metric () Bar) -> List data -> Element data msg
 bars edits properties data =
   let config =
         D.apply edits
@@ -1489,7 +1489,7 @@ monotone w config =
   { config | interpolation = Just (C.monotone w) }
 
 
-series : (data -> Float) -> List (Property data Series) -> List data -> Element data msg
+series : (data -> Float) -> List (Property data Item.Metric () Series) -> List data -> Element data msg
 series toX properties data =
   let toYs =
         List.map .visual (List.concatMap P.toConfigs properties)

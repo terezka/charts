@@ -2,37 +2,37 @@ module Internal.Property exposing (..)
 
 
 {-| -}
-type Property data deco
-  = Property (Config data deco)
-  | Stacked (List (Config data deco))
+type Property data meta inter deco
+  = Property (Config data meta inter deco)
+  | Stacked (List (Config data meta inter deco))
 
 
 {-| -}
-type alias Config data deco =
+type alias Config data meta inter deco =
   { value : data -> Maybe Float
   , visual : data -> Maybe Float
-  , name : String
-  , unit : String
+  , meta : meta
+  , inter : List (inter -> inter)
   , attrs : List (deco -> deco)
-  , extra : data -> List (deco -> deco) -- TODO
+  , extra : data -> List (deco -> deco)
   }
 
 
 {-| -}
-property : (data -> Maybe Float) -> String -> String -> List (deco -> deco) -> (data -> List (deco -> deco)) -> Property data deco
-property value name unit attrs extra =
+property : (data -> Maybe Float) -> meta -> List (inter -> inter) -> List (deco -> deco) -> (data -> List (deco -> deco)) -> Property data meta inter deco
+property value meta inter attrs extra =
   Property
     { value = value
     , visual = value
-    , name = name
-    , unit = unit
+    , meta = meta
+    , inter = inter
     , attrs = attrs
     , extra = extra
     }
 
 
 {-| -}
-stacked : List (Property data deco) -> Property data deco
+stacked : List (Property data meta inter deco) -> Property data meta inter deco
 stacked properties =
   let configs =
         List.concatMap toConfigs (List.reverse properties)
@@ -54,7 +54,7 @@ stacked properties =
 
 
 {-| -}
-toYs : List (Property data deco) -> List (data -> Maybe Float)
+toYs : List (Property data meta inter deco) -> List (data -> Maybe Float)
 toYs properties =
   let each prop =
         case prop of
@@ -65,7 +65,7 @@ toYs properties =
 
 
 {-| -}
-toConfigs : Property data deco -> List (Config data deco)
+toConfigs : Property data meta inter deco -> List (Config data meta inter deco)
 toConfigs prop =
   case prop of
     Property config -> [ config ]

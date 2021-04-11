@@ -1,7 +1,7 @@
 module Chart.Item exposing
   ( Item(..), BinItem, BarItem
   , render, value, center, datum, top, getColor, getName, getBars
-  , Property, property, stacked
+  , Property, property, stacked, Metric
   , Bars, bars, toBinsFromVariable, toBinItems
   , Series, series, toSeriesItems
   )
@@ -158,20 +158,26 @@ getBars (Item config) =
 
 -- PROPERTY
 
+{-| -}
+type alias Metric =
+  { name : String
+  , unit : String
+  }
+
 
 {-| -}
-type alias Property data deco =
-  P.Property data deco
+type alias Property data meta inter deco =
+  P.Property data meta inter deco
 
 
 {-| -}
-property : (data -> Maybe Float) -> String -> String -> List (CA.Attribute deco) -> (data -> List (CA.Attribute deco)) -> Property data deco
+property : (data -> Maybe Float) -> Metric -> List (CA.Attribute inter) -> List (CA.Attribute deco) -> (data -> List (CA.Attribute deco)) -> Property data Metric inter deco
 property =
   P.property
 
 
 {-| -}
-stacked : List (Property data deco) -> Property data deco
+stacked : List (Property data meta inter deco) -> Property data meta inter deco
 stacked =
   P.stacked
 
@@ -250,7 +256,7 @@ toBinsFromVariable start end =
 
 
 {-| -}
-toBinItems : List (CA.Attribute Bars) -> List (Property data S.Bar) -> List (Bin data) -> List (BinItem data (Maybe Float))
+toBinItems : List (CA.Attribute Bars) -> List (Property data Metric () S.Bar) -> List (Bin data) -> List (BinItem data (Maybe Float))
 toBinItems barsEdits properties bins =
   let barsConfig =
         apply barsEdits
@@ -318,18 +324,17 @@ toBinItems barsEdits properties bins =
             y2_ = Maybe.withDefault 0 (prop.visual bin.datum)
             index = barIndex + pieceIndex
             color_ = if config.color == "" then toDefaultColor index else config.color
-            name_ = if prop.name == "" then String.fromInt index else prop.name
+            name_ = if prop.meta.name == "" then String.fromInt index else prop.meta.name
         in
         Item
           { datum = bin.datum
           , render = \plane ->
-              S.bar plane .x1 .y1 .x2 .y2
-                [ CA.color color_
-                , CA.border config.border
-                , CA.borderWidth config.borderWidth
-                , CA.roundTop config.roundTop
-                , CA.roundBottom config.roundBottom
-                ]
+              S.bar plane (
+                [ CA.roundTop roundTop_
+                , CA.roundBottom roundBottom_
+                , CA.color (toDefaultColor index)
+                ] ++ prop.attrs ++ prop.extra bin.datum
+                )
                 { x1 = x1_, x2 = x2_, y1 = y1_, y2 = y2_ }
           , x1 = x1_
           , x2 = x2_
@@ -339,7 +344,7 @@ toBinItems barsEdits properties bins =
           , end = bin.end
           , y = prop.value bin.datum
           , name = name_
-          , unit = prop.unit
+          , unit = prop.meta.unit
           , color = color_
           }
   in
@@ -357,7 +362,7 @@ type alias Bars =
 
 
 {-| -}
-bars : Plane -> Maybe (data -> Float) -> Maybe (data -> Float) -> List (CA.Attribute Bars) -> List (Property data S.Bar) -> List data -> Svg msg
+bars : Plane -> Maybe (data -> Float) -> Maybe (data -> Float) -> List (CA.Attribute Bars) -> List (Property data Metric () S.Bar) -> List data -> Svg msg
 bars plane toStart toEnd barsEdits properties data =
   data
     |> toBinsFromVariable toStart toEnd
@@ -388,7 +393,7 @@ type alias Series =
 
 
 {-| -}
-toSeriesItems : (data -> Float) -> List (Property data Series) -> List data -> Plane -> List (SeriesItem data (Maybe Float))
+toSeriesItems : (data -> Float) -> List (Property data Metric () Series) -> List data -> Plane -> List (SeriesItem data (Maybe Float))
 toSeriesItems toX properties data plane =
   let toConfig propAttrs =
         apply propAttrs
@@ -446,7 +451,7 @@ toSeriesItems toX properties data plane =
             radiusX_ = scaleCartesian plane.x radius
             radiusY_ = scaleCartesian plane.y radius
             color_ = if config.color == "" then toDefaultColor index else config.color
-            name_ = if prop.name == "" then String.fromInt index else prop.name
+            name_ = if prop.meta.name == "" then String.fromInt index else prop.meta.name
             attrs =
               [ CA.color color_
               , CA.border config.border
@@ -478,7 +483,7 @@ toSeriesItems toX properties data plane =
           , x = x_
           , y = prop.value datum_
           , name = name_
-          , unit = prop.unit
+          , unit = prop.meta.unit
           , color = color_
           , dot = attrs
           }
@@ -489,7 +494,7 @@ toSeriesItems toX properties data plane =
 
 
 {-| -}
-series : Plane -> (data -> Float) -> List (Property data Series) -> List data -> Svg msg
+series : Plane -> (data -> Float) -> List (Property data Metric () Series) -> List data -> Svg msg
 series plane toX properties data =
   toSeriesItems toX properties data plane
     |> List.map (render plane)

@@ -1,9 +1,10 @@
 module Svg.Coordinates
   exposing
-    ( Point, Plane, Axis, minimum, maximum
+    ( Plane, Axis, minimum, maximum
     , scaleSVG, toSVGX, toSVGY
     , scaleCartesian, toCartesianX, toCartesianY
     , place, placeWithOffset
+    , Point, Position
     )
 
 {-| This module contains helpers for cartesian/SVG coordinate translation.
@@ -57,6 +58,15 @@ type alias Point =
   { x : Float
   , y : Float
   }
+
+
+type alias Position =
+  { x1 : Float
+  , x2 : Float
+  , y1 : Float
+  , y2 : Float
+  }
+
 
 
 -- Plane

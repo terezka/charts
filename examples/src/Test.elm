@@ -98,7 +98,7 @@ view model =
       --, C.range (C.startMin 0 >> C.endMax 6)
       --, C.domain (C.startMax 0 >> C.endMin 19)
       , C.events
-          [ C.decoder (\is -> CS.getNearest Item.center (C.getBars is))
+          [ C.decoder (\is pl ps -> CS.getNearest Item.center (C.getBars is) pl ps)
               |> C.map OnHoverNew
               |> C.event "mousemove"
           ]
@@ -116,11 +116,11 @@ view model =
           --, CA.spacing 0
           ]
           [ C.stacked
-              [ C.property .y [] (always [])
-              , C.property .z [] (always [])
-              , C.property (C.just .x) [] (always [])
+              [ C.property .y [] [] (always [])
+              , C.property .z [] [] (always [])
+              , C.property (C.just .x) [] [] (always [])
               ]
-          , C.property .z [] (always [])
+          , C.property .z [] [] (always [])
           ]
           data
 
@@ -131,15 +131,15 @@ view model =
       , C.yTicks [ C.ints ]
 
 
-      --, C.series .x
-      --    --[ C.monotone ]
-      --    [ C.stacked
-      --        [ C.property .y [ C.area 0.2, C.monotone 1, C.color C.purple ] (always [])
-      --            --(\d -> if hovered d then [ C.aura 5 0.5 ] else [])
-      --        , C.property .z [ C.monotone 1, C.color C.purple ] (always [])
-      --        ]
-      --    ]
-      --    data
+      , C.series .x
+          --[ C.monotone ]
+          [ C.stacked
+              [ C.property .y [] [ C.area 0.2, C.monotone 1, C.color C.purple ] (always [])
+                  --(\d -> if hovered d then [ C.aura 5 0.5 ] else [])
+              , C.property .z [] [ C.monotone 1, C.color C.purple ] (always [])
+              ]
+          ]
+          data
 
       , C.svg <| \p ->
           S.g []
@@ -181,8 +181,8 @@ view model =
 
             [ Item.series p .x
                 [ Item.stacked
-                    [ Item.property .z "dogs" "km/s" [ CA.area 0.25, CA.color CS.blue, CA.size 2, CA.borderWidth 1, CA.circle ] (always [])
-                    , Item.property .y "cats" "m/s" [ CA.linear, CA.color CS.blue, CA.size 2, CA.borderWidth 1, CA.diamond ] (always [])
+                    [ Item.property .z { name = "dogs", unit = "km/s" } [] [ CA.area 0.25, CA.color CS.blue, CA.size 2, CA.borderWidth 1, CA.circle ] (always [])
+                    , Item.property .y { name = "cats", unit = "km/s" } [] [ CA.linear, CA.color CS.blue, CA.size 2, CA.borderWidth 1, CA.diamond ] (always [])
                     ]
                 ]
                 [ { x = 0, y = Just 14, z = Just 2 }
@@ -245,14 +245,13 @@ view model =
 
       , C.xAxis [ C.noArrow ]
 
-      , C.when model.hoveringNew <| \item rest ->
-          C.tooltipOnTop (\_ -> (Item.top item).x) (\_ -> (Item.top item).y) [] [ tooltip item ]
+      --, C.tooltip model.hoveringNew [ C.center, C.horizontal, C.content tooltip ]
       ]
     ]
 
 
-tooltip : Item.BarItem Datum (Maybe Float) -> H.Html msg
-tooltip hovered =
+tooltip : Item.BarItem Datum (Maybe Float) -> List (Item.BarItem Datum (Maybe Float)) -> H.Html msg
+tooltip hovered _ =
   H.div []
     [ H.h4
         [ HA.style "max-width" "200px"

@@ -21,7 +21,7 @@ import Html.Attributes as HA
 import Svg as S exposing (Svg)
 import Svg.Attributes as SA
 import Svg.Events as SE
-import Svg.Coordinates as Coord exposing (Point, Plane, place, toSVGX, toSVGY, toCartesianX, toCartesianY, scaleSVG, scaleCartesian, placeWithOffset)
+import Svg.Coordinates as Coord exposing (Point, Position, Plane, place, toSVGX, toSVGY, toCartesianX, toCartesianY, scaleSVG, scaleCartesian, placeWithOffset)
 import Svg.Commands as C exposing (..)
 import Chart.Attributes as CA
 import Internal.Interpolation as Interpolation
@@ -214,9 +214,7 @@ line plane edits =
 
 {-| -}
 type alias Label =
-  { x : Float
-  , y : Float
-  , xOff : Float
+  { xOff : Float
   , yOff : Float
   , border : String
   , borderWidth : Float
@@ -228,13 +226,11 @@ type alias Label =
 
 
 {-| -}
-label : Plane -> List (CA.Attribute Label) -> String -> Svg msg
-label plane edits string =
+label : Plane -> List (CA.Attribute Label) -> String -> Point -> Svg msg
+label plane edits string point =
   let config =
         apply edits
-          { x = plane.x.min
-          , y = plane.y.max
-          , xOff = 0
+          { xOff = 0
           , yOff = 0
           , border = "white"
           , borderWidth = 0.1
@@ -259,7 +255,7 @@ label plane edits string =
     , SA.stroke config.border
     , SA.strokeWidth (String.fromFloat config.borderWidth)
     , SA.fill config.color
-    , position plane config.x config.y config.xOff config.yOff
+    , position plane point.x point.y config.xOff config.yOff
     , SA.style <| String.join " " [ "pointer-events: none;", fontStyle, anchorStyle ]
     ]
     [ S.tspan [] [ S.text string ] ]
@@ -271,9 +267,7 @@ label plane edits string =
 
 {-| -}
 type alias Arrow =
-  { x : Float
-  , y : Float
-  , xOff : Float
+  { xOff : Float
   , yOff : Float
   , color : String
   , width : Float
@@ -283,13 +277,11 @@ type alias Arrow =
 
 
 {-| -}
-arrow : Plane -> List (CA.Attribute Arrow) -> Svg msg
-arrow plane edits =
+arrow : Plane -> List (CA.Attribute Arrow) -> Point -> Svg msg
+arrow plane edits point =
   let config =
         apply edits
-          { x = plane.x.min
-          , y = plane.y.max
-          , xOff = 0
+          { xOff = 0
           , yOff = 0
           , color = "rgb(210, 210, 210)"
           , width = 4
@@ -305,7 +297,7 @@ arrow plane edits =
   in
   S.g
     [ SA.class "elm-charts__arrow"
-    , position plane config.x config.y config.xOff config.yOff
+    , position plane point.x point.y config.xOff config.yOff
     ]
     [ S.polygon
         [ SA.fill config.color
@@ -333,8 +325,8 @@ type alias Bar =
 
 
 {-| -}
-bar : Plane -> (data -> Float) -> (data -> Float) -> (data -> Float) -> (data -> Float) -> List (CA.Attribute Bar) -> data -> Svg msg
-bar plane toX1 toY1 toX2 toY2 edits datum_ =
+bar : Plane -> List (CA.Attribute Bar) -> Position -> Svg msg
+bar plane edits point =
   -- TODO round via clipPath
   let config =
         apply edits
@@ -345,10 +337,10 @@ bar plane toX1 toY1 toX2 toY2 edits datum_ =
           , color = blue
           }
 
-      x1_ = toX1 datum_
-      x2_ = toX2 datum_
-      y1_ = toY1 datum_
-      y2_ = toY2 datum_
+      x1_ = point.x1
+      x2_ = point.x2
+      y1_ = point.y1
+      y2_ = point.y2
 
       x_ = x1_
       y_ = max y1_ y2_
@@ -414,6 +406,10 @@ bar plane toX1 toY1 toX2 toY2 edits datum_ =
     , SA.d (C.description plane commands)
     ]
     []
+
+
+
+-- SERIES
 
 
 {-| -}

@@ -178,7 +178,7 @@ type alias Series =
   }
 
 
-toSeriesItems : (data -> Float) -> List (Property data Series) -> List data -> Plane -> List (List (Item (Maybe Float) DotDetails data))
+toSeriesItems : (data -> Float) -> List (Property data meta () Series) -> List data -> Plane -> List (List (Item (Maybe Float) DotDetails data))
 toSeriesItems toX properties data plane =
   let toConfig p d =
         D.apply (p.attrs ++ p.extra d)
@@ -307,7 +307,7 @@ type alias Bar =
 
 
 {-| -}
-toBarItems : Bool -> Space -> List (Property data Bar) -> List (Bin data) -> List (Items (Maybe Float) BarDetails data)
+toBarItems : Bool -> Space -> List (Property data meta () Bar) -> List (Bin data) -> List (Items (Maybe Float) BarDetails data)
 toBarItems isGrouped space properties bins =
   let toConfig p d =
         D.apply (p.attrs ++ p.extra d)
