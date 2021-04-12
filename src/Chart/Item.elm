@@ -1,6 +1,6 @@
 module Chart.Item exposing
-  ( Item(..), BinItem, BarItem, SectionItem, DotItem, SeriesItem, BarsItem
-  , render, getValue, getCenter, getDatum, getTop, getColor, getName, getItems, getSections
+  ( Item(..), BinItem, BarItem, SectionItem, DotItem, SeriesItem, BarsItem, ItemDiscrete
+  , render, getValue, getCenter, getPosition, getDatum, getTop, getColor, getName, getItems, getBars, getSections
   , getBounds, only
   , getX1, getX2, getY2, getY1
   , Property, Metric
@@ -94,6 +94,23 @@ type alias DotItem datum =
 
 
 {-| -}
+type alias ItemDiscrete a b =
+  Item
+    { a
+    | name : String
+    , unit : String
+    , y : Maybe Float
+    , config : { b | color : String }
+    }
+
+
+{-| -}
+getPosition : Plane -> Item x -> Position
+getPosition plane (Item config) =
+  config.position plane config.details
+
+
+{-| -}
 getTop : Plane -> Item x -> Point
 getTop plane (Item config) =
   let pos = config.position plane config.details in
@@ -180,13 +197,13 @@ getValue (Item config) =
 
 
 {-| -}
-getColor : Item { config | config : { a | color : String } } -> String
+getColor : ItemDiscrete a b -> String
 getColor (Item config) =
   config.details.config.color
 
 
 {-| -}
-getName : Item { config | name : String } -> String
+getName : ItemDiscrete a b -> String
 getName (Item config) =
   config.details.name
 
@@ -204,17 +221,23 @@ getItems (Item config) =
 
 
 {-| -}
-only : String -> List (Item { config | name : String }) -> List (Item { config | name : String })
+only : String -> List (ItemDiscrete a b) -> List (ItemDiscrete a b)
 only name_ =
   List.filter <| \(Item config) -> config.details.name == name_
 
 
 {-| -}
+getBars : BarsItem a -> List (BarItem a)
+getBars =
+  getItems -- bins
+    >> List.concatMap getItems
+
+
+{-| -}
 getSections : BarsItem a -> List (SectionItem a)
-getSections barsItem =
-  getItems barsItem -- bins
-    |> List.concatMap getItems -- bars
-    |> List.concatMap getItems -- sections
+getSections =
+  getBars -- bars
+    >> List.concatMap getItems -- sections
 
 
 

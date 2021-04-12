@@ -1,5 +1,5 @@
 module Chart exposing
-    ( chart, Element, bars, just
+    ( chart, Element, bars, bar, just
     , series
     , size
     , Bounds, startMin, startMax, endMin, endMax, startPad, endPad, zero, middle
@@ -895,11 +895,48 @@ getWithinX radius toPoint filterItems =
  -- TOOLTIP
 
 
+type alias Tooltip a b msg =
+  { htmlAttrs : List (H.Attribute msg)
+  , content : Item.ItemDiscrete a b -> List (Item.ItemDiscrete a b) -> H.Html msg
+  , position : C.Plane -> Item.ItemDiscrete a b -> C.Point
+  }
+
 
 {-| -}
-tooltip : (Bounds -> Float) -> (Bounds -> Float) -> List (H.Attribute msg) -> List (H.Html msg) -> Element data msg
-tooltip toX toY att content =
-  html <| \p -> C.tooltip p (toX <| toBounds .x p) (toY <| toBounds .y p) att content
+tooltip : List (Item.ItemDiscrete a b) -> List (Attribute (Tooltip a b msg)) -> Element data msg
+tooltip items edits =
+  let config =
+        applyAttrs edits
+          { htmlAttrs = []
+          , content = \first rest ->
+              H.div []
+                [ H.h4
+                    [ HA.style "max-width" "200px"
+                    , HA.style "margin-top" "2px"
+                    , HA.style "margin-bottom" "5px"
+                    , HA.style "color" (Item.getColor first)
+                    ]
+                    [ H.text (Item.getName first)
+                    ]
+                , H.div []
+                    [ H.text "X: "
+                    , H.text <| String.fromFloat (Item.getBounds first |> .x1)
+                    ]
+                , H.div []
+                    [ H.text "Y: "
+                    , H.text <| String.fromFloat (Item.getBounds first |> .y2)
+                    ]
+                ]
+          , position = Item.getTop
+          }
+  in
+  when items <| \first rest ->
+    html <| \p ->
+      C.tooltipOnTop p
+        (config.position p first |> .x)
+        (config.position p first |> .y)
+        config.htmlAttrs
+        [config.content first rest]
 
 
 {-| -}
@@ -1311,6 +1348,12 @@ type alias Property data meta inter deco =
 property : (data -> Maybe Float) -> String -> String -> List (Attribute inter) -> List (Attribute deco) -> Property data Item.Metric inter deco
 property y_ name_ unit_ =
   P.property y_ { name = name_, unit = unit_ } -- TODO
+
+
+{-| -}
+bar : (data -> Maybe Float) -> String -> String -> List (Attribute deco) -> Property data Item.Metric inter deco
+bar y_ name_ unit_ =
+  P.property y_ { name = name_, unit = unit_ } [] -- TODO
 
 
 {-| -}

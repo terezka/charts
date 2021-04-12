@@ -6,11 +6,8 @@ module Chart.Svg exposing
   , Bar, bar
   , Interpolation, interpolation, area
   , Dot, dot, toRadius
-
-  --, tooltip
-
+  , Tooltip, tooltip
   , decoder, getNearest, getNearestX, getWithin, getWithinX
-
   , position
   , blue, pink, orange, green, purple, red
   )
@@ -695,9 +692,108 @@ plusPath area_ off x_ y_ =
 
 -- TOOLTIP
 
---type alias Tooltip
 
---tooltip : Tooltip -> Html msg
+{-| -}
+type alias Tooltip =
+  { direction : Maybe CA.Direction
+  , height : Float
+  , width : Float
+  , offset : Float
+  , pointer : Bool
+  }
+
+
+{-| -}
+tooltip : Plane -> Position -> List (CA.Attribute Tooltip) -> List (H.Attribute Never) -> List (H.Html Never) -> H.Html msg
+tooltip plane pos edits htmlAttrs content =
+  let config =
+        apply edits
+          { direction = Nothing
+          , height = 0 -- TODO adjust placement
+          , width = 0
+          , offset = 12
+          , pointer = True
+          }
+
+      distanceTop = toSVGY plane pos.y2
+      distanceBottom = plane.y.length - toSVGY plane pos.y1
+      distanceLeft = toSVGX plane pos.x2
+      distanceRight = plane.x.length - toSVGX plane pos.x1
+
+      direction =
+        case config.direction of
+          Just CA.LeftOrRight -> if distanceLeft > distanceRight then CA.Left else CA.Right
+          Just CA.TopOrBottom -> if distanceTop > distanceBottom then CA.Top else CA.Bottom
+          Just dir -> dir
+          Nothing ->
+            let isLargest a = List.all (\b -> a >= b) in
+            if isLargest distanceTop [ distanceBottom, distanceLeft, distanceRight ] then CA.Top
+            else if isLargest distanceBottom [ distanceTop, distanceLeft, distanceRight ] then CA.Bottom
+            else if isLargest distanceLeft [ distanceTop, distanceBottom, distanceRight ] then CA.Left
+            else CA.Right
+
+      ( xOff, yOff, transformation ) =
+        case direction of
+          CA.Top         -> ( 0, -config.offset, "translate(-50%, -100%)" )
+          CA.Bottom      -> ( 0, config.offset, "translate(-50%, 0%)" )
+          CA.Left        -> ( -config.offset, 0, "translate(-100%, -50%)" )
+          CA.Right       -> ( config.offset, 0, "translate(0, -50%)" )
+          CA.LeftOrRight -> ( -config.offset, 0, "translate(0, -50%)" )
+          CA.TopOrBottom -> ( 0, config.offset, "translate(-50%, -100%)" )
+
+      children =
+        if config.pointer then
+          H.node "style" [] [ H.text (tooltipPointerStyle direction) ] :: content
+        else
+          content
+
+      attributes =
+        [ HA.class "elm-charts__tooltip-new"
+        , HA.style "transform" transformation
+        , HA.style "padding" "5px 10px"
+        , HA.style "background" "rgba(255, 255, 255)"
+        , HA.style "border" "1px solid #D8D8D8"
+        , HA.style "border-radius" "3px"
+        , HA.style "pointer-events" "none"
+        , HA.style "max-width" (toPx config.width)
+        , HA.style "max-height" (toPx config.height)
+        ] ++ htmlAttrs
+
+      toPx v =
+        if v > 0 then String.fromFloat v ++ "px" else "auto"
+
+      ( x, y ) =
+        case direction of
+          CA.Top         -> ( pos.x1 + (pos.x2 - pos.x1) / 2, pos.y2 )
+          CA.Bottom      -> ( pos.x1 + (pos.x2 - pos.x1) / 2, pos.y1 )
+          CA.Left        -> ( pos.x1, pos.y1 + (pos.y2 - pos.y1) / 2 )
+          CA.Right       -> ( pos.x2, pos.y1 + (pos.y2 - pos.y1) / 2 )
+          CA.LeftOrRight -> ( pos.x2, pos.y1 + (pos.y2 - pos.y1) / 2 )
+          CA.TopOrBottom -> ( pos.x1 + (pos.x2 - pos.x1) / 2, pos.y2 )
+  in
+  positionHtml plane x y xOff yOff attributes children
+    |> H.map never
+
+
+{-| -}
+positionHtml : Plane -> Float -> Float -> Float -> Float -> List (H.Attribute msg) -> List (H.Html msg) -> H.Html msg
+positionHtml plane x y xOff yOff attrs content =
+    let
+        xPercentage = (toSVGX plane x + xOff) * 100 / plane.x.length
+        yPercentage = (toSVGY plane y + yOff) * 100 / plane.y.length
+
+        posititonStyles =
+            [ HA.style "left" (String.fromFloat xPercentage ++ "%")
+            , HA.style "top" (String.fromFloat yPercentage ++ "%")
+            , HA.style "margin-right" "-400px"
+            , HA.style "position" "absolute"
+            ]
+    in
+    H.div (posititonStyles ++ attrs) content
+
+
+
+-- EVENTS
 
 
 {-| -}
@@ -938,3 +1034,121 @@ purple =
   "rgb(170, 80, 208)"
 
 
+
+-- STYLES
+
+
+tooltipPointerStyle : CA.Direction -> String
+tooltipPointerStyle direction = -- #D8D8D8
+  let ( both, before, after ) =
+        case direction of
+          CA.Top         ->
+            ( """
+              border-left: 5px solid transparent;
+              border-right: 5px solid transparent;
+              top: 100%;
+              left: 50%;
+              margin-left: -5px;
+              """
+            , "border-top: 5px solid #D8D8D8;"
+            , """
+              border-top: 5px solid white;
+              margin-top: -1px;
+              """
+            )
+
+          CA.Bottom      ->
+            ( """
+              border-left: 5px solid transparent;
+              border-right: 5px solid transparent;
+              bottom: 100%;
+              left: 50%;
+              margin-left: -5px;
+              """
+            , """
+              border-bottom: 5px solid #D8D8D8;
+              """
+            , """
+              border-bottom: 5px solid white;
+              margin-bottom: -1px;
+              """
+            )
+
+          CA.Left        ->
+            ( """
+              border-top: 5px solid transparent;
+              border-bottom: 5px solid transparent;
+              top: 50%;
+              left: 100%;
+              margin-top: -5px;
+              """
+            , "border-left: 5px solid #D8D8D8;"
+            , """
+              border-left: 5px solid white;
+              margin-left: -1px;
+              """
+            )
+
+          CA.Right       ->
+            ( """
+              border-top: 5px solid transparent;
+              border-bottom: 5px solid transparent;
+              top: 50%;
+              right: 100%;
+              margin-top: -5px;
+              """
+            , "border-right: 5px solid #D8D8D8;"
+            , """
+              border-right: 5px solid white;
+              margin-right: -1px;
+              """
+            )
+
+          CA.LeftOrRight ->
+            ( """
+              border-top: 5px solid transparent;
+              border-bottom: 5px solid transparent;
+              top: 50%;
+              left: 100%;
+              margin-top: -5px;
+              """
+            , "border-left: 5px solid #D8D8D8;"
+            , """
+              border-left: 5px solid white;
+              margin-left: -1px;
+              """
+            )
+
+          CA.TopOrBottom ->
+            ( """
+              border-left: 5px solid transparent;
+              border-right: 5px solid transparent;
+              top: 100%;
+              left: 50%;
+              margin-left: -5px;
+              """
+            , "border-top: 5px solid #D8D8D8;"
+            , """
+              border-top: 5px solid white;
+              margin-top: -1px;
+              """
+            )
+
+  in
+  """
+  .elm-charts__tooltip-new:before, .elm-charts__tooltip-new:after {
+    content: "";
+    position: absolute;
+    """ ++ both ++
+    """
+  }
+
+  .elm-charts__tooltip-new:after {
+    """ ++ after ++ """
+    z-index: 1;
+  }
+
+  .elm-charts__tooltip-new:before {
+    """ ++ before ++ """
+  }
+  """

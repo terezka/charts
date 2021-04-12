@@ -16,6 +16,7 @@ import Dict
 import Chart as C
 import Chart.Attributes as CA
 import Chart.Item as CI
+import Chart.Svg as CS
 
 
 -- TODO
@@ -115,11 +116,11 @@ view model =
           , CA.spacing 0.04
           ]
           [ C.stacked
-              [ C.property .y "cats" "km" [] []
-              , C.property .z "dogs" "km" [] []
-              , C.property (Just << .x) "fish" "km" [] []
+              [ C.bar .y "cats" "km" [ C.borderWidth 1 ]
+              , C.bar .z "dogs" "km" [ C.borderWidth 1 ]
+              , C.bar (Just << .x) "fish" "km" [ C.borderWidth 1 ]
               ]
-          , C.property .z "kids" "km" [] []
+          , C.bar .z "kids" "km" [ CA.color CA.purple ]
           ]
           data
 
@@ -129,43 +130,59 @@ view model =
       , C.yLabels [ C.ints ]
       , C.yTicks [ C.ints ]
 
-      , C.series .x
-          [ C.stacked
-              [ C.property .y "owls" "km" [ CA.linear, CA.opacity 0.25 ] [ CA.circle ]
-                  |> C.variation (\datum -> [ CA.size (Maybe.withDefault 2 datum.y) ])
-              , C.property .z "trees" "km" [ CA.linear, CA.opacity 0.25, CA.color CA.purple ] [ CA.circle ]
-              ]
-          ]
-          data
+      --, C.series .x
+      --    [ C.stacked
+      --        [ C.property .y "owls" "km" [ CA.linear, CA.opacity 0.25 ] [ CA.circle ]
+      --            |> C.variation (\datum -> [ CA.size (Maybe.withDefault 2 datum.y) ])
+      --        , C.property .z "trees" "km" [ CA.linear, CA.opacity 0.25, CA.color CA.purple ] [ CA.circle ]
+      --        ]
+      --    ]
+      --    data
 
       , C.xAxis []
-      , C.when model.hoveringNew <| \first rest ->
-          C.tooltipOnTop
-            (\p -> CI.getTop p first |> .x)
-            (\p -> CI.getTop p first |> .y)
-            []
-            [ tooltip first rest ]
+      --, C.tooltip model.hoveringNew
+      --    [ CA.content <| \hovered _ ->
+      --        H.div []
+      --          [ H.h4
+      --              [ HA.style "max-width" "200px"
+      --              , HA.style "margin-top" "2px"
+      --              , HA.style "margin-bottom" "5px"
+      --              , HA.style "color" (CI.getColor hovered)
+      --              ]
+      --              [ H.text (CI.getName hovered)
+      --              ]
+      --          , H.div []
+      --              [ H.text "X: "
+      --              , H.text <| Debug.toString <| .x <| CI.getDatum hovered
+      --              ]
+      --          , H.div []
+      --              [ H.text "Y: "
+      --              , H.text <| Debug.toString <| .y <| CI.getDatum hovered
+      --              ]
+      --          ]
+      --    ]
+
+      , C.when model.hoveringNew <| \hovered _ ->
+          C.html <| \p -> CS.tooltip p (CI.getPosition p hovered) [ CA.onTopOrBottom, CA.offset 12 ] []
+            [ H.div []
+                [ H.h4
+                    [ HA.style "max-width" "200px"
+                    , HA.style "margin-top" "2px"
+                    , HA.style "margin-bottom" "5px"
+                    , HA.style "color" (CI.getColor hovered)
+                    ]
+                    [ H.text (CI.getName hovered)
+                    ]
+                , H.div []
+                    [ H.text "X: "
+                    , H.text <| Debug.toString <| .x <| CI.getDatum hovered
+                    ]
+                , H.div []
+                    [ H.text "Y: "
+                    , H.text <| Debug.toString <| .y <| CI.getDatum hovered
+                    ]
+                ]
+            ]
       ]
     ]
 
-
-tooltip : CI.SectionItem Datum -> List (CI.SectionItem Datum) -> H.Html msg
-tooltip hovered _ =
-  H.div []
-    [ H.h4
-        [ HA.style "max-width" "200px"
-        , HA.style "margin-top" "5px"
-        , HA.style "margin-bottom" "8px"
-        , HA.style "color" (CI.getColor hovered)
-        ]
-        [ H.text (CI.getName hovered)
-        ]
-    , H.div []
-        [ H.text "X: "
-        , H.text <| Debug.toString <| .x <| CI.getDatum hovered
-        ]
-    , H.div []
-        [ H.text "Y: "
-        , H.text <| Debug.toString <| .y <| CI.getDatum hovered
-        ]
-    ]

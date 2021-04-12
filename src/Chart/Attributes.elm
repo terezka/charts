@@ -1,9 +1,10 @@
 module Chart.Attributes exposing
-  ( Attribute, x, x1, x2, y, y1, y2, xOff, yOff, border, borderWidth, fontSize, color, width
-  , Anchor(..), leftAlign, rightAlign
+  ( Attribute, x, x1, x2, y, y1, y2, xOff, yOff, border, borderWidth, fontSize, color, width, height, offset
+  , Anchor(..), leftAlign, rightAlign, content
   , rotate, length, roundTop, roundBottom, area, opacity, size, aura, auraWidth, grouped, margin, spacing
   , Method(..), linear, monotone
   , Shape(..), circle, triangle, square, diamond, plus, cross
+  , Direction(..), onTop, onBottom, onRight, onLeft, onLeftOrRight, onTopOrBottom
   , blue, pink, orange, green, purple, red
   )
 
@@ -116,9 +117,21 @@ width v config =
 
 
 {-| -}
+height : Float -> Attribute { a | height : Float }
+height v config =
+  { config | height = v }
+
+
+{-| -}
 length : Float -> Attribute { a | length : Float }
 length v config =
   { config | length = v }
+
+
+{-| -}
+offset : Float -> Attribute { a | offset : Float }
+offset v config =
+  { config | offset = v }
 
 
 {-| -}
@@ -255,6 +268,57 @@ cross config =
   { config | shape = Just Cross }
 
 
+{-| -}
+content : v -> Attribute { a | content : v }
+content v config =
+  { config | content = v }
+
+
+{-| -}
+type Direction
+  = Top
+  | Left
+  | Right
+  | Bottom
+  | LeftOrRight
+  | TopOrBottom
+
+
+{-| -}
+onTop : Attribute { a | direction : Maybe Direction }
+onTop config =
+  { config | direction = Just Top }
+
+
+{-| -}
+onBottom : Attribute { a | direction : Maybe Direction }
+onBottom config =
+  { config | direction = Just Bottom }
+
+
+{-| -}
+onRight : Attribute { a | direction : Maybe Direction }
+onRight config =
+  { config | direction = Just Right }
+
+
+{-| -}
+onLeft : Attribute { a | direction : Maybe Direction }
+onLeft config =
+  { config | direction = Just Left }
+
+
+onLeftOrRight : Attribute { a | direction : Maybe Direction }
+onLeftOrRight config =
+  { config | direction = Just LeftOrRight }
+
+
+onTopOrBottom : Attribute { a | direction : Maybe Direction }
+onTopOrBottom config =
+  { config | direction = Just TopOrBottom }
+
+
+
 -- COLORS
 
 
@@ -292,3 +356,4 @@ red =
 purple : String
 purple =
   "rgb(170, 80, 208)"
+
