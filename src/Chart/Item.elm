@@ -2,9 +2,9 @@ module Chart.Item exposing
   ( Item(..), BinItem, BarItem, SectionItem, DotItem, SeriesItem, BarsItem
   , render, getValue, getCenter, getDatum, getTop, getColor, getName, getItems, getBounds
   , getX1, getX2, getY2, getY1
-  , Property, property, stacked, Metric
+  , Property, Metric
   , Bars, toBarItems
-  , Series, toSeriesItems
+  , toSeriesItems
   )
 
 
@@ -74,10 +74,7 @@ type alias SectionItem datum =
 type alias SeriesItem datum =
   Item
     { items : List (DotItem datum)
-    , method : Maybe CA.Method
-    , area : Float
-    , width : Float
-    , color : String
+    , config : S.Interpolation
     }
 
 
@@ -87,10 +84,9 @@ type alias DotItem datum =
     { datum : datum
     , x : Float
     , y : Maybe Float
-    , color : String
     , name : String
     , unit : String
-    , dot : List (CA.Attribute S.Dot)
+    , config : S.Dot
     }
 
 
@@ -207,6 +203,7 @@ getItems (Item config) =
 
 -- PROPERTY
 
+
 {-| -}
 type alias Metric =
   { name : String
@@ -217,18 +214,6 @@ type alias Metric =
 {-| -}
 type alias Property data meta inter deco =
   P.Property data meta inter deco
-
-
-{-| -}
-property : (data -> Maybe Float) -> Metric -> List (CA.Attribute inter) -> List (CA.Attribute deco) -> (data -> List (CA.Attribute deco)) -> Property data Metric inter deco
-property =
-  P.property
-
-
-{-| -}
-stacked : List (Property data meta inter deco) -> Property data meta inter deco
-stacked =
-  P.stacked
 
 
 
@@ -423,62 +408,43 @@ toBarItems barsAttrs properties data =
 
 -- SERIES
 
-
 {-| -}
-type alias Series =
-  { method : Maybe CA.Method
-  , area : Float
-  , color : String
-  , width : Float
-  , size : Float
-  , opacity : Float
-  , border : String
-  , borderWidth : Float
-  , aura : Float
-  , auraWidth : Float
-  , shape : Maybe CA.Shape
-  }
-
-
-{-| -}
-toSeriesItems : (data -> Float) -> List (Property data Metric () Series) -> List data -> List (SeriesItem data)
+toSeriesItems : (data -> Float) -> List (Property data Metric S.Interpolation S.Dot) -> List data -> List (SeriesItem data)
 toSeriesItems toX properties data =
-  let toConfig propAttrs =
-        apply propAttrs
+  let toInterConfig attrs =
+        apply attrs
           { method = Nothing
-          , area = 0
-          , color = ""
+          , color = CA.blue
           , width = 1
-          , size = 6
+          , opacity = 0
+          }
+
+      toDotConfig attrs =
+        apply attrs
+          { color = CA.blue
           , opacity = 1
+          , size = 6
           , border = "white"
-          , borderWidth = 0
-          , aura = 0.25
-          , auraWidth = 0
+          , borderWidth = 1
+          , aura = 0
+          , auraWidth = 10
           , shape = Nothing
           }
 
       toLineItem index prop =
-        let config = toConfig prop.attrs
-            dotItems = List.map (toDotItem index prop) data
-            color_ = if config.color == "" then toDefaultColor index else config.color
+        let dotItems = List.map (toDotItem index prop interConfig) data
+            interAttr = [ CA.color (toDefaultColor index) ] ++ prop.inter
+            interConfig = toInterConfig interAttr
         in
         Item
           { render = \plane _ _ ->
               let toBottom datum_ =
                     Maybe.map2 (\real visual -> visual - real) (prop.value datum_) (prop.visual datum_)
-
-                  methodAttr =
-                    case ( config.method, config.shape ) of
-                      ( Just CA.Linear  , _ ) -> CA.linear
-                      ( Just CA.Monotone, _ ) -> CA.monotone
-                      ( Nothing, Nothing ) -> CA.linear
-                      ( Nothing, _ ) -> \c -> { c | method = Nothing }
               in
               S.g
                 [ SA.class "elm-charts__series" ]
-                [ S.area plane toX (Just toBottom) prop.visual [ methodAttr, CA.opacity config.area, CA.color color_ ] data
-                , S.interpolation plane toX prop.visual [ methodAttr, CA.width config.width, CA.color color_ ] data
+                [ S.area plane toX (Just toBottom) prop.visual interAttr data
+                , S.interpolation plane toX prop.visual interAttr data
                 , S.g [ SA.class "elm-charts__dots" ] (List.map (render plane) dotItems)
                 ]
           , bounds = \c ->
@@ -495,42 +461,22 @@ toSeriesItems toX properties data =
               }
           , details =
               { items = dotItems
-              , method = config.method
-              , color = config.color
-              , area = config.area
-              , width = config.width
+              , config = interConfig
               }
           }
 
-      toDotItem index prop datum_ =
-        let config = toConfig (prop.attrs ++ prop.extra datum_)
+      toDotItem index prop interConfig datum_ =
+        let defaultAttrs = [ CA.color interConfig.color, if interConfig.method == Nothing then CA.circle else identity ]
+            dotAttrs = defaultAttrs ++ prop.attrs ++ prop.extra datum_
+            config = toDotConfig dotAttrs
             x_ = toX datum_
             y_ = Maybe.withDefault 0 (prop.visual datum_)
-            color_ = if config.color == "" then toDefaultColor index else config.color
-            name_ = if prop.meta.name == "" then String.fromInt index else prop.meta.name
-            attrs =
-              [ CA.color color_
-              , CA.border config.border
-              , CA.borderWidth config.borderWidth
-              , CA.opacity config.opacity
-              , CA.aura config.aura
-              , CA.auraWidth config.auraWidth
-              , CA.size config.size
-              , case config.shape of
-                  Just CA.Circle -> CA.circle
-                  Just CA.Triangle -> CA.triangle
-                  Just CA.Square -> CA.square
-                  Just CA.Diamond -> CA.diamond
-                  Just CA.Cross -> CA.cross
-                  Just CA.Plus -> CA.plus
-                  Nothing -> \c -> { c | shape = Nothing }
-              ]
         in
         Item
           { render = \plane _ _ ->
               case prop.value datum_ of
                 Nothing -> S.text ""
-                Just _ -> S.dot plane .x .y attrs { x = x_, y = y_ }
+                Just _ -> S.dot plane .x .y dotAttrs { x = x_, y = y_ }
           , bounds = \_ ->
               { x1 = x_
               , x2 = x_
@@ -551,10 +497,9 @@ toSeriesItems toX properties data =
               { datum = datum_
               , x = x_
               , y = prop.value datum_
-              , name = name_
+              , name = prop.meta.name
               , unit = prop.meta.unit
-              , color = color_
-              , dot = attrs
+              , config = config
               }
           }
   in
@@ -580,7 +525,6 @@ apply funcs default =
   List.foldl apply_ default funcs
 
 
-
 withSurround : List a -> (Int -> Maybe a -> a -> Maybe a -> b) -> List b
 withSurround all func =
   let fold index prev acc list =
@@ -590,6 +534,7 @@ withSurround all func =
           [] -> acc
   in
   fold 0 Nothing [] all
+
 
 
 -- DEFAULTS

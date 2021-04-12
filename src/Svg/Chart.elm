@@ -782,36 +782,8 @@ withBorder stuff func =
       Nothing
 
 
-{-| -}
-withSurround : List a -> (Int -> Maybe a -> a -> Maybe a -> b) -> List b
-withSurround all func =
-  let fold index prev acc list =
-        case list of
-          a :: b :: rest -> fold (index + 1) (Just a) (acc ++ [func index prev a (Just b)]) (b :: rest)
-          a :: [] -> acc ++ [func index prev a Nothing]
-          [] -> acc
-  in
-  fold 0 Nothing [] all
-
-
 
 -- DEFAULTS
-
-
-toDefaultColor : Int -> String
-toDefaultColor index =
-  let numOfColors = Dict.size colors
-      colorIndex = remainderBy numOfColors index
-  in
-  Dict.get colorIndex colors
-    |> Maybe.withDefault blue
-
-
-colors : Dict Int String
-colors =
-  [ blue, orange, green, pink, purple, red ]
-    |> List.indexedMap Tuple.pair
-    |> Dict.fromList
 
 
 {-| -}

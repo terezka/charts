@@ -4,8 +4,7 @@ module Chart.Svg exposing
   , Label, label
   , Arrow, arrow
   , Bar, bar
-  , Interpolation, interpolation
-  , Area, area
+  , Interpolation, interpolation, area
   , Dot, dot, toRadius
 
   --, tooltip
@@ -417,6 +416,7 @@ type alias Interpolation =
   { method : Maybe CA.Method
   , color : String
   , width : Float
+  , opacity : Float
   }
 
 
@@ -425,9 +425,10 @@ interpolation : Plane -> (data -> Float) -> (data -> Maybe Float) -> List (CA.At
 interpolation plane toX toY edits data =
   let config =
         apply edits
-          { method = Just CA.Linear
+          { method = Nothing
           , color = blue
           , width = 1
+          , opacity = 0
           }
 
       view ( first, cmds, _ ) =
@@ -448,20 +449,13 @@ interpolation plane toX toY edits data =
 
 
 {-| -}
-type alias Area =
-  { method : Maybe CA.Method
-  , color : String
-  , opacity : Float
-  }
-
-
-{-| -}
-area : Plane -> (data -> Float) -> Maybe (data -> Maybe Float) -> (data -> Maybe Float) -> List (CA.Attribute Area) -> List data -> Svg msg
+area : Plane -> (data -> Float) -> Maybe (data -> Maybe Float) -> (data -> Maybe Float) -> List (CA.Attribute Interpolation) -> List data -> Svg msg
 area plane toX toY2M toY edits data =
   let config =
         apply edits
-          { method = Just CA.Linear
+          { method = Nothing
           , color = blue
+          , width = 1
           , opacity = 0.2
           }
 
@@ -551,7 +545,7 @@ dot plane toX toY edits datum_ =
           , borderWidth = 1
           , aura = 0
           , auraWidth = 10
-          , shape = Just CA.Circle
+          , shape = Nothing
           }
 
       x_ = toSVGX plane (toX datum_)

@@ -4,6 +4,7 @@ module Chart.Attributes exposing
   , rotate, length, roundTop, roundBottom, area, opacity, size, aura, auraWidth, grouped, margin, spacing
   , Method(..), linear, monotone
   , Shape(..), circle, triangle, square, diamond, plus, cross
+  , blue, pink, orange, green, purple, red
   )
 
 
@@ -252,3 +253,42 @@ plus config =
 cross : Attribute { a | shape : Maybe Shape }
 cross config =
   { config | shape = Just Cross }
+
+
+-- COLORS
+
+
+{-| -}
+blue : String
+blue =
+  "rgb(5,142,218)"
+
+
+{-| -}
+orange : String
+orange =
+  "rgb(244, 149, 69)"
+
+
+{-| -}
+pink : String
+pink =
+  "rgb(253, 121, 168)"
+
+
+{-| -}
+green : String
+green =
+  "rgb(68, 201, 72)"
+
+
+{-| -}
+red : String
+red =
+  "rgb(215, 31, 10)"
+
+
+{-| -}
+purple : String
+purple =
+  "rgb(170, 80, 208)"

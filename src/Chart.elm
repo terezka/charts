@@ -1,6 +1,6 @@
 module Chart exposing
     ( chart, Element, bars, just
-    , series, Series
+    , series
     , size
     , Bounds, startMin, startMax, endMin, endMax, startPad, endPad, zero, middle
     , xAxis, yAxis, xTicks, yTicks, xLabels, yLabels, grid
@@ -21,7 +21,7 @@ module Chart exposing
     , filterX, filterY, only, attrs
     , blue, orange, pink, green, red
 
-    , style, empty, detached, aura, opaque, full, name, with, stacked, property, Property
+    , style, empty, detached, aura, opaque, full, name, with, stacked, property, variation, Property
     , fontSize, borderWidth, borderColor, xOffset, yOffset, xLabel, text, at, noDot, binned, purple, grouped
 
     )
@@ -1189,9 +1189,15 @@ type alias Property data meta inter deco =
 
 
 {-| -}
-property : (data -> Maybe Float) -> List (Attribute inter) -> List (Attribute deco) -> (data -> List (Attribute deco)) -> Property data Item.Metric inter deco
-property y_ =
-  P.property y_ { name = "", unit = "" } -- TODO
+property : (data -> Maybe Float) -> String -> String -> List (Attribute inter) -> List (Attribute deco) -> Property data Item.Metric inter deco
+property y_ name_ unit_ =
+  P.property y_ { name = name_, unit = unit_ } -- TODO
+
+
+{-| -}
+variation : (data -> List (Attribute deco)) -> Property data Item.Metric inter deco -> Property data Item.Metric inter deco
+variation =
+  P.variation
 
 
 {-| -}
@@ -1258,24 +1264,7 @@ bars edits properties data =
 -- SERIES
 
 
-{-| -}
-type alias Series =
-  { method : Maybe CA.Method
-  , area : Float
-  , color : String
-  , width : Float
-  , size : Float
-  , opacity : Float
-  , border : String
-  , borderWidth : Float
-  , aura : Float
-  , auraWidth : Float
-  , shape : Maybe CA.Shape
-  }
-
-
-
-series : (data -> Float) -> List (Property data Item.Metric () Series) -> List data -> Element data msg
+series : (data -> Float) -> List (Property data Item.Metric CS.Interpolation CS.Dot) -> List data -> Element data msg
 series toX properties data =
   let items =
         Item.toSeriesItems toX properties data
