@@ -163,26 +163,29 @@ view model =
       --    ]
 
       , C.when model.hoveringNew <| \hovered _ ->
-          C.html <| \p -> CS.tooltip p (CI.getPosition p hovered) [ CA.onTopOrBottom, CA.offset 12 ] []
-            [ H.div []
-                [ H.h4
-                    [ HA.style "max-width" "200px"
-                    , HA.style "margin-top" "2px"
-                    , HA.style "margin-bottom" "5px"
-                    , HA.style "color" (CI.getColor hovered)
-                    ]
-                    [ H.text (CI.getName hovered)
-                    ]
-                , H.div []
-                    [ H.text "X: "
-                    , H.text <| Debug.toString <| .x <| CI.getDatum hovered
-                    ]
-                , H.div []
-                    [ H.text "Y: "
-                    , H.text <| Debug.toString <| .y <| CI.getDatum hovered
-                    ]
-                ]
-            ]
+          C.html <| \p ->
+            CS.tooltip p (CI.getPosition p hovered)
+              [ CA.onTopOrBottom, CA.offset 12 ]
+              []
+              [ H.div []
+                  [ H.h4
+                      [ HA.style "max-width" "200px"
+                      , HA.style "margin-top" "2px"
+                      , HA.style "margin-bottom" "5px"
+                      , HA.style "color" (CI.getColor hovered)
+                      ]
+                      [ H.text (CI.getName hovered)
+                      ]
+                  , H.div []
+                      [ H.text "X: "
+                      , H.text <| Debug.toString <| .x <| CI.getDatum hovered
+                      ]
+                  , H.div []
+                      [ H.text "Y: "
+                      , H.text <| Debug.toString <| .y <| CI.getDatum hovered
+                      ]
+                  ]
+              ]
       ]
     ]
 

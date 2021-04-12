@@ -5,7 +5,7 @@ module Chart.Attributes exposing
   , Method(..), linear, monotone
   , Shape(..), circle, triangle, square, diamond, plus, cross
   , Direction(..), onTop, onBottom, onRight, onLeft, onLeftOrRight, onTopOrBottom
-  , blue, pink, orange, green, purple, red
+  , blue, pink, orange, green, purple, red, background
   )
 
 
@@ -72,6 +72,12 @@ border v config =
 borderWidth : Float -> Attribute { a | borderWidth : Float }
 borderWidth v config =
   { config | borderWidth = v }
+
+
+{-| -}
+background : String -> Attribute { a | background : String }
+background v config =
+  { config | background = v }
 
 
 {-| -}

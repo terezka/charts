@@ -700,6 +700,8 @@ type alias Tooltip =
   , width : Float
   , offset : Float
   , pointer : Bool
+  , border : String
+  , background : String
   }
 
 
@@ -713,6 +715,8 @@ tooltip plane pos edits htmlAttrs content =
           , width = 0
           , offset = 12
           , pointer = True
+          , border = "#D8D8D8"
+          , background = "white"
           }
 
       distanceTop = toSVGY plane pos.y2
@@ -743,7 +747,7 @@ tooltip plane pos edits htmlAttrs content =
 
       children =
         if config.pointer then
-          H.node "style" [] [ H.text (tooltipPointerStyle direction) ] :: content
+          H.node "style" [] [ H.text (tooltipPointerStyle direction config.background config.border) ] :: content
         else
           content
 
@@ -751,8 +755,8 @@ tooltip plane pos edits htmlAttrs content =
         [ HA.class "elm-charts__tooltip-new"
         , HA.style "transform" transformation
         , HA.style "padding" "5px 10px"
-        , HA.style "background" "rgba(255, 255, 255)"
-        , HA.style "border" "1px solid #D8D8D8"
+        , HA.style "background" config.background
+        , HA.style "border" ("1px solid " ++ config.border)
         , HA.style "border-radius" "3px"
         , HA.style "pointer-events" "none"
         , HA.style "max-width" (toPx config.width)
@@ -1038,117 +1042,35 @@ purple =
 -- STYLES
 
 
-tooltipPointerStyle : CA.Direction -> String
-tooltipPointerStyle direction = -- #D8D8D8
-  let ( both, before, after ) =
+tooltipPointerStyle : CA.Direction -> String -> String -> String
+tooltipPointerStyle direction background borderColor =
+  let config =
         case direction of
-          CA.Top         ->
-            ( """
-              border-left: 5px solid transparent;
-              border-right: 5px solid transparent;
-              top: 100%;
-              left: 50%;
-              margin-left: -5px;
-              """
-            , "border-top: 5px solid #D8D8D8;"
-            , """
-              border-top: 5px solid white;
-              margin-top: -1px;
-              """
-            )
-
-          CA.Bottom      ->
-            ( """
-              border-left: 5px solid transparent;
-              border-right: 5px solid transparent;
-              bottom: 100%;
-              left: 50%;
-              margin-left: -5px;
-              """
-            , """
-              border-bottom: 5px solid #D8D8D8;
-              """
-            , """
-              border-bottom: 5px solid white;
-              margin-bottom: -1px;
-              """
-            )
-
-          CA.Left        ->
-            ( """
-              border-top: 5px solid transparent;
-              border-bottom: 5px solid transparent;
-              top: 50%;
-              left: 100%;
-              margin-top: -5px;
-              """
-            , "border-left: 5px solid #D8D8D8;"
-            , """
-              border-left: 5px solid white;
-              margin-left: -1px;
-              """
-            )
-
-          CA.Right       ->
-            ( """
-              border-top: 5px solid transparent;
-              border-bottom: 5px solid transparent;
-              top: 50%;
-              right: 100%;
-              margin-top: -5px;
-              """
-            , "border-right: 5px solid #D8D8D8;"
-            , """
-              border-right: 5px solid white;
-              margin-right: -1px;
-              """
-            )
-
-          CA.LeftOrRight ->
-            ( """
-              border-top: 5px solid transparent;
-              border-bottom: 5px solid transparent;
-              top: 50%;
-              left: 100%;
-              margin-top: -5px;
-              """
-            , "border-left: 5px solid #D8D8D8;"
-            , """
-              border-left: 5px solid white;
-              margin-left: -1px;
-              """
-            )
-
-          CA.TopOrBottom ->
-            ( """
-              border-left: 5px solid transparent;
-              border-right: 5px solid transparent;
-              top: 100%;
-              left: 50%;
-              margin-left: -5px;
-              """
-            , "border-top: 5px solid #D8D8D8;"
-            , """
-              border-top: 5px solid white;
-              margin-top: -1px;
-              """
-            )
-
+          CA.Top          -> { a = "right", b = "top", c = "left" }
+          CA.Bottom       -> { a = "right", b = "bottom", c = "left" }
+          CA.Left         -> { a = "bottom", b = "left", c = "top" }
+          CA.Right        -> { a = "bottom", b = "right", c = "top" }
+          CA.LeftOrRight  -> { a = "bottom", b = "left", c = "top" }
+          CA.TopOrBottom  -> { a = "right", b = "top", c = "left" }
   in
   """
   .elm-charts__tooltip-new:before, .elm-charts__tooltip-new:after {
     content: "";
     position: absolute;
-    """ ++ both ++
-    """
+    border-""" ++ config.c ++ """: 5px solid transparent;
+    border-""" ++ config.a ++ """: 5px solid transparent;
+    """ ++ config.b ++ """: 100%;
+    """ ++ config.c ++ """: 50%;
+    margin-""" ++ config.c ++ """: -5px;
   }
 
   .elm-charts__tooltip-new:after {
-    """ ++ after ++ """
+    border-""" ++ config.b ++ """: 5px solid """ ++ background ++ """;
+    margin-""" ++ config.b ++ """: -1px;
     z-index: 1;
   }
 
   .elm-charts__tooltip-new:before {
-    """ ++ before ++ """
+    border-""" ++ config.b ++ """: 5px solid """ ++ borderColor ++ """;
   }
   """
