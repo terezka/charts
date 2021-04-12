@@ -744,23 +744,23 @@ tooltip plane pos edits htmlAttrs content =
             else if isLargest distanceLeft [ distanceTop, distanceBottom, distanceRight ] then CA.Left
             else CA.Right
 
-      ( xOff, yOff, transformation ) =
+      { xOff, yOff, transformation, className } =
         case direction of
-          CA.Top         -> ( 0, -config.offset, "translate(-50%, -100%)" )
-          CA.Bottom      -> ( 0, config.offset, "translate(-50%, 0%)" )
-          CA.Left        -> ( -config.offset, 0, "translate(-100%, -50%)" )
-          CA.Right       -> ( config.offset, 0, "translate(0, -50%)" )
-          CA.LeftOrRight -> ( -config.offset, 0, "translate(0, -50%)" )
-          CA.TopOrBottom -> ( 0, config.offset, "translate(-50%, -100%)" )
+          CA.Top         -> { xOff = 0, yOff = -config.offset, transformation = "translate(-50%, -100%)", className = "elm-charts__tooltip-top" }
+          CA.Bottom      -> { xOff = 0, yOff = config.offset, transformation = "translate(-50%, 0%)", className = "elm-charts__tooltip-bottom" }
+          CA.Left        -> { xOff = -config.offset, yOff = 0, transformation = "translate(-100%, -50%)", className = "elm-charts__tooltip-left" }
+          CA.Right       -> { xOff = config.offset, yOff = 0, transformation = "translate(0, -50%)", className = "elm-charts__tooltip-right" }
+          CA.LeftOrRight -> { xOff = -config.offset, yOff = 0, transformation = "translate(0, -50%)", className = "elm-charts__tooltip-leftOrRight" }
+          CA.TopOrBottom -> { xOff = 0, yOff = config.offset, transformation =  "translate(-50%, -100%)", className = "elm-charts__tooltip-topOrBottom" }
 
       children =
         if config.pointer then
-          H.node "style" [] [ H.text (tooltipPointerStyle direction config.background config.border) ] :: content
+          H.node "style" [] [ H.text (tooltipPointerStyle direction className config.background config.border) ] :: content
         else
           content
 
       attributes =
-        [ HA.class "elm-charts__tooltip-new"
+        [ HA.class className
         , HA.style "transform" transformation
         , HA.style "padding" "5px 10px"
         , HA.style "background" config.background
@@ -1045,8 +1045,8 @@ purple =
 -- STYLES
 
 
-tooltipPointerStyle : CA.Direction -> String -> String -> String
-tooltipPointerStyle direction background borderColor =
+tooltipPointerStyle : CA.Direction -> String -> String -> String -> String
+tooltipPointerStyle direction className background borderColor =
   let config =
         case direction of
           CA.Top          -> { a = "right", b = "top", c = "left" }
@@ -1057,7 +1057,7 @@ tooltipPointerStyle direction background borderColor =
           CA.TopOrBottom  -> { a = "right", b = "top", c = "left" }
   in
   """
-  .elm-charts__tooltip-new:before, .elm-charts__tooltip-new:after {
+  .""" ++ className ++ """:before, .""" ++ className ++ """:after {
     content: "";
     position: absolute;
     border-""" ++ config.c ++ """: 5px solid transparent;
@@ -1067,13 +1067,13 @@ tooltipPointerStyle direction background borderColor =
     margin-""" ++ config.c ++ """: -5px;
   }
 
-  .elm-charts__tooltip-new:after {
+  .""" ++ className ++ """:after {
     border-""" ++ config.b ++ """: 5px solid """ ++ background ++ """;
     margin-""" ++ config.b ++ """: -1px;
     z-index: 1;
   }
 
-  .elm-charts__tooltip-new:before {
+  .""" ++ className ++ """:before {
     border-""" ++ config.b ++ """: 5px solid """ ++ borderColor ++ """;
   }
   """
