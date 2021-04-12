@@ -35,7 +35,7 @@ main =
 
 type alias Model =
   { hoveringSalery : List (CI.BarItem Salery.Datum)
-  , hovering : List (CI.BarItem Datum)
+  , hovering : List (CI.DotItem Datum)
   , hoveringNew : List (CI.SectionItem Datum)
   , point : Maybe Coordinates.Point
   }
@@ -48,8 +48,7 @@ init =
 
 type Msg
   = OnHoverSalery (List (CI.BarItem Salery.Datum))
-  | OnHover (List (CI.BarItem Datum))
-  | OnHoverNew (List (CI.SectionItem Datum))
+  | OnHoverNew (List (CI.SectionItem Datum)) (List (CI.DotItem Datum))
   | OnCoords Coordinates.Point -- TODO
 
 
@@ -57,8 +56,7 @@ update : Msg -> Model -> Model
 update msg model =
   case msg of
     OnHoverSalery bs -> { model | hoveringSalery = bs }
-    OnHoverNew bs -> { model | hoveringNew = bs }
-    OnHover bs -> { model | hovering = bs }
+    OnHoverNew bs ss -> { model | hoveringNew = bs, hovering = ss }
     OnCoords p -> { model | point = Just p }
 
 
@@ -98,31 +96,32 @@ view model =
       --, C.range (C.startMin 0 >> C.endMax 6)
       --, C.domain (C.startMax 0 >> C.endMin 19)
       , C.events
-          [ C.getNearest CI.getCenter (C.getBars >> List.concatMap CI.getSections)
-              |> C.map OnHoverNew
+          [ C.map2 OnHoverNew
+              (C.getNearestX CI.getCenter (C.getBars >> List.concatMap CI.getSections))
+              (C.getNearestX CI.getCenter (C.getSeries >> List.concatMap CI.getItems))
               |> C.event "mousemove"
           ]
       , C.id "salery-discrepancy"
       ]
       [ C.grid []
 
-      , C.bars
-          [ CA.roundTop 0.2
-          , CA.roundBottom 0.2
-          , CA.grouped
-          , CA.x1 .x
-          , CA.x2 (.x >> (\x -> x + 1))
-          , CA.margin 0.1
-          , CA.spacing 0.04
-          ]
-          [ C.stacked
-              [ C.bar .y "cats" "km" [ C.borderWidth 1 ]
-              , C.bar .z "dogs" "km" [ C.borderWidth 1 ]
-              , C.bar (Just << .x) "fish" "km" [ C.borderWidth 1 ]
-              ]
-          , C.bar .z "kids" "km" [ CA.color CA.purple ]
-          ]
-          data
+      --, C.bars
+      --    [ CA.roundTop 0.2
+      --    , CA.roundBottom 0.2
+      --    , CA.grouped
+      --    , CA.x1 .x
+      --    , CA.x2 (.x >> (\x -> x + 1))
+      --    , CA.margin 0.1
+      --    , CA.spacing 0.04
+      --    ]
+      --    [ C.stacked
+      --        [ C.bar .y "cats" "km" [ C.borderWidth 1 ]
+      --        , C.bar .z "dogs" "km" [ C.borderWidth 1 ]
+      --        , C.bar (Just << .x) "fish" "km" [ C.borderWidth 1 ]
+      --        ]
+      --    , C.bar .z "kids" "km" [ CA.color CA.purple ]
+      --    ]
+      --    data
 
       , C.yAxis []
       , C.xTicks []
@@ -130,35 +129,35 @@ view model =
       , C.yLabels [ C.ints ]
       , C.yTicks [ C.ints ]
 
-      --, C.series .x
-      --    [ C.stacked
-      --        [ C.property .y "owls" "km" [ CA.linear, CA.opacity 0.25 ] [ CA.circle ]
-      --            |> C.variation (\datum -> [ CA.size (Maybe.withDefault 2 datum.y) ])
-      --        , C.property .z "trees" "km" [ CA.linear, CA.opacity 0.25, CA.color CA.purple ] [ CA.circle ]
-      --        ]
-      --    ]
-      --    data
+      , C.series .x
+          [ C.stacked
+              [ C.property .y "owls" "km" [ CA.linear, CA.opacity 0.25 ] [ CA.circle ]
+                  |> C.variation
+                      (\datum -> [ CA.size (Maybe.withDefault 2 datum.y) ]
+                        ++ if List.any (\i -> CI.getDatum i == datum) model.hovering then [ CA.auraWidth 5, CA.aura 0.25 ] else []
+                      )
+              , C.property .z "trees" "km" [ CA.linear, CA.opacity 0.25, CA.color CA.purple ] [ CA.circle ]
+                  |> C.variation
+                      (\datum -> [ CA.size (Maybe.withDefault 2 datum.y) ]
+                        ++ if List.any (\i -> CI.getDatum i == datum) model.hovering then [ CA.auraWidth 5, CA.aura 0.25 ] else []
+                      )
+              ]
+          ]
+          data
 
       , C.xAxis []
 
-      , C.tooltip model.hoveringNew [ CA.onTopOrBottom, CA.offset 12, CA.height 70 ] [] <| \hovered _ ->
+      , C.tooltip model.hovering [ CA.onLeftOrRight, CA.offset 12 ] [] <| \hovered ->
           [ H.div []
-              [ H.h4
+              [ H.span
                   [ HA.style "max-width" "200px"
-                  , HA.style "margin-top" "0px"
-                  , HA.style "margin-bottom" "5px"
                   , HA.style "color" (CI.getColor hovered)
                   ]
                   [ H.text (CI.getName hovered)
+                  , H.text ": "
+                  , H.text (String.fromFloat <| Maybe.withDefault 0 <| CI.getValue hovered)
                   ]
-              , H.div []
-                  [ H.text "X: "
-                  , H.text <| Debug.toString <| .x <| CI.getDatum hovered
-                  ]
-              , H.div []
-                  [ H.text "Y: "
-                  , H.text <| Debug.toString <| .y <| CI.getDatum hovered
-                  ]
+
               ]
           ]
       ]

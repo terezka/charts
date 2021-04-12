@@ -21,7 +21,7 @@ module Chart exposing
     , filterX, filterY, only, attrs
     , blue, orange, pink, green, red
 
-    , style, empty, detached, aura, opaque, full, name, with, stacked, property, variation, Property
+    , style, empty, detached, aura, opaque, full, name, with, list, stacked, property, variation, Property
     , fontSize, borderWidth, borderColor, xOffset, yOffset, xLabel, text, at, noDot, binned, purple, grouped
 
     )
@@ -560,6 +560,8 @@ type Element data msg
       (C.Plane -> TickValues -> S.Svg msg)
   | SubElements
       (C.Plane -> List (Item data) -> List (Element data msg))
+  | ListOfElements
+      (List (Element data msg))
   | SvgElement
       (C.Plane -> S.Svg msg)
   | HtmlElement
@@ -583,6 +585,7 @@ definePlane config elements =
           LabelsElement _ _ -> acc
           GridElement _ -> acc
           SubElements _ -> acc
+          ListOfElements _ -> acc
           SvgElement _ -> acc
           HtmlElement _ -> acc
 
@@ -654,6 +657,7 @@ getItems plane elements =
           LabelsElement _ _ -> acc
           GridElement _ -> acc
           SubElements _ -> acc -- TODO add phantom type to only allow decorative els in this
+          ListOfElements _ -> acc
           SvgElement _ -> acc
           HtmlElement _ -> acc
   in
@@ -678,6 +682,7 @@ getTickValues plane items elements =
           LabelsElement func _ -> func plane acc
           GridElement _ -> acc
           SubElements func -> List.foldl toValues acc (func plane items)
+          ListOfElements _ -> acc
           SvgElement _ -> acc
           HtmlElement _ -> acc
   in
@@ -695,6 +700,7 @@ viewElements config plane tickValues allItems elements =
           LabelsElement _ view -> ( before, view plane :: chart_, after )
           GridElement view -> ( before, view plane tickValues :: chart_, after )
           SubElements func -> List.foldl viewOne ( before, chart_, after ) (func plane allItems)
+          ListOfElements els -> List.foldl viewOne ( before, chart_, after ) els
           SvgElement view -> ( before, view plane :: chart_, after )
           HtmlElement view ->
             ( if List.length chart_ > 0 then before else view plane :: before
@@ -907,10 +913,13 @@ type alias Tooltip =
 
 
 {-| -}
-tooltip : List (Item.Item a) -> List (Attribute Tooltip) -> List (H.Attribute Never) -> (Item.Item a -> List (Item.Item a) -> List (H.Html Never)) -> Element data msg
+tooltip : List (Item.Item a) -> List (Attribute Tooltip) -> List (H.Attribute Never) -> (Item.Item a -> List (H.Html Never)) -> Element data msg
 tooltip items edits attrs_ content =
-  when items <| \first rest ->
-    html <| \p -> CS.tooltip p (Item.getPosition p first) edits attrs_ (content first rest)
+  let viewOne i =
+        html <| \p -> CS.tooltip p (Item.getPosition p i) edits attrs_ (content i)
+  in
+  list (List.map viewOne items)
+
 
 
 {-| -}
@@ -1422,6 +1431,12 @@ series toX properties data =
 with : (List (Item data) -> a) -> (C.Plane -> a -> List (Element data msg)) -> Element data msg
 with filter func =
   SubElements <| \p is -> func p (filter is)
+
+
+{-| -}
+list : List (Element data msg) -> Element data msg
+list els =
+  ListOfElements els
 
 
 {-| -}
