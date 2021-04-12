@@ -711,7 +711,7 @@ tooltip plane pos edits htmlAttrs content =
   let config =
         apply edits
           { direction = Nothing
-          , height = 0 -- TODO adjust placement
+          , height = 0
           , width = 0
           , offset = 12
           , pointer = True
@@ -726,8 +726,16 @@ tooltip plane pos edits htmlAttrs content =
 
       direction =
         case config.direction of
-          Just CA.LeftOrRight -> if distanceLeft > distanceRight then CA.Left else CA.Right
-          Just CA.TopOrBottom -> if distanceTop > distanceBottom then CA.Top else CA.Bottom
+          Just CA.LeftOrRight ->
+            if config.width > 0
+            then if distanceLeft > (config.width + config.offset) then CA.Left else CA.Right
+            else if distanceLeft > distanceRight then CA.Left else CA.Right
+
+          Just CA.TopOrBottom ->
+            if config.height > 0
+            then if distanceTop > (config.height + config.offset) then CA.Top else CA.Bottom
+            else if distanceTop > distanceBottom then CA.Top else CA.Bottom
+
           Just dir -> dir
           Nothing ->
             let isLargest a = List.all (\b -> a >= b) in
