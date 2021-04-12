@@ -35,7 +35,7 @@ main =
 type alias Model =
   { hoveringSalery : List (CI.BarItem Salery.Datum)
   , hovering : List (CI.BarItem Datum)
-  , hoveringNew : List (CI.BarItem Datum)
+  , hoveringNew : List (CI.SectionItem Datum)
   , point : Maybe Coordinates.Point
   }
 
@@ -48,7 +48,7 @@ init =
 type Msg
   = OnHoverSalery (List (CI.BarItem Salery.Datum))
   | OnHover (List (CI.BarItem Datum))
-  | OnHoverNew (List (CI.BarItem Datum))
+  | OnHoverNew (List (CI.SectionItem Datum))
   | OnCoords Coordinates.Point -- TODO
 
 
@@ -96,11 +96,11 @@ view model =
       , C.paddingTop 15
       --, C.range (C.startMin 0 >> C.endMax 6)
       --, C.domain (C.startMax 0 >> C.endMin 19)
-      --, C.events
-      --    [ CA.getNearest CI.getCenter (C.getBars >> C.only "cats")
-      --        |> C.map OnHoverNew
-      --        |> C.event "mousemove"
-      --    ]
+      , C.events
+          [ C.getNearest CI.getCenter (C.getBars >> List.concatMap CI.getSections)
+              |> C.map OnHoverNew
+              |> C.event "mousemove"
+          ]
       , C.id "salery-discrepancy"
       ]
       [ C.grid []
@@ -116,10 +116,10 @@ view model =
           ]
           [ C.stacked
               [ C.property .y "cats" "km" [] []
-              , C.property .z "cats" "km" [] []
-              , C.property (Just << .x) "cats" "km" [] []
+              , C.property .z "dogs" "km" [] []
+              , C.property (Just << .x) "fish" "km" [] []
               ]
-          , C.property .z "cats" "km" [] []
+          , C.property .z "kids" "km" [] []
           ]
           data
 
@@ -131,38 +131,34 @@ view model =
 
       , C.series .x
           [ C.stacked
-              [ C.property .y "cats" "km" [ CA.linear, CA.opacity 0.25 ] [ CA.circle ]
+              [ C.property .y "owls" "km" [ CA.linear, CA.opacity 0.25 ] [ CA.circle ]
                   |> C.variation (\datum -> [ CA.size (Maybe.withDefault 2 datum.y) ])
-              , C.property .z "cats" "km" [ CA.linear, CA.opacity 0.25, CA.color CA.purple ] [ CA.circle ]
+              , C.property .z "trees" "km" [ CA.linear, CA.opacity 0.25, CA.color CA.purple ] [ CA.circle ]
               ]
           ]
           data
 
       , C.xAxis []
+      , C.when model.hoveringNew <| \first rest ->
+          C.tooltipOnTop
+            (\p -> CI.getTop p first |> .x)
+            (\p -> CI.getTop p first |> .y)
+            []
+            [ tooltip first rest ]
       ]
     ]
 
 
-tooltip : CI.BarItem Datum -> List (CI.BarItem Datum) -> H.Html msg
+tooltip : CI.SectionItem Datum -> List (CI.SectionItem Datum) -> H.Html msg
 tooltip hovered _ =
   H.div []
     [ H.h4
         [ HA.style "max-width" "200px"
         , HA.style "margin-top" "5px"
         , HA.style "margin-bottom" "8px"
-        , hovered
-            |> CI.getItems
-            |> List.head
-            |> Maybe.map CI.getColor
-            |> Maybe.withDefault "blue"
-            |> HA.style "color"
+        , HA.style "color" (CI.getColor hovered)
         ]
-        [ hovered
-            |> CI.getItems
-            |> List.head
-            |> Maybe.map CI.getName
-            |> Maybe.withDefault "WHAT"
-            |> H.text
+        [ H.text (CI.getName hovered)
         ]
     , H.div []
         [ H.text "X: "

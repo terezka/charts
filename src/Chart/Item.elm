@@ -1,6 +1,7 @@
 module Chart.Item exposing
   ( Item(..), BinItem, BarItem, SectionItem, DotItem, SeriesItem, BarsItem
-  , render, getValue, getCenter, getDatum, getTop, getColor, getName, getItems, getBounds
+  , render, getValue, getCenter, getDatum, getTop, getColor, getName, getItems, getSections
+  , getBounds, only
   , getX1, getX2, getY2, getY1
   , Property, Metric
   , Bars, toBarItems
@@ -21,6 +22,8 @@ import Chart.Attributes as CA
 
 -- TODO clean up plane
 -- TODO clean up property
+-- TODO replace system.id with inline clippath
+-- TODO clean up labels / axes etc
 
 
 {-| -}
@@ -198,6 +201,21 @@ render plane (Item config) =
 getItems : Item { x | items : List a } -> List a
 getItems (Item config) =
   config.details.items
+
+
+{-| -}
+only : String -> List (Item { config | name : String }) -> List (Item { config | name : String })
+only name_ =
+  List.filter <| \(Item config) -> config.details.name == name_
+
+
+{-| -}
+getSections : BarsItem a -> List (SectionItem a)
+getSections barsItem =
+  getItems barsItem -- bins
+    |> List.concatMap getItems -- bars
+    |> List.concatMap getItems -- sections
+
 
 
 

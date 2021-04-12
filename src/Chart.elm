@@ -4,10 +4,10 @@ module Chart exposing
     , size
     , Bounds, startMin, startMax, endMin, endMax, startPad, endPad, zero, middle
     , xAxis, yAxis, xTicks, yTicks, xLabels, yLabels, grid
-    , ints, floats, times, format, values, amount
-    --, Event, event, Decoder, getCoords, getNearest, getNearestX, getWithin, getWithinX, map, map2, map3, map4
+    , ints, floats, times, format, values, amount, events
+    , Event, event, Decoder, getCoords, getNearest, getNearestX, getWithin, getWithinX, map, map2, map3, map4
     --, Metric
-    , Item
+    , Item, getBars, getSeries
     --, getBars, getGroups, getDots, withoutUnknowns
     , tooltip, tooltipOnTop, when, formatTimestamp
     , svgAt, htmlAt, svg, html, none
@@ -437,13 +437,19 @@ center config =
   { config | center = True }
 
 
+{-| -}
+events : a -> Attribute { x | events : a }
+events value config =
+  { config | events = value }
+
+
 
 
 -- ELEMENTS
 
 
 {-| -}
-type alias Container msg =
+type alias Container data msg =
     { width : Maybe Float
     , height : Float
     , marginTop : Float
@@ -458,6 +464,7 @@ type alias Container msg =
     , id : String
     , range : Maybe (Bounds -> Bounds)
     , domain : Maybe (Bounds -> Bounds)
+    , events : List (Event data msg)
     , htmlAttrs : List (H.Attribute msg)
     , topped : Maybe Int
     , attrs : List (S.Attribute msg)
@@ -465,7 +472,7 @@ type alias Container msg =
 
 
 {-| -}
-chart : List (Container msg -> Container msg) -> List (Element data msg) -> H.Html msg
+chart : List (Container data msg -> Container data msg) -> List (Element data msg) -> H.Html msg
 chart edits elements =
   let config =
         applyAttrs edits
@@ -484,6 +491,7 @@ chart edits elements =
           , range = Nothing
           , domain = Nothing
           , topped = Nothing
+          , events = []
           , attrs = [ SA.style "overflow: visible;" ]
           , htmlAttrs = []
           }
@@ -501,7 +509,7 @@ chart edits elements =
         viewElements config plane tickValues items elements
 
       svgContainer =
-        S.svg (sizingAttrs ++ config.attrs) -- TODO List.map toEvent config.events ++
+        S.svg (sizingAttrs ++ List.map toEvent config.events ++ config.attrs)
 
       sizingAttrsHtml =
         if config.responsive then
@@ -514,6 +522,10 @@ chart edits elements =
       sizingAttrs =
         if config.responsive then [ C.responsive plane ] else C.static plane
 
+      toEvent (Event event_) =
+        let (Decoder decoder) = event_.decoder in
+        SE.on event_.name (CS.decoder plane (decoder items))
+
       allSvgEls =
         [ C.frame config.id plane ] ++ chartEls ++ [ C.eventCatcher plane [] ]
   in
@@ -523,11 +535,6 @@ chart edits elements =
 
 
 -- ELEMENTS
-
-
-type Item data
-  = ItemDot (List (Item.SeriesItem data))
-  | ItemBars (Item.BarsItem data)
 
 
 {-| -}
@@ -565,7 +572,7 @@ type alias XYBounds =
   }
 
 
-definePlane : Container msg -> List (Element data msg) -> C.Plane
+definePlane : Container data msg -> List (Element data msg) -> C.Plane
 definePlane config elements =
   let foldBounds el acc =
         case el of
@@ -677,7 +684,7 @@ getTickValues plane items elements =
   List.foldl toValues (TickValues [] []) elements
 
 
-viewElements : Container msg -> C.Plane -> TickValues -> List (Item data) -> List (Element data msg) -> ( List (H.Html msg), List (S.Svg msg), List (H.Html msg) )
+viewElements : Container data msg -> C.Plane -> TickValues -> List (Item data) -> List (Element data msg) -> ( List (H.Html msg), List (S.Svg msg), List (H.Html msg) )
 viewElements config plane tickValues allItems elements =
   let viewOne el ( before, chart_, after ) =
         case el of
@@ -773,8 +780,120 @@ stretch ma b =
 
 
 
-
 -- EVENT / DECODER
+
+
+{-| -}
+type Item data
+  = ItemDot (List (Item.SeriesItem data))
+  | ItemBars (Item.BarsItem data)
+
+
+{-| -}
+getSeries : List (Item data) -> List (Item.SeriesItem data)
+getSeries =
+  let filterItem = \item ->
+        case item of
+          ItemDot series_ -> Just series_
+          ItemBars _ -> Nothing
+  in
+  List.concat << List.filterMap filterItem
+
+
+{-| -}
+getBars : List (Item data) -> List (Item.BarsItem data)
+getBars =
+  List.filterMap <| \item ->
+    case item of
+      ItemDot _ -> Nothing
+      ItemBars bars_ -> Just bars_
+
+
+{-| -}
+type Event data msg =
+  Event
+    { name : String
+    , decoder : Decoder data msg
+    }
+
+
+{-| -}
+event : String -> Decoder data msg -> Event data msg
+event name_ decoder =
+  Event { name = name_, decoder = decoder }
+
+
+{-| -}
+type Decoder data msg =
+  Decoder (List (Item data) -> C.Plane -> C.Point -> msg)
+
+
+{-| -}
+map : (a -> msg) -> Decoder data a -> Decoder data msg
+map f (Decoder a) =
+  Decoder <| \ps s p -> f (a ps s p)
+
+
+{-| -}
+map2 : (a -> b -> msg) -> Decoder data a -> Decoder data b -> Decoder data msg
+map2 f (Decoder a) (Decoder b) =
+  Decoder <| \ps s p -> f (a ps s p) (b ps s p)
+
+
+{-| -}
+map3 : (a -> b -> c -> msg) -> Decoder data a -> Decoder data b -> Decoder data c -> Decoder data msg
+map3 f (Decoder a) (Decoder b) (Decoder c) =
+  Decoder <| \ps s p -> f (a ps s p) (b ps s p) (c ps s p)
+
+
+{-| -}
+map4 : (a -> b -> c -> d -> msg) -> Decoder data a -> Decoder data b -> Decoder data c -> Decoder data d -> Decoder data msg
+map4 f (Decoder a) (Decoder b) (Decoder c) (Decoder d) =
+  Decoder <| \ps s p -> f (a ps s p) (b ps s p) (c ps s p) (d ps s p)
+
+
+
+{-| -}
+getCoords : Decoder data C.Point
+getCoords =
+  Decoder <| \_ plane searched ->
+    { x = C.toCartesianX plane searched.x
+    , y = C.toCartesianY plane searched.y
+    }
+
+
+{-| -}
+getNearest : (C.Plane -> a -> C.Point) -> (List (Item data) -> List a) -> Decoder data (List a)
+getNearest toPoint filterItems =
+  Decoder <| \items plane ->
+    CS.getNearest (toPoint plane) (filterItems items) plane
+
+
+{-| -}
+getWithin : Float -> (C.Plane -> a -> C.Point) -> (List (Item data) -> List a) -> Decoder data (List a)
+getWithin radius toPoint filterItems =
+  Decoder <| \items plane ->
+    CS.getWithin radius (toPoint plane) (filterItems items) plane
+
+
+{-| -}
+getNearestX : (C.Plane -> a -> C.Point) -> (List (Item data) -> List a) -> Decoder data (List a)
+getNearestX toPoint filterItems =
+  Decoder <| \items plane ->
+    CS.getNearestX (toPoint plane) (filterItems items) plane
+
+
+
+{-| -}
+getWithinX : Float -> (C.Plane -> a -> C.Point) -> (List (Item data) -> List a) -> Decoder data (List a)
+getWithinX radius toPoint filterItems =
+  Decoder <| \items plane ->
+    CS.getWithinX radius (toPoint plane) (filterItems items) plane
+
+
+
+ -- TOOLTIP
+
 
 
 {-| -}
@@ -784,9 +903,9 @@ tooltip toX toY att content =
 
 
 {-| -}
-tooltipOnTop : (Bounds -> Float) -> (Bounds -> Float) -> List (H.Attribute msg) -> List (H.Html msg) -> Element data msg
+tooltipOnTop : (C.Plane -> Float) -> (C.Plane -> Float) -> List (H.Attribute msg) -> List (H.Html msg) -> Element data msg
 tooltipOnTop toX toY att content =
-  html <| \p -> C.tooltipOnTop p (toX <| toBounds .x p) (toY <| toBounds .y p) att content
+  html <| \p -> C.tooltipOnTop p (toX p) (toY p) att content
 
 
 {-| -}
