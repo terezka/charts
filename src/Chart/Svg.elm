@@ -767,12 +767,7 @@ tooltip plane pos edits htmlAttrs content =
         , HA.style "border" ("1px solid " ++ config.border)
         , HA.style "border-radius" "3px"
         , HA.style "pointer-events" "none"
-        , HA.style "max-width" (toPx config.width)
-        , HA.style "max-height" (toPx config.height)
         ] ++ htmlAttrs
-
-      toPx v =
-        if v > 0 then String.fromFloat v ++ "px" else "auto"
 
       ( x, y ) =
         case direction of

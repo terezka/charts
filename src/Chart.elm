@@ -9,7 +9,7 @@ module Chart exposing
     --, Metric
     , Item, getBars, getSeries
     --, getBars, getGroups, getDots, withoutUnknowns
-    , tooltip, tooltipOnTop, when, formatTimestamp
+    , tooltip, when, formatTimestamp
     , svgAt, htmlAt, svg, html, none
     , width, height
     , marginTop, marginBottom, marginLeft, marginRight
@@ -895,54 +895,22 @@ getWithinX radius toPoint filterItems =
  -- TOOLTIP
 
 
-type alias Tooltip a b msg =
-  { htmlAttrs : List (H.Attribute msg)
-  , content : Item.ItemDiscrete a b -> List (Item.ItemDiscrete a b) -> H.Html msg
-  , position : C.Plane -> Item.ItemDiscrete a b -> C.Point
+type alias Tooltip =
+  { direction : Maybe CA.Direction
+  , height : Float
+  , width : Float
+  , offset : Float
+  , pointer : Bool
+  , border : String
+  , background : String
   }
 
 
 {-| -}
-tooltip : List (Item.ItemDiscrete a b) -> List (Attribute (Tooltip a b msg)) -> Element data msg
-tooltip items edits =
-  let config =
-        applyAttrs edits
-          { htmlAttrs = []
-          , content = \first rest ->
-              H.div []
-                [ H.h4
-                    [ HA.style "max-width" "200px"
-                    , HA.style "margin-top" "2px"
-                    , HA.style "margin-bottom" "5px"
-                    , HA.style "color" (Item.getColor first)
-                    ]
-                    [ H.text (Item.getName first)
-                    ]
-                , H.div []
-                    [ H.text "X: "
-                    , H.text <| String.fromFloat (Item.getBounds first |> .x1)
-                    ]
-                , H.div []
-                    [ H.text "Y: "
-                    , H.text <| String.fromFloat (Item.getBounds first |> .y2)
-                    ]
-                ]
-          , position = Item.getTop
-          }
-  in
+tooltip : List (Item.Item a) -> List (Attribute Tooltip) -> List (H.Attribute Never) -> (Item.Item a -> List (Item.Item a) -> List (H.Html Never)) -> Element data msg
+tooltip items edits attrs_ content =
   when items <| \first rest ->
-    html <| \p ->
-      C.tooltipOnTop p
-        (config.position p first |> .x)
-        (config.position p first |> .y)
-        config.htmlAttrs
-        [config.content first rest]
-
-
-{-| -}
-tooltipOnTop : (C.Plane -> Float) -> (C.Plane -> Float) -> List (H.Attribute msg) -> List (H.Html msg) -> Element data msg
-tooltipOnTop toX toY att content =
-  html <| \p -> C.tooltipOnTop p (toX p) (toY p) att content
+    html <| \p -> CS.tooltip p (Item.getPosition p first) edits attrs_ (content first rest)
 
 
 {-| -}
