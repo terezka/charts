@@ -1,12 +1,13 @@
 module Chart.Item exposing
   ( Item(..), AnySeries(..), Series, Product
-  , getBars, getSeries, getProducts
+  , getBarSeries, getDotSeries, getProducts
   , render, getValue, getCenter, getPosition, getDatum, getTop, getItems
   , getColor, getName
+  , getBins
   , getBounds
   , getX1, getX2, getY2, getY1
   , Property, Metric
-  , Bars, toBarSeries
+  , Bars, toBarSeries, Bin
   , toDotSeries
   )
 
@@ -48,7 +49,7 @@ type AnySeries datum
 {-| -}
 type alias Series inter config datum =
   Item
-    { inter : inter
+    { config : inter
     , items : List (Product config datum)
     }
 
@@ -67,8 +68,8 @@ type alias Product config datum =
 
 
 {-| -}
-getSeries : List (AnySeries data) -> List (Series S.Interpolation S.Dot data)
-getSeries =
+getDotSeries : List (AnySeries data) -> List (Series S.Interpolation S.Dot data)
+getDotSeries =
   let filterItem = \item ->
         case item of
           DotSeries series -> Just series
@@ -78,12 +79,52 @@ getSeries =
 
 
 {-| -}
-getBars : List (AnySeries data) -> List (Series (Bars data) S.Bar data)
-getBars =
+getBarSeries : List (AnySeries data) -> List (Series (Bars data) S.Bar data)
+getBarSeries =
   List.filterMap <| \item ->
     case item of
       DotSeries _ -> Nothing
       BarSeries series -> Just series
+
+
+{-| -}
+getBins : List (Series inter config data) -> List (Series (Bin data) config data)
+getBins series =
+  let fold : Product config datum -> Dict ( Float, Float ) ( Product config datum, List (Product config datum) ) -> Dict ( Float, Float ) ( Product config datum, List (Product config datum) )
+      fold (Item prod) =
+        let update exM =
+              case exM of
+                Just ( first, rest ) -> Just ( first, Item prod :: rest )
+                Nothing -> Just ( Item prod, [] )
+        in
+        Dict.update ( prod.details.x1, prod.details.x2 ) update
+
+      toItem ( ( start, end ), ( Item first, rest ) ) =
+        Item
+          { details =
+              { config = { start = start, end = end, datum = first.details.datum }
+              , items = Item first :: List.reverse rest
+              }
+          , bounds = \c ->
+              { x1 = start
+              , x2 = end
+              , y1 = Coord.minimum [ getBounds >> .y1 >> Just ] c.items
+              , y2 = Coord.maximum [ getBounds >> .y2 >> Just ] c.items
+              }
+          , position = \plane c ->
+              { x1 = start
+              , x2 = end
+              , y1 = Coord.minimum [ getY1 plane >> Just ] c.items
+              , y2 = Coord.maximum [ getY2 plane >> Just ] c.items
+              }
+          , render = \plane config _ ->
+              S.g [ SA.class "elm-charts__bin" ] (List.map (render plane) config.items)
+          }
+  in
+  List.concatMap getProducts series
+    |> List.foldl fold Dict.empty
+    |> Dict.toList
+    |> List.map toItem
 
 
 {-| -}
@@ -294,7 +335,7 @@ toBarSeries barsAttrs properties data =
       toSeriesItem bins sections barIndex sectionIndex section =
         Item
           { details =
-              { inter = barsConfig
+              { config = barsConfig
               , items = List.map (toBarItem sections barIndex sectionIndex section) bins
               }
           , bounds = \c ->
@@ -410,7 +451,7 @@ toDotSeries toX properties data =
         Item
           { details =
               { items = dotItems
-              , inter = interConfig
+              , config = interConfig
               }
           , render = \plane _ _ ->
               let toBottom datum_ =

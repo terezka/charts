@@ -34,7 +34,7 @@ main =
 
 
 type alias Model =
-  { hovering : List (CI.Product CS.Dot Datum)
+  { hovering : List (CI.Series (CI.Bin Datum) CS.Bar Datum)
   }
 
 
@@ -44,7 +44,7 @@ init =
 
 
 type Msg
-  = OnHover (List (CI.Product CS.Dot Datum))
+  = OnHover (List (CI.Series (CI.Bin Datum) CS.Bar Datum))
 
 
 update : Msg -> Model -> Model
@@ -89,7 +89,7 @@ view model =
       --, C.range (C.startMin 0 >> C.endMax 6)
       --, C.domain (C.startMax 0 >> C.endMin 19)
       , C.events
-          [ C.event "mousemove" <| C.map OnHover <| C.getNearestX CI.getCenter (List.concatMap CI.getProducts << CI.getSeries)
+          [ C.event "mousemove" <| C.map OnHover <| C.getNearestX CI.getCenter (CI.getBins << CI.getBarSeries)
           ]
       , C.id "salery-discrepancy"
       ]
@@ -100,7 +100,7 @@ view model =
           , CA.roundBottom 0.2
           , CA.grouped
           , CA.x1 .x
-          , CA.x2 (.x >> (\x -> x + 1))
+          , CA.x2 (.x >> (\x -> x + 2))
           , CA.margin 0.1
           , CA.spacing 0.04
           ]
@@ -122,15 +122,15 @@ view model =
       , C.series .x
           [ C.stacked
               [ C.property .y "owls" "km" [ CA.linear, CA.opacity 0.25 ] [ CA.circle ]
-                  |> C.variation (\datum ->
-                        if List.any (\i -> CI.getDatum i == datum) model.hovering
-                        then [ CA.auraWidth 8, CA.aura 0.40, CA.size (Maybe.withDefault 2 datum.z * 5) ]
-                        else [ CA.size (Maybe.withDefault 2 datum.z * 5) ])
+                  --|> C.variation (\datum ->
+                  --      if List.any (\i -> CI.getDatum i == datum) model.hovering
+                  --      then [ CA.auraWidth 8, CA.aura 0.40, CA.size (Maybe.withDefault 2 datum.z * 5) ]
+                  --      else [ CA.size (Maybe.withDefault 2 datum.z * 5) ])
               , C.property .z "trees" "km" [ CA.linear, CA.opacity 0.25, CA.color CA.purple ] [ CA.circle ]
-                  |> C.variation (\datum ->
-                        if List.any (\i -> CI.getDatum i == datum) model.hovering
-                        then [ CA.auraWidth 8, CA.aura 0.40, CA.size (Maybe.withDefault 2 datum.y * 5) ]
-                        else [ CA.size (Maybe.withDefault 2 datum.y * 5) ])
+                  --|> C.variation (\datum ->
+                  --      if List.any (\i -> CI.getDatum i == datum) model.hovering
+                  --      then [ CA.auraWidth 8, CA.aura 0.40, CA.size (Maybe.withDefault 2 datum.y * 5) ]
+                  --      else [ CA.size (Maybe.withDefault 2 datum.y * 5) ])
               ]
           ]
           data
@@ -151,7 +151,7 @@ view model =
       --        ]
       --    ]
 
-      , C.tooltip model.hovering [ CA.onLeftOrRight, CA.offset 17 ] [] <| \hovered ->
+      , C.tooltip (List.concatMap CI.getProducts model.hovering) [ CA.onTop, CA.offset 17 ] [] <| \hovered ->
           [ H.div []
               [ H.span
                   [ HA.style "max-width" "200px"
