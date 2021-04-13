@@ -540,13 +540,13 @@ chart edits elements =
 type Element data msg
   = SeriesElement
       (Maybe XYBounds -> Maybe XYBounds)
-      (C.Plane -> List (Item.Series CS.Interpolation CS.Dot data))
-      (String -> C.Plane -> List (Item.Series CS.Interpolation CS.Dot data) -> S.Svg msg)
+      (C.Plane -> List (List (Item.Series CS.Interpolation CS.Dot data)))
+      (String -> C.Plane -> List (List (Item.Series CS.Interpolation CS.Dot data)) -> S.Svg msg)
   | BarsElement
       (Maybe XYBounds -> Maybe XYBounds)
-      (C.Plane -> List (Item.Series (Item.Bars data) CS.Bar data))
+      (C.Plane -> List (List (Item.Series (Item.Bars data) CS.Bar data)))
       (C.Plane -> TickValues -> TickValues)
-      (String -> C.Plane -> List (Item.Series (Item.Bars data) CS.Bar data) -> S.Svg msg)
+      (String -> C.Plane -> List (List (Item.Series (Item.Bars data) CS.Bar data)) -> S.Svg msg)
   | AxisElement
       (C.Plane -> S.Svg msg)
   | TicksElement
@@ -558,7 +558,7 @@ type Element data msg
   | GridElement
       (C.Plane -> TickValues -> S.Svg msg)
   | SubElements
-      (C.Plane -> List (Item.AnySeries data) -> List (Element data msg))
+      (C.Plane -> List (List (Item.AnySeries data)) -> List (Element data msg))
   | ListOfElements
       (List (Element data msg))
   | SvgElement
@@ -645,12 +645,12 @@ definePlane config elements =
   }
 
 
-getItems : C.Plane -> List (Element data msg) -> List (Item.AnySeries data)
+getItems : C.Plane -> List (Element data msg) -> List (List (Item.AnySeries data))
 getItems plane elements =
   let toItems el acc =
         case el of
-          SeriesElement _ func _ -> acc ++ List.map Item.DotSeries (func plane)
-          BarsElement _ func _ _ -> acc ++ List.map Item.BarSeries (func plane)
+          SeriesElement _ func _ -> acc ++ List.map (List.map Item.DotSeries) (func plane)
+          BarsElement _ func _ _ -> acc ++ List.map (List.map Item.BarSeries) (func plane)
           AxisElement _ -> acc
           TicksElement _ _ -> acc
           LabelsElement _ _ -> acc
@@ -670,7 +670,7 @@ type alias TickValues =
   }
 
 
-getTickValues : C.Plane -> List (Item.AnySeries data) -> List (Element data msg) -> TickValues
+getTickValues : C.Plane -> List (List (Item.AnySeries data)) -> List (Element data msg) -> TickValues
 getTickValues plane items elements =
   let toValues el acc =
         case el of
@@ -688,7 +688,7 @@ getTickValues plane items elements =
   List.foldl toValues (TickValues [] []) elements
 
 
-viewElements : Container data msg -> C.Plane -> TickValues -> List (Item.AnySeries data) -> List (Element data msg) -> ( List (H.Html msg), List (S.Svg msg), List (H.Html msg) )
+viewElements : Container data msg -> C.Plane -> TickValues -> List (List (Item.AnySeries data)) -> List (Element data msg) -> ( List (H.Html msg), List (S.Svg msg), List (H.Html msg) )
 viewElements config plane tickValues allItems elements =
   let viewOne el ( before, chart_, after ) =
         case el of
@@ -804,7 +804,7 @@ event name_ decoder =
 
 {-| -}
 type Decoder data msg =
-  Decoder (List (Item.AnySeries data) -> C.Plane -> C.Point -> msg)
+  Decoder (List (List (Item.AnySeries data)) -> C.Plane -> C.Point -> msg)
 
 
 {-| -}
@@ -842,21 +842,21 @@ getCoords =
 
 
 {-| -}
-getNearest : (C.Plane -> a -> C.Point) -> (List (Item.AnySeries data) -> List a) -> Decoder data (List a)
+getNearest : (C.Plane -> a -> C.Point) -> (List (List (Item.AnySeries data)) -> List a) -> Decoder data (List a)
 getNearest toPoint filterItems =
   Decoder <| \items plane ->
     CS.getNearest (toPoint plane) (filterItems items) plane
 
 
 {-| -}
-getWithin : Float -> (C.Plane -> a -> C.Point) -> (List (Item.AnySeries data) -> List a) -> Decoder data (List a)
+getWithin : Float -> (C.Plane -> a -> C.Point) -> (List (List (Item.AnySeries data)) -> List a) -> Decoder data (List a)
 getWithin radius toPoint filterItems =
   Decoder <| \items plane ->
     CS.getWithin radius (toPoint plane) (filterItems items) plane
 
 
 {-| -}
-getNearestX : (C.Plane -> a -> C.Point) -> (List (Item.AnySeries data) -> List a) -> Decoder data (List a)
+getNearestX : (C.Plane -> a -> C.Point) -> (List (List (Item.AnySeries data)) -> List a) -> Decoder data (List a)
 getNearestX toPoint filterItems =
   Decoder <| \items plane ->
     CS.getNearestX (toPoint plane) (filterItems items) plane
@@ -864,7 +864,7 @@ getNearestX toPoint filterItems =
 
 
 {-| -}
-getWithinX : Float -> (C.Plane -> a -> C.Point) -> (List (Item.AnySeries data) -> List a) -> Decoder data (List a)
+getWithinX : Float -> (C.Plane -> a -> C.Point) -> (List (List (Item.AnySeries data)) -> List a) -> Decoder data (List a)
 getWithinX radius toPoint filterItems =
   Decoder <| \items plane ->
     CS.getWithinX radius (toPoint plane) (filterItems items) plane
@@ -1355,7 +1355,7 @@ bars edits properties data =
         Item.toBarSeries edits properties data
 
       toTicks plane acc =
-        { acc | xs = List.concatMap (\i -> [ Item.getX1 plane i, Item.getX2 plane i ]) items }
+        { acc | xs = List.concatMap (\i -> [ Item.getX1 plane i, Item.getX2 plane i ]) (List.concat items) }
 
       toXYBounds =
         makeBounds
@@ -1365,10 +1365,10 @@ bars edits properties data =
           [ Item.getBounds >> .y1 >> Just
           , Item.getBounds >> .y2 >> Just
           ]
-          items
+          (List.concat items)
   in
   BarsElement toXYBounds (always items) toTicks <| \id_ plane items_ ->
-    S.g [ SA.class "elm-charts__bar-series", clipPath id_ ] (List.map (Item.render plane) items_)
+    S.g [ SA.class "elm-charts__bar-series", clipPath id_ ] (List.map (Item.render plane) (List.concat items_))
       |> S.map never
 
 
@@ -1389,10 +1389,10 @@ series toX properties data =
           [ Item.getBounds >> .y1 >> Just
           , Item.getBounds >> .y2 >> Just
           ]
-          items
+          (List.concat items)
   in
   SeriesElement toXYBounds (always items) <| \id_ p _ ->
-    S.g [ SA.class "elm-charts__dot-series" ] (List.map (Item.render p) items) -- TODO clipPath
+    S.g [ SA.class "elm-charts__dot-series" ] (List.map (Item.render p) (List.concat items)) -- TODO clipPath
       |> S.map never
 
 
@@ -1401,7 +1401,7 @@ series toX properties data =
 
 
 {-| -}
-with : (List (Item.AnySeries data) -> a) -> (C.Plane -> a -> List (Element data msg)) -> Element data msg
+with : (List (List (Item.AnySeries data)) -> a) -> (C.Plane -> a -> List (Element data msg)) -> Element data msg
 with filter func =
   SubElements <| \p is -> func p (filter is)
 

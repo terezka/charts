@@ -1,7 +1,7 @@
 module Chart.Item exposing
   ( Item(..), AnySeries(..), Series, Product
   , getBarSeries, getDotSeries, getProducts
-  , render, getValue, getCenter, getPosition, getDatum, getTop, getItems
+  , render, getValue, getCenter, getPosition, getDatum, getTop, getItems, toSeries
   , getColor, getName
   , getBins
   , getBounds
@@ -68,23 +68,45 @@ type alias Product config datum =
 
 
 {-| -}
-getDotSeries : List (AnySeries data) -> List (Series S.Interpolation S.Dot data)
-getDotSeries =
-  let filterItem = \item ->
-        case item of
-          DotSeries series -> Just series
-          BarSeries _ -> Nothing
-  in
-  List.filterMap filterItem
+getDotSeries : AnySeries data -> Maybe (Series S.Interpolation S.Dot data)
+getDotSeries item =
+  case item of
+    DotSeries series -> Just series
+    BarSeries _ -> Nothing
 
 
 {-| -}
-getBarSeries : List (AnySeries data) -> List (Series (Bars data) S.Bar data)
-getBarSeries =
-  List.filterMap <| \item ->
-    case item of
-      DotSeries _ -> Nothing
-      BarSeries series -> Just series
+getBarSeries : AnySeries data -> Maybe (Series (Bars data) S.Bar data)
+getBarSeries item =
+  case item of
+    DotSeries _ -> Nothing
+    BarSeries series -> Just series
+
+
+{-| -}
+toSeries : List (Product config data) -> Series () config data
+toSeries items =
+  Item
+    { details =
+        { config = ()
+        , items = items
+        }
+    , bounds = \c ->
+        { x1 = Coord.minimum [ getBounds >> .x1 >> Just ] c.items
+        , x2 = Coord.maximum [ getBounds >> .x2 >> Just ] c.items
+        , y1 = Coord.minimum [ getBounds >> .y1 >> Just ] c.items
+        , y2 = Coord.maximum [ getBounds >> .y2 >> Just ] c.items
+        }
+    , position = \plane c ->
+        { x1 = Coord.minimum [ getX1 plane >> Just ] c.items
+        , x2 = Coord.maximum [ getX2 plane >> Just ] c.items
+        , y1 = Coord.minimum [ getY1 plane >> Just ] c.items
+        , y2 = Coord.maximum [ getY2 plane >> Just ] c.items
+        }
+    , render = \plane config _ ->
+        S.g [ SA.class "elm-charts__stack" ] (List.map (render plane) config.items)
+    }
+
 
 
 {-| -}
@@ -289,7 +311,7 @@ type alias Bars data =
   }
 
 
-toBarSeries : List (CA.Attribute (Bars data)) -> List (Property data Metric () S.Bar) -> List data -> List (Series (Bars data) S.Bar data)
+toBarSeries : List (CA.Attribute (Bars data)) -> List (Property data Metric () S.Bar) -> List data -> List (List (Series (Bars data) S.Bar data))
 toBarSeries barsAttrs properties data =
   let barsConfig : Bars data
       barsConfig =
@@ -413,7 +435,6 @@ toBarSeries barsAttrs properties data =
   withSurround data toBin |> \bins ->
     List.map P.toConfigs properties
       |> List.indexedMap (\barIndex props -> List.indexedMap (toSeriesItem bins props barIndex) (List.reverse props))
-      |> List.concat
 
 
 
@@ -421,7 +442,7 @@ toBarSeries barsAttrs properties data =
 
 
 {-| -}
-toDotSeries : (data -> Float) -> List (Property data Metric S.Interpolation S.Dot) -> List data -> List (Series S.Interpolation S.Dot data)
+toDotSeries : (data -> Float) -> List (Property data Metric S.Interpolation S.Dot) -> List data -> List (List (Series S.Interpolation S.Dot data))
 toDotSeries toX properties data =
   let toInterConfig attrs =
         apply attrs
@@ -518,7 +539,6 @@ toDotSeries toX properties data =
   in
   List.map P.toConfigs properties
     |> List.indexedMap (\i ps -> List.map (toSeriesItem i) ps)
-    |> List.concat
 
 
 

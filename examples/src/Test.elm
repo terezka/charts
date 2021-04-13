@@ -34,7 +34,7 @@ main =
 
 
 type alias Model =
-  { hovering : List (CI.Series (CI.Bin Datum) CS.Bar Datum)
+  { hovering : List (CI.Series () CS.Bar Datum)
   }
 
 
@@ -44,7 +44,7 @@ init =
 
 
 type Msg
-  = OnHover (List (CI.Series (CI.Bin Datum) CS.Bar Datum))
+  = OnHover (List (CI.Series () CS.Bar Datum))
 
 
 update : Msg -> Model -> Model
@@ -89,7 +89,19 @@ view model =
       --, C.range (C.startMin 0 >> C.endMax 6)
       --, C.domain (C.startMax 0 >> C.endMin 19)
       , C.events
-          [ C.event "mousemove" <| C.map OnHover <| C.getNearestX CI.getCenter (CI.getBins << CI.getBarSeries)
+          [ let filter series =
+                  series
+                    |> List.map (List.filterMap CI.getBarSeries) -- List (List series)
+                    |> List.map toBars
+                    |> List.concat
+
+                toBars stacked =
+                  stacked
+                    |> CI.getBins
+                    |> List.map CI.getProducts
+                    |> List.map CI.toSeries
+            in
+            C.event "mousemove" <| C.map OnHover <| C.getNearestX CI.getCenter filter
           ]
       , C.id "salery-discrepancy"
       ]
@@ -132,6 +144,7 @@ view model =
                   --      then [ CA.auraWidth 8, CA.aura 0.40, CA.size (Maybe.withDefault 2 datum.y * 5) ]
                   --      else [ CA.size (Maybe.withDefault 2 datum.y * 5) ])
               ]
+          , C.property .y "cats" "km" [ CA.linear, CA.opacity 0 ] [ CA.circle, CA.color CA.pink ]
           ]
           data
 
@@ -151,19 +164,18 @@ view model =
       --        ]
       --    ]
 
-      , C.tooltip (List.concatMap CI.getProducts model.hovering) [ CA.onTop, CA.offset 17 ] [] <| \hovered ->
-          [ H.div []
-              [ H.span
+      , C.tooltip model.hovering [ CA.onTop, CA.offset 17 ] [] <| \hovered ->
+          List.map (\each ->
+              H.div
                   [ HA.style "max-width" "200px"
-                  , HA.style "color" (CI.getColor hovered)
+                  , HA.style "color" (CI.getColor each)
                   ]
-                  [ H.text (CI.getName hovered)
+                  [ H.text (CI.getName each)
                   , H.text ": "
-                  , H.text (String.fromFloat <| Maybe.withDefault 0 <| CI.getValue hovered)
+                  , H.text (String.fromFloat <| Maybe.withDefault 0 <| CI.getValue each)
                   ]
-
-              ]
-          ]
+            )
+          (CI.getProducts hovered)
       ]
     ]
 
