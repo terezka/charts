@@ -97,7 +97,7 @@ view model =
       --, C.domain (C.startMax 0 >> C.endMin 19)
       , C.events
           [ C.map2 OnHoverNew
-              (C.getNearestX CI.getCenter (C.getBars >> List.concatMap CI.getSections))
+              (C.getNearestX CI.getCenter (C.getBars >> List.concat >> List.concatMap CI.getItems >> List.concatMap CI.getItems))
               (C.getNearestX CI.getCenter (C.getSeries >> List.concatMap CI.getItems))
               |> C.event "mousemove"
           ]
@@ -105,23 +105,23 @@ view model =
       ]
       [ C.grid []
 
-      --, C.bars
-      --    [ CA.roundTop 0.2
-      --    , CA.roundBottom 0.2
-      --    , CA.grouped
-      --    , CA.x1 .x
-      --    , CA.x2 (.x >> (\x -> x + 1))
-      --    , CA.margin 0.1
-      --    , CA.spacing 0.04
-      --    ]
-      --    [ C.stacked
-      --        [ C.bar .y "cats" "km" [ C.borderWidth 1 ]
-      --        , C.bar .z "dogs" "km" [ C.borderWidth 1 ]
-      --        , C.bar (Just << .x) "fish" "km" [ C.borderWidth 1 ]
-      --        ]
-      --    , C.bar .z "kids" "km" [ CA.color CA.purple ]
-      --    ]
-      --    data
+      , C.bars
+          [ CA.roundTop 0.2
+          , CA.roundBottom 0.2
+          , CA.grouped
+          , CA.x1 .x
+          , CA.x2 (.x >> (\x -> x + 1))
+          , CA.margin 0.1
+          , CA.spacing 0.04
+          ]
+          [ C.stacked
+              [ C.bar .y "cats" "km" [ C.borderWidth 1 ]
+              , C.bar .z "dogs" "km" [ C.borderWidth 1 ]
+              , C.bar (Just << .x) "fish" "km" [ C.borderWidth 1 ]
+              ]
+          , C.bar .z "kids" "km" [ CA.color CA.purple ]
+          ]
+          data
 
       , C.yAxis []
       , C.xTicks []
@@ -132,22 +132,36 @@ view model =
       , C.series .x
           [ C.stacked
               [ C.property .y "owls" "km" [ CA.linear, CA.opacity 0.25 ] [ CA.circle ]
-                  |> C.variation
-                      (\datum -> [ CA.size (Maybe.withDefault 2 datum.y) ]
-                        ++ if List.any (\i -> CI.getDatum i == datum) model.hovering then [ CA.auraWidth 5, CA.aura 0.25 ] else []
-                      )
+                  |> C.variation (\datum ->
+                        if List.any (\i -> CI.getDatum i == datum) model.hovering
+                        then [ CA.auraWidth 8, CA.aura 0.40, CA.size (Maybe.withDefault 2 datum.z * 5) ]
+                        else [ CA.size (Maybe.withDefault 2 datum.z * 5) ])
               , C.property .z "trees" "km" [ CA.linear, CA.opacity 0.25, CA.color CA.purple ] [ CA.circle ]
-                  |> C.variation
-                      (\datum -> [ CA.size (Maybe.withDefault 2 datum.y) ]
-                        ++ if List.any (\i -> CI.getDatum i == datum) model.hovering then [ CA.auraWidth 5, CA.aura 0.25 ] else []
-                      )
+                  |> C.variation (\datum ->
+                        if List.any (\i -> CI.getDatum i == datum) model.hovering
+                        then [ CA.auraWidth 8, CA.aura 0.40, CA.size (Maybe.withDefault 2 datum.y * 5) ]
+                        else [ CA.size (Maybe.withDefault 2 datum.y * 5) ])
               ]
           ]
           data
 
       , C.xAxis []
 
-      , C.tooltip model.hovering [ CA.onLeftOrRight, CA.offset 12 ] [] <| \hovered ->
+      , C.tooltip model.hoveringNew [ CA.onLeftOrRight, CA.offset 17 ] [] <| \hovered ->
+          [ H.div []
+              [ H.span
+                  [ HA.style "max-width" "200px"
+                  , HA.style "color" (CI.getColor hovered)
+                  ]
+                  [ H.text (CI.getName hovered)
+                  , H.text ": "
+                  , H.text (String.fromFloat <| Maybe.withDefault 0 <| CI.getValue hovered)
+                  ]
+
+              ]
+          ]
+
+      , C.tooltip model.hovering [ CA.onLeftOrRight, CA.offset 17 ] [] <| \hovered ->
           [ H.div []
               [ H.span
                   [ HA.style "max-width" "200px"

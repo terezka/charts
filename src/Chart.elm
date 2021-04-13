@@ -545,9 +545,9 @@ type Element data msg
       (String -> C.Plane -> List (Item.SeriesItem data) -> S.Svg msg)
   | BarsElement
       (Maybe XYBounds -> Maybe XYBounds)
-      (C.Plane -> Item.BarsItem data)
+      (C.Plane -> List (Item.BinItem data))
       (C.Plane -> TickValues -> TickValues)
-      (String -> C.Plane -> Item.BarsItem data -> S.Svg msg)
+      (String -> C.Plane -> List (Item.BinItem data) -> S.Svg msg)
   | AxisElement
       (C.Plane -> S.Svg msg)
   | TicksElement
@@ -792,7 +792,7 @@ stretch ma b =
 {-| -}
 type Item data
   = ItemDot (List (Item.SeriesItem data))
-  | ItemBars (Item.BarsItem data)
+  | ItemBars (List (Item.BinItem data))
 
 
 {-| -}
@@ -807,7 +807,7 @@ getSeries =
 
 
 {-| -}
-getBars : List (Item data) -> List (Item.BarsItem data)
+getBars : List (Item data) -> List (List (Item.BinItem data))
 getBars =
   List.filterMap <| \item ->
     case item of
@@ -1378,11 +1378,11 @@ type alias Bar =
 {-| -}
 bars : List (Attribute (Bars data)) -> List (Property data Item.Metric () Bar) -> List data -> Element data msg
 bars edits properties data =
-  let item =
-        Item.toBarItems edits properties data
+  let items =
+        Item.toBinItems edits properties data
 
       toTicks plane acc =
-        { acc | xs = List.concatMap (\i -> [ Item.getX1 plane i, Item.getX2 plane i ]) (Item.getItems item) }
+        { acc | xs = List.concatMap (\i -> [ Item.getX1 plane i, Item.getX2 plane i ]) items }
 
       toXYBounds =
         makeBounds
@@ -1392,10 +1392,12 @@ bars edits properties data =
           [ Item.getBounds >> .y1 >> Just
           , Item.getBounds >> .y2 >> Just
           ]
-          (Item.getItems item)
+          items
   in
-  BarsElement toXYBounds (always item) toTicks <| \id_ plane items ->
-    S.g [ SA.class "elm-charts__bins", clipPath id_ ] [ Item.render plane items ]
+  BarsElement toXYBounds (always items) toTicks <| \id_ plane items_ ->
+    S.g
+      [ SA.class "elm-charts__bins", clipPath id_ ]
+      (List.map (Item.render plane) items_)
       |> S.map never
 
 

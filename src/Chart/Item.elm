@@ -1,10 +1,10 @@
 module Chart.Item exposing
-  ( Item(..), BinItem, BarItem, SectionItem, DotItem, SeriesItem, BarsItem, ItemDiscrete
-  , render, getValue, getCenter, getPosition, getDatum, getTop, getColor, getName, getItems, getBars, getSections
+  ( Item(..), BinItem, BarItem, SectionItem, DotItem, SeriesItem, ItemDiscrete
+  , render, getValue, getCenter, getPosition, getDatum, getTop, getColor, getName, getItems
   , getBounds, only
   , getX1, getX2, getY2, getY1
   , Property, Metric
-  , Bars, toBarItems
+  , Bars, toBinItems
   , toSeriesItems
   )
 
@@ -33,14 +33,6 @@ type Item a =
     , render : Plane -> a -> Position -> Svg Never
     , bounds : a -> Position
     , position : Plane -> a -> Position
-    }
-
-
-{-| -}
-type alias BarsItem datum =
-  Item
-    { properties : List (Property datum Metric () S.Bar)
-    , items : List (BinItem datum)
     }
 
 
@@ -226,20 +218,6 @@ only name_ =
   List.filter <| \(Item config) -> config.details.name == name_
 
 
-{-| -}
-getBars : BarsItem a -> List (BarItem a)
-getBars =
-  getItems -- bins
-    >> List.concatMap getItems
-
-
-{-| -}
-getSections : BarsItem a -> List (SectionItem a)
-getSections =
-  getBars -- bars
-    >> List.concatMap getItems -- sections
-
-
 
 
 -- PROPERTY
@@ -281,8 +259,8 @@ type alias Bars data =
   }
 
 
-toBarItems : List (CA.Attribute (Bars data)) -> List (Property data Metric () S.Bar) -> List data -> BarsItem data
-toBarItems barsAttrs properties data =
+toBinItems : List (CA.Attribute (Bars data)) -> List (Property data Metric () S.Bar) -> List data -> List (BinItem data)
+toBinItems barsAttrs properties data =
   let barsConfig : Bars data
       barsConfig =
         apply barsAttrs
@@ -424,26 +402,7 @@ toBarItems barsAttrs properties data =
               S.bar plane attrs position
           }
   in
-  Item
-    { details =
-        { properties = properties
-        , items = List.map toBinItem (withSurround data toBin)
-        }
-    , bounds = \config ->
-        { x1 = Coord.minimum [ getBounds >> .x1 >> Just ] config.items
-        , x2 = Coord.maximum [ getBounds >> .x2 >> Just ] config.items
-        , y1 = Coord.minimum [ getBounds >> .y1 >> Just ] config.items
-        , y2 = Coord.maximum [ getBounds >> .y2 >> Just ] config.items
-        }
-    , position = \plane config ->
-        { x1 = Coord.minimum [ getX1 plane >> Just ] config.items
-        , x2 = Coord.maximum [ getX2 plane >> Just ] config.items
-        , y1 = Coord.minimum [ getY1 plane >> Just ] config.items
-        , y2 = Coord.maximum [ getY2 plane >> Just ] config.items
-        }
-    , render = \plane config _ ->
-        S.g [ SA.class "elm-charts__bins" ] (List.map (render plane) config.items)
-    }
+  List.map toBinItem (withSurround data toBin)
 
 
 
