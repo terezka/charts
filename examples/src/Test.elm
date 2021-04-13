@@ -34,30 +34,23 @@ main =
 
 
 type alias Model =
-  { hoveringSalery : List (CI.BarItem Salery.Datum)
-  , hovering : List (CI.DotItem Datum)
-  , hoveringNew : List (CI.SectionItem Datum)
-  , point : Maybe Coordinates.Point
+  { hovering : List (CI.Product CS.Dot Datum)
   }
 
 
 init : Model
 init =
-  Model [] [] [] Nothing
+  Model []
 
 
 type Msg
-  = OnHoverSalery (List (CI.BarItem Salery.Datum))
-  | OnHoverNew (List (CI.SectionItem Datum)) (List (CI.DotItem Datum))
-  | OnCoords Coordinates.Point -- TODO
+  = OnHover (List (CI.Product CS.Dot Datum))
 
 
 update : Msg -> Model -> Model
 update msg model =
   case msg of
-    OnHoverSalery bs -> { model | hoveringSalery = bs }
-    OnHoverNew bs ss -> { model | hoveringNew = bs, hovering = ss }
-    OnCoords p -> { model | point = Just p }
+    OnHover items -> { model | hovering = items }
 
 
 type alias Datum =
@@ -96,10 +89,7 @@ view model =
       --, C.range (C.startMin 0 >> C.endMax 6)
       --, C.domain (C.startMax 0 >> C.endMin 19)
       , C.events
-          [ C.map2 OnHoverNew
-              (C.getNearestX CI.getCenter (C.getBars >> List.concat >> List.concatMap CI.getItems >> List.concatMap CI.getItems))
-              (C.getNearestX CI.getCenter (C.getSeries >> List.concatMap CI.getItems))
-              |> C.event "mousemove"
+          [ C.event "mousemove" <| C.map OnHover <| C.getNearestX CI.getCenter (List.concatMap CI.getProducts << CI.getSeries)
           ]
       , C.id "salery-discrepancy"
       ]
@@ -119,7 +109,7 @@ view model =
               , C.bar .z "dogs" "km" [ C.borderWidth 1 ]
               , C.bar (Just << .x) "fish" "km" [ C.borderWidth 1 ]
               ]
-          , C.bar .z "kids" "km" [ CA.color CA.purple ]
+          , C.bar .z "kids" "km" []
           ]
           data
 
@@ -147,19 +137,19 @@ view model =
 
       , C.xAxis []
 
-      , C.tooltip model.hoveringNew [ CA.onLeftOrRight, CA.offset 17 ] [] <| \hovered ->
-          [ H.div []
-              [ H.span
-                  [ HA.style "max-width" "200px"
-                  , HA.style "color" (CI.getColor hovered)
-                  ]
-                  [ H.text (CI.getName hovered)
-                  , H.text ": "
-                  , H.text (String.fromFloat <| Maybe.withDefault 0 <| CI.getValue hovered)
-                  ]
+      --, C.tooltip model.hoveringNew [ CA.onLeftOrRight, CA.offset 17 ] [] <| \hovered ->
+      --    [ H.div []
+      --        [ H.span
+      --            [ HA.style "max-width" "200px"
+      --            , HA.style "color" (CI.getColor hovered)
+      --            ]
+      --            [ H.text (CI.getName hovered)
+      --            , H.text ": "
+      --            , H.text (String.fromFloat <| Maybe.withDefault 0 <| CI.getValue hovered)
+      --            ]
 
-              ]
-          ]
+      --        ]
+      --    ]
 
       , C.tooltip model.hovering [ CA.onLeftOrRight, CA.offset 17 ] [] <| \hovered ->
           [ H.div []
