@@ -1,6 +1,6 @@
 module Chart.Item exposing
   ( Item(..), AnySeries(..), Series, Product
-  , Collection, toCollection
+  , Collection, toCollection, getBins
   , getBarSeries, getDotSeries, getProducts, getStacked
   , render, getValue, getCenter, getPosition, getDatum, getTop, getItems
   , getColor, getName
@@ -56,14 +56,6 @@ type alias Series inter config datum =
 
 
 {-| -}
-type alias Collection inter item =
-  Item
-    { config : inter
-    , items : List item
-    }
-
-
-{-| -}
 type alias Product config datum =
   Item
     { datum : datum
@@ -95,29 +87,51 @@ getBarSeries item =
 
 
 {-| -}
-toCollection : List (List (Product config data)) -> Collection () (List (Product config data))
-toCollection items =
+type alias Collection inter item =
+  Item
+    { config : inter
+    , items : List item
+    }
+
+
+{-| -}
+toCollection : c -> (a -> List (Item x)) -> List a -> Collection c a
+toCollection config toProduct items =
   Item
     { details =
-        { config = ()
+        { config = config
         , items = items
         }
     , bounds = \c ->
-        { x1 = Coord.minimum [ getBounds >> .x1 >> Just ] (List.concat c.items)
-        , x2 = Coord.maximum [ getBounds >> .x2 >> Just ] (List.concat c.items)
-        , y1 = Coord.minimum [ getBounds >> .y1 >> Just ] (List.concat c.items)
-        , y2 = Coord.maximum [ getBounds >> .y2 >> Just ] (List.concat c.items)
+        { x1 = Coord.minimum [ getBounds >> .x1 >> Just ] (List.concatMap toProduct c.items)
+        , x2 = Coord.maximum [ getBounds >> .x2 >> Just ] (List.concatMap toProduct c.items)
+        , y1 = Coord.minimum [ getBounds >> .y1 >> Just ] (List.concatMap toProduct c.items)
+        , y2 = Coord.maximum [ getBounds >> .y2 >> Just ] (List.concatMap toProduct c.items)
         }
     , position = \plane c ->
-        { x1 = Coord.minimum [ getX1 plane >> Just ] (List.concat c.items)
-        , x2 = Coord.maximum [ getX2 plane >> Just ] (List.concat c.items)
-        , y1 = Coord.minimum [ getY1 plane >> Just ] (List.concat c.items)
-        , y2 = Coord.maximum [ getY2 plane >> Just ] (List.concat c.items)
+        { x1 = Coord.minimum [ getX1 plane >> Just ] (List.concatMap toProduct c.items)
+        , x2 = Coord.maximum [ getX2 plane >> Just ] (List.concatMap toProduct c.items)
+        , y1 = Coord.minimum [ getY1 plane >> Just ] (List.concatMap toProduct c.items)
+        , y2 = Coord.maximum [ getY2 plane >> Just ] (List.concatMap toProduct c.items)
         }
-    , render = \plane config _ ->
+    , render = \plane c _ ->
         S.g [ SA.class "elm-charts__collection" ]
-          (List.map (render plane) (List.concat config.items))
+          (List.map (render plane) (List.concatMap toProduct c.items))
     }
+
+
+{-| -}
+getBins : List (Product config data) -> List (List (Product config data))
+getBins products =
+  let sortBy func (Item prod) =
+        Dict.update (func prod.details) <| \prevM ->
+          case prevM of
+            Just prev -> Just (Item prod :: prev)
+            Nothing -> Just [ Item prod ]
+  in
+  products
+    |> List.foldl (sortBy .x1) Dict.empty
+    |> Dict.values
 
 
 {-| -}

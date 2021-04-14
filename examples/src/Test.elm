@@ -34,7 +34,7 @@ main =
 
 
 type alias Model =
-  { hovering : List (CI.Collection () (List (CI.Product CS.Bar Datum)))
+  { hovering : List (CI.Collection () (CI.Product CS.Bar Datum))
   }
 
 
@@ -44,7 +44,7 @@ init =
 
 
 type Msg
-  = OnHover (List (CI.Collection () (List (CI.Product CS.Bar Datum))))
+  = OnHover (List (CI.Collection () (CI.Product CS.Bar Datum)))
 
 
 update : Msg -> Model -> Model
@@ -90,19 +90,11 @@ view model =
       --, C.domain (C.startMax 0 >> C.endMin 19)
       , C.events
           [ let filter series =
-                  let _ =
-                        series
-                          |> List.filterMap CI.getBarSeries -- List series
-                          |> List.concatMap CI.getProducts -- List Product
-                          |> CI.getStacked
-                          |> List.map (List.map (List.map (\i -> ( CI.getName i, CI.getDatum i ))))
-                          |> Debug.log "here"
-                  in
                   series
                     |> List.filterMap CI.getBarSeries -- List series
                     |> List.concatMap CI.getProducts -- List Product
-                    |> CI.getStacked
-                    |> List.map CI.toCollection
+                    |> CI.getBins
+                    |> List.map (CI.toCollection () List.singleton)
             in
             C.event "mousemove" <| C.map OnHover <| C.getNearestX CI.getCenter filter
           ]
@@ -167,11 +159,13 @@ view model =
       --        ]
       --    ]
 
-      , let tools : List (CI.Collection () (List (CI.Product CS.Bar Datum)))
-            tools =
-              model.hovering
-                |> List.map CI.getItems -- List (List (List (CI.Product CS.Bar Datum)))
-                |> List.concatMap (List.map (List.singleton >> CI.toCollection))
+      , let tools =
+              model.hovering -- [ bin ]
+                |> List.concatMap
+                    ( CI.getItems >> -- [ [ product, product, product, product ] ]
+                      CI.getStacked >> -- [ [ [ product, product, product ], [ product ] ] ]
+                      List.concatMap (List.map (CI.toCollection () List.singleton)) -- [ Col [ product ] ]
+                    )
         in
         C.tooltip tools [ CA.onTop, CA.offset 17 ] [] <| \hovered ->
           let viewOne each =
@@ -184,7 +178,7 @@ view model =
                     , H.text (String.fromFloat <| Maybe.withDefault 0 <| CI.getValue each)
                     ]
           in
-          List.concatMap (List.map viewOne) (CI.getItems hovered)
+          List.map viewOne (CI.getItems hovered)
       ]
     ]
 
