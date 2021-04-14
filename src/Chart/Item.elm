@@ -1,9 +1,9 @@
 module Chart.Item exposing
   ( Item(..), AnySeries(..), Series, Product
-  , getBarSeries, getDotSeries, getProducts
-  , render, getValue, getCenter, getPosition, getDatum, getTop, getItems, toSeries
+  , Collection, toCollection
+  , getBarSeries, getDotSeries, getProducts, getStacked
+  , render, getValue, getCenter, getPosition, getDatum, getTop, getItems
   , getColor, getName
-  , getBins
   , getBounds
   , getX1, getX2, getY2, getY1
   , Property, Metric
@@ -28,6 +28,7 @@ import Chart.Attributes as CA
 -- TODO replace system.id with inline clippath
 -- TODO clean up labels / axes etc
 -- TODO rename series to scatter
+-- TODO add element index
 
 
 {-| -}
@@ -55,10 +56,20 @@ type alias Series inter config datum =
 
 
 {-| -}
+type alias Collection inter item =
+  Item
+    { config : inter
+    , items : List item
+    }
+
+
+{-| -}
 type alias Product config datum =
   Item
     { datum : datum
     , config : config
+    , propertyNo : Int
+    , propertyNoSub : Int
     , name : String
     , unit : String
     , x1 : Float
@@ -84,69 +95,44 @@ getBarSeries item =
 
 
 {-| -}
-toSeries : List (Product config data) -> Series () config data
-toSeries items =
+toCollection : List (List (Product config data)) -> Collection () (List (Product config data))
+toCollection items =
   Item
     { details =
         { config = ()
         , items = items
         }
     , bounds = \c ->
-        { x1 = Coord.minimum [ getBounds >> .x1 >> Just ] c.items
-        , x2 = Coord.maximum [ getBounds >> .x2 >> Just ] c.items
-        , y1 = Coord.minimum [ getBounds >> .y1 >> Just ] c.items
-        , y2 = Coord.maximum [ getBounds >> .y2 >> Just ] c.items
+        { x1 = Coord.minimum [ getBounds >> .x1 >> Just ] (List.concat c.items)
+        , x2 = Coord.maximum [ getBounds >> .x2 >> Just ] (List.concat c.items)
+        , y1 = Coord.minimum [ getBounds >> .y1 >> Just ] (List.concat c.items)
+        , y2 = Coord.maximum [ getBounds >> .y2 >> Just ] (List.concat c.items)
         }
     , position = \plane c ->
-        { x1 = Coord.minimum [ getX1 plane >> Just ] c.items
-        , x2 = Coord.maximum [ getX2 plane >> Just ] c.items
-        , y1 = Coord.minimum [ getY1 plane >> Just ] c.items
-        , y2 = Coord.maximum [ getY2 plane >> Just ] c.items
+        { x1 = Coord.minimum [ getX1 plane >> Just ] (List.concat c.items)
+        , x2 = Coord.maximum [ getX2 plane >> Just ] (List.concat c.items)
+        , y1 = Coord.minimum [ getY1 plane >> Just ] (List.concat c.items)
+        , y2 = Coord.maximum [ getY2 plane >> Just ] (List.concat c.items)
         }
     , render = \plane config _ ->
-        S.g [ SA.class "elm-charts__stack" ] (List.map (render plane) config.items)
+        S.g [ SA.class "elm-charts__collection" ]
+          (List.map (render plane) (List.concat config.items))
     }
 
 
-
 {-| -}
-getBins : List (Series inter config data) -> List (Series (Bin data) config data)
-getBins series =
-  let fold : Product config datum -> Dict ( Float, Float ) ( Product config datum, List (Product config datum) ) -> Dict ( Float, Float ) ( Product config datum, List (Product config datum) )
-      fold (Item prod) =
-        let update exM =
-              case exM of
-                Just ( first, rest ) -> Just ( first, Item prod :: rest )
-                Nothing -> Just ( Item prod, [] )
-        in
-        Dict.update ( prod.details.x1, prod.details.x2 ) update
-
-      toItem ( ( start, end ), ( Item first, rest ) ) =
-        Item
-          { details =
-              { config = { start = start, end = end, datum = first.details.datum }
-              , items = Item first :: List.reverse rest
-              }
-          , bounds = \c ->
-              { x1 = start
-              , x2 = end
-              , y1 = Coord.minimum [ getBounds >> .y1 >> Just ] c.items
-              , y2 = Coord.maximum [ getBounds >> .y2 >> Just ] c.items
-              }
-          , position = \plane c ->
-              { x1 = start
-              , x2 = end
-              , y1 = Coord.minimum [ getY1 plane >> Just ] c.items
-              , y2 = Coord.maximum [ getY2 plane >> Just ] c.items
-              }
-          , render = \plane config _ ->
-              S.g [ SA.class "elm-charts__bin" ] (List.map (render plane) config.items)
-          }
+getStacked : List (Product config data) -> List (List (List (Product config data)))
+getStacked products =
+  let sortBy func (Item prod) =
+        Dict.update (func prod.details) <| \prevM ->
+          case prevM of
+            Just prev -> Just (Item prod :: prev)
+            Nothing -> Just [ Item prod ]
   in
-  List.concatMap getProducts series
-    |> List.foldl fold Dict.empty
-    |> Dict.toList
-    |> List.map toItem
+  products
+    |> List.foldl (sortBy .x1) Dict.empty
+    |> Dict.values
+    |> List.map (Dict.values << List.foldl (sortBy .propertyNo) Dict.empty)
 
 
 {-| -}
@@ -311,7 +297,7 @@ type alias Bars data =
   }
 
 
-toBarSeries : List (CA.Attribute (Bars data)) -> List (Property data Metric () S.Bar) -> List data -> List (List (Series (Bars data) S.Bar data))
+toBarSeries : List (CA.Attribute (Bars data)) -> List (Property data Metric () S.Bar) -> List data -> List (Series (Bars data) S.Bar data)
 toBarSeries barsAttrs properties data =
   let barsConfig : Bars data
       barsConfig =
@@ -412,6 +398,8 @@ toBarSeries barsAttrs properties data =
               { name = section.meta.name
               , unit = section.meta.unit
               , datum = bin.datum
+              , propertyNo = barIndex
+              , propertyNoSub = sectionIndex
               , x1 = start
               , x2 = end
               , y = value
@@ -435,6 +423,7 @@ toBarSeries barsAttrs properties data =
   withSurround data toBin |> \bins ->
     List.map P.toConfigs properties
       |> List.indexedMap (\barIndex props -> List.indexedMap (toSeriesItem bins props barIndex) (List.reverse props))
+      |> List.concat
 
 
 
@@ -442,7 +431,7 @@ toBarSeries barsAttrs properties data =
 
 
 {-| -}
-toDotSeries : (data -> Float) -> List (Property data Metric S.Interpolation S.Dot) -> List data -> List (List (Series S.Interpolation S.Dot data))
+toDotSeries : (data -> Float) -> List (Property data Metric S.Interpolation S.Dot) -> List data -> List (Series S.Interpolation S.Dot data)
 toDotSeries toX properties data =
   let toInterConfig attrs =
         apply attrs
@@ -464,9 +453,9 @@ toDotSeries toX properties data =
           , shape = Nothing
           }
 
-      toSeriesItem index prop =
-        let dotItems = List.map (toDotItem index prop interConfig) data
-            interAttr = [ CA.color (toDefaultColor index) ] ++ prop.inter
+      toSeriesItem lineIndex sublineIndex prop =
+        let dotItems = List.map (toDotItem lineIndex sublineIndex prop interConfig) data
+            interAttr = [ CA.color (toDefaultColor lineIndex) ] ++ prop.inter
             interConfig = toInterConfig interAttr
         in
         Item
@@ -498,7 +487,7 @@ toDotSeries toX properties data =
               }
           }
 
-      toDotItem index prop interConfig datum_ =
+      toDotItem lineIndex sublineIndex prop interConfig datum_ =
         let defaultAttrs = [ CA.color interConfig.color, if interConfig.method == Nothing then CA.circle else identity ]
             dotAttrs = defaultAttrs ++ prop.attrs ++ prop.extra datum_
             config = toDotConfig dotAttrs
@@ -528,6 +517,8 @@ toDotSeries toX properties data =
               }
           , details =
               { datum = datum_
+              , propertyNo = lineIndex
+              , propertyNoSub = sublineIndex
               , x1 = x_
               , x2 = x_
               , y = prop.value datum_
@@ -538,7 +529,8 @@ toDotSeries toX properties data =
           }
   in
   List.map P.toConfigs properties
-    |> List.indexedMap (\i ps -> List.map (toSeriesItem i) ps)
+    |> List.indexedMap (\lineIndex ps -> List.indexedMap (toSeriesItem lineIndex) ps)
+    |> List.concat
 
 
 

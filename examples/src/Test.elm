@@ -34,7 +34,7 @@ main =
 
 
 type alias Model =
-  { hovering : List (CI.Series () CS.Bar Datum)
+  { hovering : List (CI.Collection () (List (CI.Product CS.Bar Datum)))
   }
 
 
@@ -44,7 +44,7 @@ init =
 
 
 type Msg
-  = OnHover (List (CI.Series () CS.Bar Datum))
+  = OnHover (List (CI.Collection () (List (CI.Product CS.Bar Datum))))
 
 
 update : Msg -> Model -> Model
@@ -90,16 +90,19 @@ view model =
       --, C.domain (C.startMax 0 >> C.endMin 19)
       , C.events
           [ let filter series =
+                  let _ =
+                        series
+                          |> List.filterMap CI.getBarSeries -- List series
+                          |> List.concatMap CI.getProducts -- List Product
+                          |> CI.getStacked
+                          |> List.map (List.map (List.map (\i -> ( CI.getName i, CI.getDatum i ))))
+                          |> Debug.log "here"
+                  in
                   series
-                    |> List.map (List.filterMap CI.getBarSeries) -- List (List series)
-                    |> List.map toBars
-                    |> List.concat
-
-                toBars stacked =
-                  stacked
-                    |> CI.getBins
-                    |> List.map CI.getProducts
-                    |> List.map CI.toSeries
+                    |> List.filterMap CI.getBarSeries -- List series
+                    |> List.concatMap CI.getProducts -- List Product
+                    |> CI.getStacked
+                    |> List.map CI.toCollection
             in
             C.event "mousemove" <| C.map OnHover <| C.getNearestX CI.getCenter filter
           ]
@@ -164,18 +167,24 @@ view model =
       --        ]
       --    ]
 
-      , C.tooltip model.hovering [ CA.onTop, CA.offset 17 ] [] <| \hovered ->
-          List.map (\each ->
-              H.div
-                  [ HA.style "max-width" "200px"
-                  , HA.style "color" (CI.getColor each)
-                  ]
-                  [ H.text (CI.getName each)
-                  , H.text ": "
-                  , H.text (String.fromFloat <| Maybe.withDefault 0 <| CI.getValue each)
-                  ]
-            )
-          (CI.getProducts hovered)
+      , let tools : List (CI.Collection () (List (CI.Product CS.Bar Datum)))
+            tools =
+              model.hovering
+                |> List.map CI.getItems -- List (List (List (CI.Product CS.Bar Datum)))
+                |> List.concatMap (List.map (List.singleton >> CI.toCollection))
+        in
+        C.tooltip tools [ CA.onTop, CA.offset 17 ] [] <| \hovered ->
+          let viewOne each =
+                H.div
+                    [ HA.style "max-width" "200px"
+                    , HA.style "color" (CI.getColor each)
+                    ]
+                    [ H.text (CI.getName each)
+                    , H.text ": "
+                    , H.text (String.fromFloat <| Maybe.withDefault 0 <| CI.getValue each)
+                    ]
+          in
+          List.concatMap (List.map viewOne) (CI.getItems hovered)
       ]
     ]
 
