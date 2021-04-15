@@ -34,7 +34,7 @@ main =
 
 
 type alias Model =
-  { hovering : List (CI.Collection () (CI.Product CS.Bar Datum))
+  { hovering : List (CI.Collection (CI.Bin Datum) CS.Bar Datum)
   }
 
 
@@ -44,7 +44,7 @@ init =
 
 
 type Msg
-  = OnHover (List (CI.Collection () (CI.Product CS.Bar Datum)))
+  = OnHover (List (CI.Collection (CI.Bin Datum) CS.Bar Datum))
 
 
 update : Msg -> Model -> Model
@@ -93,8 +93,7 @@ view model =
                   series
                     |> List.filterMap CI.getBarSeries -- List series
                     |> List.concatMap CI.getProducts -- List Product
-                    |> CI.getBins
-                    |> List.map (CI.toCollection () List.singleton)
+                    |> CI.collectBy CI.isSameStack -- List Collection
             in
             C.event "mousemove" <| C.map OnHover <| C.getNearestX CI.getCenter filter
           ]
@@ -159,15 +158,10 @@ view model =
       --        ]
       --    ]
 
-      , let tools =
-              model.hovering -- [ bin ]
-                |> List.concatMap
-                    ( CI.getItems >> -- [ [ product, product, product, product ] ]
-                      CI.getStacked >> -- [ [ [ product, product, product ], [ product ] ] ]
-                      List.concatMap (List.map (CI.toCollection () List.singleton)) -- [ Col [ product ] ]
-                    )
+      , let tooltips =
+              CI.collect (List.concatMap CI.products model.hovering)
         in
-        C.tooltip tools [ CA.onTop, CA.offset 17 ] [] <| \hovered ->
+        C.tooltip [tooltips] [ CA.onTop, CA.offset 17 ] [] <| \hovered ->
           let viewOne each =
                 H.div
                     [ HA.style "max-width" "200px"
@@ -178,7 +172,7 @@ view model =
                     , H.text (String.fromFloat <| Maybe.withDefault 0 <| CI.getValue each)
                     ]
           in
-          List.map viewOne (CI.getItems hovered)
+          List.map viewOne (CI.products hovered)
       ]
     ]
 

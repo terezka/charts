@@ -1,7 +1,7 @@
 module Chart.Item exposing
   ( Item(..), AnySeries(..), Series, Product
-  , Collection, toCollection, getBins
-  , getBarSeries, getDotSeries, getProducts, getStacked
+  , Collection, collect, collectBy, Collector, isSameSeries, isSameBin, isSameStack, products, commonality
+  , getBarSeries, getDotSeries, getProducts
   , render, getValue, getCenter, getPosition, getDatum, getTop, getItems
   , getColor, getName
   , getBounds
@@ -60,13 +60,168 @@ type alias Product config datum =
   Item
     { datum : datum
     , config : config
-    , propertyNo : Int
-    , propertyNoSub : Int
+    , property : Int
+    , stack : Int
     , name : String
     , unit : String
     , x1 : Float
     , x2 : Float
     , y : Maybe Float
+    }
+
+
+{-| -}
+type alias Collection a config datum =
+  Item
+    { config : a
+    , items : List (Product config datum)
+    }
+
+
+{-| -}
+collect : List (Product config datum) -> Collection () config datum
+collect products_ =
+  Item
+    { details =
+        { config = ()
+        , items = products_
+        }
+    , bounds = \c ->
+        { x1 = Coord.minimum [ getBounds >> .x1 >> Just ] c.items
+        , x2 = Coord.maximum [ getBounds >> .x2 >> Just ] c.items
+        , y1 = Coord.minimum [ getBounds >> .y1 >> Just ] c.items
+        , y2 = Coord.maximum [ getBounds >> .y2 >> Just ] c.items
+        }
+    , position = \plane c ->
+        { x1 = Coord.minimum [ getX1 plane >> Just ] c.items
+        , x2 = Coord.maximum [ getX2 plane >> Just ] c.items
+        , y1 = Coord.minimum [ getY1 plane >> Just ] c.items
+        , y2 = Coord.maximum [ getY2 plane >> Just ] c.items
+        }
+    , render = \plane c _ ->
+        S.g [ SA.class "elm-charts__collection" ] (List.map (render plane) c.items)
+    }
+
+
+{-| -}
+collectBy : Collector a config datum -> List (Product config datum) -> List (Collection a config datum)
+collectBy (Collector { grouping, toPosition }) products_ =
+  let toCollection ( config, items ) =
+        Item
+          { details =
+              { config = config
+              , items = items
+              }
+          , bounds = \c ->
+              { x1 = Coord.minimum [ getBounds >> .x1 >> Just ] c.items
+              , x2 = Coord.maximum [ getBounds >> .x2 >> Just ] c.items
+              , y1 = Coord.minimum [ getBounds >> .y1 >> Just ] c.items
+              , y2 = Coord.maximum [ getBounds >> .y2 >> Just ] c.items
+              }
+          , position = \plane c ->
+              toPosition plane c.config c.items
+          , render = \plane c _ ->
+              S.g [ SA.class "elm-charts__collection" ] (List.map (render plane) c.items)
+          }
+  in
+  List.map toCollection (grouping products_)
+
+
+{-| -}
+products : Collection a config datum -> List (Product config datum)
+products (Item item) =
+  item.details.items
+
+
+{-| -}
+commonality : Collection a config datum -> a
+commonality (Item item) =
+  item.details.config
+
+
+{-| -}
+isSameSeries : Collector String config datum
+isSameSeries =
+  collector
+    { toCommonality = \(Item { details }) -> details.name
+    , toComparable = \(Item { details }) -> details.name
+    , toPosition = \plane _ products_ ->
+        { x1 = Coord.minimum [ getX1 plane >> Just ] products_
+        , x2 = Coord.maximum [ getX2 plane >> Just ] products_
+        , y1 = Coord.minimum [ getY1 plane >> Just ] products_
+        , y2 = Coord.maximum [ getY2 plane >> Just ] products_
+        }
+    }
+
+
+{-| -}
+isSameBin : Collector (Bin datum) config datum
+isSameBin =
+  collector
+    { toCommonality = \(Item { details }) ->
+        { start = details.x1
+        , end = details.x2
+        , datum = details.datum
+        }
+    , toComparable = \(Item { details }) -> ( details.x1, details.x2 )
+    , toPosition = \plane bin products_ ->
+        { x1 = bin.start
+        , x2 = bin.end
+        , y1 = Coord.minimum [ getY1 plane >> Just ] products_
+        , y2 = Coord.maximum [ getY2 plane >> Just ] products_
+        }
+    }
+
+
+{-| -}
+isSameStack : Collector (Bin datum) config datum
+isSameStack =
+  collector
+    { toCommonality = \(Item { details }) ->
+        { start = details.x1
+        , end = details.x2
+        , datum = details.datum
+        }
+    , toComparable = \(Item { details }) ->
+        ( details.x1, details.x2, details.property )
+    , toPosition = \plane _ products_ ->
+        { x1 = Coord.minimum [ getX1 plane >> Just ] products_
+        , x2 = Coord.maximum [ getX2 plane >> Just ] products_
+        , y1 = Coord.minimum [ getY1 plane >> Just ] products_
+        , y2 = Coord.maximum [ getY2 plane >> Just ] products_
+        }
+    }
+
+
+{-| -}
+type Collector a config datum =
+  Collector
+    { grouping : List (Product config datum) -> List ( a, List (Product config datum) )
+    , toPosition : Plane -> a -> List (Product config datum) -> Position
+    }
+
+
+{-| -}
+collector :
+  { toCommonality : Product config datum -> a
+  , toComparable : Product config datum -> comparable
+  , toPosition : Plane -> a -> List (Product config datum) -> Position
+  }
+  -> Collector a config datum
+collector { toCommonality, toComparable, toPosition } =
+  let sorter prod =
+        Dict.update (toComparable prod) <| \prevM ->
+          case prevM of
+            Just ( first, rest ) -> Just ( first, prod :: rest )
+            Nothing -> Just ( prod, [] )
+  in
+  Collector
+    { grouping = \products_ ->
+        products_
+          |> List.foldl sorter Dict.empty
+          |> Dict.toList
+          |> List.map (\( _, ( x, xs ) ) -> ( toCommonality x, x :: List.reverse xs ))
+    , toPosition = toPosition
     }
 
 
@@ -84,69 +239,6 @@ getBarSeries item =
   case item of
     DotSeries _ -> Nothing
     BarSeries series -> Just series
-
-
-{-| -}
-type alias Collection inter item =
-  Item
-    { config : inter
-    , items : List item
-    }
-
-
-{-| -}
-toCollection : c -> (a -> List (Item x)) -> List a -> Collection c a
-toCollection config toProduct items =
-  Item
-    { details =
-        { config = config
-        , items = items
-        }
-    , bounds = \c ->
-        { x1 = Coord.minimum [ getBounds >> .x1 >> Just ] (List.concatMap toProduct c.items)
-        , x2 = Coord.maximum [ getBounds >> .x2 >> Just ] (List.concatMap toProduct c.items)
-        , y1 = Coord.minimum [ getBounds >> .y1 >> Just ] (List.concatMap toProduct c.items)
-        , y2 = Coord.maximum [ getBounds >> .y2 >> Just ] (List.concatMap toProduct c.items)
-        }
-    , position = \plane c ->
-        { x1 = Coord.minimum [ getX1 plane >> Just ] (List.concatMap toProduct c.items)
-        , x2 = Coord.maximum [ getX2 plane >> Just ] (List.concatMap toProduct c.items)
-        , y1 = Coord.minimum [ getY1 plane >> Just ] (List.concatMap toProduct c.items)
-        , y2 = Coord.maximum [ getY2 plane >> Just ] (List.concatMap toProduct c.items)
-        }
-    , render = \plane c _ ->
-        S.g [ SA.class "elm-charts__collection" ]
-          (List.map (render plane) (List.concatMap toProduct c.items))
-    }
-
-
-{-| -}
-getBins : List (Product config data) -> List (List (Product config data))
-getBins products =
-  let sortBy func (Item prod) =
-        Dict.update (func prod.details) <| \prevM ->
-          case prevM of
-            Just prev -> Just (Item prod :: prev)
-            Nothing -> Just [ Item prod ]
-  in
-  products
-    |> List.foldl (sortBy .x1) Dict.empty
-    |> Dict.values
-
-
-{-| -}
-getStacked : List (Product config data) -> List (List (List (Product config data)))
-getStacked products =
-  let sortBy func (Item prod) =
-        Dict.update (func prod.details) <| \prevM ->
-          case prevM of
-            Just prev -> Just (Item prod :: prev)
-            Nothing -> Just [ Item prod ]
-  in
-  products
-    |> List.foldl (sortBy .x1) Dict.empty
-    |> Dict.values
-    |> List.map (Dict.values << List.foldl (sortBy .propertyNo) Dict.empty)
 
 
 {-| -}
@@ -412,8 +504,8 @@ toBarSeries barsAttrs properties data =
               { name = section.meta.name
               , unit = section.meta.unit
               , datum = bin.datum
-              , propertyNo = barIndex
-              , propertyNoSub = sectionIndex
+              , property = barIndex
+              , stack = sectionIndex
               , x1 = start
               , x2 = end
               , y = value
@@ -531,8 +623,8 @@ toDotSeries toX properties data =
               }
           , details =
               { datum = datum_
-              , propertyNo = lineIndex
-              , propertyNoSub = sublineIndex
+              , property = lineIndex
+              , stack = sublineIndex
               , x1 = x_
               , x2 = x_
               , y = prop.value datum_
