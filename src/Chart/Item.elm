@@ -1,5 +1,5 @@
 module Chart.Item exposing
-  ( Item(..), AnySeries(..), Series, Product
+  ( Item(..), AnySeries(..), Series, Product, Stack
   , Collection, collect, collectBy, Collector, isSameSeries, isSameBin, isSameStack, products, commonality
   , getBarSeries, getDotSeries, getProducts
   , render, getValue, getCenter, getPosition, getDatum, getTop, getItems
@@ -71,9 +71,9 @@ type alias Product config datum =
 
 
 {-| -}
-type alias Collection a config datum =
+type alias Collection inter config datum =
   Item
-    { config : a
+    { config : inter
     , items : List (Product config datum)
     }
 
@@ -104,7 +104,7 @@ collect products_ =
 
 
 {-| -}
-collectBy : Collector a config datum -> List (Product config datum) -> List (Collection a config datum)
+collectBy : Collector inter config datum -> List (Product config datum) -> List (Collection inter config datum)
 collectBy (Collector { grouping, toPosition }) products_ =
   let toCollection ( config, items ) =
         Item
@@ -143,9 +143,9 @@ commonality (Item item) =
 isSameSeries : Collector String config datum
 isSameSeries =
   collector
-    { toCommonality = \(Item { details }) -> details.name
-    , toComparable = \(Item { details }) -> details.name
-    , toPosition = \plane _ products_ ->
+    { commonality = \(Item { details }) -> details.name
+    , grouping = (==)
+    , position = \plane _ products_ ->
         { x1 = Coord.minimum [ getX1 plane >> Just ] products_
         , x2 = Coord.maximum [ getX2 plane >> Just ] products_
         , y1 = Coord.minimum [ getY1 plane >> Just ] products_
@@ -158,13 +158,13 @@ isSameSeries =
 isSameBin : Collector (Bin datum) config datum
 isSameBin =
   collector
-    { toCommonality = \(Item { details }) ->
+    { commonality = \(Item { details }) ->
         { start = details.x1
         , end = details.x2
         , datum = details.datum
         }
-    , toComparable = \(Item { details }) -> ( details.x1, details.x2 )
-    , toPosition = \plane bin products_ ->
+    , grouping = \a b -> a.start == b.start && a.end == b.end && a.datum == b.datum
+    , position = \plane bin products_ ->
         { x1 = bin.start
         , x2 = bin.end
         , y1 = Coord.minimum [ getY1 plane >> Just ] products_
@@ -174,17 +174,26 @@ isSameBin =
 
 
 {-| -}
-isSameStack : Collector (Bin datum) config datum
+type alias Stack datum =
+  { datum : datum
+  , start : Float
+  , end : Float
+  , index : Int
+  }
+
+
+{-| -}
+isSameStack : Collector (Stack datum) config datum
 isSameStack =
   collector
-    { toCommonality = \(Item { details }) ->
+    { commonality = \(Item { details }) ->
         { start = details.x1
         , end = details.x2
         , datum = details.datum
+        , index = details.property
         }
-    , toComparable = \(Item { details }) ->
-        ( details.x1, details.x2, details.property )
-    , toPosition = \plane _ products_ ->
+    , grouping = \a b -> a.index == b.index && a.start == b.start && a.end == b.end && a.datum == b.datum
+    , position = \plane _ products_ ->
         { x1 = Coord.minimum [ getX1 plane >> Just ] products_
         , x2 = Coord.maximum [ getX2 plane >> Just ] products_
         , y1 = Coord.minimum [ getY1 plane >> Just ] products_
@@ -194,35 +203,40 @@ isSameStack =
 
 
 {-| -}
-type Collector a config datum =
+type Collector inter config datum =
   Collector
-    { grouping : List (Product config datum) -> List ( a, List (Product config datum) )
-    , toPosition : Plane -> a -> List (Product config datum) -> Position
+    { grouping : List (Product config datum) -> List ( inter, List (Product config datum) )
+    , toPosition : Plane -> inter -> List (Product config datum) -> Position
     }
 
 
 {-| -}
 collector :
-  { toCommonality : Product config datum -> a
-  , toComparable : Product config datum -> comparable
-  , toPosition : Plane -> a -> List (Product config datum) -> Position
+  { commonality : Product config datum -> inter
+  , grouping : inter -> inter -> Bool
+  , position : Plane -> inter -> List (Product config datum) -> Position
   }
-  -> Collector a config datum
-collector { toCommonality, toComparable, toPosition } =
-  let sorter prod =
-        Dict.update (toComparable prod) <| \prevM ->
-          case prevM of
-            Just ( first, rest ) -> Just ( first, prod :: rest )
-            Nothing -> Just ( prod, [] )
-  in
+  -> Collector inter config datum
+collector config =
   Collector
-    { grouping = \products_ ->
-        products_
-          |> List.foldl sorter Dict.empty
-          |> Dict.toList
-          |> List.map (\( _, ( x, xs ) ) -> ( toCommonality x, x :: List.reverse xs ))
-    , toPosition = toPosition
+    { grouping =
+        List.map (\i -> ( config.commonality i, i ))
+          >> groupWhile (\(a, _) (b, _) -> config.grouping a b)
+          >> List.map (\(( inter, first ), rest ) -> ( inter, first :: List.map Tuple.second rest ))
+    , toPosition = config.position
     }
+
+
+{-| -}
+onlyBarSeries : List (Product Any datum) -> List (Product S.Bar datum)
+onlyBarSeries =
+  List.filterMap toBar
+
+
+{-| -}
+onlyDotSeries : List (Product Any datum) -> List (Product S.Dot datum)
+onlyDotSeries =
+  List.filterMap toDot
 
 
 {-| -}
@@ -667,6 +681,20 @@ withSurround all func =
   fold 0 Nothing [] all
 
 
+groupWhile : (a -> a -> Bool) -> List a -> List ( a, List a )
+groupWhile isSameGroup items =
+  let fold x acc =
+        case acc of
+          [] -> [ ( x, [] ) ]
+          ( y, rest ) :: groups ->
+            if isSameGroup x y
+            then ( x, y :: rest ) :: groups
+            else ( x, [] ) :: acc
+
+  in
+  List.foldr fold [] items
+
+
 
 -- DEFAULTS
 
@@ -684,4 +712,121 @@ toDefault default items index =
   in
   Dict.get itemIndex dict
     |> Maybe.withDefault default
+
+
+
+
+-- GENERALIZATION
+
+
+{-| -}
+type Any
+  = BarConfig S.Bar
+  | DotConfig S.Dot
+
+
+toGeneral : (config -> Any) -> Product config datum -> Product Any datum
+toGeneral toAny (Item product) =
+  Item
+    { render = \plane details position ->
+        case details.y of
+          Nothing ->
+            S.text ""
+
+          Just y ->
+            case details.config of
+              BarConfig bar -> S.bar plane (toBarAttrs bar) position
+              DotConfig dot -> S.dot plane .x .y (toDotAttrs dot) { x = details.x1, y = y }
+
+    , bounds = \_ -> product.bounds product.details
+    , position = \plane _ -> product.position plane product.details
+    , details =
+        { datum = product.details.datum
+        , property = product.details.property
+        , stack = product.details.stack
+        , x1 = product.details.x1
+        , x2 = product.details.x2
+        , y = product.details.y
+        , name = product.details.name
+        , unit = product.details.unit
+        , config = toAny product.details.config
+        }
+    }
+
+
+toBar : Product Any datum -> Maybe (Product S.Bar datum)
+toBar (Item product) =
+  case product.details.config of
+    DotConfig _ ->
+      Nothing
+
+    BarConfig bar ->
+      Just <| Item
+        { render = \plane details ->
+            S.bar plane (toBarAttrs details.config)
+        , bounds = \_ -> product.bounds product.details
+        , position = \plane _ -> product.position plane product.details
+        , details =
+            { datum = product.details.datum
+            , property = product.details.property
+            , stack = product.details.stack
+            , x1 = product.details.x1
+            , x2 = product.details.x2
+            , y = product.details.y
+            , name = product.details.name
+            , unit = product.details.unit
+            , config = bar
+            }
+        }
+
+
+toDot : Product Any datum -> Maybe (Product S.Dot datum)
+toDot (Item product) =
+  case product.details.config of
+    BarConfig _ ->
+      Nothing
+
+    DotConfig dot ->
+      Just <| Item
+        { render = \plane details _ ->
+            case details.y of
+              Nothing -> S.text ""
+              Just y -> S.dot plane .x .y (toDotAttrs details.config) { x = details.x1, y = y }
+        , bounds = \_ -> product.bounds product.details
+        , position = \plane _ -> product.position plane product.details
+        , details =
+            { datum = product.details.datum
+            , property = product.details.property
+            , stack = product.details.stack
+            , x1 = product.details.x1
+            , x2 = product.details.x2
+            , y = product.details.y
+            , name = product.details.name
+            , unit = product.details.unit
+            , config = dot
+            }
+        }
+
+
+toBarAttrs : S.Bar -> List (CA.Attribute S.Bar)
+toBarAttrs bar =
+  [ CA.color bar.color
+  , CA.roundTop bar.roundTop
+  , CA.roundBottom bar.roundBottom
+  , CA.border bar.border
+  , CA.borderWidth bar.borderWidth
+  ]
+
+
+toDotAttrs : S.Dot -> List (CA.Attribute S.Dot)
+toDotAttrs dot =
+  [ CA.color dot.color
+  , CA.opacity dot.opacity
+  , CA.size dot.size
+  , CA.border dot.border
+  , CA.borderWidth dot.borderWidth
+  , CA.aura dot.aura
+  , CA.auraWidth dot.auraWidth
+  , CA.shape dot.shape
+  ]
 

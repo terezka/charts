@@ -34,7 +34,7 @@ main =
 
 
 type alias Model =
-  { hovering : List (CI.Collection (CI.Bin Datum) CS.Bar Datum)
+  { hovering : List (CI.Collection (CI.Stack Datum) CS.Bar Datum)
   }
 
 
@@ -44,7 +44,7 @@ init =
 
 
 type Msg
-  = OnHover (List (CI.Collection (CI.Bin Datum) CS.Bar Datum))
+  = OnHover (List (CI.Collection (CI.Stack Datum) CS.Bar Datum))
 
 
 update : Msg -> Model -> Model

@@ -3,7 +3,7 @@ module Chart.Attributes exposing
   , Anchor(..), leftAlign, rightAlign, content
   , rotate, length, roundTop, roundBottom, area, opacity, size, aura, auraWidth, grouped, margin, spacing
   , Method(..), linear, monotone
-  , Shape(..), circle, triangle, square, diamond, plus, cross
+  , Shape(..), circle, triangle, square, diamond, plus, cross, shape
   , Direction(..), onTop, onBottom, onRight, onLeft, onLeftOrRight, onTopOrBottom
   , blue, pink, orange, green, purple, red, background
   )
@@ -272,6 +272,12 @@ plus config =
 cross : Attribute { a | shape : Maybe Shape }
 cross config =
   { config | shape = Just Cross }
+
+
+{-| -}
+shape : Maybe Shape -> Attribute { a | shape : Maybe Shape }
+shape v config =
+  { config | shape = v }
 
 
 {-| -}
