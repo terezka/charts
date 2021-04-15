@@ -1355,7 +1355,9 @@ bars edits properties data =
         Item.toBarSeries edits properties data
 
       generalized =
-        List.concatMap (Item.products >> List.map (Item.toGeneral Item.BarConfig)) items
+        items
+          |> List.concatMap Item.getProducts
+          |> List.map (Item.toGeneral Item.BarConfig)
 
       toTicks plane acc =
         { acc | xs = List.concatMap (\i -> [ Item.getX1 plane i, Item.getX2 plane i ]) items }
@@ -1379,13 +1381,16 @@ bars edits properties data =
 -- SERIES
 
 
+{-| -}
 series : (data -> Float) -> List (Property data Item.Metric CS.Interpolation CS.Dot) -> List data -> Element data msg
 series toX properties data =
   let items =
         Item.toDotSeries toX properties data
 
       generalized =
-        List.concatMap (Item.products >> List.map (Item.toGeneral Item.DotConfig)) items
+        items
+          |> List.concatMap Item.getProducts
+          |> List.map (Item.toGeneral Item.DotConfig)
 
       toXYBounds =
         makeBounds

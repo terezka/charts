@@ -1,14 +1,16 @@
 module Chart.Item exposing
-  ( Item(..), General, RealConfig(..), Product, Stack, toGeneral
-  , Group, collect, groupBy, Grouping, isSameSeries, isSameBin, isSameStack, products, commonality
-  , render, getValue, getCenter, getPosition, getDatum, getTop, getItems, isSame
+  ( Item(..), Product, Stack, Bin
   , onlyBarSeries, onlyDotSeries
+  , General, RealConfig(..), toGeneral
+  , Group, Grouping, groupBy
+  , isSameSeries, isSameBin, isSameStack, isSame
+  , getProducts, getCommonality
+  , getValue, getDatum
+  , getX1, getX2, getY2, getY1, getPosition, getBounds
+  , getTop, getCenter
   , getColor, getName
-  , getBounds
-  , getX1, getX2, getY2, getY1
-  , Property, Metric
-  , Bars, toBarSeries, Bin
-  , toDotSeries
+  , Property, Metric, Bars, toBarSeries, toDotSeries
+  , render
   )
 
 
@@ -65,31 +67,6 @@ type alias Group inter config datum =
 
 
 {-| -}
-collect : List (Product config datum) -> Group () config datum
-collect products_ =
-  Item
-    { details =
-        { config = ()
-        , items = products_
-        }
-    , bounds = \c ->
-        { x1 = Coord.minimum [ getBounds >> .x1 >> Just ] c.items
-        , x2 = Coord.maximum [ getBounds >> .x2 >> Just ] c.items
-        , y1 = Coord.minimum [ getBounds >> .y1 >> Just ] c.items
-        , y2 = Coord.maximum [ getBounds >> .y2 >> Just ] c.items
-        }
-    , position = \plane c ->
-        { x1 = Coord.minimum [ getX1 plane >> Just ] c.items
-        , x2 = Coord.maximum [ getX2 plane >> Just ] c.items
-        , y1 = Coord.minimum [ getY1 plane >> Just ] c.items
-        , y2 = Coord.maximum [ getY2 plane >> Just ] c.items
-        }
-    , render = \plane c _ ->
-        S.g [ SA.class "elm-charts__collection" ] (List.map (render plane) c.items)
-    }
-
-
-{-| -}
 groupBy : Grouping inter config datum -> List (Product config datum) -> List (Group inter config datum)
 groupBy (Grouping { grouping, toPosition }) products_ =
   let toGroup ( config, items ) =
@@ -114,14 +91,14 @@ groupBy (Grouping { grouping, toPosition }) products_ =
 
 
 {-| -}
-products : Group a config datum -> List (Product config datum)
-products (Item item) =
+getProducts : Group a config datum -> List (Product config datum)
+getProducts (Item item) =
   item.details.items
 
 
 {-| -}
-commonality : Group a config datum -> a
-commonality (Item item) =
+getCommonality : Group a config datum -> a
+getCommonality (Item item) =
   item.details.config
 
 
@@ -216,8 +193,7 @@ collector :
   { commonality : Product config datum -> inter
   , grouping : inter -> inter -> Bool
   , position : Plane -> inter -> List (Product config datum) -> Position
-  }
-  -> Grouping inter config datum
+  } -> Grouping inter config datum
 collector config =
   Grouping
     { grouping =
@@ -348,12 +324,6 @@ getValue (Item config) =
 render : Plane -> Item x -> Svg Never
 render plane (Item config) =
   config.render plane config.details (config.position plane config.details)
-
-
-{-| -}
-getItems : Item { x | items : List a } -> List a
-getItems (Item config) =
-  config.details.items
 
 
 

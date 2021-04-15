@@ -125,18 +125,18 @@ view model =
           [ C.stacked
               [ C.property .y "owls" "km" [ CA.linear, CA.opacity 0.25 ] [ CA.circle, CA.opacity 0.5 ]
                   |> C.variation (\datum ->
-                        if List.any (\i -> CI.getDatum i == datum) (List.concatMap CI.products model.hovering)
+                        if List.any (\i -> CI.getDatum i == datum) (List.concatMap CI.getProducts model.hovering)
                         then [ CA.auraWidth 8, CA.aura 0.40, CA.size (Maybe.withDefault 2 datum.z * 5) ]
                         else [ CA.size (Maybe.withDefault 2 datum.z * 5) ])
               , C.property .z "trees" "km" [ CA.linear, CA.opacity 0.25, CA.color CA.purple ] [ CA.circle, CA.opacity 0.5 ]
                   |> C.variation (\datum ->
-                        if List.any (\i -> CI.getDatum i == datum) (List.concatMap CI.products model.hovering)
+                        if List.any (\i -> CI.getDatum i == datum) (List.concatMap CI.getProducts model.hovering)
                         then [ CA.auraWidth 8, CA.aura 0.40, CA.size (Maybe.withDefault 2 datum.y * 5) ]
                         else [ CA.size (Maybe.withDefault 2 datum.y * 5) ])
               ]
           , C.property (.y >> Maybe.map ((*) 3)) "cats" "km" [ CA.linear, CA.opacity 0 ] [ CA.circle, CA.color CA.pink, CA.opacity 0.5 ]
               |> C.variation (\datum ->
-                if List.any (\i -> CI.getDatum i == datum) (List.concatMap CI.products model.hovering)
+                if List.any (\i -> CI.getDatum i == datum) (List.concatMap CI.getProducts model.hovering)
                 then [ CA.auraWidth 8, CA.aura 0.40 ] else [])
           ]
           data
@@ -158,7 +158,7 @@ view model =
       --    ]
 
       , let tooltips =
-              CI.groupBy CI.isSameStack <| List.concatMap CI.products model.hovering
+              CI.groupBy CI.isSameStack <| List.concatMap CI.getProducts model.hovering
         in
         C.tooltip tooltips [ CA.onTop, CA.offset 17 ] [] <| \hovered ->
           let viewOne each =
@@ -171,7 +171,7 @@ view model =
                     , H.text (String.fromFloat <| Maybe.withDefault 0 <| CI.getValue each)
                     ]
           in
-          List.map viewOne (CI.products hovered)
+          List.map viewOne (CI.getProducts hovered)
       ]
     ]
 
