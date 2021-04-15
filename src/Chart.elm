@@ -460,7 +460,6 @@ type alias Container data msg =
     , paddingLeft : Float
     , paddingRight : Float
     , responsive : Bool
-    , id : String
     , range : Maybe (Bounds -> Bounds)
     , domain : Maybe (Bounds -> Bounds)
     , events : List (Event data msg)
@@ -486,7 +485,6 @@ chart edits elements =
           , paddingLeft = 0
           , paddingRight = 10
           , responsive = True
-          , id = "you-should-really-set-the-id-of-your-chart"
           , range = Nothing
           , domain = Nothing
           , topped = Nothing
@@ -526,7 +524,7 @@ chart edits elements =
         SE.on event_.name (CS.decoder plane (decoder items))
 
       allSvgEls =
-        [ C.frame config.id plane ] ++ chartEls ++ [ C.eventCatcher plane [] ]
+        chartEls ++ [ C.eventCatcher plane [] ]
   in
   C.container plane (config.htmlAttrs ++ sizingAttrsHtml)
     (beforeEls ++ [ svgContainer allSvgEls ] ++ afterEls)
@@ -541,12 +539,12 @@ type Element data msg
   = SeriesElement
       (Maybe XYBounds -> Maybe XYBounds)
       (List (Item.Product Item.General data))
-      (String -> C.Plane -> S.Svg msg)
+      (C.Plane -> S.Svg msg)
   | BarsElement
       (Maybe XYBounds -> Maybe XYBounds)
       (List (Item.Product Item.General data))
       (C.Plane -> TickValues -> TickValues)
-      (String -> C.Plane -> S.Svg msg)
+      (C.Plane -> S.Svg msg)
   | AxisElement
       (C.Plane -> S.Svg msg)
   | TicksElement
@@ -692,8 +690,8 @@ viewElements : Container data msg -> C.Plane -> TickValues -> List (Item.Product
 viewElements config plane tickValues allItems elements =
   let viewOne el ( before, chart_, after ) =
         case el of
-          SeriesElement _ _ view -> ( before, view config.id plane :: chart_, after )
-          BarsElement _ _ _ view -> ( before, view config.id plane :: chart_, after )
+          SeriesElement _ _ view -> ( before, view plane :: chart_, after )
+          BarsElement _ _ _ view -> ( before, view plane :: chart_, after )
           AxisElement view -> ( before, view plane :: chart_, after )
           TicksElement _ view -> ( before, view plane :: chart_, after )
           LabelsElement _ view -> ( before, view plane :: chart_, after )
@@ -889,10 +887,13 @@ type alias Tooltip =
 tooltip : List (Item.Item a) -> List (Attribute Tooltip) -> List (H.Attribute Never) -> (Item.Item a -> List (H.Html Never)) -> Element data msg
 tooltip items edits attrs_ content =
   let viewOne i =
-        html <| \p -> CS.tooltip p (Item.getPosition p i) edits attrs_ (content i)
+        html <| \p ->
+          let pos = Item.getBounds i in
+          if CS.isWithinPlane p pos.x1 pos.y2
+          then CS.tooltip p (Item.getPosition p i) edits attrs_ (content i)
+          else H.text ""
   in
   list (List.map viewOne items)
-
 
 
 {-| -}
@@ -1372,8 +1373,8 @@ bars edits properties data =
           ]
           items
   in
-  BarsElement toXYBounds generalized toTicks <| \id_ plane ->
-    S.g [ SA.class "elm-charts__bar-series", clipPath id_ ] (List.map (Item.render plane) items)
+  BarsElement toXYBounds generalized toTicks <| \ plane ->
+    S.g [ SA.class "elm-charts__bar-series" ] (List.map (Item.render plane) items)
       |> S.map never
 
 
@@ -1402,8 +1403,8 @@ series toX properties data =
           ]
           items
   in
-  SeriesElement toXYBounds generalized <| \id_ p ->
-    S.g [ SA.class "elm-charts__dot-series" ] (List.map (Item.render p) items) -- TODO clipPath
+  SeriesElement toXYBounds generalized <| \p ->
+    S.g [ SA.class "elm-charts__dot-series" ] (List.map (Item.render p) items)
       |> S.map never
 
 

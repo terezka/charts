@@ -7,7 +7,7 @@ module Chart.Svg exposing
   , Interpolation, interpolation, area
   , Dot, dot, toRadius
   , Tooltip, tooltip
-  , decoder, getNearest, getNearestX, getWithin, getWithinX
+  , decoder, getNearest, getNearestX, getWithin, getWithinX, isWithinPlane
   , position
   , blue, pink, orange, green, purple, red
   )
@@ -36,8 +36,7 @@ import Dict exposing (Dict)
 
 {-| -}
 type alias Container msg =
-  { id : String
-  , attrs : List (S.Attribute msg)
+  { attrs : List (S.Attribute msg)
   , htmlAttrs : List (H.Attribute msg)
   , responsive : Bool
   , events : List (Event msg)
@@ -56,8 +55,7 @@ container plane edits below chartEls above =
   -- TODO seperate plane from container size
   let config =
         apply edits
-          { id = "set-unique-id"
-          , attrs = []
+          { attrs = []
           , htmlAttrs = []
           , responsive = True
           , events = []
@@ -82,7 +80,7 @@ container plane edits below chartEls above =
       chart =
         S.svg
           (svgAttrsSize ++ config.attrs)
-          ([frame] ++ chartEls ++ [catcher])
+          (chartEls ++ [catcher])
 
       svgAttrsSize =
         if config.responsive then
@@ -91,9 +89,6 @@ container plane edits below chartEls above =
           [ SA.width (String.fromFloat plane.x.length)
           , SA.height (String.fromFloat plane.y.length)
           ]
-
-      frame =
-        S.defs [] [ S.clipPath [ SA.id config.id ] [ S.rect chartPosition [] ] ]
 
       catcher =
         S.rect (chartPosition ++ List.map toEvent config.events) []
@@ -400,6 +395,7 @@ bar plane edits point =
     , SA.stroke config.border
     , SA.strokeWidth (String.fromFloat config.borderWidth)
     , SA.d (C.description plane commands)
+    , SA.style (clipperStyle plane x1_ x2_ bs y_)
     ]
     []
 
@@ -428,6 +424,11 @@ interpolation plane toX toY edits data =
           , opacity = 0
           }
 
+      minX = Coord.minimum [toX >> Just] data
+      maxX = Coord.maximum [toX >> Just] data
+      minY = Coord.minimum [toY] data
+      maxY = Coord.maximum [toY] data
+
       view ( first, cmds, _ ) =
         S.path
           [ SA.class "elm-charts__interpolation-section"
@@ -435,6 +436,7 @@ interpolation plane toX toY edits data =
           , SA.stroke config.color
           , SA.strokeWidth (String.fromFloat config.width)
           , SA.d (C.description plane (Move first.x first.y :: cmds))
+          , SA.style (clipperStyle plane minX maxX minY maxY)
           ]
           []
   in
@@ -456,6 +458,11 @@ area plane toX toY2M toY edits data =
           , opacity = 0.2
           }
 
+      minX = Coord.minimum [toX >> Just] data
+      maxX = Coord.maximum [toX >> Just] data
+      minY = Coord.minimum [toY, Maybe.withDefault (always (Just 0)) toY2M] data
+      maxY = Coord.maximum [toY, Maybe.withDefault (always (Just 0)) toY2M] data
+
       view cmds =
         S.path
           [ SA.class "elm-charts__area-section"
@@ -464,6 +471,7 @@ area plane toX toY2M toY edits data =
           , SA.strokeWidth "0"
           , SA.fillRule "evenodd"
           , SA.d (C.description plane cmds)
+          , SA.style (clipperStyle plane minX maxX minY maxY)
           ]
           []
 
@@ -575,6 +583,7 @@ dot plane toX toY edits datum_ =
         else
           toEl (toAttrs 0 ++ styleAttrs) []
   in
+  if not (isWithinPlane plane (toX datum_) (toY datum_)) then S.text "" else
   case config.shape of
     Nothing ->
       S.text ""
@@ -1077,3 +1086,29 @@ tooltipPointerStyle direction className background borderColor =
     border-""" ++ config.b ++ """: 5px solid """ ++ borderColor ++ """;
   }
   """
+
+
+clipperStyle : Plane -> Float -> Float -> Float -> Float -> String
+clipperStyle plane minX maxX minY maxY =
+  let x1 = max 0 (plane.x.min - minX)
+      y1 = max 0 (maxY - plane.y.max)
+      x2 = x1 + (min plane.x.max maxX - max plane.x.min minX)
+      y2 = y1 + (min plane.y.max maxY - max plane.y.min minY)
+
+      path =
+        String.join " "
+          [ "M" ++ String.fromFloat (scaleSVG plane.x x1) ++ " " ++ String.fromFloat (scaleSVG plane.y y1)
+          , "V" ++ String.fromFloat (scaleSVG plane.y y2)
+          , "H" ++ String.fromFloat (scaleSVG plane.x x2)
+          , "V" ++ String.fromFloat (scaleSVG plane.y y1)
+          , "H" ++ String.fromFloat (scaleSVG plane.y x1)
+          ]
+  in
+  "clip-path: path('" ++ path ++ "');"
+
+
+isWithinPlane : Plane -> Float -> Float -> Bool
+isWithinPlane plane x y =
+  clamp plane.x.min plane.x.max x == x && clamp plane.y.min plane.y.max y == y
+
+

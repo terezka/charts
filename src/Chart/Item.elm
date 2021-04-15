@@ -440,8 +440,9 @@ toBarSeries barsAttrs properties data =
 
             x1 = start + margin + offset
             x2 = start + margin + offset + width
-            y1 = Maybe.withDefault 0 visual - Maybe.withDefault 0 value
-            y2 = Maybe.withDefault 0 visual
+            minY = if numOfSections > 1 then max 0 else identity
+            y1 = minY <| Maybe.withDefault 0 visual - Maybe.withDefault 0 value
+            y2 = minY <| Maybe.withDefault 0 visual
 
             isFirst = sectionIndex == 0
             isLast = toFloat sectionIndex == numOfSections - 1
@@ -473,7 +474,7 @@ toBarSeries barsAttrs properties data =
                     }
               }
           , bounds = \config ->
-              { x1 = x1, x2 = x2, y1 = y1, y2 = y2 }
+              { x1 = x1, x2 = x2, y1 = min y1 y2, y2 = max y1 y2 }
           , position = \_ config ->
               { x1 = x1, x2 = x2, y1 = y1, y2 = y2 }
           , render = \plane config position ->
