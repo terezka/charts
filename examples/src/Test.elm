@@ -87,7 +87,7 @@ view model =
       , CA.static
       --, C.marginTop 60
       --, C.paddingTop 0
-      , C.paddingLeft 10
+      --, C.paddingLeft 15
       --, C.range (C.startMax 1.2 << C.endMax 6)
       , C.domain (C.startMin 0 << C.endMin 20)
       --, C.domain (C.startMin -1 << C.endMin 25)
@@ -134,8 +134,8 @@ view model =
 
       , C.xAxis []
       , C.yAxis []
-      , C.xTicks [ C.amount 10, C.ints ]
-      , C.xLabels [ C.ints ]
+      --, C.xTicks [ C.amount 10, C.ints ]
+      --, C.xLabels [ C.ints ]
       , C.yLabels [ C.ints ]
       , C.yTicks [ C.ints ]
 

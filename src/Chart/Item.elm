@@ -64,7 +64,7 @@ type alias Group inter config datum =
 
 {-| -}
 groupBy : Grouping inter config datum -> List (Product config datum) -> List (Group inter config datum)
-groupBy (Grouping { grouping, toPosition }) products_ =
+groupBy (Grouping { grouping, toPosition, toBounds }) products_ =
   let toGroup ( config, items ) =
         Item
           { details =
@@ -72,11 +72,7 @@ groupBy (Grouping { grouping, toPosition }) products_ =
               , items = items
               }
           , bounds = \c ->
-              { x1 = Coord.minimum [ getBounds >> .x1 >> Just ] c.items
-              , x2 = Coord.maximum [ getBounds >> .x2 >> Just ] c.items
-              , y1 = Coord.minimum [ getBounds >> .y1 >> Just ] c.items
-              , y2 = Coord.maximum [ getBounds >> .y2 >> Just ] c.items
-              }
+              toBounds c.config c.items
           , position = \plane c ->
               toPosition plane c.config c.items
           , render = \plane c _ ->
@@ -104,6 +100,12 @@ isSameSeries =
   collector
     { commonality = \(Item { details }) -> details.name
     , grouping = (==)
+    , bounds = \_ products_ ->
+        { x1 = Coord.minimum [ getBounds >> .x1 >> Just ] products_
+        , x2 = Coord.maximum [ getBounds >> .x2 >> Just ] products_
+        , y1 = Coord.minimum [ getBounds >> .y1 >> Just ] products_
+        , y2 = Coord.maximum [ getBounds >> .y2 >> Just ] products_
+        }
     , position = \plane _ products_ ->
         { x1 = Coord.minimum [ getX1 plane >> Just ] products_
         , x2 = Coord.maximum [ getX2 plane >> Just ] products_
@@ -123,6 +125,12 @@ isSameBin =
         , datum = details.datum
         }
     , grouping = \a b -> a.start == b.start && a.end == b.end && a.datum == b.datum
+    , bounds = \bin products_ ->
+        { x1 = bin.start
+        , x2 = bin.end
+        , y1 = Coord.minimum [ getBounds >> .y1 >> Just ] products_
+        , y2 = Coord.maximum [ getBounds >> .y2 >> Just ] products_
+        }
     , position = \plane bin products_ ->
         { x1 = bin.start
         , x2 = bin.end
@@ -152,6 +160,12 @@ isSameStack =
         , index = details.property
         }
     , grouping = \a b -> a.index == b.index && a.start == b.start && a.end == b.end && a.datum == b.datum
+    , bounds = \_ products_ ->
+        { x1 = Coord.minimum [ getBounds >> .x1 >> Just ] products_
+        , x2 = Coord.maximum [ getBounds >> .x2 >> Just ] products_
+        , y1 = Coord.minimum [ getBounds >> .y1 >> Just ] products_
+        , y2 = Coord.maximum [ getBounds >> .y2 >> Just ] products_
+        }
     , position = \plane _ products_ ->
         { x1 = Coord.minimum [ getX1 plane >> Just ] products_
         , x2 = Coord.maximum [ getX2 plane >> Just ] products_
@@ -167,6 +181,12 @@ isSame toCommon =
   collector
     { commonality = toCommon
     , grouping = (==)
+    , bounds = \_ products_ ->
+        { x1 = Coord.minimum [ getBounds >> .x1 >> Just ] products_
+        , x2 = Coord.maximum [ getBounds >> .x2 >> Just ] products_
+        , y1 = Coord.minimum [ getBounds >> .y1 >> Just ] products_
+        , y2 = Coord.maximum [ getBounds >> .y2 >> Just ] products_
+        }
     , position = \plane _ products_ ->
         { x1 = Coord.minimum [ getX1 plane >> Just ] products_
         , x2 = Coord.maximum [ getX2 plane >> Just ] products_
@@ -180,6 +200,7 @@ isSame toCommon =
 type Grouping inter config datum =
   Grouping
     { grouping : List (Product config datum) -> List ( inter, List (Product config datum) )
+    , toBounds : inter -> List (Product config datum) -> Position
     , toPosition : Plane -> inter -> List (Product config datum) -> Position
     }
 
@@ -188,6 +209,7 @@ type Grouping inter config datum =
 collector :
   { commonality : Product config datum -> inter
   , grouping : inter -> inter -> Bool
+  , bounds : inter -> List (Product config datum) -> Position
   , position : Plane -> inter -> List (Product config datum) -> Position
   } -> Grouping inter config datum
 collector config =
@@ -196,6 +218,7 @@ collector config =
         List.map (\i -> ( config.commonality i, i ))
           >> gatherWith (\(a, _) (b, _) -> config.grouping a b)
           >> List.map (\(( inter, first ), rest ) -> ( inter, first :: List.map Tuple.second rest ))
+    , toBounds = config.bounds
     , toPosition = config.position
     }
 

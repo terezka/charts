@@ -1208,8 +1208,13 @@ bars edits properties data =
           |> List.concatMap Item.getProducts
           |> List.map (Item.toGeneral Item.BarConfig)
 
+      bins =
+        items
+          |> List.concatMap Item.getProducts
+          |> Item.groupBy Item.isSameBin
+
       toTicks plane acc =
-        { acc | xs = List.concatMap (\i -> [ Item.getX1 plane i, Item.getX2 plane i ]) items }
+        { acc | xs = List.concatMap (\i -> [ Item.getX1 plane i, Item.getX2 plane i ]) bins }
 
       toXYBounds =
         makeBounds
@@ -1219,7 +1224,7 @@ bars edits properties data =
           [ Item.getBounds >> .y1 >> Just
           , Item.getBounds >> .y2 >> Just
           ]
-          items
+          bins
   in
   BarsElement toXYBounds generalized toTicks <| \ plane ->
     S.g [ SA.class "elm-charts__bar-series" ] (List.map (Item.render plane) items)
