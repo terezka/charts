@@ -540,13 +540,13 @@ chart edits elements =
 type Element data msg
   = SeriesElement
       (Maybe XYBounds -> Maybe XYBounds)
-      (C.Plane -> List (Item.Series CS.Interpolation CS.Dot data))
-      (String -> C.Plane -> List (Item.Series CS.Interpolation CS.Dot data) -> S.Svg msg)
+      (List (Item.Product Item.General data))
+      (String -> C.Plane -> S.Svg msg)
   | BarsElement
       (Maybe XYBounds -> Maybe XYBounds)
-      (C.Plane -> List (Item.Series (Item.Bars data) CS.Bar data))
+      (List (Item.Product Item.General data))
       (C.Plane -> TickValues -> TickValues)
-      (String -> C.Plane -> List (Item.Series (Item.Bars data) CS.Bar data) -> S.Svg msg)
+      (String -> C.Plane -> S.Svg msg)
   | AxisElement
       (C.Plane -> S.Svg msg)
   | TicksElement
@@ -558,7 +558,7 @@ type Element data msg
   | GridElement
       (C.Plane -> TickValues -> S.Svg msg)
   | SubElements
-      (C.Plane -> List (Item.AnySeries data) -> List (Element data msg))
+      (C.Plane -> List (Item.Product Item.General data) -> List (Element data msg))
   | ListOfElements
       (List (Element data msg))
   | SvgElement
@@ -645,12 +645,12 @@ definePlane config elements =
   }
 
 
-getItems : C.Plane -> List (Element data msg) -> List (Item.AnySeries data)
+getItems : C.Plane -> List (Element data msg) -> List (Item.Product Item.General data)
 getItems plane elements =
   let toItems el acc =
         case el of
-          SeriesElement _ func _ -> acc ++ List.map Item.DotSeries (func plane)
-          BarsElement _ func _ _ -> acc ++ List.map Item.BarSeries (func plane)
+          SeriesElement _ items _ -> acc ++ items
+          BarsElement _ items _ _ -> acc ++ items
           AxisElement _ -> acc
           TicksElement _ _ -> acc
           LabelsElement _ _ -> acc
@@ -670,7 +670,7 @@ type alias TickValues =
   }
 
 
-getTickValues : C.Plane -> List (Item.AnySeries data) -> List (Element data msg) -> TickValues
+getTickValues : C.Plane -> List (Item.Product Item.General data) -> List (Element data msg) -> TickValues
 getTickValues plane items elements =
   let toValues el acc =
         case el of
@@ -688,12 +688,12 @@ getTickValues plane items elements =
   List.foldl toValues (TickValues [] []) elements
 
 
-viewElements : Container data msg -> C.Plane -> TickValues -> List (Item.AnySeries data) -> List (Element data msg) -> ( List (H.Html msg), List (S.Svg msg), List (H.Html msg) )
+viewElements : Container data msg -> C.Plane -> TickValues -> List (Item.Product Item.General data) -> List (Element data msg) -> ( List (H.Html msg), List (S.Svg msg), List (H.Html msg) )
 viewElements config plane tickValues allItems elements =
   let viewOne el ( before, chart_, after ) =
         case el of
-          SeriesElement _ toItems view -> ( before, view config.id plane (toItems plane) :: chart_, after )
-          BarsElement _ toItems _ view -> ( before, view config.id plane (toItems plane) :: chart_, after )
+          SeriesElement _ _ view -> ( before, view config.id plane :: chart_, after )
+          BarsElement _ _ _ view -> ( before, view config.id plane :: chart_, after )
           AxisElement view -> ( before, view plane :: chart_, after )
           TicksElement _ view -> ( before, view plane :: chart_, after )
           LabelsElement _ view -> ( before, view plane :: chart_, after )
@@ -804,7 +804,7 @@ event name_ decoder =
 
 {-| -}
 type Decoder data msg =
-  Decoder (List (Item.AnySeries data) -> C.Plane -> C.Point -> msg)
+  Decoder (List (Item.Product Item.General data) -> C.Plane -> C.Point -> msg)
 
 
 {-| -}
@@ -842,21 +842,21 @@ getCoords =
 
 
 {-| -}
-getNearest : (C.Plane -> a -> C.Point) -> (List (Item.AnySeries data) -> List a) -> Decoder data (List a)
+getNearest : (C.Plane -> a -> C.Point) -> (List (Item.Product Item.General data) -> List a) -> Decoder data (List a)
 getNearest toPoint filterItems =
   Decoder <| \items plane ->
     CS.getNearest (toPoint plane) (filterItems items) plane
 
 
 {-| -}
-getWithin : Float -> (C.Plane -> a -> C.Point) -> (List (Item.AnySeries data) -> List a) -> Decoder data (List a)
+getWithin : Float -> (C.Plane -> a -> C.Point) -> (List (Item.Product Item.General data) -> List a) -> Decoder data (List a)
 getWithin radius toPoint filterItems =
   Decoder <| \items plane ->
     CS.getWithin radius (toPoint plane) (filterItems items) plane
 
 
 {-| -}
-getNearestX : (C.Plane -> a -> C.Point) -> (List (Item.AnySeries data) -> List a) -> Decoder data (List a)
+getNearestX : (C.Plane -> a -> C.Point) -> (List (Item.Product Item.General data) -> List a) -> Decoder data (List a)
 getNearestX toPoint filterItems =
   Decoder <| \items plane ->
     CS.getNearestX (toPoint plane) (filterItems items) plane
@@ -864,7 +864,7 @@ getNearestX toPoint filterItems =
 
 
 {-| -}
-getWithinX : Float -> (C.Plane -> a -> C.Point) -> (List (Item.AnySeries data) -> List a) -> Decoder data (List a)
+getWithinX : Float -> (C.Plane -> a -> C.Point) -> (List (Item.Product Item.General data) -> List a) -> Decoder data (List a)
 getWithinX radius toPoint filterItems =
   Decoder <| \items plane ->
     CS.getWithinX radius (toPoint plane) (filterItems items) plane
@@ -1354,6 +1354,9 @@ bars edits properties data =
   let items =
         Item.toBarSeries edits properties data
 
+      generalized =
+        List.concatMap (Item.products >> List.map (Item.toGeneral Item.BarConfig)) items
+
       toTicks plane acc =
         { acc | xs = List.concatMap (\i -> [ Item.getX1 plane i, Item.getX2 plane i ]) items }
 
@@ -1367,8 +1370,8 @@ bars edits properties data =
           ]
           items
   in
-  BarsElement toXYBounds (always items) toTicks <| \id_ plane items_ ->
-    S.g [ SA.class "elm-charts__bar-series", clipPath id_ ] (List.map (Item.render plane) items_)
+  BarsElement toXYBounds generalized toTicks <| \id_ plane ->
+    S.g [ SA.class "elm-charts__bar-series", clipPath id_ ] (List.map (Item.render plane) items)
       |> S.map never
 
 
@@ -1381,6 +1384,9 @@ series toX properties data =
   let items =
         Item.toDotSeries toX properties data
 
+      generalized =
+        List.concatMap (Item.products >> List.map (Item.toGeneral Item.DotConfig)) items
+
       toXYBounds =
         makeBounds
           [ Item.getBounds >> .x1 >> Just
@@ -1391,7 +1397,7 @@ series toX properties data =
           ]
           items
   in
-  SeriesElement toXYBounds (always items) <| \id_ p _ ->
+  SeriesElement toXYBounds generalized <| \id_ p ->
     S.g [ SA.class "elm-charts__dot-series" ] (List.map (Item.render p) items) -- TODO clipPath
       |> S.map never
 
@@ -1401,7 +1407,7 @@ series toX properties data =
 
 
 {-| -}
-with : (List (Item.AnySeries data) -> a) -> (C.Plane -> a -> List (Element data msg)) -> Element data msg
+with : (List (Item.Product Item.General data) -> a) -> (C.Plane -> a -> List (Element data msg)) -> Element data msg
 with filter func =
   SubElements <| \p is -> func p (filter is)
 

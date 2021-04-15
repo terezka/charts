@@ -34,7 +34,7 @@ main =
 
 
 type alias Model =
-  { hovering : List (CI.Collection (CI.Stack Datum) CS.Bar Datum)
+  { hovering : List (CI.Group (CI.Bin Datum) CI.General Datum)
   }
 
 
@@ -44,7 +44,7 @@ init =
 
 
 type Msg
-  = OnHover (List (CI.Collection (CI.Stack Datum) CS.Bar Datum))
+  = OnHover (List (CI.Group (CI.Bin Datum) CI.General Datum))
 
 
 update : Msg -> Model -> Model
@@ -89,13 +89,9 @@ view model =
       --, C.range (C.startMin 0 >> C.endMax 6)
       --, C.domain (C.startMax 0 >> C.endMin 19)
       , C.events
-          [ let filter series =
-                  series
-                    |> List.filterMap CI.getBarSeries -- List series
-                    |> List.concatMap CI.getProducts -- List Product
-                    |> CI.collectBy CI.isSameStack -- List Collection
-            in
-            C.event "mousemove" <| C.map OnHover <| C.getNearestX CI.getCenter filter
+          [ C.getNearestX CI.getCenter (CI.groupBy CI.isSameBin)
+              |> C.map OnHover
+              |> C.event "mousemove"
           ]
       , C.id "salery-discrepancy"
       ]
@@ -159,9 +155,9 @@ view model =
       --    ]
 
       , let tooltips =
-              CI.collect (List.concatMap CI.products model.hovering)
+              CI.groupBy CI.isSameStack <| List.concatMap CI.products model.hovering
         in
-        C.tooltip [tooltips] [ CA.onTop, CA.offset 17 ] [] <| \hovered ->
+        C.tooltip tooltips [ CA.onTop, CA.offset 17 ] [] <| \hovered ->
           let viewOne each =
                 H.div
                     [ HA.style "max-width" "200px"

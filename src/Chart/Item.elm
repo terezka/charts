@@ -1,8 +1,8 @@
 module Chart.Item exposing
-  ( Item(..), AnySeries(..), Series, Product, Stack
-  , Collection, collect, collectBy, Collector, isSameSeries, isSameBin, isSameStack, products, commonality
-  , getBarSeries, getDotSeries, getProducts
+  ( Item(..), General, RealConfig(..), Product, Stack, toGeneral
+  , Group, collect, groupBy, Grouping, isSameSeries, isSameBin, isSameStack, products, commonality
   , render, getValue, getCenter, getPosition, getDatum, getTop, getItems
+  , onlyBarSeries, onlyDotSeries
   , getColor, getName
   , getBounds
   , getX1, getX2, getY2, getY1
@@ -41,20 +41,6 @@ type Item a =
     }
 
 
-{-| -} -- TODO exposed?
-type AnySeries datum
-  = BarSeries (Series (Bars datum) S.Bar datum)
-  | DotSeries (Series S.Interpolation S.Dot datum)
-
-
-{-| -}
-type alias Series inter config datum =
-  Item
-    { config : inter
-    , items : List (Product config datum)
-    }
-
-
 {-| -}
 type alias Product config datum =
   Item
@@ -71,7 +57,7 @@ type alias Product config datum =
 
 
 {-| -}
-type alias Collection inter config datum =
+type alias Group inter config datum =
   Item
     { config : inter
     , items : List (Product config datum)
@@ -79,7 +65,7 @@ type alias Collection inter config datum =
 
 
 {-| -}
-collect : List (Product config datum) -> Collection () config datum
+collect : List (Product config datum) -> Group () config datum
 collect products_ =
   Item
     { details =
@@ -104,9 +90,9 @@ collect products_ =
 
 
 {-| -}
-collectBy : Collector inter config datum -> List (Product config datum) -> List (Collection inter config datum)
-collectBy (Collector { grouping, toPosition }) products_ =
-  let toCollection ( config, items ) =
+groupBy : Grouping inter config datum -> List (Product config datum) -> List (Group inter config datum)
+groupBy (Grouping { grouping, toPosition }) products_ =
+  let toGroup ( config, items ) =
         Item
           { details =
               { config = config
@@ -124,23 +110,23 @@ collectBy (Collector { grouping, toPosition }) products_ =
               S.g [ SA.class "elm-charts__collection" ] (List.map (render plane) c.items)
           }
   in
-  List.map toCollection (grouping products_)
+  List.map toGroup (grouping products_)
 
 
 {-| -}
-products : Collection a config datum -> List (Product config datum)
+products : Group a config datum -> List (Product config datum)
 products (Item item) =
   item.details.items
 
 
 {-| -}
-commonality : Collection a config datum -> a
+commonality : Group a config datum -> a
 commonality (Item item) =
   item.details.config
 
 
 {-| -}
-isSameSeries : Collector String config datum
+isSameSeries : Grouping String config datum
 isSameSeries =
   collector
     { commonality = \(Item { details }) -> details.name
@@ -155,7 +141,7 @@ isSameSeries =
 
 
 {-| -}
-isSameBin : Collector (Bin datum) config datum
+isSameBin : Grouping (Bin datum) config datum
 isSameBin =
   collector
     { commonality = \(Item { details }) ->
@@ -163,7 +149,7 @@ isSameBin =
         , end = details.x2
         , datum = details.datum
         }
-    , grouping = \a b -> a.start == b.start && a.end == b.end && a.datum == b.datum
+    , grouping = \a b -> a.start == b.start && a.end == b.end
     , position = \plane bin products_ ->
         { x1 = bin.start
         , x2 = bin.end
@@ -183,7 +169,7 @@ type alias Stack datum =
 
 
 {-| -}
-isSameStack : Collector (Stack datum) config datum
+isSameStack : Grouping (Stack datum) config datum
 isSameStack =
   collector
     { commonality = \(Item { details }) ->
@@ -192,7 +178,7 @@ isSameStack =
         , datum = details.datum
         , index = details.property
         }
-    , grouping = \a b -> a.index == b.index && a.start == b.start && a.end == b.end && a.datum == b.datum
+    , grouping = \a b -> a.index == b.index && a.start == b.start && a.end == b.end
     , position = \plane _ products_ ->
         { x1 = Coord.minimum [ getX1 plane >> Just ] products_
         , x2 = Coord.maximum [ getX2 plane >> Just ] products_
@@ -203,8 +189,8 @@ isSameStack =
 
 
 {-| -}
-type Collector inter config datum =
-  Collector
+type Grouping inter config datum =
+  Grouping
     { grouping : List (Product config datum) -> List ( inter, List (Product config datum) )
     , toPosition : Plane -> inter -> List (Product config datum) -> Position
     }
@@ -216,49 +202,27 @@ collector :
   , grouping : inter -> inter -> Bool
   , position : Plane -> inter -> List (Product config datum) -> Position
   }
-  -> Collector inter config datum
+  -> Grouping inter config datum
 collector config =
-  Collector
+  Grouping
     { grouping =
         List.map (\i -> ( config.commonality i, i ))
-          >> groupWhile (\(a, _) (b, _) -> config.grouping a b)
+          >> gatherWith (\(a, _) (b, _) -> config.grouping a b)
           >> List.map (\(( inter, first ), rest ) -> ( inter, first :: List.map Tuple.second rest ))
     , toPosition = config.position
     }
 
 
 {-| -}
-onlyBarSeries : List (Product Any datum) -> List (Product S.Bar datum)
+onlyBarSeries : List (Product General datum) -> List (Product S.Bar datum)
 onlyBarSeries =
   List.filterMap toBar
 
 
 {-| -}
-onlyDotSeries : List (Product Any datum) -> List (Product S.Dot datum)
+onlyDotSeries : List (Product General datum) -> List (Product S.Dot datum)
 onlyDotSeries =
   List.filterMap toDot
-
-
-{-| -}
-getDotSeries : AnySeries data -> Maybe (Series S.Interpolation S.Dot data)
-getDotSeries item =
-  case item of
-    DotSeries series -> Just series
-    BarSeries _ -> Nothing
-
-
-{-| -}
-getBarSeries : AnySeries data -> Maybe (Series (Bars data) S.Bar data)
-getBarSeries item =
-  case item of
-    DotSeries _ -> Nothing
-    BarSeries series -> Just series
-
-
-{-| -}
-getProducts : Series inter config data -> List (Product config data)
-getProducts (Item series) =
-  series.details.items
 
 
 {-| -}
@@ -417,10 +381,9 @@ type alias Bars data =
   }
 
 
-toBarSeries : List (CA.Attribute (Bars data)) -> List (Property data Metric () S.Bar) -> List data -> List (Series (Bars data) S.Bar data)
+toBarSeries : List (CA.Attribute (Bars data)) -> List (Property data Metric () S.Bar) -> List data -> List (Group () S.Bar data)
 toBarSeries barsAttrs properties data =
-  let barsConfig : Bars data
-      barsConfig =
+  let barsConfig =
         apply barsAttrs
           { spacing = 0.01
           , margin = 0.1
@@ -431,7 +394,6 @@ toBarSeries barsAttrs properties data =
           , x2 = Nothing
           }
 
-      toBin : Int -> Maybe data -> data -> Maybe data -> Bin data
       toBin index prevM curr nextM =
         case ( barsConfig.x1, barsConfig.x2 ) of
           ( Nothing, Nothing ) ->
@@ -458,12 +420,10 @@ toBarSeries barsAttrs properties data =
           ( Just toStart, Just toEnd ) ->
             { datum = curr, start = toStart curr, end = toEnd curr }
 
-
-      toSeriesItem : List (Bin data) -> List (P.Config data Metric () S.Bar) -> Int -> Int -> P.Config data Metric () S.Bar -> Series (Bars data) S.Bar data
       toSeriesItem bins sections barIndex sectionIndex section =
         Item
           { details =
-              { config = barsConfig
+              { config = ()
               , items = List.map (toBarItem sections barIndex sectionIndex section) bins
               }
           , bounds = \c ->
@@ -482,8 +442,6 @@ toBarSeries barsAttrs properties data =
               S.g [ SA.class "elm-charts__bar-series" ] (List.map (render plane) config.items)
           }
 
-
-      toBarItem : List (P.Config data Metric () S.Bar) -> Int -> Int -> P.Config data Metric () S.Bar -> Bin data -> Product S.Bar data
       toBarItem sections barIndex sectionIndex section bin =
         let numOfBars = if barsConfig.grouped then toFloat (List.length properties) else 1
             numOfSections = toFloat (List.length sections)
@@ -551,7 +509,7 @@ toBarSeries barsAttrs properties data =
 
 
 {-| -}
-toDotSeries : (data -> Float) -> List (Property data Metric S.Interpolation S.Dot) -> List data -> List (Series S.Interpolation S.Dot data)
+toDotSeries : (data -> Float) -> List (Property data Metric S.Interpolation S.Dot) -> List data -> List (Group S.Interpolation S.Dot data)
 toDotSeries toX properties data =
   let toInterConfig attrs =
         apply attrs
@@ -681,18 +639,16 @@ withSurround all func =
   fold 0 Nothing [] all
 
 
-groupWhile : (a -> a -> Bool) -> List a -> List ( a, List a )
-groupWhile isSameGroup items =
-  let fold x acc =
-        case acc of
-          [] -> [ ( x, [] ) ]
-          ( y, rest ) :: groups ->
-            if isSameGroup x y
-            then ( x, y :: rest ) :: groups
-            else ( x, [] ) :: acc
-
-  in
-  List.foldr fold [] items
+gatherWith : (a -> a -> Bool) -> List a -> List ( a, List a )
+gatherWith testFn list =
+    let helper scattered gathered =
+          case scattered of
+            [] -> List.reverse gathered
+            toGather :: population ->
+                let ( gathering, remaining ) = List.partition (testFn toGather) population in
+                helper remaining <| ( toGather, gathering ) :: gathered
+    in
+    helper list []
 
 
 
@@ -720,13 +676,31 @@ toDefault default items index =
 
 
 {-| -}
-type Any
+type alias Generalizable a =
+  { a
+    | color : String
+    , border : String
+    , borderWidth : Float
+  }
+
+
+{-| -}
+type alias General =
+  { color : String
+  , border : String
+  , borderWidth : Float
+  , real : RealConfig
+  }
+
+
+{-| -}
+type RealConfig
   = BarConfig S.Bar
   | DotConfig S.Dot
 
 
-toGeneral : (config -> Any) -> Product config datum -> Product Any datum
-toGeneral toAny (Item product) =
+toGeneral : (Generalizable config -> RealConfig) -> Product (Generalizable config) datum -> Product General datum
+toGeneral generalize (Item product) =
   Item
     { render = \plane details position ->
         case details.y of
@@ -734,7 +708,7 @@ toGeneral toAny (Item product) =
             S.text ""
 
           Just y ->
-            case details.config of
+            case details.config.real of
               BarConfig bar -> S.bar plane (toBarAttrs bar) position
               DotConfig dot -> S.dot plane .x .y (toDotAttrs dot) { x = details.x1, y = y }
 
@@ -749,14 +723,19 @@ toGeneral toAny (Item product) =
         , y = product.details.y
         , name = product.details.name
         , unit = product.details.unit
-        , config = toAny product.details.config
+        , config =
+            { color = product.details.config.color
+            , border = product.details.config.border
+            , borderWidth = product.details.config.borderWidth
+            , real = generalize product.details.config
+            }
         }
     }
 
 
-toBar : Product Any datum -> Maybe (Product S.Bar datum)
+toBar : Product General datum -> Maybe (Product S.Bar datum)
 toBar (Item product) =
-  case product.details.config of
+  case product.details.config.real of
     DotConfig _ ->
       Nothing
 
@@ -780,9 +759,9 @@ toBar (Item product) =
         }
 
 
-toDot : Product Any datum -> Maybe (Product S.Dot datum)
+toDot : Product General datum -> Maybe (Product S.Dot datum)
 toDot (Item product) =
-  case product.details.config of
+  case product.details.config.real of
     BarConfig _ ->
       Nothing
 
