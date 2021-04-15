@@ -34,7 +34,7 @@ main =
 
 
 type alias Model =
-  { hovering : List (CI.Group (CI.Bin Datum) CS.Bar Datum)
+  { hovering : List (CI.Group (CI.Bin Datum) CS.Dot Datum)
   }
 
 
@@ -44,7 +44,7 @@ init =
 
 
 type Msg
-  = OnHover (List (CI.Group (CI.Bin Datum) CS.Bar Datum))
+  = OnHover (List (CI.Group (CI.Bin Datum) CS.Dot Datum))
 
 
 update : Msg -> Model -> Model
@@ -89,7 +89,7 @@ view model =
       --, C.range (C.startMin 0 >> C.endMax 6)
       --, C.domain (C.startMax 0 >> C.endMin 19)
       , C.events
-          [ C.getNearestX CI.getCenter (CI.onlyBarSeries >> CI.groupBy CI.isSameBin)
+          [ C.getNearestX CI.getCenter (CI.onlyDotSeries >> CI.groupBy CI.isSameBin)
               |> C.map OnHover
               |> C.event "mousemove"
           ]
@@ -97,23 +97,23 @@ view model =
       ]
       [ C.grid []
 
-      , C.bars
-          [ CA.roundTop 0.2
-          , CA.roundBottom 0.2
-          , CA.grouped
-          , CA.x1 .x
-          , CA.x2 (.x >> (\x -> x + 2))
-          , CA.margin 0.1
-          , CA.spacing 0.04
-          ]
-          [ C.stacked
-              [ C.bar .y "cats" "km" [ C.borderWidth 1 ]
-              , C.bar .z "dogs" "km" [ C.borderWidth 1 ]
-              , C.bar (Just << .x) "fish" "km" [ C.borderWidth 1 ]
-              ]
-          , C.bar .z "kids" "km" []
-          ]
-          data
+      --, C.bars
+      --    [ CA.roundTop 0.2
+      --    , CA.roundBottom 0.2
+      --    , CA.grouped
+      --    , CA.x1 .x
+      --    , CA.x2 (.x >> (\x -> x + 2))
+      --    , CA.margin 0.1
+      --    , CA.spacing 0.04
+      --    ]
+      --    [ C.stacked
+      --        [ C.bar .y "cats" "km" [ C.borderWidth 1 ]
+      --        , C.bar .z "dogs" "km" [ C.borderWidth 1 ]
+      --        , C.bar (Just << .x) "fish" "km" [ C.borderWidth 1 ]
+      --        ]
+      --    , C.bar .z "kids" "km" []
+      --    ]
+      --    data
 
       , C.yAxis []
       , C.xTicks []
@@ -123,18 +123,21 @@ view model =
 
       , C.series .x
           [ C.stacked
-              [ C.property .y "owls" "km" [ CA.linear, CA.opacity 0.25 ] [ CA.circle ]
-                  --|> C.variation (\datum ->
-                  --      if List.any (\i -> CI.getDatum i == datum) model.hovering
-                  --      then [ CA.auraWidth 8, CA.aura 0.40, CA.size (Maybe.withDefault 2 datum.z * 5) ]
-                  --      else [ CA.size (Maybe.withDefault 2 datum.z * 5) ])
-              , C.property .z "trees" "km" [ CA.linear, CA.opacity 0.25, CA.color CA.purple ] [ CA.circle ]
-                  --|> C.variation (\datum ->
-                  --      if List.any (\i -> CI.getDatum i == datum) model.hovering
-                  --      then [ CA.auraWidth 8, CA.aura 0.40, CA.size (Maybe.withDefault 2 datum.y * 5) ]
-                  --      else [ CA.size (Maybe.withDefault 2 datum.y * 5) ])
+              [ C.property .y "owls" "km" [ CA.linear, CA.opacity 0.25 ] [ CA.circle, CA.opacity 0.5 ]
+                  |> C.variation (\datum ->
+                        if List.any (\i -> CI.getDatum i == datum) (List.concatMap CI.products model.hovering)
+                        then [ CA.auraWidth 8, CA.aura 0.40, CA.size (Maybe.withDefault 2 datum.z * 5) ]
+                        else [ CA.size (Maybe.withDefault 2 datum.z * 5) ])
+              , C.property .z "trees" "km" [ CA.linear, CA.opacity 0.25, CA.color CA.purple ] [ CA.circle, CA.opacity 0.5 ]
+                  |> C.variation (\datum ->
+                        if List.any (\i -> CI.getDatum i == datum) (List.concatMap CI.products model.hovering)
+                        then [ CA.auraWidth 8, CA.aura 0.40, CA.size (Maybe.withDefault 2 datum.y * 5) ]
+                        else [ CA.size (Maybe.withDefault 2 datum.y * 5) ])
               ]
-          , C.property .y "cats" "km" [ CA.linear, CA.opacity 0 ] [ CA.circle, CA.color CA.pink ]
+          , C.property (.y >> Maybe.map ((*) 3)) "cats" "km" [ CA.linear, CA.opacity 0 ] [ CA.circle, CA.color CA.pink, CA.opacity 0.5 ]
+              |> C.variation (\datum ->
+                if List.any (\i -> CI.getDatum i == datum) (List.concatMap CI.products model.hovering)
+                then [ CA.auraWidth 8, CA.aura 0.40 ] else [])
           ]
           data
 
