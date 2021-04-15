@@ -1,6 +1,6 @@
 module Chart.Item exposing
   ( Item, Product, Stack, Bin
-  , onlyBarSeries, onlyDotSeries
+  , onlyBarSeries, onlyDotSeries, only
   , General, RealConfig(..), toGeneral
   , Group, Grouping, groupBy
   , isSameSeries, isSameBin, isSameStack, isSame
@@ -233,6 +233,12 @@ onlyBarSeries =
 onlyDotSeries : List (Product General datum) -> List (Product S.Dot datum)
 onlyDotSeries =
   List.filterMap toDot
+
+
+{-| -}
+only : List String -> List (Product config datum) -> List (Product config datum)
+only names =
+  List.filter (\i -> List.member (getName i) names)
 
 
 {-| -}

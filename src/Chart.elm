@@ -6,7 +6,7 @@ module Chart exposing
     , Event, event, Decoder, getCoords, getNearest, getNearestX, getWithin, getWithinX, map, map2, map3, map4
 
     , tooltip, when, formatTimestamp
-    , svgAt, htmlAt, svg, html, none
+    , svgAt, htmlAt, svg, html, none, label
     , width, height
     , marginTop, marginBottom, marginLeft, marginRight
     , paddingTop, paddingBottom, paddingLeft, paddingRight
@@ -933,7 +933,7 @@ yTicks edits =
 
 
 
-type alias Labels tick msg =
+type alias Labels tick =
     { color : String -- TODO use Color
     , pinned : Bounds -> Float
     , start : Bounds -> Float
@@ -944,7 +944,6 @@ type alias Labels tick msg =
     , amount : Int
     , values : Maybe (Values tick)
     , center : Bool
-    , attrs : List (S.Attribute msg)
     }
 
 
@@ -956,7 +955,7 @@ type alias Pair =
 
 
 {-| -}
-xLabels : List (Labels tick msg -> Labels tick msg) -> Element item msg
+xLabels : List (Labels tick -> Labels tick) -> Element item msg
 xLabels edits =
   let config =
         applyAttrs edits
@@ -970,7 +969,6 @@ xLabels edits =
           , xOffset = 0
           , yOffset = 20
           , center = False
-          , attrs = []
           }
 
       xBounds p =
@@ -1011,13 +1009,15 @@ xLabels edits =
             , CA.yOff config.yOffset
             ]
             item.label
-            { x = item.value, y = item.at (toBounds .y p) }
+            { x = item.value
+            , y = item.at (toBounds .y p)
+            }
     in
     S.g [ SA.class "elm-charts__x-labels" ] (List.map toLabel (repositionIfCenter <| toTicks p))
 
 
 {-| -}
-yLabels : List (Labels tick msg -> Labels tick msg) -> Element item msg
+yLabels : List (Labels tick -> Labels tick) -> Element item msg
 yLabels edits =
   let config =
         applyAttrs edits
@@ -1031,7 +1031,6 @@ yLabels edits =
           , xOffset = -8
           , yOffset = 3
           , center = False
-          , attrs = []
           }
 
       yBounds p =
@@ -1073,7 +1072,9 @@ yLabels edits =
             , CA.rightAlign
             ]
             item.label
-            { y = item.value, x = item.at (toBounds .x p) }
+            { y = item.value
+            , x = item.at (toBounds .x p)
+            }
     in
     S.g [ SA.class "elm-charts__y-labels" ] (List.map toLabel (repositionIfCenter <| toTicks p))
 
@@ -1269,6 +1270,12 @@ series toX properties data =
 with : (List (Item.Product Item.General data) -> a) -> (C.Plane -> a -> List (Element data msg)) -> Element data msg
 with filter func =
   SubElements <| \p is -> func p (filter is)
+
+
+{-| -}
+label : List (Attribute CS.Label) -> String -> C.Point -> Element data msg
+label attrs string point =
+  SvgElement <| \p -> CS.label p attrs string point
 
 
 {-| -}

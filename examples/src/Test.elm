@@ -62,7 +62,7 @@ type alias Datum =
 
 data : List Datum
 data =
-  [ { x = -1, y = Just 5, z = Just 3, label = "DE" }
+  [ { x = -1, y = Just 5, z = Just 3, label = "IT" }
   , { x = 0, y = Just 3, z = Just 6, label = "DE" }
   , { x = 2, y = Just 2, z = Just 2, label = "DK" }
   , { x = 6, y = Just 8, z = Just 5, label = "SE" }
@@ -114,6 +114,25 @@ view model =
           , C.bar .z "kids" "km" [ CA.color CA.purple ]
           ]
           data
+
+      , C.with (CI.onlyBarSeries >> CI.groupBy CI.isSameBin) <| \p ->
+          List.concatMap <| \i ->
+            let bin = CI.getCommonality i
+                pos = CI.getCenter p i
+            in
+            [ C.label [ CA.yOff 15 ] (String.fromFloat bin.start) { x = bin.start, y = p.y.min }
+            , C.label [ CA.yOff 15 ] (String.fromFloat bin.end) { x = bin.end, y = p.y.min }
+            , C.label [ CA.yOff 15 ] bin.datum.label { x = pos.x, y = p.y.min }
+            ]
+
+      , C.with (CI.onlyBarSeries >> CI.groupBy CI.isSameStack) <| \p ->
+          List.map <| \i ->
+            let bin = CI.getCommonality i
+                bounds = CI.getBounds i
+                pos = CI.getCenter p i
+            in
+            C.label [ CA.yOff -10 ] (String.fromFloat bounds.y2) { x = pos.x, y = bounds.y2 }
+
 
       --, C.series .x
       --    [ C.stacked

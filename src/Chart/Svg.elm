@@ -272,7 +272,7 @@ label plane edits string point =
           , border = "white"
           , borderWidth = 0.1
           , fontSize = Nothing
-          , color = "rgb(210, 210, 210)"
+          , color = "#808BAB"
           , anchor = CA.Middle
           }
 
