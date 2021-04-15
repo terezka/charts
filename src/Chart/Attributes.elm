@@ -5,7 +5,7 @@ module Chart.Attributes exposing
   , Method(..), linear, monotone
   , Shape(..), circle, triangle, square, diamond, plus, cross, shape
   , Direction(..), onTop, onBottom, onRight, onLeft, onLeftOrRight, onTopOrBottom
-  , blue, pink, orange, green, purple, red, background, attrs, htmlAttrs, responsive, events
+  , blue, pink, orange, green, purple, red, background, attrs, htmlAttrs, static, events
   )
 
 
@@ -189,9 +189,9 @@ grouped config =
 
 
 {-| -}
-responsive : Attribute { a | responsive : Bool }
-responsive config =
-  { config | responsive = True }
+static : Attribute { a | responsive : Bool }
+static config =
+  { config | responsive = False }
 
 
 {-| -}

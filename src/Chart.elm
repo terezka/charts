@@ -1,27 +1,23 @@
 module Chart exposing
-    ( chart, Element, bars, bar, just
-    , series
-    , size
+    ( chart, Element, bars, bar, just, series
     , Bounds, startMin, startMax, endMin, endMax, startPad, endPad, zero, middle
     , xAxis, yAxis, xTicks, yTicks, xLabels, yLabels, grid
     , ints, floats, times, format, values, amount, events
     , Event, event, Decoder, getCoords, getNearest, getNearestX, getWithin, getWithinX, map, map2, map3, map4
-    --, Metric
-    --, getBars, getGroups, getDots, withoutUnknowns
+
     , tooltip, when, formatTimestamp
     , svgAt, htmlAt, svg, html, none
     , width, height
     , marginTop, marginBottom, marginLeft, marginRight
     , paddingTop, paddingBottom, paddingLeft, paddingRight
-    , static, id
-    , range, domain, topped, htmlAttrs
-    , start, end, pinned, color, unit, rounded, roundBottom, margin, spacing
-    , dot, dotted, area, noArrow, center
-    , filterX, filterY, only, attrs
-    , blue, orange, pink, green, red
+    , range, domain, topped
+    , start, end, pinned
+    , dotted, noArrow, center
+    , filterX, filterY, only
+    , blue, orange, pink, green, red, purple
 
-    , style, empty, detached, aura, opaque, full, name, with, list, stacked, property, variation, Property
-    , at, noDot, binned, purple, grouped
+    , with, list, stacked, property, variation, Property
+    , at, binned
 
     )
 
@@ -71,13 +67,10 @@ import Svg.Events as SE
 import Html as H
 import Html.Attributes as HA
 import Intervals as I
-import Internal.Svg as I
 import Internal.Property as P
-import Internal.Default as D
 import DateFormat as F
 import Time
 import Dict exposing (Dict)
-import Internal.Svg exposing (Variety(..))
 import Chart.Item as Item
 import Chart.Svg as CS
 import Chart.Attributes as CA
@@ -152,18 +145,6 @@ paddingRight value config =
 
 
 {-| -}
-static : Attribute { a | responsive : Bool }
-static config =
-  { config | responsive = False }
-
-
-{-| -}
-id : String -> Attribute { a | id : String }
-id value config =
-  { config | id = value }
-
-
-{-| -}
 range : (Bounds -> Bounds) -> Attribute { a | range : Maybe (Bounds -> Bounds) }
 range value config =
   { config | range = Just value }
@@ -173,30 +154,6 @@ range value config =
 domain : (Bounds -> Bounds) -> Attribute { a | domain : Maybe (Bounds -> Bounds) }
 domain value config =
   { config | domain = Just value }
-
-
-{-| -}
-init : info -> Attribute { a | init : Maybe info }
-init value config =
-  { config | init = Just value }
-
-
-{-| -}
-attrs : List (S.Attribute msg) -> Attribute { a | attrs : List (S.Attribute msg) }
-attrs value config =
-  { config | attrs = value }
-
-
-{-| -}
-htmlAttrs : List (H.Attribute msg) -> Attribute { a | htmlAttrs : List (H.Attribute msg) }
-htmlAttrs value config =
-  { config | htmlAttrs = value }
-
-
-{-| -}
-grouped : Attribute { a | grouped : D.Constant Bool }
-grouped config =
-  { config | grouped = D.Given True }
 
 
 {-| -}
@@ -212,69 +169,9 @@ end value config =
 
 
 {-| -}
-pinned : (Bounds -> Float) -> Attribute { a | pinned : Bounds -> Float }
+pinned : x -> Attribute { a | pinned : x }
 pinned value config =
   { config | pinned = value }
-
-
-{-| -}
-color : x -> Attribute { a | color : Maybe x }
-color value config =
-  { config | color = Just value }
-
-
-{-| -}
-name : x -> Attribute { a | name : D.Constant x }
-name value config =
-  { config | name = D.Given value }
-
-
-{-| -}
-unit : x -> Attribute { a | unit : D.Constant x }
-unit value config =
-  { config | unit = D.Given value }
-
-
-{-| -}
-rounded : x -> Attribute { a | round : D.Constant x }
-rounded value config =
-  { config | round = D.Given value }
-
-
-{-| -}
-roundBottom : Attribute { a | roundBottom : D.Constant Bool }
-roundBottom config =
-  { config | roundBottom = D.Given True }
-
-
-{-| -}
-margin : x -> Attribute { a | margin : D.Constant x }
-margin value config =
-  { config | margin = D.Given value }
-
-
-{-| -}
-spacing : x -> Attribute { a | spacing : D.Constant x }
-spacing value config =
-  { config | spacing = D.Given value }
-
-
-{-| -}
-dot : x -> Attribute { a | dot : Maybe x }
-dot value config =
-  { config | dot = Just value }
-
-
-{-| -}
-noDot : Attribute { a | dot : Maybe (data -> S.Svg msg) }
-noDot config =
-  { config | dot = Just (\_ -> S.text "") }
-
-
-{-| -}
-size : b -> Attribute { a | size : Maybe b }
-size value config =
-  { config | size = Just value }
 
 
 {-| -}
@@ -284,31 +181,25 @@ dotted config =
 
 
 {-| -}
-area : Float -> Attribute { a | area : Maybe Float }
-area value config =
-  { config | area = Just value }
-
-
-{-| -}
 noArrow : Attribute { a | arrow : Bool }
 noArrow config =
   { config | arrow = False }
 
 
 {-| -}
-filterX : (Bounds -> List Float) -> Attribute { a | filterX : Bounds -> List Float }
+filterX : x -> Attribute { a | filterX : x }
 filterX value config =
   { config | filterX = value }
 
 
 {-| -}
-filterY : (Bounds -> List Float) -> Attribute { a | filterY : Bounds -> List Float }
+filterY : x -> Attribute { a | filterY : x }
 filterY value config =
   { config | filterY = value }
 
 
 {-| -}
-only : (b -> Bool) -> Attribute { a | only : b -> Bool }
+only : x -> Attribute { a | only : x }
 only value config =
   { config | only = value }
 
@@ -511,7 +402,7 @@ chart edits elements =
   CS.container plane
     [ CA.attrs config.attrs
     , CA.htmlAttrs config.htmlAttrs
-    , if config.responsive then CA.responsive else identity
+    , if config.responsive then CA.static else identity
     , CA.events (List.map toEvent config.events)
     ]
     beforeEls
@@ -1535,50 +1426,6 @@ applyAttrs : List (a -> a) -> a -> a
 applyAttrs funcs default =
   let apply f a = f a in
   List.foldl apply default funcs
-
-
-clipPath : String -> S.Attribute msg
-clipPath id_ =
-  SA.clipPath <| "url(#" ++ id_ ++ ")"
-
-
--- STYLE
-
-
--- TODO remove this attr
-style : x -> Attribute { a | style : Maybe x }
-style v config =
-  { config | style = Just v }
-
-
-{-| -}
-full : Variety
-full =
-  Full
-
-
-{-| -}
-empty : Float -> Variety
-empty =
-  Empty
-
-
-{-| -}
-opaque : Float -> Float -> Variety
-opaque =
-  Opaque
-
-
-{-| -}
-aura : Float -> Float -> Variety
-aura =
-  Aura
-
-
-{-| -}
-detached : Float -> Variety
-detached =
-  Disconnected
 
 
 

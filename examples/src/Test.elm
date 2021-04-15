@@ -84,7 +84,7 @@ view model =
     [ C.chart
       [ C.height 400
       , C.width 1000
-      , C.static
+      , CA.static
       --, C.marginTop 60
       --, C.paddingTop 0
       , C.paddingLeft 10
