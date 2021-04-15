@@ -91,11 +91,11 @@ view model =
       --, C.range (C.startMax 1.2 << C.endMax 6)
       , C.domain (C.startMin 0 << C.endMin 20)
       --, C.domain (C.startMin -1 << C.endMin 25)
-      --, C.events
-      --    [ C.getNearestX CI.getCenter identity
-      --        |> C.map OnHover
-      --        |> C.event "mousemove"
-      --    ]
+      , C.events
+          [ C.getNearestX CI.getCenter identity
+              |> C.map OnHover
+              |> C.event "mousemove"
+          ]
       ]
       [ C.grid []
 
@@ -132,8 +132,8 @@ view model =
       --    ]
       --    data
 
-      --, C.xAxis []
-      --, C.yAxis []
+      , C.xAxis []
+      , C.yAxis []
       , C.xTicks [ C.amount 10, C.ints ]
       , C.xLabels [ C.ints ]
       , C.yLabels [ C.ints ]

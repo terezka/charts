@@ -15,10 +15,8 @@ module Chart exposing
     , dotted, noArrow, center
     , filterX, filterY, only
     , blue, orange, pink, green, red, purple
-
     , with, list, stacked, property, variation, Property
     , at, binned
-
     )
 
 
@@ -282,42 +280,6 @@ amount value config =
 topped : Int -> Attribute { a | topped : Maybe Int }
 topped value config =
   { config | topped = Just value }
-
-
-{-| -}
-binLabel : (data -> String) -> Attribute { a | binLabel : Maybe (data -> String) }
-binLabel value config =
-  { config | binLabel = Just value }
-
-
-{-| -}
-topLabel : (data -> Maybe String) -> Attribute { a | topLabel : data -> Maybe String }
-topLabel value config =
-  { config | topLabel = value }
-
-
-{-| -}
-binWidth : (data -> Float) -> Attribute { a | binWidth : Maybe (data -> Float) }
-binWidth value config =
-  { config | binWidth = Just value }
-
-
-{-| -}
-barColor : (data -> String) -> Attribute { a | color : Maybe (data -> String) }
-barColor value config =
-  { config | color = Just value }
-
-
-{-| -}
-tickLength : Float -> Attribute { a | tickLength : Float }
-tickLength value config =
-  { config | tickLength = value }
-
-
-{-| -}
-tickWidth : Float -> Attribute { a | tickWidth : Float }
-tickWidth value config =
-  { config | tickWidth = value }
 
 
 {-| -}
