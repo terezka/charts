@@ -1,5 +1,5 @@
 module Chart.Svg exposing
-  ( Container, container
+  ( Container, Event, container
   , Line, line
   , Label, label
   , Arrow, arrow

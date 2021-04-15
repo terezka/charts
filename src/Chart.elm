@@ -505,29 +505,19 @@ chart edits elements =
       ( beforeEls, chartEls, afterEls ) =
         viewElements config plane tickValues items elements
 
-      svgContainer =
-        S.svg (sizingAttrs ++ List.map toEvent config.events ++ config.attrs)
-
-      sizingAttrsHtml =
-        if config.responsive then
-          []
-        else
-          [ HA.style "width" (String.fromFloat plane.x.length ++ "px")
-          , HA.style "height" (String.fromFloat plane.y.length ++ "px")
-          ]
-
-      sizingAttrs =
-        if config.responsive then [ C.responsive plane ] else C.static plane
-
       toEvent (Event event_) =
         let (Decoder decoder) = event_.decoder in
-        SE.on event_.name (CS.decoder plane (decoder items))
-
-      allSvgEls =
-        chartEls ++ [ C.eventCatcher plane [] ]
+        CS.Event event_.name (decoder items)
   in
-  C.container plane (config.htmlAttrs ++ sizingAttrsHtml)
-    (beforeEls ++ [ svgContainer allSvgEls ] ++ afterEls)
+  CS.container plane
+    [ CA.attrs config.attrs
+    , CA.htmlAttrs config.htmlAttrs
+    , if config.responsive then CA.responsive else identity
+    , CA.events (List.map toEvent config.events)
+    ]
+    beforeEls
+    chartEls
+    afterEls
 
 
 

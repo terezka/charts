@@ -24,7 +24,6 @@ import Chart.Attributes as CA
 
 -- TODO clean up plane
 -- TODO clean up property
--- TODO replace system.id with inline clippath
 -- TODO clean up labels / axes etc
 -- TODO rename series to scatter
 -- TODO add element index

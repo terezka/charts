@@ -5,7 +5,7 @@ module Chart.Attributes exposing
   , Method(..), linear, monotone
   , Shape(..), circle, triangle, square, diamond, plus, cross, shape
   , Direction(..), onTop, onBottom, onRight, onLeft, onLeftOrRight, onTopOrBottom
-  , blue, pink, orange, green, purple, red, background
+  , blue, pink, orange, green, purple, red, background, attrs, htmlAttrs, responsive, events
   )
 
 
@@ -129,6 +129,18 @@ height v config =
 
 
 {-| -}
+attrs : a -> Attribute { x | attrs : a }
+attrs v config =
+  { config | attrs = v }
+
+
+{-| -}
+htmlAttrs : a -> Attribute { x | htmlAttrs : a }
+htmlAttrs v config =
+  { config | htmlAttrs = v }
+
+
+{-| -}
 length : Float -> Attribute { a | length : Float }
 length v config =
   { config | length = v }
@@ -174,6 +186,18 @@ roundBottom v config =
 grouped : Attribute { a | grouped : Bool }
 grouped config =
   { config | grouped = True }
+
+
+{-| -}
+responsive : Attribute { a | responsive : Bool }
+responsive config =
+  { config | responsive = True }
+
+
+{-| -}
+events : x -> Attribute { a | events : x }
+events v config =
+  { config | events = v }
 
 
 -- TODO Move to internal
