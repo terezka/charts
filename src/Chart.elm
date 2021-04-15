@@ -680,23 +680,22 @@ viewElements : Container data msg -> C.Plane -> TickValues -> List (Item.Product
 viewElements config plane tickValues allItems elements =
   let viewOne el ( before, chart_, after ) =
         case el of
-          SeriesElement _ _ view -> ( before, view plane :: chart_, after )
-          BarsElement _ _ _ view -> ( before, view plane :: chart_, after )
-          AxisElement view -> ( before, view plane :: chart_, after )
-          TicksElement _ view -> ( before, view plane :: chart_, after )
-          LabelsElement _ view -> ( before, view plane :: chart_, after )
-          GridElement view -> ( before, view plane tickValues :: chart_, after )
-          SubElements func -> List.foldl viewOne ( before, chart_, after ) (func plane allItems)
-          ListOfElements els -> List.foldl viewOne ( before, chart_, after ) els
-          SvgElement view -> ( before, view plane :: chart_, after )
-          HtmlElement view ->
+          SeriesElement _ _ view  -> ( before, view plane :: chart_, after )
+          BarsElement _ _ _ view  -> ( before, view plane :: chart_, after )
+          AxisElement view        -> ( before, view plane :: chart_, after )
+          TicksElement _ view     -> ( before, view plane :: chart_, after )
+          LabelsElement _ view    -> ( before, view plane :: chart_, after )
+          GridElement view        -> ( before, view plane tickValues :: chart_, after )
+          SubElements func        -> List.foldr viewOne ( before, chart_, after ) (func plane allItems)
+          ListOfElements els      -> List.foldr viewOne ( before, chart_, after ) els
+          SvgElement view         -> ( before, view plane :: chart_, after )
+          HtmlElement view        ->
             ( if List.length chart_ > 0 then before else view plane :: before
             , chart_
             , if List.length chart_ > 0 then view plane :: after else after
             )
   in
-  List.foldl viewOne ([], [], []) elements
-    |> \( b, c, a ) -> ( List.reverse b, List.reverse c, List.reverse a )
+  List.foldr viewOne ([], [], []) elements
 
 
 
