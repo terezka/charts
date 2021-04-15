@@ -34,7 +34,7 @@ main =
 
 
 type alias Model =
-  { hovering : List (CI.Group (CI.Bin Datum) CI.General Datum)
+  { hovering : List (CI.Group (CI.Bin Datum) CS.Bar Datum)
   }
 
 
@@ -44,7 +44,7 @@ init =
 
 
 type Msg
-  = OnHover (List (CI.Group (CI.Bin Datum) CI.General Datum))
+  = OnHover (List (CI.Group (CI.Bin Datum) CS.Bar Datum))
 
 
 update : Msg -> Model -> Model
@@ -89,7 +89,7 @@ view model =
       --, C.range (C.startMin 0 >> C.endMax 6)
       --, C.domain (C.startMax 0 >> C.endMin 19)
       , C.events
-          [ C.getNearestX CI.getCenter (CI.groupBy CI.isSameBin)
+          [ C.getNearestX CI.getCenter (CI.onlyBarSeries >> CI.groupBy CI.isSameBin)
               |> C.map OnHover
               |> C.event "mousemove"
           ]

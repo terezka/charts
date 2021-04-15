@@ -1,7 +1,7 @@
 module Chart.Item exposing
   ( Item(..), General, RealConfig(..), Product, Stack, toGeneral
   , Group, collect, groupBy, Grouping, isSameSeries, isSameBin, isSameStack, products, commonality
-  , render, getValue, getCenter, getPosition, getDatum, getTop, getItems
+  , render, getValue, getCenter, getPosition, getDatum, getTop, getItems, isSame
   , onlyBarSeries, onlyDotSeries
   , getColor, getName
   , getBounds
@@ -149,7 +149,7 @@ isSameBin =
         , end = details.x2
         , datum = details.datum
         }
-    , grouping = \a b -> a.start == b.start && a.end == b.end
+    , grouping = \a b -> a.start == b.start && a.end == b.end && a.datum == b.datum
     , position = \plane bin products_ ->
         { x1 = bin.start
         , x2 = bin.end
@@ -178,7 +178,22 @@ isSameStack =
         , datum = details.datum
         , index = details.property
         }
-    , grouping = \a b -> a.index == b.index && a.start == b.start && a.end == b.end
+    , grouping = \a b -> a.index == b.index && a.start == b.start && a.end == b.end && a.datum == b.datum
+    , position = \plane _ products_ ->
+        { x1 = Coord.minimum [ getX1 plane >> Just ] products_
+        , x2 = Coord.maximum [ getX2 plane >> Just ] products_
+        , y1 = Coord.minimum [ getY1 plane >> Just ] products_
+        , y2 = Coord.maximum [ getY2 plane >> Just ] products_
+        }
+    }
+
+
+{-| -}
+isSame : (Product config datum -> a) -> Grouping a config datum
+isSame toCommon =
+  collector
+    { commonality = toCommon
+    , grouping = (==)
     , position = \plane _ products_ ->
         { x1 = Coord.minimum [ getX1 plane >> Just ] products_
         , x2 = Coord.maximum [ getX2 plane >> Just ] products_
