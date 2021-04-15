@@ -89,7 +89,7 @@ fontSize v config =
 {-| -}
 color : String -> Attribute { a | color : String }
 color v config =
-  { config | color = v }
+  if v == "" then config else { config | color = v }
 
 
 {-| -}
@@ -209,14 +209,14 @@ type Anchor
 
 
 {-| -}
-rightAlign : Attribute { a | anchor : Anchor }
-rightAlign config =
+leftAlign : Attribute { a | anchor : Anchor }
+leftAlign config =
   { config | anchor = Start }
 
 
 {-| -}
-leftAlign : Attribute { a | anchor : Anchor }
-leftAlign config =
+rightAlign : Attribute { a | anchor : Anchor }
+rightAlign config =
   { config | anchor = End }
 
 

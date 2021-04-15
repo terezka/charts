@@ -21,7 +21,7 @@ module Chart exposing
     , blue, orange, pink, green, red
 
     , style, empty, detached, aura, opaque, full, name, with, list, stacked, property, variation, Property
-    , fontSize, borderWidth, borderColor, xOffset, yOffset, xLabel, text, at, noDot, binned, purple, grouped
+    , at, noDot, binned, purple, grouped
 
     )
 
@@ -64,7 +64,6 @@ module Chart exposing
 -}
 
 
-import Svg.Chart as C
 import Svg.Coordinates as C
 import Svg as S
 import Svg.Attributes as SA
@@ -898,70 +897,79 @@ when maybeA view =
 
 
 {-| -}
-type alias Axis msg =
+type alias Axis =
     { start : Bounds -> Float
     , end : Bounds -> Float
     , pinned : Bounds -> Float
     , arrow : Bool
-    , color : Maybe String -- TODO use Color
-    , attrs : List (S.Attribute msg)
+    , color : String -- TODO use Color
     }
 
 
 {-| -}
-xAxis : List (Axis msg -> Axis msg) -> Element item msg
+xAxis : List (CA.Attribute Axis) -> Element item msg
 xAxis edits =
   let config =
         applyAttrs edits
           { start = .min
           , end = .max
           , pinned = zero
-          , color = Nothing
+          , color = ""
           , arrow = True
-          , attrs = []
           }
-
-      color_ =
-        Maybe.withDefault "rgb(210, 210, 210)" config.color
   in
   AxisElement <| \p ->
-    S.g [ SA.class "elm-charts__x-axis" ]
-      [ C.horizontal p ([ SA.stroke color_ ] ++ config.attrs) (config.pinned <| toBounds .y p) (config.start <| toBounds .x p) (config.end <| toBounds .x p)
+    S.g
+      [ SA.class "elm-charts__x-axis" ]
+      [ CS.line p
+          [ CA.color config.color
+          , CA.y1 (config.pinned <| toBounds .y p)
+          , CA.x1 (config.start <| toBounds .x p)
+          , CA.x2 (config.end <| toBounds .x p)
+          ]
       , if config.arrow then
-          C.xArrow p color_ (config.end <| toBounds .x p) (config.pinned <| toBounds .y p) 0 0
+          CS.arrow p [ CA.color config.color ]
+            { x = config.end <| toBounds .x p
+            , y = config.pinned <| toBounds .y p
+            }
         else
           S.text ""
       ]
 
 
 {-| -}
-yAxis : List (Axis msg -> Axis msg) -> Element item msg
+yAxis : List (Axis -> Axis) -> Element item msg
 yAxis edits =
   let config =
         applyAttrs edits
           { start = .min
           , end = .max
           , pinned = zero
-          , color = Nothing
+          , color = ""
           , arrow = True
-          , attrs = []
           }
-
-      color_ =
-        Maybe.withDefault "rgb(210, 210, 210)" config.color
   in
   AxisElement <| \p ->
-    S.g [ SA.class "elm-charts__y-axis" ]
-      [ C.vertical p ([ SA.stroke color_ ] ++ config.attrs) (config.pinned <| toBounds .x p) (config.start <| toBounds .y p) (config.end <| toBounds .y p)
+    S.g
+      [ SA.class "elm-charts__y-axis" ]
+      [ CS.line p
+          [ CA.color config.color
+          , CA.x1 (config.pinned <| toBounds .x p)
+          , CA.y1 (config.start <| toBounds .y p)
+          , CA.y2 (config.end <| toBounds .y p)
+          ]
       , if config.arrow then
-          C.yArrow p color_ (config.pinned <| toBounds .x p) (config.end <| toBounds .y p) 0 0
+          CS.arrow p [ CA.color config.color, CA.rotate -90 ]
+            { x = config.pinned <| toBounds .x p
+            , y = config.end <| toBounds .y p
+            }
         else
           S.text ""
       ]
 
 
-type alias Ticks tick msg =
-    { color : Maybe String -- TODO use Color -- TODO allow custom color by tick value
+type alias Ticks tick =
+    { color : String -- TODO use Color -- TODO allow custom color by tick value
     , height : Float
     , width : Float
     , pinned : Bounds -> Float
@@ -970,8 +978,8 @@ type alias Ticks tick msg =
     , only : Float -> Bool
     , amount : Int
     , values : Maybe (Values tick)
-    , attrs : List (S.Attribute msg)
     }
+
 
 type alias Values tick =
   { produce : Int -> Bounds -> List tick
@@ -982,11 +990,11 @@ type alias Values tick =
 
 
 {-| -}
-xTicks : List (Ticks tick msg -> Ticks tick msg) -> Element item msg
+xTicks : List (Ticks tick -> Ticks tick) -> Element item msg
 xTicks edits =
   let config =
         applyAttrs edits
-          { color = Nothing
+          { color = ""
           , start = .min
           , end = .max
           , pinned = zero
@@ -995,11 +1003,7 @@ xTicks edits =
           , values = Nothing
           , height = 5
           , width = 1
-          , attrs = []
           }
-
-      color_ =
-        Maybe.withDefault "rgb(210, 210, 210)" config.color
 
       xBounds p =
         let b = toBounds .x p in
@@ -1013,24 +1017,29 @@ xTicks edits =
             Just { value, produce } -> List.map value (produce config.amount <| xBounds p)
             Nothing -> I.floats (I.around config.amount) (xBounds p)
 
-      tickAttrs =
-        [ SA.stroke color_
-        , SA.strokeWidth (String.fromFloat config.width)
-        ] ++ config.attrs
-
       addTickValues p ts =
         { ts | xs = ts.xs ++ toTicks p }
   in
   TicksElement addTickValues <| \p ->
-    C.xTicks p config.height tickAttrs (config.pinned <| toBounds .y p) (toTicks p)
+    let toTick x =
+          CS.xTick p
+            [ CA.color config.color
+            , CA.length config.height
+            , CA.width config.width
+            ]
+            { x = x
+            , y = config.pinned <| toBounds .y p
+            }
+    in
+    S.g [ SA.class "elm-charts__x-ticks" ] <| List.map toTick (toTicks p)
 
 
 {-| -}
-yTicks : List (Ticks tick msg -> Ticks tick msg) -> Element item msg
+yTicks : List (Ticks tick -> Ticks tick) -> Element item msg
 yTicks edits =
   let config =
         applyAttrs edits
-          { color = Nothing
+          { color = ""
           , start = .min
           , end = .max
           , pinned = zero
@@ -1039,12 +1048,7 @@ yTicks edits =
           , values = Nothing
           , height = 5
           , width = 1
-          , attrs = []
-          --, offset = 0
           }
-
-      color_ =
-        Maybe.withDefault "rgb(210, 210, 210)" config.color
 
       yBounds p =
         let b = toBounds .y p in
@@ -1058,21 +1062,26 @@ yTicks edits =
             Just { value, produce } -> List.map value (produce config.amount <| yBounds p)
             Nothing -> I.floats (I.around config.amount) (yBounds p)
 
-      tickAttrs =
-        [ SA.stroke color_
-        , SA.strokeWidth (String.fromFloat config.width)
-        ] ++ config.attrs
-
       addTickValues p ts =
         { ts | ys = ts.ys ++ toTicks p }
   in
   TicksElement addTickValues <| \p ->
-    C.yTicks p config.height tickAttrs (config.pinned <| toBounds .x p) (toTicks p)
+    let toTick y =
+          CS.yTick p
+            [ CA.color config.color
+            , CA.length config.height
+            , CA.width config.width
+            ]
+            { x = config.pinned <| toBounds .x p
+            , y = y
+            }
+    in
+    S.g [ SA.class "elm-charts__y-ticks" ] <| List.map toTick (toTicks p)
 
 
 
 type alias Labels tick msg =
-    { color : Maybe String -- TODO use Color
+    { color : String -- TODO use Color
     , pinned : Bounds -> Float
     , start : Bounds -> Float
     , end : Bounds -> Float
@@ -1098,7 +1107,7 @@ xLabels : List (Labels tick msg -> Labels tick msg) -> Element item msg
 xLabels edits =
   let config =
         applyAttrs edits
-          { color = Nothing
+          { color = "#808BAB"
           , start = .min
           , end = .max
           , only = \_ -> True
@@ -1106,13 +1115,10 @@ xLabels edits =
           , amount = 5
           , values = Nothing
           , xOffset = 0
-          , yOffset = 0
+          , yOffset = 20
           , center = False
           , attrs = []
           }
-
-      color_ =
-        Maybe.withDefault "#808BAB" config.color
 
       xBounds p =
         let b = toBounds .x p in
@@ -1141,16 +1147,20 @@ xLabels edits =
           Just prev -> Just <| Pair prev.at (prev.value + (curr.value - prev.value) / 2) prev.label
           Nothing -> Nothing
 
-      labelAttrs =
-        [ SA.fill color_
-        , SA.transform ("translate(" ++ String.fromFloat config.xOffset ++ " " ++ String.fromFloat config.yOffset ++ ")")
-        ] ++ config.attrs
-
       toTickValues p ts =
         { ts | xs = ts.xs ++ List.map .value (toTicks p) }
   in
   LabelsElement toTickValues <| \p ->
-    C.xLabels p (C.xLabel labelAttrs .value .label) (\pair -> pair.at (toBounds .y p)) (repositionIfCenter <| toTicks p)
+    let toLabel item =
+          CS.label p
+            [ CA.color config.color
+            , CA.xOff config.xOffset
+            , CA.yOff config.yOffset
+            ]
+            item.label
+            { x = item.value, y = item.at (toBounds .y p) }
+    in
+    S.g [ SA.class "elm-charts__x-labels" ] (List.map toLabel (repositionIfCenter <| toTicks p))
 
 
 {-| -}
@@ -1158,21 +1168,18 @@ yLabels : List (Labels tick msg -> Labels tick msg) -> Element item msg
 yLabels edits =
   let config =
         applyAttrs edits
-          { color = Nothing
+          { color = "#808BAB"
           , start = .min
           , end = .max
           , pinned = zero
           , only = \_ -> True
           , amount = 5 -- TODO
           , values = Nothing
-          , xOffset = 0
-          , yOffset = 0
+          , xOffset = -8
+          , yOffset = 3
           , center = False
           , attrs = []
           }
-
-      color_ =
-        Maybe.withDefault "#808BAB" config.color
 
       yBounds p =
         let b = toBounds .y p in
@@ -1201,21 +1208,26 @@ yLabels edits =
           Just prev -> Just <| Pair prev.at (prev.value + (curr.value - prev.value) / 2) prev.label
           Nothing -> Nothing
 
-      labelAttrs =
-        [ SA.fill color_
-        , SA.transform ("translate(" ++ String.fromFloat config.xOffset ++ " " ++ String.fromFloat config.yOffset ++ ")")
-        ] ++ config.attrs
-
       toTickValues p ts =
         { ts | ys = ts.ys ++ List.map .value (toTicks p) }
   in
   LabelsElement toTickValues <| \p ->
-    C.yLabels p (C.yLabel labelAttrs .value .label) (\pair -> pair.at (toBounds .x p)) (repositionIfCenter <| toTicks p)
+    let toLabel item =
+          CS.label p
+            [ CA.color config.color
+            , CA.xOff config.xOffset
+            , CA.yOff config.yOffset
+            , CA.rightAlign
+            ]
+            item.label
+            { y = item.value, x = item.at (toBounds .x p) }
+    in
+    S.g [ SA.class "elm-charts__y-labels" ] (List.map toLabel (repositionIfCenter <| toTicks p))
 
 
 
 type alias Grid msg =
-    { color : Maybe String -- TODO use Color
+    { color : String -- TODO use Color
     , width : Float
     , dotted : Bool
     , filterX : Bounds -> List Float
@@ -1229,21 +1241,13 @@ grid : List (Grid msg -> Grid msg) -> Element item msg
 grid edits =
   let config =
         applyAttrs edits
-          { color = Nothing
+          { color = "#EFF2FA"
           , filterX = zero >> List.singleton
           , filterY = zero >> List.singleton
           , width = 1
           , attrs = []
           , dotted = False
           }
-
-      color_ =
-        Maybe.withDefault "#EFF2FA" config.color
-
-      gridAttrs =
-        [ SA.stroke color_
-        , SA.strokeWidth (String.fromFloat config.width)
-        ] ++ config.attrs
 
       notTheseX p =
         config.filterX (toBounds .x p)
@@ -1253,16 +1257,18 @@ grid edits =
 
       toXGrid p v =
         if List.member v (notTheseX p)
-        then Nothing else Just <| C.yGrid p gridAttrs v
+        then Nothing else Just <|
+          CS.line p [ CA.color config.color, CA.width config.width, CA.x1 v ]
 
       toYGrid p v =
         if List.member v (notTheseY p)
-        then Nothing else Just <| C.xGrid p gridAttrs v
+        then Nothing else Just <|
+          CS.line p [ CA.color config.color, CA.width config.width, CA.y1 v ]
 
       toDot p x y =
         if List.member x (notTheseX p) || List.member y (notTheseY p)
         then Nothing
-        else Just <| S.circle [] [] -- TODO
+        else Just <| CS.dot p .x .y [ CA.color config.color, CA.size config.width, CA.circle ] { x = x, y = y }
   in
   GridElement <| \p vs ->
     S.g [ SA.class "elm-charts__grid" ] <|
@@ -1287,13 +1293,13 @@ type alias Property data meta inter deco =
 {-| -}
 property : (data -> Maybe Float) -> String -> String -> List (Attribute inter) -> List (Attribute deco) -> Property data Item.Metric inter deco
 property y_ name_ unit_ =
-  P.property y_ { name = name_, unit = unit_ } -- TODO
+  P.property y_ { name = name_, unit = unit_ }
 
 
 {-| -}
 bar : (data -> Maybe Float) -> String -> String -> List (Attribute deco) -> Property data Item.Metric inter deco
 bar y_ name_ unit_ =
-  P.property y_ { name = name_, unit = unit_ } [] -- TODO
+  P.property y_ { name = name_, unit = unit_ } []
 
 
 {-| -}
@@ -1429,14 +1435,14 @@ html func =
 svgAt : (Bounds -> Float) -> (Bounds -> Float) -> Float -> Float -> List (S.Svg msg) -> Element data msg
 svgAt toX toY xOff yOff view =
   SvgElement <| \p ->
-    S.g [ C.position p (toX <| toBounds .x p) (toY <| toBounds .y p) xOff yOff ] view
+    S.g [ CS.position p (toX <| toBounds .x p) (toY <| toBounds .y p) xOff yOff ] view
 
 
 {-| -}
 htmlAt : (Bounds -> Float) -> (Bounds -> Float) -> Float -> Float -> List (H.Attribute msg) -> List (H.Html msg) -> Element data msg
 htmlAt toX toY xOff yOff att view =
   HtmlElement <| \p ->
-    C.positionHtml p (toX <| toBounds .x p) (toY <| toBounds .y p) xOff yOff att view
+    CS.positionHtml p (toX <| toBounds .x p) (toY <| toBounds .y p) xOff yOff att view
 
 
 {-| -}
@@ -1730,116 +1736,6 @@ formatWeekday : Time.Zone -> Time.Posix -> String
 formatWeekday =
     F.format
         [ F.dayOfWeekNameFull ]
-
-
-
-
-
--- LABEL
-
-
-type alias Label msg =
-  { color : Maybe String
-  , fontSize : Maybe Float
-  , borderWidth : Float
-  , borderColor : String
-  , xOffset : Float
-  , yOffset : Float
-  , flip : Bool
-  , text : Maybe String
-  , attributes : List (S.Attribute msg)
-  }
-
-
-text : x -> Attribute { a | text : Maybe x }
-text x config =
-  { config | text = Just x }
-
-
-fontSize : x -> Attribute { a | fontSize : Maybe x }
-fontSize x config =
-  { config | fontSize = Just x }
-
-
-borderWidth : x -> Attribute { a | borderWidth : x }
-borderWidth x config =
-  { config | borderWidth = x }
-
-
-borderColor : x -> Attribute { a | borderColor : x }
-borderColor x config =
-  { config | borderColor = x }
-
-
-flip : Attribute { a | flip : Bool }
-flip config =
-  { config | flip = True }
-
-
-xOffset : Float -> Attribute { a | xOffset : Float }
-xOffset x config =
-  { config | xOffset = config.xOffset + x }
-
-
-yOffset : Float -> Attribute { a | yOffset : Float }
-yOffset x config =
-  { config | yOffset = config.yOffset + x }
-
-
-xLabel : List (Attribute (Label msg)) -> C.Plane -> Float -> Float -> S.Svg msg
-xLabel edits plane x y =
-  let config =
-        applyAttrs edits
-          { color = Nothing
-          , fontSize = Nothing
-          , borderWidth = 0.1
-          , borderColor = "white"
-          , xOffset = 0
-          , yOffset = 0
-          , text = Nothing
-          , flip = False
-          , attributes = []
-          }
-
-      borderAttrs =
-        if config.borderWidth == 0 then []
-        else [ SA.strokeWidth (String.fromFloat config.borderWidth), SA.stroke config.borderColor ]
-
-      colorAttrs =
-        [ SA.fill (Maybe.withDefault "#808BAB" config.color) ]
-
-      styleAttrs =
-        [ SA.style ("font-size: " ++ toFontSize ++ ";") ]
-
-      toFontSize =
-        case config.fontSize of
-          Just size_ -> String.fromFloat size_ ++ "px"
-          Nothing -> "inherit"
-
-      text_ =
-        case config.text of
-          Just v -> v
-          Nothing -> String.fromFloat x
-  in
-  S.g
-    [ C.position plane x y config.xOffset (config.yOffset * if config.flip then -1 else 1)
-    , SA.style "text-anchor: middle;"
-    , SA.class "elm-charts__x-label"
-    ]
-    [ C.viewLabel (borderAttrs ++ colorAttrs ++ styleAttrs ++ config.attributes) text_ ]
-
-
-
-
--- TICK
-
-
-type alias Tick msg =
-  { color : Maybe String
-  , width : Maybe Float
-  , height : Float
-  , attributes : List (S.Attribute msg)
-  }
 
 
 

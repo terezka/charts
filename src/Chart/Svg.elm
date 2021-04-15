@@ -1,6 +1,7 @@
 module Chart.Svg exposing
   ( Container, Event, container
   , Line, line
+  , Tick, xTick, yTick
   , Label, label
   , Arrow, arrow
   , Bar, bar
@@ -8,7 +9,7 @@ module Chart.Svg exposing
   , Dot, dot, toRadius
   , Tooltip, tooltip
   , decoder, getNearest, getNearestX, getWithin, getWithinX, isWithinPlane
-  , position
+  , position, positionHtml
   , blue, pink, orange, green, purple, red
   )
 
@@ -105,6 +106,51 @@ container plane edits below chartEls above =
         ]
   in
   H.div htmlAttrs (below ++ [ chart ] ++ above)
+
+
+
+-- TICK
+
+
+{-| -}
+type alias Tick =
+  { color : String
+  , width : Float
+  , length : Float
+  }
+
+
+{-| -}
+xTick : Plane -> List (CA.Attribute Tick) -> Point -> Svg msg
+xTick plane edits point =
+  tick plane edits True point
+
+
+{-| -}
+yTick : Plane -> List (CA.Attribute Tick) -> Point -> Svg msg
+yTick plane edits point =
+  tick plane edits False point
+
+
+tick : Plane -> List (CA.Attribute Tick) -> Bool -> Point -> Svg msg
+tick plane edits isX point =
+  let config =
+        apply edits
+          { length = 5
+          , color = "rgb(210, 210, 210)"
+          , width = 1
+          }
+  in
+  S.line
+    [ SA.class "elm-charts__tick"
+    , SA.stroke config.color
+    , SA.strokeWidth (String.fromFloat config.width)
+    , SA.x1 <| String.fromFloat (toSVGX plane point.x)
+    , SA.x2 <| String.fromFloat (toSVGX plane point.x + if isX then 0 else config.length)
+    , SA.y1 <| String.fromFloat (toSVGY plane point.y)
+    , SA.y2 <| String.fromFloat (toSVGY plane point.y + if isX then config.length else 0)
+    ]
+    []
 
 
 

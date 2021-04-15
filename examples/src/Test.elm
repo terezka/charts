@@ -5,7 +5,6 @@ import Html.Attributes as HA
 import Svg as S exposing (Svg, svg, g, circle, text_, text)
 import Svg.Attributes as SA exposing (width, height, stroke, fill, r, transform)
 import Svg.Coordinates as Coordinates
-import Svg.Chart as SC
 import Browser
 import Time
 import Data.Iris as Iris
@@ -90,13 +89,13 @@ view model =
       --, C.paddingTop 0
       , C.paddingLeft 10
       --, C.range (C.startMax 1.2 << C.endMax 6)
-      --, C.domain (C.startMin 1 << C.endMax 12)
+      , C.domain (C.startMin 0 << C.endMin 20)
       --, C.domain (C.startMin -1 << C.endMin 25)
-      , C.events
-          [ C.getNearestX CI.getCenter identity
-              |> C.map OnHover
-              |> C.event "mousemove"
-          ]
+      --, C.events
+      --    [ C.getNearestX CI.getCenter identity
+      --        |> C.map OnHover
+      --        |> C.event "mousemove"
+      --    ]
       ]
       [ C.grid []
 
@@ -108,9 +107,9 @@ view model =
           , CA.spacing 0.04
           ]
           [ C.stacked
-              [ C.bar .y "cats" "km" [ C.borderWidth 1 ]
-              , C.bar .z "dogs" "km" [ C.borderWidth 1 ]
-              , C.bar (Just << .x) "fish" "km" [ C.borderWidth 1 ]
+              [ C.bar .y "cats" "km" [ CA.borderWidth 1 ]
+              , C.bar .z "dogs" "km" [ CA.borderWidth 1 ]
+              , C.bar (Just << .x) "fish" "km" [ CA.borderWidth 1 ]
               ]
           , C.bar .z "kids" "km" [ CA.color CA.purple ]
           ]
@@ -133,8 +132,8 @@ view model =
       --    ]
       --    data
 
-      , C.xAxis []
-      , C.yAxis []
+      --, C.xAxis []
+      --, C.yAxis []
       , C.xTicks [ C.amount 10, C.ints ]
       , C.xLabels [ C.ints ]
       , C.yLabels [ C.ints ]
