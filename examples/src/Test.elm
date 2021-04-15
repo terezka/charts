@@ -143,24 +143,7 @@ view model =
 
       , C.xAxis []
 
-      --, C.tooltip model.hoveringNew [ CA.onLeftOrRight, CA.offset 17 ] [] <| \hovered ->
-      --    [ H.div []
-      --        [ H.span
-      --            [ HA.style "max-width" "200px"
-      --            , HA.style "color" (CI.getColor hovered)
-      --            ]
-      --            [ H.text (CI.getName hovered)
-      --            , H.text ": "
-      --            , H.text (String.fromFloat <| Maybe.withDefault 0 <| CI.getValue hovered)
-      --            ]
-
-      --        ]
-      --    ]
-
-      , let tooltips =
-              CI.groupBy CI.isSameStack <| List.concatMap CI.getProducts model.hovering
-        in
-        C.tooltip tooltips [ CA.onTop, CA.offset 17 ] [] <| \hovered ->
+      , C.tooltip model.hovering [ CA.onLeftOrRight, CA.offset 17 ] [] <| \hovered ->
           let viewOne each =
                 H.div
                     [ HA.style "max-width" "200px"

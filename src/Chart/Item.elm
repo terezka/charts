@@ -1,16 +1,13 @@
 module Chart.Item exposing
-  ( Item(..), Product, Stack, Bin
+  ( Item, Product, Stack, Bin
   , onlyBarSeries, onlyDotSeries
   , General, RealConfig(..), toGeneral
   , Group, Grouping, groupBy
   , isSameSeries, isSameBin, isSameStack, isSame
   , getProducts, getCommonality
-  , getValue, getDatum
-  , getX1, getX2, getY2, getY1, getPosition, getBounds
-  , getTop, getCenter
-  , getColor, getName
-  , Property, Metric, Bars, toBarSeries, toDotSeries
-  , render
+  , getValue, getDatum, getColor, getName
+  , getTop, getCenter, getX1, getX2, getY2, getY1, getPosition, getBounds
+  , Property, Metric, Bars, toBarSeries, toDotSeries, render
   )
 
 
