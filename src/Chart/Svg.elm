@@ -10,7 +10,7 @@ module Chart.Svg exposing
   , Tooltip, tooltip
   , decoder, getNearest, getNearestX, getWithin, getWithinX, isWithinPlane
   , position, positionHtml
-  , floats, ints, times, timesCustom
+  , Bounds, Value, floats, floatsCustom, ints, intsCustom, times, timesCustom
   , blue, pink, orange, green, purple, red
   )
 
@@ -1166,27 +1166,44 @@ isWithinPlane plane x y =
 -- INTERVALS
 
 
-floats : Int -> { min : Float, max : Float } -> List { value : Float, label : String }
-floats amount bounds =
-  List.map (\i -> { value = i, label = String.fromFloat i }) (I.floats (I.around amount) bounds)
+type alias Bounds =
+  { min : Float
+  , max : Float
+  }
 
 
-ints : Int -> { min : Float, max : Float } -> List { value : Float, label : String }
-ints amount bounds =
-  List.map (\i -> { value = toFloat i, label = String.fromInt i }) (I.ints (I.around amount) bounds)
+type alias Value =
+  { value : Float
+  , label : String
+  }
 
 
-times : Time.Zone -> Int -> { min : Float, max : Float } -> List { value : Float, label : String }
-times timezone amount bounds =
-  let toValue v =
-        { value = toFloat (Time.posixToMillis v.timestamp)
-        , label = formatTime timezone v
-        }
-  in
-  List.map toValue (I.times timezone amount bounds)
+floats : Int -> Bounds -> List Value
+floats =
+  floatsCustom String.fromFloat
 
 
-timesCustom : (I.Time -> String) -> Time.Zone -> Int -> { min : Float, max : Float } -> List { value : Float, label : String }
+floatsCustom : (Float -> String) -> Int -> Bounds -> List Value
+floatsCustom formatter amount bounds =
+  List.map (\i -> { value = i, label = formatter i }) (I.floats (I.around amount) bounds)
+
+
+ints : Int -> Bounds -> List Value
+ints =
+  intsCustom String.fromInt
+
+
+intsCustom : (Int -> String) -> Int -> Bounds -> List Value
+intsCustom formatter amount bounds =
+  List.map (\i -> { value = toFloat i, label = formatter i }) (I.ints (I.around amount) bounds)
+
+
+times : Time.Zone -> Int -> Bounds -> List Value
+times timezone =
+  timesCustom (formatTime timezone) timezone
+
+
+timesCustom : (I.Time -> String) -> Time.Zone -> Int -> Bounds -> List Value
 timesCustom formatter timezone amount bounds =
   let toValue v =
         { value = toFloat (Time.posixToMillis v.timestamp)
