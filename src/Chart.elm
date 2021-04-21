@@ -2,10 +2,10 @@ module Chart exposing
     ( chart, Element, bars, bar, just, series
     , Bounds, startMin, startMax, endMin, endMax, startPad, endPad, zero, middle
     , xAxis, yAxis, xTicks, yTicks, xLabels, yLabels, grid
-    , ints, floats, times, format, values, amount, events
+    , ints, times, timesCustom, amount, events
     , Event, event, Decoder, getCoords, getNearest, getNearestX, getWithin, getWithinX, map, map2, map3, map4
 
-    , tooltip, when, formatTimestamp
+    , tooltip, when
     , svgAt, htmlAt, svg, html, none, label
     , width, height
     , marginTop, marginBottom, marginLeft, marginRight
@@ -16,7 +16,7 @@ module Chart exposing
     , filterX, filterY, only
     , blue, orange, pink, green, red, purple
     , with, list, stacked, property, variation, Property
-    , at, binned
+    , binned
     )
 
 
@@ -66,7 +66,6 @@ import Html as H
 import Html.Attributes as HA
 import Intervals as I
 import Internal.Property as P
-import DateFormat as F
 import Time
 import Dict exposing (Dict)
 import Chart.Item as Item
@@ -203,71 +202,21 @@ only value config =
 
 
 {-| -}
-times : Time.Zone -> Attribute { a | values : Maybe (Values I.Time) }
-times zone config =
-  { config | values = Just
-      { produce = I.times zone
-      , at = \_ -> zero -- TODO
-      , value = .timestamp >> Time.posixToMillis >> toFloat
-      , format = formatTime zone
-      }
-  }
-
-
-{-| -}
-ints : Attribute { a | values : Maybe (Values Int) }
+ints : Attribute { a | produce : Int -> Bounds -> List { value : Float, label : String } }
 ints config =
-  { config | values = Just
-      { produce = \i -> I.ints (I.around i)
-      , at = \_ -> zero -- TODO
-      , value = toFloat
-      , format = String.fromInt
-      }
-  }
+  { config | produce = CS.ints }
 
 
 {-| -}
-floats : Attribute { a | values : Maybe (Values Float) }
-floats config =
-  { config | values = Just
-      { produce = \i -> I.floats (I.around i)
-      , at = \_ -> zero -- TODO
-      , value = identity
-      , format = String.fromFloat
-      }
-  }
+times : Time.Zone -> Attribute { a | produce : Int -> Bounds -> List { value : Float, label : String } }
+times zone config =
+  { config | produce = CS.times zone }
 
 
 {-| -}
-values : (tick -> Float) -> List tick -> Attribute { a | values : Maybe (Values tick) }
-values toValue produce config =
-  { config | values = Just
-      { produce = \_ _ -> produce
-      , at = \_ -> zero -- TODO
-      , value = toValue
-      , format = toValue >> String.fromFloat
-      }
-  }
-
-
-{-| -}
-format : (tick -> String) -> Attribute { a | values : Maybe (Values tick) }
-format formatter config =
-  { config | values =
-      case config.values of
-        Just c -> Just { c | format = formatter }
-        Nothing -> Nothing -- TODO
-  }
-
-
-{-| -}
-at : (tick -> Float) -> Attribute { a | values : Maybe (Values tick) }
-at value config =
-  { config | values =
-      case config.values of
-        Just c -> Just { c | at = \d b -> value d }
-        Nothing -> Nothing -- TODO
-  }
+timesCustom : Time.Zone -> (I.Time -> String) -> Attribute { a | produce : Int -> Bounds -> List { value : Float, label : String } }
+timesCustom zone formatter config =
+  { config | produce = CS.timesCustom formatter zone }
 
 
 {-| -}
@@ -821,7 +770,7 @@ yAxis edits =
       ]
 
 
-type alias Ticks tick =
+type alias Ticks =
     { color : String -- TODO use Color -- TODO allow custom color by tick value
     , height : Float
     , width : Float
@@ -830,20 +779,12 @@ type alias Ticks tick =
     , end : Bounds -> Float
     , only : Float -> Bool
     , amount : Int
-    , values : Maybe (Values tick)
+    , produce : Int -> Bounds -> List { value : Float, label : String }
     }
 
 
-type alias Values tick =
-  { produce : Int -> Bounds -> List tick
-  , at : tick -> Bounds -> Float
-  , value : tick -> Float
-  , format : tick -> String
-  }
-
-
 {-| -}
-xTicks : List (Ticks tick -> Ticks tick) -> Element item msg
+xTicks : List (Attribute Ticks) -> Element item msg
 xTicks edits =
   let config =
         applyAttrs edits
@@ -853,7 +794,7 @@ xTicks edits =
           , pinned = zero
           , amount = 5
           , only = \_ -> True
-          , values = Nothing
+          , produce = CS.floats
           , height = 5
           , width = 1
           }
@@ -865,10 +806,9 @@ xTicks edits =
         }
 
       toTicks p =
-        List.filter config.only <|
-          case config.values of
-            Just { value, produce } -> List.map value (produce config.amount <| xBounds p)
-            Nothing -> I.floats (I.around config.amount) (xBounds p)
+        config.produce config.amount (xBounds p)
+          |> List.map .value
+          |> List.filter config.only
 
       addTickValues p ts =
         { ts | xs = ts.xs ++ toTicks p }
@@ -881,14 +821,14 @@ xTicks edits =
             , CA.width config.width
             ]
             { x = x
-            , y = config.pinned <| toBounds .y p
+            , y = config.pinned (toBounds .y p)
             }
     in
     S.g [ SA.class "elm-charts__x-ticks" ] <| List.map toTick (toTicks p)
 
 
 {-| -}
-yTicks : List (Ticks tick -> Ticks tick) -> Element item msg
+yTicks : List (Attribute Ticks) -> Element item msg
 yTicks edits =
   let config =
         applyAttrs edits
@@ -898,7 +838,7 @@ yTicks edits =
           , pinned = zero
           , only = \_ -> True
           , amount = 5
-          , values = Nothing
+          , produce = CS.floats
           , height = 5
           , width = 1
           }
@@ -910,10 +850,9 @@ yTicks edits =
         }
 
       toTicks p =
-        List.filter config.only <|
-          case config.values of
-            Just { value, produce } -> List.map value (produce config.amount <| yBounds p)
-            Nothing -> I.floats (I.around config.amount) (yBounds p)
+        config.produce config.amount (yBounds p)
+          |> List.map .value
+          |> List.filter config.only
 
       addTickValues p ts =
         { ts | ys = ts.ys ++ toTicks p }
@@ -925,7 +864,7 @@ yTicks edits =
             , CA.length config.height
             , CA.width config.width
             ]
-            { x = config.pinned <| toBounds .x p
+            { x = config.pinned (toBounds .x p)
             , y = y
             }
     in
@@ -933,29 +872,21 @@ yTicks edits =
 
 
 
-type alias Labels tick =
+type alias Labels =
     { color : String -- TODO use Color
     , pinned : Bounds -> Float
     , start : Bounds -> Float
     , end : Bounds -> Float
     , only : Float -> Bool
-    , xOffset : Float
-    , yOffset : Float
+    , xOff : Float
+    , yOff : Float
     , amount : Int
-    , values : Maybe (Values tick)
-    , center : Bool
+    , produce : Int -> Bounds -> List { value : Float, label : String }
     }
 
 
-type alias Pair =
-  { at : Bounds -> Float
-  , value : Float
-  , label : String
-  }
-
-
 {-| -}
-xLabels : List (Labels tick -> Labels tick) -> Element item msg
+xLabels : List (Attribute Labels) -> Element item msg
 xLabels edits =
   let config =
         applyAttrs edits
@@ -965,10 +896,9 @@ xLabels edits =
           , only = \_ -> True
           , pinned = zero
           , amount = 5
-          , values = Nothing
-          , xOffset = 0
-          , yOffset = 20
-          , center = False
+          , produce = CS.floats
+          , xOff = 0
+          , yOff = 20
           }
 
       xBounds p =
@@ -978,25 +908,8 @@ xLabels edits =
         }
 
       toTicks p =
-        List.filter (config.only << .value) <|
-          case config.values of
-            Just c ->
-              c.produce config.amount (xBounds p)
-                |> List.map (\i -> Pair (c.at i) (c.value i) (c.format i))
-
-            Nothing ->
-              I.floats (I.around config.amount) (xBounds p)
-                |> List.map (\i -> Pair config.pinned i (String.fromFloat i))
-
-      repositionIfCenter pairs =
-        if config.center
-          then List.filterMap identity (mapWithPrev toCenterTick pairs)
-          else pairs
-
-      toCenterTick maybePrev curr =
-        case maybePrev of
-          Just prev -> Just <| Pair prev.at (prev.value + (curr.value - prev.value) / 2) prev.label
-          Nothing -> Nothing
+        config.produce config.amount (xBounds p)
+          |> List.filter (config.only << .value)
 
       toTickValues p ts =
         { ts | xs = ts.xs ++ List.map .value (toTicks p) }
@@ -1005,19 +918,19 @@ xLabels edits =
     let toLabel item =
           CS.label p
             [ CA.color config.color
-            , CA.xOff config.xOffset
-            , CA.yOff config.yOffset
+            , CA.xOff config.xOff
+            , CA.yOff config.yOff
             ]
             item.label
             { x = item.value
-            , y = item.at (toBounds .y p)
+            , y = config.pinned (toBounds .y p)
             }
     in
-    S.g [ SA.class "elm-charts__x-labels" ] (List.map toLabel (repositionIfCenter <| toTicks p))
+    S.g [ SA.class "elm-charts__x-labels" ] (List.map toLabel (toTicks p))
 
 
 {-| -}
-yLabels : List (Labels tick -> Labels tick) -> Element item msg
+yLabels : List (Attribute Labels) -> Element item msg
 yLabels edits =
   let config =
         applyAttrs edits
@@ -1026,11 +939,10 @@ yLabels edits =
           , end = .max
           , pinned = zero
           , only = \_ -> True
-          , amount = 5 -- TODO
-          , values = Nothing
-          , xOffset = -8
-          , yOffset = 3
-          , center = False
+          , amount = 5
+          , produce = CS.floats
+          , xOff = -8
+          , yOff = 3
           }
 
       yBounds p =
@@ -1040,25 +952,8 @@ yLabels edits =
         }
 
       toTicks p =
-        List.filter (config.only << .value) <|
-          case config.values of
-            Just c ->
-              c.produce config.amount (yBounds p)
-                |> List.map (\i -> Pair (c.at i) (c.value i) (c.format i))
-
-            Nothing ->
-              I.floats (I.around config.amount) (yBounds p)
-                |> List.map (\i -> Pair config.pinned i (String.fromFloat i))
-
-      repositionIfCenter pairs =
-        if config.center
-          then List.filterMap identity (mapWithPrev toCenterTick pairs)
-          else pairs
-
-      toCenterTick maybePrev curr =
-        case maybePrev of
-          Just prev -> Just <| Pair prev.at (prev.value + (curr.value - prev.value) / 2) prev.label
-          Nothing -> Nothing
+        config.produce config.amount (yBounds p)
+          |> List.filter (config.only << .value)
 
       toTickValues p ts =
         { ts | ys = ts.ys ++ List.map .value (toTicks p) }
@@ -1067,16 +962,16 @@ yLabels edits =
     let toLabel item =
           CS.label p
             [ CA.color config.color
-            , CA.xOff config.xOffset
-            , CA.yOff config.yOffset
+            , CA.xOff config.xOff
+            , CA.yOff config.yOff
             , CA.rightAlign
             ]
             item.label
-            { y = item.value
-            , x = item.at (toBounds .x p)
+            { x = config.pinned (toBounds .x p)
+            , y = item.value
             }
     in
-    S.g [ SA.class "elm-charts__y-labels" ] (List.map toLabel (repositionIfCenter <| toTicks p))
+    S.g [ SA.class "elm-charts__y-labels" ] (List.map toLabel (toTicks p))
 
 
 
@@ -1456,107 +1351,6 @@ red =
 purple : String
 purple =
   "rgb(170, 80, 208)"
-
-
-
--- FORMATTING
-
-
-{-| -}
-formatTimestamp : Time.Zone -> Float -> String
-formatTimestamp zone ts =
-  formatFullTime zone (Time.millisToPosix (round ts))
-
-
-formatTime : Time.Zone -> I.Time -> String
-formatTime zone time =
-    case Maybe.withDefault time.unit time.change of
-        I.Millisecond ->
-            formatClock zone time.timestamp
-
-        I.Second ->
-            formatClock zone time.timestamp
-
-        I.Minute ->
-            formatClock zone time.timestamp
-
-        I.Hour ->
-            formatClock zone time.timestamp
-
-        I.Day ->
-            if time.multiple == 7
-            then formatWeekday zone time.timestamp
-            else formatDate zone time.timestamp
-
-        I.Month ->
-            formatMonth zone time.timestamp
-
-        I.Year ->
-            formatYear zone time.timestamp
-
-
-formatFullTime : Time.Zone -> Time.Posix -> String
-formatFullTime =
-    F.format
-        [ F.monthNumber
-        , F.text "/"
-        , F.dayOfMonthNumber
-        , F.text "/"
-        , F.yearNumberLastTwo
-        , F.text " "
-        , F.hourMilitaryFixed
-        , F.text ":"
-        , F.minuteFixed
-        ]
-
-
-formatFullDate : Time.Zone -> Time.Posix -> String
-formatFullDate =
-    F.format
-        [ F.monthNumber
-        , F.text "/"
-        , F.dayOfMonthNumber
-        , F.text "/"
-        , F.yearNumberLastTwo
-        ]
-
-
-formatDate : Time.Zone -> Time.Posix -> String
-formatDate =
-    F.format
-        [ F.monthNumber
-        , F.text "/"
-        , F.dayOfMonthNumber
-        ]
-
-
-formatClock : Time.Zone -> Time.Posix -> String
-formatClock =
-    F.format
-        [ F.hourMilitaryFixed
-        , F.text ":"
-        , F.minuteFixed
-        ]
-
-
-formatMonth : Time.Zone -> Time.Posix -> String
-formatMonth =
-    F.format
-        [ F.monthNameAbbreviated
-        ]
-
-
-formatYear : Time.Zone -> Time.Posix -> String
-formatYear =
-    F.format
-        [ F.yearNumber
-        ]
-
-
-formatWeekday : Time.Zone -> Time.Posix -> String
-formatWeekday =
-    F.format
-        [ F.dayOfWeekNameFull ]
 
 
 

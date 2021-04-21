@@ -10,6 +10,7 @@ module Chart.Svg exposing
   , Tooltip, tooltip
   , decoder, getNearest, getNearestX, getWithin, getWithinX, isWithinPlane
   , position, positionHtml
+  , floats, ints, times, timesCustom
   , blue, pink, orange, green, purple, red
   )
 
@@ -22,8 +23,11 @@ import Svg.Coordinates as Coord exposing (Point, Position, Plane, place, toSVGX,
 import Svg.Commands as C exposing (..)
 import Chart.Attributes as CA
 import Internal.Interpolation as Interpolation
+import Intervals as I
 import Json.Decode as Json
 import DOM
+import Time
+import DateFormat as F
 import Dict exposing (Dict)
 
 
@@ -1157,4 +1161,156 @@ isWithinPlane : Plane -> Float -> Float -> Bool
 isWithinPlane plane x y =
   clamp plane.x.min plane.x.max x == x && clamp plane.y.min plane.y.max y == y
 
+
+
+-- INTERVALS
+
+
+floats : Int -> { min : Float, max : Float } -> List { value : Float, label : String }
+floats amount bounds =
+  List.map (\i -> { value = i, label = String.fromFloat i }) (I.floats (I.around amount) bounds)
+
+
+ints : Int -> { min : Float, max : Float } -> List { value : Float, label : String }
+ints amount bounds =
+  List.map (\i -> { value = toFloat i, label = String.fromInt i }) (I.ints (I.around amount) bounds)
+
+
+times : Time.Zone -> Int -> { min : Float, max : Float } -> List { value : Float, label : String }
+times timezone amount bounds =
+  let toValue v =
+        { value = toFloat (Time.posixToMillis v.timestamp)
+        , label = formatTime timezone v
+        }
+  in
+  List.map toValue (I.times timezone amount bounds)
+
+
+timesCustom : (I.Time -> String) -> Time.Zone -> Int -> { min : Float, max : Float } -> List { value : Float, label : String }
+timesCustom formatter timezone amount bounds =
+  let toValue v =
+        { value = toFloat (Time.posixToMillis v.timestamp)
+        , label = formatter v
+        }
+  in
+  List.map toValue (I.times timezone amount bounds)
+
+
+
+-- FORMATTING
+
+
+formatTime : Time.Zone -> I.Time -> String
+formatTime zone time =
+    case Maybe.withDefault time.unit time.change of
+        I.Millisecond ->
+            formatClockMillis zone time.timestamp
+
+        I.Second ->
+            formatClockSecond zone time.timestamp
+
+        I.Minute ->
+            formatClock zone time.timestamp
+
+        I.Hour ->
+            formatClock zone time.timestamp
+
+        I.Day ->
+            if time.multiple == 7
+            then formatWeekday zone time.timestamp
+            else formatDate zone time.timestamp
+
+        I.Month ->
+            formatMonth zone time.timestamp
+
+        I.Year ->
+            formatYear zone time.timestamp
+
+
+formatFullTime : Time.Zone -> Time.Posix -> String
+formatFullTime =
+    F.format
+        [ F.monthNumber
+        , F.text "/"
+        , F.dayOfMonthNumber
+        , F.text "/"
+        , F.yearNumberLastTwo
+        , F.text " "
+        , F.hourMilitaryFixed
+        , F.text ":"
+        , F.minuteFixed
+        ]
+
+
+formatFullDate : Time.Zone -> Time.Posix -> String
+formatFullDate =
+    F.format
+        [ F.monthNumber
+        , F.text "/"
+        , F.dayOfMonthNumber
+        , F.text "/"
+        , F.yearNumberLastTwo
+        ]
+
+
+formatDate : Time.Zone -> Time.Posix -> String
+formatDate =
+    F.format
+        [ F.monthNumber
+        , F.text "/"
+        , F.dayOfMonthNumber
+        ]
+
+
+formatClock : Time.Zone -> Time.Posix -> String
+formatClock =
+    F.format
+        [ F.hourMilitaryFixed
+        , F.text ":"
+        , F.minuteFixed
+        ]
+
+
+formatClockSecond : Time.Zone -> Time.Posix -> String
+formatClockSecond =
+    F.format
+        [ F.hourMilitaryFixed
+        , F.text ":"
+        , F.minuteFixed
+        , F.text ":"
+        , F.secondFixed
+        ]
+
+
+formatClockMillis : Time.Zone -> Time.Posix -> String
+formatClockMillis =
+    F.format
+        [ F.hourMilitaryFixed
+        , F.text ":"
+        , F.minuteFixed
+        , F.text ":"
+        , F.secondFixed
+        , F.text ":"
+        , F.millisecondFixed
+        ]
+
+
+formatMonth : Time.Zone -> Time.Posix -> String
+formatMonth =
+    F.format
+        [ F.monthNameAbbreviated
+        ]
+
+
+formatYear : Time.Zone -> Time.Posix -> String
+formatYear =
+    F.format
+        [ F.yearNumber
+        ]
+
+
+formatWeekday : Time.Zone -> Time.Posix -> String
+formatWeekday =
+    F.format
+        [ F.dayOfWeekNameFull ]
 
