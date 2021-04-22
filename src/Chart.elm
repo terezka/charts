@@ -7,7 +7,7 @@ module Chart exposing
     , Decoder, getCoords, getNearest, getNearestX, getWithin, getWithinX, map, map2, map3, map4
 
     , tooltip
-    , svgAt, htmlAt, svg, html, none, label
+    , svgAt, htmlAt, svg, html, none, label, xTick, yTick
     , width, height
     , marginTop, marginBottom, marginLeft, marginRight
     , paddingTop, paddingBottom, paddingLeft, paddingRight
@@ -772,7 +772,7 @@ xAxis edits =
 
 
 {-| -}
-yAxis : List (Axis -> Axis) -> Element item msg
+yAxis : List (Attribute Axis) -> Element item msg
 yAxis edits =
   let config =
         applyAttrs edits
@@ -781,7 +781,6 @@ yAxis edits =
           , color = ""
           , arrow = True
           }
-
   in
   AxisElement <| \p ->
     let xBounds = toBounds .x p
@@ -992,18 +991,17 @@ yLabels edits =
 
 
 
-type alias Grid msg =
+type alias Grid =
     { color : String -- TODO use Color
     , width : Float
     , dotted : Bool
     , filterX : Bounds -> List Float
     , filterY : Bounds -> List Float
-    , attrs : List (S.Attribute msg)
     }
 
 
 {-| -}
-grid : List (Grid msg -> Grid msg) -> Element item msg
+grid : List (Attribute Grid) -> Element item msg
 grid edits =
   let config =
         applyAttrs edits
@@ -1011,7 +1009,6 @@ grid edits =
           , filterX = zero >> List.singleton
           , filterY = zero >> List.singleton
           , width = 1
-          , attrs = []
           , dotted = False
           }
 
@@ -1230,6 +1227,18 @@ eachProduct func =
 label : List (Attribute CS.Label) -> String -> C.Point -> Element data msg
 label attrs string point =
   SvgElement <| \p -> CS.label p attrs string point
+
+
+{-| -}
+xTick : List (Attribute CS.Tick) -> C.Point -> Element data msg
+xTick attrs point =
+  SvgElement <| \p -> CS.xTick p attrs point
+
+
+{-| -}
+yTick : List (Attribute CS.Tick) -> C.Point -> Element data msg
+yTick attrs point =
+  SvgElement <| \p -> CS.yTick p attrs point
 
 
 {-| -}

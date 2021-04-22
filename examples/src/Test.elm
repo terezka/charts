@@ -86,15 +86,15 @@ view model =
       , C.width 1000
       , CA.static
 
-      , C.range
-          [ C.lowest -2 C.orLower
-          , C.highest 12 C.orHigher
-          ]
+      --, C.range
+      --    [ C.lowest -2 C.orLower
+      --    , C.highest 12 C.orHigher
+      --    ]
 
-      , C.domain
-          [ C.lowest -2 C.orLower
-          , C.highest 5 C.orHigher
-          ]
+      --, C.domain
+      --    [ C.lowest -2 C.orLower
+      --    , C.highest 5 C.orHigher
+      --    ]
 
       , C.events
           [ C.getNearestX CI.getCenter identity
@@ -108,12 +108,17 @@ view model =
           [ C.label [ CA.yOff 15 ] (CI.getCommonality i).datum.label { x = (CI.getCenter p i).x, y = p.y.min } ]
 
       , C.yAxis [ C.bounds [ C.lowest 0 C.ifNoData, C.highest 10 C.ifNoData ] ]
-      , C.yTicks [ C.ints ]
-      , C.yLabels [ C.ints ]
 
       , C.xAxis [ C.bounds [ C.lowest 0 C.ifNoData, C.highest 10 C.ifNoData ] ]
-      , C.xLabels [ CA.yOff 20, C.amount 10, C.bounds [ C.lowest 0 C.ifNoData, C.highest 10 C.ifNoData ] ]
-      , C.xTicks [ C.amount 10, C.ints ]
+
+      --, C.bars
+      --    [ CA.roundTop 0.1, CA.roundBottom 0.1 ]
+      --    [ C.stacked
+      --        [ C.property .y "owls" [] []
+      --        , C.property .z "trees" [] []
+      --        ]
+      --    ]
+      --    data
 
       , C.series .x
           [ C.stacked
@@ -129,11 +134,20 @@ view model =
               top = CI.getTop p i
               cen = CI.getCenter p i
           in
-          [ C.tooltip i [] [] (List.map tooltipContent (CI.getProducts i))
-          , C.label [ CA.yOff -10 ] (String.fromFloat bounds.y2) { x = cen.x, y = top.y }
+          [ C.tooltip i [ CA.onTop ] [] (List.map tooltipContent (CI.getProducts i))
+          --, C.label [ CA.yOff -10 ] (String.fromFloat bounds.y2) { x = cen.x, y = top.y }
           ]
 
-
+      , C.withPlane <| \p ->
+          [ C.label [ CA.yOff 35 ] (String.fromFloat p.x.data.min) { x = p.x.data.min, y = 0 }
+          , C.label [ CA.yOff 35 ] (String.fromFloat p.x.data.max) { x = p.x.data.max, y = 0 }
+          , C.xTick [] { x = p.x.data.min, y = 0 }
+          , C.xTick [] { x = p.x.data.max, y = 0 }
+          , C.label [ CA.xOff -15 ] (String.fromFloat p.y.data.min) { x = 0, y = p.y.data.min }
+          , C.label [ CA.xOff -15 ] (String.fromFloat p.y.data.max) { x = 0, y = p.y.data.max }
+          , C.yTick [] { x = 0, y = p.y.data.min }
+          , C.yTick [] { x = 0, y = p.y.data.max }
+          ]
       ]
     ]
 
