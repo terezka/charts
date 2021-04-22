@@ -7,7 +7,7 @@ module Chart.Item exposing
   , getProducts, getCommonality
   , getValue, getDatum, getColor, getName
   , getTop, getCenter, getX1, getX2, getY2, getY1, getPosition, getBounds
-  , Property, Metric, Bars, toBarSeries, toDotSeries, render
+  , Property, Bars, toBarSeries, toDotSeries, render
   )
 
 
@@ -47,7 +47,6 @@ type alias Product config datum =
     , property : Int
     , stack : Int
     , name : String
-    , unit : String
     , x1 : Float
     , x2 : Float
     , y : Maybe Float
@@ -356,13 +355,6 @@ render plane (Item config) =
 
 
 {-| -}
-type alias Metric =
-  { name : String
-  , unit : String
-  }
-
-
-{-| -}
 type alias Property data meta inter deco =
   P.Property data meta inter deco
 
@@ -391,7 +383,7 @@ type alias Bars data =
   }
 
 
-toBarSeries : List (CA.Attribute (Bars data)) -> List (Property data Metric () S.Bar) -> List data -> List (Group () S.Bar data)
+toBarSeries : List (CA.Attribute (Bars data)) -> List (Property data String () S.Bar) -> List data -> List (Group () S.Bar data)
 toBarSeries barsAttrs properties data =
   let barsConfig =
         apply barsAttrs
@@ -484,8 +476,7 @@ toBarSeries barsAttrs properties data =
         in
         Item
           { details =
-              { name = section.meta.name
-              , unit = section.meta.unit
+              { name = section.meta
               , datum = bin.datum
               , property = barIndex
               , stack = sectionIndex
@@ -520,7 +511,7 @@ toBarSeries barsAttrs properties data =
 
 
 {-| -}
-toDotSeries : (data -> Float) -> List (Property data Metric S.Interpolation S.Dot) -> List data -> List (Group S.Interpolation S.Dot data)
+toDotSeries : (data -> Float) -> List (Property data String S.Interpolation S.Dot) -> List data -> List (Group S.Interpolation S.Dot data)
 toDotSeries toX properties data =
   let toInterConfig attrs =
         apply attrs
@@ -611,8 +602,7 @@ toDotSeries toX properties data =
               , x1 = x_
               , x2 = x_
               , y = prop.value datum_
-              , name = prop.meta.name
-              , unit = prop.meta.unit
+              , name = prop.meta
               , config = config
               }
           }
@@ -733,7 +723,6 @@ toGeneral generalize (Item product) =
         , x2 = product.details.x2
         , y = product.details.y
         , name = product.details.name
-        , unit = product.details.unit
         , config =
             { color = product.details.config.color
             , border = product.details.config.border
@@ -764,7 +753,6 @@ toBar (Item product) =
             , x2 = product.details.x2
             , y = product.details.y
             , name = product.details.name
-            , unit = product.details.unit
             , config = bar
             }
         }
@@ -792,7 +780,6 @@ toDot (Item product) =
             , x2 = product.details.x2
             , y = product.details.y
             , name = product.details.name
-            , unit = product.details.unit
             , config = dot
             }
         }

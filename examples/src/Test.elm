@@ -85,21 +85,15 @@ view model =
       [ C.height 400
       , C.width 1000
       , CA.static
-      --, C.marginTop 60
-      --, C.paddingTop 0
-      --, C.paddingLeft 0
-      --, C.paddingRight 0
+
       , C.range
           [ C.lowest -2 C.orLower
           , C.highest 12 C.orHigher
           ]
+
       , C.domain
-          [ C.lowest 0 C.orLower
-          , C.lowest 1 C.less
+          [ C.lowest -2 C.orLower
           , C.highest 5 C.orHigher
-          , C.highest 8 C.orLower
-          , C.highest 1 C.more
-          , C.highest 0 C.ifNoData
           ]
 
       , C.events
@@ -110,51 +104,21 @@ view model =
       ]
       [ C.grid []
 
-      --, C.bars
-      --    [ CA.roundTop 0.2
-      --    , CA.roundBottom 0.2
-      --    , CA.grouped
-      --    , CA.margin 0.1
-      --    , CA.spacing 0.04
-      --    ]
-      --    [ C.stacked
-      --        [ C.bar .y "cats" "km" [ CA.borderWidth 1 ]
-      --        , C.bar .z "dogs" "km" [ CA.borderWidth 1 ]
-      --        , C.bar (Just << .x) "fish" "km" [ CA.borderWidth 1 ]
-      --        ]
-      --    , C.bar .z "kids" "km" [ CA.color CA.purple ]
-      --    ]
-      --    data
-
       , C.eachBin <| \p i ->
-          let bin = CI.getCommonality i
-              pos = CI.getCenter p i
-          in
-          --[ C.label [ CA.yOff 15 ] (String.fromFloat bin.start) { x = bin.start, y = p.y.min }
-          --, C.label [ CA.yOff 15 ] (String.fromFloat bin.end) { x = bin.end, y = p.y.min }
-          [ C.label [ CA.yOff 15 ] bin.datum.label { x = pos.x, y = p.y.min }
-          ]
-
-      --, C.each (\_ -> CS.produce 10 CS.ints { min = 0, max = 20 }) <| \p int ->
-      --    [ C.label [ CA.xOff 10, CA.yOff 3, CA.leftAlign ] (String.fromInt int) { x = 0, y = toFloat int } ]
+          [ C.label [ CA.yOff 15 ] (CI.getCommonality i).datum.label { x = (CI.getCenter p i).x, y = p.y.min } ]
 
       , C.yAxis [ C.bounds [ C.lowest 0 C.ifNoData, C.highest 10 C.ifNoData ] ]
-
       , C.yTicks [ C.ints ]
       , C.yLabels [ C.ints ]
 
+      , C.xAxis [ C.bounds [ C.lowest 0 C.ifNoData, C.highest 10 C.ifNoData ] ]
+      , C.xLabels [ CA.yOff 20, C.amount 10, C.bounds [ C.lowest 0 C.ifNoData, C.highest 10 C.ifNoData ] ]
+      , C.xTicks [ C.amount 10, C.ints ]
+
       , C.series .x
           [ C.stacked
-              [ C.property .y "owls" "km" [ CA.monotone, CA.opacity 0.25, CA.width 4 ] [ CA.circle, CA.opacity 0.25, CA.size 10 ]
-                  |> C.variation (\datum ->
-                        if List.any (\i -> CI.getDatum i == datum) model.hovering
-                        then [ CA.auraWidth 5, CA.aura 0.40 ]
-                        else [])
-              , C.property .z "trees" "km" [ CA.monotone, CA.opacity 0.25, CA.width 4, CA.color CA.purple ] [ CA.circle, CA.opacity 0.25, CA.size 10 ]
-                  |> C.variation (\datum ->
-                        if List.any (\i -> CI.getDatum i == datum) model.hovering
-                        then [ CA.auraWidth 5, CA.aura 0.40 ]
-                        else [])
+              [ C.property .y "owls" [ CA.monotone, CA.opacity 0.25, CA.width 4 ] [ CA.circle, CA.opacity 0.25, CA.size 10 ]
+              , C.property .z "trees" [ CA.monotone, CA.opacity 0.25, CA.width 4, CA.color CA.purple ] [ CA.circle, CA.opacity 0.25, CA.size 10 ]
               ]
           ]
           data
@@ -165,30 +129,22 @@ view model =
               top = CI.getTop p i
               cen = CI.getCenter p i
           in
-          [ C.tooltip i [] [] <| List.map (\prod -> H.text (CI.getName prod)) (CI.getProducts i)
+          [ C.tooltip i [] [] (List.map tooltipContent (CI.getProducts i))
           , C.label [ CA.yOff -10 ] (String.fromFloat bounds.y2) { x = cen.x, y = top.y }
           ]
 
 
-      , C.xAxis [ C.bounds [ C.lowest 0 C.ifNoData, C.highest 10 C.ifNoData ] ]
-      , C.xLabels [ CA.yOff 20, C.amount 10, C.bounds [ C.lowest 0 C.ifNoData, C.highest 10 C.ifNoData ] ]
-      , C.xTicks [ C.amount 10, C.ints ]
-      --, C.xLabels [ C.ints ]
-
-      , C.yLabels [ C.ints ]
-
-      --, C.tooltip (CI.groupBy CI.isSameStack model.hovering) [ CA.onTop, CA.offset 30 ] [] <| \hovered ->
-      --    let viewOne each =
-      --          H.div
-      --              [ HA.style "max-width" "200px"
-      --              , HA.style "color" (CI.getColor each)
-      --              ]
-      --              [ H.text (CI.getName each)
-      --              , H.text ": "
-      --              , H.text (String.fromFloat <| Maybe.withDefault 0 <| CI.getValue each)
-      --              ]
-      --    in
-      --    List.map viewOne (CI.getProducts hovered)
       ]
     ]
 
+
+tooltipContent : CI.Product CI.General Datum -> H.Html msg
+tooltipContent each =
+  H.div
+    [ HA.style "max-width" "200px"
+    , HA.style "color" (CI.getColor each)
+    ]
+    [ H.text (CI.getName each)
+    , H.text ": "
+    , H.text (String.fromFloat <| Maybe.withDefault 0 <| CI.getValue each)
+    ]

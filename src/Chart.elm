@@ -1057,19 +1057,19 @@ type alias Property data meta inter deco =
 
 
 {-| -}
-property : (data -> Maybe Float) -> String -> String -> List (Attribute inter) -> List (Attribute deco) -> Property data Item.Metric inter deco
-property y_ name_ unit_ =
-  P.property y_ { name = name_, unit = unit_ }
+property : (data -> Maybe Float) -> String -> List (Attribute inter) -> List (Attribute deco) -> Property data String inter deco
+property y_ name_ =
+  P.property y_ name_
 
 
 {-| -}
-bar : (data -> Maybe Float) -> String -> String -> List (Attribute deco) -> Property data Item.Metric inter deco
-bar y_ name_ unit_ =
-  P.property y_ { name = name_, unit = unit_ } []
+bar : (data -> Maybe Float) -> String -> List (Attribute deco) -> Property data String inter deco
+bar y_ name_ =
+  P.property y_ name_ []
 
 
 {-| -}
-variation : (data -> List (Attribute deco)) -> Property data Item.Metric inter deco -> Property data Item.Metric inter deco
+variation : (data -> List (Attribute deco)) -> Property data String inter deco -> Property data String inter deco
 variation =
   P.variation
 
@@ -1111,7 +1111,7 @@ type alias Bar =
 
 
 {-| -}
-bars : List (Attribute (Bars data)) -> List (Property data Item.Metric () Bar) -> List data -> Element data msg
+bars : List (Attribute (Bars data)) -> List (Property data String () Bar) -> List data -> Element data msg
 bars edits properties data =
   let items =
         Item.toBarSeries edits properties data
@@ -1149,7 +1149,7 @@ bars edits properties data =
 
 
 {-| -}
-series : (data -> Float) -> List (Property data Item.Metric CS.Interpolation CS.Dot) -> List data -> Element data msg
+series : (data -> Float) -> List (Property data String CS.Interpolation CS.Dot) -> List data -> Element data msg
 series toX properties data =
   let items =
         Item.toDotSeries toX properties data
