@@ -1,6 +1,7 @@
 module Chart exposing
     ( chart, Element, bars, bar, just, series
-    , Bounds, startMin, startMax, endMin, endMax, startPad, endPad, zero, middle
+    , Bounds, lowestShouldBe, highestShouldBe, orLower, orHigher, exactly, more, less, window
+    , zero, middle
     , xAxis, yAxis, xTicks, yTicks, xLabels, yLabels, grid
     , Event, events, event, Decoder, getCoords, getNearest, getNearestX, getWithin, getWithinX, map, map2, map3, map4
 
@@ -146,15 +147,15 @@ paddingRight value config =
 
 
 {-| -}
-range : (Bounds -> Bounds) -> Attribute { a | range : Maybe (Bounds -> Bounds) }
-range value config =
-  { config | range = Just value }
+range : List (Attribute Bounds) -> Attribute { a | range : Maybe (Bounds -> Bounds) }
+range fs config =
+  { config | range = Just (\i -> List.foldl (\f b -> f b) i fs) }
 
 
 {-| -}
-domain : (Bounds -> Bounds) -> Attribute { a | domain : Maybe (Bounds -> Bounds) }
-domain value config =
-  { config | domain = Just value }
+domain : List (Attribute Bounds) -> Attribute { a | domain : Maybe (Bounds -> Bounds) }
+domain fs config =
+  { config | domain = Just (\i -> List.foldl (\f b -> f b) i fs) }
 
 
 {-| -}
@@ -415,7 +416,7 @@ definePlane config elements =
       calcDomain =
         case config.domain of
           Just edit -> edit bounds.y
-          Nothing -> startMin 0 bounds.y
+          Nothing -> lowestShouldBe 0 orLower bounds.y
 
       scalePadX =
         C.scaleCartesian
@@ -539,39 +540,51 @@ fromData toValues data =
 
 
 {-| -}
-startMin : Float -> Bounds -> Bounds
-startMin value bounds =
-  { bounds | min = min value bounds.min }
+lowestShouldBe : Float -> (Float -> Float -> Float) -> Attribute Bounds
+lowestShouldBe x edit bounds =
+  { bounds | min = edit x bounds.min }
 
 
 {-| -}
-startMax : Float -> Bounds -> Bounds
-startMax value bounds =
-  { bounds | min = max value bounds.min }
+highestShouldBe : Float -> (Float -> Float -> Float) -> Attribute Bounds
+highestShouldBe x edit bounds =
+  { bounds | max = edit x bounds.max }
 
 
 {-| -}
-endMin : Float -> Bounds -> Bounds
-endMin value bounds =
-  { bounds | max = max value bounds.max }
+window : Float -> Float -> Attribute Bounds
+window min_ max_ x =
+  { min = min_, max = max_ }
 
 
 {-| -}
-endMax : Float -> Bounds -> Bounds
-endMax value bounds =
-  { bounds | max = min value bounds.max }
+exactly : Float -> Float -> Float
+exactly exact _ =
+  exact
 
 
 {-| -}
-endPad : Float -> Bounds -> Bounds
-endPad value bounds =
-  { bounds | max = bounds.max + value }
+orLower : Float -> Float -> Float
+orLower least real =
+  if real > least then least else real
 
 
 {-| -}
-startPad : Float -> Bounds -> Bounds
-startPad value bounds =
-  { bounds | min = bounds.min - value }
+orHigher : Float -> Float -> Float
+orHigher most real =
+  if real < most then most else real
+
+
+{-| -}
+more : Float -> Float -> Float
+more v x =
+  x + v
+
+
+{-| -}
+less : Float -> Float -> Float
+less v x =
+  x - v
 
 
 {-| -}
@@ -1232,12 +1245,6 @@ eachProduct func =
 label : List (Attribute CS.Label) -> String -> C.Point -> Element data msg
 label attrs string point =
   SvgElement <| \p -> CS.label p attrs string point
-
-
-{-| -}
-list : List (Element data msg) -> Element data msg
-list els =
-  ListOfElements els
 
 
 {-| -}

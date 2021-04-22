@@ -64,7 +64,7 @@ data : List Datum
 data =
   [ { x = -1, y = Just 5, z = Just 3, label = "IT" }
   , { x = 0, y = Just 3, z = Just 6, label = "DE" }
-  , { x = 2, y = Just 2, z = Just 2, label = "DK" }
+  , { x = 2, y = Just 2, z = Just -2, label = "DK" }
   , { x = 6, y = Just 8, z = Just 5, label = "SE" }
   , { x = 8, y = Just 3, z = Just 2, label = "FI" }
   , { x = 10, y = Just 4, z = Just 3, label = "IS" }
@@ -86,11 +86,21 @@ view model =
       , C.width 1000
       , CA.static
       --, C.marginTop 60
-      --, C.paddingTop 0
-      --, C.paddingLeft 15
-      --, C.range (C.startMax 1.2 << C.endMax 6)
-      , C.domain (C.startMin 0 << C.endMin 20)
-      --, C.domain (C.startMin -1 << C.endMin 25)
+      , C.paddingTop 0
+      , C.paddingLeft 0
+      , C.paddingRight 0
+      , C.range
+          [ C.lowestShouldBe -2 C.orLower
+          , C.highestShouldBe 8 C.orHigher
+          ]
+      , C.domain
+          [ C.lowestShouldBe 0 C.orLower
+          , C.lowestShouldBe 1 C.less
+          , C.highestShouldBe 5 C.orHigher
+          , C.highestShouldBe 8 C.orLower
+          , C.highestShouldBe 1 C.more
+          ]
+
       , C.events
           [ C.getNearestX CI.getCenter identity
               |> C.map OnHover
@@ -99,21 +109,21 @@ view model =
       ]
       [ C.grid []
 
-      , C.bars
-          [ CA.roundTop 0.2
-          , CA.roundBottom 0.2
-          , CA.grouped
-          , CA.margin 0.1
-          , CA.spacing 0.04
-          ]
-          [ C.stacked
-              [ C.bar .y "cats" "km" [ CA.borderWidth 1 ]
-              , C.bar .z "dogs" "km" [ CA.borderWidth 1 ]
-              , C.bar (Just << .x) "fish" "km" [ CA.borderWidth 1 ]
-              ]
-          , C.bar .z "kids" "km" [ CA.color CA.purple ]
-          ]
-          data
+      --, C.bars
+      --    [ CA.roundTop 0.2
+      --    , CA.roundBottom 0.2
+      --    , CA.grouped
+      --    , CA.margin 0.1
+      --    , CA.spacing 0.04
+      --    ]
+      --    [ C.stacked
+      --        [ C.bar .y "cats" "km" [ CA.borderWidth 1 ]
+      --        , C.bar .z "dogs" "km" [ CA.borderWidth 1 ]
+      --        , C.bar (Just << .x) "fish" "km" [ CA.borderWidth 1 ]
+      --        ]
+      --    , C.bar .z "kids" "km" [ CA.color CA.purple ]
+      --    ]
+      --    data
 
       , C.eachBin <| \p i ->
           let bin = CI.getCommonality i
@@ -124,30 +134,31 @@ view model =
           [ C.label [ CA.yOff 15 ] bin.datum.label { x = pos.x, y = p.y.min }
           ]
 
-      , C.xLabels [ CA.yOff 35, C.amount 5 ]
 
-      , C.each (\_ -> CS.produce 10 CS.ints { min = 0, max = 20 }) <| \p int ->
-          [ C.label [ CA.xOff 10, CA.yOff 3, CA.leftAlign ] (String.fromInt int) { x = 0, y = toFloat int } ]
+      --, C.each (\_ -> CS.produce 10 CS.ints { min = 0, max = 20 }) <| \p int ->
+      --    [ C.label [ CA.xOff 10, CA.yOff 3, CA.leftAlign ] (String.fromInt int) { x = 0, y = toFloat int } ]
 
       , C.yAxis []
       , C.yTicks [ C.ints ]
       , C.yLabels [ C.ints ]
 
       , C.series .x
-          [ C.stacked
-              [ C.property .y "owls" "km" [ CA.monotone, CA.opacity 0.25 ] [ CA.circle, CA.opacity 0.25, CA.size 10 ]
-                  |> C.variation (\datum ->
-                        if List.any (\i -> CI.getDatum i == datum) model.hovering
-                        then [ CA.auraWidth 5, CA.aura 0.40 ]
-                        else [])
-              , C.property .z "trees" "km" [ CA.monotone, CA.opacity 0.25, CA.color CA.purple ] [ CA.circle, CA.opacity 0.25, CA.size 10 ]
-                  |> C.variation (\datum ->
-                        if List.any (\i -> CI.getDatum i == datum) model.hovering
-                        then [ CA.auraWidth 5, CA.aura 0.40 ]
-                        else [])
-              ]
-
+          [ C.property .z "trees" "km" [ CA.monotone, CA.width 4, CA.color CA.purple ] [ CA.circle, CA.opacity 0.25, CA.size 10 ]
           ]
+          --[ C.stacked
+          --    [ C.property (.y >> Maybe.map ((*) -1)) "owls" "km" [ CA.monotone, CA.opacity 0.25, CA.width 4 ] [ CA.circle, CA.opacity 0.25, CA.size 10 ]
+          --        |> C.variation (\datum ->
+          --              if List.any (\i -> CI.getDatum i == datum) model.hovering
+          --              then [ CA.auraWidth 5, CA.aura 0.40 ]
+          --              else [])
+          --    , C.property (.z >> Maybe.map ((*) -1)) "trees" "km" [ CA.monotone, CA.opacity 0.25, CA.width 4, CA.color CA.purple ] [ CA.circle, CA.opacity 0.25, CA.size 10 ]
+          --        |> C.variation (\datum ->
+          --              if List.any (\i -> CI.getDatum i == datum) model.hovering
+          --              then [ CA.auraWidth 5, CA.aura 0.40 ]
+          --              else [])
+          --    ]
+
+          --]
           data
 
       , C.each (\_ -> CI.groupBy CI.isSameStack model.hovering) <| \p i ->
@@ -162,8 +173,10 @@ view model =
 
 
       , C.xAxis []
-      --, C.xTicks [ C.amount 10, C.ints ]
+      , C.xLabels [ CA.yOff 20, C.amount 5 ]
+      , C.xTicks [ C.amount 10, C.ints ]
       --, C.xLabels [ C.ints ]
+
       , C.yLabels [ C.ints ]
 
       --, C.tooltip (CI.groupBy CI.isSameStack model.hovering) [ CA.onTop, CA.offset 30 ] [] <| \hovered ->

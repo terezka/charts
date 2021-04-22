@@ -1141,10 +1141,10 @@ tooltipPointerStyle direction className background borderColor =
 
 clipperStyle : Plane -> Float -> Float -> Float -> Float -> String
 clipperStyle plane minX maxX minY maxY =
-  let x1 = max 0 (plane.x.min - minX)
-      y1 = max 0 (maxY - plane.y.max)
-      x2 = x1 + (min plane.x.max maxX - max plane.x.min minX)
-      y2 = y1 + (min plane.y.max maxY - max plane.y.min minY)
+  let x1 = plane.x.min - minX
+      y1 = maxY - plane.y.max
+      x2 = x1 + abs (plane.x.max - plane.x.min)
+      y2 = y1 + abs (plane.y.max - plane.y.min)
 
       path =
         String.join " "
