@@ -1,11 +1,12 @@
 module Chart exposing
     ( chart, Element, bars, bar, just, series
-    , Bounds, lowestShouldBe, highestShouldBe, orLower, orHigher, exactly, more, less, window
+    , Bounds, lowestShouldBe, highestShouldBe, orLower, orHigher, exactly, more, less, window, ifNoData
     , zero, middle
     , xAxis, yAxis, xTicks, yTicks, xLabels, yLabels, grid
-    , Event, events, event, Decoder, getCoords, getNearest, getNearestX, getWithin, getWithinX, map, map2, map3, map4
+    , Event, events, event
+    , Decoder, getCoords, getNearest, getNearestX, getWithin, getWithinX, map, map2, map3, map4
 
-    , tooltip, when
+    , tooltip
     , svgAt, htmlAt, svg, html, none, label
     , width, height
     , marginTop, marginBottom, marginLeft, marginRight
@@ -43,7 +44,7 @@ module Chart exposing
 @docs Event, event, Decoder, getCoords, getNearest, getNearestX, getWithin, getWithinX, map, map2, map3, map4
 @docs Metric, Item, Single, Group
 @docs getBars, getGroups, getDots, withoutUnknowns
-@docs tooltip, tooltipOnTop, when, formatTimestamp
+@docs tooltip, tooltipOnTop, formatTimestamp
 
 # Attributes
 @docs width, height
@@ -159,15 +160,15 @@ domain fs config =
 
 
 {-| -}
-start : x -> Attribute { a | start : Maybe x }
+start : x -> Attribute { a | start : x }
 start value config =
-  { config | start = Just value }
+  { config | start = value }
 
 
 {-| -}
-end : x -> Attribute { a | end : Maybe x }
+end : x -> Attribute { a | end : x }
 end value config =
-  { config | end = Just value }
+  { config | end = value }
 
 
 {-| -}
@@ -403,7 +404,10 @@ definePlane config elements =
       bounds =
         List.foldl foldBounds Nothing elements
           |> Maybe.map (\{ x, y } -> { x = fixSingles x, y = fixSingles y })
-          |> Maybe.withDefault { x = { min = 0, max = 10 }, y = { min = 0, max = 10 } }
+          |> Maybe.withDefault { x = defaultBounds, y = defaultBounds }
+
+      defaultBounds =
+        { min = 0, max = 100, dataMin = 0, dataMax = 100 }
 
       fixSingles bs =
         if bs.min == bs.max then { bs | max = bs.min + 10 } else bs
@@ -423,7 +427,7 @@ definePlane config elements =
           { marginLower = config.marginLeft
           , marginUpper = config.marginRight
           , length = max 1 (Maybe.withDefault 500 config.width - config.paddingLeft - config.paddingRight)
-          , data = calcRange
+          , data = { min = bounds.x.dataMin, max = bounds.x.dataMax }
           , min = calcRange.min
           , max = calcRange.max
           }
@@ -433,7 +437,7 @@ definePlane config elements =
           { marginUpper = config.marginTop
           , marginLower = config.marginBottom
           , length = max 1 (config.height - config.paddingBottom - config.paddingTop)
-          , data = calcDomain
+          , data = { min = bounds.y.dataMin, max = bounds.y.dataMax }
           , min = calcDomain.min
           , max = calcDomain.max
           }
@@ -442,7 +446,7 @@ definePlane config elements =
       { marginLower = config.marginLeft
       , marginUpper = config.marginRight
       , length = Maybe.withDefault 500 config.width
-      , data = bounds.x
+      , data = { min = bounds.x.dataMin, max = bounds.x.dataMax }
       , min = calcRange.min - scalePadX config.paddingLeft
       , max = calcRange.max + scalePadX config.paddingRight
       }
@@ -450,7 +454,7 @@ definePlane config elements =
       { marginUpper = config.marginTop
       , marginLower = config.marginBottom
       , length = config.height
-      , data = bounds.y
+      , data = { min = bounds.y.dataMin, max = bounds.y.dataMax }
       , min = calcDomain.min - scalePadY config.paddingBottom
       , max = calcDomain.max + scalePadY config.paddingTop
       }
@@ -528,33 +532,29 @@ viewElements config plane tickValues allItems elements =
 
 {-| -}
 type alias Bounds =
-    { min : Float, max : Float }
+    { min : Float
+    , max : Float
+    , dataMin : Float
+    , dataMax : Float
+    }
 
 
 {-| -}
-fromData : List (data -> Maybe Float) -> List data -> Bounds
-fromData toValues data =
-  { min = C.minimum toValues data
-  , max = C.maximum toValues data
-  }
-
-
-{-| -}
-lowestShouldBe : Float -> (Float -> Float -> Float) -> Attribute Bounds
+lowestShouldBe : Float -> (Float -> Float -> Float -> Float) -> Attribute Bounds
 lowestShouldBe x edit bounds =
-  { bounds | min = edit x bounds.min }
+  { bounds | min = edit x bounds.min bounds.dataMin }
 
 
 {-| -}
-highestShouldBe : Float -> (Float -> Float -> Float) -> Attribute Bounds
+highestShouldBe : Float -> (Float -> Float -> Float -> Float) -> Attribute Bounds
 highestShouldBe x edit bounds =
-  { bounds | max = edit x bounds.max }
+  { bounds | max = edit x bounds.max bounds.dataMax }
 
 
 {-| -}
 window : Float -> Float -> Attribute Bounds
-window min_ max_ x =
-  { min = min_, max = max_ }
+window min_ max_ bounds =
+  { bounds | min = min_, max = max_ }
 
 
 {-| -}
@@ -564,26 +564,32 @@ exactly exact _ =
 
 
 {-| -}
-orLower : Float -> Float -> Float
-orLower least real =
+orLower : Float -> Float -> Float -> Float
+orLower least real _ =
   if real > least then least else real
 
 
 {-| -}
-orHigher : Float -> Float -> Float
-orHigher most real =
+orHigher : Float -> Float -> Float -> Float
+orHigher most real _ =
   if real < most then most else real
 
 
 {-| -}
-more : Float -> Float -> Float
-more v x =
+ifNoData : Float -> Float -> Float -> Float
+ifNoData _ _ limit =
+  limit -- TODO
+
+
+{-| -}
+more : Float -> Float -> Float -> Float
+more v x _ =
   x + v
 
 
 {-| -}
-less : Float -> Float -> Float
-less v x =
+less : Float -> Float -> Float -> Float
+less v x _ =
   x - v
 
 
@@ -596,15 +602,22 @@ zero bounds =
 {-| -}
 middle : Bounds -> Float
 middle bounds =
-    bounds.min + (bounds.max - bounds.min) / 2
+  bounds.min + (bounds.max - bounds.min) / 2
 
 
 stretch : Maybe Bounds -> Bounds -> Maybe Bounds
-stretch ma b =
-  Just <|
-    case ma of
-      Just a -> { min = min a.min b.min, max = max a.max b.max }
-      Nothing -> b
+stretch old new =
+  case old of
+    Just bounds ->
+      Just
+        { min = min bounds.min new.min
+        , max = max bounds.max new.max
+        , dataMin = min bounds.dataMin new.dataMin
+        , dataMax = max bounds.dataMax new.dataMax
+        }
+
+    Nothing ->
+      Just new
 
 
 
@@ -713,17 +726,9 @@ tooltip : Item.Item a -> List (Attribute Tooltip) -> List (H.Attribute Never) ->
 tooltip i edits attrs_ content =
   html <| \p ->
     let pos = Item.getBounds i in
-    if CS.isWithinPlane p pos.x1 pos.y2
+    if CS.isWithinPlane p pos.x1 pos.y2 -- TODO
     then CS.tooltip p (Item.getPosition p i) edits attrs_ content
     else H.text ""
-
-
-{-| -}
-when : List a -> (a -> List a -> Element data msg) -> Element data msg
-when maybeA view =
-  case maybeA of
-    a :: rest -> view a rest
-    [] -> none
 
 
 
@@ -753,18 +758,21 @@ xAxis edits =
           }
   in
   AxisElement <| \p ->
+    let xBounds = toBounds .x p
+        yBounds = toBounds .y p
+    in
     S.g
       [ SA.class "elm-charts__x-axis" ]
       [ CS.line p
           [ CA.color config.color
-          , CA.y1 (config.pinned <| toBounds .y p)
-          , CA.x1 (config.start <| toBounds .x p)
-          , CA.x2 (config.end <| toBounds .x p)
+          , CA.y1 (config.pinned yBounds)
+          , CA.x1 (max p.x.min <| config.start xBounds)
+          , CA.x2 (min p.x.max <| config.end xBounds)
           ]
       , if config.arrow then
           CS.arrow p [ CA.color config.color ]
-            { x = config.end <| toBounds .x p
-            , y = config.pinned <| toBounds .y p
+            { x = config.end xBounds
+            , y = config.pinned yBounds
             }
         else
           S.text ""
@@ -782,20 +790,24 @@ yAxis edits =
           , color = ""
           , arrow = True
           }
+
   in
   AxisElement <| \p ->
+    let xBounds = toBounds .x p
+        yBounds = toBounds .y p
+    in
     S.g
       [ SA.class "elm-charts__y-axis" ]
       [ CS.line p
           [ CA.color config.color
-          , CA.x1 (config.pinned <| toBounds .x p)
-          , CA.y1 (config.start <| toBounds .y p)
-          , CA.y2 (config.end <| toBounds .y p)
+          , CA.x1 (config.pinned xBounds)
+          , CA.y1 (max p.y.min <| config.start yBounds)
+          , CA.y2 (min p.y.max <| config.end yBounds)
           ]
       , if config.arrow then
           CS.arrow p [ CA.color config.color, CA.rotate -90 ]
-            { x = config.pinned <| toBounds .x p
-            , y = config.end <| toBounds .y p
+            { x = config.pinned xBounds
+            , y = config.end yBounds
             }
         else
           S.text ""
@@ -833,9 +845,7 @@ xTicks edits =
 
       xBounds p =
         let b = toBounds .x p in
-        { min = config.start b
-        , max = config.end b
-        }
+        { b | min = config.start b, max = config.end b }
 
       toTicks p =
         config.produce config.amount (xBounds p)
@@ -877,9 +887,7 @@ yTicks edits =
 
       yBounds p =
         let b = toBounds .y p in
-        { min = config.start b
-        , max = config.end b
-        }
+        { b | min = config.start b, max = config.end b }
 
       toTicks p =
         config.produce config.amount (yBounds p)
@@ -935,9 +943,7 @@ xLabels edits =
 
       xBounds p =
         let b = toBounds .x p in
-        { min = config.start b
-        , max = config.end b
-        }
+        { b | min = config.start b, max = config.end b }
 
       toTicks p =
         config.produce config.amount (xBounds p)
@@ -979,9 +985,7 @@ yLabels edits =
 
       yBounds p =
         let b = toBounds .y p in
-        { min = config.start b
-        , max = config.end b
-        }
+        { b | min = config.start b, max = config.end b }
 
       toTicks p =
         config.produce config.amount (yBounds p)
@@ -1288,6 +1292,8 @@ makeBounds xs ys data prev =
   let fold vs datum bounds =
         { min = min (getMin vs datum) bounds.min
         , max = max (getMax vs datum) bounds.max
+        , dataMin = min (getMin vs datum) bounds.min
+        , dataMax = max (getMax vs datum) bounds.max
         }
 
       getMin toValues datum =
@@ -1316,11 +1322,15 @@ makeBounds xs ys data prev =
             { x = List.foldl (fold xs)
                     { min = getMin xs first
                     , max = getMax xs first
+                    , dataMin = getMin xs first
+                    , dataMax = getMax xs first
                     }
                     rest
             , y = List.foldl (fold ys)
                     { min = getMin ys first
                     , max = getMax ys first
+                    , dataMin = getMin ys first
+                    , dataMax = getMax ys first
                     }
                     rest
             }
@@ -1328,14 +1338,8 @@ makeBounds xs ys data prev =
 
 toBounds : (C.Plane -> C.Axis) -> C.Plane -> Bounds
 toBounds toA plane =
-  let { min, max } = toA plane
-  in { min = min, max = max }
-
-
-toDataBounds : (C.Plane -> C.Axis) -> C.Plane -> Bounds
-toDataBounds toA plane =
-  let axis = toA plane
-  in axis.data
+  let { min, max, data } = toA plane
+  in { min = min, max = max, dataMin = data.min, dataMax = data.max }
 
 
 mapWithPrev : (Maybe a -> a -> b) -> List a -> List b

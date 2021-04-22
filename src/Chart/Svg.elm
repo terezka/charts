@@ -1170,6 +1170,8 @@ isWithinPlane plane x y =
 type alias Bounds =
   { min : Float
   , max : Float
+  , dataMin : Float
+  , dataMax : Float
   }
 
 
@@ -1179,17 +1181,17 @@ type Generator a
 
 floats : Generator Float
 floats =
-  Generator (\i -> I.floats (I.around i))
+  Generator (\i b -> I.floats (I.around i) { min = b.min, max = b.max })
 
 
 ints : Generator Int
 ints =
-  Generator (\i -> I.ints (I.around i))
+  Generator (\i b -> I.ints (I.around i) { min = b.min, max = b.max })
 
 
 times : Time.Zone -> Generator I.Time
 times zone =
-  Generator (I.times zone)
+  Generator (\i b -> I.times zone i { min = b.min, max = b.max })
 
 
 produce : Int -> Generator a -> Bounds -> List a
