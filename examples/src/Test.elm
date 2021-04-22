@@ -64,7 +64,7 @@ data : List Datum
 data =
   [ { x = -1, y = Just 5, z = Just 3, label = "IT" }
   , { x = 0, y = Just 3, z = Just 6, label = "DE" }
-  , { x = 2, y = Just 2, z = Just -2, label = "DK" }
+  , { x = 2, y = Just 2, z = Just 2, label = "DK" }
   , { x = 6, y = Just 8, z = Just 5, label = "SE" }
   , { x = 8, y = Just 3, z = Just 2, label = "FI" }
   , { x = 10, y = Just 4, z = Just 3, label = "IS" }
@@ -86,12 +86,12 @@ view model =
       , C.width 1000
       , CA.static
       --, C.marginTop 60
-      , C.paddingTop 0
-      , C.paddingLeft 0
-      , C.paddingRight 0
+      --, C.paddingTop 0
+      --, C.paddingLeft 0
+      --, C.paddingRight 0
       , C.range
           [ C.lowestShouldBe -2 C.orLower
-          , C.highestShouldBe 8 C.orHigher
+          , C.highestShouldBe 12 C.orHigher
           ]
       , C.domain
           [ C.lowestShouldBe 0 C.orLower
@@ -134,7 +134,6 @@ view model =
           [ C.label [ CA.yOff 15 ] bin.datum.label { x = pos.x, y = p.y.min }
           ]
 
-
       --, C.each (\_ -> CS.produce 10 CS.ints { min = 0, max = 20 }) <| \p int ->
       --    [ C.label [ CA.xOff 10, CA.yOff 3, CA.leftAlign ] (String.fromInt int) { x = 0, y = toFloat int } ]
 
@@ -143,22 +142,19 @@ view model =
       , C.yLabels [ C.ints ]
 
       , C.series .x
-          [ C.property .z "trees" "km" [ CA.monotone, CA.width 4, CA.color CA.purple ] [ CA.circle, CA.opacity 0.25, CA.size 10 ]
+          [ C.stacked
+              [ C.property .y "owls" "km" [ CA.monotone, CA.opacity 0.25, CA.width 4 ] [ CA.circle, CA.opacity 0.25, CA.size 10 ]
+                  |> C.variation (\datum ->
+                        if List.any (\i -> CI.getDatum i == datum) model.hovering
+                        then [ CA.auraWidth 5, CA.aura 0.40 ]
+                        else [])
+              , C.property .z "trees" "km" [ CA.monotone, CA.opacity 0.25, CA.width 4, CA.color CA.purple ] [ CA.circle, CA.opacity 0.25, CA.size 10 ]
+                  |> C.variation (\datum ->
+                        if List.any (\i -> CI.getDatum i == datum) model.hovering
+                        then [ CA.auraWidth 5, CA.aura 0.40 ]
+                        else [])
+              ]
           ]
-          --[ C.stacked
-          --    [ C.property (.y >> Maybe.map ((*) -1)) "owls" "km" [ CA.monotone, CA.opacity 0.25, CA.width 4 ] [ CA.circle, CA.opacity 0.25, CA.size 10 ]
-          --        |> C.variation (\datum ->
-          --              if List.any (\i -> CI.getDatum i == datum) model.hovering
-          --              then [ CA.auraWidth 5, CA.aura 0.40 ]
-          --              else [])
-          --    , C.property (.z >> Maybe.map ((*) -1)) "trees" "km" [ CA.monotone, CA.opacity 0.25, CA.width 4, CA.color CA.purple ] [ CA.circle, CA.opacity 0.25, CA.size 10 ]
-          --        |> C.variation (\datum ->
-          --              if List.any (\i -> CI.getDatum i == datum) model.hovering
-          --              then [ CA.auraWidth 5, CA.aura 0.40 ]
-          --              else [])
-          --    ]
-
-          --]
           data
 
       , C.each (\_ -> CI.groupBy CI.isSameStack model.hovering) <| \p i ->
