@@ -90,16 +90,16 @@ view model =
       --, C.paddingLeft 0
       --, C.paddingRight 0
       , C.range
-          [ C.lowestShouldBe -2 C.orLower
-          , C.highestShouldBe 12 C.orHigher
+          [ C.lowest -2 C.orLower
+          , C.highest 12 C.orHigher
           ]
       , C.domain
-          [ C.lowestShouldBe 0 C.orLower
-          , C.lowestShouldBe 1 C.less
-          , C.highestShouldBe 5 C.orHigher
-          , C.highestShouldBe 8 C.orLower
-          , C.highestShouldBe 1 C.more
-          , C.highestShouldBe 0 C.ifNoData
+          [ C.lowest 0 C.orLower
+          , C.lowest 1 C.less
+          , C.highest 5 C.orHigher
+          , C.highest 8 C.orLower
+          , C.highest 1 C.more
+          , C.highest 0 C.ifNoData
           ]
 
       , C.events
@@ -138,12 +138,8 @@ view model =
       --, C.each (\_ -> CS.produce 10 CS.ints { min = 0, max = 20 }) <| \p int ->
       --    [ C.label [ CA.xOff 10, CA.yOff 3, CA.leftAlign ] (String.fromInt int) { x = 0, y = toFloat int } ]
 
-      , C.yAxis [ C.start .dataMin, C.end .dataMax ]
-          --[ C.bounds
-          --    [ C.lowestShouldBe 0 C.orDataMin
-          --    , C.highestShouldBe 10 C.orDataMax
-          --    ]
-          --]
+      , C.yAxis [ C.bounds [ C.lowest 0 C.ifNoData, C.highest 10 C.ifNoData ] ]
+
       , C.yTicks [ C.ints ]
       , C.yLabels [ C.ints ]
 
@@ -174,8 +170,8 @@ view model =
           ]
 
 
-      , C.xAxis [ C.start .dataMin, C.end .dataMax ]
-      , C.xLabels [ CA.yOff 20, C.amount 10, C.start .dataMin, C.end .dataMax ]
+      , C.xAxis [ C.bounds [ C.lowest 0 C.ifNoData, C.highest 10 C.ifNoData ] ]
+      , C.xLabels [ CA.yOff 20, C.amount 10, C.bounds [ C.lowest 0 C.ifNoData, C.highest 10 C.ifNoData ] ]
       , C.xTicks [ C.amount 10, C.ints ]
       --, C.xLabels [ C.ints ]
 

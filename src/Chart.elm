@@ -1,6 +1,6 @@
 module Chart exposing
     ( chart, Element, bars, bar, just, series
-    , Bounds, lowestShouldBe, highestShouldBe, orLower, orHigher, exactly, more, less, window, ifNoData
+    , Bounds, lowest, highest, orLower, orHigher, exactly, more, less, window, ifNoData
     , zero, middle
     , xAxis, yAxis, xTicks, yTicks, xLabels, yLabels, grid
     , Event, events, event
@@ -12,7 +12,7 @@ module Chart exposing
     , marginTop, marginBottom, marginLeft, marginRight
     , paddingTop, paddingBottom, paddingLeft, paddingRight
     , range, domain, topped
-    , start, end, pinned
+    , bounds, pinned
     , dotted, noArrow, center
     , filterX, filterY, only
     , blue, orange, pink, green, red, purple
@@ -160,15 +160,9 @@ domain fs config =
 
 
 {-| -}
-start : x -> Attribute { a | start : x }
-start value config =
-  { config | start = value }
-
-
-{-| -}
-end : x -> Attribute { a | end : x }
-end value config =
-  { config | end = value }
+bounds : List (Attribute Bounds) -> Attribute { a | bounds : Bounds -> Bounds }
+bounds fs config =
+  { config | bounds = \i -> List.foldl (\f b -> f b) i fs }
 
 
 {-| -}
@@ -401,7 +395,7 @@ definePlane config elements =
           SvgElement _ -> acc
           HtmlElement _ -> acc
 
-      bounds =
+      bounds_ =
         List.foldl foldBounds Nothing elements
           |> Maybe.map (\{ x, y } -> { x = fixSingles x, y = fixSingles y })
           |> Maybe.withDefault { x = defaultBounds, y = defaultBounds }
@@ -414,20 +408,20 @@ definePlane config elements =
 
       calcRange =
         case config.range of
-          Just edit -> edit bounds.x
-          Nothing -> bounds.x
+          Just edit -> edit bounds_.x
+          Nothing -> bounds_.x
 
       calcDomain =
         case config.domain of
-          Just edit -> edit bounds.y
-          Nothing -> lowestShouldBe 0 orLower bounds.y
+          Just edit -> edit bounds_.y
+          Nothing -> lowest 0 orLower bounds_.y
 
       scalePadX =
         C.scaleCartesian
           { marginLower = config.marginLeft
           , marginUpper = config.marginRight
           , length = max 1 (Maybe.withDefault 500 config.width - config.paddingLeft - config.paddingRight)
-          , data = { min = bounds.x.dataMin, max = bounds.x.dataMax }
+          , data = { min = bounds_.x.dataMin, max = bounds_.x.dataMax }
           , min = calcRange.min
           , max = calcRange.max
           }
@@ -437,7 +431,7 @@ definePlane config elements =
           { marginUpper = config.marginTop
           , marginLower = config.marginBottom
           , length = max 1 (config.height - config.paddingBottom - config.paddingTop)
-          , data = { min = bounds.y.dataMin, max = bounds.y.dataMax }
+          , data = { min = bounds_.y.dataMin, max = bounds_.y.dataMax }
           , min = calcDomain.min
           , max = calcDomain.max
           }
@@ -446,7 +440,7 @@ definePlane config elements =
       { marginLower = config.marginLeft
       , marginUpper = config.marginRight
       , length = Maybe.withDefault 500 config.width
-      , data = { min = bounds.x.dataMin, max = bounds.x.dataMax }
+      , data = { min = bounds_.x.dataMin, max = bounds_.x.dataMax }
       , min = calcRange.min - scalePadX config.paddingLeft
       , max = calcRange.max + scalePadX config.paddingRight
       }
@@ -454,7 +448,7 @@ definePlane config elements =
       { marginUpper = config.marginTop
       , marginLower = config.marginBottom
       , length = config.height
-      , data = { min = bounds.y.dataMin, max = bounds.y.dataMax }
+      , data = { min = bounds_.y.dataMin, max = bounds_.y.dataMax }
       , min = calcDomain.min - scalePadY config.paddingBottom
       , max = calcDomain.max + scalePadY config.paddingTop
       }
@@ -540,21 +534,21 @@ type alias Bounds =
 
 
 {-| -}
-lowestShouldBe : Float -> (Float -> Float -> Float -> Float) -> Attribute Bounds
-lowestShouldBe x edit bounds =
-  { bounds | min = edit x bounds.min bounds.dataMin }
+lowest : Float -> (Float -> Float -> Float -> Float) -> Attribute Bounds
+lowest x edit b =
+  { b | min = edit x b.min b.dataMin }
 
 
 {-| -}
-highestShouldBe : Float -> (Float -> Float -> Float -> Float) -> Attribute Bounds
-highestShouldBe x edit bounds =
-  { bounds | max = edit x bounds.max bounds.dataMax }
+highest : Float -> (Float -> Float -> Float -> Float) -> Attribute Bounds
+highest x edit b =
+  { b | max = edit x b.max b.dataMax }
 
 
 {-| -}
 window : Float -> Float -> Attribute Bounds
-window min_ max_ bounds =
-  { bounds | min = min_, max = max_ }
+window min_ max_ b =
+  { b | min = min_, max = max_ }
 
 
 {-| -}
@@ -595,25 +589,25 @@ less v x _ =
 
 {-| -}
 zero : Bounds -> Float
-zero bounds =
-  clamp bounds.min bounds.max 0
+zero b =
+  clamp b.min b.max 0
 
 
 {-| -}
 middle : Bounds -> Float
-middle bounds =
-  bounds.min + (bounds.max - bounds.min) / 2
+middle b =
+  b.min + (b.max - b.min) / 2
 
 
 stretch : Maybe Bounds -> Bounds -> Maybe Bounds
 stretch old new =
   case old of
-    Just bounds ->
+    Just b ->
       Just
-        { min = min bounds.min new.min
-        , max = max bounds.max new.max
-        , dataMin = min bounds.dataMin new.dataMin
-        , dataMax = max bounds.dataMax new.dataMax
+        { min = min b.min new.min
+        , max = max b.max new.max
+        , dataMin = min b.dataMin new.dataMin
+        , dataMax = max b.dataMax new.dataMax
         }
 
     Nothing ->
@@ -737,8 +731,7 @@ tooltip i edits attrs_ content =
 
 {-| -}
 type alias Axis =
-    { start : Bounds -> Float
-    , end : Bounds -> Float
+    { bounds : Bounds -> Bounds
     , pinned : Bounds -> Float
     , arrow : Bool
     , color : String -- TODO use Color
@@ -750,15 +743,14 @@ xAxis : List (CA.Attribute Axis) -> Element item msg
 xAxis edits =
   let config =
         applyAttrs edits
-          { start = .min
-          , end = .max
+          { bounds = identity
           , pinned = zero
           , color = ""
           , arrow = True
           }
   in
   AxisElement <| \p ->
-    let xBounds = toBounds .x p
+    let xBounds = config.bounds (toBounds .x p)
         yBounds = toBounds .y p
     in
     S.g
@@ -766,12 +758,12 @@ xAxis edits =
       [ CS.line p
           [ CA.color config.color
           , CA.y1 (config.pinned yBounds)
-          , CA.x1 (max p.x.min <| config.start xBounds)
-          , CA.x2 (min p.x.max <| config.end xBounds)
+          , CA.x1 (max p.x.min xBounds.min)
+          , CA.x2 (min p.x.max xBounds.max)
           ]
       , if config.arrow then
           CS.arrow p [ CA.color config.color ]
-            { x = config.end xBounds
+            { x = xBounds.max
             , y = config.pinned yBounds
             }
         else
@@ -784,8 +776,7 @@ yAxis : List (Axis -> Axis) -> Element item msg
 yAxis edits =
   let config =
         applyAttrs edits
-          { start = .min
-          , end = .max
+          { bounds = identity
           , pinned = zero
           , color = ""
           , arrow = True
@@ -794,20 +785,20 @@ yAxis edits =
   in
   AxisElement <| \p ->
     let xBounds = toBounds .x p
-        yBounds = toBounds .y p
+        yBounds = config.bounds (toBounds .y p)
     in
     S.g
       [ SA.class "elm-charts__y-axis" ]
       [ CS.line p
           [ CA.color config.color
           , CA.x1 (config.pinned xBounds)
-          , CA.y1 (max p.y.min <| config.start yBounds)
-          , CA.y2 (min p.y.max <| config.end yBounds)
+          , CA.y1 (max p.y.min yBounds.min)
+          , CA.y2 (min p.y.max yBounds.max)
           ]
       , if config.arrow then
           CS.arrow p [ CA.color config.color, CA.rotate -90 ]
             { x = config.pinned xBounds
-            , y = config.end yBounds
+            , y = yBounds.max
             }
         else
           S.text ""
@@ -819,8 +810,7 @@ type alias Ticks =
     , height : Float
     , width : Float
     , pinned : Bounds -> Float
-    , start : Bounds -> Float
-    , end : Bounds -> Float
+    , bounds : Bounds -> Bounds
     , only : Float -> Bool
     , amount : Int
     , produce : Int -> Bounds -> List CS.TickValue
@@ -833,8 +823,7 @@ xTicks edits =
   let config =
         applyAttrs ([ floats ] ++ edits)
           { color = ""
-          , start = .min
-          , end = .max
+          , bounds = identity
           , pinned = zero
           , amount = 5
           , only = \_ -> True
@@ -844,8 +833,7 @@ xTicks edits =
           }
 
       xBounds p =
-        let b = toBounds .x p in
-        { b | min = config.start b, max = config.end b }
+        config.bounds (toBounds .x p)
 
       toTicks p =
         config.produce config.amount (xBounds p)
@@ -875,8 +863,7 @@ yTicks edits =
   let config =
         applyAttrs ([ floats ] ++ edits)
           { color = ""
-          , start = .min
-          , end = .max
+          , bounds = identity
           , pinned = zero
           , only = \_ -> True
           , amount = 5
@@ -886,8 +873,7 @@ yTicks edits =
           }
 
       yBounds p =
-        let b = toBounds .y p in
-        { b | min = config.start b, max = config.end b }
+        config.bounds (toBounds .y p)
 
       toTicks p =
         config.produce config.amount (yBounds p)
@@ -915,8 +901,7 @@ yTicks edits =
 type alias Labels =
     { color : String -- TODO use Color
     , pinned : Bounds -> Float
-    , start : Bounds -> Float
-    , end : Bounds -> Float
+    , bounds : Bounds -> Bounds
     , only : Float -> Bool
     , xOff : Float
     , yOff : Float
@@ -931,8 +916,7 @@ xLabels edits =
   let config =
         applyAttrs ([ floats ] ++ edits)
           { color = "#808BAB"
-          , start = .min
-          , end = .max
+          , bounds = identity
           , only = \_ -> True
           , pinned = zero
           , amount = 5
@@ -942,8 +926,7 @@ xLabels edits =
           }
 
       xBounds p =
-        let b = toBounds .x p in
-        { b | min = config.start b, max = config.end b }
+        config.bounds (toBounds .x p)
 
       toTicks p =
         config.produce config.amount (xBounds p)
@@ -973,8 +956,7 @@ yLabels edits =
   let config =
         applyAttrs ([ floats ] ++ edits)
           { color = "#808BAB"
-          , start = .min
-          , end = .max
+          , bounds = identity
           , pinned = zero
           , only = \_ -> True
           , amount = 5
@@ -984,8 +966,7 @@ yLabels edits =
           }
 
       yBounds p =
-        let b = toBounds .y p in
-        { b | min = config.start b, max = config.end b }
+        config.bounds (toBounds .y p)
 
       toTicks p =
         config.produce config.amount (yBounds p)
@@ -1289,11 +1270,11 @@ none =
 
 makeBounds : List (a -> Maybe Float) -> List (a -> Maybe Float) -> List a -> Maybe XYBounds -> Maybe XYBounds
 makeBounds xs ys data prev =
-  let fold vs datum bounds =
-        { min = min (getMin vs datum) bounds.min
-        , max = max (getMax vs datum) bounds.max
-        , dataMin = min (getMin vs datum) bounds.min
-        , dataMax = max (getMax vs datum) bounds.max
+  let fold vs datum bounds_ =
+        { min = min (getMin vs datum) bounds_.min
+        , max = max (getMax vs datum) bounds_.max
+        , dataMin = min (getMin vs datum) bounds_.min
+        , dataMax = max (getMax vs datum) bounds_.max
         }
 
       getMin toValues datum =
