@@ -20,7 +20,7 @@ module Chart exposing
     , amount, floatsCustom, ints, intsCustom, times, timesCustom
 
     , each, eachBin, eachStack, eachProduct
-    , withPlane, withProducts, withStacks, withBins
+    , withPlane, withBins, withStacks, withProducts
     )
 
 
@@ -696,16 +696,13 @@ type alias Tooltip =
 
 
 {-| -}
-tooltip : List (Item.Item a) -> List (Attribute Tooltip) -> List (H.Attribute Never) -> (Item.Item a -> List (H.Html Never)) -> Element data msg
-tooltip items edits attrs_ content =
-  let viewOne i =
-        html <| \p ->
-          let pos = Item.getBounds i in
-          if CS.isWithinPlane p pos.x1 pos.y2
-          then CS.tooltip p (Item.getPosition p i) edits attrs_ (content i)
-          else H.text ""
-  in
-  list (List.map viewOne items)
+tooltip : Item.Item a -> List (Attribute Tooltip) -> List (H.Attribute Never) -> List (H.Html Never) -> Element data msg
+tooltip i edits attrs_ content =
+  html <| \p ->
+    let pos = Item.getBounds i in
+    if CS.isWithinPlane p pos.x1 pos.y2
+    then CS.tooltip p (Item.getPosition p i) edits attrs_ content
+    else H.text ""
 
 
 {-| -}

@@ -156,7 +156,9 @@ view model =
               top = CI.getTop p i
               cen = CI.getCenter p i
           in
-          [ C.label [ CA.yOff -10 ] (String.fromFloat bounds.y2) { x = cen.x, y = top.y } ]
+          [ C.tooltip i [] [] <| List.map (\prod -> H.text (CI.getName prod)) (CI.getProducts i)
+          , C.label [ CA.yOff -10 ] (String.fromFloat bounds.y2) { x = cen.x, y = top.y }
+          ]
 
 
       , C.xAxis []
