@@ -151,7 +151,7 @@ tick plane edits isX point =
     , SA.stroke config.color
     , SA.strokeWidth (String.fromFloat config.width)
     , SA.x1 <| String.fromFloat (toSVGX plane point.x)
-    , SA.x2 <| String.fromFloat (toSVGX plane point.x + if isX then 0 else config.length)
+    , SA.x2 <| String.fromFloat (toSVGX plane point.x + if isX then 0 else -config.length)
     , SA.y1 <| String.fromFloat (toSVGY plane point.y)
     , SA.y2 <| String.fromFloat (toSVGY plane point.y + if isX then config.length else 0)
     ]
