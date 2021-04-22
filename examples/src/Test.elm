@@ -120,6 +120,13 @@ view model =
       --    ]
       --    data
 
+      , C.withPlane <| \p ->
+          [ C.xTick [] { x = p.x.data.min, y = 0 }
+          , C.xTick [] { x = p.x.data.max, y = 0 }
+          , C.yTick [] { x = 0, y = p.y.data.min }
+          , C.yTick [] { x = 0, y = p.y.data.max }
+          ]
+
       , C.series .x
           [ C.stacked
               [ C.property .y "owls" [ CA.monotone, CA.opacity 0.25, CA.width 4 ] [ CA.circle, CA.opacity 0.25, CA.size 10 ]
@@ -141,12 +148,8 @@ view model =
       , C.withPlane <| \p ->
           [ C.label [ CA.yOff 35 ] (String.fromFloat p.x.data.min) { x = p.x.data.min, y = 0 }
           , C.label [ CA.yOff 35 ] (String.fromFloat p.x.data.max) { x = p.x.data.max, y = 0 }
-          , C.xTick [] { x = p.x.data.min, y = 0 }
-          , C.xTick [] { x = p.x.data.max, y = 0 }
-          , C.label [ CA.xOff -15 ] (String.fromFloat p.y.data.min) { x = 0, y = p.y.data.min }
-          , C.label [ CA.xOff -15 ] (String.fromFloat p.y.data.max) { x = 0, y = p.y.data.max }
-          , C.yTick [] { x = 0, y = p.y.data.min }
-          , C.yTick [] { x = 0, y = p.y.data.max }
+          , C.label [ CA.xOff -20, CA.yOff 3 ] (String.fromFloat p.y.data.min) { x = 0, y = p.y.data.min }
+          , C.label [ CA.xOff -20, CA.yOff 3 ] (String.fromFloat p.y.data.max) { x = 0, y = p.y.data.max }
           ]
       ]
     ]

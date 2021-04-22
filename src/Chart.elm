@@ -7,7 +7,7 @@ module Chart exposing
     , Decoder, getCoords, getNearest, getNearestX, getWithin, getWithinX, map, map2, map3, map4
 
     , tooltip
-    , svgAt, htmlAt, svg, html, none, label, xTick, yTick
+    , svgAt, htmlAt, svg, html, none, label, xTick, yTick, line
     , width, height
     , marginTop, marginBottom, marginLeft, marginRight
     , paddingTop, paddingBottom, paddingLeft, paddingRight
@@ -1226,19 +1226,34 @@ eachProduct func =
 {-| -}
 label : List (Attribute CS.Label) -> String -> C.Point -> Element data msg
 label attrs string point =
-  SvgElement <| \p -> CS.label p attrs string point
+  let toTickValues p ts =
+        { ts | xs = ts.xs ++ [ point.x ], ys = ts.ys ++ [ point.y ] }
+  in
+  LabelsElement toTickValues <| \p -> CS.label p attrs string point
 
 
 {-| -}
 xTick : List (Attribute CS.Tick) -> C.Point -> Element data msg
 xTick attrs point =
-  SvgElement <| \p -> CS.xTick p attrs point
+  let toTickValues p ts =
+        { ts | xs = ts.xs ++ [ point.x ], ys = ts.ys ++ [ point.y ] }
+  in
+  TicksElement toTickValues <| \p -> CS.xTick p attrs point
 
 
 {-| -}
 yTick : List (Attribute CS.Tick) -> C.Point -> Element data msg
 yTick attrs point =
-  SvgElement <| \p -> CS.yTick p attrs point
+  let toTickValues p ts =
+        { ts | xs = ts.xs ++ [ point.x ], ys = ts.ys ++ [ point.y ] }
+  in
+  TicksElement toTickValues <| \p -> CS.yTick p attrs point
+
+
+{-| -}
+line : List (Attribute CS.Line) -> Element data msg
+line attrs =
+  SvgElement <| \p -> CS.line p attrs
 
 
 {-| -}
