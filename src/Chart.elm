@@ -18,6 +18,8 @@ module Chart exposing
     , binned
 
     , amount, floatsCustom, ints, intsCustom, times, timesCustom
+
+    , each, eachBin, eachStack, eachProduct
     )
 
 
@@ -1184,6 +1186,30 @@ series toX properties data =
 with : (List (Item.Product Item.General data) -> a) -> (C.Plane -> a -> List (Element data msg)) -> Element data msg
 with filter func =
   SubElements <| \p is -> func p (filter is)
+
+
+{-| -}
+each : (C.Plane -> List a) -> (C.Plane -> a -> List (Element data msg)) -> Element data msg
+each toItems func =
+  SubElements <| \p is -> List.concatMap (func p) (toItems p)
+
+
+{-| -}
+eachBin : (C.Plane -> Item.Group (Item.Bin data) Item.General data -> List (Element data msg)) -> Element data msg
+eachBin func =
+  with (Item.groupBy Item.isSameBin) (\p -> List.concatMap (func p))
+
+
+{-| -}
+eachStack : (C.Plane -> Item.Group (Item.Stack data) Item.General data -> List (Element data msg)) -> Element data msg
+eachStack func =
+  with (Item.groupBy Item.isSameStack) (\p -> List.concatMap (func p))
+
+
+{-| -}
+eachProduct : (C.Plane -> Item.Product Item.General data -> List (Element data msg)) -> Element data msg
+eachProduct func =
+  with identity (\p -> List.concatMap (func p))
 
 
 {-| -}

@@ -115,17 +115,19 @@ view model =
           ]
           data
 
-      , C.with (CI.groupBy CI.isSameBin) <| \p ->
-          List.concatMap <| \i ->
-            let bin = CI.getCommonality i
-                pos = CI.getCenter p i
-            in
-            --[ C.label [ CA.yOff 15 ] (String.fromFloat bin.start) { x = bin.start, y = p.y.min }
-            --, C.label [ CA.yOff 15 ] (String.fromFloat bin.end) { x = bin.end, y = p.y.min }
-            [ C.label [ CA.yOff 15 ] bin.datum.label { x = pos.x, y = p.y.min }
-            ]
+      , C.eachBin <| \p i ->
+          let bin = CI.getCommonality i
+              pos = CI.getCenter p i
+          in
+          --[ C.label [ CA.yOff 15 ] (String.fromFloat bin.start) { x = bin.start, y = p.y.min }
+          --, C.label [ CA.yOff 15 ] (String.fromFloat bin.end) { x = bin.end, y = p.y.min }
+          [ C.label [ CA.yOff 15 ] bin.datum.label { x = pos.x, y = p.y.min }
+          ]
 
       , C.xLabels [ CA.yOff 35, C.amount 5 ]
+
+      , C.each (\_ -> CS.produce 10 CS.ints { min = 0, max = 20 }) <| \p int ->
+          [ C.label [ CA.xOff 10, CA.yOff 3, CA.leftAlign ] (String.fromInt int) { x = 0, y = toFloat int } ]
 
       , C.yAxis []
       , C.yTicks [ C.ints ]
