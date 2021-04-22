@@ -14,12 +14,13 @@ module Chart exposing
     , dotted, noArrow, center
     , filterX, filterY, only
     , blue, orange, pink, green, red, purple
-    , with, list, stacked, property, variation, Property
+    , stacked, property, variation, Property
     , binned
 
     , amount, floatsCustom, ints, intsCustom, times, timesCustom
 
     , each, eachBin, eachStack, eachProduct
+    , withPlane, withProducts, withStacks, withBins
     )
 
 
@@ -1183,33 +1184,51 @@ series toX properties data =
 
 
 {-| -}
-with : (List (Item.Product Item.General data) -> a) -> (C.Plane -> a -> List (Element data msg)) -> Element data msg
-with filter func =
-  SubElements <| \p is -> func p (filter is)
+withPlane : (C.Plane -> List (Element data msg)) -> Element data msg
+withPlane func =
+  SubElements <| \p is -> func p
+
+
+{-| -}
+withBins : (C.Plane -> List (Item.Group (Item.Bin data) Item.General data) -> List (Element data msg)) -> Element data msg
+withBins func =
+  SubElements <| \p is -> func p (Item.groupBy Item.isSameBin is)
+
+
+{-| -}
+withStacks : (C.Plane -> List (Item.Group (Item.Stack data) Item.General data) -> List (Element data msg)) -> Element data msg
+withStacks func =
+  SubElements <| \p is -> func p (Item.groupBy Item.isSameStack is)
+
+
+{-| -}
+withProducts : (C.Plane -> List (Item.Product Item.General data) -> List (Element data msg)) -> Element data msg
+withProducts func =
+  SubElements <| \p is -> func p is
 
 
 {-| -}
 each : (C.Plane -> List a) -> (C.Plane -> a -> List (Element data msg)) -> Element data msg
 each toItems func =
-  SubElements <| \p is -> List.concatMap (func p) (toItems p)
+  SubElements <| \p _ -> List.concatMap (func p) (toItems p)
 
 
 {-| -}
 eachBin : (C.Plane -> Item.Group (Item.Bin data) Item.General data -> List (Element data msg)) -> Element data msg
 eachBin func =
-  with (Item.groupBy Item.isSameBin) (\p -> List.concatMap (func p))
+  SubElements <| \p is -> List.concatMap (func p) (Item.groupBy Item.isSameBin is)
 
 
 {-| -}
 eachStack : (C.Plane -> Item.Group (Item.Stack data) Item.General data -> List (Element data msg)) -> Element data msg
 eachStack func =
-  with (Item.groupBy Item.isSameStack) (\p -> List.concatMap (func p))
+  SubElements <| \p is -> List.concatMap (func p) (Item.groupBy Item.isSameStack is)
 
 
 {-| -}
 eachProduct : (C.Plane -> Item.Product Item.General data -> List (Element data msg)) -> Element data msg
 eachProduct func =
-  with identity (\p -> List.concatMap (func p))
+  SubElements <| \p is -> List.concatMap (func p) is
 
 
 {-| -}

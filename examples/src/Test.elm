@@ -150,14 +150,13 @@ view model =
           ]
           data
 
-      , C.with (\_ -> CI.groupBy CI.isSameStack model.hovering) <| \p ->
-          List.map <| \i ->
-            let bin = CI.getCommonality i
-                bounds = CI.getBounds i
-                top = CI.getTop p i
-                cen = CI.getCenter p i
-            in
-            C.label [ CA.yOff -10 ] (String.fromFloat bounds.y2) { x = cen.x, y = top.y }
+      , C.each (\_ -> CI.groupBy CI.isSameStack model.hovering) <| \p i ->
+          let bin = CI.getCommonality i
+              bounds = CI.getBounds i
+              top = CI.getTop p i
+              cen = CI.getCenter p i
+          in
+          [ C.label [ CA.yOff -10 ] (String.fromFloat bounds.y2) { x = cen.x, y = top.y } ]
 
 
       , C.xAxis []
