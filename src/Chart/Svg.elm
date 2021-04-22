@@ -10,7 +10,8 @@ module Chart.Svg exposing
   , Tooltip, tooltip
   , decoder, getNearest, getNearestX, getWithin, getWithinX, isWithinPlane
   , position, positionHtml
-  , Bounds, Value, floats, floatsCustom, ints, intsCustom, times, timesCustom
+  , Bounds, produce, floats, ints, times
+  , TickValue, toTickValues, formatTime
   , blue, pink, orange, green, purple, red
   )
 
@@ -1172,45 +1173,39 @@ type alias Bounds =
   }
 
 
-type alias Value =
+type Generator a
+  = Generator (Int -> Bounds -> List a)
+
+
+floats : Generator Float
+floats =
+  Generator (\i -> I.floats (I.around i))
+
+
+ints : Generator Int
+ints =
+  Generator (\i -> I.ints (I.around i))
+
+
+times : Time.Zone -> Generator I.Time
+times zone =
+  Generator (I.times zone)
+
+
+produce : Int -> Generator a -> Bounds -> List a
+produce amount (Generator func) bounds =
+  func amount bounds
+
+
+type alias TickValue =
   { value : Float
   , label : String
   }
 
 
-floats : Int -> Bounds -> List Value
-floats =
-  floatsCustom String.fromFloat
-
-
-floatsCustom : (Float -> String) -> Int -> Bounds -> List Value
-floatsCustom formatter amount bounds =
-  List.map (\i -> { value = i, label = formatter i }) (I.floats (I.around amount) bounds)
-
-
-ints : Int -> Bounds -> List Value
-ints =
-  intsCustom String.fromInt
-
-
-intsCustom : (Int -> String) -> Int -> Bounds -> List Value
-intsCustom formatter amount bounds =
-  List.map (\i -> { value = toFloat i, label = formatter i }) (I.ints (I.around amount) bounds)
-
-
-times : Time.Zone -> Int -> Bounds -> List Value
-times timezone =
-  timesCustom (formatTime timezone) timezone
-
-
-timesCustom : (I.Time -> String) -> Time.Zone -> Int -> Bounds -> List Value
-timesCustom formatter timezone amount bounds =
-  let toValue v =
-        { value = toFloat (Time.posixToMillis v.timestamp)
-        , label = formatter v
-        }
-  in
-  List.map toValue (I.times timezone amount bounds)
+toTickValues : (a -> Float) -> (a -> String) -> List a -> List TickValue
+toTickValues toValue toString =
+  List.map <| \i -> { value = toValue i, label = toString i }
 
 
 

@@ -2,8 +2,7 @@ module Chart exposing
     ( chart, Element, bars, bar, just, series
     , Bounds, startMin, startMax, endMin, endMax, startPad, endPad, zero, middle
     , xAxis, yAxis, xTicks, yTicks, xLabels, yLabels, grid
-    , ints, times, timesCustom, amount, events
-    , Event, event, Decoder, getCoords, getNearest, getNearestX, getWithin, getWithinX, map, map2, map3, map4
+    , Event, events, event, Decoder, getCoords, getNearest, getNearestX, getWithin, getWithinX, map, map2, map3, map4
 
     , tooltip, when
     , svgAt, htmlAt, svg, html, none, label
@@ -17,6 +16,8 @@ module Chart exposing
     , blue, orange, pink, green, red, purple
     , with, list, stacked, property, variation, Property
     , binned
+
+    , amount, floatsCustom, ints, intsCustom, times, timesCustom
     )
 
 
@@ -202,21 +203,39 @@ only value config =
 
 
 {-| -}
-ints : Attribute { a | produce : Int -> Bounds -> List { value : Float, label : String } }
-ints config =
-  { config | produce = CS.ints }
+floats : Attribute { a | produce : Int -> Bounds -> List CS.TickValue }
+floats config =
+  { config | produce = \a -> CS.produce a CS.floats >> CS.toTickValues identity String.fromFloat }
 
 
 {-| -}
-times : Time.Zone -> Attribute { a | produce : Int -> Bounds -> List { value : Float, label : String } }
+floatsCustom : (Float -> String) -> Attribute { a | produce : Int -> Bounds -> List CS.TickValue }
+floatsCustom formatter config =
+  { config | produce = \a -> CS.produce a CS.floats >> CS.toTickValues identity formatter }
+
+
+{-| -}
+ints : Attribute { a | produce : Int -> Bounds -> List CS.TickValue }
+ints =
+  intsCustom String.fromInt
+
+
+{-| -}
+intsCustom : (Int -> String) -> Attribute { a | produce : Int -> Bounds -> List CS.TickValue }
+intsCustom formatter config =
+  { config | produce = \a -> CS.produce a CS.ints >> CS.toTickValues toFloat formatter }
+
+
+{-| -}
+times : Time.Zone -> Attribute { a | produce : Int -> Bounds -> List CS.TickValue }
 times zone config =
-  { config | produce = CS.times zone }
+  timesCustom zone (CS.formatTime zone) config
 
 
 {-| -}
-timesCustom : Time.Zone -> (I.Time -> String) -> Attribute { a | produce : Int -> Bounds -> List { value : Float, label : String } }
+timesCustom : Time.Zone -> (I.Time -> String) -> Attribute { a | produce : Int -> Bounds -> List CS.TickValue }
 timesCustom zone formatter config =
-  { config | produce = CS.timesCustom formatter zone }
+  { config | produce = \a -> CS.produce a (CS.times zone) >> CS.toTickValues (toFloat << Time.posixToMillis << .timestamp) formatter }
 
 
 {-| -}
@@ -779,7 +798,7 @@ type alias Ticks =
     , end : Bounds -> Float
     , only : Float -> Bool
     , amount : Int
-    , produce : Int -> Bounds -> List { value : Float, label : String }
+    , produce : Int -> Bounds -> List CS.TickValue
     }
 
 
@@ -787,14 +806,14 @@ type alias Ticks =
 xTicks : List (Attribute Ticks) -> Element item msg
 xTicks edits =
   let config =
-        applyAttrs edits
+        applyAttrs ([ floats ] ++ edits)
           { color = ""
           , start = .min
           , end = .max
           , pinned = zero
           , amount = 5
           , only = \_ -> True
-          , produce = CS.floats
+          , produce = \a b -> []
           , height = 5
           , width = 1
           }
@@ -831,14 +850,14 @@ xTicks edits =
 yTicks : List (Attribute Ticks) -> Element item msg
 yTicks edits =
   let config =
-        applyAttrs edits
+        applyAttrs ([ floats ] ++ edits)
           { color = ""
           , start = .min
           , end = .max
           , pinned = zero
           , only = \_ -> True
           , amount = 5
-          , produce = CS.floats
+          , produce = \a b -> []
           , height = 5
           , width = 1
           }
@@ -881,7 +900,7 @@ type alias Labels =
     , xOff : Float
     , yOff : Float
     , amount : Int
-    , produce : Int -> Bounds -> List { value : Float, label : String }
+    , produce : Int -> Bounds -> List CS.TickValue
     }
 
 
@@ -889,14 +908,14 @@ type alias Labels =
 xLabels : List (Attribute Labels) -> Element item msg
 xLabels edits =
   let config =
-        applyAttrs edits
+        applyAttrs ([ floats ] ++ edits)
           { color = "#808BAB"
           , start = .min
           , end = .max
           , only = \_ -> True
           , pinned = zero
           , amount = 5
-          , produce = CS.floats
+          , produce = \a b -> []
           , xOff = 0
           , yOff = 20
           }
@@ -933,14 +952,14 @@ xLabels edits =
 yLabels : List (Attribute Labels) -> Element item msg
 yLabels edits =
   let config =
-        applyAttrs edits
+        applyAttrs ([ floats ] ++ edits)
           { color = "#808BAB"
           , start = .min
           , end = .max
           , pinned = zero
           , only = \_ -> True
           , amount = 5
-          , produce = CS.floats
+          , produce = \a b -> []
           , xOff = -8
           , yOff = 3
           }

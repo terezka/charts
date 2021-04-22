@@ -125,10 +125,11 @@ view model =
             [ C.label [ CA.yOff 15 ] bin.datum.label { x = pos.x, y = p.y.min }
             ]
 
-      , C.xLabels [ CA.yOff 35, C.amount 5, C.times Time.utc ]
+      , C.xLabels [ CA.yOff 35, C.amount 5 ]
 
       , C.yAxis []
       , C.yTicks [ C.ints ]
+      , C.yLabels [ C.ints ]
 
       , C.series .x
           [ C.stacked
