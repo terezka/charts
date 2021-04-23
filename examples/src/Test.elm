@@ -103,48 +103,57 @@ view model =
       [ C.grid []
 
       , C.eachBin <| \p i ->
-          [ C.label [ CA.yOff 15 ] (CI.getCommonality i).datum.label { x = (CI.getCenter p i).x, y = p.y.min } ]
+          [ C.label [ CA.yOff 10, CA.rotate -45, CA.rightAlign ] (CI.getCommonality i).datum.label
+              { x = (CI.getCenter p i).x, y = p.y.min }
+          ]
+
+      , C.withPlane <| \p ->
+          [ C.title [ CA.yOff 40, CA.fontSize 12 ] "Timeline"
+              { x = p.x.min + (p.x.max - p.x.min) / 2, y = p.y.min }
+          , C.title [ CA.xOff 20, CA.fontSize 12, CA.rotate -90 ] "Height"
+              { x = 0, y = p.y.min + (p.y.max - p.y.min) * 0.85 }
+          ]
 
       , C.xAxis []
       , C.yAxis []
 
-      , C.bars
-          [ CA.roundTop 0.1, CA.roundBottom 0.1 ]
-          [ C.stacked
-              [ C.bar .y "owls"
-                  [ CA.color CA.blue
-                  , CA.opacity 0.5
-                  , CA.gradient [ CA.bottom CA.green ]
-                  , CA.border "transparent"
-                  , CA.borderWidth 0.5
-                  ]
-              , C.bar .z "trees"
-                  [ CA.color CA.purple
-                  , CA.opacity 0.5
-                  , CA.gradient [ CA.bottom CA.pink ]
-                  , CA.border "transparent"
-                  , CA.borderWidth 0.5
-                  ]
-              ]
-          ]
-          data
-
-
-      --, C.series .x
+      --, C.bars
+      --    [ CA.roundTop 0.1, CA.roundBottom 0.1 ]
       --    [ C.stacked
-      --        [ C.property .y "owls"
-      --            [ CA.linear, CA.opacity 0.75
-      --            , CA.dotted [ CA.color CA.blue, CA.width 2, CA.rotate 225 ]
+      --        [ C.bar .y "owls"
+      --            [ CA.color CA.blue
+      --            , CA.opacity 0.5
+      --            , CA.gradient [ CA.bottom CA.green ]
+      --            , CA.border "transparent"
+      --            , CA.borderWidth 0.5
       --            ]
-      --            []
-      --        , C.property .z "trees"
-      --            [ CA.linear, CA.opacity 0.4, CA.color CA.purple
-      --            , CA.gradient [ CA.top CA.purple, CA.bottom CA.pink ]
+      --        , C.bar .z "trees"
+      --            [ CA.color CA.purple
+      --            , CA.opacity 0.5
+      --            , CA.gradient [ CA.bottom CA.pink ]
+      --            , CA.border "transparent"
+      --            , CA.borderWidth 0.5
       --            ]
-      --            [ CA.circle, CA.size 3 ]
       --        ]
       --    ]
       --    data
+
+
+      , C.series .x
+          [ C.stacked
+              [ C.property .y "owls"
+                  [ CA.linear, CA.opacity 0.75
+                  , CA.dotted [ CA.color CA.blue, CA.width 2, CA.rotate 0 ]
+                  ]
+                  [ CA.circle, CA.size 3 ]
+              , C.property .z "trees"
+                  [ CA.linear, CA.opacity 0.4, CA.color CA.purple
+                  , CA.gradient [ CA.top CA.purple, CA.bottom CA.pink ]
+                  ]
+                  [ CA.circle, CA.size 3 ]
+              ]
+          ]
+          data
 
       , C.yLabels []
 

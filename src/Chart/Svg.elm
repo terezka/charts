@@ -263,7 +263,7 @@ type alias Label =
   , fontSize : Maybe Int
   , color : String
   , anchor : CA.Anchor
-  -- TODO rotate
+  , rotate : Float
   }
 
 
@@ -279,6 +279,7 @@ label plane edits string point =
           , fontSize = Nothing
           , color = "#808BAB"
           , anchor = CA.Middle
+          , rotate = 0
           }
 
       fontStyle =
@@ -297,7 +298,7 @@ label plane edits string point =
     , SA.stroke config.border
     , SA.strokeWidth (String.fromFloat config.borderWidth)
     , SA.fill config.color
-    , position plane point.x point.y config.xOff config.yOff
+    , position plane config.rotate point.x point.y config.xOff config.yOff
     , SA.style <| String.join " " [ "pointer-events: none;", fontStyle, anchorStyle ]
     ]
     [ S.tspan [] [ S.text string ] ]
@@ -339,7 +340,7 @@ arrow plane edits point =
   in
   S.g
     [ SA.class "elm-charts__arrow"
-    , position plane point.x point.y config.xOff config.yOff
+    , position plane 0 point.x point.y config.xOff config.yOff
     ]
     [ S.polygon
         [ SA.fill config.color
@@ -1173,9 +1174,9 @@ decodePosition =
 -- POSITIONING
 
 
-position : Plane -> Float -> Float -> Float -> Float -> S.Attribute msg
-position plane x_ y_ xOff_ yOff_ =
-  SA.transform <| "translate(" ++ String.fromFloat (toSVGX plane x_ + xOff_) ++ "," ++ String.fromFloat (toSVGY plane y_ + yOff_) ++ ")"
+position : Plane -> Float -> Float -> Float -> Float -> Float -> S.Attribute msg
+position plane rotation x_ y_ xOff_ yOff_ =
+  SA.transform <| "translate(" ++ String.fromFloat (toSVGX plane x_ + xOff_) ++ "," ++ String.fromFloat (toSVGY plane y_ + yOff_) ++ ") rotate(" ++ String.fromFloat rotation ++ ")"
 
 
 

@@ -6,7 +6,7 @@ module Chart exposing
     , Bounds, lowest, highest, orLower, orHigher, exactly, more, less, window, ifNoData, zero, middle
     , Event, event
     , Decoder, getCoords, getNearest, getNearestX, getWithin, getWithinX, map, map2, map3, map4
-    , tooltip, line, label, xTick, yTick, svgAt, htmlAt, svg, html, none
+    , tooltip, line, label, title, xTick, yTick, svgAt, htmlAt, svg, html, none
     , each, eachBin, eachStack, eachProduct
     , withPlane, withBins, withStacks, withProducts
 
@@ -1187,6 +1187,12 @@ label attrs string point =
 
 
 {-| -}
+title : List (Attribute CS.Label) -> String -> C.Point -> Element data msg
+title attrs string point =
+  SvgElement <| \p -> CS.label p attrs string point
+
+
+{-| -}
 xTick : List (Attribute CS.Tick) -> C.Point -> Element data msg
 xTick attrs point =
   let toTickValues p ts =
@@ -1226,7 +1232,7 @@ html func =
 svgAt : (Bounds -> Float) -> (Bounds -> Float) -> Float -> Float -> List (S.Svg msg) -> Element data msg
 svgAt toX toY xOff yOff view =
   SvgElement <| \p ->
-    S.g [ CS.position p (toX <| toBounds .x p) (toY <| toBounds .y p) xOff yOff ] view
+    S.g [ CS.position p 0 (toX <| toBounds .x p) (toY <| toBounds .y p) xOff yOff ] view
 
 
 {-| -}
