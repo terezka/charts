@@ -6,7 +6,7 @@ module Chart.Item exposing
   , isSameSeries, isSameBin, isSameStack, isSame
   , getProducts, getCommonality
   , getValue, getDatum, getColor, getName
-  , getTop, getCenter, getX1, getX2, getY2, getY1, getPosition, getBounds
+  , getTop, getCenter, getLeft, getRight, getX1, getX2, getY2, getY1, getPosition, getBounds
   , Property, Bars, toBarSeries, toDotSeries, render
   )
 
@@ -454,7 +454,7 @@ toBarSeries barsAttrs properties data =
             length = end - start
             margin = length * barsConfig.margin
             width = (length - margin * 2 - (numOfBars - 1) * barsConfig.spacing) / numOfBars
-            offset = toFloat barIndex * width + toFloat barIndex * barsConfig.spacing
+            offset = if barsConfig.grouped then toFloat barIndex * width + toFloat barIndex * barsConfig.spacing else 0
 
             x1 = start + margin + offset
             x2 = start + margin + offset + width

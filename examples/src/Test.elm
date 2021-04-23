@@ -89,10 +89,9 @@ view model =
       , C.marginTop 30
       , C.marginRight 30
 
-      --, C.domain
-      --    [ C.lowest -2 C.orLower
-      --    , C.highest 5 C.orHigher
-      --    ]
+      , C.domain
+          [ C.highest 1 C.more
+          ]
 
       , CA.events
           [ C.getNearestX CI.getCenter identity
@@ -102,61 +101,68 @@ view model =
       ]
       [ C.grid []
 
-      , C.eachBin <| \p i ->
-          if List.isEmpty <| List.filterMap CI.isBarSeries (CI.getProducts i) then [] else
-          [ C.label [ CA.yOff -5 ] (CI.getCommonality i).datum.label { x = (CI.getCenter p i).x, y = p.y.min }
-          ]
-
       , C.withPlane <| \p ->
-          [ C.title [ CA.yOff 40, CA.fontSize 12 ] "Timeline"
-              { x = p.x.min + (p.x.max - p.x.min) / 2, y = p.y.min }
-          , C.title [ CA.xOff 20, CA.fontSize 12, CA.rotate 90 ] "Height"
+          [ C.title [ CA.xOff 20, CA.fontSize 12, CA.rotate 90 ] "Height"
               { x = 0, y = p.y.min + (p.y.max - p.y.min) * 0.85 }
           ]
 
       , C.xAxis []
-      , C.xLabels [ C.amount 10 ]
+      --, C.xLabels [ C.amount 10 ]
       , C.yAxis []
 
       , C.bars
-          [ CA.roundTop 0.1, CA.roundBottom 0.1 ]
+          [ CA.roundTop 0.1
+          , CA.roundBottom 0.1
+          , CA.margin 0.3
+          ]
           [ C.stacked
               [ C.bar .y "owls"
                   [ CA.color CA.blue
-                  , CA.opacity 0.5
+                  , CA.opacity 0.75
                   , CA.border "transparent"
                   , CA.borderWidth 0.5
                   ]
               , C.bar .z "trees"
                   [ CA.color CA.purple
-                  , CA.opacity 0.5
+                  , CA.opacity 0.75
                   , CA.border "transparent"
                   , CA.borderWidth 0.5
                   ]
               ]
-          ]
-          data
-
-      , C.series .x
-          [ C.stacked
-              [ C.property .y "owls"
-                  [ CA.linear, CA.opacity 0.5
-                  , CA.striped [ CA.width 2 ]
-                  ]
-                  [ CA.circle, CA.size 10, CA.opacity 0, CA.border CA.blue ]
-              , C.property (C.just (.x >> (+) 4)) "kids"
-                  [ CA.linear, CA.opacity 0.4, CA.color CA.purple
-                  , CA.dotted [ CA.width 4 ]
-                  ]
-                  [ CA.circle, CA.size 10, CA.opacity 0, CA.border CA.purple ]
-              , C.property .z "trees"
-                  [ CA.linear, CA.opacity 0.4, CA.color CA.pink, CA.dashed [ 5, 3 ]
-                  , CA.striped [ CA.width 5, CA.rotate 45, CA.space 3 ]
-                  ]
-                  [ CA.circle, CA.size 10, CA.opacity 0, CA.border CA.pink ]
+          , C.bar (C.just (.x >> (+) 2 >> (*) -1)) "trees"
+              [ CA.color CA.pink
+              , CA.opacity 0.75
+              , CA.border "transparent"
+              , CA.borderWidth 0.5
               ]
           ]
           data
+
+      , C.eachBin <| \p i ->
+          if List.isEmpty <| List.filterMap CI.isBarSeries (CI.getProducts i) then [] else
+          [ C.title [ CA.yOff 5, CA.xOff 5, CA.borderWidth 0, CA.leftAlign ] (CI.getCommonality i).datum.label { x = CI.getX1 p i, y = p.y.max }
+          ]
+
+      --, C.series .x
+      --    [ C.stacked
+      --        [ C.property .y "owls"
+      --            [ CA.linear, CA.opacity 0.5
+      --            , CA.striped [ CA.width 2 ]
+      --            ]
+      --            [ CA.circle, CA.size 10, CA.opacity 0, CA.border CA.blue ]
+      --        , C.property (C.just (.x >> (+) 4)) "kids"
+      --            [ CA.linear, CA.opacity 0.4, CA.color CA.purple
+      --            , CA.dotted [ CA.width 4 ]
+      --            ]
+      --            [ CA.circle, CA.size 10, CA.opacity 0, CA.border CA.purple ]
+      --        , C.property .z "trees"
+      --            [ CA.linear, CA.opacity 0.4, CA.color CA.pink, CA.dashed [ 5, 3 ]
+      --            , CA.striped [ CA.width 5, CA.rotate 45, CA.space 3 ]
+      --            ]
+      --            [ CA.circle, CA.size 10, CA.opacity 0, CA.border CA.pink ]
+      --        ]
+      --    ]
+      --    data
 
       , C.yLabels []
 
