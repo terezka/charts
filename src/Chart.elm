@@ -1096,19 +1096,7 @@ type alias Bars data =
 
 
 {-| -}
-type alias Bar =
-  { roundTop : Float
-  , roundBottom : Float
-  , color : String
-  , border : String
-  , borderWidth : Float
-  -- TODO pattern
-  -- TODO aura
-  }
-
-
-{-| -}
-bars : List (Attribute (Bars data)) -> List (Property data String () Bar) -> List data -> Element data msg
+bars : List (Attribute (Bars data)) -> List (Property data String () CS.Bar) -> List data -> Element data msg
 bars edits properties data =
   let items =
         Item.toBarSeries edits properties data

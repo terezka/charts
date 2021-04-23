@@ -24,7 +24,6 @@ import Chart.Attributes as CA
 
 -- TODO clean up plane
 -- TODO clean up property
--- TODO clean up labels / axes etc
 -- TODO rename series to scatter
 -- TODO add element index
 
@@ -490,6 +489,8 @@ toBarSeries barsAttrs properties data =
                     , color = "blue" -- TODO
                     , border = "white"
                     , borderWidth = 0
+                    , opacity = 1
+                    , design = Nothing
                     }
               }
           , bounds = \config ->
@@ -519,6 +520,7 @@ toDotSeries toX properties data =
           , color = CA.blue
           , width = 1
           , opacity = 0
+          , design = Nothing
           }
 
       toDotConfig attrs =

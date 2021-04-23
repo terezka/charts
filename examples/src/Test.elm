@@ -86,10 +86,8 @@ view model =
       , C.width 1000
       , CA.static
 
-      --, C.range
-      --    [ C.lowest -2 C.orLower
-      --    , C.highest 12 C.orHigher
-      --    ]
+      , C.marginTop 30
+      , C.marginRight 30
 
       --, C.domain
       --    [ C.lowest -2 C.orLower
@@ -107,33 +105,48 @@ view model =
       , C.eachBin <| \p i ->
           [ C.label [ CA.yOff 15 ] (CI.getCommonality i).datum.label { x = (CI.getCenter p i).x, y = p.y.min } ]
 
-      , C.yAxis [ C.bounds [ C.lowest 0 C.ifNoData, C.highest 10 C.ifNoData ] ]
+      , C.xAxis []
+      , C.yAxis []
 
-      , C.xAxis [ C.bounds [ C.lowest 0 C.ifNoData, C.highest 10 C.ifNoData ] ]
+      , C.bars
+          [ CA.roundTop 0.1, CA.roundBottom 0.1 ]
+          [ C.stacked
+              [ C.bar .y "owls"
+                  [ CA.color CA.blue
+                  , CA.opacity 1
+                  , CA.dotted [ CA.color CA.blue, CA.width 1.5, CA.rotate 45 ]
+                  , CA.border CA.blue
+                  , CA.borderWidth 1
+                  ]
+              , C.bar .z "trees"
+                  [ CA.color CA.purple
+                  , CA.opacity 0.5
+                  , CA.gradient [ CA.top CA.purple, CA.bottom CA.pink ]
+                  , CA.border CA.purple
+                  , CA.borderWidth 1
+                  ]
+              ]
+          ]
+          data
 
-      --, C.bars
-      --    [ CA.roundTop 0.1, CA.roundBottom 0.1 ]
+
+      --, C.series .x
       --    [ C.stacked
-      --        [ C.property .y "owls" [] []
-      --        , C.property .z "trees" [] []
+      --        [ C.property .y "owls"
+      --            [ CA.linear, CA.opacity 0.75
+      --            , CA.dotted [ CA.color CA.blue, CA.width 2, CA.rotate 225 ]
+      --            ]
+      --            []
+      --        , C.property .z "trees"
+      --            [ CA.linear, CA.opacity 0.4, CA.color CA.purple
+      --            , CA.gradient [ CA.top CA.purple, CA.bottom CA.pink ]
+      --            ]
+      --            [ CA.circle, CA.size 3 ]
       --        ]
       --    ]
       --    data
 
-      , C.withPlane <| \p ->
-          [ C.xTick [] { x = p.x.data.min, y = 0 }
-          , C.xTick [] { x = p.x.data.max, y = 0 }
-          , C.yTick [] { x = 0, y = p.y.data.min }
-          , C.yTick [] { x = 0, y = p.y.data.max }
-          ]
-
-      , C.series .x
-          [ C.stacked
-              [ C.property .y "owls" [ CA.monotone, CA.opacity 0.25, CA.width 4 ] [ CA.circle, CA.opacity 0.25, CA.size 10 ]
-              , C.property .z "trees" [ CA.monotone, CA.opacity 0.25, CA.width 4, CA.color CA.purple ] [ CA.circle, CA.opacity 0.25, CA.size 10 ]
-              ]
-          ]
-          data
+      , C.yLabels []
 
       , C.each (\_ -> CI.groupBy CI.isSameStack model.hovering) <| \p i ->
           let bin = CI.getCommonality i
@@ -143,13 +156,6 @@ view model =
           in
           [ C.tooltip i [ CA.onTop ] [] (List.map tooltipContent (CI.getProducts i))
           --, C.label [ CA.yOff -10 ] (String.fromFloat bounds.y2) { x = cen.x, y = top.y }
-          ]
-
-      , C.withPlane <| \p ->
-          [ C.label [ CA.yOff 35 ] (String.fromFloat p.x.data.min) { x = p.x.data.min, y = 0 }
-          , C.label [ CA.yOff 35 ] (String.fromFloat p.x.data.max) { x = p.x.data.max, y = 0 }
-          , C.label [ CA.xOff -20, CA.yOff 3 ] (String.fromFloat p.y.data.min) { x = 0, y = p.y.data.min }
-          , C.label [ CA.xOff -20, CA.yOff 3 ] (String.fromFloat p.y.data.max) { x = 0, y = p.y.data.max }
           ]
       ]
     ]

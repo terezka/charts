@@ -2,6 +2,7 @@ module Chart.Attributes exposing
   ( Attribute, x, x1, x2, y, y1, y2, xOff, yOff, border, borderWidth, fontSize, color, width, height, offset
   , Anchor(..), leftAlign, rightAlign, content
   , rotate, length, roundTop, roundBottom, area, opacity, size, aura, auraWidth, grouped, margin, spacing
+  , Design(..), GradientConfig, Pattern, space, striped, dotted, gradient, top, bottom
   , Method(..), linear, monotone
   , Shape(..), circle, triangle, square, diamond, plus, cross, shape
   , Direction(..), onTop, onBottom, onRight, onLeft, onLeftOrRight, onTopOrBottom
@@ -248,6 +249,65 @@ area v config =
         Just _ -> config.method
         Nothing -> Just Linear
   }
+
+
+{-| -}
+type Design
+  = Striped (List (Attribute Pattern))
+  | Dotted (List (Attribute Pattern))
+  | Gradient (List (Attribute GradientConfig))
+
+
+{-| -}
+type alias Pattern =
+  { color : String
+  , width : Float
+  , space : Float
+  , rotate : Float
+  }
+
+
+{-| -}
+type alias GradientConfig =
+  { top : String
+  , bottom : String
+  }
+
+
+{-| -}
+space : x -> Attribute { a | space : x }
+space value config =
+  { config | space = value }
+
+
+{-| -}
+striped : List (Attribute Pattern) -> Attribute { a | design : Maybe Design }
+striped attrs_ config =
+  { config | design = Just (Striped attrs_) }
+
+
+{-| -}
+dotted : List (Attribute Pattern) -> Attribute { a | design : Maybe Design }
+dotted attrs_ config =
+  { config | design = Just (Dotted attrs_) }
+
+
+{-| -}
+gradient : List (Attribute GradientConfig) -> Attribute { a | design : Maybe Design }
+gradient attrs_ config =
+  { config | design = Just (Gradient attrs_) }
+
+
+{-| -}
+top : x -> Attribute { a | top : x }
+top value config =
+  { config | top = value }
+
+
+{-| -}
+bottom : x -> Attribute { a | bottom : x }
+bottom value config =
+  { config | bottom = value }
 
 
 

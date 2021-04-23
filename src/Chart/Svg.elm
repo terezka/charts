@@ -361,7 +361,8 @@ type alias Bar =
   , color : String
   , border : String
   , borderWidth : Float
-  -- TODO pattern
+  , opacity : Float
+  , design : Maybe CA.Design
   -- TODO aura
   }
 
@@ -377,6 +378,8 @@ bar plane edits point =
           , border = "white"
           , borderWidth = 0
           , color = blue
+          , opacity = 1
+          , design = Nothing
           }
 
       x1_ = point.x1
@@ -439,16 +442,30 @@ bar plane edits point =
               , C.Arc bB bB -45 False True (x_ + w - rxB) bs
               , C.Line (x_ + rxB) bs
               ]
+
+      actualBar fill =
+        S.path
+          [ SA.class "elm-charts__bar"
+          , SA.fill fill
+          , SA.fillOpacity (String.fromFloat config.opacity)
+          , SA.stroke config.border
+          , SA.strokeWidth (String.fromFloat config.borderWidth)
+          , SA.d (C.description plane commands)
+          , SA.style (clipperStyle plane x1_ x2_ bs y_)
+          ]
+          []
   in
-  S.path
-    [ SA.class "elm-charts__bar"
-    , SA.fill config.color
-    , SA.stroke config.border
-    , SA.strokeWidth (String.fromFloat config.borderWidth)
-    , SA.d (C.description plane commands)
-    , SA.style (clipperStyle plane x1_ x2_ bs y_)
-    ]
-    []
+  case config.design of
+    Nothing ->
+      actualBar config.color
+
+    Just design ->
+      let ( patternDefs, fill ) = toPattern design in
+      S.g
+        [ SA.class "elm-charts__bar-with-pattern" ]
+        [ patternDefs
+        , actualBar fill
+        ]
 
 
 
@@ -461,6 +478,7 @@ type alias Interpolation =
   , color : String
   , width : Float
   , opacity : Float
+  , design : Maybe CA.Design
   }
 
 
@@ -473,6 +491,7 @@ interpolation plane toX toY edits data =
           , color = blue
           , width = 1
           , opacity = 0
+          , design = Nothing
           }
 
       minX = Coord.minimum [toX >> Just] data
@@ -507,6 +526,7 @@ area plane toX toY2M toY edits data =
           , color = blue
           , width = 1
           , opacity = 0.2
+          , design = Nothing
           }
 
       minX = Coord.minimum [toX >> Just] data
@@ -514,10 +534,16 @@ area plane toX toY2M toY edits data =
       minY = Coord.minimum [toY, Maybe.withDefault (always (Just 0)) toY2M] data
       maxY = Coord.maximum [toY, Maybe.withDefault (always (Just 0)) toY2M] data
 
+
+      ( patternDefs, fill ) =
+        case config.design of
+          Nothing -> ( S.text "", config.color )
+          Just design -> toPattern design
+
       view cmds =
         S.path
           [ SA.class "elm-charts__area-section"
-          , SA.fill config.color
+          , SA.fill fill
           , SA.fillOpacity (String.fromFloat config.opacity)
           , SA.strokeWidth "0"
           , SA.fillRule "evenodd"
@@ -541,8 +567,8 @@ area plane toX toY2M toY edits data =
     Just method ->
       S.g [ SA.class "elm-charts__area-sections" ] <|
         case toY2M of
-          Nothing -> List.map withoutUnder (toCommands method toX toY data)
-          Just toY2 -> List.map2 withUnder (toCommands method toX toY2 data) (toCommands method toX toY data)
+          Nothing -> patternDefs :: List.map withoutUnder (toCommands method toX toY data)
+          Just toY2 -> patternDefs :: List.map2 withUnder (toCommands method toX toY2 data) (toCommands method toX toY data)
 
 
 toCommands : CA.Method -> (data -> Float) -> (data -> Maybe Float) -> List data -> List ( Point, List C.Command, Point )
@@ -570,6 +596,127 @@ toCommands method toX toY data =
   in
   List.map2 toSets points commands
     |> List.filterMap identity
+
+
+
+-- PATTERN
+
+
+toPattern : CA.Design -> ( S.Svg msg, String )
+toPattern design =
+  let toPatternId props =
+        String.replace "(" "-" <|
+        String.replace ")" "-" <|
+        String.replace "." "-" <|
+        String.replace "," "-" <|
+        String.replace " " "-" <|
+        String.join "-" <|
+          [ "elm-charts__pattern"
+          , case design of
+              CA.Striped _ -> "striped"
+              CA.Dotted _ -> "dotted"
+              CA.Gradient _ -> "gradient"
+          ] ++ props
+
+      toPatternDefs id space rotate inside =
+        S.defs []
+          [ S.pattern
+              [ SA.id id
+              , SA.patternUnits "userSpaceOnUse"
+              , SA.width (String.fromFloat space)
+              , SA.height (String.fromFloat space)
+              , SA.patternTransform ("rotate(" ++ String.fromFloat rotate ++ ")")
+              ]
+              [ inside ]
+          ]
+
+      ( patternDefs, patternId ) =
+        case design of
+          CA.Striped edits ->
+            let config =
+                  apply edits
+                    { color = blue -- TODO
+                    , width = 5
+                    , space = 5
+                    , rotate = 0
+                    }
+
+                theId =
+                  toPatternId
+                    [ config.color
+                    , String.fromFloat config.width
+                    , String.fromFloat config.space
+                    , String.fromFloat config.rotate
+                    ]
+            in
+            ( toPatternDefs theId config.space config.rotate <|
+                S.line
+                  [ SA.x1 "0"
+                  , SA.y "0"
+                  , SA.x2 "0"
+                  , SA.y2 (String.fromFloat config.space)
+                  , SA.stroke config.color
+                  , SA.strokeWidth (String.fromFloat config.width)
+                  ]
+                  []
+            , theId
+            )
+
+
+          CA.Dotted edits ->
+            let config =
+                  apply edits
+                    { color = blue -- TODO
+                    , width = 5
+                    , space = 5
+                    , rotate = 0
+                    }
+
+                theId =
+                  toPatternId
+                    [ config.color
+                    , String.fromFloat config.width
+                    , String.fromFloat config.space
+                    , String.fromFloat config.rotate
+                    ]
+            in
+            ( toPatternDefs theId config.space config.rotate <|
+                S.circle
+                  [ SA.fill config.color
+                  , SA.cx (String.fromFloat <| config.width / 3)
+                  , SA.cy (String.fromFloat <| config.width / 3)
+                  , SA.r (String.fromFloat <| config.width / 3)
+                  ]
+                  []
+            , theId
+            )
+
+          CA.Gradient edits ->
+            let config =
+                  apply edits
+                    { top = blue -- TODO
+                    , bottom = "transparent"
+                    }
+
+                theId =
+                  toPatternId
+                    [ config.top
+                    , config.bottom
+                    ]
+
+            in
+            ( S.defs []
+                [ S.linearGradient
+                    [ SA.id theId, SA.x1 "0", SA.x2 "0", SA.y1 "0", SA.y2 "1" ]
+                    [ S.stop [ SA.offset "0%", SA.stopColor config.top ] []
+                    , S.stop [ SA.offset "100%", SA.stopColor config.bottom ] []
+                    ]
+                ]
+            , theId
+            )
+  in
+  ( patternDefs, "url(#" ++ patternId ++ ")" )
+
 
 
 
@@ -1061,6 +1208,11 @@ apply funcs default =
   List.foldl apply_ default funcs
 
 
+isWithinPlane : Plane -> Float -> Float -> Bool
+isWithinPlane plane x y =
+  clamp plane.x.min plane.x.max x == x && clamp plane.y.min plane.y.max y == y
+
+
 
 -- COLOR
 
@@ -1157,10 +1309,6 @@ clipperStyle plane minX maxX minY maxY =
   in
   "clip-path: path('" ++ path ++ "');"
 
-
-isWithinPlane : Plane -> Float -> Float -> Bool
-isWithinPlane plane x y =
-  clamp plane.x.min plane.x.max x == x && clamp plane.y.min plane.y.max y == y
 
 
 
