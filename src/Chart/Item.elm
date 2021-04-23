@@ -486,7 +486,7 @@ toBarSeries barsAttrs properties data =
                   apply attrs
                     { roundTop = 0
                     , roundBottom = 0
-                    , color = "blue" -- TODO
+                    , color = color
                     , border = "white"
                     , borderWidth = 0
                     , opacity = 1
@@ -615,13 +615,6 @@ toDotSeries toX properties data =
 
 
 
--- TOOLTIP
-
---type alias Tooltip
-
---tooltip : Tooltip -> Html msg
-
-
 -- HELPERS
 
 
@@ -671,7 +664,6 @@ toDefault default items index =
   in
   Dict.get itemIndex dict
     |> Maybe.withDefault default
-
 
 
 

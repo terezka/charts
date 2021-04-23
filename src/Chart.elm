@@ -1,28 +1,20 @@
 module Chart exposing
-    ( chart, Element, bars, bar, just, series
-    , Bounds, lowest, highest, orLower, orHigher, exactly, more, less, window, ifNoData
-    , zero, middle
+    ( chart, Element
+    , bars, series
+    , Property, stacked, bar, property, just, variation
     , xAxis, yAxis, xTicks, yTicks, xLabels, yLabels, grid
-    , Event, events, event
+    , Bounds, lowest, highest, orLower, orHigher, exactly, more, less, window, ifNoData, zero, middle
+    , Event, event
     , Decoder, getCoords, getNearest, getNearestX, getWithin, getWithinX, map, map2, map3, map4
-
-    , tooltip
-    , svgAt, htmlAt, svg, html, none, label, xTick, yTick, line
-    , width, height
-    , marginTop, marginBottom, marginLeft, marginRight
-    , paddingTop, paddingBottom, paddingLeft, paddingRight
-    , range, domain, topped
-    , bounds, pinned
-    , dotted, noArrow, center
-    , filterX, filterY, only
-    , blue, orange, pink, green, red, purple
-    , stacked, property, variation, Property
-    , binned
-
-    , amount, floatsCustom, ints, intsCustom, times, timesCustom
-
+    , tooltip, line, label, xTick, yTick, svgAt, htmlAt, svg, html, none
     , each, eachBin, eachStack, eachProduct
     , withPlane, withBins, withStacks, withProducts
+
+    , marginTop, marginBottom, marginLeft, marginRight
+    , paddingTop, paddingBottom, paddingLeft, paddingRight
+    , range, domain, bounds, pinned, dotted, noArrow, filterX, filterY, only
+    , binned, amount, floatsCustom, ints, intsCustom, times, timesCustom
+
     )
 
 
@@ -85,18 +77,6 @@ import Chart.Attributes as CA
 {-| -}
 type alias Attribute c =
   c -> c
-
-
-{-| -}
-width : x -> Attribute { a | width : Maybe x }
-width value config =
-  { config | width = Just value }
-
-
-{-| -}
-height : Float -> Attribute { a | height : Float }
-height value config =
-  { config | height = value }
 
 
 {-| -}
@@ -249,18 +229,6 @@ topped value config =
   { config | topped = Just value }
 
 
-{-| -}
-center : Attribute { a | center : Bool }
-center config =
-  { config | center = True }
-
-
-{-| -}
-events : a -> Attribute { x | events : a }
-events value config =
-  { config | events = value }
-
-
 
 
 -- ELEMENTS
@@ -268,7 +236,7 @@ events value config =
 
 {-| -}
 type alias Container data msg =
-    { width : Maybe Float
+    { width : Float
     , height : Float
     , marginTop : Float
     , marginBottom : Float
@@ -283,7 +251,6 @@ type alias Container data msg =
     , domain : Maybe (Bounds -> Bounds)
     , events : List (Event data msg)
     , htmlAttrs : List (H.Attribute msg)
-    , topped : Maybe Int
     , attrs : List (S.Attribute msg)
     }
 
@@ -293,7 +260,7 @@ chart : List (Container data msg -> Container data msg) -> List (Element data ms
 chart edits elements =
   let config =
         applyAttrs edits
-          { width = Nothing
+          { width = 500
           , height = 200
           , marginTop = 10
           , marginBottom = 30
@@ -306,7 +273,6 @@ chart edits elements =
           , responsive = True
           , range = Nothing
           , domain = Nothing
-          , topped = Nothing
           , events = []
           , attrs = [ SA.style "overflow: visible;" ]
           , htmlAttrs = []
@@ -420,7 +386,7 @@ definePlane config elements =
         C.scaleCartesian
           { marginLower = config.marginLeft
           , marginUpper = config.marginRight
-          , length = max 1 (Maybe.withDefault 500 config.width - config.paddingLeft - config.paddingRight)
+          , length = max 1 (config.width - config.paddingLeft - config.paddingRight)
           , data = { min = bounds_.x.dataMin, max = bounds_.x.dataMax }
           , min = calcRange.min
           , max = calcRange.max
@@ -439,7 +405,7 @@ definePlane config elements =
   { x =
       { marginLower = config.marginLeft
       , marginUpper = config.marginRight
-      , length = Maybe.withDefault 500 config.width
+      , length = config.width
       , data = { min = bounds_.x.dataMin, max = bounds_.x.dataMax }
       , min = calcRange.min - scalePadX config.paddingLeft
       , max = calcRange.max + scalePadX config.paddingRight

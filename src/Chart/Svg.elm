@@ -796,7 +796,6 @@ dot plane toX toY edits datum_ =
             , SA.r (String.fromFloat (radius + off))
             ]
       in
-      -- TODO use path instead of circle
       view S.circle radiusAura toAttrs
 
     Just CA.Triangle ->

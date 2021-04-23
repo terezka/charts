@@ -82,8 +82,8 @@ view model =
     , HA.style "max-width" "1000px"
     ]
     [ C.chart
-      [ C.height 400
-      , C.width 1000
+      [ CA.height 400
+      , CA.width 1000
       , CA.static
 
       , C.marginTop 30
@@ -94,7 +94,7 @@ view model =
       --    , C.highest 5 C.orHigher
       --    ]
 
-      , C.events
+      , CA.events
           [ C.getNearestX CI.getCenter identity
               |> C.map OnHover
               |> C.event "mousemove"
