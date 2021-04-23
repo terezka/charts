@@ -170,6 +170,7 @@ type alias Line =
   , y2 : Maybe Float
   , color : String
   , width : Float
+  , dashed : List Float
   }
 
 
@@ -184,6 +185,7 @@ line plane edits =
           , y2 = Nothing
           , color = "rgb(210, 210, 210)"
           , width = 1
+          , dashed = []
           }
 
       ( ( x1_, x2_ ), ( y1_, y2_ ) ) =
@@ -245,6 +247,7 @@ line plane edits =
     [ SA.class "elm-charts__line"
     , SA.stroke config.color
     , SA.strokeWidth (String.fromFloat config.width)
+    , SA.strokeDasharray (String.join " " <| List.map String.fromFloat config.dashed)
     , SA.d (C.description plane cmds)
     ]
     []
