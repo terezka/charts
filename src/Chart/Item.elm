@@ -1,6 +1,6 @@
 module Chart.Item exposing
   ( Item, Product, Stack, Bin
-  , onlyBarSeries, onlyDotSeries, only
+  , onlyBarSeries, onlyDotSeries, isBarSeries, isDotSeries, only
   , General, RealConfig(..), toGeneral
   , Group, Grouping, groupBy
   , isSameSeries, isSameBin, isSameStack, isSame
@@ -23,7 +23,6 @@ import Chart.Attributes as CA
 
 
 -- TODO clean up plane
--- TODO clean up property
 -- TODO rename series to scatter
 -- TODO add element index
 
@@ -224,13 +223,13 @@ collector config =
 {-| -}
 onlyBarSeries : List (Product General datum) -> List (Product S.Bar datum)
 onlyBarSeries =
-  List.filterMap toBar
+  List.filterMap isBarSeries
 
 
 {-| -}
 onlyDotSeries : List (Product General datum) -> List (Product S.Dot datum)
 onlyDotSeries =
-  List.filterMap toDot
+  List.filterMap isDotSeries
 
 
 {-| -}
@@ -728,8 +727,9 @@ toGeneral generalize (Item product) =
     }
 
 
-toBar : Product General datum -> Maybe (Product S.Bar datum)
-toBar (Item product) =
+{-| -}
+isBarSeries : Product General datum -> Maybe (Product S.Bar datum)
+isBarSeries (Item product) =
   case product.details.config.real of
     DotConfig _ ->
       Nothing
@@ -753,8 +753,8 @@ toBar (Item product) =
         }
 
 
-toDot : Product General datum -> Maybe (Product S.Dot datum)
-toDot (Item product) =
+isDotSeries : Product General datum -> Maybe (Product S.Dot datum)
+isDotSeries (Item product) =
   case product.details.config.real of
     BarConfig _ ->
       Nothing

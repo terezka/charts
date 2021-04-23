@@ -103,8 +103,8 @@ view model =
       [ C.grid []
 
       , C.eachBin <| \p i ->
-          [ C.label [ CA.yOff 10, CA.rotate 45, CA.rightAlign ] (CI.getCommonality i).datum.label
-              { x = (CI.getCenter p i).x, y = p.y.min }
+          if List.isEmpty <| List.filterMap CI.isBarSeries (CI.getProducts i) then [] else
+          [ C.label [ CA.yOff -5 ] (CI.getCommonality i).datum.label { x = (CI.getCenter p i).x, y = p.y.min }
           ]
 
       , C.withPlane <| \p ->
@@ -115,46 +115,45 @@ view model =
           ]
 
       , C.xAxis []
+      , C.xLabels [ C.amount 10 ]
       , C.yAxis []
 
-      --, C.bars
-      --    [ CA.roundTop 0.1, CA.roundBottom 0.1 ]
-      --    [ C.stacked
-      --        [ C.bar .y "owls"
-      --            [ CA.color CA.blue
-      --            , CA.opacity 0.5
-      --            , CA.gradient [ CA.bottom CA.green ]
-      --            , CA.border "transparent"
-      --            , CA.borderWidth 0.5
-      --            ]
-      --        , C.bar .z "trees"
-      --            [ CA.color CA.purple
-      --            , CA.opacity 0.5
-      --            , CA.gradient [ CA.bottom CA.pink ]
-      --            , CA.border "transparent"
-      --            , CA.borderWidth 0.5
-      --            ]
-      --        ]
-      --    ]
-      --    data
-
+      , C.bars
+          [ CA.roundTop 0.1, CA.roundBottom 0.1 ]
+          [ C.stacked
+              [ C.bar .y "owls"
+                  [ CA.color CA.blue
+                  , CA.opacity 0.5
+                  , CA.border "transparent"
+                  , CA.borderWidth 0.5
+                  ]
+              , C.bar .z "trees"
+                  [ CA.color CA.purple
+                  , CA.opacity 0.5
+                  , CA.border "transparent"
+                  , CA.borderWidth 0.5
+                  ]
+              ]
+          ]
+          data
 
       , C.series .x
           [ C.stacked
               [ C.property .y "owls"
                   [ CA.linear, CA.opacity 0.5
-                  , CA.dotted [ CA.color CA.blue, CA.width 2, CA.rotate 0 ]
+                  , CA.striped [ CA.width 2 ]
                   ]
-                  [ CA.circle, CA.size 3 ]
+                  [ CA.circle, CA.size 10, CA.opacity 0, CA.border CA.blue ]
               , C.property (C.just (.x >> (+) 4)) "kids"
                   [ CA.linear, CA.opacity 0.4, CA.color CA.purple
+                  , CA.dotted [ CA.width 4 ]
                   ]
-                  [ CA.circle, CA.size 3 ]
+                  [ CA.circle, CA.size 10, CA.opacity 0, CA.border CA.purple ]
               , C.property .z "trees"
-                  [ CA.linear, CA.opacity 0.4, CA.color CA.purple, CA.dashed [ 1, 3 ], CA.width 3
-                  , CA.gradient [ CA.top CA.purple, CA.bottom CA.pink ]
+                  [ CA.linear, CA.opacity 0.4, CA.color CA.pink, CA.dashed [ 5, 3 ]
+                  , CA.striped [ CA.width 5, CA.rotate 45, CA.space 3 ]
                   ]
-                  [ CA.circle, CA.size 3 ]
+                  [ CA.circle, CA.size 10, CA.opacity 0, CA.border CA.pink ]
               ]
           ]
           data
