@@ -142,12 +142,12 @@ view model =
       , C.series .x
           [ C.stacked
               [ C.property .y "owls"
-                  [ CA.linear, CA.opacity 0.75
+                  [ CA.linear, CA.opacity 0
                   , CA.dotted [ CA.color CA.blue, CA.width 2, CA.rotate 0 ]
                   ]
                   [ CA.circle, CA.size 3 ]
               , C.property .z "trees"
-                  [ CA.linear, CA.opacity 0.4, CA.color CA.purple
+                  [ CA.linear, CA.opacity 0, CA.color CA.purple, CA.dashed [ 1, 3 ]
                   , CA.gradient [ CA.top CA.purple, CA.bottom CA.pink ]
                   ]
                   [ CA.circle, CA.size 3 ]

@@ -521,6 +521,7 @@ toDotSeries toX properties data =
           , width = 1
           , opacity = 0
           , design = Nothing
+          , dashed = []
           }
 
       toDotConfig attrs =

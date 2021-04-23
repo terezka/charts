@@ -2,7 +2,7 @@ module Chart.Attributes exposing
   ( Attribute, x, x1, x2, y, y1, y2, xOff, yOff, border, borderWidth, fontSize, color, width, height, offset
   , Anchor(..), leftAlign, rightAlign, content
   , rotate, length, roundTop, roundBottom, area, opacity, size, aura, auraWidth, grouped, margin, spacing
-  , Design(..), GradientConfig, Pattern, space, striped, dotted, gradient, top, bottom
+  , Design(..), GradientConfig, Pattern, space, striped, dotted, gradient, top, bottom, dashed
   , Method(..), linear, monotone
   , Shape(..), circle, triangle, square, diamond, plus, cross, shape
   , Direction(..), onTop, onBottom, onRight, onLeft, onLeftOrRight, onTopOrBottom
@@ -309,6 +309,11 @@ bottom : x -> Attribute { a | bottom : x }
 bottom value config =
   { config | bottom = value }
 
+
+{-| -}
+dashed : x -> Attribute { a | dashed : x }
+dashed value config =
+  { config | dashed = value }
 
 
 -- TODO Move to internal

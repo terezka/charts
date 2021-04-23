@@ -481,6 +481,7 @@ type alias Interpolation =
   , width : Float
   , opacity : Float
   , design : Maybe CA.Design
+  , dashed : List Float
   }
 
 
@@ -494,6 +495,7 @@ interpolation plane toX toY edits data =
           , width = 1
           , opacity = 0
           , design = Nothing
+          , dashed = []
           }
 
       minX = Coord.minimum [toX >> Just] data
@@ -506,6 +508,7 @@ interpolation plane toX toY edits data =
           [ SA.class "elm-charts__interpolation-section"
           , SA.fill "transparent"
           , SA.stroke config.color
+          , SA.strokeDasharray (String.join " " <| List.map String.fromFloat config.dashed)
           , SA.strokeWidth (String.fromFloat config.width)
           , SA.d (C.description plane (Move first.x first.y :: cmds))
           , SA.style (clipperStyle plane minX maxX minY maxY)
@@ -529,6 +532,7 @@ area plane toX toY2M toY edits data =
           , width = 1
           , opacity = 0.2
           , design = Nothing
+          , dashed = []
           }
 
       minX = Coord.minimum [toX >> Just] data
