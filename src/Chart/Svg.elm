@@ -460,7 +460,7 @@ bar plane edits point =
       actualBar config.color
 
     Just design ->
-      let ( patternDefs, fill ) = toPattern design in
+      let ( patternDefs, fill ) = toPattern config.color design in
       S.g
         [ SA.class "elm-charts__bar-with-pattern" ]
         [ patternDefs
@@ -538,7 +538,7 @@ area plane toX toY2M toY edits data =
       ( patternDefs, fill ) =
         case config.design of
           Nothing -> ( S.text "", config.color )
-          Just design -> toPattern design
+          Just design -> toPattern config.color design
 
       view cmds =
         S.path
@@ -602,8 +602,8 @@ toCommands method toX toY data =
 -- PATTERN
 
 
-toPattern : CA.Design -> ( S.Svg msg, String )
-toPattern design =
+toPattern : String -> CA.Design -> ( S.Svg msg, String )
+toPattern defaultColor design =
   let toPatternId props =
         String.replace "(" "-" <|
         String.replace ")" "-" <|
@@ -635,7 +635,7 @@ toPattern design =
           CA.Striped edits ->
             let config =
                   apply edits
-                    { color = blue -- TODO
+                    { color = defaultColor
                     , width = 5
                     , space = 5
                     , rotate = 0
@@ -666,7 +666,7 @@ toPattern design =
           CA.Dotted edits ->
             let config =
                   apply edits
-                    { color = blue -- TODO
+                    { color = defaultColor
                     , width = 5
                     , space = 5
                     , rotate = 0
@@ -694,7 +694,7 @@ toPattern design =
           CA.Gradient edits ->
             let config =
                   apply edits
-                    { top = blue -- TODO
+                    { top = defaultColor
                     , bottom = "transparent"
                     }
 

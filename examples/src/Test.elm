@@ -112,16 +112,16 @@ view model =
           [ CA.roundTop 0.1, CA.roundBottom 0.1 ]
           [ C.stacked
               [ C.bar .y "owls"
-                  [ CA.color CA.blue
+                  [ CA.color CA.purple
                   , CA.opacity 1
-                  , CA.dotted [ CA.color CA.blue, CA.width 1.5, CA.rotate 45 ]
-                  , CA.border CA.blue
+                  , CA.dotted [ CA.width 1.5, CA.rotate 45 ]
+                  , CA.border CA.purple
                   , CA.borderWidth 1
                   ]
               , C.bar .z "trees"
                   [ CA.color CA.purple
                   , CA.opacity 0.5
-                  , CA.gradient [ CA.top CA.purple, CA.bottom CA.pink ]
+                  , CA.gradient [ CA.bottom CA.pink ]
                   , CA.border CA.purple
                   , CA.borderWidth 1
                   ]
