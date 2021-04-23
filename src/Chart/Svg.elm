@@ -382,10 +382,10 @@ bar plane edits point =
           , design = Nothing
           }
 
-      x1_ = point.x1
-      x2_ = point.x2
-      y1_ = point.y1
-      y2_ = point.y2
+      x1_ = point.x1 + scaleCartesian plane.x (config.borderWidth / 2)
+      x2_ = point.x2 - scaleCartesian plane.x (config.borderWidth / 2)
+      y1_ = point.y1 + scaleCartesian plane.y (config.borderWidth / 2)
+      y2_ = point.y2 - scaleCartesian plane.y (config.borderWidth / 2)
 
       x_ = x1_
       y_ = max y1_ y2_
@@ -409,6 +409,7 @@ bar plane edits point =
               , C.Line x_ y_
               , C.Line (x_ + w) y_
               , C.Line (x_ + w) bs
+              , C.Line x_ bs
               ]
 
             ( True, False ) ->
