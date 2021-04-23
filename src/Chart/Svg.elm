@@ -298,7 +298,7 @@ label plane edits string point =
     , SA.stroke config.border
     , SA.strokeWidth (String.fromFloat config.borderWidth)
     , SA.fill config.color
-    , position plane config.rotate point.x point.y config.xOff config.yOff
+    , position plane -config.rotate point.x point.y config.xOff config.yOff
     , SA.style <| String.join " " [ "pointer-events: none;", fontStyle, anchorStyle ]
     ]
     [ S.tspan [] [ S.text string ] ]

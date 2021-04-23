@@ -103,14 +103,14 @@ view model =
       [ C.grid []
 
       , C.eachBin <| \p i ->
-          [ C.label [ CA.yOff 10, CA.rotate -45, CA.rightAlign ] (CI.getCommonality i).datum.label
+          [ C.label [ CA.yOff 10, CA.rotate 45, CA.rightAlign ] (CI.getCommonality i).datum.label
               { x = (CI.getCenter p i).x, y = p.y.min }
           ]
 
       , C.withPlane <| \p ->
           [ C.title [ CA.yOff 40, CA.fontSize 12 ] "Timeline"
               { x = p.x.min + (p.x.max - p.x.min) / 2, y = p.y.min }
-          , C.title [ CA.xOff 20, CA.fontSize 12, CA.rotate -90 ] "Height"
+          , C.title [ CA.xOff 20, CA.fontSize 12, CA.rotate 90 ] "Height"
               { x = 0, y = p.y.min + (p.y.max - p.y.min) * 0.85 }
           ]
 
