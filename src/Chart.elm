@@ -12,7 +12,7 @@ module Chart exposing
 
     , marginTop, marginBottom, marginLeft, marginRight
     , paddingTop, paddingBottom, paddingLeft, paddingRight
-    , range, domain, bounds, pinned, dotted, noArrow, filterX, filterY, only
+    , range, domain, limits, pinned, dotted, noArrow, filterX, filterY, only
     , binned, amount, floatsCustom, ints, intsCustom, times, timesCustom
 
     )
@@ -25,8 +25,8 @@ module Chart exposing
 @docs series, scatter, linear, monotone, just
 @docs bars, histogram, bar
 
-## Work with bounds
-@docs Bounds, startMin, startMax, endMin, endMax, startPad, endPad, zero, middle
+## Work with limits
+@docs Limit, startMin, startMax, endMin, endMax, startPad, endPad, zero, middle
 
 # Axis
 @docs xAxis, yAxis, xTicks, yTicks, xLabels, yLabels, grid
@@ -128,21 +128,21 @@ paddingRight value config =
 
 
 {-| -}
-range : List (Attribute C.Bounds) -> Attribute { a | range : Maybe (C.Bounds -> C.Bounds) }
+range : List (Attribute C.Limit) -> Attribute { a | range : Maybe (C.Limit -> C.Limit) }
 range fs config =
   { config | range = Just (\i -> List.foldl (\f b -> f b) i fs) }
 
 
 {-| -}
-domain : List (Attribute C.Bounds) -> Attribute { a | domain : Maybe (C.Bounds -> C.Bounds) }
+domain : List (Attribute C.Limit) -> Attribute { a | domain : Maybe (C.Limit -> C.Limit) }
 domain fs config =
   { config | domain = Just (\i -> List.foldl (\f b -> f b) i fs) }
 
 
 {-| -}
-bounds : List (Attribute C.Bounds) -> Attribute { a | bounds : C.Bounds -> C.Bounds }
-bounds fs config =
-  { config | bounds = \i -> List.foldl (\f b -> f b) i fs }
+limits : List (Attribute C.Limit) -> Attribute { a | limits : C.Limit -> C.Limit }
+limits fs config =
+  { config | limits = \i -> List.foldl (\f b -> f b) i fs }
 
 
 {-| -}
@@ -182,37 +182,37 @@ only value config =
 
 
 {-| -}
-floats : Attribute { a | produce : Int -> C.Bounds -> List CS.TickValue }
+floats : Attribute { a | produce : Int -> C.Limit -> List CS.TickValue }
 floats config =
   { config | produce = \a -> CS.produce a CS.floats >> CS.toTickValues identity String.fromFloat }
 
 
 {-| -}
-floatsCustom : (Float -> String) -> Attribute { a | produce : Int -> C.Bounds -> List CS.TickValue }
+floatsCustom : (Float -> String) -> Attribute { a | produce : Int -> C.Limit -> List CS.TickValue }
 floatsCustom formatter config =
   { config | produce = \a -> CS.produce a CS.floats >> CS.toTickValues identity formatter }
 
 
 {-| -}
-ints : Attribute { a | produce : Int -> C.Bounds -> List CS.TickValue }
+ints : Attribute { a | produce : Int -> C.Limit -> List CS.TickValue }
 ints =
   intsCustom String.fromInt
 
 
 {-| -}
-intsCustom : (Int -> String) -> Attribute { a | produce : Int -> C.Bounds -> List CS.TickValue }
+intsCustom : (Int -> String) -> Attribute { a | produce : Int -> C.Limit -> List CS.TickValue }
 intsCustom formatter config =
   { config | produce = \a -> CS.produce a CS.ints >> CS.toTickValues toFloat formatter }
 
 
 {-| -}
-times : Time.Zone -> Attribute { a | produce : Int -> C.Bounds -> List CS.TickValue }
+times : Time.Zone -> Attribute { a | produce : Int -> C.Limit -> List CS.TickValue }
 times zone config =
   timesCustom zone (CS.formatTime zone) config
 
 
 {-| -}
-timesCustom : Time.Zone -> (I.Time -> String) -> Attribute { a | produce : Int -> C.Bounds -> List CS.TickValue }
+timesCustom : Time.Zone -> (I.Time -> String) -> Attribute { a | produce : Int -> C.Limit -> List CS.TickValue }
 timesCustom zone formatter config =
   { config | produce = \a -> CS.produce a (CS.times zone) >> CS.toTickValues (toFloat << Time.posixToMillis << .timestamp) formatter }
 
@@ -247,8 +247,8 @@ type alias Container data msg =
     , paddingLeft : Float
     , paddingRight : Float
     , responsive : Bool
-    , range : Maybe (C.Bounds -> C.Bounds)
-    , domain : Maybe (C.Bounds -> C.Bounds)
+    , range : Maybe (C.Limit -> C.Limit)
+    , domain : Maybe (C.Limit -> C.Limit)
     , events : List (Event data msg)
     , htmlAttrs : List (H.Attribute msg)
     , attrs : List (S.Attribute msg)
@@ -312,11 +312,11 @@ chart edits elements =
 {-| -}
 type Element data msg
   = SeriesElement
-      (Maybe XYBounds -> Maybe XYBounds)
+      (List C.Position)
       (List (Item.Product Item.General data))
       (C.Plane -> S.Svg msg)
   | BarsElement
-      (Maybe XYBounds -> Maybe XYBounds)
+      (List C.Position)
       (List (Item.Product Item.General data))
       (C.Plane -> TickValues -> TickValues)
       (C.Plane -> S.Svg msg)
@@ -340,18 +340,18 @@ type Element data msg
       (C.Plane -> H.Html msg)
 
 
-type alias XYBounds =
-  { x : C.Bounds
-  , y : C.Bounds
+type alias XYLimit =
+  { x : C.Limit
+  , y : C.Limit
   }
 
 
 definePlane : Container data msg -> List (Element data msg) -> C.Plane
 definePlane config elements =
-  let foldBounds el acc =
+  let collectLimits el acc =
         case el of
-          SeriesElement func _ _ -> func acc
-          BarsElement func _ _ _ -> func acc
+          SeriesElement lims _ _ -> acc ++ lims
+          BarsElement lims _ _ _ -> acc ++ lims
           AxisElement _ -> acc
           TicksElement _ _ -> acc
           LabelsElement _ _ -> acc
@@ -361,26 +361,27 @@ definePlane config elements =
           SvgElement _ -> acc
           HtmlElement _ -> acc
 
-      bounds_ =
-        List.foldl foldBounds Nothing elements
-          |> Maybe.map (\{ x, y } -> { x = fixSingles x, y = fixSingles y })
-          |> Maybe.withDefault { x = defaultBounds, y = defaultBounds }
+      limits_ =
+        List.foldl collectLimits [] elements
+          |> C.foldPosition identity
+          |> \pos -> { x = toLimit pos.x1 pos.x2, y = toLimit pos.y1 pos.y2 }
+          |> \{ x, y } -> { x = fixSingles x, y = fixSingles y }
 
-      defaultBounds =
-        { min = 0, max = 100, dataMin = 0, dataMax = 100 }
+      toLimit min max =
+        { min = min, max = max, dataMin = min, dataMax = max }
 
       fixSingles bs =
         if bs.min == bs.max then { bs | max = bs.min + 10 } else bs
 
       calcRange =
         case config.range of
-          Just edit -> edit bounds_.x
-          Nothing -> bounds_.x
+          Just edit -> edit limits_.x
+          Nothing -> limits_.x
 
       calcDomain =
         case config.domain of
-          Just edit -> edit bounds_.y
-          Nothing -> lowest 0 orLower bounds_.y
+          Just edit -> edit limits_.y
+          Nothing -> lowest 0 orLower limits_.y
 
       unpadded =
         { width = max 1 (config.width - config.paddingLeft - config.paddingRight)
@@ -392,14 +393,14 @@ definePlane config elements =
             , bottom = config.marginBottom
             }
         , x =
-            { dataMin = bounds_.x.dataMin
-            , dataMax = bounds_.x.dataMax
+            { dataMin = limits_.x.dataMin
+            , dataMax = limits_.x.dataMax
             , min = calcRange.min
             , max = calcRange.max
             }
         , y =
-            { dataMin = bounds_.y.dataMin
-            , dataMax = bounds_.y.dataMax
+            { dataMin = limits_.y.dataMin
+            , dataMax = limits_.y.dataMax
             , min = calcDomain.min
             , max = calcDomain.max
             }
@@ -420,14 +421,14 @@ definePlane config elements =
       , bottom = config.marginBottom
       }
   , x =
-      { dataMin = bounds_.x.dataMin
-      , dataMax = bounds_.x.dataMax
+      { dataMin = limits_.x.dataMin
+      , dataMax = limits_.x.dataMax
       , min = calcRange.min - scalePadX config.paddingLeft
       , max = calcRange.max + scalePadX config.paddingRight
       }
   , y =
-      { dataMin = bounds_.y.dataMin
-      , dataMax = bounds_.y.dataMax
+      { dataMin = limits_.y.dataMin
+      , dataMax = limits_.y.dataMax
       , min = calcDomain.min - scalePadY config.paddingBottom
       , max = calcDomain.max + scalePadY config.paddingTop
       }
@@ -504,19 +505,19 @@ viewElements config plane tickValues allItems elements =
 
 
 {-| -}
-lowest : Float -> (Float -> Float -> Float -> Float) -> Attribute C.Bounds
+lowest : Float -> (Float -> Float -> Float -> Float) -> Attribute C.Limit
 lowest x edit b =
   { b | min = edit x b.min b.dataMin }
 
 
 {-| -}
-highest : Float -> (Float -> Float -> Float -> Float) -> Attribute C.Bounds
+highest : Float -> (Float -> Float -> Float -> Float) -> Attribute C.Limit
 highest x edit b =
   { b | max = edit x b.max b.dataMax }
 
 
 {-| -}
-window : Float -> Float -> Attribute C.Bounds
+window : Float -> Float -> Attribute C.Limit
 window min_ max_ b =
   { b | min = min_, max = max_ }
 
@@ -558,18 +559,18 @@ less v x _ =
 
 
 {-| -}
-zero : C.Bounds -> Float
+zero : C.Limit -> Float
 zero b =
   clamp b.min b.max 0
 
 
 {-| -}
-middle : C.Bounds -> Float
+middle : C.Limit -> Float
 middle b =
   b.min + (b.max - b.min) / 2
 
 
-stretch : Maybe C.Bounds -> C.Bounds -> Maybe C.Bounds
+stretch : Maybe C.Limit -> C.Limit -> Maybe C.Limit
 stretch old new =
   case old of
     Just b ->
@@ -689,7 +690,7 @@ type alias Tooltip =
 tooltip : Item.Item a -> List (Attribute Tooltip) -> List (H.Attribute Never) -> List (H.Html Never) -> Element data msg
 tooltip i edits attrs_ content =
   html <| \p ->
-    let pos = Item.getBounds i in
+    let pos = Item.getLimits i in
     if CS.isWithinPlane p pos.x1 pos.y2 -- TODO
     then CS.tooltip p (Item.getPosition p i) edits attrs_ content
     else H.text ""
@@ -701,8 +702,8 @@ tooltip i edits attrs_ content =
 
 {-| -}
 type alias Axis =
-    { bounds : C.Bounds -> C.Bounds
-    , pinned : C.Bounds -> Float
+    { limits : C.Limit -> C.Limit
+    , pinned : C.Limit -> Float
     , arrow : Bool
     , color : String -- TODO use Color
     }
@@ -713,28 +714,28 @@ xAxis : List (CA.Attribute Axis) -> Element item msg
 xAxis edits =
   let config =
         applyAttrs edits
-          { bounds = identity
+          { limits = identity
           , pinned = zero
           , color = ""
           , arrow = True
           }
   in
   AxisElement <| \p ->
-    let xBounds = config.bounds p.x
-        yBounds = p.y
+    let xLimit = config.limits p.x
+        yLimit = p.y
     in
     S.g
       [ SA.class "elm-charts__x-axis" ]
       [ CS.line p
           [ CA.color config.color
-          , CA.y1 (config.pinned yBounds)
-          , CA.x1 (max p.x.min xBounds.min)
-          , CA.x2 (min p.x.max xBounds.max)
+          , CA.y1 (config.pinned yLimit)
+          , CA.x1 (max p.x.min xLimit.min)
+          , CA.x2 (min p.x.max xLimit.max)
           ]
       , if config.arrow then
           CS.arrow p [ CA.color config.color ]
-            { x = xBounds.max
-            , y = config.pinned yBounds
+            { x = xLimit.max
+            , y = config.pinned yLimit
             }
         else
           S.text ""
@@ -746,28 +747,28 @@ yAxis : List (Attribute Axis) -> Element item msg
 yAxis edits =
   let config =
         applyAttrs edits
-          { bounds = identity
+          { limits = identity
           , pinned = zero
           , color = ""
           , arrow = True
           }
   in
   AxisElement <| \p ->
-    let xBounds = p.x
-        yBounds = config.bounds p.y
+    let xLimit = p.x
+        yLimit = config.limits p.y
     in
     S.g
       [ SA.class "elm-charts__y-axis" ]
       [ CS.line p
           [ CA.color config.color
-          , CA.x1 (config.pinned xBounds)
-          , CA.y1 (max p.y.min yBounds.min)
-          , CA.y2 (min p.y.max yBounds.max)
+          , CA.x1 (config.pinned xLimit)
+          , CA.y1 (max p.y.min yLimit.min)
+          , CA.y2 (min p.y.max yLimit.max)
           ]
       , if config.arrow then
           CS.arrow p [ CA.color config.color, CA.rotate -90 ]
-            { x = config.pinned xBounds
-            , y = yBounds.max
+            { x = config.pinned xLimit
+            , y = yLimit.max
             }
         else
           S.text ""
@@ -778,11 +779,11 @@ type alias Ticks =
     { color : String -- TODO use Color -- TODO allow custom color by tick value
     , height : Float
     , width : Float
-    , pinned : C.Bounds -> Float
-    , bounds : C.Bounds -> C.Bounds
+    , pinned : C.Limit -> Float
+    , limits : C.Limit -> C.Limit
     , only : Float -> Bool
     , amount : Int
-    , produce : Int -> C.Bounds -> List CS.TickValue
+    , produce : Int -> C.Limit -> List CS.TickValue
     }
 
 
@@ -792,7 +793,7 @@ xTicks edits =
   let config =
         applyAttrs ([ floats ] ++ edits)
           { color = ""
-          , bounds = identity
+          , limits = identity
           , pinned = zero
           , amount = 5
           , only = \_ -> True
@@ -801,11 +802,11 @@ xTicks edits =
           , width = 1
           }
 
-      xBounds p =
-        config.bounds p.x
+      xLimit p =
+        config.limits p.x
 
       toTicks p =
-        config.produce config.amount (xBounds p)
+        config.produce config.amount (xLimit p)
           |> List.map .value
           |> List.filter config.only
 
@@ -832,7 +833,7 @@ yTicks edits =
   let config =
         applyAttrs ([ floats ] ++ edits)
           { color = ""
-          , bounds = identity
+          , limits = identity
           , pinned = zero
           , only = \_ -> True
           , amount = 5
@@ -841,11 +842,11 @@ yTicks edits =
           , width = 1
           }
 
-      yBounds p =
-        config.bounds p.y
+      yLimit p =
+        config.limits p.y
 
       toTicks p =
-        config.produce config.amount (yBounds p)
+        config.produce config.amount (yLimit p)
           |> List.map .value
           |> List.filter config.only
 
@@ -869,13 +870,13 @@ yTicks edits =
 
 type alias Labels =
     { color : String -- TODO use Color
-    , pinned : C.Bounds -> Float
-    , bounds : C.Bounds -> C.Bounds
+    , pinned : C.Limit -> Float
+    , limits : C.Limit -> C.Limit
     , only : Float -> Bool
     , xOff : Float
     , yOff : Float
     , amount : Int
-    , produce : Int -> C.Bounds -> List CS.TickValue
+    , produce : Int -> C.Limit -> List CS.TickValue
     }
 
 
@@ -885,7 +886,7 @@ xLabels edits =
   let config =
         applyAttrs ([ floats ] ++ edits)
           { color = "#808BAB"
-          , bounds = identity
+          , limits = identity
           , only = \_ -> True
           , pinned = zero
           , amount = 5
@@ -894,11 +895,11 @@ xLabels edits =
           , yOff = 20
           }
 
-      xBounds p =
-        config.bounds p.x
+      xLimit p =
+        config.limits p.x
 
       toTicks p =
-        config.produce config.amount (xBounds p)
+        config.produce config.amount (xLimit p)
           |> List.filter (config.only << .value)
 
       toTickValues p ts =
@@ -925,7 +926,7 @@ yLabels edits =
   let config =
         applyAttrs ([ floats ] ++ edits)
           { color = "#808BAB"
-          , bounds = identity
+          , limits = identity
           , pinned = zero
           , only = \_ -> True
           , amount = 5
@@ -934,11 +935,11 @@ yLabels edits =
           , yOff = 3
           }
 
-      yBounds p =
-        config.bounds p.y
+      yLimit p =
+        config.limits p.y
 
       toTicks p =
-        config.produce config.amount (yBounds p)
+        config.produce config.amount (yLimit p)
           |> List.filter (config.only << .value)
 
       toTickValues p ts =
@@ -965,8 +966,8 @@ type alias Grid =
     { color : String -- TODO use Color
     , width : Float
     , dotted : Bool
-    , filterX : C.Bounds -> List Float
-    , filterY : C.Bounds -> List Float
+    , filterX : C.Limit -> List Float
+    , filterY : C.Limit -> List Float
     }
 
 
@@ -1084,17 +1085,10 @@ bars edits properties data =
       toTicks plane acc =
         { acc | xs = List.concatMap (\i -> [ Item.getX1 plane i, Item.getX2 plane i ]) bins }
 
-      toXYBounds =
-        C.toBounds
-          [ Item.getBounds >> .x1 >> Just
-          , Item.getBounds >> .x2 >> Just
-          ]
-          [ Item.getBounds >> .y1 >> Just
-          , Item.getBounds >> .y2 >> Just
-          ]
-          bins
+      toLimits =
+        List.map Item.getLimits bins
   in
-  BarsElement toXYBounds generalized toTicks <| \ plane ->
+  BarsElement toLimits generalized toTicks <| \ plane ->
     S.g [ SA.class "elm-charts__bar-series" ] (List.map (Item.render plane) items)
       |> S.map never
 
@@ -1114,17 +1108,10 @@ series toX properties data =
           |> List.concatMap Item.getProducts
           |> List.map (Item.toGeneral Item.DotConfig)
 
-      toXYBounds =
-        C.toBounds
-          [ Item.getBounds >> .x1 >> Just
-          , Item.getBounds >> .x2 >> Just
-          ]
-          [ Item.getBounds >> .y1 >> Just
-          , Item.getBounds >> .y2 >> Just
-          ]
-          items
+      toLimits =
+        List.map Item.getLimits items
   in
-  SeriesElement toXYBounds generalized <| \p ->
+  SeriesElement toLimits generalized <| \p ->
     S.g [ SA.class "elm-charts__dot-series" ] (List.map (Item.render p) items)
       |> S.map never
 
@@ -1233,14 +1220,14 @@ html func =
 
 
 {-| -}
-svgAt : (C.Bounds -> Float) -> (C.Bounds -> Float) -> Float -> Float -> List (S.Svg msg) -> Element data msg
+svgAt : (C.Limit -> Float) -> (C.Limit -> Float) -> Float -> Float -> List (S.Svg msg) -> Element data msg
 svgAt toX toY xOff yOff view =
   SvgElement <| \p ->
     S.g [ CS.position p 0 (toX p.x) (toY p.y) xOff yOff ] view
 
 
 {-| -}
-htmlAt : (C.Bounds -> Float) -> (C.Bounds -> Float) -> Float -> Float -> List (H.Attribute msg) -> List (H.Html msg) -> Element data msg
+htmlAt : (C.Limit -> Float) -> (C.Limit -> Float) -> Float -> Float -> List (H.Attribute msg) -> List (H.Html msg) -> Element data msg
 htmlAt toX toY xOff yOff att view =
   HtmlElement <| \p ->
     CS.positionHtml p (toX p.x) (toY p.y) xOff yOff att view

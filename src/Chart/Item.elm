@@ -6,7 +6,7 @@ module Chart.Item exposing
   , isSameSeries, isSameBin, isSameStack, isSame
   , getProducts, getCommonality
   , getValue, getDatum, getColor, getName
-  , getTop, getCenter, getLeft, getRight, getX1, getX2, getY2, getY1, getPosition, getBounds
+  , getTop, getCenter, getLeft, getRight, getX1, getX2, getY2, getY1, getPosition, getLimits
   , Property, Bars, toBarSeries, toDotSeries, render
   )
 
@@ -32,7 +32,7 @@ type Item a =
   Item
     { details : a
     , render : Plane -> a -> Position -> Svg Never
-    , bounds : a -> Position
+    , limits : a -> Position
     , position : Plane -> a -> Position
     }
 
@@ -61,15 +61,15 @@ type alias Group inter config datum =
 
 {-| -}
 groupBy : Grouping inter config datum -> List (Product config datum) -> List (Group inter config datum)
-groupBy (Grouping { grouping, toPosition, toBounds }) products_ =
+groupBy (Grouping { grouping, toPosition, toLimits }) products_ =
   let toGroup ( config, items ) =
         Item
           { details =
               { config = config
               , items = items
               }
-          , bounds = \c ->
-              toBounds c.config c.items
+          , limits = \c ->
+              toLimits c.config c.items
           , position = \plane c ->
               toPosition plane c.config c.items
           , render = \plane c _ ->
@@ -97,7 +97,7 @@ isSameSeries =
   collector
     { commonality = \(Item { details }) -> details.name
     , grouping = (==)
-    , bounds = \_ products_ -> Coord.foldPosition getBounds products_
+    , limits = \_ products_ -> Coord.foldPosition getLimits products_
     , position = \plane _ products_ -> Coord.foldPosition (getPosition plane) products_
     }
 
@@ -112,8 +112,8 @@ isSameBin =
         , datum = details.datum
         }
     , grouping = \a b -> a.start == b.start && a.end == b.end && a.datum == b.datum
-    , bounds = \bin products_ ->
-        let pos = Coord.foldPosition getBounds products_ in
+    , limits = \bin products_ ->
+        let pos = Coord.foldPosition getLimits products_ in
         { pos | x1 = bin.start, x2 = bin.end }
     , position = \plane bin products_ ->
         let pos = Coord.foldPosition (getPosition plane) products_ in
@@ -141,7 +141,7 @@ isSameStack =
         , index = details.property
         }
     , grouping = \a b -> a.index == b.index && a.start == b.start && a.end == b.end && a.datum == b.datum
-    , bounds = \_ products_ -> Coord.foldPosition getBounds products_
+    , limits = \_ products_ -> Coord.foldPosition getLimits products_
     , position = \plane _ products_ -> Coord.foldPosition (getPosition plane) products_
     }
 
@@ -152,7 +152,7 @@ isSame toCommon =
   collector
     { commonality = toCommon
     , grouping = (==)
-    , bounds = \_ products_ -> Coord.foldPosition getBounds products_
+    , limits = \_ products_ -> Coord.foldPosition getLimits products_
     , position = \plane _ products_ -> Coord.foldPosition (getPosition plane) products_
     }
 
@@ -161,7 +161,7 @@ isSame toCommon =
 type Grouping inter config datum =
   Grouping
     { grouping : List (Product config datum) -> List ( inter, List (Product config datum) )
-    , toBounds : inter -> List (Product config datum) -> Position
+    , toLimits : inter -> List (Product config datum) -> Position
     , toPosition : Plane -> inter -> List (Product config datum) -> Position
     }
 
@@ -170,7 +170,7 @@ type Grouping inter config datum =
 collector :
   { commonality : Product config datum -> inter
   , grouping : inter -> inter -> Bool
-  , bounds : inter -> List (Product config datum) -> Position
+  , limits : inter -> List (Product config datum) -> Position
   , position : Plane -> inter -> List (Product config datum) -> Position
   } -> Grouping inter config datum
 collector config =
@@ -179,7 +179,7 @@ collector config =
         List.map (\i -> ( config.commonality i, i ))
           >> gatherWith (\(a, _) (b, _) -> config.grouping a b)
           >> List.map (\(( inter, first ), rest ) -> ( inter, first :: List.map Tuple.second rest ))
-    , toBounds = config.bounds
+    , toLimits = config.limits
     , toPosition = config.position
     }
 
@@ -289,9 +289,9 @@ getY2 plane (Item config) =
   pos.y2
 
 
-getBounds : Item x -> Position
-getBounds (Item config) =
-  config.bounds config.details
+getLimits : Item x -> Position
+getLimits (Item config) =
+  config.limits config.details
 
 
 {-| -}
@@ -390,7 +390,7 @@ toBarSeries barsAttrs properties data =
               { config = ()
               , items = List.map (toBarItem sections barIndex sectionIndex section) bins
               }
-          , bounds = \c -> Coord.foldPosition getBounds c.items
+          , limits = \c -> Coord.foldPosition getLimits c.items
           , position = \plane c -> Coord.foldPosition (getPosition plane) c.items
           , render = \plane config _ ->
               S.g [ SA.class "elm-charts__bar-series" ] (List.map (render plane) config.items)
@@ -446,7 +446,7 @@ toBarSeries barsAttrs properties data =
                     , design = Nothing
                     }
               }
-          , bounds = \config ->
+          , limits = \config ->
               { x1 = x1, x2 = x2, y1 = min y1 y2, y2 = max y1 y2 }
           , position = \_ config ->
               { x1 = x1, x2 = x2, y1 = y1, y2 = y2 }
@@ -509,7 +509,7 @@ toDotSeries toX properties data =
                 , S.interpolation plane toX prop.visual interAttr data
                 , S.g [ SA.class "elm-charts__dots" ] (List.map (render plane) dotItems)
                 ]
-          , bounds = \c -> Coord.foldPosition getBounds c.items
+          , limits = \c -> Coord.foldPosition getLimits c.items
           , position = \plane c -> Coord.foldPosition (getPosition plane) c.items
           }
 
@@ -525,7 +525,7 @@ toDotSeries toX properties data =
               case prop.value datum_ of
                 Nothing -> S.text ""
                 Just _ -> S.dot plane .x .y dotAttrs { x = x_, y = y_ }
-          , bounds = \_ ->
+          , limits = \_ ->
               { x1 = x_
               , x2 = x_
               , y1 = y_
@@ -651,7 +651,7 @@ toGeneral generalize (Item product) =
               BarConfig bar -> S.bar plane (toBarAttrs bar) position
               DotConfig dot -> S.dot plane .x .y (toDotAttrs dot) { x = details.x1, y = y }
 
-    , bounds = \_ -> product.bounds product.details
+    , limits = \_ -> product.limits product.details
     , position = \plane _ -> product.position plane product.details
     , details =
         { datum = product.details.datum
@@ -682,7 +682,7 @@ isBarSeries (Item product) =
       Just <| Item
         { render = \plane details ->
             S.bar plane (toBarAttrs details.config)
-        , bounds = \_ -> product.bounds product.details
+        , limits = \_ -> product.limits product.details
         , position = \plane _ -> product.position plane product.details
         , details =
             { datum = product.details.datum
@@ -709,7 +709,7 @@ isDotSeries (Item product) =
             case details.y of
               Nothing -> S.text ""
               Just y -> S.dot plane .x .y (toDotAttrs details.config) { x = details.x1, y = y }
-        , bounds = \_ -> product.bounds product.details
+        , limits = \_ -> product.limits product.details
         , position = \plane _ -> product.position plane product.details
         , details =
             { datum = product.details.datum

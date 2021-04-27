@@ -10,7 +10,7 @@ module Chart.Svg exposing
   , Tooltip, tooltip
   , decoder, getNearest, getNearestX, getWithin, getWithinX, isWithinPlane
   , position, positionHtml
-  , Bounds, produce, floats, ints, times
+  , Limit, produce, floats, ints, times
   , TickValue, toTickValues, formatTime
   , blue, pink, orange, green, purple, red
   )
@@ -448,11 +448,6 @@ bar plane edits point =
               , C.Line (x_ + rxB) bs
               ]
 
-      bounds =
-        { x = Coord.Bounds x1_ x2_ x1_ x2_
-        , y = Coord.Bounds bs y_ bs y_
-        }
-
       actualBar fill =
         S.path
           [ SA.class "elm-charts__bar"
@@ -461,7 +456,7 @@ bar plane edits point =
           , SA.stroke config.border
           , SA.strokeWidth (String.fromFloat config.borderWidth)
           , SA.d (C.description plane commands)
-          , SA.style (clipperStyle plane bounds)
+          , SA.style (clipperStyle plane (Coord.Position x1_ x2_ bs y_))
           ]
           []
   in
@@ -506,9 +501,8 @@ interpolation plane toX toY edits data =
           , dashed = []
           }
 
-      bounds =
-        Coord.toBounds [toX >> Just] [toY] data Nothing
-          |> Maybe.withDefault { x = Coord.Bounds 0 100 0 100, y = Coord.Bounds 0 100 0 100 }
+      limits =
+        Coord.fromProps [toX >> Just] [toY] data
 
       view ( first, cmds, _ ) =
         S.path
@@ -518,7 +512,7 @@ interpolation plane toX toY edits data =
           , SA.strokeDasharray (String.join " " <| List.map String.fromFloat config.dashed)
           , SA.strokeWidth (String.fromFloat config.width)
           , SA.d (C.description plane (Move first.x first.y :: cmds))
-          , SA.style (clipperStyle plane bounds)
+          , SA.style (clipperStyle plane limits)
           ]
           []
   in
@@ -542,9 +536,8 @@ area plane toX toY2M toY edits data =
           , dashed = []
           }
 
-      bounds =
-        Coord.toBounds [toX >> Just] [toY, Maybe.withDefault (always (Just 0)) toY2M] data Nothing
-          |> Maybe.withDefault { x = Coord.Bounds 0 100 0 100, y = Coord.Bounds 0 100 0 100 }
+      limits =
+        Coord.fromProps [toX >> Just] [toY, Maybe.withDefault (always (Just 0)) toY2M] data
 
       ( patternDefs, fill ) =
         case config.design of
@@ -559,7 +552,7 @@ area plane toX toY2M toY edits data =
           , SA.strokeWidth "0"
           , SA.fillRule "evenodd"
           , SA.d (C.description plane cmds)
-          , SA.style (clipperStyle plane bounds)
+          , SA.style (clipperStyle plane limits)
           ]
           []
 
@@ -1300,10 +1293,10 @@ tooltipPointerStyle direction className background borderColor =
   """
 
 
-clipperStyle : Plane -> Coord.XY -> String
-clipperStyle plane bounds =
-  let x1 = plane.x.min - bounds.x.min
-      y1 = bounds.y.max - plane.y.max
+clipperStyle : Plane -> Coord.Position -> String
+clipperStyle plane limits =
+  let x1 = plane.x.min - limits.x1
+      y1 = limits.y2 - plane.y.max
       x2 = x1 + abs (plane.x.max - plane.x.min)
       y2 = y1 + abs (plane.y.max - plane.y.min)
 
@@ -1324,7 +1317,7 @@ clipperStyle plane bounds =
 -- INTERVALS
 
 
-type alias Bounds =
+type alias Limit =
   { min : Float
   , max : Float
   , dataMin : Float
@@ -1333,7 +1326,7 @@ type alias Bounds =
 
 
 type Generator a
-  = Generator (Int -> Bounds -> List a)
+  = Generator (Int -> Limit -> List a)
 
 
 floats : Generator Float
@@ -1351,9 +1344,9 @@ times zone =
   Generator (\i b -> I.times zone i { min = b.min, max = b.max })
 
 
-produce : Int -> Generator a -> Bounds -> List a
-produce amount (Generator func) bounds =
-  func amount bounds
+produce : Int -> Generator a -> Limit -> List a
+produce amount (Generator func) limits =
+  func amount limits
 
 
 type alias TickValue =

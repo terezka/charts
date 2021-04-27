@@ -1,6 +1,6 @@
 module Svg.Coordinates
   exposing
-    ( Plane, Bounds, Margin, minimum, maximum
+    ( Plane, Limit, Margin
     , scaleSVGX, scaleSVGY
     , toSVGX, toSVGY
     , scaleCartesianX, scaleCartesianY
@@ -8,7 +8,7 @@ module Svg.Coordinates
     , place, placeWithOffset
     , Point, Position
 
-    , toBounds, XY
+    , fromProps, Limits
     , foldPosition
     )
 
@@ -93,6 +93,26 @@ foldPosition func data =
     |> Maybe.withDefault (Position 0 0 0 0) -- TODO
 
 
+{-| -}
+fromProps : List (a -> Maybe Float) -> List (a -> Maybe Float) -> List a -> Position
+fromProps xs ys data =
+  let toPosition datum =
+        let vsX = getValues xs datum
+            vsY = getValues ys datum
+        in
+        { x1 = getMin vsX
+        , x2 = getMax vsX
+        , y1 = getMin vsY
+        , y2 = getMax vsY
+        }
+
+      getMin = Maybe.withDefault 0 << List.minimum
+      getMax = Maybe.withDefault 1 << List.maximum
+      getValues vs datum = List.filterMap (\v -> v datum) vs
+  in
+  foldPosition toPosition data
+
+
 
 -- PLANE
 
@@ -102,8 +122,8 @@ type alias Plane =
   { width : Float
   , height : Float
   , margin : Margin
-  , x : Bounds
-  , y : Bounds
+  , x : Limit
+  , y : Limit
   }
 
 
@@ -117,7 +137,7 @@ type alias Margin =
 
 
 {-| -}
-type alias Bounds =
+type alias Limit =
   { dataMin : Float
   , dataMax : Float
   , min : Float
@@ -126,89 +146,10 @@ type alias Bounds =
 
 
 {-| -}
-type alias XY =
-  { x : Bounds
-  , y : Bounds
+type alias Limits =
+  { x : Limit
+  , y : Limit
   }
-
-
-{-| -}
-toBounds : List (a -> Maybe Float) -> List (a -> Maybe Float) -> List a -> Maybe XY -> Maybe XY
-toBounds xs ys data prev =
-  let fold vs datum bounds_ =
-        { min = min (getMin vs datum) bounds_.min
-        , max = max (getMax vs datum) bounds_.max
-        , dataMin = min (getMin vs datum) bounds_.min
-        , dataMax = max (getMax vs datum) bounds_.max
-        }
-
-      getMin toValues datum =
-        List.minimum (getValues toValues datum)
-          |> Maybe.withDefault 0
-
-      getMax toValues datum =
-        List.maximum (getValues toValues datum)
-          |> Maybe.withDefault 1
-
-      getValues toValues datum =
-        List.filterMap (\v -> v datum) toValues
-
-      initial fs datum =
-        { min = getMin fs datum
-        , max = getMax fs datum
-        , dataMin = getMin fs datum
-        , dataMax = getMax fs datum
-        }
-  in
-  case data of
-    first :: rest ->
-      case prev of
-        Just { x, y } ->
-          Just
-            { x = List.foldl (fold xs) x data
-            , y = List.foldl (fold ys) y data
-            }
-
-        Nothing ->
-          Just
-            { x = List.foldl (fold xs) (initial xs first) rest
-            , y = List.foldl (fold ys) (initial ys first) rest
-            }
-
-    [] ->
-      prev
-
-
-{-| Helper to extract the minimum value amongst your coordinates.
--}
-minimum : List (a -> Maybe Float) -> List a -> Float
-minimum toValues =
-  let fold datum toValue all =
-        case toValue datum of
-          Just v -> v :: all
-          Nothing -> all
-
-      eachDatum datum = List.foldl (fold datum) [] toValues
-  in
-  List.concatMap eachDatum
-    >> List.minimum
-    >> Maybe.withDefault 0
-
-
-{-| Helper to extract the maximum value amongst your coordinates.
--}
-maximum : List (a -> Maybe Float) -> List a -> Float
-maximum toValues =
-  let fold datum toValue all =
-        case toValue datum of
-          Just v -> v :: all
-          Nothing -> all
-
-      eachDatum datum = List.foldl (fold datum) [] toValues
-  in
-  List.concatMap eachDatum
-    >> List.maximum
-    >> Maybe.withDefault 1
 
 
 
@@ -301,9 +242,9 @@ placeWithOffset plane x y offsetX offsetY =
 -- INTERNAL HELPERS
 
 
-range : Bounds -> Float
-range bounds =
-  let diff = bounds.max - bounds.min in
+range : Limit -> Float
+range limits =
+  let diff = limits.max - limits.min in
   if diff > 0 then diff else 1
 
 

@@ -164,7 +164,7 @@ view model =
 
       , C.each (\_ -> CI.groupBy CI.isSameStack model.hovering) <| \p i ->
           let bin = CI.getCommonality i
-              bounds = CI.getBounds i
+              bounds = CI.getLimits i
               top = CI.getTop p i
               cen = CI.getCenter p i
           in
