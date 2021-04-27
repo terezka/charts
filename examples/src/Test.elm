@@ -108,7 +108,14 @@ view model =
 
       , C.xAxis []
       --, C.xLabels [ C.amount 10 ]
-      --, C.yAxis [ C.pinned .dataMax ]
+      , C.yAxis
+          [ C.pinned .dataMax
+          , C.limits
+              [ C.lowest 0 C.fromData
+              , C.lowest 5 C.orHigher
+              , C.highest 10 C.fromData
+              ]
+          ]
 
       , C.bars
           [ CA.roundTop 0.2

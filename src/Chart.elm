@@ -3,7 +3,7 @@ module Chart exposing
     , bars, series
     , Property, stacked, bar, property, just, variation
     , xAxis, yAxis, xTicks, yTicks, xLabels, yLabels, grid
-    , lowest, highest, orLower, orHigher, exactly, more, less, window, ifNoData, zero, middle
+    , lowest, highest, orLower, orHigher, exactly, more, less, window, fromData, zero, middle
     , Event, event
     , Decoder, getCoords, getNearest, getNearestX, getWithin, getWithinX, map, map2, map3, map4
     , tooltip, line, label, title, xTick, yTick, svgAt, htmlAt, svg, html, none
@@ -541,8 +541,8 @@ orHigher most real _ =
 
 
 {-| -}
-ifNoData : Float -> Float -> Float -> Float
-ifNoData _ _ limit =
+fromData : Float -> Float -> Float -> Float
+fromData _ _ limit =
   limit -- TODO
 
 
@@ -721,21 +721,19 @@ xAxis edits =
           }
   in
   AxisElement <| \p ->
-    let xLimit = config.limits p.x
-        yLimit = p.y
-    in
+    let xLimit = config.limits p.x in
     S.g
       [ SA.class "elm-charts__x-axis" ]
       [ CS.line p
           [ CA.color config.color
-          , CA.y1 (config.pinned yLimit)
+          , CA.y1 (config.pinned p.y)
           , CA.x1 (max p.x.min xLimit.min)
           , CA.x2 (min p.x.max xLimit.max)
           ]
       , if config.arrow then
           CS.arrow p [ CA.color config.color ]
             { x = xLimit.max
-            , y = config.pinned yLimit
+            , y = config.pinned p.y
             }
         else
           S.text ""
@@ -754,20 +752,18 @@ yAxis edits =
           }
   in
   AxisElement <| \p ->
-    let xLimit = p.x
-        yLimit = config.limits p.y
-    in
+    let yLimit = config.limits p.y in
     S.g
       [ SA.class "elm-charts__y-axis" ]
       [ CS.line p
           [ CA.color config.color
-          , CA.x1 (config.pinned xLimit)
+          , CA.x1 (config.pinned p.x)
           , CA.y1 (max p.y.min yLimit.min)
           , CA.y2 (min p.y.max yLimit.max)
           ]
       , if config.arrow then
           CS.arrow p [ CA.color config.color, CA.rotate -90 ]
-            { x = config.pinned xLimit
+            { x = config.pinned p.x
             , y = yLimit.max
             }
         else
@@ -802,11 +798,8 @@ xTicks edits =
           , width = 1
           }
 
-      xLimit p =
-        config.limits p.x
-
       toTicks p =
-        config.produce config.amount (xLimit p)
+        config.produce config.amount (config.limits p.x)
           |> List.map .value
           |> List.filter config.only
 
@@ -842,11 +835,8 @@ yTicks edits =
           , width = 1
           }
 
-      yLimit p =
-        config.limits p.y
-
       toTicks p =
-        config.produce config.amount (yLimit p)
+        config.produce config.amount (config.limits p.y)
           |> List.map .value
           |> List.filter config.only
 
@@ -895,11 +885,8 @@ xLabels edits =
           , yOff = 20
           }
 
-      xLimit p =
-        config.limits p.x
-
       toTicks p =
-        config.produce config.amount (xLimit p)
+        config.produce config.amount (config.limits p.x)
           |> List.filter (config.only << .value)
 
       toTickValues p ts =
@@ -935,11 +922,8 @@ yLabels edits =
           , yOff = 3
           }
 
-      yLimit p =
-        config.limits p.y
-
       toTicks p =
-        config.produce config.amount (yLimit p)
+        config.produce config.amount (config.limits p.y)
           |> List.filter (config.only << .value)
 
       toTickValues p ts =
