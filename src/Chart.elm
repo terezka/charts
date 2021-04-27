@@ -382,25 +382,30 @@ definePlane config elements =
           Just edit -> edit bounds_.y
           Nothing -> lowest 0 orLower bounds_.y
 
+      unpadded =
+        { x =
+            { marginLower = config.marginLeft
+            , marginUpper = config.marginRight
+            , length = max 1 (config.width - config.paddingLeft - config.paddingRight)
+            , data = { min = bounds_.x.dataMin, max = bounds_.x.dataMax }
+            , min = calcRange.min
+            , max = calcRange.max
+            }
+        , y =
+            { marginUpper = config.marginTop
+            , marginLower = config.marginBottom
+            , length = max 1 (config.height - config.paddingBottom - config.paddingTop)
+            , data = { min = bounds_.y.dataMin, max = bounds_.y.dataMax }
+            , min = calcDomain.min
+            , max = calcDomain.max
+            }
+        }
+
       scalePadX =
-        C.scaleCartesian
-          { marginLower = config.marginLeft
-          , marginUpper = config.marginRight
-          , length = max 1 (config.width - config.paddingLeft - config.paddingRight)
-          , data = { min = bounds_.x.dataMin, max = bounds_.x.dataMax }
-          , min = calcRange.min
-          , max = calcRange.max
-          }
+        C.scaleCartesianX unpadded
 
       scalePadY =
-        C.scaleCartesian
-          { marginUpper = config.marginTop
-          , marginLower = config.marginBottom
-          , length = max 1 (config.height - config.paddingBottom - config.paddingTop)
-          , data = { min = bounds_.y.dataMin, max = bounds_.y.dataMax }
-          , min = calcDomain.min
-          , max = calcDomain.max
-          }
+        C.scaleCartesianY unpadded
   in
   { x =
       { marginLower = config.marginLeft

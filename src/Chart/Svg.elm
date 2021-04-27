@@ -20,7 +20,7 @@ import Html.Attributes as HA
 import Svg as S exposing (Svg)
 import Svg.Attributes as SA
 import Svg.Events as SE
-import Svg.Coordinates as Coord exposing (Point, Position, Plane, place, toSVGX, toSVGY, toCartesianX, toCartesianY, scaleSVG, scaleCartesian, placeWithOffset)
+import Svg.Coordinates as Coord exposing (Point, Position, Plane, place, toSVGX, toSVGY, toCartesianX, toCartesianY, placeWithOffset)
 import Svg.Commands as C exposing (..)
 import Chart.Attributes as CA
 import Internal.Interpolation as Interpolation
@@ -386,22 +386,22 @@ bar plane edits point =
           , design = Nothing
           }
 
-      x1_ = point.x1 + scaleCartesian plane.x (config.borderWidth / 2)
-      x2_ = point.x2 - scaleCartesian plane.x (config.borderWidth / 2)
-      y1_ = point.y1 + scaleCartesian plane.y (config.borderWidth / 2)
-      y2_ = point.y2 - scaleCartesian plane.y (config.borderWidth / 2)
+      x1_ = point.x1 + Coord.scaleCartesianX plane (config.borderWidth / 2)
+      x2_ = point.x2 - Coord.scaleCartesianX plane (config.borderWidth / 2)
+      y1_ = point.y1 + Coord.scaleCartesianY plane (config.borderWidth / 2)
+      y2_ = point.y2 - Coord.scaleCartesianY plane (config.borderWidth / 2)
 
       x_ = x1_
       y_ = max y1_ y2_
       bs = min y1_ y2_
       w = x2_ - x_
-      bT = scaleSVG plane.x w * 0.5 * (clamp 0 1 config.roundTop)
-      bB = scaleSVG plane.x w * 0.5 * (clamp 0 1 config.roundBottom)
-      ys = abs (scaleSVG plane.y y_)
-      rxT = scaleCartesian plane.x bT
-      ryT = scaleCartesian plane.y bT
-      rxB = scaleCartesian plane.x bB
-      ryB = scaleCartesian plane.y bB
+      bT = Coord.scaleSVGX plane w * 0.5 * (clamp 0 1 config.roundTop)
+      bB = Coord.scaleSVGX plane w * 0.5 * (clamp 0 1 config.roundBottom)
+      ys = abs (Coord.scaleSVGY plane y_)
+      rxT = Coord.scaleCartesianX plane bT
+      ryT = Coord.scaleCartesianY plane bT
+      rxB = Coord.scaleCartesianX plane bB
+      ryB = Coord.scaleCartesianY plane bB
 
       commands =
         if bs == y_ then
@@ -1308,11 +1308,11 @@ clipperStyle plane minX maxX minY maxY =
 
       path =
         String.join " "
-          [ "M" ++ String.fromFloat (scaleSVG plane.x x1) ++ " " ++ String.fromFloat (scaleSVG plane.y y1)
-          , "V" ++ String.fromFloat (scaleSVG plane.y y2)
-          , "H" ++ String.fromFloat (scaleSVG plane.x x2)
-          , "V" ++ String.fromFloat (scaleSVG plane.y y1)
-          , "H" ++ String.fromFloat (scaleSVG plane.y x1)
+          [ "M" ++ String.fromFloat (Coord.scaleSVGX plane x1) ++ " " ++ String.fromFloat (Coord.scaleSVGY plane y1)
+          , "V" ++ String.fromFloat (Coord.scaleSVGY plane y2)
+          , "H" ++ String.fromFloat (Coord.scaleSVGX plane x2)
+          , "V" ++ String.fromFloat (Coord.scaleSVGY plane y1)
+          , "H" ++ String.fromFloat (Coord.scaleSVGY plane x1)
           ]
   in
   "clip-path: path('" ++ path ++ "');"

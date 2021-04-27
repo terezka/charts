@@ -15,7 +15,7 @@ import Html as H exposing (Html)
 import Html.Attributes as HA
 import Svg as S exposing (Svg)
 import Svg.Attributes as SA
-import Svg.Coordinates as Coord exposing (Point, Position, Plane, scaleCartesian)
+import Svg.Coordinates as Coord exposing (Point, Position, Plane)
 import Dict exposing (Dict)
 import Internal.Property as P exposing (Property)
 import Chart.Svg as S
@@ -589,8 +589,8 @@ toDotSeries toX properties data =
               }
           , position = \plane _ ->
               let radius = Maybe.withDefault 0 <| Maybe.map (S.toRadius config.size) config.shape
-                  radiusX_ = scaleCartesian plane.x radius
-                  radiusY_ = scaleCartesian plane.y radius
+                  radiusX_ = Coord.scaleCartesianX plane radius
+                  radiusY_ = Coord.scaleCartesianY plane radius
               in
               { x1 = x_ - radiusX_
               , x2 = x_ + radiusX_

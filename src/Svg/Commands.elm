@@ -3,7 +3,7 @@ module Svg.Commands exposing (Command(..), description)
 {-| SVG path commands.
 -}
 
-import Svg.Coordinates exposing (Plane, toSVGX, toSVGY, scaleSVG)
+import Svg.Coordinates exposing (Plane, toSVGX, toSVGY)
 
 
 {-| -}

@@ -1,8 +1,10 @@
 module Svg.Coordinates
   exposing
     ( Plane, Axis, minimum, maximum
-    , scaleSVG, toSVGX, toSVGY
-    , scaleCartesian, toCartesianX, toCartesianY
+    , scaleSVGX, scaleSVGY
+    , toSVGX, toSVGY
+    , scaleCartesianX, scaleCartesianY
+    , toCartesianX, toCartesianY
     , place, placeWithOffset
     , Point, Position
     )
@@ -65,6 +67,14 @@ type alias Position =
   , x2 : Float
   , y1 : Float
   , y2 : Float
+  }
+
+
+type alias Bounds =
+  { dataMin : Float
+  , dataMax : Float
+  , min : Float
+  , max : Float
   }
 
 
@@ -142,45 +152,55 @@ maximum toValues =
 {-| For scaling a cartesian value to a SVG value. Note that this will _not_
   return a coordinate on the plane, but the scaled value.
 -}
-scaleSVG : Axis -> Float -> Float
-scaleSVG axis value =
-  value * (innerLength axis) / (range axis)
+scaleSVGX : Plane -> Float -> Float
+scaleSVGX plane value =
+  value * (innerLength plane.x) / (range plane.x)
+
+
+scaleSVGY : Plane -> Float -> Float
+scaleSVGY plane value =
+  value * (innerLength plane.y) / (range plane.y)
 
 
 {-| Translate a SVG x-coordinate to its cartesian x-coordinate.
 -}
 toSVGX : Plane -> Float -> Float
 toSVGX plane value =
-  scaleSVG plane.x (value - plane.x.min) + plane.x.marginLower
+  scaleSVGX plane (value - plane.x.min) + plane.x.marginLower
 
 
 {-| Translate a SVG y-coordinate to its cartesian y-coordinate.
 -}
 toSVGY : Plane -> Float -> Float
 toSVGY plane value =
-  scaleSVG plane.y (plane.y.max - value) + plane.y.marginUpper
+  scaleSVGY plane (plane.y.max - value) + plane.y.marginUpper
 
 
 {-| For scaling a SVG value to a cartesian value. Note that this will _not_
   return a coordinate on the plane, but the scaled value.
 -}
-scaleCartesian : Axis -> Float -> Float
-scaleCartesian axis value =
-  value * (range axis) / (innerLength axis)
+scaleCartesianX : Plane -> Float -> Float
+scaleCartesianX plane value =
+  value * (range plane.x) / (innerLength plane.x)
+
+
+scaleCartesianY : Plane -> Float -> Float
+scaleCartesianY plane value =
+  value * (range plane.y) / (innerLength plane.y)
 
 
 {-| Translate a cartesian x-coordinate to its SVG x-coordinate.
 -}
 toCartesianX : Plane -> Float -> Float
 toCartesianX plane value =
-  scaleCartesian plane.x (value - plane.x.marginLower) + plane.x.min
+  scaleCartesianX plane (value - plane.x.marginLower) + plane.x.min
 
 
 {-| Translate a cartesian y-coordinate to its SVG y-coordinate.
 -}
 toCartesianY : Plane -> Float -> Float
 toCartesianY plane value =
-  range plane.y - scaleCartesian plane.y (value - plane.y.marginUpper) + plane.y.min
+  range plane.y - scaleCartesianY plane (value - plane.y.marginUpper) + plane.y.min
 
 
 

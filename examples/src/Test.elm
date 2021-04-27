@@ -108,32 +108,28 @@ view model =
 
       , C.xAxis []
       --, C.xLabels [ C.amount 10 ]
-      , C.yAxis []
+      --, C.yAxis [ C.pinned .dataMax ]
 
       , C.bars
-          [ CA.roundTop 0.1
-          , CA.roundBottom 0.1
+          [ CA.roundTop 0.2
+          --, CA.roundBottom 0.2
           , CA.margin 0.3
           ]
           [ C.stacked
               [ C.bar .y "owls"
                   [ CA.color CA.blue
-                  , CA.opacity 0.75
+                  --, CA.opacity 0.75
+                  , CA.striped [ CA.width 2, CA.space 2, CA.rotate 135 ]
                   , CA.border "transparent"
                   , CA.borderWidth 0.5
                   ]
               , C.bar .z "trees"
                   [ CA.color CA.purple
-                  , CA.opacity 0.75
+                  --, CA.opacity 0.75
+                  , CA.striped [ CA.width 2, CA.space 2, CA.rotate 45 ]
                   , CA.border "transparent"
                   , CA.borderWidth 0.5
                   ]
-              ]
-          , C.bar (C.just (.x >> (+) 2 >> (*) -1)) "trees"
-              [ CA.color CA.pink
-              , CA.opacity 0.75
-              , CA.border "transparent"
-              , CA.borderWidth 0.5
               ]
           ]
           data
@@ -164,7 +160,7 @@ view model =
       --    ]
       --    data
 
-      , C.yLabels []
+      , C.yLabels [ C.ints ]
 
       , C.each (\_ -> CI.groupBy CI.isSameStack model.hovering) <| \p i ->
           let bin = CI.getCommonality i
