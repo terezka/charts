@@ -161,12 +161,12 @@ type alias Limit =
 -}
 scaleSVGX : Plane -> Float -> Float
 scaleSVGX plane value =
-  value * (innerLengthX plane) / (range plane.x)
+  value * (innerWidth plane) / (range plane.x)
 
 
 scaleSVGY : Plane -> Float -> Float
 scaleSVGY plane value =
-  value * (innerLengthY plane) / (range plane.y)
+  value * (innerHeight plane) / (range plane.y)
 
 
 {-| Translate a SVG x-coordinate to its cartesian x-coordinate.
@@ -188,12 +188,12 @@ toSVGY plane value =
 -}
 scaleCartesianX : Plane -> Float -> Float
 scaleCartesianX plane value =
-  value * (range plane.x) / (innerLengthX plane)
+  value * (range plane.x) / (innerWidth plane)
 
 
 scaleCartesianY : Plane -> Float -> Float
 scaleCartesianY plane value =
-  value * (range plane.y) / (innerLengthY plane)
+  value * (range plane.y) / (innerHeight plane)
 
 
 {-| Translate a cartesian x-coordinate to its SVG x-coordinate.
@@ -248,12 +248,12 @@ range limits =
   if diff > 0 then diff else 1
 
 
-innerLengthX : Plane -> Float
-innerLengthX plane =
-  Basics.max 1 (plane.width - plane.margin.left - plane.margin.right)
+innerWidth : Plane -> Float
+innerWidth plane =
+  max 1 (plane.width - plane.margin.left - plane.margin.right)
 
 
-innerLengthY : Plane -> Float
-innerLengthY plane =
-  Basics.max 1 (plane.height - plane.margin.top - plane.margin.bottom)
+innerHeight : Plane -> Float
+innerHeight plane =
+  max 1 (plane.height - plane.margin.top - plane.margin.bottom)
 
