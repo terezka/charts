@@ -448,6 +448,11 @@ bar plane edits point =
               , C.Line (x_ + rxB) bs
               ]
 
+      bounds =
+        { x = Coord.Bounds x1_ x2_ x1_ x2_
+        , y = Coord.Bounds bs y_ bs y_
+        }
+
       actualBar fill =
         S.path
           [ SA.class "elm-charts__bar"
@@ -456,7 +461,7 @@ bar plane edits point =
           , SA.stroke config.border
           , SA.strokeWidth (String.fromFloat config.borderWidth)
           , SA.d (C.description plane commands)
-          , SA.style (clipperStyle plane x1_ x2_ bs y_)
+          , SA.style (clipperStyle plane bounds)
           ]
           []
   in
@@ -501,10 +506,9 @@ interpolation plane toX toY edits data =
           , dashed = []
           }
 
-      minX = Coord.minimum [toX >> Just] data
-      maxX = Coord.maximum [toX >> Just] data
-      minY = Coord.minimum [toY] data
-      maxY = Coord.maximum [toY] data
+      bounds =
+        Coord.toBounds [toX >> Just] [toY] data Nothing
+          |> Maybe.withDefault { x = Coord.Bounds 0 100 0 100, y = Coord.Bounds 0 100 0 100 }
 
       view ( first, cmds, _ ) =
         S.path
@@ -514,7 +518,7 @@ interpolation plane toX toY edits data =
           , SA.strokeDasharray (String.join " " <| List.map String.fromFloat config.dashed)
           , SA.strokeWidth (String.fromFloat config.width)
           , SA.d (C.description plane (Move first.x first.y :: cmds))
-          , SA.style (clipperStyle plane minX maxX minY maxY)
+          , SA.style (clipperStyle plane bounds)
           ]
           []
   in
@@ -538,11 +542,9 @@ area plane toX toY2M toY edits data =
           , dashed = []
           }
 
-      minX = Coord.minimum [toX >> Just] data
-      maxX = Coord.maximum [toX >> Just] data
-      minY = Coord.minimum [toY, Maybe.withDefault (always (Just 0)) toY2M] data
-      maxY = Coord.maximum [toY, Maybe.withDefault (always (Just 0)) toY2M] data
-
+      bounds =
+        Coord.toBounds [toX >> Just] [toY, Maybe.withDefault (always (Just 0)) toY2M] data Nothing
+          |> Maybe.withDefault { x = Coord.Bounds 0 100 0 100, y = Coord.Bounds 0 100 0 100 }
 
       ( patternDefs, fill ) =
         case config.design of
@@ -557,7 +559,7 @@ area plane toX toY2M toY edits data =
           , SA.strokeWidth "0"
           , SA.fillRule "evenodd"
           , SA.d (C.description plane cmds)
-          , SA.style (clipperStyle plane minX maxX minY maxY)
+          , SA.style (clipperStyle plane bounds)
           ]
           []
 
@@ -1298,10 +1300,10 @@ tooltipPointerStyle direction className background borderColor =
   """
 
 
-clipperStyle : Plane -> Float -> Float -> Float -> Float -> String
-clipperStyle plane minX maxX minY maxY =
-  let x1 = plane.x.min - minX
-      y1 = maxY - plane.y.max
+clipperStyle : Plane -> Coord.XY -> String
+clipperStyle plane bounds =
+  let x1 = plane.x.min - bounds.x.min
+      y1 = bounds.y.max - plane.y.max
       x2 = x1 + abs (plane.x.max - plane.x.min)
       y2 = y1 + abs (plane.y.max - plane.y.min)
 

@@ -97,18 +97,8 @@ isSameSeries =
   collector
     { commonality = \(Item { details }) -> details.name
     , grouping = (==)
-    , bounds = \_ products_ ->
-        { x1 = Coord.minimum [ getBounds >> .x1 >> Just ] products_
-        , x2 = Coord.maximum [ getBounds >> .x2 >> Just ] products_
-        , y1 = Coord.minimum [ getBounds >> .y1 >> Just ] products_
-        , y2 = Coord.maximum [ getBounds >> .y2 >> Just ] products_
-        }
-    , position = \plane _ products_ ->
-        { x1 = Coord.minimum [ getX1 plane >> Just ] products_
-        , x2 = Coord.maximum [ getX2 plane >> Just ] products_
-        , y1 = Coord.minimum [ getY1 plane >> Just ] products_
-        , y2 = Coord.maximum [ getY2 plane >> Just ] products_
-        }
+    , bounds = \_ products_ -> Coord.foldPosition getBounds products_
+    , position = \plane _ products_ -> Coord.foldPosition (getPosition plane) products_
     }
 
 
@@ -123,17 +113,11 @@ isSameBin =
         }
     , grouping = \a b -> a.start == b.start && a.end == b.end && a.datum == b.datum
     , bounds = \bin products_ ->
-        { x1 = bin.start
-        , x2 = bin.end
-        , y1 = Coord.minimum [ getBounds >> .y1 >> Just ] products_
-        , y2 = Coord.maximum [ getBounds >> .y2 >> Just ] products_
-        }
+        let pos = Coord.foldPosition getBounds products_ in
+        { pos | x1 = bin.start, x2 = bin.end }
     , position = \plane bin products_ ->
-        { x1 = bin.start
-        , x2 = bin.end
-        , y1 = Coord.minimum [ getY1 plane >> Just ] products_
-        , y2 = Coord.maximum [ getY2 plane >> Just ] products_
-        }
+        let pos = Coord.foldPosition (getPosition plane) products_ in
+        { pos | x1 = bin.start, x2 = bin.end }
     }
 
 
@@ -157,18 +141,8 @@ isSameStack =
         , index = details.property
         }
     , grouping = \a b -> a.index == b.index && a.start == b.start && a.end == b.end && a.datum == b.datum
-    , bounds = \_ products_ ->
-        { x1 = Coord.minimum [ getBounds >> .x1 >> Just ] products_
-        , x2 = Coord.maximum [ getBounds >> .x2 >> Just ] products_
-        , y1 = Coord.minimum [ getBounds >> .y1 >> Just ] products_
-        , y2 = Coord.maximum [ getBounds >> .y2 >> Just ] products_
-        }
-    , position = \plane _ products_ ->
-        { x1 = Coord.minimum [ getX1 plane >> Just ] products_
-        , x2 = Coord.maximum [ getX2 plane >> Just ] products_
-        , y1 = Coord.minimum [ getY1 plane >> Just ] products_
-        , y2 = Coord.maximum [ getY2 plane >> Just ] products_
-        }
+    , bounds = \_ products_ -> Coord.foldPosition getBounds products_
+    , position = \plane _ products_ -> Coord.foldPosition (getPosition plane) products_
     }
 
 
@@ -178,18 +152,8 @@ isSame toCommon =
   collector
     { commonality = toCommon
     , grouping = (==)
-    , bounds = \_ products_ ->
-        { x1 = Coord.minimum [ getBounds >> .x1 >> Just ] products_
-        , x2 = Coord.maximum [ getBounds >> .x2 >> Just ] products_
-        , y1 = Coord.minimum [ getBounds >> .y1 >> Just ] products_
-        , y2 = Coord.maximum [ getBounds >> .y2 >> Just ] products_
-        }
-    , position = \plane _ products_ ->
-        { x1 = Coord.minimum [ getX1 plane >> Just ] products_
-        , x2 = Coord.maximum [ getX2 plane >> Just ] products_
-        , y1 = Coord.minimum [ getY1 plane >> Just ] products_
-        , y2 = Coord.maximum [ getY2 plane >> Just ] products_
-        }
+    , bounds = \_ products_ -> Coord.foldPosition getBounds products_
+    , position = \plane _ products_ -> Coord.foldPosition (getPosition plane) products_
     }
 
 
@@ -426,18 +390,8 @@ toBarSeries barsAttrs properties data =
               { config = ()
               , items = List.map (toBarItem sections barIndex sectionIndex section) bins
               }
-          , bounds = \c ->
-              { x1 = Coord.minimum [ getBounds >> .x1 >> Just ] c.items
-              , x2 = Coord.maximum [ getBounds >> .x2 >> Just ] c.items
-              , y1 = Coord.minimum [ getBounds >> .y1 >> Just ] c.items
-              , y2 = Coord.maximum [ getBounds >> .y2 >> Just ] c.items
-              }
-          , position = \plane c ->
-              { x1 = Coord.minimum [ getX1 plane >> Just ] c.items
-              , x2 = Coord.maximum [ getX2 plane >> Just ] c.items
-              , y1 = Coord.minimum [ getY1 plane >> Just ] c.items
-              , y2 = Coord.maximum [ getY2 plane >> Just ] c.items
-              }
+          , bounds = \c -> Coord.foldPosition getBounds c.items
+          , position = \plane c -> Coord.foldPosition (getPosition plane) c.items
           , render = \plane config _ ->
               S.g [ SA.class "elm-charts__bar-series" ] (List.map (render plane) config.items)
           }
@@ -555,18 +509,8 @@ toDotSeries toX properties data =
                 , S.interpolation plane toX prop.visual interAttr data
                 , S.g [ SA.class "elm-charts__dots" ] (List.map (render plane) dotItems)
                 ]
-          , bounds = \c ->
-              { x1 = Coord.minimum [ getBounds >> .x1 >> Just ] c.items
-              , x2 = Coord.maximum [ getBounds >> .x2 >> Just ] c.items
-              , y1 = Coord.minimum [ getBounds >> .y1 >> Just ] c.items
-              , y2 = Coord.maximum [ getBounds >> .y2 >> Just ] c.items
-              }
-          , position = \plane c ->
-              { x1 = Coord.minimum [ getX1 plane >> Just ] c.items
-              , x2 = Coord.maximum [ getX2 plane >> Just ] c.items
-              , y1 = Coord.minimum [ getY1 plane >> Just ] c.items
-              , y2 = Coord.maximum [ getY2 plane >> Just ] c.items
-              }
+          , bounds = \c -> Coord.foldPosition getBounds c.items
+          , position = \plane c -> Coord.foldPosition (getPosition plane) c.items
           }
 
       toDotItem lineIndex sublineIndex prop interConfig datum_ =

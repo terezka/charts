@@ -9,6 +9,7 @@ module Svg.Coordinates
     , Point, Position
 
     , toBounds, XY
+    , foldPosition
     )
 
 {-| This module contains helpers for cartesian/SVG coordinate translation.
@@ -70,6 +71,26 @@ type alias Position =
   , y1 : Float
   , y2 : Float
   }
+
+
+{-| -}
+foldPosition : (a -> Position) -> List a -> Position
+foldPosition func data =
+  let fold datum posM =
+        case posM of
+          Just pos ->
+            Just
+              { x1 = min (func datum).x1 pos.x1
+              , x2 = max (func datum).x2 pos.x2
+              , y1 = min (func datum).y1 pos.y1
+              , y2 = max (func datum).y2 pos.y2
+              }
+
+          Nothing ->
+            Just (func datum)
+  in
+  List.foldl fold Nothing data
+    |> Maybe.withDefault (Position 0 0 0 0) -- TODO
 
 
 
