@@ -76,8 +76,8 @@ container plane edits below chartEls above =
         if config.responsive then
           []
         else
-          [ HA.style "width" (String.fromFloat plane.x.length ++ "px")
-          , HA.style "height" (String.fromFloat plane.y.length ++ "px")
+          [ HA.style "width" (String.fromFloat plane.width ++ "px")
+          , HA.style "height" (String.fromFloat plane.height ++ "px")
           ]
 
       htmlAttrs =
@@ -90,10 +90,10 @@ container plane edits below chartEls above =
 
       svgAttrsSize =
         if config.responsive then
-          [ SA.viewBox ("0 0 " ++ String.fromFloat plane.x.length ++ " " ++ String.fromFloat plane.y.length) ]
+          [ SA.viewBox ("0 0 " ++ String.fromFloat plane.width ++ " " ++ String.fromFloat plane.height) ]
         else
-          [ SA.width (String.fromFloat plane.x.length)
-          , SA.height (String.fromFloat plane.y.length)
+          [ SA.width (String.fromFloat plane.width)
+          , SA.height (String.fromFloat plane.height)
           ]
 
       catcher =
@@ -103,10 +103,10 @@ container plane edits below chartEls above =
         SE.on event.name (decoder plane event.handler)
 
       chartPosition =
-        [ SA.x (String.fromFloat plane.x.marginLower)
-        , SA.y (String.fromFloat plane.y.marginUpper)
-        , SA.width (String.fromFloat (plane.x.length - plane.x.marginLower - plane.x.marginUpper))
-        , SA.height (String.fromFloat (plane.y.length - plane.y.marginLower - plane.y.marginUpper))
+        [ SA.x (String.fromFloat plane.margin.left)
+        , SA.y (String.fromFloat plane.margin.top)
+        , SA.width (String.fromFloat (plane.width - plane.margin.left - plane.margin.right))
+        , SA.height (String.fromFloat (plane.height - plane.margin.bottom - plane.margin.top))
         , SA.fill "transparent"
         ]
   in
@@ -935,9 +935,9 @@ tooltip plane pos edits htmlAttrs content =
           }
 
       distanceTop = toSVGY plane pos.y2
-      distanceBottom = plane.y.length - toSVGY plane pos.y1
+      distanceBottom = plane.height - toSVGY plane pos.y1
       distanceLeft = toSVGX plane pos.x2
-      distanceRight = plane.x.length - toSVGX plane pos.x1
+      distanceRight = plane.width - toSVGX plane pos.x1
 
       direction =
         case config.direction of
@@ -1001,8 +1001,8 @@ tooltip plane pos edits htmlAttrs content =
 positionHtml : Plane -> Float -> Float -> Float -> Float -> List (H.Attribute msg) -> List (H.Html msg) -> H.Html msg
 positionHtml plane x y xOff yOff attrs content =
     let
-        xPercentage = (toSVGX plane x + xOff) * 100 / plane.x.length
-        yPercentage = (toSVGY plane y + yOff) * 100 / plane.y.length
+        xPercentage = (toSVGX plane x + xOff) * 100 / plane.width
+        yPercentage = (toSVGY plane y + yOff) * 100 / plane.height
 
         posititonStyles =
             [ HA.style "left" (String.fromFloat xPercentage ++ "%")
@@ -1142,22 +1142,21 @@ decoder plane toMsg =
   let
     handle mouseX mouseY rect =
       let
-        widthPercent = rect.width / plane.x.length
-        heightPercent = rect.height / plane.y.length
+        widthPercent = rect.width / plane.width
+        heightPercent = rect.height / plane.height
 
         xPrev = plane.x
         yPrev = plane.y
 
         newPlane =
-          { x =
-              { xPrev | length = rect.width
-              , marginLower = plane.x.marginLower * widthPercent
-              , marginUpper = plane.x.marginUpper * widthPercent
-              }
-          , y =
-              { yPrev | length = rect.height
-              , marginLower = plane.y.marginLower * heightPercent
-              , marginUpper = plane.y.marginUpper * heightPercent
+          { plane
+          | width = rect.width
+          , height = rect.height
+          , margin =
+              { top = plane.margin.top * heightPercent
+              , right = plane.margin.right * widthPercent
+              , left = plane.margin.left * widthPercent
+              , bottom = plane.margin.bottom * heightPercent
               }
           }
       in

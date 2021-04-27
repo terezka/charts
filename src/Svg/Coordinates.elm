@@ -1,12 +1,14 @@
 module Svg.Coordinates
   exposing
-    ( Plane, Axis, minimum, maximum
+    ( Plane, Bounds, Margin, minimum, maximum
     , scaleSVGX, scaleSVGY
     , toSVGX, toSVGY
     , scaleCartesianX, scaleCartesianY
     , toCartesianX, toCartesianY
     , place, placeWithOffset
     , Point, Position
+
+    , toBounds, XY
     )
 
 {-| This module contains helpers for cartesian/SVG coordinate translation.
@@ -70,6 +72,30 @@ type alias Position =
   }
 
 
+
+-- PLANE
+
+
+{-| -}
+type alias Plane =
+  { width : Float
+  , height : Float
+  , margin : Margin
+  , x : Bounds
+  , y : Bounds
+  }
+
+
+{-| -}
+type alias Margin =
+  { top : Float
+  , right : Float
+  , left : Float
+  , bottom : Float
+  }
+
+
+{-| -}
 type alias Bounds =
   { dataMin : Float
   , dataMax : Float
@@ -78,39 +104,58 @@ type alias Bounds =
   }
 
 
-
--- Plane
-
-
-{-| The properties of your plane.
--}
-type alias Plane =
-  { x : Axis
-  , y : Axis
+{-| -}
+type alias XY =
+  { x : Bounds
+  , y : Bounds
   }
 
 
-{-| The axis of the plane.
+{-| -}
+toBounds : List (a -> Maybe Float) -> List (a -> Maybe Float) -> List a -> Maybe XY -> Maybe XY
+toBounds xs ys data prev =
+  let fold vs datum bounds_ =
+        { min = min (getMin vs datum) bounds_.min
+        , max = max (getMax vs datum) bounds_.max
+        , dataMin = min (getMin vs datum) bounds_.min
+        , dataMax = max (getMax vs datum) bounds_.max
+        }
 
-  - The margin properties are the upper and lower margins for the axis. So for example,
-    if you want to add margin on top of the plot, increase the marginUpper of
-    the y-`Axis`.
-  - The length is the length of your SVG axis. (`plane.x.length` is the width,
-    `plane.y.length` is the height)
-  - The `min` and `max` values is the reach of your plane. (Domain for the y-axis, range
-    for the x-axis)
--}
-type alias Axis =
-  { marginLower : Float
-  , marginUpper : Float
-  , length : Float
-  , data :
-      { min : Float
-      , max : Float
-      }
-  , min : Float
-  , max : Float
-  }
+      getMin toValues datum =
+        List.minimum (getValues toValues datum)
+          |> Maybe.withDefault 0
+
+      getMax toValues datum =
+        List.maximum (getValues toValues datum)
+          |> Maybe.withDefault 1
+
+      getValues toValues datum =
+        List.filterMap (\v -> v datum) toValues
+
+      initial fs datum =
+        { min = getMin fs datum
+        , max = getMax fs datum
+        , dataMin = getMin fs datum
+        , dataMax = getMax fs datum
+        }
+  in
+  case data of
+    first :: rest ->
+      case prev of
+        Just { x, y } ->
+          Just
+            { x = List.foldl (fold xs) x data
+            , y = List.foldl (fold ys) y data
+            }
+
+        Nothing ->
+          Just
+            { x = List.foldl (fold xs) (initial xs first) rest
+            , y = List.foldl (fold ys) (initial ys first) rest
+            }
+
+    [] ->
+      prev
 
 
 {-| Helper to extract the minimum value amongst your coordinates.
@@ -154,26 +199,26 @@ maximum toValues =
 -}
 scaleSVGX : Plane -> Float -> Float
 scaleSVGX plane value =
-  value * (innerLength plane.x) / (range plane.x)
+  value * (innerLengthX plane) / (range plane.x)
 
 
 scaleSVGY : Plane -> Float -> Float
 scaleSVGY plane value =
-  value * (innerLength plane.y) / (range plane.y)
+  value * (innerLengthY plane) / (range plane.y)
 
 
 {-| Translate a SVG x-coordinate to its cartesian x-coordinate.
 -}
 toSVGX : Plane -> Float -> Float
 toSVGX plane value =
-  scaleSVGX plane (value - plane.x.min) + plane.x.marginLower
+  scaleSVGX plane (value - plane.x.min) + plane.margin.left
 
 
 {-| Translate a SVG y-coordinate to its cartesian y-coordinate.
 -}
 toSVGY : Plane -> Float -> Float
 toSVGY plane value =
-  scaleSVGY plane (plane.y.max - value) + plane.y.marginUpper
+  scaleSVGY plane (plane.y.max - value) + plane.margin.top
 
 
 {-| For scaling a SVG value to a cartesian value. Note that this will _not_
@@ -181,26 +226,26 @@ toSVGY plane value =
 -}
 scaleCartesianX : Plane -> Float -> Float
 scaleCartesianX plane value =
-  value * (range plane.x) / (innerLength plane.x)
+  value * (range plane.x) / (innerLengthX plane)
 
 
 scaleCartesianY : Plane -> Float -> Float
 scaleCartesianY plane value =
-  value * (range plane.y) / (innerLength plane.y)
+  value * (range plane.y) / (innerLengthY plane)
 
 
 {-| Translate a cartesian x-coordinate to its SVG x-coordinate.
 -}
 toCartesianX : Plane -> Float -> Float
 toCartesianX plane value =
-  scaleCartesianX plane (value - plane.x.marginLower) + plane.x.min
+  scaleCartesianX plane (value - plane.margin.left) + plane.x.min
 
 
 {-| Translate a cartesian y-coordinate to its SVG y-coordinate.
 -}
 toCartesianY : Plane -> Float -> Float
 toCartesianY plane value =
-  range plane.y - scaleCartesianY plane (value - plane.y.marginUpper) + plane.y.min
+  range plane.y - scaleCartesianY plane (value - plane.margin.top) + plane.y.min
 
 
 
@@ -235,15 +280,18 @@ placeWithOffset plane x y offsetX offsetY =
 -- INTERNAL HELPERS
 
 
-range : Axis -> Float
-range axis =
-  let
-    diff =
-      axis.max - axis.min
-  in
-    if diff > 0 then diff else 1
+range : Bounds -> Float
+range bounds =
+  let diff = bounds.max - bounds.min in
+  if diff > 0 then diff else 1
 
 
-innerLength : Axis -> Float
-innerLength axis =
-  Basics.max 1 (axis.length - axis.marginLower - axis.marginUpper)
+innerLengthX : Plane -> Float
+innerLengthX plane =
+  Basics.max 1 (plane.width - plane.margin.left - plane.margin.right)
+
+
+innerLengthY : Plane -> Float
+innerLengthY plane =
+  Basics.max 1 (plane.height - plane.margin.top - plane.margin.bottom)
+
