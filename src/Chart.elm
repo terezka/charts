@@ -128,19 +128,19 @@ paddingRight value config =
 
 
 {-| -}
-range : List (Attribute C.Limit) -> Attribute { a | range : Maybe (C.Limit -> C.Limit) }
+range : List (Attribute C.Axis) -> Attribute { a | range : Maybe (C.Axis -> C.Axis) }
 range fs config =
   { config | range = Just (\i -> List.foldl (\f b -> f b) i fs) }
 
 
 {-| -}
-domain : List (Attribute C.Limit) -> Attribute { a | domain : Maybe (C.Limit -> C.Limit) }
+domain : List (Attribute C.Axis) -> Attribute { a | domain : Maybe (C.Axis -> C.Axis) }
 domain fs config =
   { config | domain = Just (\i -> List.foldl (\f b -> f b) i fs) }
 
 
 {-| -}
-limits : List (Attribute C.Limit) -> Attribute { a | limits : C.Limit -> C.Limit }
+limits : List (Attribute C.Axis) -> Attribute { a | limits : C.Axis -> C.Axis }
 limits fs config =
   { config | limits = \i -> List.foldl (\f b -> f b) i fs }
 
@@ -182,37 +182,37 @@ only value config =
 
 
 {-| -}
-floats : Attribute { a | produce : Int -> C.Limit -> List CS.TickValue }
+floats : Attribute { a | produce : Int -> C.Axis -> List CS.TickValue }
 floats config =
   { config | produce = \a -> CS.produce a CS.floats >> CS.toTickValues identity String.fromFloat }
 
 
 {-| -}
-floatsCustom : (Float -> String) -> Attribute { a | produce : Int -> C.Limit -> List CS.TickValue }
+floatsCustom : (Float -> String) -> Attribute { a | produce : Int -> C.Axis -> List CS.TickValue }
 floatsCustom formatter config =
   { config | produce = \a -> CS.produce a CS.floats >> CS.toTickValues identity formatter }
 
 
 {-| -}
-ints : Attribute { a | produce : Int -> C.Limit -> List CS.TickValue }
+ints : Attribute { a | produce : Int -> C.Axis -> List CS.TickValue }
 ints =
   intsCustom String.fromInt
 
 
 {-| -}
-intsCustom : (Int -> String) -> Attribute { a | produce : Int -> C.Limit -> List CS.TickValue }
+intsCustom : (Int -> String) -> Attribute { a | produce : Int -> C.Axis -> List CS.TickValue }
 intsCustom formatter config =
   { config | produce = \a -> CS.produce a CS.ints >> CS.toTickValues toFloat formatter }
 
 
 {-| -}
-times : Time.Zone -> Attribute { a | produce : Int -> C.Limit -> List CS.TickValue }
+times : Time.Zone -> Attribute { a | produce : Int -> C.Axis -> List CS.TickValue }
 times zone config =
   timesCustom zone (CS.formatTime zone) config
 
 
 {-| -}
-timesCustom : Time.Zone -> (I.Time -> String) -> Attribute { a | produce : Int -> C.Limit -> List CS.TickValue }
+timesCustom : Time.Zone -> (I.Time -> String) -> Attribute { a | produce : Int -> C.Axis -> List CS.TickValue }
 timesCustom zone formatter config =
   { config | produce = \a -> CS.produce a (CS.times zone) >> CS.toTickValues (toFloat << Time.posixToMillis << .timestamp) formatter }
 
@@ -247,8 +247,8 @@ type alias Container data msg =
     , paddingLeft : Float
     , paddingRight : Float
     , responsive : Bool
-    , range : Maybe (C.Limit -> C.Limit)
-    , domain : Maybe (C.Limit -> C.Limit)
+    , range : Maybe (Attribute C.Axis)
+    , domain : Maybe (Attribute C.Axis)
     , events : List (Event data msg)
     , htmlAttrs : List (H.Attribute msg)
     , attrs : List (S.Attribute msg)
@@ -340,12 +340,6 @@ type Element data msg
       (C.Plane -> H.Html msg)
 
 
-type alias XYLimit =
-  { x : C.Limit
-  , y : C.Limit
-  }
-
-
 definePlane : Container data msg -> List (Element data msg) -> C.Plane
 definePlane config elements =
   let collectLimits el acc =
@@ -383,27 +377,19 @@ definePlane config elements =
           Just edit -> edit limits_.y
           Nothing -> lowest 0 orLower limits_.y
 
+      margin =
+        { top = config.marginTop
+        , right = config.marginRight
+        , left = config.marginLeft
+        , bottom = config.marginBottom
+        }
+
       unpadded =
         { width = max 1 (config.width - config.paddingLeft - config.paddingRight)
         , height = max 1 (config.height - config.paddingBottom - config.paddingTop)
-        , margin =
-            { top = config.marginTop
-            , right = config.marginRight
-            , left = config.marginLeft
-            , bottom = config.marginBottom
-            }
-        , x =
-            { dataMin = limits_.x.dataMin
-            , dataMax = limits_.x.dataMax
-            , min = calcRange.min
-            , max = calcRange.max
-            }
-        , y =
-            { dataMin = limits_.y.dataMin
-            , dataMax = limits_.y.dataMax
-            , min = calcDomain.min
-            , max = calcDomain.max
-            }
+        , margin = margin
+        , x = calcRange
+        , y = calcDomain
         }
 
       scalePadX =
@@ -414,22 +400,15 @@ definePlane config elements =
   in
   { width = config.width
   , height = config.height
-  , margin =
-      { top = config.marginTop
-      , right = config.marginRight
-      , left = config.marginLeft
-      , bottom = config.marginBottom
-      }
+  , margin = margin
   , x =
-      { dataMin = limits_.x.dataMin
-      , dataMax = limits_.x.dataMax
-      , min = calcRange.min - scalePadX config.paddingLeft
+      { calcRange
+      | min = calcRange.min - scalePadX config.paddingLeft
       , max = calcRange.max + scalePadX config.paddingRight
       }
   , y =
-      { dataMin = limits_.y.dataMin
-      , dataMax = limits_.y.dataMax
-      , min = calcDomain.min - scalePadY config.paddingBottom
+      { calcDomain
+      | min = calcDomain.min - scalePadY config.paddingBottom
       , max = calcDomain.max + scalePadY config.paddingTop
       }
   }
@@ -505,19 +484,19 @@ viewElements config plane tickValues allItems elements =
 
 
 {-| -}
-lowest : Float -> (Float -> Float -> Float -> Float) -> Attribute C.Limit
+lowest : Float -> (Float -> Float -> Float -> Float) -> Attribute C.Axis
 lowest x edit b =
   { b | min = edit x b.min b.dataMin }
 
 
 {-| -}
-highest : Float -> (Float -> Float -> Float -> Float) -> Attribute C.Limit
+highest : Float -> (Float -> Float -> Float -> Float) -> Attribute C.Axis
 highest x edit b =
   { b | max = edit x b.max b.dataMax }
 
 
 {-| -}
-window : Float -> Float -> Attribute C.Limit
+window : Float -> Float -> Attribute C.Axis
 window min_ max_ b =
   { b | min = min_, max = max_ }
 
@@ -559,18 +538,18 @@ less v x _ =
 
 
 {-| -}
-zero : C.Limit -> Float
+zero : C.Axis -> Float
 zero b =
   clamp b.min b.max 0
 
 
 {-| -}
-middle : C.Limit -> Float
+middle : C.Axis -> Float
 middle b =
   b.min + (b.max - b.min) / 2
 
 
-stretch : Maybe C.Limit -> C.Limit -> Maybe C.Limit
+stretch : Maybe C.Axis -> C.Axis -> Maybe C.Axis
 stretch old new =
   case old of
     Just b ->
@@ -702,8 +681,8 @@ tooltip i edits attrs_ content =
 
 {-| -}
 type alias Axis =
-    { limits : C.Limit -> C.Limit
-    , pinned : C.Limit -> Float
+    { limits : C.Axis -> C.Axis
+    , pinned : C.Axis -> Float
     , arrow : Bool
     , color : String -- TODO use Color
     }
@@ -775,11 +754,11 @@ type alias Ticks =
     { color : String -- TODO use Color -- TODO allow custom color by tick value
     , height : Float
     , width : Float
-    , pinned : C.Limit -> Float
-    , limits : C.Limit -> C.Limit
+    , pinned : C.Axis -> Float
+    , limits : C.Axis -> C.Axis
     , only : Float -> Bool
     , amount : Int
-    , produce : Int -> C.Limit -> List CS.TickValue
+    , produce : Int -> C.Axis -> List CS.TickValue
     }
 
 
@@ -860,13 +839,13 @@ yTicks edits =
 
 type alias Labels =
     { color : String -- TODO use Color
-    , pinned : C.Limit -> Float
-    , limits : C.Limit -> C.Limit
+    , pinned : C.Axis -> Float
+    , limits : C.Axis -> C.Axis
     , only : Float -> Bool
     , xOff : Float
     , yOff : Float
     , amount : Int
-    , produce : Int -> C.Limit -> List CS.TickValue
+    , produce : Int -> C.Axis -> List CS.TickValue
     }
 
 
@@ -950,8 +929,8 @@ type alias Grid =
     { color : String -- TODO use Color
     , width : Float
     , dotted : Bool
-    , filterX : C.Limit -> List Float
-    , filterY : C.Limit -> List Float
+    , filterX : C.Axis -> List Float
+    , filterY : C.Axis -> List Float
     }
 
 
@@ -1204,14 +1183,14 @@ html func =
 
 
 {-| -}
-svgAt : (C.Limit -> Float) -> (C.Limit -> Float) -> Float -> Float -> List (S.Svg msg) -> Element data msg
+svgAt : (C.Axis -> Float) -> (C.Axis -> Float) -> Float -> Float -> List (S.Svg msg) -> Element data msg
 svgAt toX toY xOff yOff view =
   SvgElement <| \p ->
     S.g [ CS.position p 0 (toX p.x) (toY p.y) xOff yOff ] view
 
 
 {-| -}
-htmlAt : (C.Limit -> Float) -> (C.Limit -> Float) -> Float -> Float -> List (H.Attribute msg) -> List (H.Html msg) -> Element data msg
+htmlAt : (C.Axis -> Float) -> (C.Axis -> Float) -> Float -> Float -> List (H.Attribute msg) -> List (H.Html msg) -> Element data msg
 htmlAt toX toY xOff yOff att view =
   HtmlElement <| \p ->
     CS.positionHtml p (toX p.x) (toY p.y) xOff yOff att view

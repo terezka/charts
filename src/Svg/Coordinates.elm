@@ -8,7 +8,7 @@ module Svg.Coordinates
     , place, placeWithOffset
     , Point, Position
 
-    , fromProps, Limits
+    , fromProps, Axis
     , foldPosition
     )
 
@@ -122,8 +122,8 @@ type alias Plane =
   { width : Float
   , height : Float
   , margin : Margin
-  , x : Limit
-  , y : Limit
+  , x : Axis
+  , y : Axis
   }
 
 
@@ -137,7 +137,7 @@ type alias Margin =
 
 
 {-| -}
-type alias Limit =
+type alias Axis =
   { dataMin : Float
   , dataMax : Float
   , min : Float
@@ -146,9 +146,9 @@ type alias Limit =
 
 
 {-| -}
-type alias Limits =
-  { x : Limit
-  , y : Limit
+type alias Limit =
+  { min : Float
+  , max : Float
   }
 
 
@@ -242,7 +242,7 @@ placeWithOffset plane x y offsetX offsetY =
 -- INTERNAL HELPERS
 
 
-range : Limit -> Float
+range : Axis -> Float
 range limits =
   let diff = limits.max - limits.min in
   if diff > 0 then diff else 1
