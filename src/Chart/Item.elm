@@ -22,8 +22,6 @@ import Chart.Svg as S
 import Chart.Attributes as CA
 
 
--- TODO clean up plane
--- TODO rename series to scatter
 -- TODO add element index
 
 
@@ -597,7 +595,7 @@ gatherWith testFn list =
 
 toDefaultColor : Int -> String
 toDefaultColor =
-  toDefault S.blue [ S.blue, S.pink, S.orange, S.green, S.purple, S.red ]
+  toDefault CA.blue [ CA.blue, CA.turquoise, CA.purple, CA.orange, CA.pink, CA.green, CA.red ]
 
 
 toDefault : a -> List a -> Int -> a

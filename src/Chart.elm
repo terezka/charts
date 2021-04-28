@@ -3,10 +3,10 @@ module Chart exposing
     , bars, series
     , Property, stacked, bar, property, just, variation
     , xAxis, yAxis, xTicks, yTicks, xLabels, yLabels, grid
-    , lowest, highest, orLower, orHigher, exactly, more, less, window, fromData, zero, middle
+    , lowest, highest, orLower, orHigher, exactly, more, less, window, likeData, zero, middle
     , Event, event
     , Decoder, getCoords, getNearest, getNearestX, getWithin, getWithinX, map, map2, map3, map4
-    , tooltip, line, label, title, xTick, yTick, svgAt, htmlAt, svg, html, none
+    , tooltip, line, label, title, xTick, yTick, rect, svgAt, htmlAt, svg, html, none
     , each, eachBin, eachStack, eachProduct
     , withPlane, withBins, withStacks, withProducts
 
@@ -297,7 +297,7 @@ chart edits elements =
   CS.container plane
     [ CA.attrs config.attrs
     , CA.htmlAttrs config.htmlAttrs
-    , if config.responsive then CA.static else identity
+    , if config.responsive then identity else CA.static
     , CA.events (List.map toEvent config.events)
     ]
     beforeEls
@@ -496,14 +496,20 @@ highest x edit b =
 
 
 {-| -}
+likeData : Attribute C.Axis
+likeData b =
+  { b | min = b.dataMin, max = b.dataMax }
+
+
+{-| -}
 window : Float -> Float -> Attribute C.Axis
 window min_ max_ b =
   { b | min = min_, max = max_ }
 
 
 {-| -}
-exactly : Float -> Float -> Float
-exactly exact _ =
+exactly : Float -> Float -> Float -> Float
+exactly exact _ _ =
   exact
 
 
@@ -517,12 +523,6 @@ orLower least real _ =
 orHigher : Float -> Float -> Float -> Float
 orHigher most real _ =
   if real < most then most else real
-
-
-{-| -}
-fromData : Float -> Float -> Float -> Float
-fromData _ _ limit =
-  limit -- TODO
 
 
 {-| -}
@@ -1168,6 +1168,12 @@ yTick attrs point =
 line : List (Attribute CS.Line) -> Element data msg
 line attrs =
   SvgElement <| \p -> CS.line p attrs
+
+
+{-| -}
+rect : List (Attribute CS.Rect) -> Element data msg
+rect attrs =
+  SvgElement <| \p -> CS.rect p attrs
 
 
 {-| -}

@@ -8,11 +8,11 @@ module Chart.Svg exposing
   , Interpolation, interpolation, area
   , Dot, dot, toRadius
   , Tooltip, tooltip
+  , Rect, rect
   , decoder, getNearest, getNearestX, getWithin, getWithinX, isWithinPlane
   , position, positionHtml
   , Limit, produce, floats, ints, times
   , TickValue, toTickValues, formatTime
-  , blue, pink, orange, green, purple, red
   )
 
 import Html as H exposing (Html)
@@ -30,10 +30,6 @@ import DOM
 import Time
 import DateFormat as F
 import Dict exposing (Dict)
-
-
--- TODO clean up plane
--- TODO clean up property
 
 
 
@@ -248,6 +244,94 @@ line plane edits =
     , SA.stroke config.color
     , SA.strokeWidth (String.fromFloat config.width)
     , SA.strokeDasharray (String.join " " <| List.map String.fromFloat config.dashed)
+    , SA.d (C.description plane cmds)
+    ]
+    []
+
+
+
+{-| -}
+type alias Rect =
+  { x1 : Maybe Float
+  , x2 : Maybe Float
+  , y1 : Maybe Float
+  , y2 : Maybe Float
+  , color : String
+  }
+
+
+{-| -}
+rect : Plane -> List (CA.Attribute Rect) -> Svg msg
+rect plane edits =
+  let config =
+        apply edits
+          { x1 = Nothing
+          , x2 = Nothing
+          , y1 = Nothing
+          , y2 = Nothing
+          , color = "rgba(210, 210, 210, 0.5)"
+          }
+
+      ( ( x1_, x2_ ), ( y1_, y2_ ) ) =
+        case ( ( config.x1, config.x2 ), ( config.y1, config.y2 ) ) of
+          -- ONLY X
+          ( ( Just a, Just b ), ( Nothing, Nothing ) ) ->
+            ( ( a, b ), ( plane.y.min, plane.y.max ) )
+
+          ( ( Just a, Nothing ), ( Nothing, Nothing ) ) ->
+            ( ( a, a ), ( plane.y.min, plane.y.max ) )
+
+          ( ( Nothing, Just b ), ( Nothing, Nothing ) ) ->
+            ( ( b, b ), ( plane.y.min, plane.y.max ) )
+
+          -- ONLY Y
+          ( ( Nothing, Nothing ), ( Just a, Just b ) ) ->
+            ( ( plane.x.min, plane.x.min ), ( a, b ) )
+
+          ( ( Nothing, Nothing ), ( Just a, Nothing ) ) ->
+            ( ( plane.x.min, plane.x.max ), ( a, a ) )
+
+          ( ( Nothing, Nothing ), ( Nothing, Just b ) ) ->
+            ( ( plane.x.min, plane.x.max ), ( b, b ) )
+
+          -- MIXED
+
+          ( ( Nothing, Just c ), ( Just a, Just b ) ) ->
+            ( ( c, c ), ( a, b ) )
+
+          ( ( Just c, Nothing ), ( Just a, Just b ) ) ->
+            ( ( c, c ), ( a, b ) )
+
+          ( ( Just a, Just b ), ( Nothing, Just c ) ) ->
+            ( ( a, b ), ( c, c ) )
+
+          ( ( Just a, Just b ), ( Just c, Nothing ) ) ->
+            ( ( a, b ), ( c, c ) )
+
+          -- NEITHER
+          ( ( Nothing, Nothing ), ( Nothing, Nothing ) ) ->
+            ( ( plane.x.min, plane.x.max ), ( plane.y.min, plane.y.max ) )
+
+          _ ->
+            ( ( Maybe.withDefault plane.x.min config.x1
+              , Maybe.withDefault plane.x.max config.x2
+              )
+            , ( Maybe.withDefault plane.y.min config.y1
+              , Maybe.withDefault plane.y.max config.y2
+              )
+            )
+
+      cmds =
+        [ C.Move x1_ y1_
+        , C.Line x1_ y1_
+        , C.Line x2_ y1_
+        , C.Line x2_ y2_
+        , C.Line x1_ y2_
+        ]
+  in
+  S.path
+    [ SA.class "elm-charts__rect"
+    , SA.fill config.color
     , SA.d (C.description plane cmds)
     ]
     []
@@ -1135,18 +1219,18 @@ withinRadiusX plane radius searched point =
 decoder : Plane -> (Plane -> Point -> msg) -> Json.Decoder msg
 decoder plane toMsg =
   let
-    handle mouseX mouseY rect =
+    handle mouseX mouseY box =
       let
-        widthPercent = rect.width / plane.width
-        heightPercent = rect.height / plane.height
+        widthPercent = box.width / plane.width
+        heightPercent = box.height / plane.height
 
         xPrev = plane.x
         yPrev = plane.y
 
         newPlane =
           { plane
-          | width = rect.width
-          , height = rect.height
+          | width = box.width
+          , height = box.height
           , margin =
               { top = plane.margin.top * heightPercent
               , right = plane.margin.right * widthPercent
@@ -1155,7 +1239,7 @@ decoder plane toMsg =
               }
           }
       in
-      toMsg newPlane { x = mouseX - rect.left, y = mouseY - rect.top }
+      toMsg newPlane { x = mouseX - box.left, y = mouseY - box.top }
   in
   Json.map3 handle
     (Json.field "pageX" Json.float)
@@ -1222,37 +1306,37 @@ isWithinPlane plane x y =
 {-| -}
 blue : String
 blue =
-  "rgb(5,142,218)"
+  "#1976d2"
 
 
 {-| -}
 orange : String
 orange =
-  "rgb(244, 149, 69)"
+  "#ff8f00"
 
 
 {-| -}
 pink : String
 pink =
-  "rgb(253, 121, 168)"
+  "#ec407a"
 
 
 {-| -}
 green : String
 green =
-  "rgb(68, 201, 72)"
+  "#388e3c"
 
 
 {-| -}
 red : String
 red =
-  "rgb(215, 31, 10)"
+  "#d32f2f"
 
 
 {-| -}
 purple : String
 purple =
-  "rgb(170, 80, 208)"
+  "#8e24aa"
 
 
 

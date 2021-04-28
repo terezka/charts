@@ -68,7 +68,21 @@ data =
   , { x = 6, y = Just 8, z = Just 5, label = "SE" }
   , { x = 8, y = Just 3, z = Just 2, label = "FI" }
   , { x = 10, y = Just 4, z = Just 3, label = "IS" }
+  , { x = -1, y = Just 5, z = Just 3, label = "IT" }
+  , { x = 0, y = Just 3, z = Just 6, label = "DE" }
+  , { x = 2, y = Just 2, z = Just 2, label = "DK" }
+  , { x = 6, y = Just 8, z = Just 5, label = "SE" }
+  , { x = 8, y = Just 3, z = Just 2, label = "FI" }
+  , { x = 10, y = Just 4, z = Just 3, label = "IS" }
+  , { x = 2, y = Just 2, z = Just 2, label = "DK" }
+  , { x = 6, y = Just 8, z = Just 5, label = "SE" }
+  , { x = 8, y = Just 3, z = Just 2, label = "FI" }
+  , { x = 10, y = Just 4, z = Just 3, label = "IS" }
+  , { x = -1, y = Just 5, z = Just 3, label = "IT" }
+  , { x = 0, y = Just 3, z = Just 6, label = "DE" }
+  , { x = 2, y = Just 2, z = Just 2, label = "DK" }
   ]
+  |> List.indexedMap (\i d -> { d | x = toFloat i })
 
 
 view : Model -> H.Html Msg
@@ -90,7 +104,8 @@ view model =
       , C.marginRight 30
 
       , C.domain
-          [ C.highest 1 C.more
+          [ C.lowest 0 C.orLower
+          , C.highest 1 C.more
           ]
 
       , CA.events
@@ -107,65 +122,54 @@ view model =
           ]
 
       , C.xAxis []
-      --, C.xLabels [ C.amount 10 ]
+      , C.xLabels [ C.amount 10 ]
       , C.yAxis
-          [ C.pinned .dataMax
-          , C.limits
-              [ C.lowest 0 C.fromData
-              , C.lowest 5 C.orHigher
-              , C.highest 10 C.fromData
+          [ C.limits
+              [ C.likeData
+              --, C.lowest 6 C.orHigher
               ]
           ]
 
-      , C.bars
-          [ CA.roundTop 0.2
-          --, CA.roundBottom 0.2
-          , CA.margin 0.3
-          ]
-          [ C.stacked
-              [ C.bar .y "owls"
-                  [ CA.color CA.blue
-                  --, CA.opacity 0.75
-                  , CA.striped [ CA.width 2, CA.space 2, CA.rotate 135 ]
-                  , CA.border "transparent"
-                  , CA.borderWidth 0.5
-                  ]
-              , C.bar .z "trees"
-                  [ CA.color CA.purple
-                  --, CA.opacity 0.75
-                  , CA.striped [ CA.width 2, CA.space 2, CA.rotate 45 ]
-                  , CA.border "transparent"
-                  , CA.borderWidth 0.5
-                  ]
-              ]
-          ]
-          data
-
-      , C.eachBin <| \p i ->
-          if List.isEmpty <| List.filterMap CI.isBarSeries (CI.getProducts i) then [] else
-          [ C.title [ CA.yOff 5, CA.xOff 5, CA.borderWidth 0, CA.leftAlign ] (CI.getCommonality i).datum.label { x = CI.getX1 p i, y = p.y.max }
-          ]
-
-      --, C.series .x
+      --, C.bars
+      --    [ CA.roundTop 0.2
+      --    , CA.roundBottom 0.2
+      --    , CA.margin 0.3
+      --    ]
       --    [ C.stacked
-      --        [ C.property .y "owls"
-      --            [ CA.linear, CA.opacity 0.5
-      --            , CA.striped [ CA.width 2 ]
+      --        [ C.bar .y "owls"
+      --            [ CA.color CA.blue
+      --            --, CA.opacity 0.75
+      --            , CA.striped [ CA.width 2, CA.space 2, CA.rotate 135 ]
+      --            , CA.border "transparent"
+      --            , CA.borderWidth 0.5
       --            ]
-      --            [ CA.circle, CA.size 10, CA.opacity 0, CA.border CA.blue ]
-      --        , C.property (C.just (.x >> (+) 4)) "kids"
-      --            [ CA.linear, CA.opacity 0.4, CA.color CA.purple
-      --            , CA.dotted [ CA.width 4 ]
+      --        , C.bar .z "trees"
+      --            [ CA.color CA.purple
+      --            --, CA.opacity 0.75
+      --            , CA.striped [ CA.width 2, CA.space 2, CA.rotate 45 ]
+      --            , CA.border "transparent"
+      --            , CA.borderWidth 0.5
       --            ]
-      --            [ CA.circle, CA.size 10, CA.opacity 0, CA.border CA.purple ]
-      --        , C.property .z "trees"
-      --            [ CA.linear, CA.opacity 0.4, CA.color CA.pink, CA.dashed [ 5, 3 ]
-      --            , CA.striped [ CA.width 5, CA.rotate 45, CA.space 3 ]
-      --            ]
-      --            [ CA.circle, CA.size 10, CA.opacity 0, CA.border CA.pink ]
       --        ]
       --    ]
       --    data
+
+      , C.eachBin <| \p i ->
+          if List.isEmpty <| List.filterMap CI.isDotSeries (CI.getProducts i) then [] else
+          [ C.title [ CA.yOff 5, CA.borderWidth 0 ] (CI.getCommonality i).datum.label { x = CI.getX1 p i, y = p.y.max }
+          ]
+
+      , C.series .x
+          [ C.stacked
+              [ C.property .y "T2" [ CA.monotone, CA.opacity 0.25, CA.width 0 ] []
+              , C.property .y "T1" [ CA.monotone, CA.opacity 0.35, CA.width 0 ] []
+              , C.property (C.just (.x >> (+) 4)) "M" [ CA.monotone, CA.opacity 0.5, CA.color CA.blue ] []
+              , C.property .y "B2" [ CA.monotone, CA.opacity 0.35, CA.color CA.blue ] []
+              , C.property .z "B2" [ CA.monotone, CA.opacity 0.25, CA.width 0, CA.color CA.blue ] []
+              , C.property .z "A" [ CA.monotone, CA.opacity 0, CA.color CA.blue, CA.width 0 ] []
+              ]
+          ]
+          data
 
       , C.yLabels [ C.ints ]
 

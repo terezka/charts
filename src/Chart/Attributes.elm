@@ -6,7 +6,8 @@ module Chart.Attributes exposing
   , Method(..), linear, monotone
   , Shape(..), circle, triangle, square, diamond, plus, cross, shape
   , Direction(..), onTop, onBottom, onRight, onLeft, onLeftOrRight, onTopOrBottom
-  , blue, pink, orange, green, purple, red, background, attrs, htmlAttrs, static, events
+  , blue, pink, orange, green, purple, red, turquoise
+  , background, attrs, htmlAttrs, static, events
   )
 
 
@@ -426,35 +427,40 @@ onTopOrBottom config =
 {-| -}
 blue : String
 blue =
-  "rgb(5,142,218)"
+  "#1976d2"
 
 
 {-| -}
 orange : String
 orange =
-  "rgb(244, 149, 69)"
+  "#e47d32"
 
 
 {-| -}
 pink : String
 pink =
-  "rgb(253, 121, 168)"
+  "#ec407a"
 
 
 {-| -}
 green : String
 green =
-  "rgb(68, 201, 72)"
+  "#388e3c"
 
 
 {-| -}
 red : String
 red =
-  "rgb(215, 31, 10)"
+  "#d32f2f"
 
 
 {-| -}
 purple : String
 purple =
-  "rgb(170, 80, 208)"
+  "#7c29ed"
 
+
+{-| -}
+turquoise : String
+turquoise =
+  "#4eaea7"
