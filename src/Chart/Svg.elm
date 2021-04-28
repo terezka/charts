@@ -167,6 +167,7 @@ type alias Line =
   , color : String
   , width : Float
   , dashed : List Float
+  , break : Bool
   }
 
 
@@ -182,6 +183,7 @@ line plane edits =
           , color = "rgb(210, 210, 210)"
           , width = 1
           , dashed = []
+          , break = False
           }
 
       ( ( x1_, x2_ ), ( y1_, y2_ ) ) =
@@ -236,11 +238,14 @@ line plane edits =
       cmds =
         [ C.Move x1_ y1_
         , C.Line x1_ y1_
-        , C.Line x2_ y2_
-        ]
+        ] ++
+        if config.break
+        then [ C.Line x1_ y2_, C.Line x2_ y2_ ]
+        else [ C.Line x2_ y2_ ]
   in
   S.path
     [ SA.class "elm-charts__line"
+    , SA.fill "transparent"
     , SA.stroke config.color
     , SA.strokeWidth (String.fromFloat config.width)
     , SA.strokeDasharray (String.join " " <| List.map String.fromFloat config.dashed)
@@ -257,6 +262,9 @@ type alias Rect =
   , y1 : Maybe Float
   , y2 : Maybe Float
   , color : String
+  , border : String
+  , borderWidth : Float
+  , opacity : Float
   }
 
 
@@ -270,6 +278,9 @@ rect plane edits =
           , y1 = Nothing
           , y2 = Nothing
           , color = "rgba(210, 210, 210, 0.5)"
+          , border = "rgba(210, 210, 210, 1)"
+          , borderWidth = 1
+          , opacity = 1
           }
 
       ( ( x1_, x2_ ), ( y1_, y2_ ) ) =
@@ -327,11 +338,15 @@ rect plane edits =
         , C.Line x2_ y1_
         , C.Line x2_ y2_
         , C.Line x1_ y2_
+        , C.Line x1_ y1_
         ]
   in
   S.path
     [ SA.class "elm-charts__rect"
     , SA.fill config.color
+    , SA.fillOpacity (String.fromFloat config.opacity)
+    , SA.stroke config.border
+    , SA.strokeWidth (String.fromFloat config.borderWidth)
     , SA.d (C.description plane cmds)
     ]
     []
@@ -1081,7 +1096,7 @@ positionHtml : Plane -> Float -> Float -> Float -> Float -> List (H.Attribute ms
 positionHtml plane x y xOff yOff attrs content =
     let
         xPercentage = (toSVGX plane x + xOff) * 100 / plane.width
-        yPercentage = (toSVGY plane y + yOff) * 100 / plane.height
+        yPercentage = (toSVGY plane y + -yOff) * 100 / plane.height
 
         posititonStyles =
             [ HA.style "left" (String.fromFloat xPercentage ++ "%")

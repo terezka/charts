@@ -2,7 +2,7 @@ module Chart.Attributes exposing
   ( Attribute, x, x1, x2, y, y1, y2, xOff, yOff, border, borderWidth, fontSize, color, width, height, offset
   , Anchor(..), leftAlign, rightAlign, content
   , rotate, length, roundTop, roundBottom, area, opacity, size, aura, auraWidth, grouped, margin, spacing
-  , Design(..), GradientConfig, Pattern, space, striped, dotted, gradient, top, bottom, dashed
+  , Design(..), GradientConfig, Pattern, space, striped, dotted, gradient, top, bottom, dashed, break
   , Method(..), linear, monotone
   , Shape(..), circle, triangle, square, diamond, plus, cross, shape
   , Direction(..), onTop, onBottom, onRight, onLeft, onLeftOrRight, onTopOrBottom
@@ -50,6 +50,12 @@ y1 v config =
 y2 : Float -> Attribute { a | y2 : Maybe Float }
 y2 v config =
   { config | y2 = Just v }
+
+
+{-| -}
+break : Attribute { a | break : Bool }
+break config =
+  { config | break = True }
 
 
 {-| -}
