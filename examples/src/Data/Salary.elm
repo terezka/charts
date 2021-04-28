@@ -1,4 +1,4 @@
-module Data.Salery exposing (Datum, womenPerc, womenSaleryPerc, groupBy, data)
+module Data.Salary exposing (Datum, womenPerc, womenSalaryPerc, menSalaryPerc, groupBy, data, avgSalaryWomen, avgSalaryMen)
 
 import Csv.Decode as Cvs
 import Dict
@@ -10,9 +10,9 @@ type alias Datum =
   , numOfBoth : Float
   , numOfWomen : Float
   , numOfMen : Float
-  , saleryBoth : Float
-  , saleryWomen : Float
-  , saleryMen : Float
+  , salaryBoth : Float
+  , salaryWomen : Float
+  , salaryMen : Float
   }
 
 
@@ -22,10 +22,16 @@ womenPerc datum =
   else datum.numOfWomen / datum.numOfBoth * 100
 
 
-womenSaleryPerc : Datum -> Maybe Float
-womenSaleryPerc datum =
-  if datum.saleryWomen == 0 || datum.saleryMen == 0 then Nothing
-  else Just (datum.saleryWomen / datum.saleryMen * 100)
+womenSalaryPerc : Datum -> Maybe Float
+womenSalaryPerc datum =
+  if datum.salaryWomen == 0 || datum.salaryMen == 0 then Nothing
+  else Just (datum.salaryWomen / datum.salaryMen * 100)
+
+
+menSalaryPerc : Datum -> Maybe Float
+menSalaryPerc datum =
+  if datum.salaryWomen == 0 || datum.salaryMen == 0 then Nothing
+  else Just (datum.salaryMen / datum.salaryWomen * 100)
 
 
 groupBy : (Datum -> comparable) -> List Datum -> List ( comparable, List Datum )
@@ -34,6 +40,36 @@ groupBy toV =
         Dict.update (toV datum) (Maybe.map (\l -> l ++ [datum]) >> Maybe.withDefault [datum] >> Just)
   in
   List.foldl fold Dict.empty >> Dict.toList
+
+
+avgSalaryWomen : Float
+avgSalaryWomen =
+  let totalSalary =
+        data
+          |> List.map (\d -> d.salaryWomen * d.numOfWomen)
+          |> List.sum
+
+      totalWomen =
+        data
+          |> List.map .numOfWomen
+          |> List.sum
+  in
+  totalSalary / totalWomen
+
+
+avgSalaryMen : Float
+avgSalaryMen =
+  let totalSalary =
+        data
+          |> List.map (\d -> d.salaryMen * d.numOfMen)
+          |> List.sum
+
+      totalMen =
+        data
+          |> List.map .numOfMen
+          |> List.sum
+  in
+  totalSalary / totalMen
 
 
 
@@ -71,15 +107,15 @@ process =
               ]
         in
         case numbers of
-          [ Just year, Just saleryBoth, Just saleryMen, Just saleryWomen, Just numOfBoth, Just numOfMen, Just numOfWomen ] ->
+          [ Just year, Just salaryBoth, Just salaryMen, Just salaryWomen, Just numOfBoth, Just numOfMen, Just numOfWomen ] ->
             { year = year
             , sector = a.work
             , numOfBoth = numOfBoth
             , numOfWomen = numOfWomen
             , numOfMen = numOfMen
-            , saleryBoth = saleryBoth
-            , saleryWomen = saleryWomen
-            , saleryMen = saleryMen
+            , salaryBoth = salaryBoth
+            , salaryWomen = salaryWomen
+            , salaryMen = salaryMen
             } |> Just
 
           _ ->
@@ -100,7 +136,7 @@ type alias Raw =
   , sector : String
   , year : String
   , work : String
-  , salery : String
+  , salary : String
   , gender : String
   , contents : String
   }

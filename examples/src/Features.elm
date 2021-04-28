@@ -9,7 +9,7 @@ import Svg.Coordinates as Coordinates
 import Browser
 import Time
 import Data.Iris as Iris
-import Data.Salery as Salery
+import Data.Salary as Salary
 import Data.Education as Education
 import Dict
 
@@ -36,15 +36,16 @@ type alias Model =
   , hoveringStackedBars : List (CI.Product CI.General ScatterDatum)
   , hoveringBinnedBars : List (CI.Group (CI.Bin ScatterDatum) CI.General ScatterDatum)
   -- SALERY
-  , selectSalery : Maybe { a : Coordinates.Point, b : Coordinates.Point }
-  , hoveringSalery : List (CI.Product CI.General Salery.Datum)
-  , saleryWindow : Maybe Coordinates.Position
+  , selectSalary : Maybe { a : Coordinates.Point, b : Coordinates.Point }
+  , hoveringSalary : List (CI.Product CI.General Salary.Datum)
+  , salaryWindow : Maybe Coordinates.Position
+  , salaryYear : Float
   }
 
 
 init : Model
 init =
-  Model Nothing 1262217600000 1640908800000 [] [] [] [] Nothing [] Nothing
+  Model Nothing 1262217600000 1640908800000 [] [] [] [] Nothing [] Nothing 2019
 
 
 type alias ScatterDatum =
@@ -67,11 +68,12 @@ type Msg
   | OnHoverStackedBars (List (CI.Product CI.General ScatterDatum))
   | OnHoverBinnedBars (List (CI.Group (CI.Bin ScatterDatum) CI.General ScatterDatum))
   --
-  | OnHoverSalery (List (CI.Product CI.General Salery.Datum)) Coordinates.Point
-  | OnMouseDownSalery Coordinates.Point
-  | OnMouseUpSalery Coordinates.Point
-  | OnResetSalery
-  | OnResetSaleryWindow
+  | OnHoverSalary (List (CI.Product CI.General Salary.Datum)) Coordinates.Point
+  | OnMouseDownSalary Coordinates.Point
+  | OnMouseUpSalary Coordinates.Point
+  | OnResetSalary
+  | OnResetSalaryWindow
+  | OnSalaryYear Float
 
 
 update : Msg -> Model -> Model
@@ -111,32 +113,38 @@ update msg model =
 
     --
 
-    OnHoverSalery hovering coords ->
-      case model.selectSalery of
-        Nothing -> { model | hoveringSalery = hovering }
-        Just select -> { model | selectSalery = Just { select | b = coords }, hoveringSalery = [] }
+    OnHoverSalary hovering coords ->
+      case model.selectSalary of
+        Nothing -> { model | hoveringSalary = hovering }
+        Just select -> { model | selectSalary = Just { select | b = coords }, hoveringSalary = [] }
 
-    OnMouseDownSalery coords ->
-      { model | selectSalery = Just { a = coords, b = coords } }
+    OnMouseDownSalary coords ->
+      { model | selectSalary = Just { a = coords, b = coords } }
 
-    OnMouseUpSalery coords ->
-      case model.selectSalery of
+    OnMouseUpSalary coords ->
+      case model.selectSalary of
         Nothing -> model
         Just select ->
-          { model | selectSalery = Nothing
-          , saleryWindow = Just
-              { x1 = min select.a.x coords.x
-              , x2 = max select.a.x coords.x
-              , y1 = min select.a.y coords.y
-              , y2 = max select.a.y coords.y
-              }
-          }
+          if select.a == coords
+          then { model | selectSalary = Nothing, salaryWindow = Nothing }
+          else
+            { model | selectSalary = Nothing
+            , salaryWindow = Just
+                { x1 = min select.a.x coords.x
+                , x2 = max select.a.x coords.x
+                , y1 = min select.a.y coords.y
+                , y2 = max select.a.y coords.y
+                }
+            }
 
-    OnResetSalery ->
-      { model | hoveringSalery = [] }
+    OnResetSalary ->
+      { model | hoveringSalary = [] }
 
-    OnResetSaleryWindow ->
-      { model | saleryWindow = Nothing }
+    OnResetSalaryWindow ->
+      { model | salaryWindow = Nothing }
+
+    OnSalaryYear year ->
+      { model | salaryYear = year }
 
 
 
@@ -144,26 +152,29 @@ view : Model -> H.Html Msg
 view model =
   H.div
     [ HA.style "font-size" "12px"
-    , HA.style "font-family" "monospace"
+    , HA.style "font-family" "\"IBM Plex Sans\", sans-serif"
     , HA.style "margin" "0 auto"
-    , HA.style "padding-top" "30px"
+    , HA.style "padding-top" "25px"
     , HA.style "padding-bottom" "100px"
     , HA.style "width" "100vw"
     , HA.style "max-width" "1000px"
     , HA.style "display" "flex"
     , HA.style "flex-flow" "wrap"
     ]
-    [ viewSaleryDiscrepancy model
-
+    [ viewSalaryDiscrepancy model
+    --, viewSalaryDiscrepancyBar model
     , H.h1
         [ HA.style "width" "100%"
         , HA.style "font-size" "50px"
-        , HA.style "color" "rgb(60, 60, 60)"
+        , HA.style "color" "rgb(80, 80, 80)"
         , HA.style "margin" "20px 0 60px 0"
         ]
         [ H.text "elm-charts" ]
+    ]
 
-    , H.h1 [ HA.style "width" "100%" ] [ H.text "Axes and grid" ]
+
+features model =
+    [ H.h1 [ HA.style "width" "100%" ] [ H.text "Axes and grid" ]
     , C.chart
         [ CA.height 250
         , CA.width 250
@@ -1224,9 +1235,8 @@ tooltipContent each =
     ]
 
 
-
-viewSaleryDiscrepancy : Model -> H.Html Msg
-viewSaleryDiscrepancy model =
+viewSalaryDiscrepancy : Model -> H.Html Msg
+viewSalaryDiscrepancy model =
   C.chart
     [ CA.height 600
     , CA.width 1000
@@ -1236,22 +1246,22 @@ viewSaleryDiscrepancy model =
     , C.paddingTop 15
 
     , C.range <|
-        case model.saleryWindow of
+        case model.salaryWindow of
           Just window -> [ C.lowest window.x1 C.exactly, C.highest window.x2 C.exactly ]
           Nothing -> [ C.lowest 20000 C.orHigher ]
 
     , C.domain  <|
-        case model.saleryWindow of
+        case model.salaryWindow of
           Just window -> [ C.lowest window.y1 C.exactly, C.highest window.y2 C.exactly ]
           Nothing -> [ C.lowest 76 C.orHigher ]
 
     , CA.events
-        [ C.map2 OnHoverSalery (C.getNearest CI.getCenter identity) C.getCoords
+        [ C.map2 OnHoverSalary (C.getNearest CI.getCenter identity) C.getCoords
             |> C.event "mousemove"
 
-        , C.event "mouseleave" (C.map (\_ -> OnResetSalery) C.getCoords)
-        , C.event "mousedown" (C.map OnMouseDownSalery C.getCoords)
-        , C.event "mouseup" (C.map OnMouseUpSalery C.getCoords)
+        , C.event "mouseleave" (C.map (\_ -> OnResetSalary) C.getCoords)
+        , C.event "mousedown" (C.map OnMouseDownSalary C.getCoords)
+        , C.event "mouseup" (C.map OnMouseUpSalary C.getCoords)
         ]
 
     , CA.htmlAttrs
@@ -1263,43 +1273,20 @@ viewSaleryDiscrepancy model =
         [ C.label [ CA.leftAlign, CA.yOff 15 ] (String.fromInt t) { x = toFloat t, y = p.y.min } ]
 
     , C.each (CS.produce 8 CS.ints << .y) <| \p t ->
-        [ C.label [ CA.leftAlign, CA.yOff -5 ] (String.fromInt t) { x = p.x.min, y = toFloat t } ]
+        [ (if t == 100 then C.title else C.label) [ CA.leftAlign, CA.yOff -5 ] (String.fromInt t) { x = p.x.min, y = toFloat t } ]
 
     , C.withPlane <| \p ->
-        [ C.title [ CA.fontSize 14, CA.yOff -3 ] "Gender salery gap in Denmark 2019" { x = C.middle p.x, y = p.y.max }
+        [ C.title [ CA.fontSize 14, CA.yOff -3 ] ("Gender salary gap in Denmark " ++ String.fromFloat model.salaryYear) { x = C.middle p.x, y = p.y.max }
         , C.title [ CA.fontSize 11, CA.yOff 12 ] "Data from Danmarks Statestik" { x = C.middle p.x, y = p.y.max }
-        , C.title [ CA.fontSize 12, CA.yOff 35 ] "Salery in DKK" { x = C.middle p.x, y = p.y.min }
-        , C.title [ CA.fontSize 12, CA.xOff -15, CA.rotate 90 ] "Womens percentage of mens salery" { x = p.x.min, y = C.middle p.y }
+        , C.title [ CA.fontSize 12, CA.yOff 35 ] "Average salary in DKK" { x = C.middle p.x, y = p.y.min }
+        , C.title [ CA.fontSize 12, CA.xOff -15, CA.rotate 90 ] "Womens percentage of mens salary" { x = p.x.min, y = C.middle p.y }
+        , C.line [ CA.dashed [ 4, 2 ], CA.opacity 0.7, CA.color "#f56dbc", CA.x1 Salary.avgSalaryWomen ]
+        , C.line [ CA.dashed [ 4, 2 ], CA.opacity 0.7, CA.color "#58a9f6", CA.x1 Salary.avgSalaryMen ]
         ]
 
     , C.line [ CA.dashed [ 3, 3 ], CA.y1 100 ]
 
-    , C.series .saleryBoth
-        [ C.property Salery.womenSaleryPerc "percentage" [] [ CA.opacity 0.5, CA.circle, CA.border CA.blue ]
-            |> C.variation (\d ->
-                  let precentOfWomen = Salery.womenPerc d
-                      isHovered = List.any (CI.getDatum >> (==) d) model.hoveringSalery
-
-                      color =
-                        if precentOfWomen < 20
-                        then [ CA.border "#58a9f6", CA.color "#58a9f6" ]
-                        else if precentOfWomen < 40
-                        then [ CA.border "#8a91f7", CA.color "#8a91f7" ]
-                        else if precentOfWomen < 60
-                        then [ CA.border "#c579f2", CA.color "#c579f2" ]
-                        else if precentOfWomen < 80
-                        then [ CA.border "#de74d7", CA.color "#de74d7" ]
-                        else [ CA.border "#f56dbc", CA.color "#f56dbc" ]
-
-                      aura =
-                        if isHovered
-                        then [ CA.aura 0.4, CA.auraWidth 5, CA.opacity 0.7 ]
-                        else []
-                  in
-                  [ CA.size (d.numOfBoth / 200) ] ++ color ++ aura
-                )
-        ]
-        (List.filter (.year >> (==) 2019) Salery.data)
+    , salarySeries model 0.7 5 200
 
     , C.eachProduct <| \p product ->
         let datum = CI.getDatum product
@@ -1315,14 +1302,14 @@ viewSaleryDiscrepancy model =
         else
           []
 
-    , case model.saleryWindow of
+    , case model.salaryWindow of
         Just _ ->
-         C.htmlAt .max .max -20 -20
-            [ HA.style "transform" "translate(-100%, 0%)"
+         C.htmlAt .max .min -10 10
+            [ HA.style "transform" "translate(-100%, -100%)"
             , HA.style "background" "white"
             , HA.style "border" "1px solid rgb(210, 210, 210)"
             ]
-            [ viewSaleryDiscrepancyMini model
+            [ viewSalaryDiscrepancyMini model
             , H.button
                 [ HA.style "position" "absolute"
                 , HA.style "top" "0"
@@ -1335,12 +1322,12 @@ viewSaleryDiscrepancy model =
                 , HA.style "padding" "0"
                 , HA.style "margin" "0"
                 , HA.style "cursor" "pointer"
-                , HE.onClick OnResetSaleryWindow
+                , HE.onClick OnResetSalaryWindow
                 ]
                 [ H.span
                     [ HA.style "font-size" "28px"
                     , HA.style "position" "absolute"
-                    , HA.style "top" "50%"
+                    , HA.style "top" "40%"
                     , HA.style "left" "50%"
                     , HA.style "transform" "translate(-50%, -50%)"
                     , HA.style "line-height" "10px"
@@ -1352,17 +1339,52 @@ viewSaleryDiscrepancy model =
         Nothing ->
           C.none
 
-    , C.each (always model.hoveringSalery) <| \p item ->
-        [ C.tooltip item [] [] [ saleryTooltip item ] ]
+    , C.each (always model.hoveringSalary) <| \p item ->
+        [ C.tooltip item [] [] [ salaryTooltip item ] ]
 
-    , case model.selectSalery of
+    , case model.selectSalary of
         Just select -> C.rect [ CA.opacity 0.5, CA.x1 select.a.x, CA.x2 select.b.x, CA.y1 select.a.y, CA.y2 select.b.y ]
         Nothing -> C.none
+
+
+    , C.svg <| \_ ->
+        S.defs []
+          [ S.linearGradient
+              [ SA.id "colorscale", SA.x1 "0", SA.x2 "100%", SA.y1 "0", SA.y2 "0" ]
+              [ S.stop [ SA.offset "0%", SA.stopColor "#f56dbc" ] [] -- most pink
+              , S.stop [ SA.offset "30%", SA.stopColor "#de74d7" ] [] -- pink
+              , S.stop [ SA.offset "50%", SA.stopColor "#c579f2" ] [] -- middle
+              , S.stop [ SA.offset "70%", SA.stopColor "#8a91f7" ] [] -- blue
+              , S.stop [ SA.offset "100%", SA.stopColor "#58a9f6" ] [] -- most blue
+              ]
+          ]
+
+    , C.withPlane <| \p ->
+        let toSvgX = Coordinates.scaleCartesianX p
+            toSvgY = Coordinates.scaleCartesianY p
+            x1 = p.x.max - toSvgX 150
+            x2 = p.x.max - toSvgX 20
+            y1 = p.y.max - toSvgY 13
+            y2 = p.y.max - toSvgY 10
+        in
+        [ C.rect [ CA.borderWidth 0, CA.x1 x1, CA.x2 x2, CA.y1 y1, CA.y2 y2, CA.color "url(#colorscale)" ]
+        , C.title [ CA.fontSize 10 ] "more women" { x = x1, y = p.y.max - toSvgY 25 }
+        , C.title [ CA.fontSize 10 ] "more men" { x = x2, y = p.y.max - toSvgY 25 }
+        , C.htmlAt .max .max -45 -45
+            [ HA.style "color" "rgb(90 90 90)"
+            , HA.style "cursor" "pointer"
+            ]
+            [ H.div [ HE.onClick (OnSalaryYear 2016) ] [ H.text "2016" ]
+            , H.div [ HE.onClick (OnSalaryYear 2017) ] [ H.text "2017" ]
+            , H.div [ HE.onClick (OnSalaryYear 2018) ] [ H.text "2018" ]
+            , H.div [ HE.onClick (OnSalaryYear 2019) ] [ H.text "2019" ]
+            ]
+        ]
     ]
 
 
-viewSaleryDiscrepancyMini : Model -> H.Html Msg
-viewSaleryDiscrepancyMini model =
+viewSalaryDiscrepancyMini : Model -> H.Html Msg
+viewSalaryDiscrepancyMini model =
   C.chart
     [ CA.height 100
     , CA.width 167
@@ -1375,9 +1397,7 @@ viewSaleryDiscrepancyMini model =
     , C.range [ C.lowest 20000 C.orHigher ]
     , C.domain [ C.lowest 76 C.orHigher ]
     ]
-    [ C.grid []
-
-    , C.each (CS.produce 10 CS.ints << .x) <| \p t ->
+    [ C.each (CS.produce 10 CS.ints << .x) <| \p t ->
         [ C.label [ CA.leftAlign, CA.yOff 15 ] "" { x = toFloat t, y = p.y.min } ]
 
     , C.each (CS.produce 8 CS.ints << .y) <| \p t ->
@@ -1385,66 +1405,117 @@ viewSaleryDiscrepancyMini model =
 
     , C.line [ CA.dashed [ 3, 3 ], CA.y1 100, CA.width 0.5 ]
 
-     , case model.saleryWindow of
+     , case model.salaryWindow of
         Just select -> C.rect [ CA.borderWidth 0, CA.x1 select.x1, CA.x2 select.x2, CA.y1 select.y1, CA.y2 select.y2 ]
         Nothing -> C.none
 
-    , C.series .saleryBoth
-        [ C.property Salery.womenSaleryPerc "percentage" []
-            [ CA.opacity 0.5, CA.circle, CA.border CA.blue, CA.borderWidth 0.5 ]
-            |> C.variation (\d ->
-                  let precentOfWomen = Salery.womenPerc d
-                      isHovered = List.any (CI.getDatum >> (==) d) model.hoveringSalery
-
-                      color =
-                        if precentOfWomen < 20
-                        then [ CA.border "#58a9f6", CA.color "#58a9f6" ]
-                        else if precentOfWomen < 40
-                        then [ CA.border "#8a91f7", CA.color "#8a91f7" ]
-                        else if precentOfWomen < 60
-                        then [ CA.border "#c579f2", CA.color "#c579f2" ]
-                        else if precentOfWomen < 80
-                        then [ CA.border "#de74d7", CA.color "#de74d7" ]
-                        else [ CA.border "#f56dbc", CA.color "#f56dbc" ]
-
-                      aura =
-                        if isHovered
-                        then [ CA.aura 0.4, CA.auraWidth 3, CA.opacity 0.7 ]
-                        else []
-                  in
-                  [ CA.size (d.numOfBoth / 4000) ] ++ color ++ aura
-                )
-        ]
-        (List.filter (.year >> (==) 2019) Salery.data)
+    , salarySeries model 0.5 3 4000
     ]
 
 
-saleryTooltip : CI.Product CI.General Salery.Datum -> H.Html msg
-saleryTooltip hovered =
+salarySeries : Model -> Float -> Float -> Float -> C.Element Salary.Datum Msg
+salarySeries model border auraSize size =
+  C.series .salaryBoth
+      [ C.property Salary.womenSalaryPerc "percentage" []
+          [ CA.opacity 0.5, CA.circle, CA.border CA.blue, CA.borderWidth border ]
+          |> C.variation (\d ->
+                let precentOfWomen = Salary.womenPerc d
+                    isHovered = List.any (CI.getDatum >> (==) d) model.hoveringSalary
+
+                    color =
+                      if precentOfWomen < 20
+                      then [ CA.border "#58a9f6", CA.color "#58a9f6" ]
+                      else if precentOfWomen < 40
+                      then [ CA.border "#8a91f7", CA.color "#8a91f7" ]
+                      else if precentOfWomen < 60
+                      then [ CA.border "#c579f2", CA.color "#c579f2" ]
+                      else if precentOfWomen < 80
+                      then [ CA.border "#de74d7", CA.color "#de74d7" ]
+                      else [ CA.border "#f56dbc", CA.color "#f56dbc" ]
+
+                    aura =
+                      if isHovered
+                      then [ CA.aura 0.4, CA.auraWidth auraSize, CA.opacity 0.7 ]
+                      else []
+                in
+                [ CA.size (d.numOfBoth / size) ] ++ color ++ aura
+              )
+      ]
+      (List.filter (.year >> (==) model.salaryYear) Salary.data)
+
+
+viewSalaryDiscrepancyBar : Model -> H.Html Msg
+viewSalaryDiscrepancyBar model =
+  C.chart
+    [ CA.height 100
+    , CA.width 1000
+    , CA.static
+    , C.marginLeft 0
+    , C.marginRight 0
+    , C.marginBottom 0
+    , C.marginTop 0
+    , C.paddingTop 0
+    , C.range [ C.lowest 20000 C.orHigher ]
+    --, C.domain [ C.lowest 76 C.orHigher ]
+    ]
+    [ C.grid []
+
+    --, C.xLabels [ C.amount 10 ]
+    --, C.yLabels []
+
+    , C.bars
+        [ CA.grouped
+        , CA.spacing 0.1
+        , CA.margin 0.3
+        , CA.roundTop 0.2
+        , CA.roundBottom 0.2
+        , CA.x1 (\d -> d.bin - 5000)
+        , CA.x2 .bin
+        ]
+        [ C.bar (.data >> List.map .numOfWomen >> List.sum >> Just) "women" [ CA.color "#f56dbc", CA.striped [ CA.rotate 45, CA.width 2, CA.space 1.5 ] ]
+        , C.bar (.data >> List.map .numOfMen >> List.sum >> Just) "men" [ CA.color "#58a9f6", CA.dotted [ CA.rotate 45, CA.width 2, CA.space 1.5 ] ]
+        ]
+        (C.binned 5000 .salaryBoth <| List.filter (.year >> (==) 2019) Salary.data)
+    ]
+
+
+salaryTooltip : CI.Product CI.General Salary.Datum -> H.Html msg
+salaryTooltip hovered =
   let datum = CI.getDatum hovered
-      precentOfWomen = round (Salery.womenPerc datum)
-      percentOfSalery = round (Maybe.withDefault 0 (Salery.womenSaleryPerc datum))
+      precentOfWomen = round (Salary.womenPerc datum)
+      percentOfSalary = round (Maybe.withDefault 0 (Salary.womenSalaryPerc datum))
+      percentOfSalaryMen = round (Maybe.withDefault 0 (Salary.menSalaryPerc datum))
   in
   H.div []
     [ H.h4
-        [ HA.style "max-width" "200px"
+        [ HA.style "width" "240px"
         , HA.style "margin-top" "5px"
-        , HA.style "margin-bottom" "8px"
+        , HA.style "margin-bottom" "5px"
         , HA.style "color" (CI.getColor hovered)
         ]
         [ H.text datum.sector ]
-    , H.div []
-        [ H.text "# Women: "
-        , H.text <| String.fromInt precentOfWomen ++ "%"
-        , H.text " # Men: "
-        , H.text <| String.fromInt (100 - precentOfWomen) ++ "%"
-        ]
-    , H.div []
-        [ H.text "Women: "
-        , H.text <| String.fromFloat datum.saleryWomen ++ " DKK (" ++ String.fromInt percentOfSalery ++ "%)"
-        ]
-    , H.div []
-        [ H.text "Men: "
-        , H.text <| String.fromFloat datum.saleryMen ++ " DKK"
+
+    , H.table [ HA.style "color" "rgb(90, 90, 90)", HA.style "width" "100%", HA.style "font-size" "11px" ]
+        [ H.tr []
+            [ H.th [] []
+            , H.th [ HA.style "text-align" "right" ] [ H.text "Women" ]
+            , H.th [ HA.style "text-align" "right" ] [ H.text "%" ]
+            , H.th [ HA.style "text-align" "right" ] [ H.text "Men" ]
+            , H.th [ HA.style "text-align" "right" ] [ H.text "%" ]
+            ]
+        , H.tr []
+            [ H.th [ HA.style "text-align" "left" ] [ H.text "Salary" ]
+            , H.th [ HA.style "text-align" "right" ] [ H.text (String.fromInt (round datum.salaryWomen)) ]
+            , H.th [ HA.style "text-align" "right" ] [ H.text (String.fromInt percentOfSalary) ]
+            , H.th [ HA.style "text-align" "right" ] [ H.text (String.fromInt (round datum.salaryMen)) ]
+            , H.th [ HA.style "text-align" "right" ] [ H.text (String.fromInt percentOfSalaryMen) ]
+            ]
+        , H.tr []
+            [ H.th [ HA.style "text-align" "left" ] [ H.text "Distribution" ]
+            , H.th [ HA.style "text-align" "right" ] [ H.text (String.fromFloat datum.numOfWomen) ]
+            , H.th [ HA.style "text-align" "right" ] [ H.text (String.fromInt precentOfWomen) ]
+            , H.th [ HA.style "text-align" "right" ] [ H.text (String.fromFloat datum.numOfMen) ]
+            , H.th [ HA.style "text-align" "right" ] [ H.text (String.fromInt (100 - precentOfWomen)) ]
+            ]
         ]
     ]

@@ -406,10 +406,10 @@ toBarSeries barsAttrs properties data =
             length = end - start
             margin = length * barsConfig.margin
             width = (length - margin * 2 - (numOfBars - 1) * barsConfig.spacing) / numOfBars
-            offset = if barsConfig.grouped then toFloat barIndex * width + toFloat barIndex * barsConfig.spacing else 0
+            offset = if barsConfig.grouped then toFloat barIndex + toFloat barIndex * barsConfig.spacing else 0
 
-            x1 = start + margin + offset
-            x2 = start + margin + offset + width
+            x1 = start + margin + offset * width
+            x2 = start + margin + offset * width + width
             minY = if numOfSections > 1 then max 0 else identity
             y1 = minY <| Maybe.withDefault 0 visual - Maybe.withDefault 0 value
             y2 = minY <| Maybe.withDefault 0 visual

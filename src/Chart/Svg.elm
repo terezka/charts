@@ -167,6 +167,7 @@ type alias Line =
   , color : String
   , width : Float
   , dashed : List Float
+  , opacity : Float
   , break : Bool
   }
 
@@ -183,6 +184,7 @@ line plane edits =
           , color = "rgb(210, 210, 210)"
           , width = 1
           , dashed = []
+          , opacity = 1
           , break = False
           }
 
@@ -248,6 +250,7 @@ line plane edits =
     , SA.fill "transparent"
     , SA.stroke config.color
     , SA.strokeWidth (String.fromFloat config.width)
+    , SA.strokeOpacity (String.fromFloat config.opacity)
     , SA.strokeDasharray (String.join " " <| List.map String.fromFloat config.dashed)
     , SA.d (C.description plane cmds)
     ]
