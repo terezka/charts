@@ -36,8 +36,8 @@ type alias Model =
   , hoveringStackedBars : List (CI.Product CI.General ScatterDatum)
   , hoveringBinnedBars : List (CI.Group (CI.Bin ScatterDatum) CI.General ScatterDatum)
   -- SALERY
-  , selectSalary : Maybe { a : Coordinates.Point, b : Coordinates.Point }
-  , hoveringSalary : List (CI.Product CI.General Salary.Datum)
+  , salarySelection : Maybe { a : Coordinates.Point, b : Coordinates.Point }
+  , salaryHovering : List (CI.Product CI.General Salary.Datum)
   , salaryWindow : Maybe Coordinates.Position
   , salaryYear : Float
   }
@@ -114,21 +114,21 @@ update msg model =
     --
 
     OnHoverSalary hovering coords ->
-      case model.selectSalary of
-        Nothing -> { model | hoveringSalary = hovering }
-        Just select -> { model | selectSalary = Just { select | b = coords }, hoveringSalary = [] }
+      case model.salarySelection of
+        Nothing -> { model | salaryHovering = hovering }
+        Just select -> { model | salarySelection = Just { select | b = coords }, salaryHovering = [] }
 
     OnMouseDownSalary coords ->
-      { model | selectSalary = Just { a = coords, b = coords } }
+      { model | salarySelection = Just { a = coords, b = coords } }
 
     OnMouseUpSalary coords ->
-      case model.selectSalary of
+      case model.salarySelection of
         Nothing -> model
         Just select ->
           if select.a == coords
-          then { model | selectSalary = Nothing, salaryWindow = Nothing }
+          then { model | salarySelection = Nothing, salaryWindow = Nothing }
           else
-            { model | selectSalary = Nothing
+            { model | salarySelection = Nothing
             , salaryWindow = Just
                 { x1 = min select.a.x coords.x
                 , x2 = max select.a.x coords.x
@@ -138,7 +138,7 @@ update msg model =
             }
 
     OnResetSalary ->
-      { model | hoveringSalary = [] }
+      { model | salaryHovering = [] }
 
     OnResetSalaryWindow ->
       { model | salaryWindow = Nothing }
@@ -1339,10 +1339,10 @@ viewSalaryDiscrepancy model =
         Nothing ->
           C.none
 
-    , C.each (always model.hoveringSalary) <| \p item ->
+    , C.each (always model.salaryHovering) <| \p item ->
         [ C.tooltip item [] [] [ salaryTooltip item ] ]
 
-    , case model.selectSalary of
+    , case model.salarySelection of
         Just select -> C.rect [ CA.opacity 0.5, CA.x1 select.a.x, CA.x2 select.b.x, CA.y1 select.a.y, CA.y2 select.b.y ]
         Nothing -> C.none
 
@@ -1420,7 +1420,7 @@ salarySeries model border auraSize size =
           [ CA.opacity 0.5, CA.circle, CA.border CA.blue, CA.borderWidth border ]
           |> C.variation (\d ->
                 let precentOfWomen = Salary.womenPerc d
-                    isHovered = List.any (CI.getDatum >> (==) d) model.hoveringSalary
+                    isHovered = List.any (CI.getDatum >> (==) d) model.salaryHovering
 
                     color =
                       if precentOfWomen < 20
