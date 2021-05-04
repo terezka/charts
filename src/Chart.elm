@@ -6,7 +6,7 @@ module Chart exposing
     , lowest, highest, orLower, orHigher, exactly, more, less, window, likeData, zero, middle
     , Event, event
     , Decoder, getCoords, getNearest, getNearestX, getWithin, getWithinX, map, map2, map3, map4
-    , tooltip, line, label, title, xTick, yTick, rect, svgAt, htmlAt, svg, html, none
+    , tooltip, line, title, xLabel, yLabel, xTick, yTick, rect, svgAt, htmlAt, svg, html, none
     , each, eachBin, eachStack, eachProduct
     , withPlane, withBins, withStacks, withProducts
 
@@ -932,6 +932,173 @@ yLabels edits =
     S.g [ SA.class "elm-charts__y-labels" ] (List.map toLabel (toTicks p))
 
 
+{-| -}
+type alias Label =
+  { xOff : Float
+  , yOff : Float
+  , border : String
+  , borderWidth : Float
+  , fontSize : Maybe Int
+  , color : String
+  , anchor : CA.Anchor
+  , rotate : Float
+  , format : String
+  , pinned : C.Axis -> Float
+  , flip : Bool
+  }
+
+
+{-| -}
+xLabel : List (Attribute Label) -> Float -> Element data msg
+xLabel edits val =
+  let config =
+        applyAttrs edits
+          { xOff = 0
+          , yOff = 0
+          , border = "white"
+          , borderWidth = 0.1
+          , fontSize = Nothing
+          , color = "#808BAB"
+          , anchor = CA.Middle
+          , rotate = 0
+          , format = ""
+          , pinned = zero
+          , flip = False
+          }
+
+      string =
+        if config.format == ""
+        then String.fromFloat val
+        else config.format
+
+      toTickValues p ts =
+        { ts | xs = ts.xs ++ [ val ] }
+  in
+  LabelsElement toTickValues <| \p ->
+    CS.label p
+      [ CA.xOff config.xOff
+      , CA.yOff (if config.flip then -config.yOff + 10 else config.yOff)
+      , CA.border config.border
+      , CA.borderWidth config.borderWidth
+      , case config.fontSize of
+          Just s -> CA.fontSize s
+          Nothing -> identity
+      , CA.color config.color
+      , case config.anchor of
+          CA.Middle -> identity
+          CA.End -> CA.alignRight
+          CA.Start -> CA.alignLeft
+      , CA.rotate config.rotate
+      ]
+      string
+      { y = config.pinned p.y, x = val }
+
+
+{-| -}
+yLabel : List (Attribute Label) -> Float -> Element data msg
+yLabel edits val =
+  let config =
+        applyAttrs edits
+          { xOff = 0
+          , yOff = 0
+          , border = "white"
+          , borderWidth = 0.1
+          , fontSize = Nothing
+          , color = "#808BAB"
+          , anchor = CA.Start
+          , rotate = 0
+          , format = ""
+          , pinned = zero
+          , flip = False
+          }
+
+      string =
+        if config.format == ""
+        then String.fromFloat val
+        else config.format
+
+      toTickValues p ts =
+        { ts | ys = ts.ys ++ [ val ] }
+  in
+  LabelsElement toTickValues <| \p ->
+    CS.label p
+      [ CA.xOff (if config.flip then -config.xOff else config.xOff)
+      , CA.yOff config.yOff
+      , CA.border config.border
+      , CA.borderWidth config.borderWidth
+      , case config.fontSize of
+          Just s -> CA.fontSize s
+          Nothing -> identity
+      , CA.color config.color
+      , case config.anchor of
+          CA.Middle -> identity
+          CA.End -> CA.alignRight
+          CA.Start -> CA.alignLeft
+      , CA.rotate config.rotate
+      ]
+      string
+      { x = config.pinned p.x, y = val }
+
+
+
+{-| -}
+type alias Tick =
+  { color : String
+  , width : Float
+  , length : Float
+  , flip : Bool
+  , pinned : C.Axis -> Float
+  }
+
+
+{-| -}
+xTick : List (Attribute Tick) -> Float -> Element data msg
+xTick edits val =
+  let config =
+        applyAttrs edits
+          { length = 5
+          , color = "rgb(210, 210, 210)"
+          , width = 1
+          , pinned = zero
+          , flip = False
+          }
+
+      toTickValues p ts =
+        { ts | xs = ts.xs ++ [ val ] }
+  in
+  TicksElement toTickValues <| \p ->
+    CS.xTick p
+      [ CA.length (if config.flip then -config.length else config.length)
+      , CA.color config.color
+      , CA.width config.width
+      ]
+      { x = val, y = config.pinned p.y }
+
+
+{-| -}
+yTick : List (Attribute Tick) -> Float -> Element data msg
+yTick edits val =
+  let config =
+        applyAttrs edits
+          { length = 5
+          , color = "rgb(210, 210, 210)"
+          , width = 1
+          , pinned = zero
+          , flip = False
+          }
+
+      toTickValues p ts =
+        { ts | ys = ts.ys ++ [ val ] }
+  in
+  TicksElement toTickValues <| \p ->
+    CS.yTick p
+      [ CA.length (if config.flip then -config.length else config.length)
+      , CA.color config.color
+      , CA.width config.width
+      ]
+      { x = config.pinned p.x, y = val }
+
+
 
 type alias Grid =
     { color : String -- TODO use Color
@@ -1140,36 +1307,9 @@ eachProduct func =
 
 
 {-| -}
-label : List (Attribute CS.Label) -> String -> C.Point -> Element data msg
-label attrs string point =
-  let toTickValues p ts =
-        { ts | xs = ts.xs ++ [ point.x ], ys = ts.ys ++ [ point.y ] }
-  in
-  LabelsElement toTickValues <| \p -> CS.label p attrs string point
-
-
-{-| -}
 title : List (Attribute CS.Label) -> String -> C.Point -> Element data msg
 title attrs string point =
   SvgElement <| \p -> CS.label p attrs string point
-
-
-{-| -}
-xTick : List (Attribute CS.Tick) -> C.Point -> Element data msg
-xTick attrs point =
-  let toTickValues p ts =
-        { ts | xs = ts.xs ++ [ point.x ], ys = ts.ys ++ [ point.y ] }
-  in
-  TicksElement toTickValues <| \p -> CS.xTick p attrs point
-
-
-{-| -}
-yTick : List (Attribute CS.Tick) -> C.Point -> Element data msg
-yTick attrs point =
-  let toTickValues p ts =
-        { ts | xs = ts.xs ++ [ point.x ], ys = ts.ys ++ [ point.y ] }
-  in
-  TicksElement toTickValues <| \p -> CS.yTick p attrs point
 
 
 {-| -}

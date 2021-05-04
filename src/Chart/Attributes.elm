@@ -1,5 +1,5 @@
 module Chart.Attributes exposing
-  ( Attribute, x, x1, x2, y, y1, y2, xOff, yOff, flip, border, borderWidth, fontSize, color, width, height, offset
+  ( Attribute, x, x1, x2, y, y1, y2, xOff, yOff, flip, border, borderWidth, fontSize, format, color, width, height, offset
   , Anchor(..), alignLeft, alignRight, content
   , rotate, length, roundTop, roundBottom, area, opacity, size, aura, auraWidth, ungroup, margin, spacing
   , Design(..), GradientConfig, Pattern, space, striped, dotted, gradient, top, bottom, dashed, break
@@ -98,6 +98,12 @@ background v config =
 fontSize : Int -> Attribute { a | fontSize : Maybe Int }
 fontSize v config =
   { config | fontSize = Just v }
+
+
+{-| -}
+format : String -> Attribute { a | format : String }
+format v config =
+  { config | format = v }
 
 
 {-| -}

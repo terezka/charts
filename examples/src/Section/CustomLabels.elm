@@ -157,26 +157,26 @@ view onSelect selected =
               """
           , C.xAxis []
           , C.each (CS.produce 12 CS.ints << .x) <| \\p num ->
-              [ C.xTick [] { x = toFloat num, y = p.x.min }
-              , C.label
+              [ C.xTick [] (toFloat num)
+              , C.xLabel
                   [ CA.yOff 20
                   , if num == 3 then CA.color "blue" else identity
+                  , CA.format (String.fromInt num ++ "°")
                   ]
-                  (String.fromInt num ++ "°")
-                  { x = toFloat num, y = p.x.min }
+                  (toFloat num)
               ]
               """
           , chart = \_ ->
               frame
                 [ C.xAxis []
                 , C.each (CS.produce 12 CS.ints << .x) <| \p num ->
-                    [ C.xTick [] { x = toFloat num, y = p.x.min }
-                    , C.label
+                    [ C.xTick [] (toFloat num)
+                    , C.xLabel
                         [ CA.yOff 20
                         , if num == 3 then CA.color "blue" else identity
+                        , CA.format (String.fromInt num ++ "°")
                         ]
-                        (String.fromInt num ++ "°")
-                        { x = toFloat num, y = p.x.min }
+                        (toFloat num)
                     ]
                 ]
           }

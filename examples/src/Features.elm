@@ -194,7 +194,7 @@ view model =
           [ E.paddingEach { top = 0, bottom = 25, left = 0, right = 0 }
           , F.color (E.rgb255 130 130 130)
           ]
-          (E.text "Unreleased. Feel free to use, but please do not share publicly yet. Documentation unfinished and API is still liable to breaking changes.")
+          (E.text "Unreleased. Feel free to use, but please do not share publicly yet. Documentation unfinished/wrong and API is still liable to breaking changes.")
       , E.row
           [ E.spaceEvenly
           , E.width (E.maximum 600 E.fill)
@@ -1190,10 +1190,14 @@ viewSalaryDiscrepancy model =
     [ C.grid []
 
     , C.each (CS.produce 10 CS.ints << .x) <| \p t ->
-        [ C.label [ CA.alignLeft, CA.yOff 15 ] (String.fromInt t) { x = toFloat t, y = p.y.min } ]
+        [ C.xLabel [ CA.alignLeft, CA.yOff 0, CA.xOff 3, CA.format (String.fromInt t) ] (toFloat t) ]
 
     , C.each (CS.produce 8 CS.ints << .y) <| \p t ->
-        [ (if t == 100 then C.title else C.label) [ CA.alignLeft, CA.yOff -5 ] (String.fromInt t) { x = p.x.min, y = toFloat t } ]
+        [ if t == 100 then
+            C.title [ CA.alignLeft, CA.yOff -5 ] (String.fromInt t) { x = p.x.min, y = toFloat t }
+          else
+            C.yLabel [ CA.alignLeft, CA.yOff -5, CA.format (String.fromInt t) ] (toFloat t)
+      ]
 
     , C.withPlane <| \p ->
         [ C.title [ CA.fontSize 14, CA.yOff -3 ] ("Salary distribution in Denmark " ++ String.fromFloat model.salaryYear) { x = C.middle p.x, y = p.y.max }
@@ -1318,10 +1322,10 @@ viewSalaryDiscrepancyMini model =
     , C.domain [ C.lowest 76 C.orHigher ]
     ]
     [ C.each (CS.produce 10 CS.ints << .x) <| \p t ->
-        [ C.label [ CA.alignLeft, CA.yOff 15 ] "" { x = toFloat t, y = p.y.min } ]
+        [ C.xLabel [ CA.alignLeft, CA.yOff 15, CA.format "" ] (toFloat t) ]
 
     , C.each (CS.produce 8 CS.ints << .y) <| \p t ->
-        [ C.label [ CA.alignLeft, CA.yOff -5 ] "" { x = p.x.min, y = toFloat t } ]
+        [ C.yLabel [ CA.alignLeft, CA.yOff -5, CA.format "" ] (toFloat t) ]
 
     , C.line [ CA.dashed [ 3, 3 ], CA.y1 100, CA.width 0.5 ]
 
