@@ -61,13 +61,13 @@ break config =
 {-| -}
 xOff : Float -> Attribute { a | xOff : Float }
 xOff v config =
-  { config | xOff = v }
+  { config | xOff = config.xOff + v }
 
 
 {-| -}
 yOff : Float -> Attribute { a | yOff : Float }
 yOff v config =
-  { config | yOff = v }
+  { config | yOff = config.yOff + v }
 
 
 {-| -}

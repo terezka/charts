@@ -1190,13 +1190,13 @@ viewSalaryDiscrepancy model =
     [ C.grid []
 
     , C.each (CS.produce 10 CS.ints << .x) <| \p t ->
-        [ C.xLabel [ CA.alignLeft, CA.yOff 0, CA.xOff 3, CA.format (String.fromInt t) ] (toFloat t) ]
+        [ C.xLabel [ CA.alignLeft, CA.yOff -20, CA.xOff 3, CA.format (String.fromInt t) ] (toFloat t) ]
 
     , C.each (CS.produce 8 CS.ints << .y) <| \p t ->
         [ if t == 100 then
-            C.title [ CA.alignLeft, CA.yOff -5 ] (String.fromInt t) { x = p.x.min, y = toFloat t }
+            C.title [ CA.alignLeft, CA.yOff -7, CA.xOff 1 ] (String.fromInt t) { x = p.x.min, y = toFloat t }
           else
-            C.yLabel [ CA.alignLeft, CA.yOff -5, CA.format (String.fromInt t) ] (toFloat t)
+            C.yLabel [ CA.alignLeft, CA.yOff -10, CA.xOff 10, CA.format (String.fromInt t) ] (toFloat t)
       ]
 
     , C.withPlane <| \p ->

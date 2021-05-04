@@ -954,7 +954,7 @@ xLabel edits val =
   let config =
         applyAttrs edits
           { xOff = 0
-          , yOff = 0
+          , yOff = 20
           , border = "white"
           , borderWidth = 0.1
           , fontSize = Nothing
@@ -999,8 +999,8 @@ yLabel : List (Attribute Label) -> Float -> Element data msg
 yLabel edits val =
   let config =
         applyAttrs edits
-          { xOff = 0
-          , yOff = 0
+          { xOff = -8
+          , yOff = 3
           , border = "white"
           , borderWidth = 0.1
           , fontSize = Nothing
