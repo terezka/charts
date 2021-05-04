@@ -1,7 +1,7 @@
 module Chart.Attributes exposing
   ( Attribute, x, x1, x2, y, y1, y2, xOff, yOff, border, borderWidth, fontSize, color, width, height, offset
   , Anchor(..), leftAlign, rightAlign, content
-  , rotate, length, roundTop, roundBottom, area, opacity, size, aura, auraWidth, grouped, margin, spacing
+  , rotate, length, roundTop, roundBottom, area, opacity, size, aura, auraWidth, ungroup, margin, spacing
   , Design(..), GradientConfig, Pattern, space, striped, dotted, gradient, top, bottom, dashed, break
   , Method(..), linear, monotone
   , Shape(..), circle, triangle, square, diamond, plus, cross, shape
@@ -191,9 +191,9 @@ roundBottom v config =
 
 
 {-| -}
-grouped : Attribute { a | grouped : Bool }
-grouped config =
-  { config | grouped = True }
+ungroup : Attribute { a | grouped : Bool }
+ungroup config =
+  { config | grouped = False }
 
 
 {-| -}
@@ -288,21 +288,21 @@ space value config =
 
 
 {-| -}
-striped : List (Attribute Pattern) -> Attribute { a | design : Maybe Design }
+striped : List (Attribute Pattern) -> Attribute { a | design : Maybe Design, opacity : Float }
 striped attrs_ config =
-  { config | design = Just (Striped attrs_) }
+  { config | design = Just (Striped attrs_), opacity = if config.opacity == 0 then 1 else config.opacity }
 
 
 {-| -}
-dotted : List (Attribute Pattern) -> Attribute { a | design : Maybe Design }
+dotted : List (Attribute Pattern) -> Attribute { a | design : Maybe Design, opacity : Float }
 dotted attrs_ config =
-  { config | design = Just (Dotted attrs_) }
+  { config | design = Just (Dotted attrs_), opacity = if config.opacity == 0 then 1 else config.opacity }
 
 
 {-| -}
-gradient : List (Attribute GradientConfig) -> Attribute { a | design : Maybe Design }
+gradient : List (Attribute GradientConfig) -> Attribute { a | design : Maybe Design, opacity : Float }
 gradient attrs_ config =
-  { config | design = Just (Gradient attrs_) }
+  { config | design = Just (Gradient attrs_), opacity = if config.opacity == 0 then 1 else config.opacity }
 
 
 {-| -}

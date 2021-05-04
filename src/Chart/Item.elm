@@ -347,11 +347,11 @@ toBarSeries : List (CA.Attribute (Bars data)) -> List (Property data String () S
 toBarSeries barsAttrs properties data =
   let barsConfig =
         apply barsAttrs
-          { spacing = 0.01
+          { spacing = 0.05
           , margin = 0.1
           , roundTop = 0
           , roundBottom = 0
-          , grouped = False
+          , grouped = True
           , x1 = Nothing
           , x2 = Nothing
           }
@@ -405,11 +405,12 @@ toBarSeries barsAttrs properties data =
 
             length = end - start
             margin = length * barsConfig.margin
-            width = (length - margin * 2 - (numOfBars - 1) * barsConfig.spacing) / numOfBars
-            offset = if barsConfig.grouped then toFloat barIndex + toFloat barIndex * barsConfig.spacing else 0
+            spacing = length * barsConfig.spacing
+            width = (length - margin * 2 - (numOfBars - 1) * spacing) / numOfBars
+            offset = if barsConfig.grouped then toFloat barIndex * width + toFloat barIndex * spacing else 0
 
-            x1 = start + margin + offset * width
-            x2 = start + margin + offset * width + width
+            x1 = start + margin + offset
+            x2 = start + margin + offset + width
             minY = if numOfSections > 1 then max 0 else identity
             y1 = minY <| Maybe.withDefault 0 visual - Maybe.withDefault 0 value
             y2 = minY <| Maybe.withDefault 0 visual
@@ -489,7 +490,7 @@ toDotSeries toX properties data =
 
       toSeriesItem lineIndex sublineIndex prop =
         let dotItems = List.map (toDotItem lineIndex sublineIndex prop interConfig) data
-            interAttr = [ CA.color (toDefaultColor lineIndex) ] ++ prop.inter
+            interAttr = [ CA.color (toDefaultColor lineIndex), CA.opacity 0 ] ++ prop.inter
             interConfig = toInterConfig interAttr
         in
         Item

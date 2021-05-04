@@ -18,6 +18,16 @@ import Chart.Attributes as CA
 import Chart.Item as CI
 import Chart.Svg as CS
 
+import Element as E
+import Element.Font as F
+import Element.Border as B
+import Element.Background as BG
+
+import SyntaxHighlight as SH
+import Section.ScatterChart
+import Section.LineChart
+import Section.BarChart
+
 
 main =
   Browser.sandbox
@@ -28,9 +38,12 @@ main =
 
 
 type alias Model =
-  { select : Maybe { a : Float, b : Float }
+  { exploration : Dict.Dict String Int
+
+  , select : Maybe { a : Float, b : Float }
   , rangeMin : Float
   , rangeMax : Float
+
   , hoveringScatter : List (CI.Product CI.General ScatterDatum)
   , hoveringBars : List (CI.Product CI.General ScatterDatum)
   , hoveringStackedBars : List (CI.Product CI.General ScatterDatum)
@@ -45,7 +58,7 @@ type alias Model =
 
 init : Model
 init =
-  Model Nothing 1262217600000 1640908800000 [] [] [] [] Nothing [] Nothing 2019
+  Model Dict.empty Nothing 1262217600000 1640908800000 [] [] [] [] Nothing [] Nothing 2019
 
 
 type alias ScatterDatum =
@@ -58,7 +71,9 @@ type alias ScatterDatum =
 
 
 type Msg
-  = OnMouseDown Coordinates.Point
+  = OnExploration String Int
+
+  | OnMouseDown Coordinates.Point
   | OnMouseMove Coordinates.Point
   | OnMouseUp Coordinates.Point
   | OnReset
@@ -79,6 +94,11 @@ type Msg
 update : Msg -> Model -> Model
 update msg model =
   case msg of
+    OnExploration title selected ->
+      { model | exploration = Dict.insert title selected model.exploration }
+
+    --
+
     OnMouseDown coords ->
       { model | select = Just { a = coords.x, b = coords.x } }
 
@@ -147,33 +167,101 @@ update msg model =
       { model | salaryYear = year }
 
 
-
 view : Model -> H.Html Msg
 view model =
-  H.div
-    [ HA.style "font-size" "12px"
-    , HA.style "font-family" "\"IBM Plex Sans\", sans-serif"
-    , HA.style "margin" "0 auto"
-    , HA.style "padding-top" "25px"
-    , HA.style "padding-bottom" "100px"
-    , HA.style "width" "100vw"
-    , HA.style "max-width" "1000px"
-    , HA.style "display" "flex"
-    , HA.style "flex-flow" "wrap"
-    ]
-    [ viewSalaryDiscrepancy model
-    --, viewSalaryDiscrepancyBar model
-    , H.h1
-        [ HA.style "width" "100%"
-        , HA.style "font-size" "50px"
-        , HA.style "color" "rgb(80, 80, 80)"
-        , HA.style "margin" "20px 0 60px 0"
-        ]
-        [ H.text "elm-charts" ]
-    ]
+  E.layout
+    [ E.width E.fill
+    , F.family [ F.typeface "IBM Plex Sans", F.sansSerif ]
+    ] <|
+    E.column
+      [ E.width (E.maximum 1000 E.fill)
+      , E.paddingEach { top = 30, bottom = 30, left = 0, right = 0 }
+      , E.centerX
+      , F.size 12
+      , F.color (E.rgb255 80 80 80)
+      ]
+      [ E.html (viewSalaryDiscrepancy model)
+      , E.el
+          [ F.size 50
+          , E.paddingEach { top = 50, bottom = 25, left = 0, right = 0 }
+          ]
+          (E.text "elm-charts")
+      , E.row
+          [ E.spaceEvenly
+          , E.width (E.maximum 600 E.fill)
+          ]
+          [ E.column
+              [ E.alignTop
+              , E.spacing 5
+              ]
+              [ E.el
+                  [ F.size 16
+                  , E.paddingEach { top = 0, bottom = 10, left = 0, right = 0 }
+                  ]
+                  (E.text "Explore")
+              , E.el [ F.size 13 ] (E.text "Scatter charts")
+              , E.el [ F.size 13 ] (E.text "Line charts")
+              , E.el [ F.size 13 ] (E.text "Bar charts")
+              , E.el [ F.size 13 ] (E.text "Interactivity")
+              , E.el [ F.size 13 ] (E.text "Custom axes")
+              , E.el [ F.size 13 ] (E.text "Custom labels")
+              ]
+          , E.column
+              [ E.alignTop
+              , E.spacing 5
+              ]
+              [ E.el
+                  [ F.size 16
+                  , E.paddingEach { top = 0, bottom = 10, left = 0, right = 0 }
+                  ]
+                  (E.text "Real life examples")
+              , E.el [ F.size 13 ] (E.text "Salary distribution in Denmark")
+              , E.el [ F.size 13 ] (E.text "Perceptions of Probability")
+              , E.el [ F.size 13 ] (E.text "Community examples")
+              ]
+          , E.column
+              [ E.alignTop
+              , E.spacing 5
+              ]
+              [ E.el
+                  [ F.size 16
+                  , E.paddingEach { top = 0, bottom = 10, left = 0, right = 0 }
+                  ]
+                  (E.text "Administration")
+              , E.el [ F.size 13 ] (E.text "Roadmap")
+              , E.el [ F.size 13 ] (E.text "Donating")
+              , E.el [ F.size 13 ] (E.text "Consulting")
+              , E.el [ F.size 13 ] (E.text "Github")
+              , E.el [ F.size 13 ] (E.text "Twitter")
+              ]
+          ]
+      , E.el
+          [ F.size 12
+          , F.color (E.rgb255 180 180 180)
+          , E.paddingEach { top = 20, bottom = 20, left = 0, right = 0 }
+          , E.alignRight
+          ]
+          (E.text "Designed and developed by Tereza Sokol © 2021")
 
 
-features model =
+      -- FEATURES
+
+      , E.column
+          [ B.widthEach { top = 1, bottom = 0, left = 0, right = 0 }
+          , B.color (E.rgb255 210 210 210)
+          , E.width E.fill
+          ]
+          [ Section.ScatterChart.view OnExploration model.exploration
+          , Section.LineChart.view OnExploration model.exploration
+          , Section.BarChart.view OnExploration model.exploration
+          ]
+      ]
+
+
+viewFeatures : Model -> E.Element Msg
+viewFeatures model =
+  E.html <|
+    H.div []
     [ H.h1 [ HA.style "width" "100%" ] [ H.text "Axes and grid" ]
     , C.chart
         [ CA.height 250
@@ -202,173 +290,7 @@ features model =
     , H.h1 [ HA.style "width" "100%" ] [ H.text "Scatters" ]
 
     -- SCATTER
-    , C.chart
-        [ CA.height 250
-        , CA.width 250
-        , CA.static
-        ]
-        [ C.grid []
-        , C.xAxis []
-        , C.xLabels []
-        , C.yAxis []
-        , C.yLabels []
-        , C.series .x
-            [ C.property .y "y" [] [] ]
-            [ { x = 0, y = Just 2 }
-            , { x = 5, y = Just 3 }
-            , { x = 10, y = Just 4 }
-            ]
-        ]
 
-    -- SCATTER / TRIANGLE
-    , C.chart
-        [ CA.height 250
-        , CA.width 250
-        , CA.static
-        ]
-        [ C.grid []
-        , C.xAxis []
-        , C.xLabels []
-        , C.yAxis []
-        , C.yLabels []
-        , C.series .x
-            [ C.property .y "y" [] [ CA.size 6, CA.triangle ]
-            , C.property .z "z" [] [ CA.size 6, CA.cross ]
-            , C.property .v "v" [] [ CA.size 6, CA.square ]
-            , C.property .w "w" [] [ CA.size 6, CA.circle ]
-            , C.property .p "p" [] [ CA.size 6, CA.diamond ]
-            , C.property .q "q" [] [ CA.size 6, CA.plus ]
-            ]
-            [ { x = 0, y = Just 2, z = Just 3, v = Just 1, w = Just 5, p = Just 4, q = Just 6 }
-            , { x = 2, y = Just 1, z = Just 2, v = Just 3, w = Just 4, p = Just 6, q = Just 4 }
-            , { x = 5, y = Just 1, z = Just 2, v = Just 3, w = Just 4, p = Just 6, q = Just 4 }
-            , { x = 7, y = Just 4, z = Just 5, v = Just 3, w = Just 2, p = Just 7, q = Just 6 }
-            , { x = 10, y = Just 4, z = Just 5, v = Just 3, w = Just 2, p = Just 7, q = Just 6 }
-            ]
-        ]
-
-    -- SCATTER / SIZE
-    , C.chart
-        [ CA.height 250
-        , CA.width 250
-        , CA.static
-        ]
-        [ C.grid []
-        , C.xAxis []
-        , C.xLabels []
-        , C.yAxis []
-        , C.yLabels []
-        , C.series .x
-            [ C.property .y "y" [] [ CA.size 10 ] ]
-            [ { x = 0, y = Just 2 }
-            , { x = 5, y = Just 3 }
-            , { x = 10, y = Just 4 }
-            ]
-        ]
-
-    -- SCATTER / OPACITY
-    , C.chart
-        [ CA.height 250
-        , CA.width 250
-        , CA.static
-        ]
-        [ C.grid []
-        , C.xAxis []
-        , C.xLabels []
-        , C.yAxis []
-        , C.yLabels []
-        , C.series .x
-            [ C.property .y "y" [] [ CA.size 10, CA.opacity 0.75 ] ]
-            [ { x = 0, y = Just 2 }
-            , { x = 5, y = Just 3 }
-            , { x = 10, y = Just 4 }
-            ]
-        ]
-
-     -- SCATTER / COLOR
-    , C.chart
-        [ CA.height 250
-        , CA.width 250
-        , CA.static
-        ]
-        [ C.grid []
-        , C.xAxis []
-        , C.xLabels []
-        , C.yAxis []
-        , C.yLabels []
-        , C.series .x
-            [ C.property .y "y" [] [ CA.color CA.purple ] ]
-            [ { x = 0, y = Just 2 }
-            , { x = 5, y = Just 3 }
-            , { x = 10, y = Just 4 }
-            ]
-        ]
-
-
-    -- SCATTER / STYLE
-    , C.chart
-        [ CA.height 250
-        , CA.width 250
-        , CA.static
-        ]
-        [ C.grid []
-        , C.xAxis []
-        , C.xLabels []
-        , C.yAxis []
-        , C.yLabels []
-        , C.series .x
-            [ C.property .y "y" [] [ CA.size 10, CA.border CA.blue, CA.opacity 0, CA.color CA.purple ] ]
-            [ { x = 0, y = Just 2 }
-            , { x = 5, y = Just 3 }
-            , { x = 10, y = Just 4 }
-            ]
-        ]
-
-    -- SCATTER / SIZE / VARIABLE
-    , C.chart
-        [ CA.height 250
-        , CA.width 250
-        , CA.static
-        ]
-        [ C.grid []
-        , C.xAxis []
-        , C.xLabels []
-        , C.yAxis []
-        , C.yLabels []
-        , C.series .x
-            [ C.property .y "y" [] [ CA.size 10, CA.border CA.purple, CA.opacity 0.25, CA.color CA.purple ]
-                |> C.variation (\datum -> [ CA.size datum.s ])
-            ]
-            [ { x = 0, y = Just 2, s = 65 }
-            , { x = 2, y = Just 6, s = 20 }
-            , { x = 5, y = Just 3, s = 95 }
-            , { x = 7, y = Just 1, s = 78 }
-            , { x = 10, y = Just 4, s = 49 }
-            ]
-        ]
-
-    -- SCATTER / SIZE / VARIABLE
-    , C.chart
-        [ CA.height 250
-        , CA.width 250
-        , CA.static
-        ]
-        [ C.grid []
-        , C.xAxis []
-        , C.xLabels []
-        , C.yAxis []
-        , C.yLabels []
-        , C.series .x
-            [ C.property .y "y" [] [ CA.size 10, CA.border CA.purple, CA.opacity 0.25, CA.color CA.purple ]
-                |> C.variation (\datum -> if datum.x == 5 then [ CA.aura 0.2, CA.auraWidth 5 ] else [])
-            ]
-            [ { x = 0, y = Just 2 }
-            , { x = 2, y = Just 6 }
-            , { x = 5, y = Just 3 }
-            , { x = 7, y = Just 1 }
-            , { x = 10, y = Just 4 }
-            ]
-        ]
 
     , H.h1 [ HA.style "width" "100%" ] [ H.text "Interpolations" ]
 
@@ -594,7 +516,7 @@ features model =
         , C.yAxis []
         , C.yLabels []
         , C.bars
-            [ CA.grouped ]
+            []
             [ C.bar .y "y" []
             , C.bar .z "z" []
             ]
@@ -616,7 +538,7 @@ features model =
         , C.yAxis []
         , C.yLabels []
         , C.bars
-            [ CA.grouped ]
+            []
             [ C.stacked
                 [ C.bar .y "y" []
                 , C.bar .z "z" []
@@ -640,8 +562,7 @@ features model =
         , C.yAxis []
         , C.yLabels []
         , C.bars
-            [ CA.grouped
-            , CA.roundTop 0.2
+            [ CA.roundTop 0.2
             ]
             [ C.stacked
                 [ C.bar .y "y" []
@@ -666,8 +587,7 @@ features model =
         , C.yAxis []
         , C.yLabels []
         , C.bars
-            [ CA.grouped
-            , CA.roundTop 0.2
+            [ CA.roundTop 0.2
             , CA.roundBottom 0.2
             ]
             [ C.stacked
@@ -693,8 +613,7 @@ features model =
         , C.yAxis []
         , C.yLabels []
         , C.bars
-            [ CA.grouped
-            , CA.margin 0.3
+            [ CA.margin 0.3
             ]
             [ C.stacked
                 [ C.bar .y "y" []
@@ -719,8 +638,7 @@ features model =
         , C.yAxis []
         , C.yLabels []
         , C.bars
-            [ CA.grouped
-            , CA.spacing 0.1
+            [ CA.spacing 0.1
             ]
             [ C.stacked
                 [ C.bar .y "y" []
@@ -917,7 +835,6 @@ features model =
             [ CA.x1 .x1
             , CA.roundTop 0.2
             , CA.roundBottom 0.2
-            , CA.grouped
             ]
             [ C.bar .y "y" []
             , C.bar .z "z" []
@@ -945,7 +862,6 @@ features model =
             , CA.x2 .x2
             , CA.roundTop 0.2
             , CA.roundBottom 0.2
-            , CA.grouped
             ]
             [ C.bar .y "y" []
             , C.bar .z "z" []
@@ -971,7 +887,6 @@ features model =
         , C.bars
             [ CA.roundTop 0.2
             , CA.roundBottom 0.2
-            , CA.grouped
             ]
             [ C.bar .y "y" []
             , C.bar .z "z" []
@@ -1003,7 +918,6 @@ features model =
         , C.bars
             [ CA.roundTop 0.2
             , CA.roundBottom 0.2
-            , CA.grouped
             ]
             [ C.bar .y "y" []
             , C.bar .z "z" []
@@ -1032,7 +946,6 @@ features model =
         , C.bars
             [ CA.roundTop 0.2
             , CA.roundBottom 0.2
-            , CA.grouped
             ]
             [ C.bar .y "y" []
             , C.bar .z "z" []
@@ -1127,7 +1040,6 @@ features model =
         , C.yLabels []
         , C.bars
             [ CA.roundTop 0.2
-            , CA.grouped
             ]
             [ C.stacked
                 [ C.bar .y "y" []
@@ -1164,7 +1076,6 @@ features model =
         , C.yLabels []
         , C.bars
             [ CA.roundTop 0.2
-            , CA.grouped
             ]
             [ C.stacked
                 [ C.bar .y "y" []
@@ -1201,7 +1112,6 @@ features model =
         , C.yLabels []
         , C.bars
             [ CA.roundTop 0.2
-            , CA.grouped
             ]
             [ C.stacked
                 [ C.bar .y "y" []
@@ -1238,7 +1148,7 @@ tooltipContent each =
 viewSalaryDiscrepancy : Model -> H.Html Msg
 viewSalaryDiscrepancy model =
   C.chart
-    [ CA.height 600
+    [ CA.height 590
     , CA.width 1000
     , CA.static
     , C.marginLeft 0
@@ -1276,7 +1186,7 @@ viewSalaryDiscrepancy model =
         [ (if t == 100 then C.title else C.label) [ CA.leftAlign, CA.yOff -5 ] (String.fromInt t) { x = p.x.min, y = toFloat t } ]
 
     , C.withPlane <| \p ->
-        [ C.title [ CA.fontSize 14, CA.yOff -3 ] ("Gender salary gap in Denmark " ++ String.fromFloat model.salaryYear) { x = C.middle p.x, y = p.y.max }
+        [ C.title [ CA.fontSize 14, CA.yOff -3 ] ("Salary distribution in Denmark " ++ String.fromFloat model.salaryYear) { x = C.middle p.x, y = p.y.max }
         , C.title [ CA.fontSize 11, CA.yOff 12 ] "Data from Danmarks Statestik" { x = C.middle p.x, y = p.y.max }
         , C.title [ CA.fontSize 12, CA.yOff 35 ] "Average salary in DKK" { x = C.middle p.x, y = p.y.min }
         , C.title [ CA.fontSize 12, CA.xOff -15, CA.rotate 90 ] "Womens percentage of mens salary" { x = p.x.min, y = C.middle p.y }
@@ -1464,8 +1374,7 @@ viewSalaryDiscrepancyBar model =
     --, C.yLabels []
 
     , C.bars
-        [ CA.grouped
-        , CA.spacing 0.1
+        [ CA.spacing 0.1
         , CA.margin 0.3
         , CA.roundTop 0.2
         , CA.roundBottom 0.2
@@ -1491,11 +1400,18 @@ salaryTooltip hovered =
         [ HA.style "width" "240px"
         , HA.style "margin-top" "5px"
         , HA.style "margin-bottom" "5px"
+        , HA.style "line-break" "normal"
+        , HA.style "white-space" "normal"
+        , HA.style "line-height" "1.25"
         , HA.style "color" (CI.getColor hovered)
         ]
         [ H.text datum.sector ]
 
-    , H.table [ HA.style "color" "rgb(90, 90, 90)", HA.style "width" "100%", HA.style "font-size" "11px" ]
+    , H.table
+        [ HA.style "color" "rgb(90, 90, 90)"
+        , HA.style "width" "100%"
+        , HA.style "font-size" "11px"
+        ]
         [ H.tr []
             [ H.th [] []
             , H.th [ HA.style "text-align" "right" ] [ H.text "Women" ]

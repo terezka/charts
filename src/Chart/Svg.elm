@@ -744,7 +744,7 @@ toPattern defaultColor design =
                     { color = defaultColor
                     , width = 5
                     , space = 5
-                    , rotate = 0
+                    , rotate = 45
                     }
 
                 theId =
@@ -775,7 +775,7 @@ toPattern defaultColor design =
                     { color = defaultColor
                     , width = 5
                     , space = 5
-                    , rotate = 0
+                    , rotate = 45
                     }
 
                 theId =
@@ -850,10 +850,10 @@ dot plane toX toY edits datum_ =
           { color = blue
           , opacity = 1
           , size = 6
-          , border = "white"
+          , border = ""
           , borderWidth = 1
           , aura = 0
-          , auraWidth = 10
+          , auraWidth = 5
           , shape = Nothing
           }
 
@@ -862,7 +862,7 @@ dot plane toX toY edits datum_ =
       area_ = 2 * pi * config.size
 
       styleAttrs =
-        [ SA.stroke config.border
+        [ SA.stroke (if config.border == "" then config.color else config.border)
         , SA.strokeWidth (String.fromFloat config.borderWidth)
         , SA.fillOpacity (String.fromFloat config.opacity)
         , SA.fill config.color

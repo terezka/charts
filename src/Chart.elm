@@ -262,10 +262,10 @@ chart edits elements =
         applyAttrs edits
           { width = 500
           , height = 200
-          , marginTop = 10
-          , marginBottom = 30
-          , marginLeft = 30
-          , marginRight = 10
+          , marginTop = 0
+          , marginBottom = 0
+          , marginLeft = 0
+          , marginRight = 0
           , paddingTop = 10
           , paddingBottom = 0
           , paddingLeft = 0
