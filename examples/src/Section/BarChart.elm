@@ -224,6 +224,21 @@ view onSelect selected =
                 , C.bar .z "z" []
                 ]
           }
+        , { title = "Pattern"
+          , code =
+              """
+              []
+              [ C.bar .y "y" [ CA.striped [] ]
+              , C.bar .z "z" [ CA.dotted [] ]
+              ]
+              """
+          , chart = \_ ->
+              frame
+                []
+                [ C.bar .y "y" [ CA.striped [] ]
+                , C.bar .z "z" [ CA.dotted [] ]
+                ]
+          }
         , { title = "Data dependent"
           , code =
               """

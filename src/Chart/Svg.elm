@@ -742,8 +742,8 @@ toPattern defaultColor design =
             let config =
                   apply edits
                     { color = defaultColor
-                    , width = 5
-                    , space = 5
+                    , width = 3
+                    , space = 4
                     , rotate = 45
                     }
 
@@ -773,8 +773,8 @@ toPattern defaultColor design =
             let config =
                   apply edits
                     { color = defaultColor
-                    , width = 5
-                    , space = 5
+                    , width = 3
+                    , space = 4
                     , rotate = 45
                     }
 

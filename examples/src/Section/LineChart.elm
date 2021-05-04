@@ -47,7 +47,7 @@ view onSelect selected =
           ]
   in
   Section.view
-    { title = "Scatter charts"
+    { title = "Line charts"
     , onSelect = onSelect
     , selected = selected
     , frame =
@@ -173,6 +173,30 @@ view onSelect selected =
           , chart = \_ ->
               scatterFrame
                 [ C.property .y "y" [ CA.linear, CA.opacity 0.6, CA.gradient [ CA.bottom "lightblue" ] ] []
+                ]
+          }
+        , { title = "Dashed"
+          , code =
+              """
+              [ C.property .y "y" [ CA.linear, CA.dashed [ 2, 2 ] ] []
+              , C.property .z "z" [ CA.linear, CA.dashed [ 5, 2 ] ] []
+              ]
+              """
+          , chart = \_ ->
+              scatterFrame
+                [ C.property .y "y" [ CA.linear, CA.dashed [ 2, 2 ] ] []
+                , C.property .z "z" [ CA.linear, CA.dashed [ 5, 2 ] ] []
+                ]
+          }
+        , { title = "Dots"
+          , code =
+              """
+              [ C.property .y "y" [ CA.linear ] [ CA.circle ]
+              ]
+              """
+          , chart = \_ ->
+              scatterFrame
+                [ C.property .y "y" [ CA.linear ] [ CA.circle ]
                 ]
           }
         ]
