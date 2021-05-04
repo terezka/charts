@@ -1,6 +1,6 @@
 module Chart.Attributes exposing
-  ( Attribute, x, x1, x2, y, y1, y2, xOff, yOff, border, borderWidth, fontSize, color, width, height, offset
-  , Anchor(..), leftAlign, rightAlign, content
+  ( Attribute, x, x1, x2, y, y1, y2, xOff, yOff, flip, border, borderWidth, fontSize, color, width, height, offset
+  , Anchor(..), alignLeft, alignRight, content
   , rotate, length, roundTop, roundBottom, area, opacity, size, aura, auraWidth, ungroup, margin, spacing
   , Design(..), GradientConfig, Pattern, space, striped, dotted, gradient, top, bottom, dashed, break
   , Method(..), linear, monotone
@@ -68,6 +68,12 @@ xOff v config =
 yOff : Float -> Attribute { a | yOff : Float }
 yOff v config =
   { config | yOff = v }
+
+
+{-| -}
+flip : Attribute { a | flip : Bool }
+flip config =
+  { config | flip = True }
 
 
 {-| -}
@@ -217,14 +223,14 @@ type Anchor
 
 
 {-| -}
-leftAlign : Attribute { a | anchor : Anchor }
-leftAlign config =
+alignLeft : Attribute { a | anchor : Anchor }
+alignLeft config =
   { config | anchor = Start }
 
 
 {-| -}
-rightAlign : Attribute { a | anchor : Anchor }
-rightAlign config =
+alignRight : Attribute { a | anchor : Anchor }
+alignRight config =
   { config | anchor = End }
 
 

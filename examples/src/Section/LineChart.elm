@@ -30,7 +30,7 @@ import Ui.Section as Section
 
 view : (String -> Int -> msg) -> Dict.Dict String Int -> E.Element msg
 view onSelect selected =
-  let scatterFrame props =
+  let frame props =
         H.div
           [ HA.style "width" "300px"
           , HA.style "height" "300px"
@@ -73,7 +73,7 @@ view onSelect selected =
               ]
               """
           , chart = \_ ->
-              scatterFrame
+              frame
                 [ C.property .y "y" [ CA.linear ] []
                 , C.property .z "z" [ CA.linear ] []
                 ]
@@ -88,7 +88,7 @@ view onSelect selected =
               ]
               """
           , chart = \_ ->
-              scatterFrame
+              frame
                 [ C.stacked
                   [ C.property .y "y" [ CA.linear ] []
                   , C.property .z "z" [ CA.linear, CA.color CA.green ] []
@@ -103,7 +103,7 @@ view onSelect selected =
               ]
               """
           , chart = \_ ->
-              scatterFrame
+              frame
                 [ C.property .y "y" [ CA.monotone ] []
                 , C.property .z "z" [ CA.monotone ] []
                 ]
@@ -116,7 +116,7 @@ view onSelect selected =
               ]
               """
           , chart = \_ ->
-              scatterFrame
+              frame
                 [ C.property .y "y" [ CA.linear, CA.color "purple" ] []
                 , C.property .z "z" [ CA.linear ] []
                 ]
@@ -129,7 +129,7 @@ view onSelect selected =
               ]
               """
           , chart = \_ ->
-              scatterFrame
+              frame
                 [ C.property .y "y" [ CA.linear, CA.width 3 ] []
                 , C.property .z "z" [ CA.linear ] []
                 ]
@@ -142,7 +142,7 @@ view onSelect selected =
               ]
               """
           , chart = \_ ->
-              scatterFrame
+              frame
                 [ C.property .y "y" [ CA.linear, CA.opacity 0.2 ] []
                 , C.property .z "z" [ CA.linear, CA.opacity 0.2 ] []
                 ]
@@ -157,7 +157,7 @@ view onSelect selected =
               ]
               """
           , chart = \_ ->
-              scatterFrame
+              frame
                 [ C.stacked
                   [ C.property .y "y" [ CA.linear, CA.striped [ CA.width 3, CA.space 4, CA.rotate 90 ] ] []
                   , C.property .z "z" [ CA.linear, CA.dotted [ CA.width 3, CA.space 4 ] ] []
@@ -171,7 +171,7 @@ view onSelect selected =
               ]
               """
           , chart = \_ ->
-              scatterFrame
+              frame
                 [ C.property .y "y" [ CA.linear, CA.opacity 0.6, CA.gradient [ CA.bottom "lightblue" ] ] []
                 ]
           }
@@ -183,7 +183,7 @@ view onSelect selected =
               ]
               """
           , chart = \_ ->
-              scatterFrame
+              frame
                 [ C.property .y "y" [ CA.linear, CA.dashed [ 2, 2 ] ] []
                 , C.property .z "z" [ CA.linear, CA.dashed [ 5, 2 ] ] []
                 ]
@@ -195,7 +195,7 @@ view onSelect selected =
               ]
               """
           , chart = \_ ->
-              scatterFrame
+              frame
                 [ C.property .y "y" [ CA.linear ] [ CA.circle ]
                 ]
           }

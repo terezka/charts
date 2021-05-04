@@ -27,6 +27,7 @@ import SyntaxHighlight as SH
 import Section.ScatterChart
 import Section.LineChart
 import Section.BarChart
+import Section.CustomLabels
 
 
 main =
@@ -181,11 +182,19 @@ view model =
       , F.color (E.rgb255 80 80 80)
       ]
       [ E.html (viewSalaryDiscrepancy model)
-      , E.el
+      , E.row
           [ F.size 50
-          , E.paddingEach { top = 50, bottom = 25, left = 0, right = 0 }
+          , E.paddingEach { top = 50, bottom = 10, left = 0, right = 0 }
+          --, E.spacing 10
           ]
-          (E.text "elm-charts")
+          [ E.text "elm-charts"
+          , E.el [ F.color (E.rgb255 130 130 130) ] (E.text "-alpha")
+          ]
+      , E.el
+          [ E.paddingEach { top = 0, bottom = 25, left = 0, right = 0 }
+          , F.color (E.rgb255 130 130 130)
+          ]
+          (E.text "Unreleased. Feel free to use, but please do not share publicly yet. Documentation unfinished and API is still liable to breaking changes.")
       , E.row
           [ E.spaceEvenly
           , E.width (E.maximum 600 E.fill)
@@ -254,6 +263,7 @@ view model =
           [ Section.ScatterChart.view OnExploration model.exploration
           , Section.LineChart.view OnExploration model.exploration
           , Section.BarChart.view OnExploration model.exploration
+          , Section.CustomLabels.view OnExploration model.exploration
           ]
       ]
 
@@ -1148,7 +1158,7 @@ tooltipContent each =
 viewSalaryDiscrepancy : Model -> H.Html Msg
 viewSalaryDiscrepancy model =
   C.chart
-    [ CA.height 590
+    [ CA.height 560
     , CA.width 1000
     , CA.static
     , C.marginLeft 0
@@ -1180,10 +1190,10 @@ viewSalaryDiscrepancy model =
     [ C.grid []
 
     , C.each (CS.produce 10 CS.ints << .x) <| \p t ->
-        [ C.label [ CA.leftAlign, CA.yOff 15 ] (String.fromInt t) { x = toFloat t, y = p.y.min } ]
+        [ C.label [ CA.alignLeft, CA.yOff 15 ] (String.fromInt t) { x = toFloat t, y = p.y.min } ]
 
     , C.each (CS.produce 8 CS.ints << .y) <| \p t ->
-        [ (if t == 100 then C.title else C.label) [ CA.leftAlign, CA.yOff -5 ] (String.fromInt t) { x = p.x.min, y = toFloat t } ]
+        [ (if t == 100 then C.title else C.label) [ CA.alignLeft, CA.yOff -5 ] (String.fromInt t) { x = p.x.min, y = toFloat t } ]
 
     , C.withPlane <| \p ->
         [ C.title [ CA.fontSize 14, CA.yOff -3 ] ("Salary distribution in Denmark " ++ String.fromFloat model.salaryYear) { x = C.middle p.x, y = p.y.max }
@@ -1207,7 +1217,7 @@ viewSalaryDiscrepancy model =
         in
         if String.startsWith "251 " datum.sector then
           [ C.line [ CA.color color, CA.break, CA.x1 top.x, CA.x2 (top.x + toSvgX 10), CA.y1 top.y, CA.y2 (top.y + toSvgY 10) ]
-          , C.title [ CA.color color,CA.leftAlign, CA.xOff 5, CA.yOff 3 ] "Software engineering" { x = top.x + toSvgX 10, y = top.y + toSvgY 10 }
+          , C.title [ CA.color color,CA.alignLeft, CA.xOff 5, CA.yOff 3 ] "Software engineering" { x = top.x + toSvgX 10, y = top.y + toSvgY 10 }
           ]
         else
           []
@@ -1308,10 +1318,10 @@ viewSalaryDiscrepancyMini model =
     , C.domain [ C.lowest 76 C.orHigher ]
     ]
     [ C.each (CS.produce 10 CS.ints << .x) <| \p t ->
-        [ C.label [ CA.leftAlign, CA.yOff 15 ] "" { x = toFloat t, y = p.y.min } ]
+        [ C.label [ CA.alignLeft, CA.yOff 15 ] "" { x = toFloat t, y = p.y.min } ]
 
     , C.each (CS.produce 8 CS.ints << .y) <| \p t ->
-        [ C.label [ CA.leftAlign, CA.yOff -5 ] "" { x = p.x.min, y = toFloat t } ]
+        [ C.label [ CA.alignLeft, CA.yOff -5 ] "" { x = p.x.min, y = toFloat t } ]
 
     , C.line [ CA.dashed [ 3, 3 ], CA.y1 100, CA.width 0.5 ]
 

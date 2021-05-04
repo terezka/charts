@@ -1,4 +1,4 @@
-module Section.ScatterChart exposing (..)
+module Section.CustomLabels exposing (..)
 
 
 import Html as H
@@ -38,16 +38,13 @@ view onSelect selected =
           [ C.chart
               [ CA.height 300
               , CA.width 300
-              ]
-              [ C.grid []
-              , C.xLabels []
-              , C.yLabels []
-              , C.series .x props data
-              ]
+              , C.marginTop 15
+              ] <|
+              [ C.grid [] ] ++ props
           ]
   in
   Section.view
-    { title = "Scatter charts"
+    { title = "Custom axes"
     , onSelect = onSelect
     , selected = selected
     , frame =
@@ -57,124 +54,130 @@ view onSelect selected =
           , CA.width 300
           ]
           [ C.grid []
-          , C.xLabels []
-          , C.yLabels []
-          , C.series .x
-              {{CONFIG}}
-              data
+          {{CONFIG}}
           ]
         """
     , configs =
         [ { title = "Basic"
           , code =
               """
-              [ C.property .y "y" [] []
-              , C.property .z "z" [] []
-              ]
+          , C.xAxis []
+          , C.xTicks []
+          , C.xLabels []
               """
           , chart = \_ ->
               frame
-                [ C.property .y "y" [] []
-                , C.property .z "z" [] []
+                [ C.xAxis []
+                , C.xTicks []
+                , C.xLabels []
                 ]
           }
-        , { title = "Shapes"
+        , { title = "Color"
           , code =
               """
-              [ C.property .y "y" [] [ CA.circle ]
-              , C.property .z "z" [] [ CA.square ]
-              , C.property .w "w" [] [ CA.cross ]
-              ]
+          , C.xAxis [ CA.color "blue" ]
+          , C.xTicks [ CA.color "blue" ]
+          , C.xLabels [ CA.color "blue" ]
               """
           , chart = \_ ->
               frame
-                [ C.property .y "y" [] [ CA.circle ]
-                , C.property .z "z" [] [ CA.square ]
-                , C.property .w "w" [] [ CA.triangle ]
+                [ C.xAxis [ CA.color "blue" ]
+                , C.xTicks [ CA.color "blue" ]
+                , C.xLabels [ CA.color "blue" ]
                 ]
           }
-        , { title = "Colors"
+        , { title = "Position"
           , code =
               """
-              [ C.property .y "y" [] [ CA.color "red" ]
-              , C.property .z "z" [] [ CA.color "blue" ]
-              ]
+          , C.xAxis [ C.pinned .max ]
+          , C.xTicks [ C.pinned .max ]
+          , C.xLabels [ C.pinned .max, CA.yOff -7 ]
               """
           , chart = \_ ->
               frame
-                [ C.property .y "y" [] [ CA.color "red" ]
-                , C.property .z "z" [] [ CA.color "blue" ]
+                [ C.xAxis [ C.pinned .max ]
+                , C.xTicks [ C.pinned .max, CA.flip ]
+                , C.xLabels [ C.pinned .max, CA.flip ]
                 ]
           }
-        , { title = "Sizes"
+        , { title = "Offset"
           , code =
               """
-              [ C.property .y "y" [] [ CA.size 12 ]
-              , C.property .z "z" [] [ CA.size 3 ]
-              ]
+          , C.xLabels [ CA.xOff 5, CA.yOff 0, CA.alignRight ]
               """
           , chart = \_ ->
               frame
-                [ C.property .y "y" [] [ CA.size 12 ]
-                , C.property .z "z" [] [ CA.size 3 ]
+                [ C.xLabels [ CA.xOff 5, CA.yOff 0, CA.alignRight ]
                 ]
           }
-        , { title = "Opacity"
+        , { title = "No arrow"
           , code =
               """
-              [ C.property .y "y" [] [ CA.opacity 0.5 ]
-              , C.property .z "z" [] [ CA.opacity 0.5 ]
-              ]
+          , C.xAxis [ C.noArrow ]
+          , C.xTicks []
+          , C.xLabels []
               """
           , chart = \_ ->
               frame
-                [ C.property .y "y" [] [ CA.opacity 0.5 ]
-                , C.property .z "z" [] [ CA.opacity 0.5 ]
+                [ C.xAxis [ C.noArrow ]
+                , C.xTicks []
+                , C.xLabels []
                 ]
           }
-        , { title = "Borders"
+        , { title = "Amount"
           , code =
               """
-              [ C.property .y "y" [] [ CA.borderWidth 2, CA.border "red" ]
-              , C.property .z "z" [] []
-              ]
+          , C.xAxis []
+          , C.xTicks [ C.amount 4 ]
+          , C.xLabels [ C.amount 4 ]
               """
           , chart = \_ ->
               frame
-                [ C.property .y "y" [] [ CA.borderWidth 2, CA.border "red" ]
-                , C.property .z "z" [] []
+                [ C.xAxis []
+                , C.xTicks [ C.amount 4 ]
+                , C.xLabels [ C.amount 4 ]
                 ]
           }
-        , { title = "Highlight"
+        , { title = "Only ints"
           , code =
               """
-              [ C.property .y "y" [] []
-              , C.property .z "z" [] [ CA.aura 0.5  ]
-              ]
+          , C.xAxis []
+          , C.xTicks [ C.amount 4, C.ints ]
+          , C.xLabels [ C.amount 4, C.ints ]
               """
           , chart = \_ ->
               frame
-                [ C.property .y "y" [] []
-                , C.property .z "z" [] [ CA.aura 0.5 ]
+                [ C.xAxis []
+                , C.xTicks [ C.amount 4, C.ints ]
+                , C.xLabels [ C.amount 4, C.ints ]
                 ]
           }
-        , { title = "Data dependent"
+        , { title = "Custom"
           , code =
               """
-              [ C.property .y "y" [] []
-                  |> C.variation (\\d -> [ CA.aura (if d.x == 3 then 0.5 else 0) ])
-                  -- If particular data point, add highlight
-              , C.property .z "z" [] []
-                  |> C.variation (\\d -> [ CA.size (d.x * 2 + 2) ])
-                  -- Base size on data point characteristic
+          , C.xAxis []
+          , C.each (CS.produce 12 CS.ints << .x) <| \\p num ->
+              [ C.xTick [] { x = toFloat num, y = p.x.min }
+              , C.label
+                  [ CA.yOff 20
+                  , if num == 3 then CA.color "blue" else identity
+                  ]
+                  (String.fromInt num ++ "°")
+                  { x = toFloat num, y = p.x.min }
               ]
               """
           , chart = \_ ->
               frame
-                [ C.property .y "y" [] []
-                  |> C.variation (\d -> [ CA.aura (if d.x == 3 then 0.5 else 0) ])
-                , C.property .z "z" [] []
-                    |> C.variation (\d -> [ CA.size (d.x * 2 + 2) ])
+                [ C.xAxis []
+                , C.each (CS.produce 12 CS.ints << .x) <| \p num ->
+                    [ C.xTick [] { x = toFloat num, y = p.x.min }
+                    , C.label
+                        [ CA.yOff 20
+                        , if num == 3 then CA.color "blue" else identity
+                        ]
+                        (String.fromInt num ++ "°")
+                        { x = toFloat num, y = p.x.min }
+                    ]
                 ]
           }
         ]

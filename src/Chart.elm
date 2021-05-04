@@ -14,7 +14,6 @@ module Chart exposing
     , paddingTop, paddingBottom, paddingLeft, paddingRight
     , range, domain, limits, pinned, dotted, noArrow, filterX, filterY, only
     , binned, amount, floatsCustom, ints, intsCustom, times, timesCustom
-
     )
 
 
@@ -221,13 +220,6 @@ timesCustom zone formatter config =
 amount : Int -> Attribute { a | amount : Int }
 amount value config =
   { config | amount = value }
-
-
-{-| -}
-topped : Int -> Attribute { a | topped : Maybe Int }
-topped value config =
-  { config | topped = Just value }
-
 
 
 
@@ -758,6 +750,7 @@ type alias Ticks =
     , limits : C.Axis -> C.Axis
     , only : Float -> Bool
     , amount : Int
+    , flip : Bool
     , produce : Int -> C.Axis -> List CS.TickValue
     }
 
@@ -774,6 +767,7 @@ xTicks edits =
           , only = \_ -> True
           , produce = \a b -> []
           , height = 5
+          , flip = False
           , width = 1
           }
 
@@ -789,7 +783,7 @@ xTicks edits =
     let toTick x =
           CS.xTick p
             [ CA.color config.color
-            , CA.length config.height
+            , CA.length (if config.flip then -config.height else config.height)
             , CA.width config.width
             ]
             { x = x
@@ -811,6 +805,7 @@ yTicks edits =
           , amount = 5
           , produce = \a b -> []
           , height = 5
+          , flip = False
           , width = 1
           }
 
@@ -826,7 +821,7 @@ yTicks edits =
     let toTick y =
           CS.yTick p
             [ CA.color config.color
-            , CA.length config.height
+            , CA.length (if config.flip then -config.height else config.height)
             , CA.width config.width
             ]
             { x = config.pinned p.x
@@ -844,7 +839,9 @@ type alias Labels =
     , only : Float -> Bool
     , xOff : Float
     , yOff : Float
+    , flip : Bool
     , amount : Int
+    , anchor : CA.Anchor
     , produce : Int -> C.Axis -> List CS.TickValue
     }
 
@@ -860,6 +857,8 @@ xLabels edits =
           , pinned = zero
           , amount = 5
           , produce = \a b -> []
+          , flip = False
+          , anchor = CA.Middle
           , xOff = 0
           , yOff = 20
           }
@@ -876,7 +875,11 @@ xLabels edits =
           CS.label p
             [ CA.color config.color
             , CA.xOff config.xOff
-            , CA.yOff config.yOff
+            , CA.yOff (if config.flip then -config.yOff + 10 else config.yOff)
+            , case config.anchor of
+                CA.Middle -> identity
+                CA.End -> CA.alignLeft
+                CA.Start -> CA.alignRight
             ]
             item.label
             { x = item.value
@@ -897,6 +900,8 @@ yLabels edits =
           , only = \_ -> True
           , amount = 5
           , produce = \a b -> []
+          , anchor = CA.Middle
+          , flip = False
           , xOff = -8
           , yOff = 3
           }
@@ -912,9 +917,12 @@ yLabels edits =
     let toLabel item =
           CS.label p
             [ CA.color config.color
-            , CA.xOff config.xOff
+            , CA.xOff (if config.flip then -config.xOff else config.xOff)
             , CA.yOff config.yOff
-            , CA.rightAlign
+            , case config.anchor of
+                CA.Middle -> identity
+                CA.End -> CA.alignLeft
+                CA.Start -> CA.alignRight
             ]
             item.label
             { x = config.pinned p.x
