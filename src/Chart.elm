@@ -860,7 +860,7 @@ xLabels edits =
           , flip = False
           , anchor = CA.Middle
           , xOff = 0
-          , yOff = 20
+          , yOff = 18
           }
 
       toTicks p =
@@ -881,7 +881,7 @@ xLabels edits =
                 CA.End -> CA.alignLeft
                 CA.Start -> CA.alignRight
             ]
-            item.label
+            [ S.text item.label ]
             { x = item.value
             , y = config.pinned p.y
             }
@@ -924,7 +924,7 @@ yLabels edits =
                 CA.End -> CA.alignLeft
                 CA.Start -> CA.alignRight
             ]
-            item.label
+            [ S.text item.label ]
             { x = config.pinned p.x
             , y = item.value
             }
@@ -934,7 +934,9 @@ yLabels edits =
 
 {-| -}
 type alias Label =
-  { xOff : Float
+  { x : Float
+  , y : Float
+  , xOff : Float
   , yOff : Float
   , border : String
   , borderWidth : Float
@@ -942,39 +944,52 @@ type alias Label =
   , color : String
   , anchor : CA.Anchor
   , rotate : Float
-  , format : String
-  , pinned : C.Axis -> Float
   , flip : Bool
   }
 
 
 {-| -}
-xLabel : List (Attribute Label) -> Float -> Element data msg
-xLabel edits val =
-  let config =
-        applyAttrs edits
-          { xOff = 0
-          , yOff = 20
-          , border = "white"
-          , borderWidth = 0.1
-          , fontSize = Nothing
-          , color = "#808BAB"
-          , anchor = CA.Middle
-          , rotate = 0
-          , format = ""
-          , pinned = zero
-          , flip = False
-          }
-
-      string =
-        if config.format == ""
-        then String.fromFloat val
-        else config.format
-
-      toTickValues p ts =
-        { ts | xs = ts.xs ++ [ val ] }
+xLabel : List (Attribute Label) -> List (S.Svg msg) -> Element data msg
+xLabel edits inner =
+  let toTickValues p ts =
+        let config =
+              applyAttrs edits
+                { x = middle p.x
+                , y = zero p.y
+                , xOff = 0
+                , yOff = 20
+                , border = "white"
+                , borderWidth = 0.1
+                , fontSize = Nothing
+                , color = "#808BAB"
+                , anchor = CA.Middle
+                , rotate = 0
+                , flip = False
+                }
+        in
+        { ts | xs = ts.xs ++ [ config.x ] }
   in
   LabelsElement toTickValues <| \p ->
+    let config =
+          applyAttrs edits
+            { x = middle p.x
+            , y = zero p.y
+            , xOff = 0
+            , yOff = 20
+            , border = "white"
+            , borderWidth = 0.1
+            , fontSize = Nothing
+            , color = "#808BAB"
+            , anchor = CA.Middle
+            , rotate = 0
+            , flip = False
+            }
+
+        string =
+          if inner == []
+          then [ S.text (String.fromFloat config.x) ]
+          else inner
+    in
     CS.label p
       [ CA.xOff config.xOff
       , CA.yOff (if config.flip then -config.yOff + 10 else config.yOff)
@@ -991,36 +1006,51 @@ xLabel edits val =
       , CA.rotate config.rotate
       ]
       string
-      { y = config.pinned p.y, x = val }
+      { x = config.x, y = config.y }
 
 
 {-| -}
-yLabel : List (Attribute Label) -> Float -> Element data msg
-yLabel edits val =
-  let config =
-        applyAttrs edits
-          { xOff = -8
-          , yOff = 3
-          , border = "white"
-          , borderWidth = 0.1
-          , fontSize = Nothing
-          , color = "#808BAB"
-          , anchor = CA.Start
-          , rotate = 0
-          , format = ""
-          , pinned = zero
-          , flip = False
-          }
-
-      string =
-        if config.format == ""
-        then String.fromFloat val
-        else config.format
-
-      toTickValues p ts =
-        { ts | ys = ts.ys ++ [ val ] }
+yLabel : List (Attribute Label) -> List (S.Svg msg) -> Element data msg
+yLabel edits inner =
+  let toTickValues p ts =
+        let config =
+              applyAttrs edits
+                { x = zero p.x
+                , y = middle p.y
+                , xOff = -8
+                , yOff = 3
+                , border = "white"
+                , borderWidth = 0.1
+                , fontSize = Nothing
+                , color = "#808BAB"
+                , anchor = CA.Start
+                , rotate = 0
+                , flip = False
+                }
+        in
+        { ts | ys = ts.ys ++ [ config.y ] }
   in
   LabelsElement toTickValues <| \p ->
+    let config =
+          applyAttrs edits
+            { x = zero p.x
+            , y = middle p.y
+            , xOff = -8
+            , yOff = 3
+            , border = "white"
+            , borderWidth = 0.1
+            , fontSize = Nothing
+            , color = "#808BAB"
+            , anchor = CA.Start
+            , rotate = 0
+            , flip = False
+            }
+
+        string =
+          if inner == []
+          then [ S.text (String.fromFloat config.y) ]
+          else inner
+    in
     CS.label p
       [ CA.xOff (if config.flip then -config.xOff else config.xOff)
       , CA.yOff config.yOff
@@ -1037,7 +1067,7 @@ yLabel edits val =
       , CA.rotate config.rotate
       ]
       string
-      { x = config.pinned p.x, y = val }
+      { x = config.x, y = config.y }
 
 
 
@@ -1307,9 +1337,9 @@ eachProduct func =
 
 
 {-| -}
-title : List (Attribute CS.Label) -> String -> C.Point -> Element data msg
-title attrs string point =
-  SvgElement <| \p -> CS.label p attrs string point
+title : List (Attribute CS.Label) -> List (S.Svg msg) -> C.Point -> Element data msg
+title attrs inner point =
+  SvgElement <| \p -> CS.label p attrs inner point
 
 
 {-| -}

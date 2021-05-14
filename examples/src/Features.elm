@@ -193,8 +193,9 @@ view model =
       , E.el
           [ E.paddingEach { top = 0, bottom = 25, left = 0, right = 0 }
           , F.color (E.rgb255 130 130 130)
+          , F.size 14
           ]
-          (E.text "Unreleased. Feel free to use, but please do not share publicly yet. Documentation unfinished/wrong and API is still liable to breaking changes.")
+          (E.text "Alpha version. Feel free to use, but please do not share publicly yet. Documentation is unfinished/wrong and API liable to breaking changes.")
       , E.row
           [ E.spaceEvenly
           , E.width (E.maximum 600 E.fill)
@@ -1190,20 +1191,20 @@ viewSalaryDiscrepancy model =
     [ C.grid []
 
     , C.each (CS.produce 10 CS.ints << .x) <| \p t ->
-        [ C.xLabel [ CA.alignLeft, CA.yOff -20, CA.xOff 3, CA.format (String.fromInt t) ] (toFloat t) ]
+        [ C.xLabel [ CA.alignLeft, CA.yOff -20, CA.xOff 3, CA.x (toFloat t) ] [ S.text (String.fromInt t) ] ]
 
     , C.each (CS.produce 8 CS.ints << .y) <| \p t ->
         [ if t == 100 then
-            C.title [ CA.alignLeft, CA.yOff -7, CA.xOff 1 ] (String.fromInt t) { x = p.x.min, y = toFloat t }
+            C.title [ CA.alignLeft, CA.yOff -7, CA.xOff 1 ] [ S.text (String.fromInt t) ] { x = p.x.min, y = toFloat t }
           else
-            C.yLabel [ CA.alignLeft, CA.yOff -10, CA.xOff 10, CA.format (String.fromInt t) ] (toFloat t)
+            C.yLabel [ CA.alignLeft, CA.yOff -10, CA.xOff 10, CA.y (toFloat t) ] [ S.text (String.fromInt t) ]
       ]
 
     , C.withPlane <| \p ->
-        [ C.title [ CA.fontSize 14, CA.yOff -3 ] ("Salary distribution in Denmark " ++ String.fromFloat model.salaryYear) { x = C.middle p.x, y = p.y.max }
-        , C.title [ CA.fontSize 11, CA.yOff 12 ] "Data from Danmarks Statestik" { x = C.middle p.x, y = p.y.max }
-        , C.title [ CA.fontSize 12, CA.yOff 35 ] "Average salary in DKK" { x = C.middle p.x, y = p.y.min }
-        , C.title [ CA.fontSize 12, CA.xOff -15, CA.rotate 90 ] "Womens percentage of mens salary" { x = p.x.min, y = C.middle p.y }
+        [ C.title [ CA.fontSize 14, CA.yOff -3 ] [ S.text ("Salary distribution in Denmark " ++ String.fromFloat model.salaryYear) ] { x = C.middle p.x, y = p.y.max }
+        , C.title [ CA.fontSize 11, CA.yOff 12 ] [ S.text "Data from Danmarks Statestik" ] { x = C.middle p.x, y = p.y.max }
+        , C.title [ CA.fontSize 12, CA.yOff 35 ] [ S.text "Average salary in DKK" ] { x = C.middle p.x, y = p.y.min }
+        , C.title [ CA.fontSize 12, CA.xOff -15, CA.rotate 90 ] [ S.text "Womens percentage of mens salary" ] { x = p.x.min, y = C.middle p.y }
         , C.line [ CA.dashed [ 4, 2 ], CA.opacity 0.7, CA.color "#f56dbc", CA.x1 Salary.avgSalaryWomen ]
         , C.line [ CA.dashed [ 4, 2 ], CA.opacity 0.7, CA.color "#58a9f6", CA.x1 Salary.avgSalaryMen ]
         ]
@@ -1221,7 +1222,7 @@ viewSalaryDiscrepancy model =
         in
         if String.startsWith "251 " datum.sector then
           [ C.line [ CA.color color, CA.break, CA.x1 top.x, CA.x2 (top.x + toSvgX 10), CA.y1 top.y, CA.y2 (top.y + toSvgY 10) ]
-          , C.title [ CA.color color,CA.alignLeft, CA.xOff 5, CA.yOff 3 ] "Software engineering" { x = top.x + toSvgX 10, y = top.y + toSvgY 10 }
+          , C.title [ CA.color color,CA.alignLeft, CA.xOff 5, CA.yOff 3 ] [ S.text "Software engineering" ] { x = top.x + toSvgX 10, y = top.y + toSvgY 10 }
           ]
         else
           []
@@ -1292,8 +1293,8 @@ viewSalaryDiscrepancy model =
             y2 = p.y.max - toSvgY 10
         in
         [ C.rect [ CA.borderWidth 0, CA.x1 x1, CA.x2 x2, CA.y1 y1, CA.y2 y2, CA.color "url(#colorscale)" ]
-        , C.title [ CA.fontSize 10 ] "more women" { x = x1, y = p.y.max - toSvgY 25 }
-        , C.title [ CA.fontSize 10 ] "more men" { x = x2, y = p.y.max - toSvgY 25 }
+        , C.title [ CA.fontSize 10 ] [ S.text "more women" ] { x = x1, y = p.y.max - toSvgY 25 }
+        , C.title [ CA.fontSize 10 ] [ S.text "more men" ] { x = x2, y = p.y.max - toSvgY 25 }
         , C.htmlAt .max .max -45 -45
             [ HA.style "color" "rgb(90 90 90)"
             , HA.style "cursor" "pointer"
@@ -1322,10 +1323,10 @@ viewSalaryDiscrepancyMini model =
     , C.domain [ C.lowest 76 C.orHigher ]
     ]
     [ C.each (CS.produce 10 CS.ints << .x) <| \p t ->
-        [ C.xLabel [ CA.alignLeft, CA.yOff 15, CA.format "" ] (toFloat t) ]
+        [ C.xLabel [ CA.alignLeft, CA.yOff 15, CA.x (toFloat t) ] [ S.text "" ] ]
 
     , C.each (CS.produce 8 CS.ints << .y) <| \p t ->
-        [ C.yLabel [ CA.alignLeft, CA.yOff -5, CA.format "" ] (toFloat t) ]
+        [ C.yLabel [ CA.alignLeft, CA.yOff -5, CA.y (toFloat t) ] [ S.text "" ] ]
 
     , C.line [ CA.dashed [ 3, 3 ], CA.y1 100, CA.width 0.5 ]
 

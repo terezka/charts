@@ -373,8 +373,8 @@ type alias Label =
 
 
 {-| -}
-label : Plane -> List (CA.Attribute Label) -> String -> Point -> Svg msg
-label plane edits string point =
+label : Plane -> List (CA.Attribute Label) -> List (Svg msg) -> Point -> Svg msg
+label plane edits inner point =
   let config =
         apply edits
           { xOff = 0
@@ -406,7 +406,7 @@ label plane edits string point =
     , position plane -config.rotate point.x point.y config.xOff config.yOff
     , SA.style <| String.join " " [ "pointer-events: none;", fontStyle, anchorStyle ]
     ]
-    [ S.tspan [] [ S.text string ] ]
+    [ S.tspan [] inner ]
 
 
 

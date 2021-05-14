@@ -90,8 +90,8 @@ view onSelect selected =
           , code =
               """
           , C.xAxis [ C.pinned .max ]
-          , C.xTicks [ C.pinned .max ]
-          , C.xLabels [ C.pinned .max, CA.yOff -7 ]
+          , C.xTicks [ C.pinned .max, CA.flip  ]
+          , C.xLabels [ C.pinned .max, CA.flip ]
               """
           , chart = \_ ->
               frame
@@ -107,7 +107,7 @@ view onSelect selected =
               """
           , chart = \_ ->
               frame
-                [ C.xLabels [ CA.xOff 5, CA.yOff 0, CA.alignRight ]
+                [ C.xLabels [ CA.xOff 5, CA.yOff -20, CA.alignRight ]
                 ]
           }
         , { title = "No arrow"
@@ -159,11 +159,8 @@ view onSelect selected =
           , C.each (CS.produce 12 CS.ints << .x) <| \\p num ->
               [ C.xTick [] (toFloat num)
               , C.xLabel
-                  [ CA.yOff 20
-                  , if num == 3 then CA.color "blue" else identity
-                  , CA.format (String.fromInt num ++ "°")
-                  ]
-                  (toFloat num)
+                  [ CA.x (toFloat num) ]
+                  [ S.text (String.fromInt num), S.text "°" ]
               ]
               """
           , chart = \_ ->
@@ -172,11 +169,8 @@ view onSelect selected =
                 , C.each (CS.produce 12 CS.ints << .x) <| \p num ->
                     [ C.xTick [] (toFloat num)
                     , C.xLabel
-                        [ CA.yOff 20
-                        , if num == 3 then CA.color "blue" else identity
-                        , CA.format (String.fromInt num ++ "°")
-                        ]
-                        (toFloat num)
+                        [ CA.x (toFloat num) ]
+                        [ S.text (String.fromInt num), S.text "°" ]
                     ]
                 ]
           }
