@@ -157,9 +157,8 @@ view onSelect selected =
               """
           , C.xAxis []
           , C.each (CS.produce 12 CS.ints << .x) <| \\p num ->
-              [ C.xTick [] (toFloat num)
-              , C.xLabel
-                  [ CA.x (toFloat num) ]
+              [ C.xTick [ CA.x (toFloat num) ]
+              , C.xLabel [ CA.x (toFloat num) ]
                   [ S.text (String.fromInt num), S.text "°" ]
               ]
               """
@@ -167,9 +166,8 @@ view onSelect selected =
               frame
                 [ C.xAxis []
                 , C.each (CS.produce 12 CS.ints << .x) <| \p num ->
-                    [ C.xTick [] (toFloat num)
-                    , C.xLabel
-                        [ CA.x (toFloat num) ]
+                    [ C.xTick [ CA.x (toFloat num) ]
+                    , C.xLabel [ CA.x (toFloat num) ]
                         [ S.text (String.fromInt num), S.text "°" ]
                     ]
                 ]

@@ -317,6 +317,10 @@ type Element data msg
   | TicksElement
       (C.Plane -> TickValues -> TickValues)
       (C.Plane -> S.Svg msg)
+  | TickElement
+      (C.Plane -> Tick)
+      (C.Plane -> Tick -> TickValues -> TickValues)
+      (C.Plane -> Tick -> S.Svg msg)
   | LabelsElement
       (C.Plane -> Labels)
       (C.Plane -> Labels -> TickValues -> TickValues)
@@ -345,6 +349,7 @@ definePlane config elements =
           BarsElement lims _ _ _ -> acc ++ lims
           AxisElement _ -> acc
           TicksElement _ _ -> acc
+          TickElement _ _ _ -> acc
           LabelsElement _ _ _ -> acc
           LabelElement _ _ _ -> acc
           GridElement _ -> acc
@@ -420,6 +425,7 @@ getItems plane elements =
           BarsElement _ items _ _ -> acc ++ items
           AxisElement _ -> acc
           TicksElement _ _ -> acc
+          TickElement _ _ _ -> acc
           LabelsElement _ _ _ -> acc
           LabelElement _ _ _ -> acc
           GridElement _ -> acc
@@ -446,6 +452,7 @@ getTickValues plane items elements =
           BarsElement _ _ func _ -> func plane acc
           AxisElement _ -> acc
           TicksElement func _ -> func plane acc
+          TickElement toC func _ -> func plane (toC plane) acc
           LabelsElement toC func _ -> func plane (toC plane) acc
           LabelElement toC func _ -> func plane (toC plane) acc
           GridElement _ -> acc
@@ -461,17 +468,18 @@ viewElements : Container data msg -> C.Plane -> TickValues -> List (Item.Product
 viewElements config plane tickValues allItems elements =
   let viewOne el ( before, chart_, after ) =
         case el of
-          SeriesElement _ _ view  -> ( before, view plane :: chart_, after )
-          BarsElement _ _ _ view  -> ( before, view plane :: chart_, after )
-          AxisElement view        -> ( before, view plane :: chart_, after )
-          TicksElement _ view     -> ( before, view plane :: chart_, after )
-          LabelsElement toC _ view    -> ( before, view plane (toC plane) :: chart_, after )
-          LabelElement toC _ view    -> ( before, view plane (toC plane) :: chart_, after )
-          GridElement view        -> ( before, view plane tickValues :: chart_, after )
-          SubElements func        -> List.foldr viewOne ( before, chart_, after ) (func plane allItems)
-          ListOfElements els      -> List.foldr viewOne ( before, chart_, after ) els
-          SvgElement view         -> ( before, view plane :: chart_, after )
-          HtmlElement view        ->
+          SeriesElement _ _ view    -> ( before, view plane :: chart_, after )
+          BarsElement _ _ _ view    -> ( before, view plane :: chart_, after )
+          AxisElement view          -> ( before, view plane :: chart_, after )
+          TicksElement _ view       -> ( before, view plane :: chart_, after )
+          TickElement toC _ view   -> ( before, view plane (toC plane) :: chart_, after )
+          LabelsElement toC _ view  -> ( before, view plane (toC plane) :: chart_, after )
+          LabelElement toC _ view   -> ( before, view plane (toC plane) :: chart_, after )
+          GridElement view          -> ( before, view plane tickValues :: chart_, after )
+          SubElements func          -> List.foldr viewOne ( before, chart_, after ) (func plane allItems)
+          ListOfElements els        -> List.foldr viewOne ( before, chart_, after ) els
+          SvgElement view           -> ( before, view plane :: chart_, after )
+          HtmlElement view          ->
             ( if List.length chart_ > 0 then before else view plane :: before
             , chart_
             , if List.length chart_ > 0 then view plane :: after else after
@@ -1052,60 +1060,63 @@ yLabel edits inner =
 
 {-| -}
 type alias Tick =
-  { color : String
+  { x : Float
+  , y : Float
+  , color : String
   , width : Float
   , length : Float
   , flip : Bool
-  , pinned : C.Axis -> Float
   }
 
 
 {-| -}
-xTick : List (Attribute Tick) -> Float -> Element data msg
-xTick edits val =
-  let config =
+xTick : List (Attribute Tick) -> Element data msg
+xTick edits =
+  let toConfig p =
         applyAttrs edits
-          { length = 5
+          { x = middle p.x
+          , y = zero p.y
+          , length = 5
           , color = "rgb(210, 210, 210)"
           , width = 1
-          , pinned = zero
           , flip = False
           }
 
-      toTickValues p ts =
-        { ts | xs = ts.xs ++ [ val ] }
+      toTickValues p config ts =
+        { ts | xs = ts.xs ++ [ config.x ] }
   in
-  TicksElement toTickValues <| \p ->
+  TickElement toConfig toTickValues <| \p config ->
     CS.xTick p
       [ CA.length (if config.flip then -config.length else config.length)
       , CA.color config.color
       , CA.width config.width
       ]
-      { x = val, y = config.pinned p.y }
+      { x = config.x, y = config.y }
 
 
 {-| -}
 yTick : List (Attribute Tick) -> Float -> Element data msg
 yTick edits val =
-  let config =
+  let toConfig p =
         applyAttrs edits
-          { length = 5
+          { x = middle p.x
+          , y = zero p.y
+          , length = 5
           , color = "rgb(210, 210, 210)"
           , width = 1
-          , pinned = zero
           , flip = False
           }
 
-      toTickValues p ts =
-        { ts | ys = ts.ys ++ [ val ] }
+      toTickValues p config ts =
+        { ts | ys = ts.ys ++ [ config.y ] }
   in
-  TicksElement toTickValues <| \p ->
+  TickElement toConfig toTickValues <| \p config ->
     CS.yTick p
       [ CA.length (if config.flip then -config.length else config.length)
       , CA.color config.color
       , CA.width config.width
       ]
-      { x = config.pinned p.x, y = val }
+      { x = config.x, y = config.y }
 
 
 
