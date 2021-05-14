@@ -1,42 +1,37 @@
-# Charts (Alpha)
+# elm-charts-alpha
 
-Some helpers to make charts with.
+Make charts! Alpha version. Feel free to use, but please do not share publicly yet. Documentation is unfinished/wrong and API liable to breaking changes.
 
 ```elm
 
-planeFromPoints : List Point -> Plane
-planeFromPoints points =
-  { x =
-    { marginLower = 10
-    , marginUpper = 10
-    , length = 300
-    , min = minimum .x points
-    , max = maximum .x points
-    }
-  , y =
-    { marginLower = 10
-    , marginUpper = 10
-    , length = 300
-    , min = minimum .y points
-    , max = maximum .y points
-    }
-  }
+import Chart as C
+import Chart.Attributes as CA
 
 main : Svg msg
 main =
-  let plane = planeFromPoints data in
-  svg
-    [ width (String.fromFloat plane.x.length)
-    , height (String.fromFloat plane.x.length)
+  C.chart
+    [ CA.height 250
+    , CA.width 250
+    , CA.static
     ]
-    [ linear plane .x .y [ stroke blueStroke ] clear data
-    , fullHorizontal plane [] 0
-    , fullVertical plane [] 0
-    , xTicks plane 5 [] 0 [ 1, 2, 3 ]
-    , yTicks plane 5 [] 0 [ 1, 2, 3, 5, 6 ]
-    , xLabels plane (xLabel "blue" String.fromFloat) 0 [ 1, 2, 3, 5, 10 ]
-    , yLabels plane (yLabel "green" String.fromFloat) 0 [ 1, 2, 3, 5, 6 ]
+    [ C.grid []
+    , C.xAxis []
+    , C.xLabels []
+    , C.yAxis []
+    , C.yLabels []
+    , C.series .x
+        [ C.property .y "y" [] [ CA.size 6, CA.triangle ]
+        , C.property .z "z" [] [ CA.size 6, CA.cross ]
+        , C.property .v "v" [] [ CA.size 6, CA.square ]
+        , C.property .w "w" [] [ CA.size 6, CA.circle ]
+        , C.property .p "p" [] [ CA.size 6, CA.diamond ]
+        , C.property .q "q" [] [ CA.size 6, CA.plus ]
+        ]
+        [ { x = 0, y = Just 2, z = Just 3, v = Just 1, w = Just 5, p = Just 4, q = Just 6 }
+        , { x = 2, y = Just 1, z = Just 2, v = Just 3, w = Just 4, p = Just 6, q = Just 4 }
+        , { x = 5, y = Just 1, z = Just 2, v = Just 3, w = Just 4, p = Just 6, q = Just 4 }
+        , { x = 7, y = Just 4, z = Just 5, v = Just 3, w = Just 2, p = Just 7, q = Just 6 }
+        , { x = 10, y = Just 4, z = Just 5, v = Just 3, w = Just 2, p = Just 7, q = Just 6 }
+        ]
     ]
 ```
-
-See more examples in the examples folder.
