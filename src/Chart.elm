@@ -318,8 +318,13 @@ type Element data msg
       (C.Plane -> TickValues -> TickValues)
       (C.Plane -> S.Svg msg)
   | LabelsElement
-      (C.Plane -> TickValues -> TickValues)
-      (C.Plane -> S.Svg msg)
+      (C.Plane -> Labels)
+      (C.Plane -> Labels -> TickValues -> TickValues)
+      (C.Plane -> Labels -> S.Svg msg)
+  | LabelElement
+      (C.Plane -> Label)
+      (C.Plane -> Label -> TickValues -> TickValues)
+      (C.Plane -> Label -> S.Svg msg)
   | GridElement
       (C.Plane -> TickValues -> S.Svg msg)
   | SubElements
@@ -340,7 +345,8 @@ definePlane config elements =
           BarsElement lims _ _ _ -> acc ++ lims
           AxisElement _ -> acc
           TicksElement _ _ -> acc
-          LabelsElement _ _ -> acc
+          LabelsElement _ _ _ -> acc
+          LabelElement _ _ _ -> acc
           GridElement _ -> acc
           SubElements _ -> acc
           ListOfElements _ -> acc
@@ -414,7 +420,8 @@ getItems plane elements =
           BarsElement _ items _ _ -> acc ++ items
           AxisElement _ -> acc
           TicksElement _ _ -> acc
-          LabelsElement _ _ -> acc
+          LabelsElement _ _ _ -> acc
+          LabelElement _ _ _ -> acc
           GridElement _ -> acc
           SubElements _ -> acc -- TODO add phantom type to only allow decorative els in this
           ListOfElements _ -> acc
@@ -439,7 +446,8 @@ getTickValues plane items elements =
           BarsElement _ _ func _ -> func plane acc
           AxisElement _ -> acc
           TicksElement func _ -> func plane acc
-          LabelsElement func _ -> func plane acc
+          LabelsElement toC func _ -> func plane (toC plane) acc
+          LabelElement toC func _ -> func plane (toC plane) acc
           GridElement _ -> acc
           SubElements func -> List.foldl toValues acc (func plane items)
           ListOfElements _ -> acc
@@ -457,7 +465,8 @@ viewElements config plane tickValues allItems elements =
           BarsElement _ _ _ view  -> ( before, view plane :: chart_, after )
           AxisElement view        -> ( before, view plane :: chart_, after )
           TicksElement _ view     -> ( before, view plane :: chart_, after )
-          LabelsElement _ view    -> ( before, view plane :: chart_, after )
+          LabelsElement toC _ view    -> ( before, view plane (toC plane) :: chart_, after )
+          LabelElement toC _ view    -> ( before, view plane (toC plane) :: chart_, after )
           GridElement view        -> ( before, view plane tickValues :: chart_, after )
           SubElements func        -> List.foldr viewOne ( before, chart_, after ) (func plane allItems)
           ListOfElements els      -> List.foldr viewOne ( before, chart_, after ) els
@@ -849,7 +858,7 @@ type alias Labels =
 {-| -}
 xLabels : List (Attribute Labels) -> Element item msg
 xLabels edits =
-  let config =
+  let toConfig p =
         applyAttrs ([ floats ] ++ edits)
           { color = "#808BAB"
           , limits = identity
@@ -863,14 +872,14 @@ xLabels edits =
           , yOff = 18
           }
 
-      toTicks p =
+      toTicks p config =
         config.produce config.amount (config.limits p.x)
           |> List.filter (config.only << .value)
 
-      toTickValues p ts =
-        { ts | xs = ts.xs ++ List.map .value (toTicks p) }
+      toTickValues p config ts =
+        { ts | xs = ts.xs ++ List.map .value (toTicks p config) }
   in
-  LabelsElement toTickValues <| \p ->
+  LabelsElement toConfig toTickValues <| \p config ->
     let toLabel item =
           CS.label p
             [ CA.color config.color
@@ -886,13 +895,13 @@ xLabels edits =
             , y = config.pinned p.y
             }
     in
-    S.g [ SA.class "elm-charts__x-labels" ] (List.map toLabel (toTicks p))
+    S.g [ SA.class "elm-charts__x-labels" ] (List.map toLabel (toTicks p config))
 
 
 {-| -}
 yLabels : List (Attribute Labels) -> Element item msg
 yLabels edits =
-  let config =
+  let toConfig p =
         applyAttrs ([ floats ] ++ edits)
           { color = "#808BAB"
           , limits = identity
@@ -906,14 +915,14 @@ yLabels edits =
           , yOff = 3
           }
 
-      toTicks p =
+      toTicks p config =
         config.produce config.amount (config.limits p.y)
           |> List.filter (config.only << .value)
 
-      toTickValues p ts =
-        { ts | ys = ts.ys ++ List.map .value (toTicks p) }
+      toTickValues p config ts =
+        { ts | ys = ts.ys ++ List.map .value (toTicks p config) }
   in
-  LabelsElement toTickValues <| \p ->
+  LabelsElement toConfig toTickValues <| \p config ->
     let toLabel item =
           CS.label p
             [ CA.color config.color
@@ -929,7 +938,7 @@ yLabels edits =
             , y = item.value
             }
     in
-    S.g [ SA.class "elm-charts__y-labels" ] (List.map toLabel (toTicks p))
+    S.g [ SA.class "elm-charts__y-labels" ] (List.map toLabel (toTicks p config))
 
 
 {-| -}
@@ -951,41 +960,26 @@ type alias Label =
 {-| -}
 xLabel : List (Attribute Label) -> List (S.Svg msg) -> Element data msg
 xLabel edits inner =
-  let toTickValues p ts =
-        let config =
-              applyAttrs edits
-                { x = middle p.x
-                , y = zero p.y
-                , xOff = 0
-                , yOff = 20
-                , border = "white"
-                , borderWidth = 0.1
-                , fontSize = Nothing
-                , color = "#808BAB"
-                , anchor = CA.Middle
-                , rotate = 0
-                , flip = False
-                }
-        in
+  let toConfig p =
+        applyAttrs edits
+          { x = middle p.x
+          , y = zero p.y
+          , xOff = 0
+          , yOff = 20
+          , border = "white"
+          , borderWidth = 0.1
+          , fontSize = Nothing
+          , color = "#808BAB"
+          , anchor = CA.Middle
+          , rotate = 0
+          , flip = False
+          }
+
+      toTickValues p config ts =
         { ts | xs = ts.xs ++ [ config.x ] }
   in
-  LabelsElement toTickValues <| \p ->
-    let config =
-          applyAttrs edits
-            { x = middle p.x
-            , y = zero p.y
-            , xOff = 0
-            , yOff = 20
-            , border = "white"
-            , borderWidth = 0.1
-            , fontSize = Nothing
-            , color = "#808BAB"
-            , anchor = CA.Middle
-            , rotate = 0
-            , flip = False
-            }
-
-        string =
+  LabelElement toConfig toTickValues <| \p config ->
+    let string =
           if inner == []
           then [ S.text (String.fromFloat config.x) ]
           else inner
@@ -1012,41 +1006,26 @@ xLabel edits inner =
 {-| -}
 yLabel : List (Attribute Label) -> List (S.Svg msg) -> Element data msg
 yLabel edits inner =
-  let toTickValues p ts =
-        let config =
-              applyAttrs edits
-                { x = zero p.x
-                , y = middle p.y
-                , xOff = -8
-                , yOff = 3
-                , border = "white"
-                , borderWidth = 0.1
-                , fontSize = Nothing
-                , color = "#808BAB"
-                , anchor = CA.Start
-                , rotate = 0
-                , flip = False
-                }
-        in
+  let toConfig p =
+        applyAttrs edits
+          { x = zero p.x
+          , y = middle p.y
+          , xOff = -8
+          , yOff = 3
+          , border = "white"
+          , borderWidth = 0.1
+          , fontSize = Nothing
+          , color = "#808BAB"
+          , anchor = CA.Start
+          , rotate = 0
+          , flip = False
+          }
+
+      toTickValues p config ts =
         { ts | ys = ts.ys ++ [ config.y ] }
   in
-  LabelsElement toTickValues <| \p ->
-    let config =
-          applyAttrs edits
-            { x = zero p.x
-            , y = middle p.y
-            , xOff = -8
-            , yOff = 3
-            , border = "white"
-            , borderWidth = 0.1
-            , fontSize = Nothing
-            , color = "#808BAB"
-            , anchor = CA.Start
-            , rotate = 0
-            , flip = False
-            }
-
-        string =
+  LabelElement toConfig toTickValues <| \p config ->
+    let string =
           if inner == []
           then [ S.text (String.fromFloat config.y) ]
           else inner
