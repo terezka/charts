@@ -1058,8 +1058,8 @@ tooltip plane pos edits htmlAttrs content =
 
       { xOff, yOff, transformation, className } =
         case direction of
-          CA.Top         -> { xOff = 0, yOff = -config.offset, transformation = "translate(-50%, -100%)", className = "elm-charts__tooltip-top" }
-          CA.Bottom      -> { xOff = 0, yOff = config.offset, transformation = "translate(-50%, 0%)", className = "elm-charts__tooltip-bottom" }
+          CA.Top         -> { xOff = 0, yOff = config.offset, transformation = "translate(-50%, -100%)", className = "elm-charts__tooltip-top" }
+          CA.Bottom      -> { xOff = 0, yOff = -config.offset, transformation = "translate(-50%, 0%)", className = "elm-charts__tooltip-bottom" }
           CA.Left        -> { xOff = -config.offset, yOff = 0, transformation = "translate(-100%, -50%)", className = "elm-charts__tooltip-left" }
           CA.Right       -> { xOff = config.offset, yOff = 0, transformation = "translate(0, -50%)", className = "elm-charts__tooltip-right" }
           CA.LeftOrRight -> { xOff = -config.offset, yOff = 0, transformation = "translate(0, -50%)", className = "elm-charts__tooltip-leftOrRight" }

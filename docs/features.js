@@ -4602,35 +4602,11 @@ var $elm$core$Set$toList = function (_v0) {
 var $elm$core$Basics$EQ = {$: 'EQ'};
 var $elm$core$Basics$GT = {$: 'GT'};
 var $elm$core$Basics$LT = {$: 'LT'};
-var $author$project$Features$Model = function (exploration) {
-	return function (select) {
-		return function (rangeMin) {
-			return function (rangeMax) {
-				return function (hoveringScatter) {
-					return function (hoveringBars) {
-						return function (hoveringStackedBars) {
-							return function (hoveringBinnedBars) {
-								return function (salarySelection) {
-									return function (salaryHovering) {
-										return function (salaryWindow) {
-											return function (salaryYear) {
-												return {exploration: exploration, hoveringBars: hoveringBars, hoveringBinnedBars: hoveringBinnedBars, hoveringScatter: hoveringScatter, hoveringStackedBars: hoveringStackedBars, rangeMax: rangeMax, rangeMin: rangeMin, salaryHovering: salaryHovering, salarySelection: salarySelection, salaryWindow: salaryWindow, salaryYear: salaryYear, select: select};
-											};
-										};
-									};
-								};
-							};
-						};
-					};
-				};
-			};
-		};
-	};
-};
 var $elm$core$Maybe$Nothing = {$: 'Nothing'};
 var $elm$core$Dict$RBEmpty_elm_builtin = {$: 'RBEmpty_elm_builtin'};
 var $elm$core$Dict$empty = $elm$core$Dict$RBEmpty_elm_builtin;
-var $author$project$Features$init = $author$project$Features$Model($elm$core$Dict$empty)($elm$core$Maybe$Nothing)(1262217600000)(1640908800000)(_List_Nil)(_List_Nil)(_List_Nil)(_List_Nil)($elm$core$Maybe$Nothing)(_List_Nil)($elm$core$Maybe$Nothing)(2019);
+var $author$project$Section$Interactivity$init = {hovering: _List_Nil};
+var $author$project$Features$init = {exploration: $elm$core$Dict$empty, hoveringBars: _List_Nil, hoveringBinnedBars: _List_Nil, hoveringScatter: _List_Nil, hoveringStackedBars: _List_Nil, interactivity: $author$project$Section$Interactivity$init, rangeMax: 1640908800000, rangeMin: 1262217600000, salaryHovering: _List_Nil, salarySelection: $elm$core$Maybe$Nothing, salaryWindow: $elm$core$Maybe$Nothing, salaryYear: 2019, select: $elm$core$Maybe$Nothing};
 var $elm$core$Result$Err = function (a) {
 	return {$: 'Err', a: a};
 };
@@ -5473,6 +5449,13 @@ var $elm$core$Basics$min = F2(
 	function (x, y) {
 		return (_Utils_cmp(x, y) < 0) ? x : y;
 	});
+var $author$project$Section$Interactivity$update = F2(
+	function (msg, model) {
+		var products = msg.a;
+		return _Utils_update(
+			model,
+			{hovering: products});
+	});
 var $author$project$Features$update = F2(
 	function (msg, model) {
 		switch (msg.$) {
@@ -5483,6 +5466,13 @@ var $author$project$Features$update = F2(
 					model,
 					{
 						exploration: A3($elm$core$Dict$insert, title, selected, model.exploration)
+					});
+			case 'OnInteractivity':
+				var subMsg = msg.a;
+				return _Utils_update(
+					model,
+					{
+						interactivity: A2($author$project$Section$Interactivity$update, subMsg, model.interactivity)
 					});
 			case 'OnMouseDown':
 				var coords = msg.a;
@@ -5614,6 +5604,9 @@ var $author$project$Features$OnExploration = F2(
 	function (a, b) {
 		return {$: 'OnExploration', a: a, b: b};
 	});
+var $author$project$Features$OnInteractivity = function (a) {
+	return {$: 'OnInteractivity', a: a};
+};
 var $mdgriffith$elm_ui$Internal$Model$AlignX = function (a) {
 	return {$: 'AlignX', a: a};
 };
@@ -19004,7 +18997,7 @@ var $author$project$Chart$xTicks = function (edits) {
 					toTicks(p)));
 		});
 };
-var $author$project$Section$CustomLabels$view = F2(
+var $author$project$Section$CustomAxes$view = F2(
 	function (onSelect, selected) {
 		var frame = function (props) {
 			return A2(
@@ -19235,27 +19228,24 @@ var $author$project$Section$CustomLabels$view = F2(
 				title: 'Custom axes'
 			});
 	});
-var $author$project$Chart$Attributes$bottom = F2(
-	function (value, config) {
+var $author$project$Section$Interactivity$OnHover = function (a) {
+	return {$: 'OnHover', a: a};
+};
+var $author$project$Chart$Attributes$background = F2(
+	function (v, config) {
 		return _Utils_update(
 			config,
-			{bottom: value});
+			{background: v});
 	});
-var $author$project$Chart$Attributes$dashed = F2(
-	function (value, config) {
-		return _Utils_update(
-			config,
-			{dashed: value});
-	});
-var $author$project$Section$LineChart$Datum = F7(
+var $author$project$Section$Interactivity$Datum = F7(
 	function (x, y, z, v, w, p, q) {
 		return {p: p, q: q, v: v, w: w, x: x, y: y, z: z};
 	});
-var $author$project$Section$LineChart$data = function () {
+var $author$project$Section$Interactivity$data = function () {
 	var toDatum = F7(
 		function (x, y, z, v, w, p, q) {
 			return A7(
-				$author$project$Section$LineChart$Datum,
+				$author$project$Section$Interactivity$Datum,
 				x,
 				$elm$core$Maybe$Just(y),
 				$elm$core$Maybe$Just(z),
@@ -19266,45 +19256,166 @@ var $author$project$Section$LineChart$data = function () {
 		});
 	return _List_fromArray(
 		[
-			A7(toDatum, 1, 2, 1, 4.6, 6.9, 7.3, 8.0),
-			A7(toDatum, 2, 3, 2, 5.2, 6.2, 7.0, 8.7),
-			A7(toDatum, 3, 4, 3, 5.5, 5.2, 7.2, 8.1),
-			A7(toDatum, 4, 3, 4, 5.3, 5.7, 6.2, 7.8),
-			A7(toDatum, 5, 2, 3, 4.9, 5.9, 6.7, 8.2),
-			A7(toDatum, 6, 4, 1, 4.8, 5.4, 7.2, 8.3),
-			A7(toDatum, 7, 5, 2, 5.3, 5.1, 7.8, 7.1),
-			A7(toDatum, 8, 6, 3, 5.4, 3.9, 7.6, 8.5),
-			A7(toDatum, 9, 5, 4, 5.8, 4.6, 6.5, 6.9),
-			A7(toDatum, 10, 4, 3, 4.5, 5.3, 6.3, 7.0)
+			A7(toDatum, 0.0, 2.0, 4.0, 4.6, 6.9, 7.3, 8.0),
+			A7(toDatum, 0.2, 3.0, 4.2, 5.2, 6.2, 7.0, 8.7),
+			A7(toDatum, 0.8, 4.0, 4.6, 5.5, 5.2, 7.2, 8.1),
+			A7(toDatum, 1.0, 2.0, 4.2, 5.3, 5.7, 6.2, 7.8),
+			A7(toDatum, 1.2, 5.0, 3.5, 4.9, 5.9, 6.7, 8.2),
+			A7(toDatum, 2.0, 2.0, 3.2, 4.8, 5.4, 7.2, 8.3),
+			A7(toDatum, 2.3, 1.0, 4.3, 5.3, 5.1, 7.8, 7.1),
+			A7(toDatum, 2.8, 3.0, 2.9, 5.4, 3.9, 7.6, 8.5),
+			A7(toDatum, 3.0, 2.0, 3.6, 5.8, 4.6, 6.5, 6.9),
+			A7(toDatum, 4.0, 1.0, 4.2, 4.5, 5.3, 6.3, 7.0)
 		]);
 }();
-var $author$project$Chart$Attributes$Gradient = function (a) {
-	return {$: 'Gradient', a: a};
+var $author$project$Chart$Event = function (a) {
+	return {$: 'Event', a: a};
 };
-var $author$project$Chart$Attributes$gradient = F2(
-	function (attrs_, config) {
+var $author$project$Chart$event = F2(
+	function (name_, decoder) {
+		return $author$project$Chart$Event(
+			{decoder: decoder, name: name_});
+	});
+var $author$project$Chart$Item$getCenter = F2(
+	function (plane, _v0) {
+		var config = _v0.a;
+		var pos = A2(config.position, plane, config.details);
+		return {x: pos.x1 + ((pos.x2 - pos.x1) / 2), y: pos.y1 + ((pos.y2 - pos.y1) / 2)};
+	});
+var $author$project$Chart$Decoder = function (a) {
+	return {$: 'Decoder', a: a};
+};
+var $author$project$Svg$Coordinates$toCartesianX = F2(
+	function (plane, value) {
+		return A2($author$project$Svg$Coordinates$scaleCartesianX, plane, value - plane.margin.left) + plane.x.min;
+	});
+var $author$project$Svg$Coordinates$toCartesianY = F2(
+	function (plane, value) {
+		return ($author$project$Svg$Coordinates$range(plane.y) - A2($author$project$Svg$Coordinates$scaleCartesianY, plane, value - plane.margin.top)) + plane.y.min;
+	});
+var $author$project$Chart$getCoords = $author$project$Chart$Decoder(
+	F3(
+		function (_v0, plane, searched) {
+			return {
+				x: A2($author$project$Svg$Coordinates$toCartesianX, plane, searched.x),
+				y: A2($author$project$Svg$Coordinates$toCartesianY, plane, searched.y)
+			};
+		}));
+var $author$project$Chart$Item$getInd = function (_v0) {
+	var config = _v0.a;
+	return config.details.x1;
+};
+var $author$project$Chart$Svg$distanceX = F3(
+	function (plane, searched, point) {
+		return $elm$core$Basics$abs(
+			A2($author$project$Svg$Coordinates$toSVGX, plane, point.x) - A2($author$project$Svg$Coordinates$toSVGX, plane, searched.x));
+	});
+var $author$project$Chart$Svg$distanceY = F3(
+	function (plane, searched, point) {
+		return $elm$core$Basics$abs(
+			A2($author$project$Svg$Coordinates$toSVGY, plane, point.y) - A2($author$project$Svg$Coordinates$toSVGY, plane, searched.y));
+	});
+var $author$project$Chart$Svg$distance = F3(
+	function (plane, searched, point) {
+		return $elm$core$Basics$sqrt(
+			A2(
+				$elm$core$Basics$pow,
+				A3($author$project$Chart$Svg$distanceX, plane, searched, point),
+				2) + A2(
+				$elm$core$Basics$pow,
+				A3($author$project$Chart$Svg$distanceY, plane, searched, point),
+				2));
+	});
+var $author$project$Chart$Svg$getNearestHelp = F4(
+	function (toPoint, items, plane, searched) {
+		var distance_ = A2($author$project$Chart$Svg$distance, plane, searched);
+		var getClosest = F2(
+			function (item, allClosest) {
+				var _v0 = $elm$core$List$head(allClosest);
+				if (_v0.$ === 'Just') {
+					var closest = _v0.a;
+					return _Utils_eq(
+						toPoint(closest),
+						toPoint(item)) ? A2($elm$core$List$cons, item, allClosest) : ((_Utils_cmp(
+						distance_(
+							toPoint(closest)),
+						distance_(
+							toPoint(item))) > 0) ? _List_fromArray(
+						[item]) : allClosest);
+				} else {
+					return _List_fromArray(
+						[item]);
+				}
+			});
+		return A3($elm$core$List$foldl, getClosest, _List_Nil, items);
+	});
+var $author$project$Chart$Svg$getNearest = F4(
+	function (toPoint, items, plane, searchedSvg) {
+		var searched = {
+			x: A2($author$project$Svg$Coordinates$toCartesianX, plane, searchedSvg.x),
+			y: A2($author$project$Svg$Coordinates$toCartesianY, plane, searchedSvg.y)
+		};
+		return A4($author$project$Chart$Svg$getNearestHelp, toPoint, items, plane, searched);
+	});
+var $author$project$Chart$getNearest = F2(
+	function (toPoint, filterItems) {
+		return $author$project$Chart$Decoder(
+			F2(
+				function (items, plane) {
+					return A3(
+						$author$project$Chart$Svg$getNearest,
+						toPoint(plane),
+						filterItems(items),
+						plane);
+				}));
+	});
+var $author$project$Chart$Item$getValue = function (_v0) {
+	var config = _v0.a;
+	return config.details.y;
+};
+var $author$project$Chart$map = F2(
+	function (f, _v0) {
+		var a = _v0.a;
+		return $author$project$Chart$Decoder(
+			F3(
+				function (ps, s, p) {
+					return f(
+						A3(a, ps, s, p));
+				}));
+	});
+var $author$project$Chart$Attributes$noPointer = function (config) {
+	return _Utils_update(
+		config,
+		{pointer: false});
+};
+var $author$project$Chart$Attributes$offset = F2(
+	function (v, config) {
 		return _Utils_update(
 			config,
-			{
-				design: $elm$core$Maybe$Just(
-					$author$project$Chart$Attributes$Gradient(attrs_)),
-				opacity: (!config.opacity) ? 1 : config.opacity
-			});
+			{offset: v});
 	});
-var $author$project$Chart$Attributes$Linear = {$: 'Linear'};
-var $author$project$Chart$Attributes$linear = function (config) {
+var $author$project$Chart$Attributes$Left = {$: 'Left'};
+var $author$project$Chart$Attributes$onLeft = function (config) {
 	return _Utils_update(
 		config,
 		{
-			method: $elm$core$Maybe$Just($author$project$Chart$Attributes$Linear)
+			direction: $elm$core$Maybe$Just($author$project$Chart$Attributes$Left)
 		});
 };
-var $author$project$Chart$Attributes$Monotone = {$: 'Monotone'};
-var $author$project$Chart$Attributes$monotone = function (config) {
+var $author$project$Chart$Attributes$LeftOrRight = {$: 'LeftOrRight'};
+var $author$project$Chart$Attributes$onLeftOrRight = function (config) {
 	return _Utils_update(
 		config,
 		{
-			method: $elm$core$Maybe$Just($author$project$Chart$Attributes$Monotone)
+			direction: $elm$core$Maybe$Just($author$project$Chart$Attributes$LeftOrRight)
+		});
+};
+var $author$project$Chart$Attributes$TopOrBottom = {$: 'TopOrBottom'};
+var $author$project$Chart$Attributes$onTopOrBottom = function (config) {
+	return _Utils_update(
+		config,
+		{
+			direction: $elm$core$Maybe$Just($author$project$Chart$Attributes$TopOrBottom)
 		});
 };
 var $author$project$Chart$property = F2(
@@ -20047,6 +20158,808 @@ var $author$project$Chart$series = F3(
 							items)));
 			});
 	});
+var $author$project$Chart$HtmlElement = function (a) {
+	return {$: 'HtmlElement', a: a};
+};
+var $author$project$Chart$html = function (func) {
+	return $author$project$Chart$HtmlElement(
+		function (p) {
+			return func(p);
+		});
+};
+var $author$project$Chart$Attributes$Bottom = {$: 'Bottom'};
+var $author$project$Chart$Attributes$Right = {$: 'Right'};
+var $author$project$Chart$Attributes$Top = {$: 'Top'};
+var $elm$core$List$all = F2(
+	function (isOkay, list) {
+		return !A2(
+			$elm$core$List$any,
+			A2($elm$core$Basics$composeL, $elm$core$Basics$not, isOkay),
+			list);
+	});
+var $elm$html$Html$map = $elm$virtual_dom$VirtualDom$map;
+var $author$project$Chart$Svg$positionHtml = F7(
+	function (plane, x, y, xOff, yOff, attrs, content) {
+		var yPercentage = ((A2($author$project$Svg$Coordinates$toSVGY, plane, y) + (-yOff)) * 100) / plane.height;
+		var xPercentage = ((A2($author$project$Svg$Coordinates$toSVGX, plane, x) + xOff) * 100) / plane.width;
+		var posititonStyles = _List_fromArray(
+			[
+				A2(
+				$elm$html$Html$Attributes$style,
+				'left',
+				$elm$core$String$fromFloat(xPercentage) + '%'),
+				A2(
+				$elm$html$Html$Attributes$style,
+				'top',
+				$elm$core$String$fromFloat(yPercentage) + '%'),
+				A2($elm$html$Html$Attributes$style, 'margin-right', '-400px'),
+				A2($elm$html$Html$Attributes$style, 'position', 'absolute')
+			]);
+		return A2(
+			$elm$html$Html$div,
+			_Utils_ap(posititonStyles, attrs),
+			content);
+	});
+var $author$project$Chart$Svg$tooltipPointerStyle = F4(
+	function (direction, className, background, borderColor) {
+		var config = function () {
+			switch (direction.$) {
+				case 'Top':
+					return {a: 'right', b: 'top', c: 'left'};
+				case 'Bottom':
+					return {a: 'right', b: 'bottom', c: 'left'};
+				case 'Left':
+					return {a: 'bottom', b: 'left', c: 'top'};
+				case 'Right':
+					return {a: 'bottom', b: 'right', c: 'top'};
+				case 'LeftOrRight':
+					return {a: 'bottom', b: 'left', c: 'top'};
+				default:
+					return {a: 'right', b: 'top', c: 'left'};
+			}
+		}();
+		return '\n  .' + (className + (':before, .' + (className + (':after {\n    content: "";\n    position: absolute;\n    border-' + (config.c + (': 5px solid transparent;\n    border-' + (config.a + (': 5px solid transparent;\n    ' + (config.b + (': 100%;\n    ' + (config.c + (': 50%;\n    margin-' + (config.c + (': -5px;\n  }\n\n  .' + (className + (':after {\n    border-' + (config.b + (': 5px solid ' + (background + (';\n    margin-' + (config.b + (': -1px;\n    z-index: 1;\n  }\n\n  .' + (className + (':before {\n    border-' + (config.b + (': 5px solid ' + (borderColor + ';\n  }\n  ')))))))))))))))))))))))))));
+	});
+var $author$project$Chart$Svg$tooltip = F5(
+	function (plane, pos, edits, htmlAttrs, content) {
+		var distanceTop = A2($author$project$Svg$Coordinates$toSVGY, plane, pos.y2);
+		var distanceRight = plane.width - A2($author$project$Svg$Coordinates$toSVGX, plane, pos.x1);
+		var distanceLeft = A2($author$project$Svg$Coordinates$toSVGX, plane, pos.x2);
+		var distanceBottom = plane.height - A2($author$project$Svg$Coordinates$toSVGY, plane, pos.y1);
+		var config = A2(
+			$author$project$Chart$Svg$apply,
+			edits,
+			{background: 'white', border: '#D8D8D8', direction: $elm$core$Maybe$Nothing, height: 0, offset: 12, pointer: true, width: 0});
+		var direction = function () {
+			var _v4 = config.direction;
+			if (_v4.$ === 'Just') {
+				switch (_v4.a.$) {
+					case 'LeftOrRight':
+						var _v5 = _v4.a;
+						return (config.width > 0) ? ((_Utils_cmp(distanceLeft, config.width + config.offset) > 0) ? $author$project$Chart$Attributes$Left : $author$project$Chart$Attributes$Right) : ((_Utils_cmp(distanceLeft, distanceRight) > 0) ? $author$project$Chart$Attributes$Left : $author$project$Chart$Attributes$Right);
+					case 'TopOrBottom':
+						var _v6 = _v4.a;
+						return (config.height > 0) ? ((_Utils_cmp(distanceTop, config.height + config.offset) > 0) ? $author$project$Chart$Attributes$Top : $author$project$Chart$Attributes$Bottom) : ((_Utils_cmp(distanceTop, distanceBottom) > 0) ? $author$project$Chart$Attributes$Top : $author$project$Chart$Attributes$Bottom);
+					default:
+						var dir = _v4.a;
+						return dir;
+				}
+			} else {
+				var isLargest = function (a) {
+					return $elm$core$List$all(
+						function (b) {
+							return _Utils_cmp(a, b) > -1;
+						});
+				};
+				return A2(
+					isLargest,
+					distanceTop,
+					_List_fromArray(
+						[distanceBottom, distanceLeft, distanceRight])) ? $author$project$Chart$Attributes$Top : (A2(
+					isLargest,
+					distanceBottom,
+					_List_fromArray(
+						[distanceTop, distanceLeft, distanceRight])) ? $author$project$Chart$Attributes$Bottom : (A2(
+					isLargest,
+					distanceLeft,
+					_List_fromArray(
+						[distanceTop, distanceBottom, distanceRight])) ? $author$project$Chart$Attributes$Left : $author$project$Chart$Attributes$Right));
+			}
+		}();
+		var _v0 = function () {
+			switch (direction.$) {
+				case 'Top':
+					return _Utils_Tuple2(pos.x1 + ((pos.x2 - pos.x1) / 2), pos.y2);
+				case 'Bottom':
+					return _Utils_Tuple2(pos.x1 + ((pos.x2 - pos.x1) / 2), pos.y1);
+				case 'Left':
+					return _Utils_Tuple2(pos.x1, pos.y1 + ((pos.y2 - pos.y1) / 2));
+				case 'Right':
+					return _Utils_Tuple2(pos.x2, pos.y1 + ((pos.y2 - pos.y1) / 2));
+				case 'LeftOrRight':
+					return _Utils_Tuple2(pos.x2, pos.y1 + ((pos.y2 - pos.y1) / 2));
+				default:
+					return _Utils_Tuple2(pos.x1 + ((pos.x2 - pos.x1) / 2), pos.y2);
+			}
+		}();
+		var x = _v0.a;
+		var y = _v0.b;
+		var _v2 = function () {
+			switch (direction.$) {
+				case 'Top':
+					return {className: 'elm-charts__tooltip-top', transformation: 'translate(-50%, -100%)', xOff: 0, yOff: config.offset};
+				case 'Bottom':
+					return {className: 'elm-charts__tooltip-bottom', transformation: 'translate(-50%, 0%)', xOff: 0, yOff: -config.offset};
+				case 'Left':
+					return {className: 'elm-charts__tooltip-left', transformation: 'translate(-100%, -50%)', xOff: -config.offset, yOff: 0};
+				case 'Right':
+					return {className: 'elm-charts__tooltip-right', transformation: 'translate(0, -50%)', xOff: config.offset, yOff: 0};
+				case 'LeftOrRight':
+					return {className: 'elm-charts__tooltip-leftOrRight', transformation: 'translate(0, -50%)', xOff: -config.offset, yOff: 0};
+				default:
+					return {className: 'elm-charts__tooltip-topOrBottom', transformation: 'translate(-50%, -100%)', xOff: 0, yOff: config.offset};
+			}
+		}();
+		var xOff = _v2.xOff;
+		var yOff = _v2.yOff;
+		var transformation = _v2.transformation;
+		var className = _v2.className;
+		var children = config.pointer ? A2(
+			$elm$core$List$cons,
+			A3(
+				$elm$html$Html$node,
+				'style',
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text(
+						A4($author$project$Chart$Svg$tooltipPointerStyle, direction, className, config.background, config.border))
+					])),
+			content) : content;
+		var attributes = _Utils_ap(
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class(className),
+					A2($elm$html$Html$Attributes$style, 'transform', transformation),
+					A2($elm$html$Html$Attributes$style, 'padding', '5px 10px'),
+					A2($elm$html$Html$Attributes$style, 'background', config.background),
+					A2($elm$html$Html$Attributes$style, 'border', '1px solid ' + config.border),
+					A2($elm$html$Html$Attributes$style, 'border-radius', '3px'),
+					A2($elm$html$Html$Attributes$style, 'pointer-events', 'none')
+				]),
+			htmlAttrs);
+		return A2(
+			$elm$html$Html$map,
+			$elm$core$Basics$never,
+			A7($author$project$Chart$Svg$positionHtml, plane, x, y, xOff, yOff, attributes, children));
+	});
+var $author$project$Chart$tooltip = F4(
+	function (i, edits, attrs_, content) {
+		return $author$project$Chart$html(
+			function (p) {
+				var pos = $author$project$Chart$Item$getLimits(i);
+				return A3($author$project$Chart$Svg$isWithinPlane, p, pos.x1, pos.y2) ? A5(
+					$author$project$Chart$Svg$tooltip,
+					p,
+					A2($author$project$Chart$Item$getPosition, p, i),
+					edits,
+					attrs_,
+					content) : $elm$html$Html$text('');
+			});
+	});
+var $author$project$Section$Interactivity$view = F4(
+	function (onSelect, selected, onMsg, model) {
+		var frame = F2(
+			function (events, tooltip) {
+				return A2(
+					$elm$html$Html$div,
+					_List_fromArray(
+						[
+							A2($elm$html$Html$Attributes$style, 'width', '300px'),
+							A2($elm$html$Html$Attributes$style, 'height', '300px')
+						]),
+					_List_fromArray(
+						[
+							A2(
+							$author$project$Chart$chart,
+							_List_fromArray(
+								[
+									$author$project$Chart$Attributes$height(300),
+									$author$project$Chart$Attributes$width(300),
+									$author$project$Chart$Attributes$events(events)
+								]),
+							_List_fromArray(
+								[
+									$author$project$Chart$grid(_List_Nil),
+									$author$project$Chart$xLabels(_List_Nil),
+									$author$project$Chart$yLabels(_List_Nil),
+									A3(
+									$author$project$Chart$series,
+									function ($) {
+										return $.x;
+									},
+									_List_fromArray(
+										[
+											A4(
+											$author$project$Chart$property,
+											function ($) {
+												return $.y;
+											},
+											'y',
+											_List_Nil,
+											_List_Nil),
+											A4(
+											$author$project$Chart$property,
+											function ($) {
+												return $.z;
+											},
+											'z',
+											_List_Nil,
+											_List_Nil)
+										]),
+									$author$project$Section$Interactivity$data),
+									tooltip
+								]))
+						]));
+			});
+		return $author$project$Ui$Section$view(
+			{
+				configs: _List_fromArray(
+					[
+						{
+						chart: function (_v0) {
+							return A2(
+								frame,
+								_List_fromArray(
+									[
+										A2(
+										$author$project$Chart$event,
+										'mousemove',
+										A2(
+											$author$project$Chart$map,
+											A2($elm$core$Basics$composeR, $author$project$Section$Interactivity$OnHover, onMsg),
+											A2($author$project$Chart$getNearest, $author$project$Chart$Item$getCenter, $elm$core$Basics$identity))),
+										A2(
+										$author$project$Chart$event,
+										'mouseleave',
+										A2(
+											$author$project$Chart$map,
+											function (_v1) {
+												return onMsg(
+													$author$project$Section$Interactivity$OnHover(_List_Nil));
+											},
+											$author$project$Chart$getCoords))
+									]),
+								A2(
+									$author$project$Chart$each,
+									function (_v2) {
+										return model.hovering;
+									},
+									F2(
+										function (p, item) {
+											return _List_fromArray(
+												[
+													A4(
+													$author$project$Chart$tooltip,
+													item,
+													_List_Nil,
+													_List_Nil,
+													_List_fromArray(
+														[
+															$elm$html$Html$text(
+															$elm$core$String$fromFloat(
+																$author$project$Chart$Item$getInd(item))),
+															$elm$html$Html$text(', '),
+															$elm$html$Html$text(
+															$elm$core$String$fromFloat(
+																A2(
+																	$elm$core$Maybe$withDefault,
+																	0,
+																	$author$project$Chart$Item$getValue(item))))
+														]))
+												]);
+										})));
+						},
+						code: '\n          C.each (always model.hovering) <| \\p item ->\n            [ C.tooltip item [] []\n                [ H.text <| String.fromFloat (CI.getInd item)\n                , H.text ", "\n                , H.text <| String.fromFloat (CI.getValue item)\n                ]\n            ]\n              ',
+						title: 'Basic'
+					},
+						{
+						chart: function (_v3) {
+							return A2(
+								frame,
+								_List_fromArray(
+									[
+										A2(
+										$author$project$Chart$event,
+										'mousemove',
+										A2(
+											$author$project$Chart$map,
+											A2($elm$core$Basics$composeR, $author$project$Section$Interactivity$OnHover, onMsg),
+											A2($author$project$Chart$getNearest, $author$project$Chart$Item$getCenter, $elm$core$Basics$identity))),
+										A2(
+										$author$project$Chart$event,
+										'mouseleave',
+										A2(
+											$author$project$Chart$map,
+											function (_v4) {
+												return onMsg(
+													$author$project$Section$Interactivity$OnHover(_List_Nil));
+											},
+											$author$project$Chart$getCoords))
+									]),
+								A2(
+									$author$project$Chart$each,
+									function (_v5) {
+										return model.hovering;
+									},
+									F2(
+										function (p, item) {
+											return _List_fromArray(
+												[
+													A4(
+													$author$project$Chart$tooltip,
+													item,
+													_List_fromArray(
+														[$author$project$Chart$Attributes$onLeft]),
+													_List_Nil,
+													_List_fromArray(
+														[
+															$elm$html$Html$text(
+															$elm$core$String$fromFloat(
+																$author$project$Chart$Item$getInd(item))),
+															$elm$html$Html$text(', '),
+															$elm$html$Html$text(
+															$elm$core$String$fromFloat(
+																A2(
+																	$elm$core$Maybe$withDefault,
+																	0,
+																	$author$project$Chart$Item$getValue(item))))
+														]))
+												]);
+										})));
+						},
+						code: '\n          C.each (always model.hovering) <| \\p item ->\n            [ C.tooltip item [ CA.onLeft ] []\n                [ H.text <| String.fromFloat (CI.getInd item)\n                , H.text ", "\n                , H.text <| String.fromFloat (CI.getValue item)\n                ]\n            ]\n              ',
+						title: 'Direction'
+					},
+						{
+						chart: function (_v6) {
+							return A2(
+								frame,
+								_List_fromArray(
+									[
+										A2(
+										$author$project$Chart$event,
+										'mousemove',
+										A2(
+											$author$project$Chart$map,
+											A2($elm$core$Basics$composeR, $author$project$Section$Interactivity$OnHover, onMsg),
+											A2($author$project$Chart$getNearest, $author$project$Chart$Item$getCenter, $elm$core$Basics$identity))),
+										A2(
+										$author$project$Chart$event,
+										'mouseleave',
+										A2(
+											$author$project$Chart$map,
+											function (_v7) {
+												return onMsg(
+													$author$project$Section$Interactivity$OnHover(_List_Nil));
+											},
+											$author$project$Chart$getCoords))
+									]),
+								A2(
+									$author$project$Chart$each,
+									function (_v8) {
+										return model.hovering;
+									},
+									F2(
+										function (p, item) {
+											return _List_fromArray(
+												[
+													A4(
+													$author$project$Chart$tooltip,
+													item,
+													_List_fromArray(
+														[$author$project$Chart$Attributes$noPointer]),
+													_List_Nil,
+													_List_fromArray(
+														[
+															$elm$html$Html$text(
+															$elm$core$String$fromFloat(
+																$author$project$Chart$Item$getInd(item))),
+															$elm$html$Html$text(', '),
+															$elm$html$Html$text(
+															$elm$core$String$fromFloat(
+																A2(
+																	$elm$core$Maybe$withDefault,
+																	0,
+																	$author$project$Chart$Item$getValue(item))))
+														]))
+												]);
+										})));
+						},
+						code: '\n          C.each (always model.hovering) <| \\p item ->\n            [ C.tooltip item [ CA.noPointer ] []\n                [ H.text <| String.fromFloat (CI.getInd item)\n                , H.text ", "\n                , H.text <| String.fromFloat (CI.getValue item)\n                ]\n            ]\n              ',
+						title: 'No arrow'
+					},
+						{
+						chart: function (_v9) {
+							return A2(
+								frame,
+								_List_fromArray(
+									[
+										A2(
+										$author$project$Chart$event,
+										'mousemove',
+										A2(
+											$author$project$Chart$map,
+											A2($elm$core$Basics$composeR, $author$project$Section$Interactivity$OnHover, onMsg),
+											A2($author$project$Chart$getNearest, $author$project$Chart$Item$getCenter, $elm$core$Basics$identity))),
+										A2(
+										$author$project$Chart$event,
+										'mouseleave',
+										A2(
+											$author$project$Chart$map,
+											function (_v10) {
+												return onMsg(
+													$author$project$Section$Interactivity$OnHover(_List_Nil));
+											},
+											$author$project$Chart$getCoords))
+									]),
+								A2(
+									$author$project$Chart$each,
+									function (_v11) {
+										return model.hovering;
+									},
+									F2(
+										function (p, item) {
+											return _List_fromArray(
+												[
+													A4(
+													$author$project$Chart$tooltip,
+													item,
+													_List_fromArray(
+														[
+															$author$project$Chart$Attributes$offset(0)
+														]),
+													_List_Nil,
+													_List_fromArray(
+														[
+															$elm$html$Html$text(
+															$elm$core$String$fromFloat(
+																$author$project$Chart$Item$getInd(item))),
+															$elm$html$Html$text(', '),
+															$elm$html$Html$text(
+															$elm$core$String$fromFloat(
+																A2(
+																	$elm$core$Maybe$withDefault,
+																	0,
+																	$author$project$Chart$Item$getValue(item))))
+														]))
+												]);
+										})));
+						},
+						code: '\n          C.each (always model.hovering) <| \\p item ->\n            [ C.tooltip item [ CA.offset 0 ] []\n                [ H.text <| String.fromFloat (CI.getInd item)\n                , H.text ", "\n                , H.text <| String.fromFloat (CI.getValue item)\n                ]\n            ]\n              ',
+						title: 'Offset'
+					},
+						{
+						chart: function (_v12) {
+							return A2(
+								frame,
+								_List_fromArray(
+									[
+										A2(
+										$author$project$Chart$event,
+										'mousemove',
+										A2(
+											$author$project$Chart$map,
+											A2($elm$core$Basics$composeR, $author$project$Section$Interactivity$OnHover, onMsg),
+											A2($author$project$Chart$getNearest, $author$project$Chart$Item$getCenter, $elm$core$Basics$identity))),
+										A2(
+										$author$project$Chart$event,
+										'mouseleave',
+										A2(
+											$author$project$Chart$map,
+											function (_v13) {
+												return onMsg(
+													$author$project$Section$Interactivity$OnHover(_List_Nil));
+											},
+											$author$project$Chart$getCoords))
+									]),
+								A2(
+									$author$project$Chart$each,
+									function (_v14) {
+										return model.hovering;
+									},
+									F2(
+										function (p, item) {
+											return _List_fromArray(
+												[
+													A4(
+													$author$project$Chart$tooltip,
+													item,
+													_List_fromArray(
+														[
+															$author$project$Chart$Attributes$width(20),
+															$author$project$Chart$Attributes$onLeftOrRight
+														]),
+													_List_Nil,
+													_List_fromArray(
+														[
+															$elm$html$Html$text(
+															$elm$core$String$fromFloat(
+																$author$project$Chart$Item$getInd(item))),
+															$elm$html$Html$text(', '),
+															$elm$html$Html$text(
+															$elm$core$String$fromFloat(
+																A2(
+																	$elm$core$Maybe$withDefault,
+																	0,
+																	$author$project$Chart$Item$getValue(item))))
+														]))
+												]);
+										})));
+						},
+						code: '\n          C.each (always model.hovering) <| \\p item ->\n            [ C.tooltip item [ CA.width 20, CA.onLeftOrRight ] []\n                [ H.text <| String.fromFloat (CI.getInd item)\n                , H.text ", "\n                , H.text <| String.fromFloat (CI.getValue item)\n                ]\n            ]\n              ',
+						title: 'Width'
+					},
+						{
+						chart: function (_v15) {
+							return A2(
+								frame,
+								_List_fromArray(
+									[
+										A2(
+										$author$project$Chart$event,
+										'mousemove',
+										A2(
+											$author$project$Chart$map,
+											A2($elm$core$Basics$composeR, $author$project$Section$Interactivity$OnHover, onMsg),
+											A2($author$project$Chart$getNearest, $author$project$Chart$Item$getCenter, $elm$core$Basics$identity))),
+										A2(
+										$author$project$Chart$event,
+										'mouseleave',
+										A2(
+											$author$project$Chart$map,
+											function (_v16) {
+												return onMsg(
+													$author$project$Section$Interactivity$OnHover(_List_Nil));
+											},
+											$author$project$Chart$getCoords))
+									]),
+								A2(
+									$author$project$Chart$each,
+									function (_v17) {
+										return model.hovering;
+									},
+									F2(
+										function (p, item) {
+											return _List_fromArray(
+												[
+													A4(
+													$author$project$Chart$tooltip,
+													item,
+													_List_fromArray(
+														[
+															$author$project$Chart$Attributes$height(20),
+															$author$project$Chart$Attributes$onTopOrBottom
+														]),
+													_List_Nil,
+													_List_fromArray(
+														[
+															$elm$html$Html$text(
+															$elm$core$String$fromFloat(
+																$author$project$Chart$Item$getInd(item))),
+															$elm$html$Html$text(', '),
+															$elm$html$Html$text(
+															$elm$core$String$fromFloat(
+																A2(
+																	$elm$core$Maybe$withDefault,
+																	0,
+																	$author$project$Chart$Item$getValue(item))))
+														]))
+												]);
+										})));
+						},
+						code: '\n          C.each (always model.hovering) <| \\p item ->\n            [ C.tooltip item [ CA.height 20, CA.onTopOrBottom ] []\n                [ H.text <| String.fromFloat (CI.getInd item)\n                , H.text ", "\n                , H.text <| String.fromFloat (CI.getValue item)\n                ]\n            ]\n              ',
+						title: 'Height'
+					},
+						{
+						chart: function (_v18) {
+							return A2(
+								frame,
+								_List_fromArray(
+									[
+										A2(
+										$author$project$Chart$event,
+										'mousemove',
+										A2(
+											$author$project$Chart$map,
+											A2($elm$core$Basics$composeR, $author$project$Section$Interactivity$OnHover, onMsg),
+											A2($author$project$Chart$getNearest, $author$project$Chart$Item$getCenter, $elm$core$Basics$identity))),
+										A2(
+										$author$project$Chart$event,
+										'mouseleave',
+										A2(
+											$author$project$Chart$map,
+											function (_v19) {
+												return onMsg(
+													$author$project$Section$Interactivity$OnHover(_List_Nil));
+											},
+											$author$project$Chart$getCoords))
+									]),
+								A2(
+									$author$project$Chart$each,
+									function (_v20) {
+										return model.hovering;
+									},
+									F2(
+										function (p, item) {
+											return _List_fromArray(
+												[
+													A4(
+													$author$project$Chart$tooltip,
+													item,
+													_List_fromArray(
+														[
+															$author$project$Chart$Attributes$border('red')
+														]),
+													_List_Nil,
+													_List_fromArray(
+														[
+															$elm$html$Html$text(
+															$elm$core$String$fromFloat(
+																$author$project$Chart$Item$getInd(item))),
+															$elm$html$Html$text(', '),
+															$elm$html$Html$text(
+															$elm$core$String$fromFloat(
+																A2(
+																	$elm$core$Maybe$withDefault,
+																	0,
+																	$author$project$Chart$Item$getValue(item))))
+														]))
+												]);
+										})));
+						},
+						code: '\n          C.each (always model.hovering) <| \\p item ->\n            [ C.tooltip item [ CA.border "red" ] []\n                [ H.text <| String.fromFloat (CI.getInd item)\n                , H.text ", "\n                , H.text <| String.fromFloat (CI.getValue item)\n                ]\n            ]\n              ',
+						title: 'Border'
+					},
+						{
+						chart: function (_v21) {
+							return A2(
+								frame,
+								_List_fromArray(
+									[
+										A2(
+										$author$project$Chart$event,
+										'mousemove',
+										A2(
+											$author$project$Chart$map,
+											A2($elm$core$Basics$composeR, $author$project$Section$Interactivity$OnHover, onMsg),
+											A2($author$project$Chart$getNearest, $author$project$Chart$Item$getCenter, $elm$core$Basics$identity))),
+										A2(
+										$author$project$Chart$event,
+										'mouseleave',
+										A2(
+											$author$project$Chart$map,
+											function (_v22) {
+												return onMsg(
+													$author$project$Section$Interactivity$OnHover(_List_Nil));
+											},
+											$author$project$Chart$getCoords))
+									]),
+								A2(
+									$author$project$Chart$each,
+									function (_v23) {
+										return model.hovering;
+									},
+									F2(
+										function (p, item) {
+											return _List_fromArray(
+												[
+													A4(
+													$author$project$Chart$tooltip,
+													item,
+													_List_fromArray(
+														[
+															$author$project$Chart$Attributes$background('beige')
+														]),
+													_List_Nil,
+													_List_fromArray(
+														[
+															$elm$html$Html$text(
+															$elm$core$String$fromFloat(
+																$author$project$Chart$Item$getInd(item))),
+															$elm$html$Html$text(', '),
+															$elm$html$Html$text(
+															$elm$core$String$fromFloat(
+																A2(
+																	$elm$core$Maybe$withDefault,
+																	0,
+																	$author$project$Chart$Item$getValue(item))))
+														]))
+												]);
+										})));
+						},
+						code: '\n          C.each (always model.hovering) <| \\p item ->\n            [ C.tooltip item [ CA.background "beige" ] []\n                [ H.text <| String.fromFloat (CI.getInd item)\n                , H.text ", "\n                , H.text <| String.fromFloat (CI.getValue item)\n                ]\n            ]\n              ',
+						title: 'Background'
+					}
+					]),
+				frame: '\n        C.chart\n          [ CA.height 300\n          , CA.width 300\n          , CA.events\n              [ C.event "mousemove" <|\n                  C.map OnHover (C.getNearest CI.getCenter identity)\n              , C.event "mouseleave" <|\n                  C.map OnReset C.getCoords\n              ]\n          ]\n          [ C.grid []\n          , C.xLabels []\n          , C.yLabels []\n          , C.series .x props data\n          , {{CONFIG}}\n          ]\n        ',
+				onSelect: onSelect,
+				selected: selected,
+				title: 'Interactivity'
+			});
+	});
+var $author$project$Chart$Attributes$bottom = F2(
+	function (value, config) {
+		return _Utils_update(
+			config,
+			{bottom: value});
+	});
+var $author$project$Chart$Attributes$dashed = F2(
+	function (value, config) {
+		return _Utils_update(
+			config,
+			{dashed: value});
+	});
+var $author$project$Section$LineChart$Datum = F7(
+	function (x, y, z, v, w, p, q) {
+		return {p: p, q: q, v: v, w: w, x: x, y: y, z: z};
+	});
+var $author$project$Section$LineChart$data = function () {
+	var toDatum = F7(
+		function (x, y, z, v, w, p, q) {
+			return A7(
+				$author$project$Section$LineChart$Datum,
+				x,
+				$elm$core$Maybe$Just(y),
+				$elm$core$Maybe$Just(z),
+				$elm$core$Maybe$Just(v),
+				$elm$core$Maybe$Just(w),
+				$elm$core$Maybe$Just(p),
+				$elm$core$Maybe$Just(q));
+		});
+	return _List_fromArray(
+		[
+			A7(toDatum, 1, 2, 1, 4.6, 6.9, 7.3, 8.0),
+			A7(toDatum, 2, 3, 2, 5.2, 6.2, 7.0, 8.7),
+			A7(toDatum, 3, 4, 3, 5.5, 5.2, 7.2, 8.1),
+			A7(toDatum, 4, 3, 4, 5.3, 5.7, 6.2, 7.8),
+			A7(toDatum, 5, 2, 3, 4.9, 5.9, 6.7, 8.2),
+			A7(toDatum, 6, 4, 1, 4.8, 5.4, 7.2, 8.3),
+			A7(toDatum, 7, 5, 2, 5.3, 5.1, 7.8, 7.1),
+			A7(toDatum, 8, 6, 3, 5.4, 3.9, 7.6, 8.5),
+			A7(toDatum, 9, 5, 4, 5.8, 4.6, 6.5, 6.9),
+			A7(toDatum, 10, 4, 3, 4.5, 5.3, 6.3, 7.0)
+		]);
+}();
+var $author$project$Chart$Attributes$Gradient = function (a) {
+	return {$: 'Gradient', a: a};
+};
+var $author$project$Chart$Attributes$gradient = F2(
+	function (attrs_, config) {
+		return _Utils_update(
+			config,
+			{
+				design: $elm$core$Maybe$Just(
+					$author$project$Chart$Attributes$Gradient(attrs_)),
+				opacity: (!config.opacity) ? 1 : config.opacity
+			});
+	});
+var $author$project$Chart$Attributes$Linear = {$: 'Linear'};
+var $author$project$Chart$Attributes$linear = function (config) {
+	return _Utils_update(
+		config,
+		{
+			method: $elm$core$Maybe$Just($author$project$Chart$Attributes$Linear)
+		});
+};
+var $author$project$Chart$Attributes$Monotone = {$: 'Monotone'};
+var $author$project$Chart$Attributes$monotone = function (config) {
+	return _Utils_update(
+		config,
+		{
+			method: $elm$core$Maybe$Just($author$project$Chart$Attributes$Monotone)
+		});
+};
 var $author$project$Chart$Attributes$space = F2(
 	function (value, config) {
 		return _Utils_update(
@@ -21868,115 +22781,18 @@ var $author$project$Chart$eachProduct = function (func) {
 					is);
 			}));
 };
-var $author$project$Chart$Event = function (a) {
-	return {$: 'Event', a: a};
-};
-var $author$project$Chart$event = F2(
-	function (name_, decoder) {
-		return $author$project$Chart$Event(
-			{decoder: decoder, name: name_});
-	});
 var $author$project$Chart$exactly = F3(
 	function (exact, _v0, _v1) {
 		return exact;
-	});
-var $author$project$Chart$Item$getCenter = F2(
-	function (plane, _v0) {
-		var config = _v0.a;
-		var pos = A2(config.position, plane, config.details);
-		return {x: pos.x1 + ((pos.x2 - pos.x1) / 2), y: pos.y1 + ((pos.y2 - pos.y1) / 2)};
 	});
 var $author$project$Chart$Item$getColor = function (_v0) {
 	var config = _v0.a;
 	return config.details.config.color;
 };
-var $author$project$Chart$Decoder = function (a) {
-	return {$: 'Decoder', a: a};
-};
-var $author$project$Svg$Coordinates$toCartesianX = F2(
-	function (plane, value) {
-		return A2($author$project$Svg$Coordinates$scaleCartesianX, plane, value - plane.margin.left) + plane.x.min;
-	});
-var $author$project$Svg$Coordinates$toCartesianY = F2(
-	function (plane, value) {
-		return ($author$project$Svg$Coordinates$range(plane.y) - A2($author$project$Svg$Coordinates$scaleCartesianY, plane, value - plane.margin.top)) + plane.y.min;
-	});
-var $author$project$Chart$getCoords = $author$project$Chart$Decoder(
-	F3(
-		function (_v0, plane, searched) {
-			return {
-				x: A2($author$project$Svg$Coordinates$toCartesianX, plane, searched.x),
-				y: A2($author$project$Svg$Coordinates$toCartesianY, plane, searched.y)
-			};
-		}));
 var $author$project$Chart$Item$getDatum = function (_v0) {
 	var config = _v0.a;
 	return config.details.datum;
 };
-var $author$project$Chart$Svg$distanceX = F3(
-	function (plane, searched, point) {
-		return $elm$core$Basics$abs(
-			A2($author$project$Svg$Coordinates$toSVGX, plane, point.x) - A2($author$project$Svg$Coordinates$toSVGX, plane, searched.x));
-	});
-var $author$project$Chart$Svg$distanceY = F3(
-	function (plane, searched, point) {
-		return $elm$core$Basics$abs(
-			A2($author$project$Svg$Coordinates$toSVGY, plane, point.y) - A2($author$project$Svg$Coordinates$toSVGY, plane, searched.y));
-	});
-var $author$project$Chart$Svg$distance = F3(
-	function (plane, searched, point) {
-		return $elm$core$Basics$sqrt(
-			A2(
-				$elm$core$Basics$pow,
-				A3($author$project$Chart$Svg$distanceX, plane, searched, point),
-				2) + A2(
-				$elm$core$Basics$pow,
-				A3($author$project$Chart$Svg$distanceY, plane, searched, point),
-				2));
-	});
-var $author$project$Chart$Svg$getNearestHelp = F4(
-	function (toPoint, items, plane, searched) {
-		var distance_ = A2($author$project$Chart$Svg$distance, plane, searched);
-		var getClosest = F2(
-			function (item, allClosest) {
-				var _v0 = $elm$core$List$head(allClosest);
-				if (_v0.$ === 'Just') {
-					var closest = _v0.a;
-					return _Utils_eq(
-						toPoint(closest),
-						toPoint(item)) ? A2($elm$core$List$cons, item, allClosest) : ((_Utils_cmp(
-						distance_(
-							toPoint(closest)),
-						distance_(
-							toPoint(item))) > 0) ? _List_fromArray(
-						[item]) : allClosest);
-				} else {
-					return _List_fromArray(
-						[item]);
-				}
-			});
-		return A3($elm$core$List$foldl, getClosest, _List_Nil, items);
-	});
-var $author$project$Chart$Svg$getNearest = F4(
-	function (toPoint, items, plane, searchedSvg) {
-		var searched = {
-			x: A2($author$project$Svg$Coordinates$toCartesianX, plane, searchedSvg.x),
-			y: A2($author$project$Svg$Coordinates$toCartesianY, plane, searchedSvg.y)
-		};
-		return A4($author$project$Chart$Svg$getNearestHelp, toPoint, items, plane, searched);
-	});
-var $author$project$Chart$getNearest = F2(
-	function (toPoint, filterItems) {
-		return $author$project$Chart$Decoder(
-			F2(
-				function (items, plane) {
-					return A3(
-						$author$project$Chart$Svg$getNearest,
-						toPoint(plane),
-						filterItems(items),
-						plane);
-				}));
-	});
 var $author$project$Chart$Item$getTop = F2(
 	function (plane, _v0) {
 		var config = _v0.a;
@@ -21990,31 +22806,6 @@ var $author$project$Chart$highest = F3(
 			{
 				max: A3(edit, x, b.max, b.dataMax)
 			});
-	});
-var $author$project$Chart$HtmlElement = function (a) {
-	return {$: 'HtmlElement', a: a};
-};
-var $author$project$Chart$Svg$positionHtml = F7(
-	function (plane, x, y, xOff, yOff, attrs, content) {
-		var yPercentage = ((A2($author$project$Svg$Coordinates$toSVGY, plane, y) + (-yOff)) * 100) / plane.height;
-		var xPercentage = ((A2($author$project$Svg$Coordinates$toSVGX, plane, x) + xOff) * 100) / plane.width;
-		var posititonStyles = _List_fromArray(
-			[
-				A2(
-				$elm$html$Html$Attributes$style,
-				'left',
-				$elm$core$String$fromFloat(xPercentage) + '%'),
-				A2(
-				$elm$html$Html$Attributes$style,
-				'top',
-				$elm$core$String$fromFloat(yPercentage) + '%'),
-				A2($elm$html$Html$Attributes$style, 'margin-right', '-400px'),
-				A2($elm$html$Html$Attributes$style, 'position', 'absolute')
-			]);
-		return A2(
-			$elm$html$Html$div,
-			_Utils_ap(posititonStyles, attrs),
-			content);
 	});
 var $author$project$Chart$htmlAt = F6(
 	function (toX, toY, xOff, yOff, att, view) {
@@ -22040,16 +22831,6 @@ var $author$project$Chart$line = function (attrs) {
 			return A2($author$project$Chart$Svg$line, p, attrs);
 		});
 };
-var $author$project$Chart$map = F2(
-	function (f, _v0) {
-		var a = _v0.a;
-		return $author$project$Chart$Decoder(
-			F3(
-				function (ps, s, p) {
-					return f(
-						A3(a, ps, s, p));
-				}));
-	});
 var $author$project$Chart$map2 = F3(
 	function (f, _v0, _v1) {
 		var a = _v0.a;
@@ -22635,171 +23416,6 @@ var $author$project$Chart$title = F3(
 		return $author$project$Chart$SvgElement(
 			function (p) {
 				return A4($author$project$Chart$Svg$label, p, attrs, inner, point);
-			});
-	});
-var $author$project$Chart$html = function (func) {
-	return $author$project$Chart$HtmlElement(
-		function (p) {
-			return func(p);
-		});
-};
-var $author$project$Chart$Attributes$Bottom = {$: 'Bottom'};
-var $author$project$Chart$Attributes$Left = {$: 'Left'};
-var $author$project$Chart$Attributes$Right = {$: 'Right'};
-var $author$project$Chart$Attributes$Top = {$: 'Top'};
-var $elm$core$List$all = F2(
-	function (isOkay, list) {
-		return !A2(
-			$elm$core$List$any,
-			A2($elm$core$Basics$composeL, $elm$core$Basics$not, isOkay),
-			list);
-	});
-var $elm$html$Html$map = $elm$virtual_dom$VirtualDom$map;
-var $author$project$Chart$Svg$tooltipPointerStyle = F4(
-	function (direction, className, background, borderColor) {
-		var config = function () {
-			switch (direction.$) {
-				case 'Top':
-					return {a: 'right', b: 'top', c: 'left'};
-				case 'Bottom':
-					return {a: 'right', b: 'bottom', c: 'left'};
-				case 'Left':
-					return {a: 'bottom', b: 'left', c: 'top'};
-				case 'Right':
-					return {a: 'bottom', b: 'right', c: 'top'};
-				case 'LeftOrRight':
-					return {a: 'bottom', b: 'left', c: 'top'};
-				default:
-					return {a: 'right', b: 'top', c: 'left'};
-			}
-		}();
-		return '\n  .' + (className + (':before, .' + (className + (':after {\n    content: "";\n    position: absolute;\n    border-' + (config.c + (': 5px solid transparent;\n    border-' + (config.a + (': 5px solid transparent;\n    ' + (config.b + (': 100%;\n    ' + (config.c + (': 50%;\n    margin-' + (config.c + (': -5px;\n  }\n\n  .' + (className + (':after {\n    border-' + (config.b + (': 5px solid ' + (background + (';\n    margin-' + (config.b + (': -1px;\n    z-index: 1;\n  }\n\n  .' + (className + (':before {\n    border-' + (config.b + (': 5px solid ' + (borderColor + ';\n  }\n  ')))))))))))))))))))))))))));
-	});
-var $author$project$Chart$Svg$tooltip = F5(
-	function (plane, pos, edits, htmlAttrs, content) {
-		var distanceTop = A2($author$project$Svg$Coordinates$toSVGY, plane, pos.y2);
-		var distanceRight = plane.width - A2($author$project$Svg$Coordinates$toSVGX, plane, pos.x1);
-		var distanceLeft = A2($author$project$Svg$Coordinates$toSVGX, plane, pos.x2);
-		var distanceBottom = plane.height - A2($author$project$Svg$Coordinates$toSVGY, plane, pos.y1);
-		var config = A2(
-			$author$project$Chart$Svg$apply,
-			edits,
-			{background: 'white', border: '#D8D8D8', direction: $elm$core$Maybe$Nothing, height: 0, offset: 12, pointer: true, width: 0});
-		var direction = function () {
-			var _v4 = config.direction;
-			if (_v4.$ === 'Just') {
-				switch (_v4.a.$) {
-					case 'LeftOrRight':
-						var _v5 = _v4.a;
-						return (config.width > 0) ? ((_Utils_cmp(distanceLeft, config.width + config.offset) > 0) ? $author$project$Chart$Attributes$Left : $author$project$Chart$Attributes$Right) : ((_Utils_cmp(distanceLeft, distanceRight) > 0) ? $author$project$Chart$Attributes$Left : $author$project$Chart$Attributes$Right);
-					case 'TopOrBottom':
-						var _v6 = _v4.a;
-						return (config.height > 0) ? ((_Utils_cmp(distanceTop, config.height + config.offset) > 0) ? $author$project$Chart$Attributes$Top : $author$project$Chart$Attributes$Bottom) : ((_Utils_cmp(distanceTop, distanceBottom) > 0) ? $author$project$Chart$Attributes$Top : $author$project$Chart$Attributes$Bottom);
-					default:
-						var dir = _v4.a;
-						return dir;
-				}
-			} else {
-				var isLargest = function (a) {
-					return $elm$core$List$all(
-						function (b) {
-							return _Utils_cmp(a, b) > -1;
-						});
-				};
-				return A2(
-					isLargest,
-					distanceTop,
-					_List_fromArray(
-						[distanceBottom, distanceLeft, distanceRight])) ? $author$project$Chart$Attributes$Top : (A2(
-					isLargest,
-					distanceBottom,
-					_List_fromArray(
-						[distanceTop, distanceLeft, distanceRight])) ? $author$project$Chart$Attributes$Bottom : (A2(
-					isLargest,
-					distanceLeft,
-					_List_fromArray(
-						[distanceTop, distanceBottom, distanceRight])) ? $author$project$Chart$Attributes$Left : $author$project$Chart$Attributes$Right));
-			}
-		}();
-		var _v0 = function () {
-			switch (direction.$) {
-				case 'Top':
-					return _Utils_Tuple2(pos.x1 + ((pos.x2 - pos.x1) / 2), pos.y2);
-				case 'Bottom':
-					return _Utils_Tuple2(pos.x1 + ((pos.x2 - pos.x1) / 2), pos.y1);
-				case 'Left':
-					return _Utils_Tuple2(pos.x1, pos.y1 + ((pos.y2 - pos.y1) / 2));
-				case 'Right':
-					return _Utils_Tuple2(pos.x2, pos.y1 + ((pos.y2 - pos.y1) / 2));
-				case 'LeftOrRight':
-					return _Utils_Tuple2(pos.x2, pos.y1 + ((pos.y2 - pos.y1) / 2));
-				default:
-					return _Utils_Tuple2(pos.x1 + ((pos.x2 - pos.x1) / 2), pos.y2);
-			}
-		}();
-		var x = _v0.a;
-		var y = _v0.b;
-		var _v2 = function () {
-			switch (direction.$) {
-				case 'Top':
-					return {className: 'elm-charts__tooltip-top', transformation: 'translate(-50%, -100%)', xOff: 0, yOff: -config.offset};
-				case 'Bottom':
-					return {className: 'elm-charts__tooltip-bottom', transformation: 'translate(-50%, 0%)', xOff: 0, yOff: config.offset};
-				case 'Left':
-					return {className: 'elm-charts__tooltip-left', transformation: 'translate(-100%, -50%)', xOff: -config.offset, yOff: 0};
-				case 'Right':
-					return {className: 'elm-charts__tooltip-right', transformation: 'translate(0, -50%)', xOff: config.offset, yOff: 0};
-				case 'LeftOrRight':
-					return {className: 'elm-charts__tooltip-leftOrRight', transformation: 'translate(0, -50%)', xOff: -config.offset, yOff: 0};
-				default:
-					return {className: 'elm-charts__tooltip-topOrBottom', transformation: 'translate(-50%, -100%)', xOff: 0, yOff: config.offset};
-			}
-		}();
-		var xOff = _v2.xOff;
-		var yOff = _v2.yOff;
-		var transformation = _v2.transformation;
-		var className = _v2.className;
-		var children = config.pointer ? A2(
-			$elm$core$List$cons,
-			A3(
-				$elm$html$Html$node,
-				'style',
-				_List_Nil,
-				_List_fromArray(
-					[
-						$elm$html$Html$text(
-						A4($author$project$Chart$Svg$tooltipPointerStyle, direction, className, config.background, config.border))
-					])),
-			content) : content;
-		var attributes = _Utils_ap(
-			_List_fromArray(
-				[
-					$elm$html$Html$Attributes$class(className),
-					A2($elm$html$Html$Attributes$style, 'transform', transformation),
-					A2($elm$html$Html$Attributes$style, 'padding', '5px 10px'),
-					A2($elm$html$Html$Attributes$style, 'background', config.background),
-					A2($elm$html$Html$Attributes$style, 'border', '1px solid ' + config.border),
-					A2($elm$html$Html$Attributes$style, 'border-radius', '3px'),
-					A2($elm$html$Html$Attributes$style, 'pointer-events', 'none')
-				]),
-			htmlAttrs);
-		return A2(
-			$elm$html$Html$map,
-			$elm$core$Basics$never,
-			A7($author$project$Chart$Svg$positionHtml, plane, x, y, xOff, yOff, attributes, children));
-	});
-var $author$project$Chart$tooltip = F4(
-	function (i, edits, attrs_, content) {
-		return $author$project$Chart$html(
-			function (p) {
-				var pos = $author$project$Chart$Item$getLimits(i);
-				return A3($author$project$Chart$Svg$isWithinPlane, p, pos.x1, pos.y2) ? A5(
-					$author$project$Chart$Svg$tooltip,
-					p,
-					A2($author$project$Chart$Item$getPosition, p, i),
-					edits,
-					attrs_,
-					content) : $elm$html$Html$text('');
 			});
 	});
 var $author$project$Chart$marginBottom = F2(
@@ -23861,7 +24477,8 @@ var $author$project$Features$view = function (model) {
 							A2($author$project$Section$ScatterChart$view, $author$project$Features$OnExploration, model.exploration),
 							A2($author$project$Section$LineChart$view, $author$project$Features$OnExploration, model.exploration),
 							A2($author$project$Section$BarChart$view, $author$project$Features$OnExploration, model.exploration),
-							A2($author$project$Section$CustomLabels$view, $author$project$Features$OnExploration, model.exploration)
+							A2($author$project$Section$CustomAxes$view, $author$project$Features$OnExploration, model.exploration),
+							A4($author$project$Section$Interactivity$view, $author$project$Features$OnExploration, model.exploration, $author$project$Features$OnInteractivity, model.interactivity)
 						]))
 				])));
 };

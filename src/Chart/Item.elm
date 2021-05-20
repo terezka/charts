@@ -6,7 +6,7 @@ module Chart.Item exposing
   , isSameSeries, isSameBin, isSameStack, isSame
   , getProducts, getCommonality
   , getValue, getDatum, getColor, getName
-  , getTop, getCenter, getLeft, getRight, getX1, getX2, getY2, getY1, getPosition, getLimits
+  , getTop, getCenter, getLeft, getRight, getInd, getX1, getX2, getY2, getY1, getPosition, getLimits
   , Property, Bars, toBarSeries, toDotSeries, render
   )
 
@@ -296,6 +296,12 @@ getLimits (Item config) =
 getDatum : Item { config | datum : datum } -> datum
 getDatum (Item config) =
   config.details.datum
+
+
+{-| -} -- TODO
+getInd : Item { config | x1 : Float } -> Float
+getInd (Item config) =
+  config.details.x1
 
 
 {-| -}

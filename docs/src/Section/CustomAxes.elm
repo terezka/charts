@@ -1,4 +1,4 @@
-module Section.CustomLabels exposing (..)
+module Section.CustomAxes exposing (..)
 
 
 import Html as H

@@ -5,7 +5,7 @@ module Chart.Attributes exposing
   , Design(..), GradientConfig, Pattern, space, striped, dotted, gradient, top, bottom, dashed, break
   , Method(..), linear, monotone
   , Shape(..), circle, triangle, square, diamond, plus, cross, shape
-  , Direction(..), onTop, onBottom, onRight, onLeft, onLeftOrRight, onTopOrBottom
+  , Direction(..), onTop, onBottom, onRight, onLeft, onLeftOrRight, onTopOrBottom, noPointer
   , blue, pink, orange, green, purple, red, turquoise
   , background, attrs, htmlAttrs, static, events
   )
@@ -437,6 +437,11 @@ onTopOrBottom : Attribute { a | direction : Maybe Direction }
 onTopOrBottom config =
   { config | direction = Just TopOrBottom }
 
+
+-- TODO arrow intead?
+noPointer : Attribute { a | pointer : Bool }
+noPointer config =
+  { config | pointer = False }
 
 
 -- COLORS

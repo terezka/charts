@@ -27,7 +27,8 @@ import SyntaxHighlight as SH
 import Section.ScatterChart
 import Section.LineChart
 import Section.BarChart
-import Section.CustomLabels
+import Section.CustomAxes
+import Section.Interactivity
 
 
 main =
@@ -40,6 +41,7 @@ main =
 
 type alias Model =
   { exploration : Dict.Dict String Int
+  , interactivity : Section.Interactivity.Model
 
   , select : Maybe { a : Float, b : Float }
   , rangeMin : Float
@@ -59,7 +61,24 @@ type alias Model =
 
 init : Model
 init =
-  Model Dict.empty Nothing 1262217600000 1640908800000 [] [] [] [] Nothing [] Nothing 2019
+  { exploration = Dict.empty
+  , interactivity = Section.Interactivity.init
+
+  , select = Nothing
+  , rangeMin = 1262217600000
+  , rangeMax = 1640908800000
+
+  , hoveringScatter = []
+  , hoveringBars = []
+  , hoveringStackedBars = []
+  , hoveringBinnedBars = []
+  -- SALERY
+  , salarySelection = Nothing
+  , salaryHovering = []
+  , salaryWindow = Nothing
+  , salaryYear = 2019
+  }
+
 
 
 type alias ScatterDatum =
@@ -73,6 +92,7 @@ type alias ScatterDatum =
 
 type Msg
   = OnExploration String Int
+  | OnInteractivity Section.Interactivity.Msg
 
   | OnMouseDown Coordinates.Point
   | OnMouseMove Coordinates.Point
@@ -97,6 +117,9 @@ update msg model =
   case msg of
     OnExploration title selected ->
       { model | exploration = Dict.insert title selected model.exploration }
+
+    OnInteractivity subMsg ->
+      { model | interactivity = Section.Interactivity.update subMsg model.interactivity }
 
     --
 
@@ -264,7 +287,8 @@ view model =
           [ Section.ScatterChart.view OnExploration model.exploration
           , Section.LineChart.view OnExploration model.exploration
           , Section.BarChart.view OnExploration model.exploration
-          , Section.CustomLabels.view OnExploration model.exploration
+          , Section.CustomAxes.view OnExploration model.exploration
+          , Section.Interactivity.view OnExploration model.exploration OnInteractivity model.interactivity
           ]
       ]
 
