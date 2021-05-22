@@ -11,6 +11,8 @@ import Element as E
 import Element.Font as F
 import Element.Border as B
 import Element.Background as BG
+import Ui.Layout as Layout
+
 
 page : Shared.Model -> Request.With Params -> Page.With Model Msg
 page shared req =
@@ -57,33 +59,33 @@ view : Model -> View Msg
 view model =
     { title = "elm-charts"
     , body =
-        List.singleton <| viewLayout
+        viewLayout
           { chart = H.map SaleryDistMsg (SaleryDist.view model.saleryDist)
           , navigation =
               [ { title = "Explore"
                 , links =
-                    [ "Scatter charts"
-                    , "Line charts"
-                    , "Bar charts"
-                    , "Interactivity"
-                    , "Custom axes"
-                    , "Custom labels"
+                    [ Link "/explore#scatter-charts" "Scatter charts"
+                    , Link "/explore#line-charts" "Line charts"
+                    , Link "/explore#bar-charts" "Bar charts"
+                    , Link "/explore#interactivity" "Interactivity"
+                    , Link "/explore#custom-axes" "Custom axes"
+                    , Link "/explore#custom-labels" "Custom labels"
                     ]
                 }
               , { title = "Real data examples"
                 , links =
-                    [ "Salary distribution in Denmark"
-                    , "Perceptions of Probability"
-                    , "Community examples"
+                    [ Link "/real#salery-distribution" "Salary distribution in Denmark"
+                    , Link "/real#perceptions-of-probability" "Perceptions of Probability"
+                    , Link "/real#community-examples" "Community examples"
                     ]
                 }
               , { title = "Administration"
                 , links =
-                    [ "Roadmap"
-                    , "Donating"
-                    , "Consulting"
-                    , "Github"
-                    , "Twitter"
+                    [ Link "/roadmap" "Roadmap"
+                    , Link "/donating" "Donating"
+                    , Link "/consulting" "Consulting"
+                    , Link "https://github.com/terezka/charts" "Github"
+                    , Link "https://twitter.com/tereza_sokol" "Twitter"
                     ]
                 }
               ]
@@ -91,51 +93,47 @@ view model =
     }
 
 
-viewLayout : { chart : H.Html Msg, navigation : List Group } -> H.Html Msg
+viewLayout : { chart : H.Html Msg, navigation : List Group } -> List (H.Html Msg)
 viewLayout config =
-  E.layout
-    [ E.width E.fill
-    , F.family [ F.typeface "IBM Plex Sans", F.sansSerif ]
-    ] <|
-    E.column
-      [ E.width (E.maximum 1000 E.fill)
-      , E.paddingEach { top = 30, bottom = 20, left = 0, right = 0 }
-      , E.centerX
-      , F.size 12
-      , F.color (E.rgb255 80 80 80)
-      ]
-      [ E.html config.chart
-      , E.row
-          [ F.size 50
-          , E.paddingEach { top = 50, bottom = 10, left = 0, right = 0 }
-          ]
-          [ E.text "elm-charts"
-          , E.el [ F.color (E.rgb255 130 130 130) ] (E.text "-alpha")
-          ]
-      , E.el
-          [ E.paddingEach { top = 0, bottom = 25, left = 0, right = 0 }
-          , F.color (E.rgb255 130 130 130)
-          , F.size 14
-          ]
-          (E.text "Alpha version. Feel free to use, but please do not share publicly yet. Documentation is unfinished/wrong and API liable to breaking changes.")
-      , E.row
-          [ E.spaceEvenly
-          , E.width (E.maximum 600 E.fill)
-          ]
-          (List.map viewGroup config.navigation)
-      , E.el
-          [ F.size 12
-          , F.color (E.rgb255 180 180 180)
-          , E.paddingEach { top = 20, bottom = 0, left = 0, right = 0 }
-          , E.alignRight
-          ]
-          (E.text "Designed and developed by Tereza Sokol © 2021")
-      ]
+  Layout.view
+    [ E.html config.chart
+    , E.row
+        [ F.size 50
+        , E.paddingEach { top = 50, bottom = 10, left = 0, right = 0 }
+        ]
+        [ E.text "elm-charts"
+        , E.el [ F.color (E.rgb255 130 130 130) ] (E.text "-alpha")
+        ]
+    , E.el
+        [ E.paddingEach { top = 0, bottom = 25, left = 0, right = 0 }
+        , F.color (E.rgb255 130 130 130)
+        , F.size 14
+        ]
+        (E.text "Alpha version. Feel free to use, but please do not share publicly yet. Documentation is unfinished/wrong and API liable to breaking changes.")
+    , E.row
+        [ E.spaceEvenly
+        , E.width (E.maximum 600 E.fill)
+        ]
+        (List.map viewGroup config.navigation)
+    , E.el
+        [ F.size 12
+        , F.color (E.rgb255 180 180 180)
+        , E.paddingEach { top = 20, bottom = 0, left = 0, right = 0 }
+        , E.alignRight
+        ]
+        (E.text "Designed and developed by Tereza Sokol © 2021")
+    ]
 
 
 type alias Group =
   { title : String
-  , links : List String
+  , links : List Link
+  }
+
+
+type alias Link =
+  { url : String
+  , title : String
   }
 
 
@@ -151,9 +149,16 @@ viewGroup group =
         ]
         (E.text group.title)
     , group.links
-        |> List.map (\l -> E.el [ F.size 13 ] (E.text l))
+        |> List.map viewLink
         |> E.column [ E.spacing 5 ]
     ]
 
 
+
+viewLink : Link -> E.Element Msg
+viewLink link =
+  E.link [ F.size 13 ]
+    { url = link.url
+    , label = E.text link.title
+    }
 

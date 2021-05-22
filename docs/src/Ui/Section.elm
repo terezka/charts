@@ -54,12 +54,12 @@ view config =
   in
   E.column
     [ E.width E.fill
-    , E.paddingEach { top = 25, bottom = 25, left = 0, right = 0 }
+    , E.paddingEach { top = 0, bottom = 70, left = 0, right = 0 }
     ]
     [ E.el
       [ F.size 28
       , E.width E.fill
-      , E.paddingEach { top = 30, bottom = 25, left = 0, right = 0 }
+      , E.paddingEach { top = 0, bottom = 25, left = 0, right = 0 }
       ] (E.text config.title)
     , E.row
         [ E.width E.fill ]
