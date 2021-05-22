@@ -51,7 +51,7 @@ update msg model =
 
 view : (String -> Int -> msg) -> Dict.Dict String Int -> (Msg -> msg) -> Model -> E.Element msg
 view onSelect selected onMsg model =
-  let frame events tooltip =
+  let frame tooltip =
         H.div
           [ HA.style "width" "300px"
           , HA.style "height" "300px"
@@ -59,7 +59,10 @@ view onSelect selected onMsg model =
           [ C.chart
               [ CA.height 300
               , CA.width 300
-              , CA.events events
+              , CA.events
+                  [ C.event "mousemove" (C.map (OnHover >> onMsg) (C.getNearest CI.getCenter identity))
+                  , C.event "mouseleave" (C.map (\_ -> OnHover [] |> onMsg) C.getCoords)
+                  ]
               ]
               [ C.grid []
               , C.xLabels []
@@ -109,10 +112,7 @@ view onSelect selected onMsg model =
             ]
               """
           , chart = \_ ->
-              frame
-                [ C.event "mousemove" (C.map (OnHover >> onMsg) (C.getNearest CI.getCenter identity))
-                , C.event "mouseleave" (C.map (\_ -> OnHover [] |> onMsg) C.getCoords)
-                ] <|
+              frame <|
                 C.each (\_ -> model.hovering) <| \p item ->
                   [ C.tooltip item [] []
                       [ H.text <| String.fromFloat (CI.getInd item) -- TODO
@@ -133,10 +133,7 @@ view onSelect selected onMsg model =
             ]
               """
           , chart = \_ ->
-              frame
-                [ C.event "mousemove" (C.map (OnHover >> onMsg) (C.getNearest CI.getCenter identity))
-                , C.event "mouseleave" (C.map (\_ -> OnHover [] |> onMsg) C.getCoords)
-                ] <|
+              frame <|
                 C.each (\_ -> model.hovering) <| \p item ->
                   [ C.tooltip item [ CA.onLeft ] []
                       [ H.text <| String.fromFloat (CI.getInd item) -- TODO
@@ -157,10 +154,7 @@ view onSelect selected onMsg model =
             ]
               """
           , chart = \_ ->
-              frame
-                [ C.event "mousemove" (C.map (OnHover >> onMsg) (C.getNearest CI.getCenter identity))
-                , C.event "mouseleave" (C.map (\_ -> OnHover [] |> onMsg) C.getCoords)
-                ] <|
+              frame <|
                 C.each (\_ -> model.hovering) <| \p item ->
                   [ C.tooltip item [ CA.noPointer ] []
                       [ H.text <| String.fromFloat (CI.getInd item) -- TODO
@@ -181,10 +175,7 @@ view onSelect selected onMsg model =
             ]
               """
           , chart = \_ ->
-              frame
-                [ C.event "mousemove" (C.map (OnHover >> onMsg) (C.getNearest CI.getCenter identity))
-                , C.event "mouseleave" (C.map (\_ -> OnHover [] |> onMsg) C.getCoords)
-                ] <|
+              frame <|
                 C.each (\_ -> model.hovering) <| \p item ->
                   [ C.tooltip item [ CA.offset 0 ] []
                       [ H.text <| String.fromFloat (CI.getInd item) -- TODO
@@ -205,10 +196,7 @@ view onSelect selected onMsg model =
             ]
               """
           , chart = \_ ->
-              frame
-                [ C.event "mousemove" (C.map (OnHover >> onMsg) (C.getNearest CI.getCenter identity))
-                , C.event "mouseleave" (C.map (\_ -> OnHover [] |> onMsg) C.getCoords)
-                ] <|
+              frame <|
                 C.each (\_ -> model.hovering) <| \p item ->
                   [ C.tooltip item [ CA.width 20, CA.onLeftOrRight ] []
                       [ H.text <| String.fromFloat (CI.getInd item) -- TODO
@@ -229,10 +217,7 @@ view onSelect selected onMsg model =
             ]
               """
           , chart = \_ ->
-              frame
-                [ C.event "mousemove" (C.map (OnHover >> onMsg) (C.getNearest CI.getCenter identity))
-                , C.event "mouseleave" (C.map (\_ -> OnHover [] |> onMsg) C.getCoords)
-                ] <|
+              frame <|
                 C.each (\_ -> model.hovering) <| \p item ->
                   [ C.tooltip item [ CA.height 20, CA.onTopOrBottom  ] []
                       [ H.text <| String.fromFloat (CI.getInd item) -- TODO
@@ -253,10 +238,7 @@ view onSelect selected onMsg model =
             ]
               """
           , chart = \_ ->
-              frame
-                [ C.event "mousemove" (C.map (OnHover >> onMsg) (C.getNearest CI.getCenter identity))
-                , C.event "mouseleave" (C.map (\_ -> OnHover [] |> onMsg) C.getCoords)
-                ] <|
+              frame <|
                 C.each (\_ -> model.hovering) <| \p item ->
                   [ C.tooltip item [ CA.border "red" ] []
                       [ H.text <| String.fromFloat (CI.getInd item) -- TODO
@@ -277,10 +259,7 @@ view onSelect selected onMsg model =
             ]
               """
           , chart = \_ ->
-              frame
-                [ C.event "mousemove" (C.map (OnHover >> onMsg) (C.getNearest CI.getCenter identity))
-                , C.event "mouseleave" (C.map (\_ -> OnHover [] |> onMsg) C.getCoords)
-                ] <|
+              frame <|
                 C.each (\_ -> model.hovering) <| \p item ->
                   [ C.tooltip item [ CA.background "beige" ] []
                       [ H.text <| String.fromFloat (CI.getInd item) -- TODO

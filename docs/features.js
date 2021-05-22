@@ -20349,67 +20349,23 @@ var $author$project$Chart$tooltip = F4(
 	});
 var $author$project$Section$Interactivity$view = F4(
 	function (onSelect, selected, onMsg, model) {
-		var frame = F2(
-			function (events, tooltip) {
-				return A2(
-					$elm$html$Html$div,
-					_List_fromArray(
-						[
-							A2($elm$html$Html$Attributes$style, 'width', '300px'),
-							A2($elm$html$Html$Attributes$style, 'height', '300px')
-						]),
-					_List_fromArray(
-						[
-							A2(
-							$author$project$Chart$chart,
-							_List_fromArray(
-								[
-									$author$project$Chart$Attributes$height(300),
-									$author$project$Chart$Attributes$width(300),
-									$author$project$Chart$Attributes$events(events)
-								]),
-							_List_fromArray(
-								[
-									$author$project$Chart$grid(_List_Nil),
-									$author$project$Chart$xLabels(_List_Nil),
-									$author$project$Chart$yLabels(_List_Nil),
-									A3(
-									$author$project$Chart$series,
-									function ($) {
-										return $.x;
-									},
-									_List_fromArray(
-										[
-											A4(
-											$author$project$Chart$property,
-											function ($) {
-												return $.y;
-											},
-											'y',
-											_List_Nil,
-											_List_Nil),
-											A4(
-											$author$project$Chart$property,
-											function ($) {
-												return $.z;
-											},
-											'z',
-											_List_Nil,
-											_List_Nil)
-										]),
-									$author$project$Section$Interactivity$data),
-									tooltip
-								]))
-						]));
-			});
-		return $author$project$Ui$Section$view(
-			{
-				configs: _List_fromArray(
+		var frame = function (tooltip) {
+			return A2(
+				$elm$html$Html$div,
+				_List_fromArray(
 					[
-						{
-						chart: function (_v0) {
-							return A2(
-								frame,
+						A2($elm$html$Html$Attributes$style, 'width', '300px'),
+						A2($elm$html$Html$Attributes$style, 'height', '300px')
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$author$project$Chart$chart,
+						_List_fromArray(
+							[
+								$author$project$Chart$Attributes$height(300),
+								$author$project$Chart$Attributes$width(300),
+								$author$project$Chart$Attributes$events(
 								_List_fromArray(
 									[
 										A2(
@@ -20424,15 +20380,57 @@ var $author$project$Section$Interactivity$view = F4(
 										'mouseleave',
 										A2(
 											$author$project$Chart$map,
-											function (_v1) {
+											function (_v16) {
 												return onMsg(
 													$author$project$Section$Interactivity$OnHover(_List_Nil));
 											},
 											$author$project$Chart$getCoords))
+									]))
+							]),
+						_List_fromArray(
+							[
+								$author$project$Chart$grid(_List_Nil),
+								$author$project$Chart$xLabels(_List_Nil),
+								$author$project$Chart$yLabels(_List_Nil),
+								A3(
+								$author$project$Chart$series,
+								function ($) {
+									return $.x;
+								},
+								_List_fromArray(
+									[
+										A4(
+										$author$project$Chart$property,
+										function ($) {
+											return $.y;
+										},
+										'y',
+										_List_Nil,
+										_List_Nil),
+										A4(
+										$author$project$Chart$property,
+										function ($) {
+											return $.z;
+										},
+										'z',
+										_List_Nil,
+										_List_Nil)
 									]),
+								$author$project$Section$Interactivity$data),
+								tooltip
+							]))
+					]));
+		};
+		return $author$project$Ui$Section$view(
+			{
+				configs: _List_fromArray(
+					[
+						{
+						chart: function (_v0) {
+							return frame(
 								A2(
 									$author$project$Chart$each,
-									function (_v2) {
+									function (_v1) {
 										return model.hovering;
 									},
 									F2(
@@ -20464,32 +20462,11 @@ var $author$project$Section$Interactivity$view = F4(
 						title: 'Basic'
 					},
 						{
-						chart: function (_v3) {
-							return A2(
-								frame,
-								_List_fromArray(
-									[
-										A2(
-										$author$project$Chart$event,
-										'mousemove',
-										A2(
-											$author$project$Chart$map,
-											A2($elm$core$Basics$composeR, $author$project$Section$Interactivity$OnHover, onMsg),
-											A2($author$project$Chart$getNearest, $author$project$Chart$Item$getCenter, $elm$core$Basics$identity))),
-										A2(
-										$author$project$Chart$event,
-										'mouseleave',
-										A2(
-											$author$project$Chart$map,
-											function (_v4) {
-												return onMsg(
-													$author$project$Section$Interactivity$OnHover(_List_Nil));
-											},
-											$author$project$Chart$getCoords))
-									]),
+						chart: function (_v2) {
+							return frame(
 								A2(
 									$author$project$Chart$each,
-									function (_v5) {
+									function (_v3) {
 										return model.hovering;
 									},
 									F2(
@@ -20522,32 +20499,11 @@ var $author$project$Section$Interactivity$view = F4(
 						title: 'Direction'
 					},
 						{
-						chart: function (_v6) {
-							return A2(
-								frame,
-								_List_fromArray(
-									[
-										A2(
-										$author$project$Chart$event,
-										'mousemove',
-										A2(
-											$author$project$Chart$map,
-											A2($elm$core$Basics$composeR, $author$project$Section$Interactivity$OnHover, onMsg),
-											A2($author$project$Chart$getNearest, $author$project$Chart$Item$getCenter, $elm$core$Basics$identity))),
-										A2(
-										$author$project$Chart$event,
-										'mouseleave',
-										A2(
-											$author$project$Chart$map,
-											function (_v7) {
-												return onMsg(
-													$author$project$Section$Interactivity$OnHover(_List_Nil));
-											},
-											$author$project$Chart$getCoords))
-									]),
+						chart: function (_v4) {
+							return frame(
 								A2(
 									$author$project$Chart$each,
-									function (_v8) {
+									function (_v5) {
 										return model.hovering;
 									},
 									F2(
@@ -20580,32 +20536,11 @@ var $author$project$Section$Interactivity$view = F4(
 						title: 'No arrow'
 					},
 						{
-						chart: function (_v9) {
-							return A2(
-								frame,
-								_List_fromArray(
-									[
-										A2(
-										$author$project$Chart$event,
-										'mousemove',
-										A2(
-											$author$project$Chart$map,
-											A2($elm$core$Basics$composeR, $author$project$Section$Interactivity$OnHover, onMsg),
-											A2($author$project$Chart$getNearest, $author$project$Chart$Item$getCenter, $elm$core$Basics$identity))),
-										A2(
-										$author$project$Chart$event,
-										'mouseleave',
-										A2(
-											$author$project$Chart$map,
-											function (_v10) {
-												return onMsg(
-													$author$project$Section$Interactivity$OnHover(_List_Nil));
-											},
-											$author$project$Chart$getCoords))
-									]),
+						chart: function (_v6) {
+							return frame(
 								A2(
 									$author$project$Chart$each,
-									function (_v11) {
+									function (_v7) {
 										return model.hovering;
 									},
 									F2(
@@ -20640,32 +20575,11 @@ var $author$project$Section$Interactivity$view = F4(
 						title: 'Offset'
 					},
 						{
-						chart: function (_v12) {
-							return A2(
-								frame,
-								_List_fromArray(
-									[
-										A2(
-										$author$project$Chart$event,
-										'mousemove',
-										A2(
-											$author$project$Chart$map,
-											A2($elm$core$Basics$composeR, $author$project$Section$Interactivity$OnHover, onMsg),
-											A2($author$project$Chart$getNearest, $author$project$Chart$Item$getCenter, $elm$core$Basics$identity))),
-										A2(
-										$author$project$Chart$event,
-										'mouseleave',
-										A2(
-											$author$project$Chart$map,
-											function (_v13) {
-												return onMsg(
-													$author$project$Section$Interactivity$OnHover(_List_Nil));
-											},
-											$author$project$Chart$getCoords))
-									]),
+						chart: function (_v8) {
+							return frame(
 								A2(
 									$author$project$Chart$each,
-									function (_v14) {
+									function (_v9) {
 										return model.hovering;
 									},
 									F2(
@@ -20701,32 +20615,11 @@ var $author$project$Section$Interactivity$view = F4(
 						title: 'Width'
 					},
 						{
-						chart: function (_v15) {
-							return A2(
-								frame,
-								_List_fromArray(
-									[
-										A2(
-										$author$project$Chart$event,
-										'mousemove',
-										A2(
-											$author$project$Chart$map,
-											A2($elm$core$Basics$composeR, $author$project$Section$Interactivity$OnHover, onMsg),
-											A2($author$project$Chart$getNearest, $author$project$Chart$Item$getCenter, $elm$core$Basics$identity))),
-										A2(
-										$author$project$Chart$event,
-										'mouseleave',
-										A2(
-											$author$project$Chart$map,
-											function (_v16) {
-												return onMsg(
-													$author$project$Section$Interactivity$OnHover(_List_Nil));
-											},
-											$author$project$Chart$getCoords))
-									]),
+						chart: function (_v10) {
+							return frame(
 								A2(
 									$author$project$Chart$each,
-									function (_v17) {
+									function (_v11) {
 										return model.hovering;
 									},
 									F2(
@@ -20762,32 +20655,11 @@ var $author$project$Section$Interactivity$view = F4(
 						title: 'Height'
 					},
 						{
-						chart: function (_v18) {
-							return A2(
-								frame,
-								_List_fromArray(
-									[
-										A2(
-										$author$project$Chart$event,
-										'mousemove',
-										A2(
-											$author$project$Chart$map,
-											A2($elm$core$Basics$composeR, $author$project$Section$Interactivity$OnHover, onMsg),
-											A2($author$project$Chart$getNearest, $author$project$Chart$Item$getCenter, $elm$core$Basics$identity))),
-										A2(
-										$author$project$Chart$event,
-										'mouseleave',
-										A2(
-											$author$project$Chart$map,
-											function (_v19) {
-												return onMsg(
-													$author$project$Section$Interactivity$OnHover(_List_Nil));
-											},
-											$author$project$Chart$getCoords))
-									]),
+						chart: function (_v12) {
+							return frame(
 								A2(
 									$author$project$Chart$each,
-									function (_v20) {
+									function (_v13) {
 										return model.hovering;
 									},
 									F2(
@@ -20822,32 +20694,11 @@ var $author$project$Section$Interactivity$view = F4(
 						title: 'Border'
 					},
 						{
-						chart: function (_v21) {
-							return A2(
-								frame,
-								_List_fromArray(
-									[
-										A2(
-										$author$project$Chart$event,
-										'mousemove',
-										A2(
-											$author$project$Chart$map,
-											A2($elm$core$Basics$composeR, $author$project$Section$Interactivity$OnHover, onMsg),
-											A2($author$project$Chart$getNearest, $author$project$Chart$Item$getCenter, $elm$core$Basics$identity))),
-										A2(
-										$author$project$Chart$event,
-										'mouseleave',
-										A2(
-											$author$project$Chart$map,
-											function (_v22) {
-												return onMsg(
-													$author$project$Section$Interactivity$OnHover(_List_Nil));
-											},
-											$author$project$Chart$getCoords))
-									]),
+						chart: function (_v14) {
+							return frame(
 								A2(
 									$author$project$Chart$each,
-									function (_v23) {
+									function (_v15) {
 										return model.hovering;
 									},
 									F2(
