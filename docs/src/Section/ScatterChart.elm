@@ -32,12 +32,13 @@ view : (String -> Int -> msg) -> Dict.Dict String Int -> E.Element msg
 view onSelect selected =
   let frame props =
         H.div
-          [ HA.style "width" "300px"
+          [ HA.style "width" "760px"
           , HA.style "height" "300px"
           ]
           [ C.chart
               [ CA.height 300
-              , CA.width 300
+              , CA.width 760
+              , C.marginLeft 10
               ]
               [ C.grid []
               , C.xLabels []
@@ -171,9 +172,9 @@ view onSelect selected =
               """
           , chart = \_ ->
               frame
-                [ C.property .y "y" [] []
+                [ C.property .y "y" [ CA.color "#d7670a" ] []
                   |> C.variation (\d -> [ CA.aura (if d.x == 3 then 0.5 else 0) ])
-                , C.property .z "z" [] []
+                , C.property .z "z" [ CA.color "#058eda" ] []
                     |> C.variation (\d -> [ CA.size (d.x * 2 + 2) ])
                 ]
           }

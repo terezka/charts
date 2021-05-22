@@ -6,12 +6,14 @@ import Request
 import Shared
 import View exposing (View)
 import Charts.SaleryDist as SaleryDist
+import Charts.Basics exposing (Example)
 import Html as H
 import Element as E
 import Element.Font as F
 import Element.Border as B
 import Element.Background as BG
 import Ui.Layout as Layout
+import Ui.Code as Code
 
 
 page : Shared.Model -> Request.With Params -> Page.With Model Msg
@@ -62,7 +64,7 @@ view model =
         viewLayout
           { chart = H.map SaleryDistMsg (SaleryDist.view model.saleryDist)
           , navigation =
-              [ { title = "Explore"
+              [ { title = "Documentation"
                 , links =
                     [ Link "/explore#scatter-charts" "Scatter charts"
                     , Link "/explore#line-charts" "Line charts"
@@ -89,32 +91,66 @@ view model =
                     ]
                 }
               ]
+          , examples =
+              [ Charts.Basics.scatter
+              , Charts.Basics.lines
+              , Charts.Basics.areas
+              , Charts.Basics.bars
+              ]
           }
     }
 
 
-viewLayout : { chart : H.Html Msg, navigation : List Group } -> List (H.Html Msg)
+viewLayout : { chart : H.Html Msg, navigation : List Group, examples : List (Example Msg) } -> List (H.Html Msg)
 viewLayout config =
+  let viewTitle =
+        E.column
+          [ E.alignTop
+          , E.spacing 5
+          , E.width (E.px 300)
+          ]
+          [ E.row
+              [ F.size 20
+              ]
+              [ E.text "elm-charts"
+              , E.el [ F.color (E.rgb255 130 130 130) ] (E.text "-alpha")
+              ]
+          , E.paragraph
+              [ E.paddingEach { top = 10, bottom = 25, left = 0, right = 0 }
+              , F.color (E.rgb255 130 130 130)
+              , F.size 12
+              ]
+              [ E.text "Alpha version. Feel free to use, but please do not share publicly yet. Documentation is unfinished/wrong and API liable to breaking changes." ]
+          ]
+  in
   Layout.view
-    [ E.html config.chart
-    , E.row
-        [ F.size 50
-        , E.paddingEach { top = 50, bottom = 10, left = 0, right = 0 }
+    [ E.row
+        [ E.width E.fill
+        , E.spacing 80
+        , E.paddingEach { top = 0, bottom = 70, left = 0, right = 0 }
         ]
-        [ E.text "elm-charts"
-        , E.el [ F.color (E.rgb255 130 130 130) ] (E.text "-alpha")
+        [ viewTitle
+        , E.row
+            [ E.spaceEvenly
+            , E.width E.fill
+            , E.alignRight
+            ]
+            (List.map viewGroup config.navigation)
         ]
-    , E.el
-        [ E.paddingEach { top = 0, bottom = 25, left = 0, right = 0 }
-        , F.color (E.rgb255 130 130 130)
-        , F.size 14
+
+    , E.el [ E.paddingEach { top = 0, bottom = 150, left = 0, right = 0 } ] (E.html config.chart)
+
+
+    , E.el [ F.size 50 ] (E.text "Quick start")
+
+    , E.column
+        [ E.width E.fill
+        , E.height E.fill
+        , E.spacing 70
+        , E.paddingEach { top = 50, bottom = 0, left = 0, right = 0 }
         ]
-        (E.text "Alpha version. Feel free to use, but please do not share publicly yet. Documentation is unfinished/wrong and API liable to breaking changes.")
-    , E.row
-        [ E.spaceEvenly
-        , E.width (E.maximum 600 E.fill)
-        ]
-        (List.map viewGroup config.navigation)
+        (List.map viewExample config.examples)
+
     , E.el
         [ F.size 12
         , F.color (E.rgb255 180 180 180)
@@ -122,6 +158,48 @@ viewLayout config =
         , E.alignRight
         ]
         (E.text "Designed and developed by Tereza Sokol © 2021")
+    ]
+
+
+viewExample : Example msg -> E.Element msg
+viewExample example =
+  E.row
+    [ E.width E.fill
+    , E.spacing 20
+    ]
+    [ E.el
+        [ B.widthEach { top = 0, bottom = 0, left = 1, right = 0 }
+        , E.width (E.maximum 1 E.fill)
+        , B.color (E.rgb255 200 200 200)
+        , E.height E.fill
+        , E.moveRight 6
+        , E.alignTop
+        ]
+        E.none
+
+    , E.row
+        [ E.rotate (degrees 90)
+        , E.width (E.maximum 35 E.fill)
+        , E.alignTop
+        , E.moveDown 20
+        , E.moveLeft 30
+        ]
+        [ E.el
+            [ F.size 16
+            , E.paddingXY 10 0
+            , F.color (E.rgb255 130 130 130)
+            , BG.color (E.rgb255 256 256 256)
+            ]
+            (E.text example.title)
+        ]
+
+    , E.row
+        [ E.width E.fill
+        , E.spacing 80
+        ]
+        [ E.el [ E.width (E.fillPortion 4) ] <| E.html <| example.chart ()
+        , E.el [ E.width (E.fillPortion 20), E.alignTop, F.size 12 ] (Code.view { template = example.code, edits = [] })
+        ]
     ]
 
 

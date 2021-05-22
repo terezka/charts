@@ -75,9 +75,9 @@ view model =
   , body =
       Layout.view
         [ Section.ScatterChart.view OnExploration model.exploration
-        , Section.LineChart.view OnExploration model.exploration
-        , Section.BarChart.view OnExploration model.exploration
-        , Section.CustomAxes.view OnExploration model.exploration
-        , Section.Interactivity.view OnExploration model.exploration OnInteractivity model.interactivity
+        --, Section.LineChart.view OnExploration model.exploration
+        --, Section.BarChart.view OnExploration model.exploration
+        --, Section.CustomAxes.view OnExploration model.exploration
+        --, Section.Interactivity.view OnExploration model.exploration OnInteractivity model.interactivity
         ]
   }
