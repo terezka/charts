@@ -35,6 +35,7 @@ view =
             [ E.width E.fill
             , E.height E.fill
             , E.spacing 90
+            , E.paddingEach { top = 0, bottom = 50, left = 0, right = 0 }
             ]
             <| List.map CompactExample.view
                 [ Charts.Basics.empty
