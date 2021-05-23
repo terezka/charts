@@ -1,6 +1,6 @@
-module Pages.Explore exposing (Model, Msg, page)
+module Pages.Documentation exposing (Model, Msg, page)
 
-import Gen.Params.Explore exposing (Params)
+import Gen.Params.Documentation exposing (Params)
 import Page
 import Request
 import Shared
@@ -71,7 +71,7 @@ update msg model =
 
 view : Model -> View Msg
 view model =
-  { title = "Explore"
+  { title = "Documentation"
   , body =
       Layout.view
         [ Section.ScatterChart.view OnExploration model.exploration

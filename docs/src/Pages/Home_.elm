@@ -66,12 +66,13 @@ view model =
           , navigation =
               [ { title = "Documentation"
                 , links =
-                    [ Link "/explore#scatter-charts" "Scatter charts"
-                    , Link "/explore#line-charts" "Line charts"
-                    , Link "/explore#bar-charts" "Bar charts"
-                    , Link "/explore#interactivity" "Interactivity"
-                    , Link "/explore#custom-axes" "Custom axes"
-                    , Link "/explore#custom-labels" "Custom labels"
+                    [ Link "/documentation#quick-start" "Quick start"
+                    , Link "/documentation#scatter-charts" "Scatter charts"
+                    , Link "/documentation#line-charts" "Line charts"
+                    , Link "/documentation#bar-charts" "Bar charts"
+                    , Link "/documentation#interactivity" "Interactivity"
+                    , Link "/documentation#custom-axes" "Custom axes"
+                    , Link "/documentation#custom-labels" "Custom labels"
                     ]
                 }
               , { title = "Real data examples"
@@ -112,7 +113,7 @@ viewLayout config =
           [ E.row
               [ F.size 20
               ]
-              [ E.text "elm-charts"
+              [ E.text "terezka/elm-charts"
               , E.el [ F.color (E.rgb255 130 130 130) ] (E.text "-alpha")
               ]
           , E.paragraph
@@ -124,10 +125,12 @@ viewLayout config =
           ]
   in
   Layout.view
-    [ E.row
+    [ E.el [ E.paddingEach { top = 0, bottom = 70, left = 0, right = 0 } ] (E.html config.chart)
+
+    , E.row
         [ E.width E.fill
         , E.spacing 80
-        , E.paddingEach { top = 0, bottom = 70, left = 0, right = 0 }
+        , E.paddingEach { top = 0, bottom = 50, left = 0, right = 0 }
         ]
         [ viewTitle
         , E.row
@@ -138,23 +141,17 @@ viewLayout config =
             (List.map viewGroup config.navigation)
         ]
 
-    , E.el [ E.paddingEach { top = 0, bottom = 150, left = 0, right = 0 } ] (E.html config.chart)
-
-
-    , E.el [ F.size 50 ] (E.text "Quick start")
-
     , E.column
         [ E.width E.fill
         , E.height E.fill
-        , E.spacing 70
-        , E.paddingEach { top = 50, bottom = 0, left = 0, right = 0 }
+        , E.spacing 40
         ]
         (List.map viewExample config.examples)
 
     , E.el
         [ F.size 12
         , F.color (E.rgb255 180 180 180)
-        , E.paddingEach { top = 20, bottom = 0, left = 0, right = 0 }
+        , E.paddingEach { top = 50, bottom = 0, left = 0, right = 0 }
         , E.alignRight
         ]
         (E.text "Designed and developed by Tereza Sokol © 2021")
@@ -165,7 +162,7 @@ viewExample : Example msg -> E.Element msg
 viewExample example =
   E.row
     [ E.width E.fill
-    , E.spacing 20
+    , E.spacing 25
     ]
     [ E.el
         [ B.widthEach { top = 0, bottom = 0, left = 1, right = 0 }
@@ -179,26 +176,37 @@ viewExample example =
 
     , E.row
         [ E.rotate (degrees 90)
-        , E.width (E.maximum 35 E.fill)
+        , E.width (E.maximum 15 E.fill)
         , E.alignTop
         , E.moveDown 20
-        , E.moveLeft 30
+        , E.moveLeft 27
         ]
         [ E.el
-            [ F.size 16
+            [ F.size 14
             , E.paddingXY 10 0
             , F.color (E.rgb255 130 130 130)
             , BG.color (E.rgb255 256 256 256)
+            , E.alignLeft
             ]
             (E.text example.title)
         ]
 
     , E.row
         [ E.width E.fill
-        , E.spacing 80
+        , E.spacing 50
         ]
-        [ E.el [ E.width (E.fillPortion 4) ] <| E.html <| example.chart ()
-        , E.el [ E.width (E.fillPortion 20), E.alignTop, F.size 12 ] (Code.view { template = example.code, edits = [] })
+        [ E.el
+            [ E.width (E.fillPortion 4)
+            , E.alignTop
+            , F.size 10
+            ] <| E.html <| example.chart ()
+        , E.el
+            [ E.width (E.fillPortion 20)
+            , E.alignTop
+            , F.size 12
+            , BG.color (E.rgb255 250 250 250)
+            ]
+            (Code.view { template = example.code, edits = [] })
         ]
     ]
 

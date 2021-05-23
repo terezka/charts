@@ -90,7 +90,7 @@ update msg model =
 view : Model -> H.Html Msg
 view model =
   C.chart
-    [ CA.height 650
+    [ CA.height 530
     , CA.width 1000
     , CA.static
     , C.marginLeft 0
@@ -134,7 +134,7 @@ view model =
     , C.withPlane <| \p ->
         [ C.title [ CA.fontSize 14, CA.yOff -3 ] [ S.text ("Salary distribution in Denmark " ++ String.fromFloat model.year) ] { x = C.middle p.x, y = p.y.max }
         , C.title [ CA.fontSize 11, CA.yOff 12 ] [ S.text "Data from Danmarks Statestik" ] { x = C.middle p.x, y = p.y.max }
-        , C.title [ CA.fontSize 12, CA.yOff 35 ] [ S.text "Average salary in DKK" ] { x = C.middle p.x, y = p.y.min }
+        , C.title [ CA.fontSize 12, CA.yOff 25 ] [ S.text "Average salary in DKK" ] { x = C.middle p.x, y = p.y.min }
         , C.title [ CA.fontSize 12, CA.xOff -15, CA.rotate 90 ] [ S.text "Womens percentage of mens salary" ] { x = p.x.min, y = C.middle p.y }
         , C.line [ CA.dashed [ 4, 2 ], CA.opacity 0.7, CA.color "#f56dbc", CA.x1 Salary.avgSalaryWomen ]
         , C.line [ CA.dashed [ 4, 2 ], CA.opacity 0.7, CA.color "#58a9f6", CA.x1 Salary.avgSalaryMen ]

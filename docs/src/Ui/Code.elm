@@ -30,8 +30,9 @@ view config =
     |> E.html
     |> E.el
         [ E.width E.fill
-        , E.height (E.fill |> E.minimum 300)
+        , E.height (E.fill |> E.minimum 250)
         , E.htmlAttribute (HA.style "white-space" "pre")
+        , E.htmlAttribute (HA.style "padding" "0 20px")
         , F.size 14
         , F.family [ F.typeface "Source Code Pro", F.monospace ]
         , E.alignTop
