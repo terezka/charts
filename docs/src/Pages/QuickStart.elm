@@ -24,18 +24,21 @@ view =
             [ E.text "← terezka/elm-charts"
             , E.el [ F.color (E.rgb255 130 130 130) ] (E.text "-alpha")
             ]
+
         , E.el
             [ F.size 50
-            , E.paddingEach { top = 0, bottom = 70, left = 0, right = 0 }
+            , E.paddingEach { top = 0, bottom = 90, left = 0, right = 0 }
             ]
             (E.text "Quick start")
+
         , E.column
             [ E.width E.fill
             , E.height E.fill
-            , E.spacing 40
+            , E.spacing 90
             ]
             <| List.map CompactExample.view
-                [ Charts.Basics.scatter
+                [ Charts.Basics.empty
+                , Charts.Basics.scatter
                 , Charts.Basics.lines
                 , Charts.Basics.areas
                 , Charts.Basics.bars

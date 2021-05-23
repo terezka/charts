@@ -1,4 +1,4 @@
-module Charts.Basics exposing (Example, scatter, lines, areas, bars)
+module Charts.Basics exposing (Example, empty, scatter, lines, areas, bars)
 
 
 import Html as H
@@ -27,6 +27,51 @@ type alias Example msg =
   , chart : () -> H.Html msg
   }
 
+
+empty : Example msg
+empty =
+  { title = "Empty chart example"
+  , code =
+      """
+import Html exposing (Html)
+import Chart as C
+import Chart.Attributes as CA
+
+view : Html msg
+view =
+  C.chart
+    [ CA.height 300
+    , CA.width 300
+    ]
+    [ C.grid []
+    , C.xAxis []
+    , C.xTicks []
+    , C.xLabels []
+    , C.yAxis []
+    , C.yTicks []
+    , C.yLabels []
+    ]
+      """
+  , chart = \_ ->
+      H.div
+        [ HA.style "width" "300px"
+        , HA.style "height" "300px"
+        ]
+        [ C.chart
+            [ CA.height 300
+            , CA.width 300
+            , C.marginBottom 20
+            ]
+            [ C.grid []
+            , C.xAxis []
+            , C.xTicks []
+            , C.xLabels []
+            , C.yAxis []
+            , C.yTicks []
+            , C.yLabels [ CA.xOff -8 ]
+            ]
+        ]
+  }
 
 
 scatter : Example msg
