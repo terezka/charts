@@ -13,6 +13,7 @@ import Element.Font as F
 import Element.Border as B
 import Element.Background as BG
 import Ui.Layout as Layout
+import Ui.CompactExample as CompactExample
 import Ui.Code as Code
 
 
@@ -66,7 +67,7 @@ view model =
           , navigation =
               [ { title = "Documentation"
                 , links =
-                    [ Link "/documentation#quick-start" "Quick start"
+                    [ Link "/quick-start" "Quick start"
                     , Link "/documentation#scatter-charts" "Scatter charts"
                     , Link "/documentation#line-charts" "Line charts"
                     , Link "/documentation#bar-charts" "Bar charts"
@@ -92,20 +93,20 @@ view model =
                     ]
                 }
               ]
-          , examples =
-              [ Charts.Basics.scatter
-              , Charts.Basics.lines
-              , Charts.Basics.areas
-              , Charts.Basics.bars
-              ]
           }
     }
 
 
-viewLayout : { chart : H.Html Msg, navigation : List Group, examples : List (Example Msg) } -> List (H.Html Msg)
+viewLayout : { chart : H.Html Msg, navigation : List Group } -> List (H.Html Msg)
 viewLayout config =
-  let viewTitle =
-        E.column
+  Layout.view
+    [ E.el [ E.paddingEach { top = 0, bottom = 70, left = 0, right = 0 } ] (E.html config.chart)
+
+    , E.row
+        [ E.width E.fill
+        , E.spacing 80
+        ]
+        [ E.column
           [ E.alignTop
           , E.spacing 5
           , E.width (E.px 300)
@@ -117,96 +118,18 @@ viewLayout config =
               , E.el [ F.color (E.rgb255 130 130 130) ] (E.text "-alpha")
               ]
           , E.paragraph
-              [ E.paddingEach { top = 10, bottom = 25, left = 0, right = 0 }
+              [ E.paddingEach { top = 10, bottom = 0, left = 0, right = 0 }
               , F.color (E.rgb255 130 130 130)
               , F.size 12
               ]
               [ E.text "Alpha version. Feel free to use, but please do not share publicly yet. Documentation is unfinished/wrong and API liable to breaking changes." ]
           ]
-  in
-  Layout.view
-    [ E.el [ E.paddingEach { top = 0, bottom = 70, left = 0, right = 0 } ] (E.html config.chart)
-
-    , E.row
-        [ E.width E.fill
-        , E.spacing 80
-        , E.paddingEach { top = 0, bottom = 50, left = 0, right = 0 }
-        ]
-        [ viewTitle
         , E.row
             [ E.spaceEvenly
             , E.width E.fill
             , E.alignRight
             ]
             (List.map viewGroup config.navigation)
-        ]
-
-    , E.column
-        [ E.width E.fill
-        , E.height E.fill
-        , E.spacing 40
-        ]
-        (List.map viewExample config.examples)
-
-    , E.el
-        [ F.size 12
-        , F.color (E.rgb255 180 180 180)
-        , E.paddingEach { top = 50, bottom = 0, left = 0, right = 0 }
-        , E.alignRight
-        ]
-        (E.text "Designed and developed by Tereza Sokol © 2021")
-    ]
-
-
-viewExample : Example msg -> E.Element msg
-viewExample example =
-  E.row
-    [ E.width E.fill
-    , E.spacing 25
-    ]
-    [ E.el
-        [ B.widthEach { top = 0, bottom = 0, left = 1, right = 0 }
-        , E.width (E.maximum 1 E.fill)
-        , B.color (E.rgb255 200 200 200)
-        , E.height E.fill
-        , E.moveRight 6
-        , E.alignTop
-        ]
-        E.none
-
-    , E.row
-        [ E.rotate (degrees 90)
-        , E.width (E.maximum 15 E.fill)
-        , E.alignTop
-        , E.moveDown 20
-        , E.moveLeft 27
-        ]
-        [ E.el
-            [ F.size 14
-            , E.paddingXY 10 0
-            , F.color (E.rgb255 130 130 130)
-            , BG.color (E.rgb255 256 256 256)
-            , E.alignLeft
-            ]
-            (E.text example.title)
-        ]
-
-    , E.row
-        [ E.width E.fill
-        , E.spacing 50
-        ]
-        [ E.el
-            [ E.width (E.fillPortion 2)
-            , E.alignTop
-            , F.size 10
-            ] <| E.html <| example.chart ()
-        , E.el
-            [ E.width (E.fillPortion 6)
-            , E.alignTop
-            , F.size 12
-            , BG.color (E.rgb255 250 250 250)
-            ]
-            (Code.view { template = example.code, edits = [] })
         ]
     ]
 
