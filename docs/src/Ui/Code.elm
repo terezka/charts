@@ -30,7 +30,7 @@ view config =
     |> E.html
     |> E.el
         [ E.width E.fill
-        , E.height (E.fill |> E.minimum 250)
+        , E.height (E.fill |> E.minimum 300)
         , E.htmlAttribute (HA.style "white-space" "pre")
         , E.htmlAttribute (HA.style "padding" "0 20px")
         , F.size 14

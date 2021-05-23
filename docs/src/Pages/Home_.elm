@@ -196,12 +196,12 @@ viewExample example =
         , E.spacing 50
         ]
         [ E.el
-            [ E.width (E.fillPortion 4)
+            [ E.width (E.fillPortion 2)
             , E.alignTop
             , F.size 10
             ] <| E.html <| example.chart ()
         , E.el
-            [ E.width (E.fillPortion 20)
+            [ E.width (E.fillPortion 6)
             , E.alignTop
             , F.size 12
             , BG.color (E.rgb255 250 250 250)

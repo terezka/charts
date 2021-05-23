@@ -35,8 +35,9 @@ scatter =
   , code =
       """
       C.chart
-        [ CA.height 250
-        , CA.width 250
+        [ CA.height 300
+        , CA.width 300
+        , C.paddingLeft 10
         ]
         [ C.grid []
         , C.xLabels []
@@ -45,17 +46,22 @@ scatter =
             [ C.property .y [] [ CA.circle ]
             , C.property .z [] [ CA.square ]
             ]
-            data
+            [ { x = 1, y = Just 2, z = Just 3 }
+            , { x = 2, y = Just 3, z = Just 5 }
+            , { x = 3, y = Just 4, z = Just 2 }
+            , { x = 4, y = Just 1, z = Just 3 }
+            , { x = 5, y = Just 4, z = Just 1 }
+            ]
         ]
       """
   , chart = \_ ->
       H.div
-        [ HA.style "width" "250px"
-        , HA.style "height" "250px"
+        [ HA.style "width" "300px"
+        , HA.style "height" "300px"
         ]
         [ C.chart
-            [ CA.height 250
-            , CA.width 250
+            [ CA.height 300
+            , CA.width 300
             , C.marginBottom 20
             , C.paddingLeft 10
             ]
@@ -83,8 +89,9 @@ lines =
   , code =
       """
       C.chart
-        [ CA.height 250
-        , CA.width 250
+        [ CA.height 300
+        , CA.width 300
+        , C.paddingLeft 10
         ]
         [ C.grid []
         , C.xLabels []
@@ -93,17 +100,20 @@ lines =
             [ C.property .y [ CA.monotone ] [ CA.circle ]
             , C.property .z [ CA.monotone ] [ CA.square ]
             ]
-            data
+            [ { x = 1, y = Just 2, z = Just 3 }
+            , { x = 5, y = Just 4, z = Just 1 }
+            , { x = 10, y = Just 2, z = Just 4 }
+            ]
         ]
       """
   , chart = \_ ->
       H.div
-        [ HA.style "width" "250px"
-        , HA.style "height" "250px"
+        [ HA.style "width" "300px"
+        , HA.style "height" "300px"
         ]
         [ C.chart
-            [ CA.height 250
-            , CA.width 250
+            [ CA.height 300
+            , CA.width 300
             , C.marginBottom 20
             , C.paddingLeft 10
             ]
@@ -129,8 +139,8 @@ areas =
   , code =
       """
       C.chart
-        [ CA.height 250
-        , CA.width 250
+        [ CA.height 300
+        , CA.width 300
         ]
         [ C.grid []
         , C.xLabels []
@@ -141,17 +151,20 @@ areas =
                 , C.property .z [ CA.linear ] []
                 ]
             ]
-            data
+            [ { x = 1, y = Just 1, z = Just 3 }
+            , { x = 5, y = Just 2, z = Just 1 }
+            , { x = 10, y = Just 2, z = Just 4 }
+            ]
         ]
       """
   , chart = \_ ->
       H.div
-        [ HA.style "width" "250px"
-        , HA.style "height" "250px"
+        [ HA.style "width" "300px"
+        , HA.style "height" "300px"
         ]
         [ C.chart
-            [ CA.height 250
-            , CA.width 250
+            [ CA.height 300
+            , CA.width 300
             , C.marginBottom 20
             ]
             [ C.grid []
@@ -178,8 +191,8 @@ bars =
   , code =
       """
       C.chart
-        [ CA.height 250
-        , CA.width 250
+        [ CA.height 300
+        , CA.width 300
         ]
         [ C.grid []
         , C.xLabels [ C.ints ]
@@ -189,17 +202,20 @@ bars =
             [ C.bar .z [ CA.striped [] ]
             , C.bar .y []
             ]
-            data
+            [ { x = 1, y = Just 3, z = Just 1 }
+            , { x = 2, y = Just 2, z = Just 3 }
+            , { x = 3, y = Just 4, z = Just 2 }
+            ]
         ]
       """
   , chart = \_ ->
       H.div
-        [ HA.style "width" "250px"
-        , HA.style "height" "250px"
+        [ HA.style "width" "300px"
+        , HA.style "height" "300px"
         ]
         [ C.chart
-            [ CA.height 250
-            , CA.width 250
+            [ CA.height 300
+            , CA.width 300
             , C.marginBottom 20
             ]
             [ C.grid []
