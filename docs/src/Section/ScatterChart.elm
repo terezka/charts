@@ -28,8 +28,8 @@ import Element.Background as BG
 import Ui.Section as Section
 
 
-view : (String -> Int -> msg) -> Dict.Dict String Int -> E.Element msg
-view onSelect selected =
+section : Section.Section msg
+section =
   let frame props =
         H.div
           [ HA.style "width" "760px"
@@ -47,121 +47,126 @@ view onSelect selected =
               ]
           ]
   in
-  Section.view
-    { title = "Scatter charts"
-    , onSelect = onSelect
-    , selected = selected
-    , frame =
-        """
-        C.chart
-          [ CA.height 300
-          , CA.width 300
+  { title = "Scatter charts"
+  , template =
+      """
+      C.chart
+        [ CA.height 300
+        , CA.width 300
+        ]
+        [ C.grid []
+        , C.xLabels []
+        , C.yLabels []
+        , C.series .x
+            {{1}}
+            data
+        ]
+      """
+  , configs =
+      Tuple.pair
+      { title = "Basic"
+      , edits =
+          [ """
+            [ C.property .y "y" [] []
+            , C.property .z "z" [] []
+            ]
+            """
           ]
-          [ C.grid []
-          , C.xLabels []
-          , C.yLabels []
-          , C.series .x
-              {{CONFIG}}
-              data
-          ]
-        """
-    , configs =
-        [ { title = "Basic"
-          , code =
-              """
-              [ C.property .y "y" [] []
-              , C.property .z "z" [] []
-              ]
-              """
-          , chart = \_ ->
-              frame
-                [ C.property .y "y" [] []
-                , C.property .z "z" [] []
-                ]
-          }
-        , { title = "Shapes"
-          , code =
-              """
+      , chart = \_ ->
+          frame
+            [ C.property .y "y" [] []
+            , C.property .z "z" [] []
+            ]
+      }
+      [ { title = "Shapes"
+        , edits =
+            [ """
               [ C.property .y "y" [] [ CA.circle ]
               , C.property .z "z" [] [ CA.square ]
               , C.property .w "w" [] [ CA.cross ]
               ]
               """
-          , chart = \_ ->
-              frame
-                [ C.property .y "y" [] [ CA.circle ]
-                , C.property .z "z" [] [ CA.square ]
-                , C.property .w "w" [] [ CA.triangle ]
-                ]
-          }
-        , { title = "Colors"
-          , code =
-              """
+            ]
+        , chart = \_ ->
+            frame
+              [ C.property .y "y" [] [ CA.circle ]
+              , C.property .z "z" [] [ CA.square ]
+              , C.property .w "w" [] [ CA.triangle ]
+              ]
+        }
+      , { title = "Colors"
+        , edits =
+            [ """
               [ C.property .y "y" [] [ CA.color "red" ]
               , C.property .z "z" [] [ CA.color "blue" ]
               ]
               """
-          , chart = \_ ->
-              frame
-                [ C.property .y "y" [] [ CA.color "red" ]
-                , C.property .z "z" [] [ CA.color "blue" ]
-                ]
-          }
-        , { title = "Sizes"
-          , code =
-              """
+            ]
+        , chart = \_ ->
+            frame
+              [ C.property .y "y" [] [ CA.color "red" ]
+              , C.property .z "z" [] [ CA.color "blue" ]
+              ]
+        }
+      , { title = "Sizes"
+        , edits =
+            [ """
               [ C.property .y "y" [] [ CA.size 12 ]
               , C.property .z "z" [] [ CA.size 3 ]
               ]
               """
-          , chart = \_ ->
-              frame
-                [ C.property .y "y" [] [ CA.size 12 ]
-                , C.property .z "z" [] [ CA.size 3 ]
-                ]
-          }
-        , { title = "Opacity"
-          , code =
-              """
+            ]
+        , chart = \_ ->
+            frame
+              [ C.property .y "y" [] [ CA.size 12 ]
+              , C.property .z "z" [] [ CA.size 3 ]
+              ]
+        }
+      , { title = "Opacity"
+        , edits =
+            [ """
               [ C.property .y "y" [] [ CA.opacity 0.5 ]
               , C.property .z "z" [] [ CA.opacity 0.5 ]
               ]
               """
-          , chart = \_ ->
-              frame
-                [ C.property .y "y" [] [ CA.opacity 0.5 ]
-                , C.property .z "z" [] [ CA.opacity 0.5 ]
-                ]
-          }
-        , { title = "Borders"
-          , code =
-              """
+            ]
+        , chart = \_ ->
+            frame
+              [ C.property .y "y" [] [ CA.opacity 0.5 ]
+              , C.property .z "z" [] [ CA.opacity 0.5 ]
+              ]
+        }
+      , { title = "Borders"
+        , edits =
+            [ """
               [ C.property .y "y" [] [ CA.borderWidth 2, CA.border "red" ]
               , C.property .z "z" [] []
               ]
               """
-          , chart = \_ ->
-              frame
-                [ C.property .y "y" [] [ CA.borderWidth 2, CA.border "red" ]
-                , C.property .z "z" [] []
-                ]
-          }
-        , { title = "Highlight"
-          , code =
-              """
+            ]
+        , chart = \_ ->
+            frame
+              [ C.property .y "y" [] [ CA.borderWidth 2, CA.border "red" ]
+              , C.property .z "z" [] []
+              ]
+        }
+      , { title = "Highlight"
+        , edits =
+            [ """
               [ C.property .y "y" [] []
               , C.property .z "z" [] [ CA.aura 0.5  ]
               ]
               """
-          , chart = \_ ->
-              frame
-                [ C.property .y "y" [] []
-                , C.property .z "z" [] [ CA.aura 0.5 ]
-                ]
-          }
-        , { title = "Data dependent"
-          , code =
-              """
+            ]
+        , chart = \_ ->
+            frame
+              [ C.property .y "y" [] []
+              , C.property .z "z" [] [ CA.aura 0.5 ]
+              ]
+        }
+      , { title = "Data dependent"
+        , edits =
+            [ """
               [ C.property .y "y" [] []
                   |> C.variation (\\d -> [ CA.aura (if d.x == 3 then 0.5 else 0) ])
                   -- If particular data point, add highlight
@@ -170,16 +175,17 @@ view onSelect selected =
                   -- Base size on data point characteristic
               ]
               """
-          , chart = \_ ->
-              frame
-                [ C.property .y "y" [ CA.color "#d7670a" ] []
-                  |> C.variation (\d -> [ CA.aura (if d.x == 3 then 0.5 else 0) ])
-                , C.property .z "z" [ CA.color "#058eda" ] []
-                    |> C.variation (\d -> [ CA.size (d.x * 2 + 2) ])
-                ]
-          }
-        ]
-    }
+            ]
+        , chart = \_ ->
+            frame
+              [ C.property .y "y" [] []
+                |> C.variation (\d -> [ CA.aura (if d.x == 3 then 0.5 else 0) ])
+              , C.property .z "z" [] []
+                  |> C.variation (\d -> [ CA.size (d.x * 2 + 2) ])
+              ]
+        }
+      ]
+  }
 
 
 type alias Datum =

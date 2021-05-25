@@ -6,7 +6,9 @@ import Request
 import Shared
 import View exposing (View)
 import Ui.Layout as Layout
+import Ui.Menu as Menu
 import SyntaxHighlight as SH
+import Ui.Section as Section
 import Section.ScatterChart
 import Section.LineChart
 import Section.BarChart
@@ -21,11 +23,11 @@ import Element.Background as BG
 
 page : Shared.Model -> Request.With Params -> Page.With Model Msg
 page shared req =
-    Page.sandbox
-        { init = init
-        , update = update
-        , view = view
-        }
+  Page.sandbox
+    { init = init
+    , update = update
+    , view = view
+    }
 
 
 
@@ -33,16 +35,16 @@ page shared req =
 
 
 type alias Model =
-    { exploration : Dict.Dict String Int
-    , interactivity : Section.Interactivity.Model
-    }
+  { exploration : Section.Model
+  , interactivity : Section.Interactivity.Model
+  }
 
 
 init : Model
 init =
-    { exploration = Dict.empty
-    , interactivity = Section.Interactivity.init
-    }
+  { exploration = Section.init Section.ScatterChart.section
+  , interactivity = Section.Interactivity.init
+  }
 
 
 
@@ -50,7 +52,7 @@ init =
 
 
 type Msg
-  = OnExploration String Int
+  = OnExploration String String
   | OnInteractivity Section.Interactivity.Msg
 
 
@@ -59,7 +61,7 @@ update : Msg -> Model -> Model
 update msg model =
     case msg of
       OnExploration title selected ->
-        { model | exploration = Dict.insert title selected model.exploration }
+        { model | exploration = { selected = title, selectedSub = selected } }
 
       OnInteractivity subMsg ->
         { model | interactivity = Section.Interactivity.update subMsg model.interactivity }
@@ -74,10 +76,13 @@ view model =
   { title = "Documentation"
   , body =
       Layout.view
-        [ Section.ScatterChart.view OnExploration model.exploration
-        --, Section.LineChart.view OnExploration model.exploration
-        --, Section.BarChart.view OnExploration model.exploration
-        --, Section.CustomAxes.view OnExploration model.exploration
-        --, Section.Interactivity.view OnExploration model.exploration OnInteractivity model.interactivity
+        [ Menu.small
+        , Section.view OnExploration model.exploration
+            [ Section.ScatterChart.section
+            , Section.LineChart.section
+            , Section.BarChart.section
+            , Section.CustomAxes.section
+            , Section.Interactivity.section OnInteractivity model.interactivity
+            ]
         ]
   }

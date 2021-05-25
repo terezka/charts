@@ -28,16 +28,16 @@ import Element.Background as BG
 import Ui.Section as Section
 
 
-view : (String -> Int -> msg) -> Dict.Dict String Int -> E.Element msg
-view onSelect selected =
+section : Section.Section msg
+section =
   let frame props =
         H.div
-          [ HA.style "width" "300px"
+          [ HA.style "width" "760px"
           , HA.style "height" "300px"
           ]
           [ C.chart
               [ CA.height 300
-              , CA.width 300
+              , CA.width 760
               ]
               [ C.grid []
               , C.xLabels []
@@ -46,161 +46,168 @@ view onSelect selected =
               ]
           ]
   in
-  Section.view
-    { title = "Line charts"
-    , onSelect = onSelect
-    , selected = selected
-    , frame =
-        """
-        C.chart
-          [ CA.height 300
-          , CA.width 300
+  { title = "Line charts"
+  , template =
+      """
+      C.chart
+        [ CA.height 300
+        , CA.width 760
+        ]
+        [ C.grid []
+        , C.xLabels []
+        , C.yLabels []
+        , C.series .x
+            {{1}}
+            data
+        ]
+      """
+  , configs =
+      Tuple.pair
+      { title = "Basic"
+      , edits =
+          [ """
+            [ C.property .y "y" [ CA.linear ] []
+            , C.property .z "z" [ CA.linear ] []
+            ]
+            """
           ]
-          [ C.grid []
-          , C.xLabels []
-          , C.yLabels []
-          , C.series .x
-              {{CONFIG}}
-              data
-          ]
-        """
-    , configs =
-        [ { title = "Basic"
-          , code =
-              """
-              [ C.property .y "y" [ CA.linear ] []
-              , C.property .z "z" [ CA.linear ] []
-              ]
-              """
-          , chart = \_ ->
-              frame
-                [ C.property .y "y" [ CA.linear ] []
-                , C.property .z "z" [ CA.linear ] []
-                ]
-          }
-        , { title = "Stacked"
-          , code =
-              """
+      , chart = \_ ->
+          frame
+            [ C.property .y "y" [ CA.linear ] []
+            , C.property .z "z" [ CA.linear ] []
+            ]
+      }
+      [ { title = "Stacked"
+        , edits =
+            [ """
               [ C.stacked
                 [ C.property .y "y" [ CA.linear ] []
                 , C.property .z "z" [ CA.linear ] []
                 ]
               ]
               """
-          , chart = \_ ->
-              frame
-                [ C.stacked
-                  [ C.property .y "y" [ CA.linear ] []
-                  , C.property .z "z" [ CA.linear, CA.color CA.green ] []
-                  ]
+            ]
+        , chart = \_ ->
+            frame
+              [ C.stacked
+                [ C.property .y "y" [ CA.linear ] []
+                , C.property .z "z" [ CA.linear ] []
                 ]
-          }
-        , { title = "Montone"
-          , code =
-              """
+              ]
+        }
+      , { title = "Montone"
+        , edits =
+            [ """
               [ C.property .y "y" [ CA.monotone ] []
               , C.property .z "z" [ CA.monotone ] []
               ]
               """
-          , chart = \_ ->
-              frame
-                [ C.property .y "y" [ CA.monotone ] []
-                , C.property .z "z" [ CA.monotone ] []
-                ]
-          }
-        , { title = "Color"
-          , code =
-              """
+            ]
+        , chart = \_ ->
+            frame
+              [ C.property .y "y" [ CA.monotone ] []
+              , C.property .z "z" [ CA.monotone ] []
+              ]
+        }
+      , { title = "Color"
+        , edits =
+            [ """
               [ C.property .y "y" [ CA.linear, CA.color "purple" ] []
               , C.property .z "z" [ CA.linear ] []
               ]
               """
-          , chart = \_ ->
-              frame
-                [ C.property .y "y" [ CA.linear, CA.color "purple" ] []
-                , C.property .z "z" [ CA.linear ] []
-                ]
-          }
-        , { title = "Width"
-          , code =
-              """
+            ]
+        , chart = \_ ->
+            frame
+              [ C.property .y "y" [ CA.linear, CA.color "purple" ] []
+              , C.property .z "z" [ CA.linear ] []
+              ]
+        }
+      , { title = "Width"
+        , edits =
+            [ """
               [ C.property .y "y" [ CA.linear, CA.width 3 ] []
               , C.property .z "z" [ CA.linear ] []
               ]
               """
-          , chart = \_ ->
-              frame
-                [ C.property .y "y" [ CA.linear, CA.width 3 ] []
-                , C.property .z "z" [ CA.linear ] []
-                ]
-          }
-        , { title = "Area"
-          , code =
-              """
+            ]
+        , chart = \_ ->
+            frame
+              [ C.property .y "y" [ CA.linear, CA.width 3 ] []
+              , C.property .z "z" [ CA.linear ] []
+              ]
+        }
+      , { title = "Area"
+        , edits =
+            [ """
               [ C.property .y "y" [ CA.linear, CA.opacity 0.2 ] []
               , C.property .z "z" [ CA.linear, CA.opacity 0.2 ] []
               ]
               """
-          , chart = \_ ->
-              frame
-                [ C.property .y "y" [ CA.linear, CA.opacity 0.2 ] []
-                , C.property .z "z" [ CA.linear, CA.opacity 0.2 ] []
-                ]
-          }
-        , { title = "Pattern"
-          , code =
-              """
+            ]
+        , chart = \_ ->
+            frame
+              [ C.property .y "y" [ CA.linear, CA.opacity 0.2 ] []
+              , C.property .z "z" [ CA.linear, CA.opacity 0.2 ] []
+              ]
+        }
+      , { title = "Pattern"
+        , edits =
+            [ """
               [ C.stacked
                 [ C.property .y "y" [ CA.linear, CA.striped [ CA.width 3, CA.space 4, CA.rotate 90 ] ] []
                 , C.property .z "z" [ CA.linear, CA.dotted [ CA.width 3, CA.space 4 ] ] []
                 ]
               ]
               """
-          , chart = \_ ->
-              frame
-                [ C.stacked
-                  [ C.property .y "y" [ CA.linear, CA.striped [ CA.width 3, CA.space 4, CA.rotate 90 ] ] []
-                  , C.property .z "z" [ CA.linear, CA.dotted [ CA.width 3, CA.space 4 ] ] []
-                  ]
+            ]
+        , chart = \_ ->
+            frame
+              [ C.stacked
+                [ C.property .y "y" [ CA.linear, CA.striped [ CA.width 3, CA.space 4, CA.rotate 90 ] ] []
+                , C.property .z "z" [ CA.linear, CA.dotted [ CA.width 3, CA.space 4 ] ] []
                 ]
-          }
-        , { title = "Gradient"
-          , code =
-              """
+              ]
+        }
+      , { title = "Gradient"
+        , edits =
+            [ """
               [ C.property .y "y" [ CA.linear, CA.opacity 0.6, CA.gradient [ CA.bottom "lightblue" ] ] []
               ]
               """
-          , chart = \_ ->
-              frame
-                [ C.property .y "y" [ CA.linear, CA.opacity 0.6, CA.gradient [ CA.bottom "lightblue" ] ] []
-                ]
-          }
-        , { title = "Dashed"
-          , code =
-              """
+            ]
+        , chart = \_ ->
+            frame
+              [ C.property .y "y" [ CA.linear, CA.opacity 0.6, CA.gradient [ CA.bottom "lightblue" ] ] []
+              ]
+        }
+      , { title = "Dashed"
+        , edits =
+            [ """
               [ C.property .y "y" [ CA.linear, CA.dashed [ 2, 2 ] ] []
               , C.property .z "z" [ CA.linear, CA.dashed [ 5, 2 ] ] []
               ]
               """
-          , chart = \_ ->
-              frame
-                [ C.property .y "y" [ CA.linear, CA.dashed [ 2, 2 ] ] []
-                , C.property .z "z" [ CA.linear, CA.dashed [ 5, 2 ] ] []
-                ]
-          }
-        , { title = "Dots"
-          , code =
+            ]
+        , chart = \_ ->
+            frame
+              [ C.property .y "y" [ CA.linear, CA.dashed [ 2, 2 ] ] []
+              , C.property .z "z" [ CA.linear, CA.dashed [ 5, 2 ] ] []
+              ]
+        }
+      , { title = "Dots"
+        , edits =
+            [ """
+              [ C.property .y "y" [ CA.linear ] [ CA.circle ] ]
               """
+            ]
+        , chart = \_ ->
+            frame
               [ C.property .y "y" [ CA.linear ] [ CA.circle ]
               ]
-              """
-          , chart = \_ ->
-              frame
-                [ C.property .y "y" [ CA.linear ] [ CA.circle ]
-                ]
-          }
-        ]
-    }
+        }
+      ]
+  }
 
 
 type alias Datum =

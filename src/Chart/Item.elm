@@ -602,7 +602,7 @@ gatherWith testFn list =
 
 toDefaultColor : Int -> String
 toDefaultColor =
-  toDefault CA.blue [ CA.blue, CA.turquoise, CA.purple, CA.orange, CA.pink, CA.green, CA.red ]
+  toDefault CA.blue [ CA.pink, CA.purple, CA.blue, CA.turquoise, CA.orange, CA.green, CA.red ]
 
 
 toDefault : a -> List a -> Int -> a

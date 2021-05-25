@@ -49,16 +49,17 @@ update msg model =
     OnHover products -> { model | hovering = products }
 
 
-view : (String -> Int -> msg) -> Dict.Dict String Int -> (Msg -> msg) -> Model -> E.Element msg
-view onSelect selected onMsg model =
+
+section : (Msg -> msg) -> Model -> Section.Section msg
+section onMsg model =
   let frame tooltip =
         H.div
-          [ HA.style "width" "300px"
+          [ HA.style "width" "760px"
           , HA.style "height" "300px"
           ]
           [ C.chart
               [ CA.height 300
-              , CA.width 300
+              , CA.width 760
               , CA.events
                   [ C.event "mousemove" (C.map (OnHover >> onMsg) (C.getNearest CI.getCenter identity))
                   , C.event "mouseleave" (C.map (\_ -> OnHover [] |> onMsg) C.getCoords)
@@ -76,200 +77,198 @@ view onSelect selected onMsg model =
               ]
           ]
   in
-  Section.view
-    { title = "Interactivity"
-    , onSelect = onSelect
-    , selected = selected
-    , frame = -- TODO
-        """
-        C.chart
-          [ CA.height 300
-          , CA.width 300
-          , CA.events
-              [ C.event "mousemove" <|
-                  C.map OnHover (C.getNearest CI.getCenter identity)
-              , C.event "mouseleave" <|
-                  C.map OnReset C.getCoords
+  { title = "Interactivity"
+  , template = -- TODO
+      """
+      C.chart
+        [ CA.height 300
+        , CA.width 760
+        , CA.events
+            [ C.event "mousemove" <|
+                C.map OnHover (C.getNearest CI.getCenter identity)
+            , C.event "mouseleave" <|
+                C.map OnReset C.getCoords
+            ]
+        ]
+        [ C.grid []
+        , C.xLabels []
+        , C.yLabels []
+        , C.series .x props data
+        , {{1}}
+        ]
+      """
+  , configs =
+      Tuple.pair
+      { title = "Basic"
+      , edits =
+          ["""
+      C.each (always model.hovering) <| \\p item ->
+        [ C.tooltip item [] []
+            [ H.text <| String.fromFloat (CI.getInd item)
+            , H.text ", "
+            , H.text <| String.fromFloat (CI.getValue item)
+            ]
+        ]
+          """]
+      , chart = \_ ->
+          frame <|
+            C.each (\_ -> model.hovering) <| \p item ->
+              [ C.tooltip item [] []
+                  [ H.text <| String.fromFloat (CI.getInd item) -- TODO
+                  , H.text ", "
+                  , H.text <| String.fromFloat (Maybe.withDefault 0 <| CI.getValue item)
+                  ]
+              ]
+      }
+      [ { title = "Direction"
+        , edits =
+            ["""
+        C.each (always model.hovering) <| \\p item ->
+          [ C.tooltip item [ CA.onLeft ] []
+              [ H.text <| String.fromFloat (CI.getInd item)
+              , H.text ", "
+              , H.text <| String.fromFloat (CI.getValue item)
               ]
           ]
-          [ C.grid []
-          , C.xLabels []
-          , C.yLabels []
-          , C.series .x props data
-          , {{CONFIG}}
+            """]
+        , chart = \_ ->
+            frame <|
+              C.each (\_ -> model.hovering) <| \p item ->
+                [ C.tooltip item [ CA.onLeft ] []
+                    [ H.text <| String.fromFloat (CI.getInd item) -- TODO
+                    , H.text ", "
+                    , H.text <| String.fromFloat (Maybe.withDefault 0 <| CI.getValue item)
+                    ]
+                ]
+        }
+      , { title = "No arrow"
+        , edits =
+            ["""
+        C.each (always model.hovering) <| \\p item ->
+          [ C.tooltip item [ CA.noPointer ] []
+              [ H.text <| String.fromFloat (CI.getInd item)
+              , H.text ", "
+              , H.text <| String.fromFloat (CI.getValue item)
+              ]
           ]
-        """
-    , configs =
-        [ { title = "Basic"
-          , code =
-              """
-          C.each (always model.hovering) <| \\p item ->
-            [ C.tooltip item [] []
-                [ H.text <| String.fromFloat (CI.getInd item)
-                , H.text ", "
-                , H.text <| String.fromFloat (CI.getValue item)
+            """]
+        , chart = \_ ->
+            frame <|
+              C.each (\_ -> model.hovering) <| \p item ->
+                [ C.tooltip item [ CA.noPointer ] []
+                    [ H.text <| String.fromFloat (CI.getInd item) -- TODO
+                    , H.text ", "
+                    , H.text <| String.fromFloat (Maybe.withDefault 0 <| CI.getValue item)
+                    ]
                 ]
-            ]
-              """
-          , chart = \_ ->
-              frame <|
-                C.each (\_ -> model.hovering) <| \p item ->
-                  [ C.tooltip item [] []
-                      [ H.text <| String.fromFloat (CI.getInd item) -- TODO
-                      , H.text ", "
-                      , H.text <| String.fromFloat (Maybe.withDefault 0 <| CI.getValue item)
-                      ]
-                  ]
-          }
-        , { title = "Direction"
-          , code =
-              """
-          C.each (always model.hovering) <| \\p item ->
-            [ C.tooltip item [ CA.onLeft ] []
-                [ H.text <| String.fromFloat (CI.getInd item)
-                , H.text ", "
-                , H.text <| String.fromFloat (CI.getValue item)
+        }
+      , { title = "Offset"
+        , edits =
+            ["""
+        C.each (always model.hovering) <| \\p item ->
+          [ C.tooltip item [ CA.offset 0 ] []
+              [ H.text <| String.fromFloat (CI.getInd item)
+              , H.text ", "
+              , H.text <| String.fromFloat (CI.getValue item)
+              ]
+          ]
+            """]
+        , chart = \_ ->
+            frame <|
+              C.each (\_ -> model.hovering) <| \p item ->
+                [ C.tooltip item [ CA.offset 0 ] []
+                    [ H.text <| String.fromFloat (CI.getInd item) -- TODO
+                    , H.text ", "
+                    , H.text <| String.fromFloat (Maybe.withDefault 0 <| CI.getValue item)
+                    ]
                 ]
-            ]
-              """
-          , chart = \_ ->
-              frame <|
-                C.each (\_ -> model.hovering) <| \p item ->
-                  [ C.tooltip item [ CA.onLeft ] []
-                      [ H.text <| String.fromFloat (CI.getInd item) -- TODO
-                      , H.text ", "
-                      , H.text <| String.fromFloat (Maybe.withDefault 0 <| CI.getValue item)
-                      ]
-                  ]
-          }
-        , { title = "No arrow"
-          , code =
-              """
-          C.each (always model.hovering) <| \\p item ->
-            [ C.tooltip item [ CA.noPointer ] []
-                [ H.text <| String.fromFloat (CI.getInd item)
-                , H.text ", "
-                , H.text <| String.fromFloat (CI.getValue item)
+        }
+      , { title = "Width"
+        , edits =
+            ["""
+        C.each (always model.hovering) <| \\p item ->
+          [ C.tooltip item [ CA.width 20, CA.onLeftOrRight ] []
+              [ H.text <| String.fromFloat (CI.getInd item)
+              , H.text ", "
+              , H.text <| String.fromFloat (CI.getValue item)
+              ]
+          ]
+            """]
+        , chart = \_ ->
+            frame <|
+              C.each (\_ -> model.hovering) <| \p item ->
+                [ C.tooltip item [ CA.width 20, CA.onLeftOrRight ] []
+                    [ H.text <| String.fromFloat (CI.getInd item) -- TODO
+                    , H.text ", "
+                    , H.text <| String.fromFloat (Maybe.withDefault 0 <| CI.getValue item)
+                    ]
                 ]
-            ]
-              """
-          , chart = \_ ->
-              frame <|
-                C.each (\_ -> model.hovering) <| \p item ->
-                  [ C.tooltip item [ CA.noPointer ] []
-                      [ H.text <| String.fromFloat (CI.getInd item) -- TODO
-                      , H.text ", "
-                      , H.text <| String.fromFloat (Maybe.withDefault 0 <| CI.getValue item)
-                      ]
-                  ]
-          }
-        , { title = "Offset"
-          , code =
-              """
-          C.each (always model.hovering) <| \\p item ->
-            [ C.tooltip item [ CA.offset 0 ] []
-                [ H.text <| String.fromFloat (CI.getInd item)
-                , H.text ", "
-                , H.text <| String.fromFloat (CI.getValue item)
+        }
+      , { title = "Height"
+        , edits =
+            ["""
+        C.each (always model.hovering) <| \\p item ->
+          [ C.tooltip item [ CA.height 20, CA.onTopOrBottom ] []
+              [ H.text <| String.fromFloat (CI.getInd item)
+              , H.text ", "
+              , H.text <| String.fromFloat (CI.getValue item)
+              ]
+          ]
+            """]
+        , chart = \_ ->
+            frame <|
+              C.each (\_ -> model.hovering) <| \p item ->
+                [ C.tooltip item [ CA.height 20, CA.onTopOrBottom  ] []
+                    [ H.text <| String.fromFloat (CI.getInd item) -- TODO
+                    , H.text ", "
+                    , H.text <| String.fromFloat (Maybe.withDefault 0 <| CI.getValue item)
+                    ]
                 ]
-            ]
-              """
-          , chart = \_ ->
-              frame <|
-                C.each (\_ -> model.hovering) <| \p item ->
-                  [ C.tooltip item [ CA.offset 0 ] []
-                      [ H.text <| String.fromFloat (CI.getInd item) -- TODO
-                      , H.text ", "
-                      , H.text <| String.fromFloat (Maybe.withDefault 0 <| CI.getValue item)
-                      ]
-                  ]
-          }
-        , { title = "Width"
-          , code =
-              """
-          C.each (always model.hovering) <| \\p item ->
-            [ C.tooltip item [ CA.width 20, CA.onLeftOrRight ] []
-                [ H.text <| String.fromFloat (CI.getInd item)
-                , H.text ", "
-                , H.text <| String.fromFloat (CI.getValue item)
+        }
+      , { title = "Border"
+        , edits =
+            ["""
+        C.each (always model.hovering) <| \\p item ->
+          [ C.tooltip item [ CA.border "red" ] []
+              [ H.text <| String.fromFloat (CI.getInd item)
+              , H.text ", "
+              , H.text <| String.fromFloat (CI.getValue item)
+              ]
+          ]
+            """]
+        , chart = \_ ->
+            frame <|
+              C.each (\_ -> model.hovering) <| \p item ->
+                [ C.tooltip item [ CA.border "red" ] []
+                    [ H.text <| String.fromFloat (CI.getInd item) -- TODO
+                    , H.text ", "
+                    , H.text <| String.fromFloat (Maybe.withDefault 0 <| CI.getValue item)
+                    ]
                 ]
-            ]
-              """
-          , chart = \_ ->
-              frame <|
-                C.each (\_ -> model.hovering) <| \p item ->
-                  [ C.tooltip item [ CA.width 20, CA.onLeftOrRight ] []
-                      [ H.text <| String.fromFloat (CI.getInd item) -- TODO
-                      , H.text ", "
-                      , H.text <| String.fromFloat (Maybe.withDefault 0 <| CI.getValue item)
-                      ]
-                  ]
-          }
-        , { title = "Height"
-          , code =
-              """
-          C.each (always model.hovering) <| \\p item ->
-            [ C.tooltip item [ CA.height 20, CA.onTopOrBottom ] []
-                [ H.text <| String.fromFloat (CI.getInd item)
-                , H.text ", "
-                , H.text <| String.fromFloat (CI.getValue item)
+        }
+      , { title = "Background"
+        , edits =
+            ["""
+        C.each (always model.hovering) <| \\p item ->
+          [ C.tooltip item [ CA.background "beige" ] []
+              [ H.text <| String.fromFloat (CI.getInd item)
+              , H.text ", "
+              , H.text <| String.fromFloat (CI.getValue item)
+              ]
+          ]
+            """]
+        , chart = \_ ->
+            frame <|
+              C.each (\_ -> model.hovering) <| \p item ->
+                [ C.tooltip item [ CA.background "beige" ] []
+                    [ H.text <| String.fromFloat (CI.getInd item) -- TODO
+                    , H.text ", "
+                    , H.text <| String.fromFloat (Maybe.withDefault 0 <| CI.getValue item)
+                    ]
                 ]
-            ]
-              """
-          , chart = \_ ->
-              frame <|
-                C.each (\_ -> model.hovering) <| \p item ->
-                  [ C.tooltip item [ CA.height 20, CA.onTopOrBottom  ] []
-                      [ H.text <| String.fromFloat (CI.getInd item) -- TODO
-                      , H.text ", "
-                      , H.text <| String.fromFloat (Maybe.withDefault 0 <| CI.getValue item)
-                      ]
-                  ]
-          }
-        , { title = "Border"
-          , code =
-              """
-          C.each (always model.hovering) <| \\p item ->
-            [ C.tooltip item [ CA.border "red" ] []
-                [ H.text <| String.fromFloat (CI.getInd item)
-                , H.text ", "
-                , H.text <| String.fromFloat (CI.getValue item)
-                ]
-            ]
-              """
-          , chart = \_ ->
-              frame <|
-                C.each (\_ -> model.hovering) <| \p item ->
-                  [ C.tooltip item [ CA.border "red" ] []
-                      [ H.text <| String.fromFloat (CI.getInd item) -- TODO
-                      , H.text ", "
-                      , H.text <| String.fromFloat (Maybe.withDefault 0 <| CI.getValue item)
-                      ]
-                  ]
-          }
-        , { title = "Background"
-          , code =
-              """
-          C.each (always model.hovering) <| \\p item ->
-            [ C.tooltip item [ CA.background "beige" ] []
-                [ H.text <| String.fromFloat (CI.getInd item)
-                , H.text ", "
-                , H.text <| String.fromFloat (CI.getValue item)
-                ]
-            ]
-              """
-          , chart = \_ ->
-              frame <|
-                C.each (\_ -> model.hovering) <| \p item ->
-                  [ C.tooltip item [ CA.background "beige" ] []
-                      [ H.text <| String.fromFloat (CI.getInd item) -- TODO
-                      , H.text ", "
-                      , H.text <| String.fromFloat (Maybe.withDefault 0 <| CI.getValue item)
-                      ]
-                  ]
-          }
-        ]
-    }
+        }
+      ]
+  }
 
 
 type alias Datum =

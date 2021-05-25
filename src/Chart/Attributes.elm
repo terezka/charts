@@ -462,7 +462,12 @@ orange =
 {-| -}
 pink : String
 pink =
-  "#ec407a"
+  "#f56dbc"
+
+
+purple : String
+purple =
+  "#7c29ed"
 
 
 {-| -}
@@ -475,12 +480,6 @@ green =
 red : String
 red =
   "#d32f2f"
-
-
-{-| -}
-purple : String
-purple =
-  "#7c29ed"
 
 
 {-| -}

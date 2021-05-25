@@ -1,4 +1,4 @@
-module Ui.Section exposing (..)
+module Ui.Section exposing (Section, Model, init, view)
 
 
 import Html as H
@@ -13,6 +13,7 @@ import Data.Iris as Iris
 import Data.Salary as Salary
 import Data.Education as Education
 import Dict
+import Ui.Code as Code
 
 import Chart as C
 import Chart.Attributes as CA
@@ -28,150 +29,153 @@ import Element.Background as BG
 import SyntaxHighlight as SH
 
 
-type alias Configuration msg =
+
+type alias Model =
+  { selected : String
+  , selectedSub : String
+  }
+
+
+init : Section msg -> Model
+init section =
+  { selected = section.title
+  , selectedSub = (Tuple.first section.configs).title
+  }
+
+
+type alias Section msg =
   { title : String
-  , code : String
+  , template : String
+  , configs : ( Config msg, List (Config msg) )
+  }
+
+
+type alias Config msg =
+  { title : String
+  , edits : List String
   , chart : () -> H.Html msg
   }
 
 
-view :
-  { title : String
-  , frame : String
-  , onSelect : String -> Int -> msg
-  , selected : Dict.Dict String Int
-  , configs : List (Configuration msg)
-  } -> E.Element msg
-view config =
-  let selectedId =
-          Dict.get config.title config.selected
-            |> Maybe.withDefault 0
+allConfigs : Section msg -> List (Config msg)
+allConfigs section =
+  section.configs |> \(x, xs) -> x :: xs
+
+
+
+-- VIEW
+
+
+view : (String -> String -> msg) -> Model -> List (Section msg) -> E.Element msg
+view onSelect model sections =
+  let selectedSection =
+        List.filter (\s -> s.title == model.selected) sections
+          |> List.head
+          |> Maybe.withDefault (Section "" "" ( Config "" [] (\_ -> H.text ""), [] ))
 
       selectedConfig =
-        List.drop selectedId config.configs
+        List.filter (\s -> s.title == model.selectedSub) (allConfigs selectedSection)
           |> List.head
-          |> Maybe.withDefault (Configuration "" "" (\_ -> H.text ""))
-
-      viewSubConfig i c =
-        I.button
-          [ F.size 14
-          , if i == selectedId
-              then F.color (E.rgb255 0 0 0)
-              else F.color (E.rgb255 80 80 80)
-          ]
-          { onPress = Just (config.onSelect config.title i)
-          , label = E.text <|
-              if i == selectedId
-              then "·  " ++ c.title
-              else "   " ++ c.title
-          }
+          |> Maybe.withDefault (Tuple.first selectedSection.configs)
   in
   E.row
     [ E.width E.fill
-    , E.paddingEach { top = 10, bottom = 70, left = 0, right = 0 }
+    , E.paddingEach { top = 60, bottom = 70, left = 0, right = 0 }
     ]
-    [ E.column
-        [ E.alignTop
-        , E.width (E.fillPortion 4)
-        ]
-        [ E.el
-            [ F.size 16
-            , F.color (E.rgb255 0 0 0)
-            , E.paddingEach { top = 0, bottom = 10, left = 0, right = 0 }
-            ]
-            (E.text config.title)
-        , config.configs
-            |> List.indexedMap viewSubConfig
-            |> E.column
-                [ E.width (E.fillPortion 1)
-                , E.spacing 10
-                , E.paddingEach { top = 10, bottom = 20, left = 0, right = 0 }
-                ]
-        , E.el
-            [ F.size 16
-            , F.color (E.rgb255 0 0 0)
-            , E.paddingEach { top = 0, bottom = 10, left = 0, right = 0 }
-            ]
-            (E.text "Line charts")
-        , E.el
-            [ F.size 16
-            , F.color (E.rgb255 0 0 0)
-            , E.paddingEach { top = 0, bottom = 10, left = 0, right = 0 }
-            ]
-            (E.text "Interactivity")
-        ]
+    [ sidebar onSelect model sections
+    , content selectedSection selectedConfig
+    ]
 
-    , E.column
-        [ E.width (E.fillPortion 9)
-        , E.height E.fill
-        ]
-        [ E.row
-            [ F.size 30
-            , E.paddingEach { top = 0, bottom = 25, left = 0, right = 0 }
-            ]
-            [ E.text "Scatter charts"
-            , E.el [ F.color (E.rgb255 130 130 130) ] (E.text " · Data dependent styling")
-            ]
-        , E.paragraph
-            [ F.size 14
-            , E.paddingEach { top = 0, bottom = 25, left = 0, right = 0 }
-            ]
-            [ E.text "Style individual data points differently. In the example below, we use "
-            , E.text "the property `.x` of each data point to display a different size for each point. For "
-            , E.text "another property we use highlight a particuler data point."
-            ]
-        , E.el
-          [ E.width E.fill
-          , E.height E.fill
-          , E.paddingEach { top = 0, bottom = 40, left = 0, right = 0 }
+
+sidebar : (String -> String -> msg) -> Model -> List (Section msg) -> E.Element msg
+sidebar onSelect model sections =
+  let viewTitle section =
+        if model.selected == section.title
+        then viewOpen section
+        else viewClosed section
+
+      viewClosed section =
+        I.button
+          [ F.size 16
+          , F.color (E.rgb255 80 80 80)
           ]
-          (E.html <| selectedConfig.chart ())
-        , E.column
-            [ E.width E.fill
-            , E.height E.fill
-            ]
-            [ H.div []
-                [ SH.useTheme SH.gitHub
-                , config.frame
-                    |> String.replace "{{CONFIG}}" (String.trim selectedConfig.code)
-                    |> fixIndent
-                    |> SH.elm
-                    |> Result.map (SH.toBlockHtml (Just 1))
-                    |> Result.withDefault (H.pre [] [ H.code [] [ H.text config.frame ]])
-                ]
-                |> E.html
-                |> E.el
-                    [ E.width E.fill
-                    , E.height (E.fill |> E.minimum 300)
-                    --, BG.color (E.rgb255 245 245 245)
-                    --, B.rounded 3
-                    --, B.width 1
-                    --, E.paddingXY 15 0
-                    , E.htmlAttribute (HA.style "white-space" "pre")
-                    , F.size 14
-                    , F.family [ F.typeface "Source Code Pro", F.monospace ]
-                    , E.alignTop
-                    , E.scrollbarX
-                    ]
+          { onPress = Just <| onSelect section.title (Tuple.first section.configs).title
+          , label = E.text section.title
+          }
+
+      viewOpen section =
+        E.column
+          []
+          [ E.el
+              [ F.size 16
+              , F.color (E.rgb255 0 0 0)
+              , E.paddingEach { top = 0, bottom = 10, left = 0, right = 0 }
               ]
+              (E.text section.title)
+          , E.column
+              [ E.width (E.fillPortion 1)
+              , E.paddingEach { top = 0, bottom = 0, left = 5, right = 0 }
+              ]
+              (List.map (viewSub section) (allConfigs section))
           ]
+
+      viewSub section config =
+        let isSelected =
+              config.title == model.selectedSub
+        in
+        I.button
+          [ F.size 14
+          , E.paddingEach { top = 5, bottom = 5, left = 10, right = 0 }
+          , if isSelected
+              then F.color (E.rgb255 0 0 0)
+              else F.color (E.rgb255 80 80 80)
+          , B.widthEach { top = 0, bottom = 0, left = 1, right = 0 }
+          , if isSelected
+              then B.color (E.rgb255 180 180 180)
+              else B.color (E.rgb255 230 230 230)
+          , E.moveLeft 2
+          ]
+          { onPress = Just (onSelect section.title config.title)
+          , label = E.text config.title
+          }
+  in
+  E.column
+    [ E.alignTop
+    , E.width (E.fillPortion 4)
+    , E.spacing 20
+    ]
+    [ E.el [ F.size 14 ] (E.text "Documentation")
+    , E.column
+      [ E.spacing 15
+      ]
+      (List.map viewTitle sections)
     ]
 
 
-fixIndent : String -> String
-fixIndent code =
-  code
-    |> String.lines
-    |> List.drop 1
-    |> List.map (\x ->
-        let trimmed = String.trimLeft x
-            indent = String.length x - String.length trimmed
-        in
-        ( indent, x ))
-    |> (\xs ->
-        let smallest = Maybe.withDefault 0 <| List.minimum (List.map Tuple.first xs) in
-        List.map (\( _, x ) -> String.dropLeft smallest x) xs
-          |> String.join "\n"
-      )
-
+content : Section msg -> Config msg -> E.Element msg
+content section config =
+  E.column
+    [ E.width (E.fillPortion 9)
+    , E.height E.fill
+    ]
+    [ E.row
+        [ F.size 28
+        , E.paddingEach { top = 0, bottom = 25, left = 0, right = 0 }
+        ]
+        [ E.text section.title
+        , E.el [ F.color (E.rgb255 130 130 130) ] (E.text <| " · " ++ config.title)
+        ]
+    , E.el
+      [ E.width E.fill
+      , E.height E.fill
+      , E.paddingEach { top = 0, bottom = 40, left = 0, right = 0 }
+      ]
+      (E.html <| config.chart ())
+    , E.column
+        [ E.width E.fill
+        , E.height E.fill
+        , BG.color (E.rgb255 250 250 250)
+        ]
+        [ Code.view { template = section.template, edits = config.edits } ]
+      ]
 

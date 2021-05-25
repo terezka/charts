@@ -28,57 +28,55 @@ import Element.Background as BG
 import Ui.Section as Section
 
 
-view : (String -> Int -> msg) -> Dict.Dict String Int -> E.Element msg
-view onSelect selected =
+section : Section.Section msg
+section =
   let frame props =
         H.div
-          [ HA.style "width" "300px"
+          [ HA.style "width" "760px"
           , HA.style "height" "300px"
           ]
           [ C.chart
               [ CA.height 300
-              , CA.width 300
+              , CA.width 760
               , C.marginTop 15
               ] <|
               [ C.grid [] ] ++ props
           ]
   in
-  Section.view
     { title = "Custom axes"
-    , onSelect = onSelect
-    , selected = selected
-    , frame =
+    , template =
         """
         C.chart
           [ CA.height 300
-          , CA.width 300
+          , CA.width 760
           ]
           [ C.grid []
-          {{CONFIG}}
+          {{1}}
           ]
         """
     , configs =
-        [ { title = "Basic"
-          , code =
-              """
-          , C.xAxis []
-          , C.xTicks []
-          , C.xLabels []
-              """
-          , chart = \_ ->
-              frame
-                [ C.xAxis []
-                , C.xTicks []
-                , C.xLabels []
-                ]
-          }
-        , { title = "Color"
-          , code =
-              """
+        Tuple.pair
+        { title = "Basic"
+        , edits =
+            ["""
+        , C.xAxis []
+        , C.xTicks []
+        , C.xLabels []
+            """]
+        , chart = \_ ->
+            frame
+              [ C.xAxis []
+              , C.xTicks []
+              , C.xLabels []
+              ]
+        }
+        [ { title = "Color"
+          , edits =
+              ["""
           , C.xAxis [ CA.color "blue" ]
           , C.xTicks [ CA.color "blue" ]
           , C.xLabels [ CA.color "blue" ]
-              """
+              """]
           , chart = \_ ->
               frame
                 [ C.xAxis [ CA.color "blue" ]
@@ -87,12 +85,12 @@ view onSelect selected =
                 ]
           }
         , { title = "Position"
-          , code =
-              """
+          , edits =
+              ["""
           , C.xAxis [ C.pinned .max ]
           , C.xTicks [ C.pinned .max, CA.flip  ]
           , C.xLabels [ C.pinned .max, CA.flip ]
-              """
+              """]
           , chart = \_ ->
               frame
                 [ C.xAxis [ C.pinned .max ]
@@ -101,22 +99,22 @@ view onSelect selected =
                 ]
           }
         , { title = "Offset"
-          , code =
-              """
+          , edits =
+              ["""
           , C.xLabels [ CA.xOff 5, CA.yOff 0, CA.alignRight ]
-              """
+              """]
           , chart = \_ ->
               frame
                 [ C.xLabels [ CA.xOff 5, CA.yOff -20, CA.alignRight ]
                 ]
           }
         , { title = "No arrow"
-          , code =
-              """
+          , edits =
+              ["""
           , C.xAxis [ C.noArrow ]
           , C.xTicks []
           , C.xLabels []
-              """
+              """]
           , chart = \_ ->
               frame
                 [ C.xAxis [ C.noArrow ]
@@ -125,12 +123,12 @@ view onSelect selected =
                 ]
           }
         , { title = "Amount"
-          , code =
-              """
+          , edits =
+              ["""
           , C.xAxis []
           , C.xTicks [ C.amount 4 ]
           , C.xLabels [ C.amount 4 ]
-              """
+              """]
           , chart = \_ ->
               frame
                 [ C.xAxis []
@@ -139,12 +137,12 @@ view onSelect selected =
                 ]
           }
         , { title = "Only ints"
-          , code =
-              """
+          , edits =
+              ["""
           , C.xAxis []
           , C.xTicks [ C.amount 4, C.ints ]
           , C.xLabels [ C.amount 4, C.ints ]
-              """
+              """]
           , chart = \_ ->
               frame
                 [ C.xAxis []
@@ -153,15 +151,15 @@ view onSelect selected =
                 ]
           }
         , { title = "Custom"
-          , code =
-              """
+          , edits =
+              ["""
           , C.xAxis []
           , C.each (CS.produce 12 CS.ints << .x) <| \\p num ->
               [ C.xTick [ CA.x (toFloat num) ]
               , C.xLabel [ CA.x (toFloat num) ]
                   [ S.text (String.fromInt num), S.text "°" ]
               ]
-              """
+              """]
           , chart = \_ ->
               frame
                 [ C.xAxis []

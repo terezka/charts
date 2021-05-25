@@ -28,16 +28,16 @@ import Element.Background as BG
 import Ui.Section as Section
 
 
-view : (String -> Int -> msg) -> Dict.Dict String Int -> E.Element msg
-view onSelect selected =
+section : Section.Section msg
+section =
   let frame attrs props =
         H.div
-          [ HA.style "width" "300px"
+          [ HA.style "width" "760px"
           , HA.style "height" "300px"
           ]
           [ C.chart
               [ CA.height 300
-              , CA.width 300
+              , CA.width 760
               ]
               [ C.grid []
               , C.xLabels []
@@ -46,48 +46,46 @@ view onSelect selected =
               ]
           ]
   in
-  Section.view
     { title = "Bar charts"
-    , onSelect = onSelect
-    , selected = selected
-    , frame =
+    , template =
         """
         C.chart
           [ CA.height 300
-          , CA.width 300
+          , CA.width 760
           ]
           [ C.grid []
           , C.xLabels []
           , C.yLabels []
           , C.bars
-              {{CONFIG}}
+              {{1}}
               data
           ]
         """
     , configs =
-        [ { title = "Basic"
-          , code =
-              """
+        Tuple.pair
+        { title = "Basic"
+        , edits =
+            ["""
+            []
+            [ C.bar .y "y" []
+            , C.bar .z "z" []
+            ]
+            """]
+        , chart = \_ ->
+            frame
               []
               [ C.bar .y "y" []
               , C.bar .z "z" []
               ]
-              """
-          , chart = \_ ->
-              frame
-                []
-                [ C.bar .y "y" []
-                , C.bar .z "z" []
-                ]
-          }
-        , { title = "Margin"
-          , code =
-              """
+        }
+        [ { title = "Margin"
+          , edits =
+              ["""
               [ CA.margin 0.2 ] -- Number is percentage of bin width
               [ C.bar .y "y" []
               , C.bar .z "z" []
               ]
-              """
+              """]
           , chart = \_ ->
               frame
                 [ CA.margin 0.2 ]
@@ -96,13 +94,13 @@ view onSelect selected =
                 ]
           }
         , { title = "Spacing"
-          , code =
-              """
+          , edits =
+              ["""
               [ CA.spacing 0.1 ] -- Number is percentage of bin width
               [ C.bar .y "y" []
               , C.bar .z "z" []
               ]
-              """
+              """]
           , chart = \_ ->
               frame
                 [ CA.spacing 0.1 ]
@@ -111,15 +109,15 @@ view onSelect selected =
                 ]
           }
         , { title = "Stacked"
-          , code =
-              """
+          , edits =
+              ["""
               []
               [ C.stacked
                   [ C.bar .y "y" []
                   , C.bar .z "z" []
                   ]
               ]
-              """
+              """]
           , chart = \_ ->
               frame
                 []
@@ -131,13 +129,13 @@ view onSelect selected =
 
           }
         , { title = "Ungroup"
-          , code =
-              """
+          , edits =
+              ["""
               [ CA.ungroup ]
               [ C.bar .y "y" []
               , C.bar .z "z" []
               ]
-              """
+              """]
           , chart = \_ ->
               frame
                 [ CA.ungroup ]
@@ -146,13 +144,13 @@ view onSelect selected =
                 ]
           }
         , { title = "Corners"
-          , code =
-              """
+          , edits =
+              ["""
               [ CA.roundTop 0.5 ]
               [ C.bar .y "y" []
               , C.bar .z "z" [ CA.roundBottom 0.5 ]
               ]
-              """
+              """]
           , chart = \_ ->
               frame
                 [ CA.roundTop 0.5 ]
@@ -161,15 +159,15 @@ view onSelect selected =
                 ]
           }
         , { title = "Set x1/x2"
-          , code =
-              """
+          , edits =
+              ["""
               [ CA.x1 .x1
               , CA.x2 (\\d -> d.x1 + 0.2)
               ]
               [ C.bar .y "y" []
               , C.bar .z "z" []
               ]
-              """
+              """]
           , chart = \_ ->
               frame
                 [ CA.x1 .x1
@@ -180,13 +178,13 @@ view onSelect selected =
                 ]
           }
         , { title = "Borders"
-          , code =
-              """
+          , edits =
+              ["""
               []
               [ C.bar .y "y" [ CA.border "red", CA.borderWidth 2 ]
               , C.bar .z "z" []
               ]
-              """
+              """]
           , chart = \_ ->
               frame
                 []
@@ -195,13 +193,13 @@ view onSelect selected =
                 ]
           }
         , { title = "Color"
-          , code =
-              """
+          , edits =
+              ["""
               []
               [ C.bar .y "y" [ CA.color "pink" ]
               , C.bar .z "z" []
               ]
-              """
+              """]
           , chart = \_ ->
               frame
                 []
@@ -210,13 +208,13 @@ view onSelect selected =
                 ]
           }
         , { title = "Opacity"
-          , code =
-              """
+          , edits =
+              ["""
               []
               [ C.bar .y "y" [ CA.opacity 0.25 ]
               , C.bar .z "z" []
               ]
-              """
+              """]
           , chart = \_ ->
               frame
                 []
@@ -225,13 +223,13 @@ view onSelect selected =
                 ]
           }
         , { title = "Pattern"
-          , code =
-              """
+          , edits =
+              ["""
               []
               [ C.bar .y "y" [ CA.striped [] ]
               , C.bar .z "z" [ CA.dotted [] ]
               ]
-              """
+              """]
           , chart = \_ ->
               frame
                 []
@@ -240,14 +238,14 @@ view onSelect selected =
                 ]
           }
         , { title = "Data dependent"
-          , code =
-              """
+          , edits =
+              ["""
               []
               [ C.bar .y "y" []
                   |> C.variation (\\d -> if d.x == 3 then [ CA.color "red" ] else [])
               , C.bar .z "z" []
               ]
-              """
+              """]
           , chart = \_ ->
               frame
                 []
