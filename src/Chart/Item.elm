@@ -388,11 +388,11 @@ toBarSeries barsAttrs properties data =
           ( Just toStart, Just toEnd ) ->
             { datum = curr, start = toStart curr, end = toEnd curr }
 
-      toSeriesItem bins sections barIndex sectionIndex section =
+      toSeriesItem bins sections barIndex sectionIndex section colorIndex =
         Item
           { details =
               { config = ()
-              , items = List.map (toBarItem sections barIndex sectionIndex section) bins
+              , items = List.map (toBarItem sections barIndex sectionIndex section colorIndex) bins
               }
           , limits = \c -> Coord.foldPosition getLimits c.items
           , position = \plane c -> Coord.foldPosition (getPosition plane) c.items
@@ -400,7 +400,7 @@ toBarSeries barsAttrs properties data =
               S.g [ SA.class "elm-charts__bar-series" ] (List.map (render plane) config.items)
           }
 
-      toBarItem sections barIndex sectionIndex section bin =
+      toBarItem sections barIndex sectionIndex section colorIndex bin =
         let numOfBars = if barsConfig.grouped then toFloat (List.length properties) else 1
             numOfSections = toFloat (List.length sections)
 
@@ -427,7 +427,7 @@ toBarSeries barsAttrs properties data =
 
             roundTop = if isSingle || isLast then barsConfig.roundTop else 0
             roundBottom = if isSingle || isFirst then barsConfig.roundBottom else 0
-            color = toDefaultColor (barIndex + sectionIndex)
+            color = toDefaultColor colorIndex
             defaultAttrs = [ CA.roundTop roundTop, CA.roundBottom roundBottom, CA.color color ]
             attrs = defaultAttrs ++ section.attrs ++ section.extra bin.datum
         in
@@ -463,6 +463,7 @@ toBarSeries barsAttrs properties data =
     List.map P.toConfigs properties
       |> List.indexedMap (\barIndex props -> List.indexedMap (toSeriesItem bins props barIndex) (List.reverse props))
       |> List.concat
+      |> List.indexedMap (\colorIndex f -> f colorIndex)
 
 
 
@@ -494,9 +495,9 @@ toDotSeries toX properties data =
           , shape = Nothing
           }
 
-      toSeriesItem lineIndex sublineIndex prop =
+      toSeriesItem lineIndex sublineIndex prop colorIndex =
         let dotItems = List.map (toDotItem lineIndex sublineIndex prop interConfig) data
-            interAttr = [ CA.color (toDefaultColor lineIndex), CA.opacity 0 ] ++ prop.inter
+            interAttr = [ CA.color (toDefaultColor colorIndex), CA.opacity 0 ] ++ prop.inter
             interConfig = toInterConfig interAttr
         in
         Item
@@ -561,6 +562,7 @@ toDotSeries toX properties data =
   List.map P.toConfigs properties
     |> List.indexedMap (\lineIndex ps -> List.indexedMap (toSeriesItem lineIndex) ps)
     |> List.concat
+    |> List.indexedMap (\colorIndex f -> f colorIndex)
 
 
 
