@@ -73,7 +73,7 @@ update msg model =
 
 view : Model -> View Msg
 view model =
-  { title = "Documentation"
+  { title = "elm-charts | Documentation"
   , body =
       Layout.view
         [ Menu.small

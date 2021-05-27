@@ -313,6 +313,7 @@ type Element data msg
       (C.Plane -> TickValues -> TickValues)
       (C.Plane -> S.Svg msg)
   | AxisElement
+      (C.Plane -> TickValues -> TickValues)
       (C.Plane -> S.Svg msg)
   | TicksElement
       (C.Plane -> TickValues -> TickValues)
@@ -347,7 +348,7 @@ definePlane config elements =
         case el of
           SeriesElement lims _ _ -> acc ++ lims
           BarsElement lims _ _ _ -> acc ++ lims
-          AxisElement _ -> acc
+          AxisElement _ _ -> acc
           TicksElement _ _ -> acc
           TickElement _ _ _ -> acc
           LabelsElement _ _ _ -> acc
@@ -423,7 +424,7 @@ getItems plane elements =
         case el of
           SeriesElement _ items _ -> acc ++ items
           BarsElement _ items _ _ -> acc ++ items
-          AxisElement _ -> acc
+          AxisElement func _ -> acc
           TicksElement _ _ -> acc
           TickElement _ _ _ -> acc
           LabelsElement _ _ _ -> acc
@@ -439,7 +440,9 @@ getItems plane elements =
 
 {-| -}
 type alias TickValues =
-  { xs : List Float
+  { xAxis : List Float
+  , yAxis : List Float
+  , xs : List Float
   , ys : List Float
   }
 
@@ -450,7 +453,7 @@ getTickValues plane items elements =
         case el of
           SeriesElement _ _ _ -> acc
           BarsElement _ _ func _ -> func plane acc
-          AxisElement _ -> acc
+          AxisElement func _ -> func plane acc
           TicksElement func _ -> func plane acc
           TickElement toC func _ -> func plane (toC plane) acc
           LabelsElement toC func _ -> func plane (toC plane) acc
@@ -461,7 +464,7 @@ getTickValues plane items elements =
           SvgElement _ -> acc
           HtmlElement _ -> acc
   in
-  List.foldl toValues (TickValues [] []) elements
+  List.foldl toValues (TickValues [] [] [] []) elements
 
 
 viewElements : Container data msg -> C.Plane -> TickValues -> List (Item.Product Item.General data) -> List (Element data msg) -> ( List (H.Html msg), List (S.Svg msg), List (H.Html msg) )
@@ -470,9 +473,9 @@ viewElements config plane tickValues allItems elements =
         case el of
           SeriesElement _ _ view    -> ( before, view plane :: chart_, after )
           BarsElement _ _ _ view    -> ( before, view plane :: chart_, after )
-          AxisElement view          -> ( before, view plane :: chart_, after )
+          AxisElement _ view        -> ( before, view plane :: chart_, after )
           TicksElement _ view       -> ( before, view plane :: chart_, after )
-          TickElement toC _ view   -> ( before, view plane (toC plane) :: chart_, after )
+          TickElement toC _ view    -> ( before, view plane (toC plane) :: chart_, after )
           LabelsElement toC _ view  -> ( before, view plane (toC plane) :: chart_, after )
           LabelElement toC _ view   -> ( before, view plane (toC plane) :: chart_, after )
           GridElement view          -> ( before, view plane tickValues :: chart_, after )
@@ -707,8 +710,11 @@ xAxis edits =
           , color = ""
           , arrow = True
           }
+
+      addTickValues p ts =
+        { ts | yAxis = config.pinned p.y :: ts.yAxis }
   in
-  AxisElement <| \p ->
+  AxisElement addTickValues <| \p ->
     let xLimit = config.limits p.x in
     S.g
       [ SA.class "elm-charts__x-axis" ]
@@ -738,8 +744,11 @@ yAxis edits =
           , color = ""
           , arrow = True
           }
+
+      addTickValues p ts =
+        { ts | xAxis = config.pinned p.x :: ts.xAxis }
   in
-  AxisElement <| \p ->
+  AxisElement addTickValues <| \p ->
     let yLimit = config.limits p.y in
     S.g
       [ SA.class "elm-charts__y-axis" ]
@@ -1135,40 +1144,40 @@ grid edits =
   let config =
         applyAttrs edits
           { color = "#EFF2FA"
-          , filterX = zero >> List.singleton
-          , filterY = zero >> List.singleton
+          , filterX = always []
+          , filterY = always []
           , width = 1
           , dotted = False
           }
 
-      notTheseX p =
-        config.filterX p.x
+      notTheseX vs p =
+        config.filterX p.x ++ vs.xAxis
 
-      notTheseY p =
-        config.filterY p.y
+      notTheseY vs p =
+        config.filterY p.y ++ vs.yAxis
 
-      toXGrid p v =
-        if List.member v (notTheseX p)
+      toXGrid vs p v =
+        if List.member v (notTheseX vs p)
         then Nothing else Just <|
           CS.line p [ CA.color config.color, CA.width config.width, CA.x1 v ]
 
-      toYGrid p v =
-        if List.member v (notTheseY p)
+      toYGrid vs p v =
+        if List.member v (notTheseY vs p)
         then Nothing else Just <|
           CS.line p [ CA.color config.color, CA.width config.width, CA.y1 v ]
 
-      toDot p x y =
-        if List.member x (notTheseX p) || List.member y (notTheseY p)
+      toDot vs p x y =
+        if List.member x (notTheseX vs p) || List.member y (notTheseY vs p)
         then Nothing
         else Just <| CS.dot p .x .y [ CA.color config.color, CA.size config.width, CA.circle ] { x = x, y = y }
   in
   GridElement <| \p vs ->
     S.g [ SA.class "elm-charts__grid" ] <|
       if config.dotted then
-        List.concatMap (\x -> List.filterMap (toDot p x) vs.ys) vs.xs
+        List.concatMap (\x -> List.filterMap (toDot vs p x) vs.ys) vs.xs
       else
-        [ S.g [ SA.class "elm-charts__x-grid" ] (List.filterMap (toXGrid p) vs.xs)
-        , S.g [ SA.class "elm-charts__y-grid" ] (List.filterMap (toYGrid p) vs.ys)
+        [ S.g [ SA.class "elm-charts__x-grid" ] (List.filterMap (toXGrid (Debug.log "here" vs) p) vs.xs)
+        , S.g [ SA.class "elm-charts__y-grid" ] (List.filterMap (toYGrid vs p) vs.ys)
         ]
 
 

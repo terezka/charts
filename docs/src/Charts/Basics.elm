@@ -83,6 +83,7 @@ scatter =
         [ CA.height 300
         , CA.width 300
         , C.paddingLeft 10
+        , C.paddingBottom 5
         ]
         [ C.grid []
         , C.xLabels []
@@ -109,6 +110,7 @@ scatter =
             , CA.width 300
             , C.marginBottom 20
             , C.paddingLeft 10
+            , C.paddingBottom 5
             ]
             [ C.grid []
             , C.xLabels []
@@ -137,6 +139,7 @@ lines =
         [ CA.height 300
         , CA.width 300
         , C.paddingLeft 10
+        , C.paddingBottom 10
         ]
         [ C.grid []
         , C.xLabels []
@@ -161,6 +164,7 @@ lines =
             , CA.width 300
             , C.marginBottom 20
             , C.paddingLeft 10
+            , C.paddingBottom 5
             ]
             [ C.grid []
             , C.xLabels []
