@@ -116,8 +116,8 @@ scatter =
             , C.xLabels []
             , C.yLabels []
             , C.series .x
-                [ C.property .y "y" [ CA.color pink ] [ CA.circle ]
-                , C.property .z "z" [ CA.color purple ] [ CA.square ]
+                [ C.property .y [ CA.color pink ] [ CA.circle ]
+                , C.property .z [ CA.color purple ] [ CA.square ]
                 ]
                 [ { x = 1, y = Just 2, z = Just 3 }
                 , { x = 2, y = Just 3, z = Just 5 }
@@ -170,8 +170,8 @@ lines =
             , C.xLabels []
             , C.yLabels []
             , C.series .x
-                [ C.property .y "y" [ CA.monotone, CA.color pink ] [ CA.circle ]
-                , C.property .z "z" [ CA.monotone, CA.color purple ] [ CA.square ]
+                [ C.property .y [ CA.monotone, CA.color pink ] [ CA.circle ]
+                , C.property .z [ CA.monotone, CA.color purple ] [ CA.square ]
                 ]
                 [ { x = 1, y = Just 2, z = Just 3 }
                 , { x = 5, y = Just 4, z = Just 1 }
@@ -221,8 +221,8 @@ areas =
             , C.yLabels []
             , C.series .x
                 [ C.stacked
-                    [ C.property .y "y" [ CA.linear, CA.color purple, CA.opacity 0.4, CA.dotted [] ] []
-                    , C.property .z "z" [ CA.linear, CA.color pink, CA.opacity 0.4 ] []
+                    [ C.property .y [ CA.linear, CA.color purple, CA.opacity 0.4, CA.dotted [] ] []
+                    , C.property .z [ CA.linear, CA.color pink, CA.opacity 0.4 ] []
                     ]
                 ]
                 [ { x = 1, y = Just 1, z = Just 3 }
@@ -272,8 +272,8 @@ bars =
             , C.yLabels []
             , C.bars
                 [ CA.x1 .x ]
-                [ C.bar .z "z" [ CA.color purple, CA.striped [] ]
-                , C.bar .y "y" [ CA.color pink ]
+                [ C.bar .z [ CA.color purple, CA.striped [] ]
+                , C.bar .y [ CA.color pink ]
                 ]
                 [ { x = 1, y = Just 3, z = Just 1 }
                 , { x = 2, y = Just 2, z = Just 3 }

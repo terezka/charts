@@ -14,6 +14,8 @@ module Chart exposing
     , paddingTop, paddingBottom, paddingLeft, paddingRight
     , range, domain, limits, pinned, dotted, noArrow, filterX, filterY, only
     , binned, amount, floatsCustom, ints, intsCustom, times, timesCustom
+
+    , named
     )
 
 
@@ -1192,15 +1194,21 @@ type alias Property data meta inter deco =
 
 
 {-| -}
-property : (data -> Maybe Float) -> String -> List (Attribute inter) -> List (Attribute deco) -> Property data String inter deco
-property y_ name_ =
-  P.property y_ name_
+property : (data -> Maybe Float) -> List (Attribute inter) -> List (Attribute deco) -> Property data String inter deco
+property y_ =
+  P.property y_
 
 
 {-| -}
-bar : (data -> Maybe Float) -> String -> List (Attribute deco) -> Property data String inter deco
-bar y_ name_ =
-  P.property y_ name_ []
+named : String -> Property data String inter deco -> Property data String inter deco
+named name =
+  P.meta name
+
+
+{-| -}
+bar : (data -> Maybe Float) -> List (Attribute deco) -> Property data String inter deco
+bar y_ =
+  P.property y_ []
 
 
 {-| -}

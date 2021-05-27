@@ -69,8 +69,8 @@ section onMsg model =
               , C.xLabels []
               , C.yLabels []
               , C.series .x
-                  [ C.property .y "y" [] []
-                  , C.property .z "z" [] []
+                  [ C.property .y [] []
+                  , C.property .z [] []
                   ]
                   data
               , tooltip

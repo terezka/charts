@@ -67,45 +67,45 @@ section =
         , edits =
             ["""
             []
-            [ C.bar .y "y" []
-            , C.bar .z "z" []
+            [ C.bar .y []
+            , C.bar .z []
             ]
             """]
         , chart = \_ ->
             frame
               []
-              [ C.bar .y "y" []
-              , C.bar .z "z" []
+              [ C.bar .y []
+              , C.bar .z []
               ]
         }
         [ { title = "Margin"
           , edits =
               ["""
               [ CA.margin 0.2 ] -- Number is percentage of bin width
-              [ C.bar .y "y" []
-              , C.bar .z "z" []
+              [ C.bar .y []
+              , C.bar .z []
               ]
               """]
           , chart = \_ ->
               frame
                 [ CA.margin 0.2 ]
-                [ C.bar .y "y" []
-                , C.bar .z "z" []
+                [ C.bar .y []
+                , C.bar .z []
                 ]
           }
         , { title = "Spacing"
           , edits =
               ["""
               [ CA.spacing 0.1 ] -- Number is percentage of bin width
-              [ C.bar .y "y" []
-              , C.bar .z "z" []
+              [ C.bar .y []
+              , C.bar .z []
               ]
               """]
           , chart = \_ ->
               frame
                 [ CA.spacing 0.1 ]
-                [ C.bar .y "y" []
-                , C.bar .z "z" []
+                [ C.bar .y []
+                , C.bar .z []
                 ]
           }
         , { title = "Stacked"
@@ -113,8 +113,8 @@ section =
               ["""
               []
               [ C.stacked
-                  [ C.bar .y "y" []
-                  , C.bar .z "z" []
+                  [ C.bar .y []
+                  , C.bar .z []
                   ]
               ]
               """]
@@ -122,8 +122,8 @@ section =
               frame
                 []
                 [ C.stacked
-                    [ C.bar .y "y" []
-                    , C.bar .z "z" []
+                    [ C.bar .y []
+                    , C.bar .z []
                     ]
                 ]
 
@@ -132,30 +132,30 @@ section =
           , edits =
               ["""
               [ CA.ungroup ]
-              [ C.bar .y "y" []
-              , C.bar .z "z" []
+              [ C.bar .y []
+              , C.bar .z []
               ]
               """]
           , chart = \_ ->
               frame
                 [ CA.ungroup ]
-                [ C.bar .z "z" []
-                , C.bar .y "y" []
+                [ C.bar .z []
+                , C.bar .y []
                 ]
           }
         , { title = "Corners"
           , edits =
               ["""
               [ CA.roundTop 0.5 ]
-              [ C.bar .y "y" []
-              , C.bar .z "z" [ CA.roundBottom 0.5 ]
+              [ C.bar .y []
+              , C.bar .z [ CA.roundBottom 0.5 ]
               ]
               """]
           , chart = \_ ->
               frame
                 [ CA.roundTop 0.5 ]
-                [ C.bar .y "y" []
-                , C.bar .z "z" [ CA.roundBottom 0.5 ]
+                [ C.bar .y []
+                , C.bar .z [ CA.roundBottom 0.5 ]
                 ]
           }
         , { title = "Set x1/x2"
@@ -164,8 +164,8 @@ section =
               [ CA.x1 .x1
               , CA.x2 (\\d -> d.x1 + 0.2)
               ]
-              [ C.bar .y "y" []
-              , C.bar .z "z" []
+              [ C.bar .y []
+              , C.bar .z []
               ]
               """]
           , chart = \_ ->
@@ -173,85 +173,85 @@ section =
                 [ CA.x1 .x1
                 , CA.x2 (\d -> d.x1 + 0.2)
                 ]
-                [ C.bar .y "y" []
-                , C.bar .z "z" []
+                [ C.bar .y []
+                , C.bar .z []
                 ]
           }
         , { title = "Borders"
           , edits =
               ["""
               []
-              [ C.bar .y "y" [ CA.border "red", CA.borderWidth 2 ]
-              , C.bar .z "z" []
+              [ C.bar .y [ CA.border "red", CA.borderWidth 2 ]
+              , C.bar .z []
               ]
               """]
           , chart = \_ ->
               frame
                 []
-                [ C.bar .y "y" [ CA.border "red", CA.borderWidth 2 ]
-                , C.bar .z "z" []
+                [ C.bar .y [ CA.border "red", CA.borderWidth 2 ]
+                , C.bar .z []
                 ]
           }
         , { title = "Color"
           , edits =
               ["""
               []
-              [ C.bar .y "y" [ CA.color "pink" ]
-              , C.bar .z "z" []
+              [ C.bar .y [ CA.color "pink" ]
+              , C.bar .z []
               ]
               """]
           , chart = \_ ->
               frame
                 []
-                [ C.bar .y "y" [ CA.color "pink" ]
-                , C.bar .z "z" []
+                [ C.bar .y [ CA.color "pink" ]
+                , C.bar .z []
                 ]
           }
         , { title = "Opacity"
           , edits =
               ["""
               []
-              [ C.bar .y "y" [ CA.opacity 0.25 ]
-              , C.bar .z "z" []
+              [ C.bar .y [ CA.opacity 0.25 ]
+              , C.bar .z []
               ]
               """]
           , chart = \_ ->
               frame
                 []
-                [ C.bar .y "y" [ CA.opacity 0.25 ]
-                , C.bar .z "z" []
+                [ C.bar .y [ CA.opacity 0.25 ]
+                , C.bar .z []
                 ]
           }
         , { title = "Pattern"
           , edits =
               ["""
               []
-              [ C.bar .y "y" [ CA.striped [] ]
-              , C.bar .z "z" [ CA.dotted [] ]
+              [ C.bar .y [ CA.striped [] ]
+              , C.bar .z [ CA.dotted [] ]
               ]
               """]
           , chart = \_ ->
               frame
                 []
-                [ C.bar .y "y" [ CA.striped [] ]
-                , C.bar .z "z" [ CA.dotted [] ]
+                [ C.bar .y [ CA.striped [] ]
+                , C.bar .z [ CA.dotted [] ]
                 ]
           }
         , { title = "Data dependent"
           , edits =
               ["""
               []
-              [ C.bar .y "y" []
+              [ C.bar .y []
                   |> C.variation (\\d -> if d.x == 3 then [ CA.color "red" ] else [])
-              , C.bar .z "z" []
+              , C.bar .z []
               ]
               """]
           , chart = \_ ->
               frame
                 []
-                [ C.bar .y "y" []
+                [ C.bar .y []
                     |> C.variation (\d -> if d.x == 3 then [ CA.color "red" ] else [])
-                , C.bar .z "z" []
+                , C.bar .z []
                 ]
           }
         ]

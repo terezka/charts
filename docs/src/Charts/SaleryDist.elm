@@ -271,7 +271,7 @@ viewSalaryDiscrepancyMini model =
 salarySeries : Model -> Float -> Float -> Float -> C.Element Salary.Datum Msg
 salarySeries model border auraSize size =
   C.series .salaryBoth
-      [ C.property Salary.womenSalaryPerc "percentage" []
+      [ C.property Salary.womenSalaryPerc []
           [ CA.opacity 0.5, CA.circle, CA.border CA.blue, CA.borderWidth border ]
           |> C.variation (\d ->
                 let precentOfWomen = Salary.womenPerc d

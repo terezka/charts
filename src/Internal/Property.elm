@@ -11,7 +11,7 @@ type Property data meta inter deco
 type alias Config data meta inter deco =
   { value : data -> Maybe Float
   , visual : data -> Maybe Float
-  , meta : meta
+  , meta : Maybe meta
   , inter : List (inter -> inter)
   , attrs : List (deco -> deco)
   , extra : data -> List (deco -> deco)
@@ -19,16 +19,24 @@ type alias Config data meta inter deco =
 
 
 {-| -}
-property : (data -> Maybe Float) -> meta -> List (inter -> inter) -> List (deco -> deco) -> Property data meta inter deco
-property value meta inter attrs =
+property : (data -> Maybe Float) -> List (inter -> inter) -> List (deco -> deco) -> Property data meta inter deco
+property value inter attrs =
   Property
     { value = value
     , visual = value
-    , meta = meta
+    , meta = Nothing
     , inter = inter
     , attrs = attrs
     , extra = always []
     }
+
+
+{-| -}
+meta : meta -> Property data meta inter deco -> Property data meta inter deco
+meta value prop =
+  case prop of
+    Property con -> Property { con | meta = Just value }
+    Stacked cons -> Stacked (List.map (\con -> { con | meta = Just value }) cons)
 
 
 {-| -}

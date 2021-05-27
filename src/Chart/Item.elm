@@ -42,7 +42,7 @@ type alias Product config datum =
     , config : config
     , property : Int
     , stack : Int
-    , name : String
+    , name : Maybe String
     , x1 : Float
     , x2 : Float
     , y : Maybe Float
@@ -105,10 +105,11 @@ isSameBin : Grouping (Bin datum) config datum
 isSameBin =
   collector
     { commonality = \(Item { details }) ->
-        { start = details.x1
-        , end = details.x2
-        , datum = details.datum
-        }
+        Just
+          { start = details.x1
+          , end = details.x2
+          , datum = details.datum
+          }
     , grouping = \a b -> a.start == b.start && a.end == b.end && a.datum == b.datum
     , limits = \bin products_ ->
         let pos = Coord.foldPosition getLimits products_ in
@@ -133,11 +134,12 @@ isSameStack : Grouping (Stack datum) config datum
 isSameStack =
   collector
     { commonality = \(Item { details }) ->
-        { start = details.x1
-        , end = details.x2
-        , datum = details.datum
-        , index = details.property
-        }
+        Just
+          { start = details.x1
+          , end = details.x2
+          , datum = details.datum
+          , index = details.property
+          }
     , grouping = \a b -> a.index == b.index && a.start == b.start && a.end == b.end && a.datum == b.datum
     , limits = \_ products_ -> Coord.foldPosition getLimits products_
     , position = \plane _ products_ -> Coord.foldPosition (getPosition plane) products_
@@ -145,7 +147,7 @@ isSameStack =
 
 
 {-| -}
-isSame : (Product config datum -> a) -> Grouping a config datum
+isSame : (Product config datum -> Maybe a) -> Grouping a config datum
 isSame toCommon =
   collector
     { commonality = toCommon
@@ -166,7 +168,7 @@ type Grouping inter config datum =
 
 {-| -}
 collector :
-  { commonality : Product config datum -> inter
+  { commonality : Product config datum -> Maybe inter
   , grouping : inter -> inter -> Bool
   , limits : inter -> List (Product config datum) -> Position
   , position : Plane -> inter -> List (Product config datum) -> Position
@@ -174,7 +176,7 @@ collector :
 collector config =
   Grouping
     { grouping =
-        List.map (\i -> ( config.commonality i, i ))
+        List.filterMap (\i -> Maybe.map (\c -> ( c, i )) (config.commonality i))
           >> gatherWith (\(a, _) (b, _) -> config.grouping a b)
           >> List.map (\(( inter, first ), rest ) -> ( inter, first :: List.map Tuple.second rest ))
     , toLimits = config.limits
@@ -197,7 +199,10 @@ onlyDotSeries =
 {-| -}
 only : List String -> List (Product config datum) -> List (Product config datum)
 only names =
-  List.filter (\i -> List.member (getName i) names)
+  List.filter <| \i ->
+    case getName i of
+      Just name -> List.member name names
+      Nothing -> False
 
 
 {-| -}
@@ -207,7 +212,7 @@ getColor (Item config) =
 
 
 {-| -}
-getName : Product config data -> String
+getName : Product config data -> Maybe String
 getName (Item config) =
   config.details.name
 
