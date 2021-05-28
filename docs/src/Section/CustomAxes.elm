@@ -87,15 +87,15 @@ section =
         , { title = "Position"
           , edits =
               ["""
-          , C.xAxis [ C.pinned .max ]
-          , C.xTicks [ C.pinned .max, CA.flip  ]
-          , C.xLabels [ C.pinned .max, CA.flip ]
+          , C.xAxis [ CA.pinned .max ]
+          , C.xTicks [ CA.pinned .max, CA.flip  ]
+          , C.xLabels [ CA.pinned .max, CA.flip ]
               """]
           , chart = \_ ->
               frame
-                [ C.xAxis [ C.pinned .max ]
-                , C.xTicks [ C.pinned .max, CA.flip ]
-                , C.xLabels [ C.pinned .max, CA.flip ]
+                [ C.xAxis [ CA.pinned .max ]
+                , C.xTicks [ CA.pinned .max, CA.flip ]
+                , C.xLabels [ CA.pinned .max, CA.flip ]
                 ]
           }
         , { title = "Offset"
@@ -111,13 +111,13 @@ section =
         , { title = "No arrow"
           , edits =
               ["""
-          , C.xAxis [ C.noArrow ]
+          , C.xAxis [ CA.noArrow ]
           , C.xTicks []
           , C.xLabels []
               """]
           , chart = \_ ->
               frame
-                [ C.xAxis [ C.noArrow ]
+                [ C.xAxis [ CA.noArrow ]
                 , C.xTicks []
                 , C.xLabels []
                 ]

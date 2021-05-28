@@ -10,7 +10,7 @@ module Chart exposing
     , each, eachBin, eachStack, eachProduct
     , withPlane, withBins, withStacks, withProducts
 
-    , range, domain, limits, pinned, dotted, noArrow, filterX, filterY, only
+    , range, domain, limits
     , binned, amount, floatsCustom, ints, intsCustom, times, timesCustom
 
     , named
@@ -94,42 +94,6 @@ domain fs config =
 limits : List (Attribute C.Axis) -> Attribute { a | limits : C.Axis -> C.Axis }
 limits fs config =
   { config | limits = \i -> List.foldl (\f b -> f b) i fs }
-
-
-{-| -}
-pinned : x -> Attribute { a | pinned : x }
-pinned value config =
-  { config | pinned = value }
-
-
-{-| -}
-dotted : Attribute { a | dotted : Bool }
-dotted config =
-  { config | dotted = True }
-
-
-{-| -}
-noArrow : Attribute { a | arrow : Bool }
-noArrow config =
-  { config | arrow = False }
-
-
-{-| -}
-filterX : x -> Attribute { a | filterX : x }
-filterX value config =
-  { config | filterX = value }
-
-
-{-| -}
-filterY : x -> Attribute { a | filterY : x }
-filterY value config =
-  { config | filterY = value }
-
-
-{-| -}
-only : x -> Attribute { a | only : x }
-only value config =
-  { config | only = value }
 
 
 {-| -}
@@ -1084,7 +1048,7 @@ yTick edits val =
 type alias Grid =
     { color : String -- TODO use Color
     , width : Float
-    , dotted : Bool
+    , dotGrid : Bool
     , filterX : C.Axis -> List Float
     , filterY : C.Axis -> List Float
     }
@@ -1099,7 +1063,7 @@ grid edits =
           , filterX = always []
           , filterY = always []
           , width = 1
-          , dotted = False
+          , dotGrid = False
           }
 
       notTheseX vs p =
@@ -1125,7 +1089,7 @@ grid edits =
   in
   GridElement <| \p vs ->
     S.g [ SA.class "elm-charts__grid" ] <|
-      if config.dotted then
+      if config.dotGrid then
         List.concatMap (\x -> List.filterMap (toDot vs p x) vs.ys) vs.xs
       else
         [ S.g [ SA.class "elm-charts__x-grid" ] (List.filterMap (toXGrid (Debug.log "here" vs) p) vs.xs)

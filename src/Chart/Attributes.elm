@@ -11,6 +11,7 @@ module Chart.Attributes exposing
 
   , marginTop, marginBottom, marginLeft, marginRight
   , paddingTop, paddingBottom, paddingLeft, paddingRight
+  , pinned, dotGrid, noArrow, filterX, filterY, only
   )
 
 
@@ -65,6 +66,42 @@ paddingLeft value config =
 paddingRight : Float -> Attribute { a | paddingRight : Float }
 paddingRight value config =
   { config | paddingRight = value }
+
+
+{-| -}
+pinned : x -> Attribute { a | pinned : x }
+pinned value config =
+  { config | pinned = value }
+
+
+{-| -}
+dotGrid : Attribute { a | dotGrid : Bool }
+dotGrid config =
+  { config | dotGrid = True }
+
+
+{-| -}
+noArrow : Attribute { a | arrow : Bool }
+noArrow config =
+  { config | arrow = False }
+
+
+{-| -}
+filterX : x -> Attribute { a | filterX : x }
+filterX value config =
+  { config | filterX = value }
+
+
+{-| -}
+filterY : x -> Attribute { a | filterY : x }
+filterY value config =
+  { config | filterY = value }
+
+
+{-| -}
+only : x -> Attribute { a | only : x }
+only value config =
+  { config | only = value }
 
 
 {-| -}
