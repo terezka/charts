@@ -116,8 +116,8 @@ scatter =
             , C.xLabels []
             , C.yLabels []
             , C.series .x
-                [ C.property .y [ CA.color pink ] [ CA.circle ]
-                , C.property .z [ CA.color purple ] [ CA.square ]
+                [ C.property .y [] [ CA.circle ]
+                , C.property .z [] [ CA.square ]
                 ]
                 [ { x = 1, y = Just 2, z = Just 3 }
                 , { x = 2, y = Just 3, z = Just 5 }
@@ -170,8 +170,8 @@ lines =
             , C.xLabels []
             , C.yLabels []
             , C.series .x
-                [ C.property .y [ CA.monotone, CA.color pink ] [ CA.circle ]
-                , C.property .z [ CA.monotone, CA.color purple ] [ CA.square ]
+                [ C.property .y [ CA.monotone ] [ CA.circle ]
+                , C.property .z [ CA.monotone ] [ CA.square ]
                 ]
                 [ { x = 1, y = Just 2, z = Just 3 }
                 , { x = 5, y = Just 4, z = Just 1 }
