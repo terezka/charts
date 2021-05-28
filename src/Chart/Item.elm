@@ -500,9 +500,10 @@ toDotSeries toX properties data =
           , shape = Nothing
           }
 
-      toSeriesItem lineIndex sublineIndex prop colorIndex =
+      toSeriesItem lineIndex props sublineIndex prop colorIndex =
         let dotItems = List.map (toDotItem lineIndex sublineIndex prop interConfig) data
-            interAttr = [ CA.color (toDefaultColor colorIndex), CA.opacity 0 ] ++ prop.inter
+            defaultOpacity = if List.length props > 1 then 0.4 else 0
+            interAttr = [ CA.color (toDefaultColor colorIndex), CA.opacity defaultOpacity ] ++ prop.inter
             interConfig = toInterConfig interAttr
         in
         Item
@@ -565,7 +566,7 @@ toDotSeries toX properties data =
           }
   in
   List.map P.toConfigs properties
-    |> List.indexedMap (\lineIndex ps -> List.indexedMap (toSeriesItem lineIndex) ps)
+    |> List.indexedMap (\lineIndex ps -> List.indexedMap (toSeriesItem lineIndex ps) ps)
     |> List.concat
     |> List.indexedMap (\colorIndex f -> f colorIndex)
 

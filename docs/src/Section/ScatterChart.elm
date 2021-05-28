@@ -81,11 +81,11 @@ section =
       [ { title = "Shapes"
         , edits =
             [ """
-              [ C.property .y [] [ CA.circle ]
-              , C.property .z [] [ CA.square ]
-              , C.property .w [] [ CA.cross ]
-              ]
-              """
+            [ C.property .y [] [ CA.circle ]
+            , C.property .z [] [ CA.square ]
+            , C.property .w [] [ CA.cross ]
+            ]
+            """
             ]
         , chart = \_ ->
             frame
@@ -97,10 +97,10 @@ section =
       , { title = "Colors"
         , edits =
             [ """
-              [ C.property .y [] [ CA.color "red" ]
-              , C.property .z [] [ CA.color "blue" ]
-              ]
-              """
+            [ C.property .y [] [ CA.color "red" ]
+            , C.property .z [] [ CA.color "blue" ]
+            ]
+            """
             ]
         , chart = \_ ->
             frame
@@ -111,10 +111,10 @@ section =
       , { title = "Sizes"
         , edits =
             [ """
-              [ C.property .y [] [ CA.size 12 ]
-              , C.property .z [] [ CA.size 3 ]
-              ]
-              """
+            [ C.property .y [] [ CA.size 12 ]
+            , C.property .z [] [ CA.size 3 ]
+            ]
+            """
             ]
         , chart = \_ ->
             frame
@@ -125,9 +125,9 @@ section =
       , { title = "Opacity"
         , edits =
             [ """
-              [ C.property .y [] [ CA.opacity 0.5 ]
-              , C.property .z [] [ CA.opacity 0.5 ]
-              ]
+            [ C.property .y [] [ CA.opacity 0.5 ]
+            , C.property .z [] [ CA.opacity 0.5 ]
+            ]
               """
             ]
         , chart = \_ ->
@@ -139,9 +139,9 @@ section =
       , { title = "Borders"
         , edits =
             [ """
-              [ C.property .y [] [ CA.borderWidth 2, CA.border "red" ]
-              , C.property .z [] []
-              ]
+            [ C.property .y [] [ CA.borderWidth 2, CA.border "red" ]
+            , C.property .z [] []
+            ]
               """
             ]
         , chart = \_ ->
@@ -153,9 +153,9 @@ section =
       , { title = "Highlight"
         , edits =
             [ """
-              [ C.property .y [] []
-              , C.property .z [] [ CA.aura 0.5  ]
-              ]
+            [ C.property .y [] []
+            , C.property .z [] [ CA.aura 0.5  ]
+            ]
               """
             ]
         , chart = \_ ->
@@ -167,19 +167,17 @@ section =
       , { title = "Data dependent"
         , edits =
             [ """
-              [ C.property .y [] []
-                  |> C.variation (\\d -> [ CA.aura (if d.x == 3 then 0.5 else 0) ])
-                  -- If particular data point, add highlight
-              , C.property .z [] []
-                  |> C.variation (\\d -> [ CA.size (d.x * 2 + 2) ])
-                  -- Base size on data point characteristic
-              ]
+            [ C.property .y [] []
+                |> C.variation (\\d -> [ CA.aura (if d.x == 3 then 0.5 else 0) ])
+            , C.property .z [] []
+                |> C.variation (\\d -> [ CA.size (d.x * 2 + 2) ])
+            ]
               """
             ]
         , chart = \_ ->
             frame
               [ C.property .y [] []
-                |> C.variation (\d -> [ CA.aura (if d.x == 3 then 0.5 else 0) ])
+                  |> C.variation (\d -> [ CA.aura (if d.x == 3 then 0.5 else 0) ])
               , C.property .z [] []
                   |> C.variation (\d -> [ CA.size (d.x * 2 + 2) ])
               ]

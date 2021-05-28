@@ -221,8 +221,8 @@ areas =
             , C.yLabels []
             , C.series .x
                 [ C.stacked
-                    [ C.property .y [ CA.linear, CA.color purple, CA.opacity 0.4, CA.dotted [] ] []
-                    , C.property .z [ CA.linear, CA.color pink, CA.opacity 0.4 ] []
+                    [ C.property .y [ CA.linear, CA.color purple, CA.dotted [] ] []
+                    , C.property .z [ CA.linear, CA.color pink ] []
                     ]
                 ]
                 [ { x = 1, y = Just 1, z = Just 3 }
