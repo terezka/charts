@@ -93,9 +93,9 @@ view model =
     [ CA.height 530
     , CA.width 1000
     , CA.static
-    , C.marginLeft 0
-    , C.marginRight 0
-    , C.paddingTop 15
+    , CA.marginLeft 0
+    , CA.marginRight 0
+    , CA.paddingTop 15
 
     , C.range <|
         case model.window of
@@ -244,11 +244,11 @@ viewSalaryDiscrepancyMini model =
     [ CA.height 100
     , CA.width 167
     , CA.static
-    , C.marginLeft 0
-    , C.marginBottom 0
-    , C.marginTop 0
-    , C.marginRight 0
-    , C.paddingTop 15
+    , CA.marginLeft 0
+    , CA.marginBottom 0
+    , CA.marginTop 0
+    , CA.marginRight 0
+    , CA.paddingTop 15
     , C.range [ C.lowest 20000 C.orHigher ]
     , C.domain [ C.lowest 76 C.orHigher ]
     ]

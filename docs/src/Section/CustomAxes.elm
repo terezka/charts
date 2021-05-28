@@ -38,7 +38,7 @@ section =
           [ C.chart
               [ CA.height 300
               , CA.width 760
-              , C.marginTop 15
+              , CA.marginTop 15
               ] <|
               [ C.grid [] ] ++ props
           ]

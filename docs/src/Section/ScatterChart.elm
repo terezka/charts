@@ -38,7 +38,7 @@ section =
           [ C.chart
               [ CA.height 300
               , CA.width 760
-              , C.marginLeft 10
+              , CA.marginLeft 10
               ]
               [ C.grid []
               , C.xLabels []

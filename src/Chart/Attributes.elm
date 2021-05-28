@@ -8,12 +8,63 @@ module Chart.Attributes exposing
   , Direction(..), onTop, onBottom, onRight, onLeft, onLeftOrRight, onTopOrBottom, noPointer
   , blue, pink, orange, green, purple, red, turquoise
   , background, attrs, htmlAttrs, static, events
+
+  , marginTop, marginBottom, marginLeft, marginRight
+  , paddingTop, paddingBottom, paddingLeft, paddingRight
   )
 
 
 {-| -}
 type alias Attribute c =
   c -> c
+
+
+{-| -}
+marginTop : Float -> Attribute { a | marginTop : Float }
+marginTop value config =
+  { config | marginTop = value }
+
+
+{-| -}
+marginBottom : Float -> Attribute { a | marginBottom : Float }
+marginBottom value config =
+  { config | marginBottom = value }
+
+
+{-| -}
+marginLeft : Float -> Attribute { a | marginLeft : Float }
+marginLeft value config =
+  { config | marginLeft = value }
+
+
+{-| -}
+marginRight : Float -> Attribute { a | marginRight : Float }
+marginRight value config =
+  { config | marginRight = value }
+
+
+{-| -}
+paddingTop : Float -> Attribute { a | paddingTop : Float }
+paddingTop value config =
+  { config | paddingTop = value }
+
+
+{-| -}
+paddingBottom : Float -> Attribute { a | paddingBottom : Float }
+paddingBottom value config =
+  { config | paddingBottom = value }
+
+
+{-| -}
+paddingLeft : Float -> Attribute { a | paddingLeft : Float }
+paddingLeft value config =
+  { config | paddingLeft = value }
+
+
+{-| -}
+paddingRight : Float -> Attribute { a | paddingRight : Float }
+paddingRight value config =
+  { config | paddingRight = value }
 
 
 {-| -}

@@ -60,7 +60,7 @@ view =
         [ C.chart
             [ CA.height 300
             , CA.width 300
-            , C.marginBottom 20
+            , CA.marginBottom 20
             ]
             [ C.grid []
             , C.xAxis []
@@ -82,8 +82,8 @@ scatter =
       C.chart
         [ CA.height 300
         , CA.width 300
-        , C.paddingLeft 10
-        , C.paddingBottom 5
+        , CA.paddingLeft 10
+        , CA.paddingBottom 5
         ]
         [ C.grid []
         , C.xLabels []
@@ -108,9 +108,9 @@ scatter =
         [ C.chart
             [ CA.height 300
             , CA.width 300
-            , C.marginBottom 20
-            , C.paddingLeft 10
-            , C.paddingBottom 5
+            , CA.marginBottom 20
+            , CA.paddingLeft 10
+            , CA.paddingBottom 5
             ]
             [ C.grid []
             , C.xLabels []
@@ -138,8 +138,8 @@ lines =
       C.chart
         [ CA.height 300
         , CA.width 300
-        , C.paddingLeft 10
-        , C.paddingBottom 10
+        , CA.paddingLeft 10
+        , CA.paddingBottom 10
         ]
         [ C.grid []
         , C.xLabels []
@@ -162,9 +162,9 @@ lines =
         [ C.chart
             [ CA.height 300
             , CA.width 300
-            , C.marginBottom 20
-            , C.paddingLeft 10
-            , C.paddingBottom 5
+            , CA.marginBottom 20
+            , CA.paddingLeft 10
+            , CA.paddingBottom 5
             ]
             [ C.grid []
             , C.xLabels []
@@ -214,7 +214,7 @@ areas =
         [ C.chart
             [ CA.height 300
             , CA.width 300
-            , C.marginBottom 20
+            , CA.marginBottom 20
             ]
             [ C.grid []
             , C.xLabels []
@@ -265,7 +265,7 @@ bars =
         [ C.chart
             [ CA.height 300
             , CA.width 300
-            , C.marginBottom 20
+            , CA.marginBottom 20
             ]
             [ C.grid []
             , C.xLabels [ C.ints ]
