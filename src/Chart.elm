@@ -82,7 +82,6 @@ type alias Attribute c =
   c -> c
 
 
-
 {-| -}
 limits : List (Attribute C.Axis) -> Attribute { a | limits : C.Axis -> C.Axis }
 limits fs config =
@@ -1235,9 +1234,9 @@ produce num gen limit func =
 
 
 {-| -}
-each : (C.Plane -> List a) -> (C.Plane -> a -> List (Element data msg)) -> Element data msg
-each toItems func =
-  SubElements <| \p _ -> List.concatMap (func p) (toItems p)
+each : List a -> (C.Plane -> a -> List (Element data msg)) -> Element data msg
+each items func =
+  SubElements <| \p _ -> List.concatMap (func p) items
 
 
 {-| -}

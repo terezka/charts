@@ -121,10 +121,10 @@ view model =
     ]
     [ C.grid []
 
-    , C.each (CS.produce 10 CS.ints << .x) <| \p t ->
+    , C.produce 10 CS.ints .x <| \p t ->
         [ C.xLabel [ CA.alignLeft, CA.yOff -20, CA.xOff 3, CA.x (toFloat t) ] [ S.text (String.fromInt t) ] ]
 
-    , C.each (CS.produce 8 CS.ints << .y) <| \p t ->
+    , C.produce 8 CS.ints .y <| \p t ->
         [ if t == 100 then
             C.title [ CA.alignLeft, CA.yOff -7, CA.xOff 1 ] [ S.text (String.fromInt t) ] { x = p.x.min, y = toFloat t }
           else
@@ -195,7 +195,7 @@ view model =
         Nothing ->
           C.none
 
-    , C.each (always model.hovering) <| \p item ->
+    , C.each model.hovering <| \p item ->
         [ C.tooltip item [] [] [ tooltipContent item ] ]
 
     , case model.selection of
@@ -252,10 +252,10 @@ viewSalaryDiscrepancyMini model =
     , CA.range [ C.lowest 20000 C.orHigher ]
     , CA.domain [ C.lowest 76 C.orHigher ]
     ]
-    [ C.each (CS.produce 10 CS.ints << .x) <| \p t ->
+    [ C.produce 10 CS.ints .x <| \p t ->
         [ C.xLabel [ CA.alignLeft, CA.yOff 15, CA.x (toFloat t) ] [ S.text "" ] ]
 
-    , C.each (CS.produce 8 CS.ints << .y) <| \p t ->
+    , C.produce 8 CS.ints .y <| \p t ->
         [ C.yLabel [ CA.alignLeft, CA.yOff -5, CA.y (toFloat t) ] [ S.text "" ] ]
 
     , C.line [ CA.dashed [ 3, 3 ], CA.y1 100, CA.width 0.5 ]
