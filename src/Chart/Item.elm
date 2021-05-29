@@ -22,9 +22,6 @@ import Chart.Svg as S
 import Chart.Attributes as CA
 
 
--- TODO add element index
-
-
 {-| -}
 type Item a =
   Item

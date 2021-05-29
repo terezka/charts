@@ -11,7 +11,7 @@ module Chart.Svg exposing
   , Rect, rect
   , decoder, getNearest, getNearestX, getWithin, getWithinX, isWithinPlane
   , position, positionHtml
-  , Limit, produce, floats, ints, times
+  , Generator, Limit, produce, floats, ints, times
   , TickValue, toTickValues, formatTime
   )
 

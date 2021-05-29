@@ -1,19 +1,23 @@
 module Chart exposing
     ( chart, Element
     , bars, series
-    , Property, stacked, bar, property, just, variation
+    , Property, stacked, bar, property, just, variation, named
     , xAxis, yAxis, xTicks, yTicks, xLabels, yLabels, grid
+
     , lowest, highest, orLower, orHigher, exactly, more, less, window, likeData, zero, middle
+
     , Event, event
     , Decoder, getCoords, getNearest, getNearestX, getWithin, getWithinX, map, map2, map3, map4
-    , tooltip, line, title, xLabel, yLabel, xTick, yTick, rect, svgAt, htmlAt, svg, html, none
+
+    , tooltip, line, title, xLabel, yLabel, xTick, yTick
+    , rect, svgAt, htmlAt, svg, html, none
+
     , each, eachBin, eachStack, eachProduct
     , withPlane, withBins, withStacks, withProducts
 
-    , range, domain, limits
+    , limits
     , binned, amount, floatsCustom, ints, intsCustom, times, timesCustom
-
-    , named
+    , produce
     )
 
 
@@ -77,17 +81,6 @@ import Chart.Attributes as CA
 type alias Attribute c =
   c -> c
 
-
-{-| -}
-range : List (Attribute C.Axis) -> Attribute { a | range : Maybe (C.Axis -> C.Axis) }
-range fs config =
-  { config | range = Just (\i -> List.foldl (\f b -> f b) i fs) }
-
-
-{-| -}
-domain : List (Attribute C.Axis) -> Attribute { a | domain : Maybe (C.Axis -> C.Axis) }
-domain fs config =
-  { config | domain = Just (\i -> List.foldl (\f b -> f b) i fs) }
 
 
 {-| -}
@@ -155,8 +148,8 @@ type alias Container data msg =
     , paddingLeft : Float
     , paddingRight : Float
     , responsive : Bool
-    , range : Maybe (Attribute C.Axis)
-    , domain : Maybe (Attribute C.Axis)
+    , range : List (Attribute C.Axis)
+    , domain : List (Attribute C.Axis)
     , events : List (Event data msg)
     , htmlAttrs : List (H.Attribute msg)
     , attrs : List (S.Attribute msg)
@@ -164,7 +157,7 @@ type alias Container data msg =
 
 
 {-| -}
-chart : List (Container data msg -> Container data msg) -> List (Element data msg) -> H.Html msg
+chart : List (Attribute (Container data msg)) -> List (Element data msg) -> H.Html msg
 chart edits elements =
   let config =
         applyAttrs edits
@@ -179,8 +172,8 @@ chart edits elements =
           , paddingLeft = 0
           , paddingRight = 10
           , responsive = True
-          , range = Nothing
-          , domain = Nothing
+          , range = []
+          , domain = []
           , events = []
           , attrs = [ SA.style "overflow: visible;" ]
           , htmlAttrs = []
@@ -289,13 +282,13 @@ definePlane config elements =
 
       calcRange =
         case config.range of
-          Just edit -> edit limits_.x
-          Nothing -> limits_.x
+          [] -> limits_.x
+          some -> List.foldl (\f b -> f b) limits_.x some
 
       calcDomain =
         case config.domain of
-          Just edit -> edit limits_.y
-          Nothing -> lowest 0 orLower limits_.y
+          [] -> lowest 0 orLower limits_.y
+          some -> List.foldl (\f b -> f b) limits_.y some
 
       margin =
         { top = config.marginTop
@@ -367,18 +360,18 @@ getTickValues : C.Plane -> List (Item.Product Item.General data) -> List (Elemen
 getTickValues plane items elements =
   let toValues el acc =
         case el of
-          SeriesElement _ _ _ -> acc
-          BarsElement _ _ func _ -> func plane acc
-          AxisElement func _ -> func plane acc
-          TicksElement func _ -> func plane acc
-          TickElement toC func _ -> func plane (toC plane) acc
-          LabelsElement toC func _ -> func plane (toC plane) acc
-          LabelElement toC func _ -> func plane (toC plane) acc
-          GridElement _ -> acc
-          SubElements func -> List.foldl toValues acc (func plane items)
-          ListOfElements _ -> acc
-          SvgElement _ -> acc
-          HtmlElement _ -> acc
+          SeriesElement _ _ _       -> acc
+          BarsElement _ _ func _    -> func plane acc
+          AxisElement func _        -> func plane acc
+          TicksElement func _       -> func plane acc
+          TickElement toC func _    -> func plane (toC plane) acc
+          LabelsElement toC func _  -> func plane (toC plane) acc
+          LabelElement toC func _   -> func plane (toC plane) acc
+          SubElements func          -> List.foldl toValues acc (func plane items)
+          GridElement _             -> acc
+          ListOfElements _          -> acc
+          SvgElement _              -> acc
+          HtmlElement _             -> acc
   in
   List.foldl toValues (TickValues [] [] [] []) elements
 
@@ -612,7 +605,7 @@ type alias Axis =
     { limits : C.Axis -> C.Axis
     , pinned : C.Axis -> Float
     , arrow : Bool
-    , color : String -- TODO use Color
+    , color : String
     }
 
 
@@ -685,7 +678,7 @@ yAxis edits =
 
 
 type alias Ticks =
-    { color : String -- TODO use Color -- TODO allow custom color by tick value
+    { color : String
     , height : Float
     , width : Float
     , pinned : C.Axis -> Float
@@ -775,7 +768,7 @@ yTicks edits =
 
 
 type alias Labels =
-    { color : String -- TODO use Color
+    { color : String
     , pinned : C.Axis -> Float
     , limits : C.Axis -> C.Axis
     , only : Float -> Bool
@@ -1046,7 +1039,7 @@ yTick edits val =
 
 
 type alias Grid =
-    { color : String -- TODO use Color
+    { color : String
     , width : Float
     , dotGrid : Bool
     , filterX : C.Axis -> List Float
@@ -1231,6 +1224,14 @@ withStacks func =
 withProducts : (C.Plane -> List (Item.Product Item.General data) -> List (Element data msg)) -> Element data msg
 withProducts func =
   SubElements <| \p is -> func p is
+
+
+{-| -}
+produce : Int -> CS.Generator a -> (C.Plane -> CS.Limit) -> (C.Plane -> a -> List (Element data msg)) -> Element data msg
+produce num gen limit func =
+  SubElements <| \p _ ->
+    let items = CS.produce num gen (limit p) in
+    List.concatMap (func p) items
 
 
 {-| -}

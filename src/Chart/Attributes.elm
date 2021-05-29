@@ -12,12 +12,25 @@ module Chart.Attributes exposing
   , marginTop, marginBottom, marginLeft, marginRight
   , paddingTop, paddingBottom, paddingLeft, paddingRight
   , pinned, dotGrid, noArrow, filterX, filterY, only
+  , range, domain
   )
 
 
 {-| -}
 type alias Attribute c =
   c -> c
+
+
+{-| -}
+range : x -> Attribute { a | range : x }
+range v config =
+  { config | range = v }
+
+
+{-| -}
+domain : x -> Attribute { a | domain : x }
+domain v config =
+  { config | domain = v }
 
 
 {-| -}

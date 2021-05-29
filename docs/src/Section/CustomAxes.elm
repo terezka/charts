@@ -33,10 +33,10 @@ section =
   let frame props =
         H.div
           [ HA.style "width" "760px"
-          , HA.style "height" "300px"
+          , HA.style "height" "100px"
           ]
           [ C.chart
-              [ CA.height 300
+              [ CA.height 100
               , CA.width 760
               , CA.marginTop 15
               ] <|
@@ -47,7 +47,7 @@ section =
     , template =
         """
         C.chart
-          [ CA.height 300
+          [ CA.height 100
           , CA.width 760
           ]
           [ C.grid []
@@ -59,9 +59,9 @@ section =
         { title = "Basic"
         , edits =
             ["""
-        , C.xAxis []
-        , C.xTicks []
-        , C.xLabels []
+          , C.xAxis []
+          , C.xTicks []
+          , C.xLabels []
             """]
         , chart = \_ ->
             frame
@@ -154,19 +154,18 @@ section =
           , edits =
               ["""
           , C.xAxis []
-          , C.each (CS.produce 12 CS.ints << .x) <| \\p num ->
+          , C.produce 12 CS.ints .x <| \\p num ->
               [ C.xTick [ CA.x (toFloat num) ]
-              , C.xLabel [ CA.x (toFloat num) ]
-                  [ S.text (String.fromInt num), S.text "°" ]
+              , C.xLabel [ CA.x (toFloat num) ] [ S.text (String.fromInt num ++ "°") ]
               ]
               """]
           , chart = \_ ->
               frame
                 [ C.xAxis []
-                , C.each (CS.produce 12 CS.ints << .x) <| \p num ->
+                , C.produce 12 CS.ints .x <| \p num ->
                     [ C.xTick [ CA.x (toFloat num) ]
                     , C.xLabel [ CA.x (toFloat num) ]
-                        [ S.text (String.fromInt num), S.text "°" ]
+                        [ S.text (String.fromInt num ++ "°") ]
                     ]
                 ]
           }

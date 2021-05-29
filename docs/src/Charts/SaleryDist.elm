@@ -97,12 +97,12 @@ view model =
     , CA.marginRight 0
     , CA.paddingTop 15
 
-    , C.range <|
+    , CA.range <|
         case model.window of
           Just window -> [ C.lowest window.x1 C.exactly, C.highest window.x2 C.exactly ]
           Nothing -> [ C.lowest 20000 C.orHigher ]
 
-    , C.domain  <|
+    , CA.domain <|
         case model.window of
           Just window -> [ C.lowest window.y1 C.exactly, C.highest window.y2 C.exactly ]
           Nothing -> [ C.lowest 76 C.orHigher ]
@@ -249,8 +249,8 @@ viewSalaryDiscrepancyMini model =
     , CA.marginTop 0
     , CA.marginRight 0
     , CA.paddingTop 15
-    , C.range [ C.lowest 20000 C.orHigher ]
-    , C.domain [ C.lowest 76 C.orHigher ]
+    , CA.range [ C.lowest 20000 C.orHigher ]
+    , CA.domain [ C.lowest 76 C.orHigher ]
     ]
     [ C.each (CS.produce 10 CS.ints << .x) <| \p t ->
         [ C.xLabel [ CA.alignLeft, CA.yOff 15, CA.x (toFloat t) ] [ S.text "" ] ]
