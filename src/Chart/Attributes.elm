@@ -11,12 +11,13 @@ module Chart.Attributes exposing
 
   , marginTop, marginBottom, marginLeft, marginRight
   , paddingTop, paddingBottom, paddingLeft, paddingRight
-  , pinned, dotGrid, noArrow, filterX, filterY, only
+  , pinned, dotGrid, noArrow
   , range, domain, limits, amount
 
   , lowest, highest, orLower, orHigher, exactly, more, less, window, likeData, zero, middle
 
   , Tick(..), ints, times
+  , noGrid
   )
 
 
@@ -205,21 +206,9 @@ noArrow config =
 
 
 {-| -}
-filterX : x -> Attribute { a | filterX : x }
-filterX value config =
-  { config | filterX = value }
-
-
-{-| -}
-filterY : x -> Attribute { a | filterY : x }
-filterY value config =
-  { config | filterY = value }
-
-
-{-| -}
-only : x -> Attribute { a | only : x }
-only value config =
-  { config | only = value }
+noGrid : Attribute { a | grid : Bool }
+noGrid config =
+  { config | grid = False }
 
 
 {-| -}

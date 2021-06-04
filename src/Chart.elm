@@ -502,7 +502,6 @@ type alias Ticks =
     , width : Float
     , pinned : C.Axis -> Float
     , limits : List (CA.Attribute C.Axis)
-    , only : Float -> Bool
     , amount : Int
     , flip : Bool
     , generate : CA.Tick
@@ -518,7 +517,6 @@ xTicks edits =
           , limits = []
           , pinned = CA.zero
           , amount = 5
-          , only = \_ -> True
           , generate = CA.Floats
           , height = 5
           , flip = False
@@ -529,7 +527,6 @@ xTicks edits =
         List.foldl (\f x -> f x) p.x config.limits
           |> generateValues config.amount config.generate
           |> List.map .value
-          |> List.filter config.only
 
       addTickValues p ts =
         { ts | xs = ts.xs ++ toTicks p }
@@ -556,7 +553,6 @@ yTicks edits =
           { color = ""
           , limits = []
           , pinned = CA.zero
-          , only = \_ -> True
           , amount = 5
           , generate = CA.Floats
           , height = 5
@@ -568,7 +564,6 @@ yTicks edits =
         List.foldl (\f y -> f y) p.y config.limits
           |> generateValues config.amount config.generate
           |> List.map .value
-          |> List.filter config.only
 
       addTickValues p ts =
         { ts | ys = ts.ys ++ toTicks p }
@@ -592,13 +587,13 @@ type alias Labels =
     { color : String
     , pinned : C.Axis -> Float
     , limits : List (CA.Attribute C.Axis)
-    , only : Float -> Bool
     , xOff : Float
     , yOff : Float
     , flip : Bool
     , amount : Int
     , anchor : CA.Anchor
     , generate : CA.Tick
+    , grid : Bool
     }
 
 
@@ -609,7 +604,6 @@ xLabels edits =
         applyAttrs edits
           { color = "#808BAB"
           , limits = []
-          , only = \_ -> True
           , pinned = CA.zero
           , amount = 5
           , generate = CA.Floats
@@ -617,14 +611,15 @@ xLabels edits =
           , anchor = CA.Middle
           , xOff = 0
           , yOff = 18
+          , grid = True
           }
 
       toTicks p config =
         List.foldl (\f x -> f x) p.x config.limits
           |> generateValues config.amount config.generate
-          |> List.filter (config.only << .value)
 
       toTickValues p config ts =
+        if not config.grid then ts else
         { ts | xs = ts.xs ++ List.map .value (toTicks p config) }
   in
   LabelsElement toConfig toTickValues <| \p config ->
@@ -654,21 +649,21 @@ yLabels edits =
           { color = "#808BAB"
           , limits = []
           , pinned = CA.zero
-          , only = \_ -> True
           , amount = 5
           , generate = CA.Floats
           , anchor = CA.Middle
           , flip = False
           , xOff = -8
           , yOff = 3
+          , grid = True
           }
 
       toTicks p config =
         List.foldl (\f y -> f y) p.y config.limits
           |> generateValues config.amount config.generate
-          |> List.filter (config.only << .value)
 
       toTickValues p config ts =
+        if not config.grid then ts else
         { ts | ys = ts.ys ++ List.map .value (toTicks p config) }
   in
   LabelsElement toConfig toTickValues <| \p config ->
@@ -703,6 +698,7 @@ type alias Label =
   , anchor : CA.Anchor
   , rotate : Float
   , flip : Bool
+  , grid : Bool
   }
 
 
@@ -722,9 +718,11 @@ xLabel edits inner =
           , anchor = CA.Middle
           , rotate = 0
           , flip = False
+          , grid = True
           }
 
       toTickValues p config ts =
+        if not config.grid then ts else
         { ts | xs = ts.xs ++ [ config.x ] }
   in
   LabelElement toConfig toTickValues <| \p config ->
@@ -768,9 +766,11 @@ yLabel edits inner =
           , anchor = CA.Start
           , rotate = 0
           , flip = False
+          , grid = True
           }
 
       toTickValues p config ts =
+        if not config.grid then ts else
         { ts | ys = ts.ys ++ [ config.y ] }
   in
   LabelElement toConfig toTickValues <| \p config ->

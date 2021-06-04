@@ -122,13 +122,18 @@ view model =
     [ C.grid []
 
     , C.generate 10 CS.ints .x <| \p t ->
-        [ C.xLabel [ CA.alignLeft, CA.yOff -20, CA.xOff 3, CA.x (toFloat t) ] [ S.text (String.fromInt t) ] ]
+        [ C.xLabel
+            [ CA.alignLeft, CA.yOff -20, CA.xOff 3, CA.x (toFloat t)
+            , if t == 20000 then CA.noGrid else identity
+            ]
+            [ S.text (String.fromInt t) ]
+        ]
 
     , C.generate 8 CS.ints .y <| \p t ->
         [ if t == 100 then
             C.title [ CA.alignLeft, CA.yOff -7, CA.xOff 1 ] [ S.text (String.fromInt t) ] { x = p.x.min, y = toFloat t }
           else
-            C.yLabel [ CA.alignLeft, CA.yOff -10, CA.xOff 10, CA.y (toFloat t) ] [ S.text (String.fromInt t) ]
+            C.yLabel [ CA.alignLeft, CA.yOff -7, CA.xOff 10, CA.y (toFloat t) ] [ S.text (String.fromInt t) ]
       ]
 
     , C.withPlane <| \p ->
