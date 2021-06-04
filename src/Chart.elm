@@ -1,20 +1,26 @@
 module Chart exposing
-  ( chart, Element
-  , bars, series
-  , Property, stacked, bar, property, just, variation, named
+  ( chart
+
+  , Element, bars, series
+  , Property, stacked, bar, property, variation, named, just
+
   , xAxis, yAxis, xTicks, yTicks, xLabels, yLabels, grid
 
+  , xLabel, yLabel, xTick, yTick
+  , title, tooltip, line, rect
 
-  , Event, event
-  , Decoder, getCoords, getNearest, getNearestX, getWithin, getWithinX, map, map2, map3, map4
-
-  , tooltip, line, title, xLabel, yLabel, xTick, yTick
-  , rect, svgAt, htmlAt, svg, html, none
+  , svgAt, htmlAt, svg, html, none
 
   , each, eachBin, eachStack, eachProduct
   , withPlane, withBins, withStacks, withProducts
 
-  , binned, generate
+  , generate, floats, ints, times
+
+  , binned
+
+  -- TODO move
+  , Event, event
+  , Decoder, getCoords, getNearest, getNearestX, getWithin, getWithinX, map, map2, map3, map4
   )
 
 
@@ -1050,14 +1056,6 @@ withProducts func =
 
 
 {-| -}
-generate : Int -> CS.Generator a -> (C.Plane -> C.Axis) -> (C.Plane -> a -> List (Element data msg)) -> Element data msg
-generate num gen limit func =
-  SubElements <| \p _ ->
-    let items = CS.generate num gen (limit p) in
-    List.concatMap (func p) items
-
-
-{-| -}
 each : List a -> (C.Plane -> a -> List (Element data msg)) -> Element data msg
 each items func =
   SubElements <| \p _ -> List.concatMap (func p) items
@@ -1079,6 +1077,32 @@ eachStack func =
 eachProduct : (C.Plane -> Item.Product Item.General data -> List (Element data msg)) -> Element data msg
 eachProduct func =
   SubElements <| \p is -> List.concatMap (func p) is
+
+
+{-| -}
+generate : Int -> CS.Generator a -> (C.Plane -> C.Axis) -> (C.Plane -> a -> List (Element data msg)) -> Element data msg
+generate num gen limit func =
+  SubElements <| \p _ ->
+    let items = CS.generate num gen (limit p) in
+    List.concatMap (func p) items
+
+
+{-| -}
+floats : CS.Generator Float
+floats =
+  CS.floats
+
+
+{-| -}
+ints : CS.Generator Int
+ints =
+  CS.ints
+
+
+{-| -}
+times : Time.Zone -> CS.Generator I.Time
+times =
+  CS.times
 
 
 {-| -}
