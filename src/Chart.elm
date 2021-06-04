@@ -1,24 +1,24 @@
 module Chart exposing
-    ( chart, Element
-    , bars, series
-    , Property, stacked, bar, property, just, variation, named
-    , xAxis, yAxis, xTicks, yTicks, xLabels, yLabels, grid
+  ( chart, Element
+  , bars, series
+  , Property, stacked, bar, property, just, variation, named
+  , xAxis, yAxis, xTicks, yTicks, xLabels, yLabels, grid
 
-    , lowest, highest, orLower, orHigher, exactly, more, less, window, likeData, zero, middle
+  , lowest, highest, orLower, orHigher, exactly, more, less, window, likeData, zero, middle
 
-    , Event, event
-    , Decoder, getCoords, getNearest, getNearestX, getWithin, getWithinX, map, map2, map3, map4
+  , Event, event
+  , Decoder, getCoords, getNearest, getNearestX, getWithin, getWithinX, map, map2, map3, map4
 
-    , tooltip, line, title, xLabel, yLabel, xTick, yTick
-    , rect, svgAt, htmlAt, svg, html, none
+  , tooltip, line, title, xLabel, yLabel, xTick, yTick
+  , rect, svgAt, htmlAt, svg, html, none
 
-    , each, eachBin, eachStack, eachProduct
-    , withPlane, withBins, withStacks, withProducts
+  , each, eachBin, eachStack, eachProduct
+  , withPlane, withBins, withStacks, withProducts
 
-    , limits
-    , binned, amount, floatsCustom, ints, intsCustom, times, timesCustom
-    , produce
-    )
+  , limits
+  , binned, amount, floatsCustom, ints, intsCustom, times, timesCustom
+  , produce
+  )
 
 
 {-| Make a chart! Documentation is still unfinished!

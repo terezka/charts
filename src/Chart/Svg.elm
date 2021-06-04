@@ -893,62 +893,49 @@ dot plane toX toY edits datum_ =
       S.text ""
 
     Just CA.Circle ->
-      let radius = sqrt (area_ / pi)
-          radiusAura = config.auraWidth / 2
-          toAttrs off =
-            [ SA.cx (String.fromFloat x_)
-            , SA.cy (String.fromFloat y_)
-            , SA.r (String.fromFloat (radius + off))
-            ]
-      in
-      view S.circle radiusAura toAttrs
+      view S.circle (config.auraWidth / 2) <| \off ->
+        let radius = sqrt (area_ / pi) in
+        [ SA.cx (String.fromFloat x_)
+        , SA.cy (String.fromFloat y_)
+        , SA.r (String.fromFloat (radius + off))
+        ]
 
     Just CA.Triangle ->
-      let toAttrs off =
-            [ SA.d (trianglePath area_ off x_ y_) ]
-      in
-      view S.path config.auraWidth toAttrs
+      view S.path config.auraWidth <| \off ->
+        [ SA.d (trianglePath area_ off x_ y_) ]
 
     Just CA.Square ->
-      let side = sqrt area_
-          toAttrs off =
-            let sideOff = side + off in
-            [ SA.x <| String.fromFloat (x_ - sideOff / 2)
-            , SA.y <| String.fromFloat (y_ - sideOff / 2)
-            , SA.width (String.fromFloat sideOff)
-            , SA.height (String.fromFloat sideOff)
-            ]
-      in
-      view S.rect (config.auraWidth) toAttrs
+      view S.rect config.auraWidth <| \off ->
+        let side = sqrt area_
+            sideOff = side + off
+        in
+        [ SA.x <| String.fromFloat (x_ - sideOff / 2)
+        , SA.y <| String.fromFloat (y_ - sideOff / 2)
+        , SA.width (String.fromFloat sideOff)
+        , SA.height (String.fromFloat sideOff)
+        ]
 
     Just CA.Diamond ->
-      let side = sqrt area_
-          rotation = "rotate(45 " ++ String.fromFloat x_ ++ " " ++ String.fromFloat y_ ++ ")"
-          toAttrs off =
-            let sideOff = side + off in
-            [ SA.x <| String.fromFloat (x_ - sideOff / 2)
-            , SA.y <| String.fromFloat (y_ - sideOff / 2)
-            , SA.width (String.fromFloat sideOff)
-            , SA.height (String.fromFloat sideOff)
-            , SA.transform rotation
-            ]
-      in
-      view S.rect config.auraWidth toAttrs
+      view S.rect config.auraWidth <| \off ->
+        let side = sqrt area_
+            sideOff = side + off
+        in
+        [ SA.x <| String.fromFloat (x_ - sideOff / 2)
+        , SA.y <| String.fromFloat (y_ - sideOff / 2)
+        , SA.width (String.fromFloat sideOff)
+        , SA.height (String.fromFloat sideOff)
+        , SA.transform ("rotate(45 " ++ String.fromFloat x_ ++ " " ++ String.fromFloat y_ ++ ")")
+        ]
 
     Just CA.Cross ->
-      let rotation = "rotate(45 " ++ String.fromFloat x_ ++ " " ++ String.fromFloat y_ ++ ")"
-          toAttrs off =
-            [ SA.d (plusPath area_ off x_ y_)
-            , SA.transform rotation
-            ]
-      in
-      view S.path config.auraWidth toAttrs
+      view S.path config.auraWidth <| \off ->
+        [ SA.d (plusPath area_ off x_ y_)
+        , SA.transform ("rotate(45 " ++ String.fromFloat x_ ++ " " ++ String.fromFloat y_ ++ ")")
+        ]
 
     Just CA.Plus ->
-      let toAttrs off =
-            [ SA.d (plusPath area_ off x_ y_) ]
-      in
-      view S.path config.auraWidth toAttrs
+      view S.path config.auraWidth <| \off ->
+        [ SA.d (plusPath area_ off x_ y_) ]
 
 
 toRadius : Float -> CA.Shape -> Float
