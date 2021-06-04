@@ -11,7 +11,7 @@ module Chart.Svg exposing
   , Rect, rect
   , decoder, getNearest, getNearestX, getWithin, getWithinX, isWithinPlane
   , position, positionHtml
-  , Generator, Limit, generate, floats, ints, times
+  , Generator, generate, floats, ints, times
   , TickValue, toTickValues, formatTime
   )
 
@@ -1406,16 +1406,8 @@ clipperStyle plane limits =
 -- INTERVALS
 
 
-type alias Limit =
-  { min : Float
-  , max : Float
-  , dataMin : Float
-  , dataMax : Float
-  }
-
-
 type Generator a
-  = Generator (Int -> Limit -> List a)
+  = Generator (Int -> Coord.Axis -> List a)
 
 
 floats : Generator Float
@@ -1433,7 +1425,7 @@ times zone =
   Generator (\i b -> I.times zone i { min = b.min, max = b.max })
 
 
-generate : Int -> Generator a -> Limit -> List a
+generate : Int -> Generator a -> Coord.Axis -> List a
 generate amount (Generator func) limits =
   func amount limits
 

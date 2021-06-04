@@ -1050,7 +1050,7 @@ withProducts func =
 
 
 {-| -}
-generate : Int -> CS.Generator a -> (C.Plane -> CS.Limit) -> (C.Plane -> a -> List (Element data msg)) -> Element data msg
+generate : Int -> CS.Generator a -> (C.Plane -> C.Axis) -> (C.Plane -> a -> List (Element data msg)) -> Element data msg
 generate num gen limit func =
   SubElements <| \p _ ->
     let items = CS.generate num gen (limit p) in
