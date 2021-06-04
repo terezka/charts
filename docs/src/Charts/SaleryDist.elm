@@ -99,13 +99,13 @@ view model =
 
     , CA.range <|
         case model.window of
-          Just window -> [ C.lowest window.x1 C.exactly, C.highest window.x2 C.exactly ]
-          Nothing -> [ C.lowest 20000 C.orHigher ]
+          Just window -> [ CA.lowest window.x1 CA.exactly, CA.highest window.x2 CA.exactly ]
+          Nothing -> [ CA.lowest 20000 CA.orHigher ]
 
     , CA.domain <|
         case model.window of
-          Just window -> [ C.lowest window.y1 C.exactly, C.highest window.y2 C.exactly ]
-          Nothing -> [ C.lowest 76 C.orHigher ]
+          Just window -> [ CA.lowest window.y1 CA.exactly, CA.highest window.y2 CA.exactly ]
+          Nothing -> [ CA.lowest 76 CA.orHigher ]
 
     , CA.events
         [ C.map2 OnHover (C.getNearest CI.getCenter identity) C.getCoords
@@ -121,10 +121,10 @@ view model =
     ]
     [ C.grid []
 
-    , C.produce 10 CS.ints .x <| \p t ->
+    , C.generate 10 CS.ints .x <| \p t ->
         [ C.xLabel [ CA.alignLeft, CA.yOff -20, CA.xOff 3, CA.x (toFloat t) ] [ S.text (String.fromInt t) ] ]
 
-    , C.produce 8 CS.ints .y <| \p t ->
+    , C.generate 8 CS.ints .y <| \p t ->
         [ if t == 100 then
             C.title [ CA.alignLeft, CA.yOff -7, CA.xOff 1 ] [ S.text (String.fromInt t) ] { x = p.x.min, y = toFloat t }
           else
@@ -132,10 +132,10 @@ view model =
       ]
 
     , C.withPlane <| \p ->
-        [ C.title [ CA.fontSize 14, CA.yOff -3 ] [ S.text ("Salary distribution in Denmark " ++ String.fromFloat model.year) ] { x = C.middle p.x, y = p.y.max }
-        , C.title [ CA.fontSize 11, CA.yOff 12 ] [ S.text "Data from Danmarks Statestik" ] { x = C.middle p.x, y = p.y.max }
-        , C.title [ CA.fontSize 12, CA.yOff 25 ] [ S.text "Average salary in DKK" ] { x = C.middle p.x, y = p.y.min }
-        , C.title [ CA.fontSize 12, CA.xOff -15, CA.rotate 90 ] [ S.text "Womens percentage of mens salary" ] { x = p.x.min, y = C.middle p.y }
+        [ C.title [ CA.fontSize 14, CA.yOff -3 ] [ S.text ("Salary distribution in Denmark " ++ String.fromFloat model.year) ] { x = CA.middle p.x, y = p.y.max }
+        , C.title [ CA.fontSize 11, CA.yOff 12 ] [ S.text "Data from Danmarks Statestik" ] { x = CA.middle p.x, y = p.y.max }
+        , C.title [ CA.fontSize 12, CA.yOff 25 ] [ S.text "Average salary in DKK" ] { x = CA.middle p.x, y = p.y.min }
+        , C.title [ CA.fontSize 12, CA.xOff -15, CA.rotate 90 ] [ S.text "Womens percentage of mens salary" ] { x = p.x.min, y = CA.middle p.y }
         , C.line [ CA.dashed [ 4, 2 ], CA.opacity 0.7, CA.color "#f56dbc", CA.x1 Salary.avgSalaryWomen ]
         , C.line [ CA.dashed [ 4, 2 ], CA.opacity 0.7, CA.color "#58a9f6", CA.x1 Salary.avgSalaryMen ]
         ]
@@ -249,13 +249,13 @@ viewSalaryDiscrepancyMini model =
     , CA.marginTop 0
     , CA.marginRight 0
     , CA.paddingTop 15
-    , CA.range [ C.lowest 20000 C.orHigher ]
-    , CA.domain [ C.lowest 76 C.orHigher ]
+    , CA.range [ CA.lowest 20000 CA.orHigher ]
+    , CA.domain [ CA.lowest 76 CA.orHigher ]
     ]
-    [ C.produce 10 CS.ints .x <| \p t ->
+    [ C.generate 10 CS.ints .x <| \p t ->
         [ C.xLabel [ CA.alignLeft, CA.yOff 15, CA.x (toFloat t) ] [ S.text "" ] ]
 
-    , C.produce 8 CS.ints .y <| \p t ->
+    , C.generate 8 CS.ints .y <| \p t ->
         [ C.yLabel [ CA.alignLeft, CA.yOff -5, CA.y (toFloat t) ] [ S.text "" ] ]
 
     , C.line [ CA.dashed [ 3, 3 ], CA.y1 100, CA.width 0.5 ]

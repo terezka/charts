@@ -244,7 +244,7 @@ bars =
         , CA.width 300
         ]
         [ C.grid []
-        , C.xLabels [ C.ints ]
+        , C.xLabels [ CA.ints ]
         , C.yLabels []
         , C.bars
             [ CA.x1 .x ]
@@ -268,7 +268,7 @@ bars =
             , CA.marginBottom 20
             ]
             [ C.grid []
-            , C.xLabels [ C.ints ]
+            , C.xLabels [ CA.ints ]
             , C.yLabels []
             , C.bars
                 [ CA.x1 .x ]

@@ -4,7 +4,6 @@ module Chart exposing
   , Property, stacked, bar, property, just, variation, named
   , xAxis, yAxis, xTicks, yTicks, xLabels, yLabels, grid
 
-  , lowest, highest, orLower, orHigher, exactly, more, less, window, likeData, zero, middle
 
   , Event, event
   , Decoder, getCoords, getNearest, getNearestX, getWithin, getWithinX, map, map2, map3, map4
@@ -15,46 +14,12 @@ module Chart exposing
   , each, eachBin, eachStack, eachProduct
   , withPlane, withBins, withStacks, withProducts
 
-  , limits
-  , binned, amount, floatsCustom, ints, intsCustom, times, timesCustom
-  , produce
+  , binned, generate
   )
 
 
-{-| Make a chart! Documentation is still unfinished!
+{-| Make a chart!
 
-# Elements
-@docs chart, Element
-@docs series, scatter, linear, monotone, just
-@docs bars, histogram, bar
-
-## Work with limits
-@docs Limit, startMin, startMax, endMin, endMax, startPad, endPad, zero, middle
-
-# Axis
-@docs xAxis, yAxis, xTicks, yTicks, xLabels, yLabels, grid
-@docs amount, floats, ints, times, values, format, noArrow, start, end, pinned, only, filterX, filterY
-
-# Events
-@docs Event, event, Decoder, getCoords, getNearest, getNearestX, getWithin, getWithinX, map, map2, map3, map4
-@docs Metric, Item, Single, Group
-@docs getBars, getGroups, getDots, withoutUnknowns
-@docs tooltip, tooltipOnTop, formatTimestamp
-
-# Attributes
-@docs width, height
-@docs marginTop, marginBottom, marginLeft, marginRight
-@docs paddingTop, paddingBottom, paddingLeft, paddingRight
-@docs center
-@docs range, domain, topped, static, id, events, htmlAttrs
-@docs binWidth, binLabel, topLabel, barColor, tickLength, tickWidth, margin, spacing, rounded, roundBottom
-@docs dotted, color, label, unit, dot, area, attrs
-
-# Interop
-@docs svgAt, htmlAt, svg, html, none
-
-# Colors
-@docs blue, orange, pink, green, red
 
 -}
 
@@ -74,66 +39,6 @@ import Chart.Svg as CS
 import Chart.Attributes as CA
 
 
--- ATTRS
-
-
-{-| -}
-type alias Attribute c =
-  c -> c
-
-
-{-| -}
-limits : List (Attribute C.Axis) -> Attribute { a | limits : C.Axis -> C.Axis }
-limits fs config =
-  { config | limits = \i -> List.foldl (\f b -> f b) i fs }
-
-
-{-| -}
-floats : Attribute { a | produce : Int -> C.Axis -> List CS.TickValue }
-floats config =
-  { config | produce = \a -> CS.produce a CS.floats >> CS.toTickValues identity String.fromFloat }
-
-
-{-| -}
-floatsCustom : (Float -> String) -> Attribute { a | produce : Int -> C.Axis -> List CS.TickValue }
-floatsCustom formatter config =
-  { config | produce = \a -> CS.produce a CS.floats >> CS.toTickValues identity formatter }
-
-
-{-| -}
-ints : Attribute { a | produce : Int -> C.Axis -> List CS.TickValue }
-ints =
-  intsCustom String.fromInt
-
-
-{-| -}
-intsCustom : (Int -> String) -> Attribute { a | produce : Int -> C.Axis -> List CS.TickValue }
-intsCustom formatter config =
-  { config | produce = \a -> CS.produce a CS.ints >> CS.toTickValues toFloat formatter }
-
-
-{-| -}
-times : Time.Zone -> Attribute { a | produce : Int -> C.Axis -> List CS.TickValue }
-times zone config =
-  timesCustom zone (CS.formatTime zone) config
-
-
-{-| -}
-timesCustom : Time.Zone -> (I.Time -> String) -> Attribute { a | produce : Int -> C.Axis -> List CS.TickValue }
-timesCustom zone formatter config =
-  { config | produce = \a -> CS.produce a (CS.times zone) >> CS.toTickValues (toFloat << Time.posixToMillis << .timestamp) formatter }
-
-
-{-| -}
-amount : Int -> Attribute { a | amount : Int }
-amount value config =
-  { config | amount = value }
-
-
-
--- ELEMENTS
-
-
 {-| -}
 type alias Container data msg =
     { width : Float
@@ -147,8 +52,8 @@ type alias Container data msg =
     , paddingLeft : Float
     , paddingRight : Float
     , responsive : Bool
-    , range : List (Attribute C.Axis)
-    , domain : List (Attribute C.Axis)
+    , range : List (CA.Attribute C.Axis)
+    , domain : List (CA.Attribute C.Axis)
     , events : List (Event data msg)
     , htmlAttrs : List (H.Attribute msg)
     , attrs : List (S.Attribute msg)
@@ -156,7 +61,7 @@ type alias Container data msg =
 
 
 {-| -}
-chart : List (Attribute (Container data msg)) -> List (Element data msg) -> H.Html msg
+chart : List (CA.Attribute (Container data msg)) -> List (Element data msg) -> H.Html msg
 chart edits elements =
   let config =
         applyAttrs edits
@@ -286,7 +191,7 @@ definePlane config elements =
 
       calcDomain =
         case config.domain of
-          [] -> lowest 0 orLower limits_.y
+          [] -> CA.lowest 0 CA.orLower limits_.y
           some -> List.foldl (\f b -> f b) limits_.y some
 
       margin =
@@ -400,91 +305,6 @@ viewElements config plane tickValues allItems elements =
 
 
 
--- BOUNDS
-
-
-{-| -}
-lowest : Float -> (Float -> Float -> Float -> Float) -> Attribute C.Axis
-lowest x edit b =
-  { b | min = edit x b.min b.dataMin }
-
-
-{-| -}
-highest : Float -> (Float -> Float -> Float -> Float) -> Attribute C.Axis
-highest x edit b =
-  { b | max = edit x b.max b.dataMax }
-
-
-{-| -}
-likeData : Attribute C.Axis
-likeData b =
-  { b | min = b.dataMin, max = b.dataMax }
-
-
-{-| -}
-window : Float -> Float -> Attribute C.Axis
-window min_ max_ b =
-  { b | min = min_, max = max_ }
-
-
-{-| -}
-exactly : Float -> Float -> Float -> Float
-exactly exact _ _ =
-  exact
-
-
-{-| -}
-orLower : Float -> Float -> Float -> Float
-orLower least real _ =
-  if real > least then least else real
-
-
-{-| -}
-orHigher : Float -> Float -> Float -> Float
-orHigher most real _ =
-  if real < most then most else real
-
-
-{-| -}
-more : Float -> Float -> Float -> Float
-more v x _ =
-  x + v
-
-
-{-| -}
-less : Float -> Float -> Float -> Float
-less v x _ =
-  x - v
-
-
-{-| -}
-zero : C.Axis -> Float
-zero b =
-  clamp b.min b.max 0
-
-
-{-| -}
-middle : C.Axis -> Float
-middle b =
-  b.min + (b.max - b.min) / 2
-
-
-stretch : Maybe C.Axis -> C.Axis -> Maybe C.Axis
-stretch old new =
-  case old of
-    Just b ->
-      Just
-        { min = min b.min new.min
-        , max = max b.max new.max
-        , dataMin = min b.dataMin new.dataMin
-        , dataMax = max b.dataMax new.dataMax
-        }
-
-    Nothing ->
-      Just new
-
-
-
 -- EVENT / DECODER
 
 
@@ -586,7 +406,7 @@ type alias Tooltip =
 
 
 {-| -}
-tooltip : Item.Item a -> List (Attribute Tooltip) -> List (H.Attribute Never) -> List (H.Html Never) -> Element data msg
+tooltip : Item.Item a -> List (CA.Attribute Tooltip) -> List (H.Attribute Never) -> List (H.Html Never) -> Element data msg
 tooltip i edits attrs_ content =
   html <| \p ->
     let pos = Item.getLimits i in
@@ -601,7 +421,7 @@ tooltip i edits attrs_ content =
 
 {-| -}
 type alias Axis =
-    { limits : C.Axis -> C.Axis
+    { limits : List (CA.Attribute C.Axis)
     , pinned : C.Axis -> Float
     , arrow : Bool
     , color : String
@@ -613,8 +433,8 @@ xAxis : List (CA.Attribute Axis) -> Element item msg
 xAxis edits =
   let config =
         applyAttrs edits
-          { limits = identity
-          , pinned = zero
+          { limits = []
+          , pinned = CA.zero
           , color = ""
           , arrow = True
           }
@@ -623,7 +443,7 @@ xAxis edits =
         { ts | yAxis = config.pinned p.y :: ts.yAxis }
   in
   AxisElement addTickValues <| \p ->
-    let xLimit = config.limits p.x in
+    let xLimit = List.foldl (\f x -> f x) p.x config.limits in
     S.g
       [ SA.class "elm-charts__x-axis" ]
       [ CS.line p
@@ -643,12 +463,12 @@ xAxis edits =
 
 
 {-| -}
-yAxis : List (Attribute Axis) -> Element item msg
+yAxis : List (CA.Attribute Axis) -> Element item msg
 yAxis edits =
   let config =
         applyAttrs edits
-          { limits = identity
-          , pinned = zero
+          { limits = []
+          , pinned = CA.zero
           , color = ""
           , arrow = True
           }
@@ -657,7 +477,7 @@ yAxis edits =
         { ts | xAxis = config.pinned p.x :: ts.xAxis }
   in
   AxisElement addTickValues <| \p ->
-    let yLimit = config.limits p.y in
+    let yLimit = List.foldl (\f y -> f y) p.y config.limits in
     S.g
       [ SA.class "elm-charts__y-axis" ]
       [ CS.line p
@@ -681,32 +501,33 @@ type alias Ticks =
     , height : Float
     , width : Float
     , pinned : C.Axis -> Float
-    , limits : C.Axis -> C.Axis
+    , limits : List (CA.Attribute C.Axis)
     , only : Float -> Bool
     , amount : Int
     , flip : Bool
-    , produce : Int -> C.Axis -> List CS.TickValue
+    , generate : CA.Tick
     }
 
 
 {-| -}
-xTicks : List (Attribute Ticks) -> Element item msg
+xTicks : List (CA.Attribute Ticks) -> Element item msg
 xTicks edits =
   let config =
-        applyAttrs ([ floats ] ++ edits)
+        applyAttrs edits
           { color = ""
-          , limits = identity
-          , pinned = zero
+          , limits = []
+          , pinned = CA.zero
           , amount = 5
           , only = \_ -> True
-          , produce = \a b -> []
+          , generate = CA.Floats
           , height = 5
           , flip = False
           , width = 1
           }
 
       toTicks p =
-        config.produce config.amount (config.limits p.x)
+        List.foldl (\f x -> f x) p.x config.limits
+          |> generateValues config.amount config.generate
           |> List.map .value
           |> List.filter config.only
 
@@ -728,23 +549,24 @@ xTicks edits =
 
 
 {-| -}
-yTicks : List (Attribute Ticks) -> Element item msg
+yTicks : List (CA.Attribute Ticks) -> Element item msg
 yTicks edits =
   let config =
-        applyAttrs ([ floats ] ++ edits)
+        applyAttrs edits
           { color = ""
-          , limits = identity
-          , pinned = zero
+          , limits = []
+          , pinned = CA.zero
           , only = \_ -> True
           , amount = 5
-          , produce = \a b -> []
+          , generate = CA.Floats
           , height = 5
           , flip = False
           , width = 1
           }
 
       toTicks p =
-        config.produce config.amount (config.limits p.y)
+        List.foldl (\f y -> f y) p.y config.limits
+          |> generateValues config.amount config.generate
           |> List.map .value
           |> List.filter config.only
 
@@ -769,28 +591,28 @@ yTicks edits =
 type alias Labels =
     { color : String
     , pinned : C.Axis -> Float
-    , limits : C.Axis -> C.Axis
+    , limits : List (CA.Attribute C.Axis)
     , only : Float -> Bool
     , xOff : Float
     , yOff : Float
     , flip : Bool
     , amount : Int
     , anchor : CA.Anchor
-    , produce : Int -> C.Axis -> List CS.TickValue
+    , generate : CA.Tick
     }
 
 
 {-| -}
-xLabels : List (Attribute Labels) -> Element item msg
+xLabels : List (CA.Attribute Labels) -> Element item msg
 xLabels edits =
   let toConfig p =
-        applyAttrs ([ floats ] ++ edits)
+        applyAttrs edits
           { color = "#808BAB"
-          , limits = identity
+          , limits = []
           , only = \_ -> True
-          , pinned = zero
+          , pinned = CA.zero
           , amount = 5
-          , produce = \a b -> []
+          , generate = CA.Floats
           , flip = False
           , anchor = CA.Middle
           , xOff = 0
@@ -798,7 +620,8 @@ xLabels edits =
           }
 
       toTicks p config =
-        config.produce config.amount (config.limits p.x)
+        List.foldl (\f x -> f x) p.x config.limits
+          |> generateValues config.amount config.generate
           |> List.filter (config.only << .value)
 
       toTickValues p config ts =
@@ -824,16 +647,16 @@ xLabels edits =
 
 
 {-| -}
-yLabels : List (Attribute Labels) -> Element item msg
+yLabels : List (CA.Attribute Labels) -> Element item msg
 yLabels edits =
   let toConfig p =
-        applyAttrs ([ floats ] ++ edits)
+        applyAttrs edits
           { color = "#808BAB"
-          , limits = identity
-          , pinned = zero
+          , limits = []
+          , pinned = CA.zero
           , only = \_ -> True
           , amount = 5
-          , produce = \a b -> []
+          , generate = CA.Floats
           , anchor = CA.Middle
           , flip = False
           , xOff = -8
@@ -841,7 +664,8 @@ yLabels edits =
           }
 
       toTicks p config =
-        config.produce config.amount (config.limits p.y)
+        List.foldl (\f y -> f y) p.y config.limits
+          |> generateValues config.amount config.generate
           |> List.filter (config.only << .value)
 
       toTickValues p config ts =
@@ -883,12 +707,12 @@ type alias Label =
 
 
 {-| -}
-xLabel : List (Attribute Label) -> List (S.Svg msg) -> Element data msg
+xLabel : List (CA.Attribute Label) -> List (S.Svg msg) -> Element data msg
 xLabel edits inner =
   let toConfig p =
         applyAttrs edits
-          { x = middle p.x
-          , y = zero p.y
+          { x = CA.middle p.x
+          , y = CA.zero p.y
           , xOff = 0
           , yOff = 20
           , border = "white"
@@ -929,12 +753,12 @@ xLabel edits inner =
 
 
 {-| -}
-yLabel : List (Attribute Label) -> List (S.Svg msg) -> Element data msg
+yLabel : List (CA.Attribute Label) -> List (S.Svg msg) -> Element data msg
 yLabel edits inner =
   let toConfig p =
         applyAttrs edits
-          { x = zero p.x
-          , y = middle p.y
+          { x = CA.zero p.x
+          , y = CA.middle p.y
           , xOff = -8
           , yOff = 3
           , border = "white"
@@ -987,12 +811,12 @@ type alias Tick =
 
 
 {-| -}
-xTick : List (Attribute Tick) -> Element data msg
+xTick : List (CA.Attribute Tick) -> Element data msg
 xTick edits =
   let toConfig p =
         applyAttrs edits
-          { x = middle p.x
-          , y = zero p.y
+          { x = CA.middle p.x
+          , y = CA.zero p.y
           , length = 5
           , color = "rgb(210, 210, 210)"
           , width = 1
@@ -1012,12 +836,12 @@ xTick edits =
 
 
 {-| -}
-yTick : List (Attribute Tick) -> Float -> Element data msg
+yTick : List (CA.Attribute Tick) -> Float -> Element data msg
 yTick edits val =
   let toConfig p =
         applyAttrs edits
-          { x = middle p.x
-          , y = zero p.y
+          { x = CA.middle p.x
+          , y = CA.zero p.y
           , length = 5
           , color = "rgb(210, 210, 210)"
           , width = 1
@@ -1047,7 +871,7 @@ type alias Grid =
 
 
 {-| -}
-grid : List (Attribute Grid) -> Element item msg
+grid : List (CA.Attribute Grid) -> Element item msg
 grid edits =
   let config =
         applyAttrs edits
@@ -1100,7 +924,7 @@ type alias Property data meta inter deco =
 
 
 {-| -}
-property : (data -> Maybe Float) -> List (Attribute inter) -> List (Attribute deco) -> Property data String inter deco
+property : (data -> Maybe Float) -> List (CA.Attribute inter) -> List (CA.Attribute deco) -> Property data String inter deco
 property y_ =
   P.property y_
 
@@ -1112,13 +936,13 @@ named name =
 
 
 {-| -}
-bar : (data -> Maybe Float) -> List (Attribute deco) -> Property data String inter deco
+bar : (data -> Maybe Float) -> List (CA.Attribute deco) -> Property data String inter deco
 bar y_ =
   P.property y_ []
 
 
 {-| -}
-variation : (data -> List (Attribute deco)) -> Property data String inter deco -> Property data String inter deco
+variation : (data -> List (CA.Attribute deco)) -> Property data String inter deco -> Property data String inter deco
 variation =
   P.variation
 
@@ -1148,7 +972,7 @@ type alias Bars data =
 
 
 {-| -}
-bars : List (Attribute (Bars data)) -> List (Property data String () CS.Bar) -> List data -> Element data msg
+bars : List (CA.Attribute (Bars data)) -> List (Property data String () CS.Bar) -> List data -> Element data msg
 bars edits properties data =
   let items =
         Item.toBarSeries edits properties data
@@ -1226,10 +1050,10 @@ withProducts func =
 
 
 {-| -}
-produce : Int -> CS.Generator a -> (C.Plane -> CS.Limit) -> (C.Plane -> a -> List (Element data msg)) -> Element data msg
-produce num gen limit func =
+generate : Int -> CS.Generator a -> (C.Plane -> CS.Limit) -> (C.Plane -> a -> List (Element data msg)) -> Element data msg
+generate num gen limit func =
   SubElements <| \p _ ->
-    let items = CS.produce num gen (limit p) in
+    let items = CS.generate num gen (limit p) in
     List.concatMap (func p) items
 
 
@@ -1258,19 +1082,19 @@ eachProduct func =
 
 
 {-| -}
-title : List (Attribute CS.Label) -> List (S.Svg msg) -> C.Point -> Element data msg
+title : List (CA.Attribute CS.Label) -> List (S.Svg msg) -> C.Point -> Element data msg
 title attrs inner point =
   SvgElement <| \p -> CS.label p attrs inner point
 
 
 {-| -}
-line : List (Attribute CS.Line) -> Element data msg
+line : List (CA.Attribute CS.Line) -> Element data msg
 line attrs =
   SvgElement <| \p -> CS.line p attrs
 
 
 {-| -}
-rect : List (Attribute CS.Rect) -> Element data msg
+rect : List (CA.Attribute CS.Rect) -> Element data msg
 rect attrs =
   SvgElement <| \p -> CS.rect p attrs
 
@@ -1354,4 +1178,13 @@ binned w func =
   List.foldr fold Dict.empty
     >> Dict.toList
     >> List.map (\(bin, ds) -> { bin = bin, data = ds })
+
+
+generateValues : Int -> CA.Tick -> C.Axis -> List CS.TickValue
+generateValues amount tick axis =
+  case tick of
+    CA.Floats -> CS.toTickValues identity String.fromFloat (CS.generate amount CS.floats axis)
+    CA.Ints -> CS.toTickValues toFloat String.fromInt (CS.generate amount CS.ints axis)
+    CA.Times zone -> CS.toTickValues (toFloat << Time.posixToMillis << .timestamp) (CS.formatTime zone) (CS.generate amount (CS.times zone) axis)
+
 

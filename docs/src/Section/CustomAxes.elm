@@ -126,35 +126,35 @@ section =
           , edits =
               ["""
           , C.xAxis []
-          , C.xTicks [ C.amount 4 ]
-          , C.xLabels [ C.amount 4 ]
+          , C.xTicks [ CA.amount 4 ]
+          , C.xLabels [ CA.amount 4 ]
               """]
           , chart = \_ ->
               frame
                 [ C.xAxis []
-                , C.xTicks [ C.amount 4 ]
-                , C.xLabels [ C.amount 4 ]
+                , C.xTicks [ CA.amount 4 ]
+                , C.xLabels [ CA.amount 4 ]
                 ]
           }
         , { title = "Only ints"
           , edits =
               ["""
           , C.xAxis []
-          , C.xTicks [ C.amount 4, C.ints ]
-          , C.xLabels [ C.amount 4, C.ints ]
+          , C.xTicks [ CA.amount 4, CA.ints ]
+          , C.xLabels [ CA.amount 4, CA.ints ]
               """]
           , chart = \_ ->
               frame
                 [ C.xAxis []
-                , C.xTicks [ C.amount 4, C.ints ]
-                , C.xLabels [ C.amount 4, C.ints ]
+                , C.xTicks [ CA.amount 4, CA.ints ]
+                , C.xLabels [ CA.amount 4, CA.ints ]
                 ]
           }
         , { title = "Custom"
           , edits =
               ["""
           , C.xAxis []
-          , C.produce 12 CS.ints .x <| \\p num ->
+          , C.generate 12 CS.ints .x <| \\p num ->
               [ C.xTick [ CA.x (toFloat num) ]
               , C.xLabel [ CA.x (toFloat num) ] [ S.text (String.fromInt num ++ "°") ]
               ]
@@ -162,7 +162,7 @@ section =
           , chart = \_ ->
               frame
                 [ C.xAxis []
-                , C.produce 12 CS.ints .x <| \p num ->
+                , C.generate 12 CS.ints .x <| \p num ->
                     [ C.xTick [ CA.x (toFloat num) ]
                     , C.xLabel [ CA.x (toFloat num) ]
                         [ S.text (String.fromInt num ++ "°") ]

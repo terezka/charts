@@ -12,13 +12,118 @@ module Chart.Attributes exposing
   , marginTop, marginBottom, marginLeft, marginRight
   , paddingTop, paddingBottom, paddingLeft, paddingRight
   , pinned, dotGrid, noArrow, filterX, filterY, only
-  , range, domain
+  , range, domain, limits, amount
+
+  , lowest, highest, orLower, orHigher, exactly, more, less, window, likeData, zero, middle
+
+  , Tick(..), ints, times
   )
+
+
+import Time
+import Svg.Coordinates as C
 
 
 {-| -}
 type alias Attribute c =
   c -> c
+
+
+{-| -}
+lowest : Float -> (Float -> Float -> Float -> Float) -> Attribute C.Axis
+lowest v edit b =
+  { b | min = edit v b.min b.dataMin }
+
+
+{-| -}
+highest : Float -> (Float -> Float -> Float -> Float) -> Attribute C.Axis
+highest v edit b =
+  { b | max = edit v b.max b.dataMax }
+
+
+{-| -}
+likeData : Attribute C.Axis
+likeData b =
+  { b | min = b.dataMin, max = b.dataMax }
+
+
+{-| -}
+window : Float -> Float -> Attribute C.Axis
+window min_ max_ b =
+  { b | min = min_, max = max_ }
+
+
+{-| -}
+exactly : Float -> Float -> Float -> Float
+exactly exact _ _ =
+  exact
+
+
+{-| -}
+orLower : Float -> Float -> Float -> Float
+orLower least real _ =
+  if real > least then least else real
+
+
+{-| -}
+orHigher : Float -> Float -> Float -> Float
+orHigher most real _ =
+  if real < most then most else real
+
+
+{-| -}
+more : Float -> Float -> Float -> Float
+more v o _ =
+  o + v
+
+
+{-| -}
+less : Float -> Float -> Float -> Float
+less v o _ =
+  o - v
+
+
+{-| -}
+zero : C.Axis -> Float
+zero b =
+  clamp b.min b.max 0
+
+
+{-| -}
+middle : C.Axis -> Float
+middle b =
+  b.min + (b.max - b.min) / 2
+
+
+{-| -}
+amount : Int -> Attribute { a | amount : Int }
+amount value config =
+  { config | amount = value }
+
+
+{-| -}
+type Tick
+  = Floats
+  | Ints
+  | Times Time.Zone
+
+
+{-| -}
+ints : Attribute { a | generate : Tick }
+ints config =
+  { config | generate = Ints }
+
+
+{-| -}
+times : Time.Zone -> Attribute { a | generate : Tick }
+times zone config =
+  { config | generate = Times zone }
+
+
+{-| -}
+limits : x -> Attribute { a | limits : x }
+limits value config =
+  { config | limits = value }
 
 
 {-| -}

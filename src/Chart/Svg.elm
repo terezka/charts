@@ -11,7 +11,7 @@ module Chart.Svg exposing
   , Rect, rect
   , decoder, getNearest, getNearestX, getWithin, getWithinX, isWithinPlane
   , position, positionHtml
-  , Generator, Limit, produce, floats, ints, times
+  , Generator, Limit, generate, floats, ints, times
   , TickValue, toTickValues, formatTime
   )
 
@@ -1433,8 +1433,8 @@ times zone =
   Generator (\i b -> I.times zone i { min = b.min, max = b.max })
 
 
-produce : Int -> Generator a -> Limit -> List a
-produce amount (Generator func) limits =
+generate : Int -> Generator a -> Limit -> List a
+generate amount (Generator func) limits =
   func amount limits
 
 
