@@ -1080,10 +1080,10 @@ eachProduct func =
 
 
 {-| -}
-generate : Int -> CS.Generator a -> (C.Plane -> C.Axis) -> (C.Plane -> a -> List (Element data msg)) -> Element data msg
-generate num gen limit func =
+generate : Int -> CS.Generator a -> (C.Plane -> C.Axis) -> List (CA.Attribute C.Axis) -> (C.Plane -> a -> List (Element data msg)) -> Element data msg
+generate num gen limit attrs func =
   SubElements <| \p _ ->
-    let items = CS.generate num gen (limit p) in
+    let items = CS.generate num gen (List.foldl (\f x -> f x) (limit p) attrs) in
     List.concatMap (func p) items
 
 

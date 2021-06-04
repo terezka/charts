@@ -154,7 +154,7 @@ section =
           , edits =
               ["""
           , C.xAxis []
-          , C.generate 12 CS.ints .x <| \\p num ->
+          , C.generate 12 CS.ints .x [] <| \\p num ->
               [ C.xTick [ CA.x (toFloat num) ]
               , C.xLabel [ CA.x (toFloat num) ] [ S.text (String.fromInt num ++ "°") ]
               ]
@@ -162,7 +162,7 @@ section =
           , chart = \_ ->
               frame
                 [ C.xAxis []
-                , C.generate 12 CS.ints .x <| \p num ->
+                , C.generate 12 CS.ints .x [] <| \p num ->
                     [ C.xTick [ CA.x (toFloat num) ]
                     , C.xLabel [ CA.x (toFloat num) ]
                         [ S.text (String.fromInt num ++ "°") ]
