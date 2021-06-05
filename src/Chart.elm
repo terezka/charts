@@ -326,9 +326,11 @@ type alias Tooltip =
 tooltip : Item.Item a -> List (CA.Attribute Tooltip) -> List (H.Attribute Never) -> List (H.Html Never) -> Element data msg
 tooltip i edits attrs_ content =
   html <| \p ->
-    let pos = Item.getLimits i in
+    let pos = Item.getLimits i
+        content_ = if content == [] then Item.renderTooltip i else content
+    in
     if CS.isWithinPlane p pos.x1 pos.y2 -- TODO
-    then CS.tooltip p (Item.getPosition p i) edits attrs_ content
+    then CS.tooltip p (Item.getPosition p i) edits attrs_ content_
     else H.text ""
 
 

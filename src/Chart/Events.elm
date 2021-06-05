@@ -5,7 +5,7 @@ module Chart.Events exposing
   , product, dot, bin, stack, bar
   , map, map2, map3, map4
 
-  , Group, Bin, Stack, Product
+  , Product, Group, Bin, Stack
   , getDependent, getIndependent, getDatum, getColor, getName
   , getTop, getCenter, getLeft, getRight, getPosition, getLimits
   , getProducts, getCommonality, group, ungroup, regroup, named
@@ -13,7 +13,16 @@ module Chart.Events exposing
 
 -- TODO
 -- Rename General to Any
+-- Legends
+-- Auto examples
+-- Auto tooltip
+-- Remove tiles
+-- move things to internal
+-- find out what to expose in Svg
 
+
+import Html as H exposing (Html)
+import Html.Attributes as HA
 import Svg as S exposing (Svg)
 import Svg.Attributes as SA
 import Svg.Coordinates as C exposing (Point, Position, Plane)
@@ -194,7 +203,7 @@ group (Grouping _ func) items =
 
 ungroup : Group inter config data -> List (Product config data)
 ungroup =
-  I.getProducts
+  I.getProducts -- TODO
 
 
 regroup : Grouping data result -> Group i a data -> List result
@@ -256,6 +265,7 @@ stack =
             , limits = \c -> C.foldPosition getLimits c.items
             , position = \plane c -> C.foldPosition (getPosition plane) c.items
             , render = \plane c _ -> S.g [ SA.class "elm-charts__group" ] (List.map (I.render plane) c.items)
+            , tooltip = \c -> [ H.table [] (List.concatMap I.renderTooltip c.items) ]
             }
     in
     List.map toGroup (gatherWith isSame items)
@@ -290,6 +300,7 @@ bin =
                 { pos | x1 = c.config.start, x2 = c.config.end }
             , position = \plane c -> C.foldPosition (getPosition plane) c.items
             , render = \plane c _ -> S.g [ SA.class "elm-charts__group" ] (List.map (I.render plane) c.items)
+            , tooltip = \c -> [ H.table [] (List.concatMap I.renderTooltip c.items) ]
             }
     in
     gatherWith isSame items
@@ -307,11 +318,14 @@ named names (Grouping toPos filter) =
   Grouping toPos (filter >> List.filter onlyAcceptedNames)
 
 
+custom : (Plane -> result -> Position) -> (List (Product I.General data) -> List result) -> Grouping data result
+custom =
+  Grouping
 
--- TODO custom : todo -> Grouping inter config datum
 
 
 -- ITEM
+
 
 type alias Item a =
   I.Item a
@@ -352,10 +366,9 @@ getLimits =
   I.getLimits
 
 
--- TODO getDetails : Item a -> a
-
 
 -- HELPERS
+
 
 gatherWith : (a -> a -> Bool) -> List a -> List ( a, List a )
 gatherWith testFn list =

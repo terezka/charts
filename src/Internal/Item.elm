@@ -19,6 +19,7 @@ type Item a =
     , render : Plane -> a -> Position -> Svg Never
     , limits : a -> Position
     , position : Plane -> a -> Position
+    , tooltip : a -> List (Html Never)
     }
 
 
@@ -194,6 +195,11 @@ render plane (Item config) =
   config.render plane config.details (config.position plane config.details)
 
 
+renderTooltip : Item x -> List (Html Never)
+renderTooltip (Item config) =
+  config.tooltip config.details
+
+
 
 -- PROPERTY
 
@@ -278,6 +284,7 @@ toBarSeries barsAttrs properties data =
           , position = \plane c -> Coord.foldPosition (getPosition plane) c.items
           , render = \plane config _ ->
               S.g [ SA.class "elm-charts__bar-series" ] (List.map (render plane) config.items)
+          , tooltip = \c -> [ H.table [ HA.style "margin" "0" ] (List.concatMap renderTooltip c.items) ]
           }
 
       toBarItem sections barIndex sectionIndex section colorIndex bin =
@@ -337,6 +344,13 @@ toBarSeries barsAttrs properties data =
               { x1 = x1, x2 = x2, y1 = y1, y2 = y2 }
           , render = \plane config position ->
               S.bar plane attrs position
+          , tooltip = \c ->
+              [ H.tr
+                  []
+                  [ H.td [ HA.style "color" c.config.color ] [ H.text (Maybe.withDefault ("Property #" ++ String.fromInt (colorIndex + 1)) c.name ++ ":") ]
+                  , H.td [] [ H.text (Maybe.withDefault "N/A" <| Maybe.map String.fromFloat value) ]
+                  ]
+              ]
           }
   in
   withSurround data toBin |> \bins ->
@@ -376,7 +390,7 @@ toDotSeries toX properties data =
           }
 
       toSeriesItem lineIndex props sublineIndex prop colorIndex =
-        let dotItems = List.map (toDotItem lineIndex sublineIndex prop interConfig) data
+        let dotItems = List.map (toDotItem lineIndex sublineIndex colorIndex prop interConfig) data
             defaultOpacity = if List.length props > 1 then 0.4 else 0
             interAttr = [ CA.color (toDefaultColor colorIndex), CA.opacity defaultOpacity ] ++ prop.inter
             interConfig = toInterConfig interAttr
@@ -399,9 +413,10 @@ toDotSeries toX properties data =
                 ]
           , limits = \c -> Coord.foldPosition getLimits c.items
           , position = \plane c -> Coord.foldPosition (getPosition plane) c.items
+          , tooltip = \c -> [ H.table [ HA.style "margin" "0" ] (List.concatMap renderTooltip c.items) ]
           }
 
-      toDotItem lineIndex sublineIndex prop interConfig datum_ =
+      toDotItem lineIndex sublineIndex colorIndex prop interConfig datum_ =
         let defaultAttrs = [ CA.color interConfig.color, if interConfig.method == Nothing then CA.circle else identity ]
             dotAttrs = defaultAttrs ++ prop.attrs ++ prop.extra datum_
             config = toDotConfig dotAttrs
@@ -413,6 +428,13 @@ toDotSeries toX properties data =
               case prop.value datum_ of
                 Nothing -> S.text ""
                 Just _ -> S.dot plane .x .y dotAttrs { x = x_, y = y_ }
+          , tooltip = \c ->
+              [ H.tr
+                  []
+                  [ H.td [ HA.style "color" c.config.color ] [ H.text (Maybe.withDefault ("Property #" ++ String.fromInt (colorIndex + 1)) c.name ++ ":") ]
+                  , H.td [] [ H.text (Maybe.withDefault "N/A" <| Maybe.map String.fromFloat (prop.value datum_)) ]
+                  ]
+              ]
           , limits = \_ ->
               { x1 = x_
               , x2 = x_
@@ -542,6 +564,7 @@ toGeneral generalize (Item product) =
 
     , limits = \_ -> product.limits product.details
     , position = \plane _ -> product.position plane product.details
+    , tooltip = \c -> product.tooltip product.details
     , details =
         { datum = product.details.datum
         , property = product.details.property
@@ -573,6 +596,7 @@ isBarSeries (Item product) =
             S.bar plane (toBarAttrs details.config)
         , limits = \_ -> product.limits product.details
         , position = \plane _ -> product.position plane product.details
+        , tooltip = \c -> product.tooltip product.details
         , details =
             { datum = product.details.datum
             , property = product.details.property
@@ -600,6 +624,7 @@ isDotSeries (Item product) =
               Just y -> S.dot plane .x .y (toDotAttrs details.config) { x = details.x1, y = y }
         , limits = \_ -> product.limits product.details
         , position = \plane _ -> product.position plane product.details
+        , tooltip = \c -> product.tooltip product.details
         , details =
             { datum = product.details.datum
             , property = product.details.property

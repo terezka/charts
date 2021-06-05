@@ -31,7 +31,7 @@ import Ui.Section as Section
 
 type alias Model =
   { hovering : List (CI.Product CI.General Datum)
-  , hovering2 : List (CE.Group (CE.Bin Datum) CI.General Datum)
+  , hovering2 : List (CE.Group (CE.Stack Datum) CI.General Datum)
   }
 
 
@@ -44,7 +44,7 @@ init =
 
 type Msg
   = OnHover (List (CI.Product CI.General Datum))
-  | OnHover2 (List (CE.Group (CE.Bin Datum) CI.General Datum))
+  | OnHover2 (List (CE.Group (CE.Stack Datum) CI.General Datum))
 
 
 update : Msg -> Model -> Model
@@ -87,7 +87,7 @@ section onMsg model =
         [ CA.height 300
         , CA.width 760
         , CE.onMouseMove OnHover (CE.getNearest CE.product)
-        , CE.onMouseLeave (OnHover [])
+        , CE.onMouseLeave OnReset
         ]
         [ C.grid []
         , C.xLabels []
@@ -286,7 +286,7 @@ section onMsg model =
               [ C.chart
                   [ CA.height 300
                   , CA.width 760
-                  , CE.onMouseMove (OnHover2 >> onMsg) (CE.getNearest CE.bin)
+                  , CE.onMouseMove (OnHover2 >> onMsg) (CE.getNearest CE.stack)
                   , CE.onMouseLeave (OnHover2 [] |> onMsg)
                   ]
                   [ C.grid []
@@ -295,20 +295,23 @@ section onMsg model =
                   , C.bars []
                       [ C.stacked
                           [ C.property .z [] []
+                              |> C.named "Cats"
                           , C.property .y [] []
+                              |> C.named "Dogs"
                           ]
                       , C.property .v [] []
+                          |> C.named "Fish"
                       ]
                       data
-                  , C.each (List.concatMap (CE.regroup CE.stack) model.hovering2) <| \p item ->
+                  , C.each model.hovering2 <| \p item ->
                       let viewLine i = H.div []
                             [ H.text <| String.fromFloat (CE.getIndependent i)
                             , H.text ", "
                             , H.text <| String.fromFloat (Maybe.withDefault 0 <| CE.getDependent i)
                             ]
                       in
-                      [ C.tooltip item [ CA.onTop ] [] <|
-                          List.map viewLine (CE.ungroup item)
+                      [ C.tooltip item [ CA.onTop ] [] []
+                          --List.map viewLine (CE.ungroup item)
                       ]
                   ]
               ]
