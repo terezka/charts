@@ -82,34 +82,34 @@ getCoords =
 
 {-| -}
 getNearest : Grouping data (Item result) -> Decoder data (List (Item result))
-getNearest grouping =
+getNearest (Grouping toPos _ as grouping) =
   Decoder <| \items plane ->
     let groups = group grouping items in
-    CS.getNearest (getPosition plane) groups plane
+    CS.getNearest (toPos plane) groups plane
 
 
 {-| -}
 getWithin : Float -> Grouping data (Item result) -> Decoder data (List (Item result))
-getWithin radius grouping =
+getWithin radius (Grouping toPos _ as grouping) =
   Decoder <| \items plane ->
     let groups = group grouping items in
-    CS.getWithin radius (getPosition plane) groups plane
+    CS.getWithin radius (toPos plane) groups plane
 
 
 {-| -}
 getNearestX : Grouping data (Item result) -> Decoder data (List (Item result))
-getNearestX grouping =
+getNearestX (Grouping toPos _ as grouping) =
   Decoder <| \items plane ->
     let groups = group grouping items in
-    CS.getNearestX (getPosition plane) groups plane
+    CS.getNearestX (toPos plane) groups plane
 
 
 {-| -}
 getWithinX : Float -> Grouping data (Item result) -> Decoder data (List (Item result))
-getWithinX radius grouping =
+getWithinX radius (Grouping toPos _ as grouping) =
   Decoder <| \items plane ->
     let groups = group grouping items in
-    CS.getWithinX radius (getPosition plane) groups plane
+    CS.getWithinX radius (toPos plane) groups plane
 
 
 {-| -}
@@ -188,7 +188,7 @@ getCommonality =
 
 
 group : Grouping data result -> List (Product I.General data) -> List result
-group (Grouping func) items =
+group (Grouping _ func) items =
   func items
 
 
@@ -198,7 +198,7 @@ ungroup =
 
 
 regroup : Grouping data result -> Group i a data -> List result
-regroup (Grouping func) (I.Item config as group_) =
+regroup (Grouping _ func) (I.Item config as group_) =
   func (List.map config.details.toGeneral <| I.getProducts group_)
 
 
@@ -207,22 +207,24 @@ regroup (Grouping func) (I.Item config as group_) =
 
 
 type Grouping data result =
-  Grouping (List (Product I.General data) -> List result)
+  Grouping
+    (Plane -> result -> Position)
+    (List (Product I.General data) -> List result)
 
 
 product : Grouping data (Product I.General data)
 product =
-  Grouping identity
+  Grouping getPosition identity
 
 
 dot : Grouping data (Product CS.Dot data)
 dot =
-  Grouping I.onlyDotSeries
+  Grouping (\p -> getCenter p >> fromPoint) I.onlyDotSeries
 
 
 bar : Grouping data (Product CS.Bar data)
 bar =
-  Grouping I.onlyBarSeries
+  Grouping getPosition I.onlyBarSeries
 
 
 {-| -}
@@ -236,7 +238,7 @@ type alias Stack datum =
 
 stack : Grouping data (Group (Stack data) I.General data)
 stack =
-  Grouping <| \items ->
+  Grouping getPosition <| \items ->
     let toConfig (I.Item { details }) =
           { start = details.x1
           , end = details.x2
@@ -269,7 +271,7 @@ type alias Bin data =
 
 bin : Grouping data (Group (Bin data) I.General data)
 bin =
-  Grouping <| \items ->
+  Grouping getPosition <| \items ->
     let toConfig (I.Item { details }) =
           { start = details.x1
           , end = details.x2
@@ -298,13 +300,13 @@ bin =
 
 
 named : List String -> Grouping data (Product config data) -> Grouping data (Product config data)
-named names (Grouping filter) =
+named names (Grouping toPos filter) =
   let onlyAcceptedNames i =
         case getName i of
           Just name -> List.member name names
           Nothing -> False
   in
-  Grouping (filter >> List.filter onlyAcceptedNames)
+  Grouping toPos (filter >> List.filter onlyAcceptedNames)
 
 
 
@@ -367,3 +369,8 @@ gatherWith testFn list =
               helper remaining <| ( toGather, gathering ) :: gathered
     in
     helper list []
+
+
+fromPoint : Point -> Position
+fromPoint point =
+  { x1 = point.x, y1 = point.y, x2 = point.x, y2 = point.y }

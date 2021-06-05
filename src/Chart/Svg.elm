@@ -1179,6 +1179,7 @@ getNearestHelp toPosition items plane searched =
             [ item ]
   in
   List.foldl getClosest [] items
+    |> keepOne toPosition
 
 
 getNearestXHelp : (a -> Position) -> List a -> Plane -> Point -> List a
@@ -1200,6 +1201,7 @@ getNearestXHelp toPosition items plane searched =
             [ item ]
   in
   List.foldl getClosest [] items
+    |> keepOne toPosition
 
 
 distanceX : Plane -> Point -> Point -> Float
@@ -1232,6 +1234,18 @@ withinRadius plane radius searched point =
 withinRadiusX : Plane -> Float -> Point -> Point -> Bool
 withinRadiusX plane radius searched point =
     distanceX plane searched point <= radius
+
+
+keepOne : (a -> Position) -> List a -> List a
+keepOne toPosition =
+  let func one acc =
+        case List.head acc of
+          Nothing -> [ one ]
+          Just other ->
+            if toPosition other == toPosition other
+            then other :: acc else acc
+  in
+  List.foldr func []
 
 
 {-| -}
