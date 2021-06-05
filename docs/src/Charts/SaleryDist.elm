@@ -15,13 +15,16 @@ import Dict
 
 import Chart as C
 import Chart.Attributes as CA
-import Chart.Item as CI
+import Chart.Events as CE
+import Internal.Item as CI -- TODO
 import Chart.Svg as CS
 
 import Element as E
 import Element.Font as F
 import Element.Border as B
 import Element.Background as BG
+
+import Chart.Events
 
 
 type alias Model =
@@ -42,7 +45,7 @@ init =
 
 
 type Msg
-  = OnHover (List (CI.Product CI.General Salary.Datum)) Coordinates.Point
+  = OnHover (List (CI.Group () CI.General Salary.Datum)) Coordinates.Point
   | OnMouseDown Coordinates.Point
   | OnMouseUp Coordinates.Point
   | OnReset
@@ -55,7 +58,7 @@ update msg model =
   case msg of
     OnHover hovering coords ->
       case model.selection of
-        Nothing -> { model | hovering = hovering }
+        Nothing -> { model | hovering = List.concatMap CE.getProducts hovering }
         Just select -> { model | selection = Just { select | b = coords }, hovering = [] }
 
     OnMouseDown coords ->
@@ -107,14 +110,12 @@ view model =
           Just window -> [ CA.lowest window.y1 CA.exactly, CA.highest window.y2 CA.exactly ]
           Nothing -> [ CA.lowest 76 CA.orHigher ]
 
-    , CA.events
-        [ C.map2 OnHover (C.getNearest CI.getCenter identity) C.getCoords
-            |> C.event "mousemove"
+    , CE.on "mousemove" <|
+        CE.map2 OnHover (CE.getNearest CE.product) CE.getCoords
 
-        , C.event "mouseleave" (C.map (\_ -> OnReset) C.getCoords)
-        , C.event "mousedown" (C.map OnMouseDown C.getCoords)
-        , C.event "mouseup" (C.map OnMouseUp C.getCoords)
-        ]
+    , CE.onMouseDown OnMouseDown CE.getCoords
+    , CE.onMouseUp OnMouseUp CE.getCoords
+    , CE.onMouseLeave OnReset
 
     , CA.htmlAttrs
         [ HA.style "cursor" "crosshair" ]

@@ -1,16 +1,6 @@
-module Chart.Item exposing
-  ( Item, Product, Stack, Bin
-  , onlyBarSeries, onlyDotSeries, isBarSeries, isDotSeries, only
-  , General, RealConfig(..), toGeneral
-  , Group, Grouping, groupBy
-  , isSameSeries, isSameBin, isSameStack, isSame
-  , getProducts, getCommonality
-  , getValue, getDatum, getColor, getName
-  , getTop, getCenter, getLeft, getRight, getInd, getX1, getX2, getY2, getY1, getPosition, getLimits
-  , Property, Bars, toBarSeries, toDotSeries, render
-  )
+module Internal.Item exposing (..)
 
-
+--
 import Html as H exposing (Html)
 import Html.Attributes as HA
 import Svg as S exposing (Svg)
@@ -51,27 +41,8 @@ type alias Group inter config datum =
   Item
     { config : inter
     , items : List (Product config datum)
+    , toGeneral : Product config datum -> Product General datum
     }
-
-
-{-| -}
-groupBy : Grouping inter config datum -> List (Product config datum) -> List (Group inter config datum)
-groupBy (Grouping { grouping, toPosition, toLimits }) products_ =
-  let toGroup ( config, items ) =
-        Item
-          { details =
-              { config = config
-              , items = items
-              }
-          , limits = \c ->
-              toLimits c.config c.items
-          , position = \plane c ->
-              toPosition plane c.config c.items
-          , render = \plane c _ ->
-              S.g [ SA.class "elm-charts__collection" ] (List.map (render plane) c.items)
-          }
-  in
-  List.map toGroup (grouping products_)
 
 
 {-| -}
@@ -84,101 +55,6 @@ getProducts (Item item) =
 getCommonality : Group a config datum -> a
 getCommonality (Item item) =
   item.details.config
-
-
-{-| -}
-isSameSeries : Grouping String config datum
-isSameSeries =
-  collector
-    { commonality = \(Item { details }) -> details.name
-    , grouping = (==)
-    , limits = \_ products_ -> Coord.foldPosition getLimits products_
-    , position = \plane _ products_ -> Coord.foldPosition (getPosition plane) products_
-    }
-
-
-{-| -}
-isSameBin : Grouping (Bin datum) config datum
-isSameBin =
-  collector
-    { commonality = \(Item { details }) ->
-        Just
-          { start = details.x1
-          , end = details.x2
-          , datum = details.datum
-          }
-    , grouping = \a b -> a.start == b.start && a.end == b.end && a.datum == b.datum
-    , limits = \bin products_ ->
-        let pos = Coord.foldPosition getLimits products_ in
-        { pos | x1 = bin.start, x2 = bin.end }
-    , position = \plane bin products_ ->
-        let pos = Coord.foldPosition (getPosition plane) products_ in
-        { pos | x1 = bin.start, x2 = bin.end }
-    }
-
-
-{-| -}
-type alias Stack datum =
-  { datum : datum
-  , start : Float
-  , end : Float
-  , index : Int
-  }
-
-
-{-| -}
-isSameStack : Grouping (Stack datum) config datum
-isSameStack =
-  collector
-    { commonality = \(Item { details }) ->
-        Just
-          { start = details.x1
-          , end = details.x2
-          , datum = details.datum
-          , index = details.property
-          }
-    , grouping = \a b -> a.index == b.index && a.start == b.start && a.end == b.end && a.datum == b.datum
-    , limits = \_ products_ -> Coord.foldPosition getLimits products_
-    , position = \plane _ products_ -> Coord.foldPosition (getPosition plane) products_
-    }
-
-
-{-| -}
-isSame : (Product config datum -> Maybe a) -> Grouping a config datum
-isSame toCommon =
-  collector
-    { commonality = toCommon
-    , grouping = (==)
-    , limits = \_ products_ -> Coord.foldPosition getLimits products_
-    , position = \plane _ products_ -> Coord.foldPosition (getPosition plane) products_
-    }
-
-
-{-| -}
-type Grouping inter config datum =
-  Grouping
-    { grouping : List (Product config datum) -> List ( inter, List (Product config datum) )
-    , toLimits : inter -> List (Product config datum) -> Position
-    , toPosition : Plane -> inter -> List (Product config datum) -> Position
-    }
-
-
-{-| -}
-collector :
-  { commonality : Product config datum -> Maybe inter
-  , grouping : inter -> inter -> Bool
-  , limits : inter -> List (Product config datum) -> Position
-  , position : Plane -> inter -> List (Product config datum) -> Position
-  } -> Grouping inter config datum
-collector config =
-  Grouping
-    { grouping =
-        List.filterMap (\i -> Maybe.map (\c -> ( c, i )) (config.commonality i))
-          >> gatherWith (\(a, _) (b, _) -> config.grouping a b)
-          >> List.map (\(( inter, first ), rest ) -> ( inter, first :: List.map Tuple.second rest ))
-    , toLimits = config.limits
-    , toPosition = config.position
-    }
 
 
 {-| -}
@@ -390,11 +266,13 @@ toBarSeries barsAttrs properties data =
           ( Just toStart, Just toEnd ) ->
             { datum = curr, start = toStart curr, end = toEnd curr }
 
+      toSeriesItem : List (Bin data) -> List (P.Config data String () S.Bar) -> Int -> Int -> P.Config data String () S.Bar -> Int -> Group () S.Bar data
       toSeriesItem bins sections barIndex sectionIndex section colorIndex =
         Item
           { details =
               { config = ()
               , items = List.map (toBarItem sections barIndex sectionIndex section colorIndex) bins
+              , toGeneral = toGeneral BarConfig
               }
           , limits = \c -> Coord.foldPosition getLimits c.items
           , position = \plane c -> Coord.foldPosition (getPosition plane) c.items
@@ -507,6 +385,7 @@ toDotSeries toX properties data =
           { details =
               { items = dotItems
               , config = interConfig
+              , toGeneral = toGeneral DotConfig
               }
           , render = \plane _ _ ->
               let toBottom datum_ =
@@ -595,8 +474,8 @@ gatherWith testFn list =
           case scattered of
             [] -> List.reverse gathered
             toGather :: population ->
-                let ( gathering, remaining ) = List.partition (testFn toGather) population in
-                helper remaining <| ( toGather, gathering ) :: gathered
+              let ( gathering, remaining ) = List.partition (testFn toGather) population in
+              helper remaining <| ( toGather, gathering ) :: gathered
     in
     helper list []
 

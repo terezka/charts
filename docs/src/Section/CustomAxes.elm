@@ -16,7 +16,7 @@ import Dict
 
 import Chart as C
 import Chart.Attributes as CA
-import Chart.Item as CI
+import Internal.Item as CI
 import Chart.Svg as CS
 
 import Element as E

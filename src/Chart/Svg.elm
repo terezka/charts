@@ -1103,63 +1103,68 @@ positionHtml plane x y xOff yOff attrs content =
 
 
 {-| -}
-getNearest : (a -> Point) -> List a -> Plane -> Point -> List a
-getNearest toPoint items plane searchedSvg =
+getNearest : (a -> Position) -> List a -> Plane -> Point -> List a
+getNearest toPosition items plane searchedSvg =
   let searched =
         { x = toCartesianX plane searchedSvg.x
         , y = toCartesianY plane searchedSvg.y
         }
   in
-  getNearestHelp toPoint items plane searched
+  getNearestHelp toPosition items plane searched
 
 
 {-| -}
-getWithin : Float -> (a -> Point) -> List a -> Plane -> Point -> List a
-getWithin radius toPoint items plane searchedSvg =
-    let
-      searched =
-        { x = toCartesianX plane searchedSvg.x
-        , y = toCartesianY plane searchedSvg.y
-        }
+getWithin : Float -> (a -> Position) -> List a -> Plane -> Point -> List a
+getWithin radius toPosition items plane searchedSvg =
+    let toPoint i =
+          closestPoint (toPosition i) searched
 
-      keepIfEligible closest =
-        withinRadius plane radius searched (toPoint closest)
+        searched =
+          { x = toCartesianX plane searchedSvg.x
+          , y = toCartesianY plane searchedSvg.y
+          }
+
+        keepIfEligible closest =
+          withinRadius plane radius searched (toPoint closest)
     in
-    getNearestHelp toPoint items plane searched
+    getNearestHelp toPosition items plane searched
       |> List.filter keepIfEligible
 
 
 {-| -}
-getNearestX : (a -> Point) -> List a -> Plane -> Point -> List a
-getNearestX toPoint items plane searchedSvg =
-    let
-      searched =
-        { x = toCartesianX plane searchedSvg.x
-        , y = toCartesianY plane searchedSvg.y
-        }
+getNearestX : (a -> Position) -> List a -> Plane -> Point -> List a
+getNearestX toPosition items plane searchedSvg =
+    let searched =
+          { x = toCartesianX plane searchedSvg.x
+          , y = toCartesianY plane searchedSvg.y
+          }
     in
-    getNearestXHelp toPoint items plane searched
+    getNearestXHelp toPosition items plane searched
 
 
 {-| -}
-getWithinX : Float -> (a -> Point) -> List a -> Plane -> Point -> List a
-getWithinX radius toPoint items plane searchedSvg =
-    let
-      searched =
-        { x = toCartesianX plane searchedSvg.x
-        , y = toCartesianY plane searchedSvg.y
-        }
+getWithinX : Float -> (a -> Position) -> List a -> Plane -> Point -> List a
+getWithinX radius toPosition items plane searchedSvg =
+    let toPoint i =
+          closestPoint (toPosition i) searched
 
-      keepIfEligible =
-          withinRadiusX plane radius searched << toPoint
+        searched =
+          { x = toCartesianX plane searchedSvg.x
+          , y = toCartesianY plane searchedSvg.y
+          }
+
+        keepIfEligible =
+            withinRadiusX plane radius searched << toPoint
     in
-    getNearestXHelp toPoint items plane searched
+    getNearestXHelp toPosition items plane searched
       |> List.filter keepIfEligible
 
 
-getNearestHelp : (a -> Point) -> List a -> Plane -> Point -> List a
-getNearestHelp toPoint items plane searched =
-  let
+getNearestHelp : (a -> Position) -> List a -> Plane -> Point -> List a
+getNearestHelp toPosition items plane searched =
+  let toPoint i =
+        closestPoint (toPosition i) searched
+
       distance_ =
           distance plane searched
 
@@ -1176,9 +1181,11 @@ getNearestHelp toPoint items plane searched =
   List.foldl getClosest [] items
 
 
-getNearestXHelp : (a -> Point) -> List a ->Plane -> Point -> List a
-getNearestXHelp toPoint items plane searched =
-  let
+getNearestXHelp : (a -> Position) -> List a -> Plane -> Point -> List a
+getNearestXHelp toPosition items plane searched =
+  let toPoint i =
+        closestPoint (toPosition i) searched
+
       distanceX_ =
           distanceX plane searched
 
@@ -1208,6 +1215,13 @@ distanceY plane searched point =
 distance : Plane -> Point -> Point -> Float
 distance plane searched point =
     sqrt <| distanceX plane searched point ^ 2 + distanceY plane searched point ^ 2
+
+
+closestPoint : Position -> Point -> Point
+closestPoint pos searched =
+  { x = clamp pos.x1 pos.x2 searched.x
+  , y = clamp pos.y1 pos.y2 searched.y
+  }
 
 
 withinRadius : Plane -> Float -> Point -> Point -> Bool

@@ -17,10 +17,6 @@ module Chart exposing
   , generate, floats, ints, times
 
   , binned
-
-  -- TODO move
-  , Event, event
-  , Decoder, getCoords, getNearest, getNearestX, getWithin, getWithinX, map, map2, map3, map4
   )
 
 
@@ -40,9 +36,10 @@ import Intervals as I
 import Internal.Property as P
 import Time
 import Dict exposing (Dict)
-import Chart.Item as Item
+import Internal.Item as Item
 import Chart.Svg as CS
 import Chart.Attributes as CA
+import Chart.Events as CE
 
 
 {-| -}
@@ -60,7 +57,7 @@ type alias Container data msg =
     , responsive : Bool
     , range : List (CA.Attribute C.Axis)
     , domain : List (CA.Attribute C.Axis)
-    , events : List (Event data msg)
+    , events : List (CE.Event data msg)
     , htmlAttrs : List (H.Attribute msg)
     , attrs : List (S.Attribute msg)
     }
@@ -101,8 +98,8 @@ chart edits elements =
       ( beforeEls, chartEls, afterEls ) =
         viewElements config plane tickValues items elements
 
-      toEvent (Event event_) =
-        let (Decoder decoder) = event_.decoder in
+      toEvent (CE.Event event_) =
+        let (CE.Decoder decoder) = event_.decoder in
         CS.Event event_.name (decoder items)
   in
   CS.container plane
@@ -308,92 +305,6 @@ viewElements config plane tickValues allItems elements =
             )
   in
   List.foldr viewOne ([], [], []) elements
-
-
-
--- EVENT / DECODER
-
-
-{-| -}
-type Event data msg =
-  Event
-    { name : String
-    , decoder : Decoder data msg
-    }
-
-
-{-| -}
-event : String -> Decoder data msg -> Event data msg
-event name_ decoder =
-  Event { name = name_, decoder = decoder }
-
-
-{-| -}
-type Decoder data msg =
-  Decoder (List (Item.Product Item.General data) -> C.Plane -> C.Point -> msg)
-
-
-{-| -}
-map : (a -> msg) -> Decoder data a -> Decoder data msg
-map f (Decoder a) =
-  Decoder <| \ps s p -> f (a ps s p)
-
-
-{-| -}
-map2 : (a -> b -> msg) -> Decoder data a -> Decoder data b -> Decoder data msg
-map2 f (Decoder a) (Decoder b) =
-  Decoder <| \ps s p -> f (a ps s p) (b ps s p)
-
-
-{-| -}
-map3 : (a -> b -> c -> msg) -> Decoder data a -> Decoder data b -> Decoder data c -> Decoder data msg
-map3 f (Decoder a) (Decoder b) (Decoder c) =
-  Decoder <| \ps s p -> f (a ps s p) (b ps s p) (c ps s p)
-
-
-{-| -}
-map4 : (a -> b -> c -> d -> msg) -> Decoder data a -> Decoder data b -> Decoder data c -> Decoder data d -> Decoder data msg
-map4 f (Decoder a) (Decoder b) (Decoder c) (Decoder d) =
-  Decoder <| \ps s p -> f (a ps s p) (b ps s p) (c ps s p) (d ps s p)
-
-
-
-{-| -}
-getCoords : Decoder data C.Point
-getCoords =
-  Decoder <| \_ plane searched ->
-    { x = C.toCartesianX plane searched.x
-    , y = C.toCartesianY plane searched.y
-    }
-
-
-{-| -}
-getNearest : (C.Plane -> a -> C.Point) -> (List (Item.Product Item.General data) -> List a) -> Decoder data (List a)
-getNearest toPoint filterItems =
-  Decoder <| \items plane ->
-    CS.getNearest (toPoint plane) (filterItems items) plane
-
-
-{-| -}
-getWithin : Float -> (C.Plane -> a -> C.Point) -> (List (Item.Product Item.General data) -> List a) -> Decoder data (List a)
-getWithin radius toPoint filterItems =
-  Decoder <| \items plane ->
-    CS.getWithin radius (toPoint plane) (filterItems items) plane
-
-
-{-| -}
-getNearestX : (C.Plane -> a -> C.Point) -> (List (Item.Product Item.General data) -> List a) -> Decoder data (List a)
-getNearestX toPoint filterItems =
-  Decoder <| \items plane ->
-    CS.getNearestX (toPoint plane) (filterItems items) plane
-
-
-
-{-| -}
-getWithinX : Float -> (C.Plane -> a -> C.Point) -> (List (Item.Product Item.General data) -> List a) -> Decoder data (List a)
-getWithinX radius toPoint filterItems =
-  Decoder <| \items plane ->
-    CS.getWithinX radius (toPoint plane) (filterItems items) plane
 
 
 
@@ -914,7 +825,7 @@ grid edits =
       if config.dotGrid then
         List.concatMap (\x -> List.filterMap (toDot vs p x) vs.ys) vs.xs
       else
-        [ S.g [ SA.class "elm-charts__x-grid" ] (List.filterMap (toXGrid (Debug.log "here" vs) p) vs.xs)
+        [ S.g [ SA.class "elm-charts__x-grid" ] (List.filterMap (toXGrid vs p) vs.xs)
         , S.g [ SA.class "elm-charts__y-grid" ] (List.filterMap (toYGrid vs p) vs.ys)
         ]
 
@@ -989,9 +900,8 @@ bars edits properties data =
           |> List.map (Item.toGeneral Item.BarConfig)
 
       bins =
-        items
-          |> List.concatMap Item.getProducts
-          |> Item.groupBy Item.isSameBin
+        generalized
+          |> CE.group CE.bin
 
       toTicks plane acc =
         { acc | xs = List.concatMap (\i -> [ Item.getX1 plane i, Item.getX2 plane i ]) bins }
@@ -1038,15 +948,15 @@ withPlane func =
 
 
 {-| -}
-withBins : (C.Plane -> List (Item.Group (Item.Bin data) Item.General data) -> List (Element data msg)) -> Element data msg
+withBins : (C.Plane -> List (Item.Group (CE.Bin data) Item.General data) -> List (Element data msg)) -> Element data msg
 withBins func =
-  SubElements <| \p is -> func p (Item.groupBy Item.isSameBin is)
+  SubElements <| \p is -> func p (CE.group CE.bin is)
 
 
 {-| -}
-withStacks : (C.Plane -> List (Item.Group (Item.Stack data) Item.General data) -> List (Element data msg)) -> Element data msg
+withStacks : (C.Plane -> List (Item.Group (CE.Stack data) Item.General data) -> List (Element data msg)) -> Element data msg
 withStacks func =
-  SubElements <| \p is -> func p (Item.groupBy Item.isSameStack is)
+  SubElements <| \p is -> func p (CE.group CE.stack is)
 
 
 {-| -}
@@ -1062,15 +972,15 @@ each items func =
 
 
 {-| -}
-eachBin : (C.Plane -> Item.Group (Item.Bin data) Item.General data -> List (Element data msg)) -> Element data msg
+eachBin : (C.Plane -> Item.Group (CE.Bin data) Item.General data -> List (Element data msg)) -> Element data msg
 eachBin func =
-  SubElements <| \p is -> List.concatMap (func p) (Item.groupBy Item.isSameBin is)
+  SubElements <| \p is -> List.concatMap (func p) (CE.group CE.bin is)
 
 
 {-| -}
-eachStack : (C.Plane -> Item.Group (Item.Stack data) Item.General data -> List (Element data msg)) -> Element data msg
+eachStack : (C.Plane -> Item.Group (CE.Stack data) Item.General data -> List (Element data msg)) -> Element data msg
 eachStack func =
-  SubElements <| \p is -> List.concatMap (func p) (Item.groupBy Item.isSameStack is)
+  SubElements <| \p is -> List.concatMap (func p) (CE.group CE.stack is)
 
 
 {-| -}

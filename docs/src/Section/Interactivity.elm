@@ -16,7 +16,8 @@ import Dict
 
 import Chart as C
 import Chart.Attributes as CA
-import Chart.Item as CI
+import Chart.Events as CE
+import Internal.Item as CI
 import Chart.Svg as CS
 
 import Element as E
@@ -30,29 +31,33 @@ import Ui.Section as Section
 
 type alias Model =
   { hovering : List (CI.Product CI.General Datum)
+  , hovering2 : List (CE.Group (CE.Bin Datum) CI.General Datum)
   }
 
 
 init : Model
 init =
   { hovering = []
+  , hovering2 = []
   }
 
 
 type Msg
-  = OnHover (List (CI.Product CI.General Datum))
+  = OnHover (List (CE.Group () CI.General Datum))
+  | OnHover2 (List (CE.Group (CE.Bin Datum) CI.General Datum))
 
 
 update : Msg -> Model -> Model
 update msg model =
   case msg of
-    OnHover products -> { model | hovering = products }
+    OnHover groups -> { model | hovering = List.concatMap CE.getProducts groups }
+    OnHover2 groups -> { model | hovering2 = groups }
 
 
 
 section : (Msg -> msg) -> Model -> Section.Section msg
 section onMsg model =
-  let frame tooltip =
+  let frame toEls tooltip =
         H.div
           [ HA.style "width" "760px"
           , HA.style "height" "300px"
@@ -60,17 +65,15 @@ section onMsg model =
           [ C.chart
               [ CA.height 300
               , CA.width 760
-              , CA.events
-                  [ C.event "mousemove" (C.map (OnHover >> onMsg) (C.getNearest CI.getCenter identity))
-                  , C.event "mouseleave" (C.map (\_ -> OnHover [] |> onMsg) C.getCoords)
-                  ]
+              , CE.onMouseMove (OnHover >> onMsg) (CE.getNearest CE.product)
+              , CE.onMouseLeave (OnHover [] |> onMsg)
               ]
               [ C.grid []
               , C.xLabels []
               , C.yLabels []
-              , C.series .x
-                  [ C.property .y [] []
-                  , C.property .z [] []
+              , toEls
+                  [ C.property .z [] []
+                  , C.property .y [] []
                   ]
                   data
               , tooltip
@@ -83,12 +86,8 @@ section onMsg model =
       C.chart
         [ CA.height 300
         , CA.width 760
-        , CA.events
-            [ C.event "mousemove" <|
-                C.map OnHover (C.getNearest CI.getCenter identity)
-            , C.event "mouseleave" <|
-                C.map OnReset C.getCoords
-            ]
+        , CE.onMouseMove OnHover (CE.getNearest CE.product)
+        , CE.onMouseLeave (OnHover [])
         ]
         [ C.grid []
         , C.xLabels []
@@ -111,7 +110,7 @@ section onMsg model =
         ]
           """]
       , chart = \_ ->
-          frame <|
+          frame  (C.series .x) <|
             C.each model.hovering <| \p item ->
               [ C.tooltip item [] []
                   [ H.text <| String.fromFloat (CI.getInd item) -- TODO
@@ -132,7 +131,7 @@ section onMsg model =
           ]
             """]
         , chart = \_ ->
-            frame <|
+            frame (C.series .x) <|
               C.each model.hovering <| \p item ->
                 [ C.tooltip item [ CA.onLeft ] []
                     [ H.text <| String.fromFloat (CI.getInd item) -- TODO
@@ -153,7 +152,7 @@ section onMsg model =
           ]
             """]
         , chart = \_ ->
-            frame <|
+            frame (C.series .x) <|
               C.each model.hovering <| \p item ->
                 [ C.tooltip item [ CA.noPointer ] []
                     [ H.text <| String.fromFloat (CI.getInd item) -- TODO
@@ -174,7 +173,7 @@ section onMsg model =
           ]
             """]
         , chart = \_ ->
-            frame <|
+            frame (C.series .x) <|
               C.each model.hovering <| \p item ->
                 [ C.tooltip item [ CA.offset 0 ] []
                     [ H.text <| String.fromFloat (CI.getInd item) -- TODO
@@ -195,7 +194,7 @@ section onMsg model =
           ]
             """]
         , chart = \_ ->
-            frame <|
+            frame (C.series .x) <|
               C.each model.hovering <| \p item ->
                 [ C.tooltip item [ CA.width 20, CA.onLeftOrRight ] []
                     [ H.text <| String.fromFloat (CI.getInd item) -- TODO
@@ -216,7 +215,7 @@ section onMsg model =
           ]
             """]
         , chart = \_ ->
-            frame <|
+            frame (C.series .x) <|
               C.each model.hovering <| \p item ->
                 [ C.tooltip item [ CA.height 20, CA.onTopOrBottom  ] []
                     [ H.text <| String.fromFloat (CI.getInd item) -- TODO
@@ -237,7 +236,7 @@ section onMsg model =
           ]
             """]
         , chart = \_ ->
-            frame <|
+            frame (C.series .x) <|
               C.each model.hovering <| \p item ->
                 [ C.tooltip item [ CA.border "red" ] []
                     [ H.text <| String.fromFloat (CI.getInd item) -- TODO
@@ -258,7 +257,7 @@ section onMsg model =
           ]
             """]
         , chart = \_ ->
-            frame <|
+            frame (C.series .x) <|
               C.each model.hovering <| \p item ->
                 [ C.tooltip item [ CA.background "beige" ] []
                     [ H.text <| String.fromFloat (CI.getInd item) -- TODO
@@ -266,6 +265,48 @@ section onMsg model =
                     , H.text <| String.fromFloat (Maybe.withDefault 0 <| CI.getValue item)
                     ]
                 ]
+        }
+      , { title = "Bars"
+        , edits =
+            [""" --TODO
+        C.each model.hovering <| \\p item ->
+          [ C.tooltip item [ CA.background "beige" ] []
+              [ H.text <| String.fromFloat (CI.getInd item)
+              , H.text ", "
+              , H.text <| String.fromFloat (CI.getValue item)
+              ]
+          ]
+            """]
+        , chart = \_ ->
+            -- TODO
+            H.div
+              [ HA.style "width" "760px"
+              , HA.style "height" "300px"
+              ]
+              [ C.chart
+                  [ CA.height 300
+                  , CA.width 760
+                  , CE.onMouseMove (OnHover2 >> onMsg) (CE.getNearest CE.bin)
+                  , CE.onMouseLeave (OnHover2 [] |> onMsg)
+                  ]
+                  [ C.grid []
+                  , C.xLabels []
+                  , C.yLabels []
+                  , C.bars []
+                      [ C.stacked
+                          [ C.property .z [] []
+                          , C.property .y [] []
+                          ]
+                      , C.property .v [] []
+                      ]
+                      data
+                  , C.each (List.concatMap (CE.regroup CE.stack) model.hovering2) <| \p item ->
+                      let show i = H.div [] [ H.text (String.fromFloat <| Maybe.withDefault -1 <| CE.getDependent i) ]
+                      in
+                      [ C.tooltip item [ CA.onTop ] [] (List.map show (CE.getProducts item))
+                      ]
+                  ]
+              ]
         }
       ]
   }
