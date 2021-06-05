@@ -31,7 +31,7 @@ import Ui.Section as Section
 
 type alias Model =
   { hovering : List (CI.Product CI.General Datum)
-  , hovering2 : List (CE.Group (CE.Bin Datum) CI.General Datum)
+  , hovering2 : List (CE.Product CI.General Datum)
   }
 
 
@@ -43,14 +43,14 @@ init =
 
 
 type Msg
-  = OnHover (List (CE.Group () CI.General Datum))
-  | OnHover2 (List (CE.Group (CE.Bin Datum) CI.General Datum))
+  = OnHover (List (CI.Product CI.General Datum))
+  | OnHover2 (List (CE.Product CI.General Datum))
 
 
 update : Msg -> Model -> Model
 update msg model =
   case msg of
-    OnHover groups -> { model | hovering = List.concatMap CE.getProducts groups }
+    OnHover groups -> { model | hovering = groups }
     OnHover2 groups -> { model | hovering2 = groups }
 
 
@@ -286,7 +286,7 @@ section onMsg model =
               [ C.chart
                   [ CA.height 300
                   , CA.width 760
-                  , CE.onMouseMove (OnHover2 >> onMsg) (CE.getNearest CE.bin)
+                  , CE.onMouseMove (OnHover2 >> onMsg) (CE.getNearest CE.product)
                   , CE.onMouseLeave (OnHover2 [] |> onMsg)
                   ]
                   [ C.grid []
@@ -300,10 +300,10 @@ section onMsg model =
                       , C.property .v [] []
                       ]
                       data
-                  , C.each (List.concatMap (CE.regroup CE.stack) model.hovering2) <| \p item ->
+                  , C.each model.hovering2 <| \p item ->
                       let show i = H.div [] [ H.text (String.fromFloat <| Maybe.withDefault -1 <| CE.getDependent i) ]
                       in
-                      [ C.tooltip item [ CA.onTop ] [] (List.map show (CE.getProducts item))
+                      [ C.tooltip item [ CA.onTop ] [] [show item]
                       ]
                   ]
               ]

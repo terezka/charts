@@ -5,10 +5,10 @@ module Chart.Events exposing
   , product, dot, bin, stack, bar
   , map, map2, map3, map4
 
-  , Group, Bin, Stack
+  , Group, Bin, Stack, Product
   , getDependent, getIndependent, getDatum, getColor, getName
   , getTop, getCenter, getLeft, getRight, getPosition, getLimits
-  , getProducts, getCommonality, group, ungroup, regroup
+  , getProducts, getCommonality, group, ungroup, regroup, named
   )
 
 -- TODO
@@ -81,7 +81,7 @@ getCoords =
 
 
 {-| -}
-getNearest : Grouping inter b data -> Decoder data (List (Group inter b data))
+getNearest : Grouping data (Item result) -> Decoder data (List (Item result))
 getNearest grouping =
   Decoder <| \items plane ->
     let groups = group grouping items in
@@ -89,7 +89,7 @@ getNearest grouping =
 
 
 {-| -}
-getWithin : Float -> Grouping inter b data -> Decoder data (List (Group inter b data))
+getWithin : Float -> Grouping data (Item result) -> Decoder data (List (Item result))
 getWithin radius grouping =
   Decoder <| \items plane ->
     let groups = group grouping items in
@@ -97,7 +97,7 @@ getWithin radius grouping =
 
 
 {-| -}
-getNearestX : Grouping inter b data -> Decoder data (List (Group inter b data))
+getNearestX : Grouping data (Item result) -> Decoder data (List (Item result))
 getNearestX grouping =
   Decoder <| \items plane ->
     let groups = group grouping items in
@@ -105,7 +105,7 @@ getNearestX grouping =
 
 
 {-| -}
-getWithinX : Float -> Grouping inter b data -> Decoder data (List (Group inter b data))
+getWithinX : Float -> Grouping data (Item result) -> Decoder data (List (Item result))
 getWithinX radius grouping =
   Decoder <| \items plane ->
     let groups = group grouping items in
@@ -139,6 +139,7 @@ map4 f (Decoder a) (Decoder b) (Decoder c) (Decoder d) =
 
 -- PRODUCT
 
+
 type alias Product config data =
   I.Product config data
 
@@ -153,17 +154,17 @@ getIndependent =
   I.getInd
 
 
-getDatum : Product I.General data -> data
+getDatum : Item { config | datum : datum } -> datum
 getDatum =
   I.getDatum
 
 
-getName : Product I.General data -> Maybe String
+getName : Product config data -> Maybe String
 getName =
   I.getName
 
 
-getColor : Product I.General data -> String
+getColor : Product { a | color : String } data -> String
 getColor =
   I.getColor
 
@@ -186,7 +187,7 @@ getCommonality =
   I.getCommonality
 
 
-group : Grouping inter config data -> List (Product I.General data) -> List (Group inter config data)
+group : Grouping data result -> List (Product I.General data) -> List result
 group (Grouping func) items =
   func items
 
@@ -196,7 +197,7 @@ ungroup =
   I.getProducts
 
 
-regroup : Grouping inter b data -> Group i a data -> List (Group inter b data)
+regroup : Grouping data result -> Group i a data -> List result
 regroup (Grouping func) (I.Item config as group_) =
   func (List.map config.details.toGeneral <| I.getProducts group_)
 
@@ -205,50 +206,23 @@ regroup (Grouping func) (I.Item config as group_) =
 -- GROUPING
 
 
-type Grouping inter config data =
-  Grouping (List (Product I.General data) -> List (Group inter config data))
+type Grouping data result =
+  Grouping (List (Product I.General data) -> List result)
 
 
-product : Grouping () I.General data
+product : Grouping data (Product I.General data)
 product =
-  Grouping <| \items ->
-    let func item =
-          I.Item
-            { details = { config = (), items = [ item ], toGeneral = identity }
-            , limits = \c -> C.foldPosition getLimits c.items
-            , position = \plane c -> C.foldPosition (getPosition plane) c.items
-            , render = \plane c _ -> S.g [ SA.class "elm-charts__group" ] (List.map (I.render plane) c.items)
-            }
-    in
-    List.map func items
+  Grouping identity
 
 
-dot : Grouping () CS.Dot data
+dot : Grouping data (Product CS.Dot data)
 dot =
-  Grouping <| \items ->
-    let func item =
-          I.Item
-            { details = { config = (), items = [ item ], toGeneral = I.toGeneral I.DotConfig }
-            , limits = \c -> C.foldPosition getLimits c.items
-            , position = \plane c -> C.foldPosition (getPosition plane) c.items
-            , render = \plane c _ -> S.g [ SA.class "elm-charts__group" ] (List.map (I.render plane) c.items)
-            }
-    in
-    List.map func (I.onlyDotSeries items)
+  Grouping I.onlyDotSeries
 
 
-bar : Grouping () CS.Bar data
+bar : Grouping data (Product CS.Bar data)
 bar =
-  Grouping <| \items ->
-    let func item =
-          I.Item
-            { details = { config = (), items = [ item ], toGeneral = I.toGeneral I.BarConfig }
-            , limits = \c -> C.foldPosition getLimits c.items
-            , position = \plane c -> C.foldPosition (getPosition plane) c.items
-            , render = \plane c _ -> S.g [ SA.class "elm-charts__group" ] (List.map (I.render plane) c.items)
-            }
-    in
-    List.map func (I.onlyBarSeries items)
+  Grouping I.onlyBarSeries
 
 
 {-| -}
@@ -260,7 +234,7 @@ type alias Stack datum =
   }
 
 
-stack : Grouping (Stack data) I.General data
+stack : Grouping data (Group (Stack data) I.General data)
 stack =
   Grouping <| \items ->
     let toConfig (I.Item { details }) =
@@ -293,7 +267,7 @@ type alias Bin data =
   }
 
 
-bin : Grouping (Bin data) I.General data
+bin : Grouping data (Group (Bin data) I.General data)
 bin =
   Grouping <| \items ->
     let toConfig (I.Item { details }) =
@@ -320,6 +294,17 @@ bin =
     in
     gatherWith isSame items
       |> List.map toGroup
+
+
+
+named : List String -> Grouping data (Product config data) -> Grouping data (Product config data)
+named names (Grouping filter) =
+  let onlyAcceptedNames i =
+        case getName i of
+          Just name -> List.member name names
+          Nothing -> False
+  in
+  Grouping (filter >> List.filter onlyAcceptedNames)
 
 
 

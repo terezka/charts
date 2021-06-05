@@ -45,7 +45,7 @@ init =
 
 
 type Msg
-  = OnHover (List (CI.Group () CI.General Salary.Datum)) Coordinates.Point
+  = OnHover (List (CI.Product CI.General Salary.Datum)) Coordinates.Point
   | OnMouseDown Coordinates.Point
   | OnMouseUp Coordinates.Point
   | OnReset
@@ -58,7 +58,7 @@ update msg model =
   case msg of
     OnHover hovering coords ->
       case model.selection of
-        Nothing -> { model | hovering = List.concatMap CE.getProducts hovering }
+        Nothing -> { model | hovering = hovering }
         Just select -> { model | selection = Just { select | b = coords }, hovering = [] }
 
     OnMouseDown coords ->
