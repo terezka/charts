@@ -347,8 +347,17 @@ toBarSeries barsAttrs properties data =
           , tooltip = \c ->
               [ H.tr
                   []
-                  [ H.td [ HA.style "color" c.config.color ] [ H.text (Maybe.withDefault ("Property #" ++ String.fromInt (colorIndex + 1)) c.name ++ ":") ]
-                  , H.td [] [ H.text (Maybe.withDefault "N/A" <| Maybe.map String.fromFloat value) ]
+                  [ H.td
+                      [ HA.style "color" c.config.color
+                      , HA.style "padding" "0"
+                      , HA.style "padding-right" "3px"
+                      ]
+                      [ H.text (Maybe.withDefault ("Property #" ++ String.fromInt (colorIndex + 1)) c.name ++ ":") ]
+                  , H.td
+                      [ HA.style "text-align" "right"
+                      , HA.style "padding" "0"
+                      ]
+                      [ H.text (Maybe.withDefault "N/A" <| Maybe.map String.fromFloat value) ]
                   ]
               ]
           }
@@ -431,8 +440,17 @@ toDotSeries toX properties data =
           , tooltip = \c ->
               [ H.tr
                   []
-                  [ H.td [ HA.style "color" c.config.color ] [ H.text (Maybe.withDefault ("Property #" ++ String.fromInt (colorIndex + 1)) c.name ++ ":") ]
-                  , H.td [] [ H.text (Maybe.withDefault "N/A" <| Maybe.map String.fromFloat (prop.value datum_)) ]
+                  [ H.td
+                      [ HA.style "color" c.config.color
+                      , HA.style "padding" "0"
+                      , HA.style "padding-right" "3px"
+                      ]
+                      [ H.text (Maybe.withDefault ("Property #" ++ String.fromInt (colorIndex + 1)) c.name ++ ":") ]
+                  , H.td
+                      [ HA.style "text-align" "right"
+                      , HA.style "padding" "0"
+                      ]
+                      [ H.text (Maybe.withDefault "N/A" <| Maybe.map String.fromFloat (prop.value datum_)) ]
                   ]
               ]
           , limits = \_ ->

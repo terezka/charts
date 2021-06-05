@@ -1061,7 +1061,7 @@ tooltip plane pos edits htmlAttrs content =
       attributes =
         [ HA.class className
         , HA.style "transform" transformation
-        , HA.style "padding" "5px 10px"
+        , HA.style "padding" "5px 8px"
         , HA.style "background" config.background
         , HA.style "border" ("1px solid " ++ config.border)
         , HA.style "border-radius" "3px"
