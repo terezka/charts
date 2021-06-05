@@ -904,7 +904,7 @@ bars edits properties data =
           |> CE.group CE.bin
 
       toTicks plane acc =
-        { acc | xs = List.concatMap (\i -> [ Item.getX1 plane i, Item.getX2 plane i ]) bins }
+        { acc | xs = List.concatMap (CE.getLimits >> \pos -> [ pos.x1, pos.x2 ]) bins }
 
       toLimits =
         List.map Item.getLimits bins

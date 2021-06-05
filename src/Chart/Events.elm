@@ -288,9 +288,7 @@ bin =
             , limits = \c ->
                 let pos = C.foldPosition getLimits c.items in
                 { pos | x1 = c.config.start, x2 = c.config.end }
-            , position = \plane c ->
-                let pos = C.foldPosition (getPosition plane) c.items in
-              { pos | x1 = c.config.start, x2 = c.config.end }
+            , position = \plane c -> C.foldPosition (getPosition plane) c.items
             , render = \plane c _ -> S.g [ SA.class "elm-charts__group" ] (List.map (I.render plane) c.items)
             }
     in
