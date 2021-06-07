@@ -6,6 +6,7 @@ module Chart.Attributes exposing
   , Method(..), linear, monotone
   , Shape(..), circle, triangle, square, diamond, plus, cross, shape
   , Direction(..), onTop, onBottom, onRight, onLeft, onLeftOrRight, onTopOrBottom, noPointer
+  , Alignment(..), row, column
   , blue, pink, orange, green, purple, red, turquoise
   , background, attrs, htmlAttrs, static, events
 
@@ -650,6 +651,22 @@ onTopOrBottom config =
 noPointer : Attribute { a | pointer : Bool }
 noPointer config =
   { config | pointer = False }
+
+
+type Alignment
+  = Row
+  | Column
+
+
+row : Attribute { a | alignment : Alignment }
+row config =
+  { config | alignment = Row }
+
+
+column : Attribute { a | alignment : Alignment }
+column config =
+  { config | alignment = Column }
+
 
 
 -- COLORS

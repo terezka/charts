@@ -13,6 +13,9 @@ module Chart.Svg exposing
   , position, positionHtml
   , Generator, generate, floats, ints, times
   , TickValue, toTickValues, formatTime
+
+  , Legends, legends, legendsAt
+  , Legend, lineLegend, barLegend
   )
 
 import Html as H exposing (Html)
@@ -57,7 +60,7 @@ container plane edits below chartEls above =
   -- TODO seperate plane from container size
   let config =
         apply edits
-          { attrs = []
+          { attrs = [ SA.style "overflow: visible;" ]
           , htmlAttrs = []
           , responsive = True
           , events = []
@@ -66,6 +69,8 @@ container plane edits below chartEls above =
       htmlAttrsDef =
         [ HA.class "elm-charts__container"
         , HA.style "position" "relative"
+        , HA.style "display" "flex"
+        , HA.style "flex-direction" "column"
         ]
 
       htmlAttrsSize =
@@ -353,6 +358,255 @@ rect plane edits =
     , SA.d (C.description plane cmds)
     ]
     []
+
+
+
+-- LEGEND
+
+
+type alias Legends msg =
+  { alignment : CA.Alignment
+  , anchor : CA.Anchor
+  , spacing : Float
+  , htmlAttrs : List (H.Attribute msg)
+  }
+
+
+legends : List (CA.Attribute (Legends msg)) -> List (Html msg) -> Html msg
+legends edits children =
+  let config =
+        apply edits
+          { alignment = CA.Row
+          , anchor = CA.Start
+          , spacing = 10
+          , htmlAttrs = []
+          }
+
+      ( htmlAttrs, htmlChildren ) =
+        legendsHelp edits children
+
+      anchorAttrs =
+        case config.anchor of
+          CA.End -> [ HA.style "align-self" "flex-end" ]
+          CA.Start -> [ HA.style "align-self" "flex-start" ]
+          CA.Middle -> [ HA.style "align-self" "center" ]
+  in
+  H.div (anchorAttrs ++ htmlAttrs) htmlChildren
+
+
+legendsAt : Plane -> Float -> Float -> Float -> Float -> List (CA.Attribute (Legends msg)) -> List (Html msg) -> Html msg
+legendsAt plane x y xOff yOff edits children =
+  let config =
+        apply edits
+          { alignment = CA.Row
+          , anchor = CA.Start
+          , spacing = 10
+          , htmlAttrs = []
+          }
+
+      ( htmlAttrs, htmlChildren ) =
+        legendsHelp edits children
+
+      anchorAttrs =
+        case config.anchor of
+          CA.End -> [ HA.style "transform" "translate(-100%, 0%)" ]
+          CA.Start -> [ HA.style "transform" "translate(-0%, 0%)" ]
+          CA.Middle -> [ HA.style "transform" "translate(-50%, 0%)" ]
+  in
+  positionHtml plane x y xOff yOff (anchorAttrs ++ htmlAttrs) htmlChildren
+
+
+legendsHelp : List (CA.Attribute (Legends msg)) -> List (Html msg) -> ( List (H.Attribute msg), List (Html msg) )
+legendsHelp edits children =
+  let config =
+        apply edits
+          { alignment = CA.Row
+          , anchor = CA.Start
+          , spacing = 10
+          , htmlAttrs = []
+          }
+
+      ( alignmentAttrs, direction ) =
+        case config.alignment of
+          CA.Row ->
+            ( [ HA.style "display" "flex"
+              , HA.style "align-items" "baseline"
+              ]
+            , "right"
+            )
+
+          CA.Column ->
+            ( [ HA.style "display" "flex"
+              , HA.style "flex-direction" "column"
+              , HA.style "align-items" "baseline"
+              ]
+            , "bottom"
+            )
+
+      classAttrs =
+        [ HA.class "elm-charts__legends" ]
+
+      paddingStyle =
+        """ .elm-charts__legends .elm-charts__legend {
+              margin-""" ++ direction ++ """:""" ++ String.fromFloat config.spacing ++ """px;
+            }
+
+            .elm-charts__legends .elm-charts__legend:last-child {
+              margin-""" ++ direction ++ """: 0px;
+            }
+        """
+  in
+  ( alignmentAttrs ++ classAttrs ++ config.htmlAttrs
+  , H.node "style" [] [ H.text paddingStyle ] :: children
+  )
+
+
+
+-- LEGEND
+
+
+
+type alias Legend msg =
+  { xOff : Float
+  , yOff : Float
+  , width : Float
+  , height : Float
+  , fontSize : Maybe Int
+  , color : String
+  , spacing : Float
+  , title : String
+  , htmlAttrs : List (H.Attribute msg)
+  }
+
+
+barLegend : List (CA.Attribute (Legend msg)) -> List (CA.Attribute Bar) ->  Html msg
+barLegend edits barAttrs =
+  let config =
+        apply edits
+          { xOff = 0
+          , yOff = 0
+          , width = 10
+          , height = 10
+          , fontSize = Nothing
+          , color = "#808BAB"
+          , spacing = 10
+          , title = ""
+          , htmlAttrs = []
+          }
+
+      fakePlane =
+        { width = config.width
+        , height = config.height
+        , margin = Coord.Margin 0 0 0 0
+        , x = Coord.Axis 0 10 0 10
+        , y = Coord.Axis 0 10 0 10
+        }
+
+      fontStyle =
+        case config.fontSize of
+          Just size_ -> HA.style "font-size" (String.fromInt size_ ++ "px")
+          Nothing -> HA.style "" ""
+  in
+  H.div
+    ([ HA.class "elm-charts__legend"
+    , HA.style "display" "flex"
+    , HA.style "align-items" "center"
+    ] ++ config.htmlAttrs)
+    [ container fakePlane [ CA.static ]
+        []
+        [ bar fakePlane barAttrs { x1 = 0, y1 = 0, x2 = 10, y2 = 10 }
+        ]
+        []
+    , H.div
+        [ fontStyle
+        , HA.style "margin-left" (String.fromFloat config.spacing ++ "px")
+        ]
+        [ H.text config.title ]
+    ]
+
+
+
+lineLegend : List (CA.Attribute (Legend msg)) -> List (CA.Attribute Interpolation) -> List (CA.Attribute Dot) -> Html msg
+lineLegend edits interAttrsOrg dotAttrsOrg =
+  let config =
+        apply edits
+          { xOff = 0
+          , yOff = 0
+          , width = 30
+          , height = 16
+          , fontSize = Nothing
+          , color = "#808BAB"
+          , spacing = 10
+          , title = ""
+          , htmlAttrs = []
+          }
+
+      ( dotAttrs, interAttrs ) =
+        if List.isEmpty interAttrsOrg then ( CA.circle :: dotAttrsOrg, CA.opacity 0 :: interAttrsOrg )
+        else if List.isEmpty dotAttrsOrg then ( dotAttrsOrg, CA.linear :: CA.opacity 0 :: interAttrsOrg )
+        else ( dotAttrsOrg, CA.opacity 0 :: interAttrsOrg )
+
+      dotConfig =
+        apply dotAttrs
+          { color = CA.blue
+          , opacity = 1
+          , size = 6
+          , border = "white"
+          , borderWidth = 1
+          , aura = 0
+          , auraWidth = 10
+          , shape = Nothing
+          }
+
+      interConfig =
+        apply interAttrs
+          { method = Nothing
+          , color = blue
+          , width = 1
+          , opacity = 0
+          , design = Nothing
+          , dashed = []
+          }
+
+      topMargin =
+        case dotConfig.shape of
+          Just shape -> toRadius dotConfig.size shape
+          Nothing -> 0
+
+      bottomMargin =
+        if interConfig.opacity == 0 then topMargin else 0
+
+      fakePlane =
+        { width = config.width
+        , height = config.height
+        , margin = Coord.Margin 0 0 0 0
+        , x = Coord.Axis 0 10 0 10
+        , y = Coord.Axis 0 10 0 10
+        }
+
+      fontStyle =
+        case config.fontSize of
+          Just size_ -> HA.style "font-size" (String.fromInt size_ ++ "px")
+          Nothing -> HA.style "" ""
+  in
+  H.div
+    ([ HA.class "elm-charts__legend"
+    , HA.style "display" "flex"
+    , HA.style "align-items" "center"
+    ] ++ config.htmlAttrs)
+    [ container fakePlane [ CA.static ]
+        []
+        [ dot fakePlane .x .y dotAttrs (Point 5 5)
+        , interpolation fakePlane .x (.y >> Just) interAttrs [ Point 0 5, Point 10 5 ]
+        , area fakePlane .x Nothing (.y >> Just) interAttrs [ Point 0 5, Point 10 5 ]
+        ]
+        []
+    , H.div
+        [ fontStyle
+        , HA.style "margin-left" (String.fromFloat config.spacing ++ "px")
+        ]
+        [ H.text config.title ]
+    ]
 
 
 
@@ -1089,11 +1343,11 @@ positionHtml plane x y xOff yOff attrs content =
         yPercentage = (toSVGY plane y + -yOff) * 100 / plane.height
 
         posititonStyles =
-            [ HA.style "left" (String.fromFloat xPercentage ++ "%")
-            , HA.style "top" (String.fromFloat yPercentage ++ "%")
-            , HA.style "margin-right" "-400px"
-            , HA.style "position" "absolute"
-            ]
+          [ HA.style "left" (String.fromFloat xPercentage ++ "%")
+          , HA.style "top" (String.fromFloat yPercentage ++ "%")
+          , HA.style "margin-right" "-400px"
+          , HA.style "position" "absolute"
+          ]
     in
     H.div (posititonStyles ++ attrs) content
 

@@ -13,6 +13,7 @@ module Chart exposing
 
   , each, eachBin, eachStack, eachProduct
   , withPlane, withBins, withStacks, withProducts
+  , legends, legendsAt
 
   , generate, floats, ints, times
 
@@ -37,6 +38,7 @@ import Internal.Property as P
 import Time
 import Dict exposing (Dict)
 import Internal.Item as Item
+import Internal.Legend as Legend
 import Chart.Svg as CS
 import Chart.Attributes as CA
 import Chart.Events as CE
@@ -92,11 +94,14 @@ chart edits elements =
       items =
         getItems plane elements
 
+      legends_ =
+        getLegends elements
+
       tickValues =
         getTickValues plane items elements
 
       ( beforeEls, chartEls, afterEls ) =
-        viewElements config plane tickValues items elements
+        viewElements config plane tickValues items legends_ elements
 
       toEvent (CE.Event event_) =
         let (CE.Decoder decoder) = event_.decoder in
@@ -122,10 +127,12 @@ type Element data msg
   = SeriesElement
       (List C.Position)
       (List (Item.Product Item.General data))
+      (List (Legend.Legend))
       (C.Plane -> S.Svg msg)
   | BarsElement
       (List C.Position)
       (List (Item.Product Item.General data))
+      (List (Legend.Legend))
       (C.Plane -> TickValues -> TickValues)
       (C.Plane -> S.Svg msg)
   | AxisElement
@@ -155,15 +162,15 @@ type Element data msg
   | SvgElement
       (C.Plane -> S.Svg msg)
   | HtmlElement
-      (C.Plane -> H.Html msg)
+      (C.Plane -> List Legend.Legend -> H.Html msg)
 
 
 definePlane : Container data msg -> List (Element data msg) -> C.Plane
 definePlane config elements =
   let collectLimits el acc =
         case el of
-          SeriesElement lims _ _ -> acc ++ lims
-          BarsElement lims _ _ _ -> acc ++ lims
+          SeriesElement lims _ _ _ -> acc ++ lims
+          BarsElement lims _ _ _ _ -> acc ++ lims
           AxisElement _ _ -> acc
           TicksElement _ _ -> acc
           TickElement _ _ _ -> acc
@@ -238,8 +245,8 @@ getItems : C.Plane -> List (Element data msg) -> List (Item.Product Item.General
 getItems plane elements =
   let toItems el acc =
         case el of
-          SeriesElement _ items _ -> acc ++ items
-          BarsElement _ items _ _ -> acc ++ items
+          SeriesElement _ items _ _ -> acc ++ items
+          BarsElement _ items _ _ _ -> acc ++ items
           AxisElement func _ -> acc
           TicksElement _ _ -> acc
           TickElement _ _ _ -> acc
@@ -252,6 +259,27 @@ getItems plane elements =
           HtmlElement _ -> acc
   in
   List.foldl toItems [] elements
+
+
+getLegends : List (Element data msg) -> List Legend.Legend
+getLegends elements =
+  let toLegends el acc =
+        case el of
+          SeriesElement _ _ legends_ _ -> acc ++ legends_
+          BarsElement _ _ legends_ _ _ -> acc ++ legends_
+          AxisElement _ _ -> acc
+          TicksElement _ _ -> acc
+          TickElement _ _ _ -> acc
+          LabelsElement _ _ _ -> acc
+          LabelElement _ _ _ -> acc
+          GridElement _ -> acc
+          SubElements _ -> acc
+          ListOfElements _ -> acc
+          SvgElement _ -> acc
+          HtmlElement _ -> acc
+  in
+  List.foldl toLegends [] elements
+
 
 
 {-| -}
@@ -267,8 +295,8 @@ getTickValues : C.Plane -> List (Item.Product Item.General data) -> List (Elemen
 getTickValues plane items elements =
   let toValues el acc =
         case el of
-          SeriesElement _ _ _       -> acc
-          BarsElement _ _ func _    -> func plane acc
+          SeriesElement _ _ _ _     -> acc
+          BarsElement _ _ _ func _  -> func plane acc
           AxisElement func _        -> func plane acc
           TicksElement func _       -> func plane acc
           TickElement toC func _    -> func plane (toC plane) acc
@@ -283,12 +311,12 @@ getTickValues plane items elements =
   List.foldl toValues (TickValues [] [] [] []) elements
 
 
-viewElements : Container data msg -> C.Plane -> TickValues -> List (Item.Product Item.General data) -> List (Element data msg) -> ( List (H.Html msg), List (S.Svg msg), List (H.Html msg) )
-viewElements config plane tickValues allItems elements =
+viewElements : Container data msg -> C.Plane -> TickValues -> List (Item.Product Item.General data) -> List Legend.Legend -> List (Element data msg) -> ( List (H.Html msg), List (S.Svg msg), List (H.Html msg) )
+viewElements config plane tickValues allItems allLegends elements =
   let viewOne el ( before, chart_, after ) =
         case el of
-          SeriesElement _ _ view    -> ( before, view plane :: chart_, after )
-          BarsElement _ _ _ view    -> ( before, view plane :: chart_, after )
+          SeriesElement _ _ _ view  -> ( before, view plane :: chart_, after )
+          BarsElement _ _ _ _ view  -> ( before, view plane :: chart_, after )
           AxisElement _ view        -> ( before, view plane :: chart_, after )
           TicksElement _ view       -> ( before, view plane :: chart_, after )
           TickElement toC _ view    -> ( before, view plane (toC plane) :: chart_, after )
@@ -299,9 +327,9 @@ viewElements config plane tickValues allItems elements =
           ListOfElements els        -> List.foldr viewOne ( before, chart_, after ) els
           SvgElement view           -> ( before, view plane :: chart_, after )
           HtmlElement view          ->
-            ( if List.length chart_ > 0 then before else view plane :: before
+            ( if List.length chart_ > 0 then view plane allLegends :: before else before
             , chart_
-            , if List.length chart_ > 0 then view plane :: after else after
+            , if List.length chart_ > 0 then after else view plane allLegends :: after
             )
   in
   List.foldr viewOne ([], [], []) elements
@@ -902,8 +930,10 @@ bars edits properties data =
           |> List.map (Item.toGeneral Item.BarConfig)
 
       bins =
-        generalized
-          |> CE.group CE.bin
+        CE.group CE.bin generalized
+
+      legends_ =
+        Legend.toBarLegends edits properties
 
       toTicks plane acc =
         { acc | xs = List.concatMap (CE.getLimits >> \pos -> [ pos.x1, pos.x2 ]) bins }
@@ -911,7 +941,7 @@ bars edits properties data =
       toLimits =
         List.map Item.getLimits bins
   in
-  BarsElement toLimits generalized toTicks <| \ plane ->
+  BarsElement toLimits generalized legends_ toTicks <| \ plane ->
     S.g [ SA.class "elm-charts__bar-series" ] (List.map (Item.render plane) items)
       |> S.map never
 
@@ -931,10 +961,13 @@ series toX properties data =
           |> List.concatMap Item.getProducts
           |> List.map (Item.toGeneral Item.DotConfig)
 
+      legends_ =
+        Legend.toDotLegends properties
+
       toLimits =
         List.map Item.getLimits items
   in
-  SeriesElement toLimits generalized <| \p ->
+  SeriesElement toLimits generalized legends_ <| \p ->
     S.g [ SA.class "elm-charts__dot-series" ] (List.map (Item.render p) items)
       |> S.map never
 
@@ -992,6 +1025,30 @@ eachProduct func =
 
 
 {-| -}
+legends : List (CA.Attribute (CS.Legends msg)) -> List (CA.Attribute (CS.Legend msg)) -> Element data msg
+legends attrs children =
+  HtmlElement <| \p legends_ ->
+    let viewLegend legend =
+          case legend of
+            Legend.BarLegend name barAttrs -> CS.barLegend (CA.title name :: children) barAttrs
+            Legend.LineLegend name interAttrs dotAttrs -> CS.lineLegend (CA.title name :: children) interAttrs dotAttrs
+    in
+    CS.legends attrs (List.map viewLegend legends_)
+
+
+{-| -}
+legendsAt : (C.Axis -> Float) -> (C.Axis -> Float) -> Float -> Float -> List (CA.Attribute (CS.Legends msg)) -> List (CA.Attribute (CS.Legend msg)) -> Element data msg
+legendsAt toX toY xOff yOff attrs children =
+  HtmlElement <| \p legends_ ->
+    let viewLegend legend =
+          case legend of
+            Legend.BarLegend name barAttrs -> CS.barLegend (CA.title name :: children) barAttrs
+            Legend.LineLegend name interAttrs dotAttrs -> CS.lineLegend (CA.title name :: children) interAttrs dotAttrs
+    in
+    CS.legendsAt p (toX p.x) (toY p.y) xOff yOff attrs (List.map viewLegend legends_)
+
+
+{-| -}
 generate : Int -> CS.Generator a -> (C.Plane -> C.Axis) -> List (CA.Attribute C.Axis) -> (C.Plane -> a -> List (Element data msg)) -> Element data msg
 generate num gen limit attrs func =
   SubElements <| \p _ ->
@@ -1044,7 +1101,7 @@ svg func =
 {-| -}
 html : (C.Plane -> H.Html msg) -> Element data msg
 html func =
-  HtmlElement <| \p -> func p
+  HtmlElement <| \p _ -> func p
 
 
 {-| -}
@@ -1057,14 +1114,14 @@ svgAt toX toY xOff yOff view =
 {-| -}
 htmlAt : (C.Axis -> Float) -> (C.Axis -> Float) -> Float -> Float -> List (H.Attribute msg) -> List (H.Html msg) -> Element data msg
 htmlAt toX toY xOff yOff att view =
-  HtmlElement <| \p ->
+  HtmlElement <| \p _ ->
     CS.positionHtml p (toX p.x) (toY p.y) xOff yOff att view
 
 
 {-| -}
 none : Element data msg
 none =
-  HtmlElement <| \_ -> H.text ""
+  HtmlElement <| \_ _ -> H.text ""
 
 
 

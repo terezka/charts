@@ -1,6 +1,5 @@
 module Internal.Item exposing (..)
 
---
 import Html as H exposing (Html)
 import Html.Attributes as HA
 import Svg as S exposing (Svg)

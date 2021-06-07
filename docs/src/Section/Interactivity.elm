@@ -213,55 +213,33 @@ section onMsg model =
                   , CE.onMouseMove (OnHover2 >> onMsg) (CE.getNearest CE.stack)
                   , CE.onMouseLeave (OnHover2 [] |> onMsg)
                   ]
-                  [ C.grid []
+                  [ C.legends
+                      [ CA.row
+                      , CA.spacing 20
+                      , CA.alignRight
+                      , CA.htmlAttrs [ HA.style "padding" "20px 10px" ]
+                      ]
+                      [ CA.fontSize 14
+                      , CA.spacing 7
+                      , CA.width 25
+                      , CA.height 12
+                      ]
+                  , C.grid []
                   , C.xLabels []
                   , C.yLabels []
-                  , C.bars []
+                  , C.series .x
                       [ C.stacked
-                          [ C.property .z [] []
+                          [ C.property .z [ CA.linear, CA.opacity 0, CA.dashed [ 3, 2 ] ] []
                               |> C.named "Cats"
-                          , C.property .y [] []
+                          , C.property .y [ CA.linear, CA.opacity 0 ] [ CA.circle ]
                               |> C.named "Dogs"
                           ]
-                      , C.property .v [] []
+                      , C.property .v [ CA.linear ] [ CA.diamond ]
                           |> C.named "Fish"
                       ]
                       data
                   , C.each model.hovering2 <| \p item ->
                       [ C.tooltip item [ CA.onTop ] [] [] ]
-
-                  , C.htmlAt .max .max -10 0
-                      [ HA.style "display" "flex"
-                      , HA.style "align-items" "baseline"
-                      , HA.style "transform" "translate(-100%, 0%)"
-                      ]
-                      [ CS.lineLegend
-                          [ CA.title "hello"
-                          , CA.fontSize 14
-                          , CA.spacing 7
-                          , CA.width 20
-                          , CA.height 10
-                          , CA.htmlAttrs
-                              [ HA.style "margin-right" "15px" ]
-                          ]
-                          [ CA.color CA.blue
-                          , CA.opacity 0.4
-                          , CA.linear
-                          ]
-                          [ CA.square
-                          , CA.size 5
-                          ]
-                      , CS.barLegend
-                          [ CA.title "longer text"
-                          , CA.fontSize 14
-                          , CA.spacing 7
-                          ]
-                          [ CA.borderWidth 1
-                          , CA.color CA.pink
-                          , CA.roundTop 0.6
-                          , CA.roundBottom 0.6
-                          ]
-                      ]
                   ]
               ]
         }
