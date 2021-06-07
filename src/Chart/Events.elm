@@ -2,7 +2,8 @@ module Chart.Events exposing
   ( Event(..)
   , onMouseMove, onMouseLeave, onMouseUp, onMouseDown, onClick, on
   , Decoder(..), getCoords, getNearest, getNearestX, getWithin, getWithinX
-  , product, dot, bin, stack, bar
+  , product, dot, bin, stack, bar, only
+  , SameX, sameX
   , map, map2, map3, map4
 
   , Product, Group, Bin, Stack
@@ -193,6 +194,11 @@ getProducts =
   I.getProducts
 
 
+getGenerals : Group inter (I.Generalizable config) data -> List (Product I.General data)
+getGenerals =
+  I.getGenerals
+
+
 getCommonality : Group inter config data -> inter
 getCommonality =
   I.getCommonality
@@ -208,9 +214,37 @@ ungroup =
   I.getProducts -- TODO
 
 
-regroup : Grouping data result -> Group i a data -> List result
-regroup (Grouping _ func) (I.Item config as group_) =
-  func (List.map config.details.toGeneral <| I.getProducts group_)
+regroup : Grouping data result -> Group i (I.Generalizable a) data -> List result
+regroup (Grouping _ func) group_ =
+  func (getGenerals group_)
+
+
+only : Grouping data (Product next data) -> Grouping data (Group inter I.General data) -> Grouping data (Group inter next data)
+only (Grouping _ filterA) (Grouping getPosB filterB) =
+  Grouping getPosition <| \items ->
+    let newFilter : Group inter I.General data -> Maybe (Group inter next data)
+        newFilter g =
+          let generals : List (Product I.General data)
+              generals =
+                getProducts g
+
+              filtered : List (Product next data)
+              filtered =
+                filterA generals
+
+              newGroup : Group inter next data
+              newGroup =
+                I.Item
+                  { details = { config = getCommonality g, items = filtered }
+                  , limits = \c -> C.foldPosition getLimits c.items
+                  , position = \plane c -> C.foldPosition (getPosition plane) c.items
+                  , render = \plane c _ -> S.g [ SA.class "elm-charts__group" ] (List.map (I.render plane) c.items)
+                  , tooltip = \c -> [ H.table [] (List.concatMap I.renderTooltip c.items) ]
+                  }
+          in
+          if List.isEmpty filtered then Nothing else Just newGroup
+    in
+    List.filterMap newFilter (filterB items)
 
 
 
@@ -239,6 +273,37 @@ bar =
 
 
 {-| -}
+type alias SameX =
+  { x1 : Float
+  , x2 : Float
+  }
+
+
+sameX : Grouping data (Group SameX I.General data)
+sameX =
+  Grouping (\p -> getPosition p >> \x -> { x | y1 = p.y.min, y2 = p.y.max }) <| \items ->
+    let toConfig (I.Item { details }) =
+          { x1 = details.x1
+          , x2 = details.x2
+          }
+
+        isSame ai bi =
+          let ( a, b ) = ( toConfig ai, toConfig bi ) in
+          a.x1 == b.x1 && a.x2 == b.x2
+
+        toGroup ( i, is ) =
+          I.Item
+            { details = { config = toConfig i, items = i :: is }
+            , limits = \c -> C.foldPosition getLimits c.items
+            , position = \plane c -> C.foldPosition (getPosition plane) c.items
+            , render = \plane c _ -> S.g [ SA.class "elm-charts__group" ] (List.map (I.render plane) c.items)
+            , tooltip = \c -> [ H.table [] (List.concatMap I.renderTooltip c.items) ]
+            }
+    in
+    List.map toGroup (gatherWith isSame items)
+
+
+{-| -}
 type alias Stack datum =
   { datum : datum
   , start : Float
@@ -263,7 +328,7 @@ stack =
 
         toGroup ( i, is ) =
           I.Item
-            { details = { config = toConfig i, items = i :: is, toGeneral = identity }
+            { details = { config = toConfig i, items = i :: is }
             , limits = \c -> C.foldPosition getLimits c.items
             , position = \plane c -> C.foldPosition (getPosition plane) c.items
             , render = \plane c _ -> S.g [ SA.class "elm-charts__group" ] (List.map (I.render plane) c.items)
@@ -296,7 +361,7 @@ bin =
 
         toGroup ( i, is ) =
           I.Item
-            { details = { config = toConfig i, items = i :: is, toGeneral = identity }
+            { details = { config = toConfig i, items = i :: is }
             , limits = \c ->
                 let pos = C.foldPosition getLimits c.items in
                 { pos | x1 = c.config.start, x2 = c.config.end }

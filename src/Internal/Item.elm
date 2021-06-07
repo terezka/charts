@@ -33,6 +33,7 @@ type alias Product config datum =
     , x1 : Float
     , x2 : Float
     , y : Maybe Float
+    , toGeneral : config -> RealConfig
     }
 
 
@@ -41,7 +42,6 @@ type alias Group inter config datum =
   Item
     { config : inter
     , items : List (Product config datum)
-    , toGeneral : Product config datum -> Product General datum
     }
 
 
@@ -49,6 +49,12 @@ type alias Group inter config datum =
 getProducts : Group a config datum -> List (Product config datum)
 getProducts (Item item) =
   item.details.items
+
+
+{-| -}
+getGenerals : Group a (Generalizable config) datum -> List (Product General datum)
+getGenerals (Item item) =
+  List.map (\(Item i) -> toGeneral i.details.toGeneral (Item i)) item.details.items
 
 
 {-| -}
@@ -277,7 +283,6 @@ toBarSeries barsAttrs properties data =
           { details =
               { config = ()
               , items = List.map (toBarItem sections barIndex sectionIndex section colorIndex) bins
-              , toGeneral = toGeneral BarConfig
               }
           , limits = \c -> Coord.foldPosition getLimits c.items
           , position = \plane c -> Coord.foldPosition (getPosition plane) c.items
@@ -326,6 +331,7 @@ toBarSeries barsAttrs properties data =
               , x1 = start
               , x2 = end
               , y = value
+              , toGeneral = BarConfig
               , config =
                   apply attrs
                     { roundTop = 0
@@ -407,7 +413,6 @@ toDotSeries toX properties data =
           { details =
               { items = dotItems
               , config = interConfig
-              , toGeneral = toGeneral DotConfig
               }
           , render = \plane _ _ ->
               let toBottom datum_ =
@@ -477,6 +482,7 @@ toDotSeries toX properties data =
               , y = prop.value datum_
               , name = prop.meta
               , config = config
+              , toGeneral = DotConfig
               }
           }
   in
@@ -590,6 +596,7 @@ toGeneral generalize (Item product) =
         , x2 = product.details.x2
         , y = product.details.y
         , name = product.details.name
+        , toGeneral = .real
         , config =
             { color = product.details.config.color
             , border = product.details.config.border
@@ -623,6 +630,7 @@ isBarSeries (Item product) =
             , y = product.details.y
             , name = product.details.name
             , config = bar
+            , toGeneral = BarConfig
             }
         }
 
@@ -651,6 +659,7 @@ isDotSeries (Item product) =
             , y = product.details.y
             , name = product.details.name
             , config = dot
+            , toGeneral = DotConfig
             }
         }
 

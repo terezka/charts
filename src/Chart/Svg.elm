@@ -1394,7 +1394,7 @@ getNearestHelp toPosition items plane searched =
             [ item ]
   in
   List.foldl getClosest [] items
-    --|> keepOne toPosition
+    |> keepOne toPosition
 
 
 getNearestXHelp : (a -> Position) -> List a -> Plane -> Point -> List a
@@ -1416,7 +1416,7 @@ getNearestXHelp toPosition items plane searched =
             [ item ]
   in
   List.foldl getClosest [] items
-    --|> keepOne toPosition
+    |> keepOne toPosition
 
 
 distanceX : Plane -> Point -> Point -> Float
@@ -1457,8 +1457,16 @@ keepOne toPosition =
         case List.head acc of
           Nothing -> [ one ]
           Just other ->
-            if toPosition other == toPosition other
-            then other :: acc else acc
+            if toPosition other == toPosition one then
+              other :: acc
+            else if toArea other > toArea one then
+              [ one ]
+            else
+              acc
+
+      toArea a =
+        toPosition a |> \pos ->
+          (pos.x1 - pos.x2) * (pos.y1 - pos.y2)
   in
   List.foldr func []
 

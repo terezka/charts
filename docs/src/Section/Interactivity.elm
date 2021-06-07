@@ -31,7 +31,8 @@ import Ui.Section as Section
 
 type alias Model =
   { hovering : List (CI.Product CI.General Datum)
-  , hovering2 : List (CE.Product CS.Bar Datum)
+  , hovering2 : List (CE.Group (CE.Stack Datum) CS.Dot Datum)
+  , hovering3 : List (CE.Group (CE.Stack Datum) CS.Bar Datum)
   }
 
 
@@ -39,19 +40,22 @@ init : Model
 init =
   { hovering = []
   , hovering2 = []
+  , hovering3 = []
   }
 
 
 type Msg
   = OnHover (List (CI.Product CI.General Datum))
-  | OnHover2 (List (CE.Product CS.Bar Datum))
+  | OnHover2
+      (List (CE.Group (CE.Stack Datum) CS.Dot Datum))
+      (List (CE.Group (CE.Stack Datum) CS.Bar Datum))
 
 
 update : Msg -> Model -> Model
 update msg model =
   case msg of
     OnHover groups -> { model | hovering = groups }
-    OnHover2 groups -> { model | hovering2 = groups }
+    OnHover2 groups prods -> { model | hovering2 = groups, hovering3 = prods }
 
 
 
@@ -201,6 +205,7 @@ section onMsg model =
             """]
         , chart = \_ ->
             -- TODO
+            H.map onMsg <|
             C.chart
               [ CA.height 350
               , CA.width 760
@@ -208,8 +213,12 @@ section onMsg model =
               , CA.marginBottom 20
               , CA.paddingLeft 10
               , CA.static
-              , CE.onMouseMove (OnHover2 >> onMsg) (CE.getNearest CE.bar)
-              , CE.onMouseLeave (OnHover2 [] |> onMsg)
+              --, CE.onMouseMove (OnHover2 >> onMsg) (CE.getNearest CE.product)
+              , CE.onMouseLeave (OnHover2 [] [])
+              , CE.on "mousemove" <|
+                  CE.map2 OnHover2
+                    (CE.getNearest <| CE.only CE.dot CE.stack)
+                    (CE.getNearest <| CE.only CE.bar CE.stack)
               ]
               [ C.legendsAt .max .max 0 50
                   [ CA.row
@@ -226,22 +235,33 @@ section onMsg model =
               , C.grid []
               , C.xLabels []
               , C.yLabels [ CA.xOff -10 ]
+
               , C.bars
                   [ CA.roundTop 0.5
                   , CA.roundBottom 0.5
-                  , CA.margin 0.47
                   , CA.ungroup
                   ]
-                  [ C.property .v [] [ CA.roundTop 0.7 ]
-                      |> C.named "Cats"
-                  , C.property .z [] [ CA.roundTop 0.7 ]
-                      |> C.named "Dogs"
-                  , C.property .y [] [ CA.roundTop 0.7 ]
-                      |> C.named "Fish"
+                  [ C.stacked
+                      [ C.named "Cats" (C.property .v [] [])
+                      , C.named "Dogs" (C.property .z [] [])
+                      , C.named "Fish" (C.property .y [] [])
+                      ]
                   ]
                   data
+
+              , C.series .x
+                  [ C.stacked
+                      [ C.named "Blues" (C.property .v [ CA.color CA.turquoise ] [])
+                      , C.named "Greens" (C.property .z [ CA.color CA.green ] [])
+                      ]
+                  ]
+                  data
+
               , C.each model.hovering2 <| \p item ->
                   [ C.tooltip item [ CA.onLeftOrRight ] [] [] ]
+
+              , C.each model.hovering3 <| \p item ->
+                  [ C.tooltip item [ CA.onTop ] [] [] ]
               ]
         }
       ]
