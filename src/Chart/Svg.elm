@@ -14,7 +14,7 @@ module Chart.Svg exposing
   , Generator, generate, floats, ints, times
   , TickValue, toTickValues, formatTime
 
-  , Legends, legends, legendsAt
+  , Legends, legendsAt
   , Legend, lineLegend, barLegend
   )
 
@@ -372,52 +372,8 @@ type alias Legends msg =
   }
 
 
-legends : List (CA.Attribute (Legends msg)) -> List (Html msg) -> Html msg
-legends edits children =
-  let config =
-        apply edits
-          { alignment = CA.Row
-          , anchor = CA.Start
-          , spacing = 10
-          , htmlAttrs = []
-          }
-
-      ( htmlAttrs, htmlChildren ) =
-        legendsHelp edits children
-
-      anchorAttrs =
-        case config.anchor of
-          CA.End -> [ HA.style "align-self" "flex-end" ]
-          CA.Start -> [ HA.style "align-self" "flex-start" ]
-          CA.Middle -> [ HA.style "align-self" "center" ]
-  in
-  H.div (anchorAttrs ++ htmlAttrs) htmlChildren
-
-
 legendsAt : Plane -> Float -> Float -> Float -> Float -> List (CA.Attribute (Legends msg)) -> List (Html msg) -> Html msg
 legendsAt plane x y xOff yOff edits children =
-  let config =
-        apply edits
-          { alignment = CA.Row
-          , anchor = CA.Start
-          , spacing = 10
-          , htmlAttrs = []
-          }
-
-      ( htmlAttrs, htmlChildren ) =
-        legendsHelp edits children
-
-      anchorAttrs =
-        case config.anchor of
-          CA.End -> [ HA.style "transform" "translate(-100%, 0%)" ]
-          CA.Start -> [ HA.style "transform" "translate(-0%, 0%)" ]
-          CA.Middle -> [ HA.style "transform" "translate(-50%, 0%)" ]
-  in
-  positionHtml plane x y xOff yOff (anchorAttrs ++ htmlAttrs) htmlChildren
-
-
-legendsHelp : List (CA.Attribute (Legends msg)) -> List (Html msg) -> ( List (H.Attribute msg), List (Html msg) )
-legendsHelp edits children =
   let config =
         apply edits
           { alignment = CA.Row
@@ -455,10 +411,15 @@ legendsHelp edits children =
               margin-""" ++ direction ++ """: 0px;
             }
         """
+      anchorAttrs =
+        case config.anchor of
+          CA.End -> [ HA.style "transform" "translate(-100%, 0%)" ]
+          CA.Start -> [ HA.style "transform" "translate(-0%, 0%)" ]
+          CA.Middle -> [ HA.style "transform" "translate(-50%, 0%)" ]
   in
-  ( alignmentAttrs ++ classAttrs ++ config.htmlAttrs
-  , H.node "style" [] [ H.text paddingStyle ] :: children
-  )
+  positionHtml plane x y xOff yOff
+    (anchorAttrs ++ alignmentAttrs ++ classAttrs ++ config.htmlAttrs)
+    (H.node "style" [] [ H.text paddingStyle ] :: children)
 
 
 

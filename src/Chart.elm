@@ -13,7 +13,7 @@ module Chart exposing
 
   , each, eachBin, eachStack, eachProduct
   , withPlane, withBins, withStacks, withProducts
-  , legends, legendsAt
+  , legendsAt
 
   , generate, floats, ints, times
 
@@ -1022,18 +1022,6 @@ eachStack func =
 eachProduct : (C.Plane -> Item.Product Item.General data -> List (Element data msg)) -> Element data msg
 eachProduct func =
   SubElements <| \p is -> List.concatMap (func p) is
-
-
-{-| -}
-legends : List (CA.Attribute (CS.Legends msg)) -> List (CA.Attribute (CS.Legend msg)) -> Element data msg
-legends attrs children =
-  HtmlElement <| \p legends_ ->
-    let viewLegend legend =
-          case legend of
-            Legend.BarLegend name barAttrs -> CS.barLegend (CA.title name :: children) barAttrs
-            Legend.LineLegend name interAttrs dotAttrs -> CS.lineLegend (CA.title name :: children) interAttrs dotAttrs
-    in
-    CS.legends attrs (List.map viewLegend legends_)
 
 
 {-| -}

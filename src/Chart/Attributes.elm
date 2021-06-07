@@ -1,6 +1,6 @@
 module Chart.Attributes exposing
   ( Attribute, x, x1, x2, y, y1, y2, xOff, yOff, flip, border, borderWidth, fontSize, format, color, width, height, offset
-  , Anchor(..), alignLeft, alignRight, content
+  , Anchor(..), alignLeft, alignRight, alignMiddle, content
   , rotate, length, roundTop, roundBottom, area, opacity, size, aura, auraWidth, ungroup, margin, spacing
   , Design(..), GradientConfig, Pattern, space, striped, dotted, gradient, top, bottom, dashed, break
   , Method(..), linear, monotone

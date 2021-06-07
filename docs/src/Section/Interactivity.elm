@@ -201,46 +201,43 @@ section onMsg model =
             """]
         , chart = \_ ->
             -- TODO
-            H.div
-              [ HA.style "width" "760px"
-              , HA.style "height" "300px"
+            C.chart
+              [ CA.height 350
+              , CA.width 760
+              , CA.marginTop 50
+              , CA.marginBottom 20
+              , CA.paddingLeft 10
+              , CA.static
+              , CE.onMouseMove (OnHover2 >> onMsg) (CE.getNearest CE.stack)
+              , CE.onMouseLeave (OnHover2 [] |> onMsg)
               ]
-              [ C.chart
-                  [ CA.height 300
-                  , CA.width 760
-                  , CA.marginBottom 20
-                  , CA.paddingLeft 10
-                  , CE.onMouseMove (OnHover2 >> onMsg) (CE.getNearest CE.stack)
-                  , CE.onMouseLeave (OnHover2 [] |> onMsg)
+              [ C.legendsAt CA.middle .max 0 50
+                  [ CA.row
+                  , CA.spacing 20
+                  , CA.alignMiddle
+                  , CA.htmlAttrs [ HA.style "padding" "20px 10px" ]
                   ]
-                  [ C.legends
-                      [ CA.row
-                      , CA.spacing 20
-                      , CA.alignRight
-                      , CA.htmlAttrs [ HA.style "padding" "20px 10px" ]
-                      ]
-                      [ CA.fontSize 14
-                      , CA.spacing 7
-                      , CA.width 25
-                      , CA.height 12
-                      ]
-                  , C.grid []
-                  , C.xLabels []
-                  , C.yLabels []
-                  , C.series .x
-                      [ C.stacked
-                          [ C.property .z [ CA.linear, CA.opacity 0, CA.dashed [ 3, 2 ] ] []
-                              |> C.named "Cats"
-                          , C.property .y [ CA.linear, CA.opacity 0 ] [ CA.circle ]
-                              |> C.named "Dogs"
-                          ]
-                      , C.property .v [ CA.linear ] [ CA.diamond ]
-                          |> C.named "Fish"
-                      ]
-                      data
-                  , C.each model.hovering2 <| \p item ->
-                      [ C.tooltip item [ CA.onTop ] [] [] ]
+                  [ CA.fontSize 14
+                  , CA.spacing 7
+                  , CA.width 25
+                  , CA.height 12
                   ]
+              , C.grid []
+              , C.xLabels []
+              , C.yLabels [ CA.xOff -10 ]
+              , C.series .x
+                  [ C.stacked
+                      [ C.property .z [ CA.linear, CA.opacity 0, CA.dashed [ 3, 2 ] ] []
+                          |> C.named "Cats"
+                      , C.property .y [ CA.linear, CA.opacity 0 ] [ CA.circle ]
+                          |> C.named "Dogs"
+                      ]
+                  , C.property .v [ CA.linear ] [ CA.diamond ]
+                      |> C.named "Fish"
+                  ]
+                  data
+              , C.each model.hovering2 <| \p item ->
+                  [ C.tooltip item [ CA.onTop ] [] [] ]
               ]
         }
       ]
