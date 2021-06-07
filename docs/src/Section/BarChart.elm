@@ -237,6 +237,25 @@ section =
                 , C.bar .z [ CA.dotted [] ]
                 ]
           }
+        , { title = "Gradient"
+          , edits =
+              ["""
+              [ CA.margin 0.4
+              , CA.roundTop 0.4
+              ]
+              [ C.bar .y [ CA.gradient [ CA.bottom "white" ] ]
+              , C.bar .z [ CA.gradient [ CA.bottom "white" ] ]
+              ]
+              """]
+          , chart = \_ ->
+              frame
+                [ CA.margin 0.4
+                , CA.roundTop 0.4
+                ]
+                [ C.bar .y [ CA.gradient [ CA.bottom "white" ] ]
+                , C.bar .z [ CA.gradient [ CA.bottom "white" ] ]
+                ]
+          }
         , { title = "Data dependent"
           , edits =
               ["""

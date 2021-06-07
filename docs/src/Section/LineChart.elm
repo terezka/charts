@@ -172,13 +172,13 @@ section =
       , { title = "Gradient"
         , edits =
             [ """
-              [ C.property .y [ CA.linear, CA.opacity 0.6, CA.gradient [ CA.bottom "lightblue" ] ] []
+              [ C.property .y [ CA.linear, CA.opacity 0.6, CA.gradient [ CA.bottom \"white\" ] ] []
               ]
               """
             ]
         , chart = \_ ->
             frame
-              [ C.property .y [ CA.linear, CA.opacity 0.6, CA.gradient [ CA.bottom "lightblue" ] ] []
+              [ C.property .y [ CA.linear, CA.opacity 0.6, CA.gradient [ CA.bottom "white" ] ] []
               ]
         }
       , { title = "Dashed"

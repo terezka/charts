@@ -31,7 +31,7 @@ import Ui.Section as Section
 
 type alias Model =
   { hovering : List (CI.Product CI.General Datum)
-  , hovering2 : List (CE.Group (CE.Stack Datum) CI.General Datum)
+  , hovering2 : List (CE.Product CS.Bar Datum)
   }
 
 
@@ -44,7 +44,7 @@ init =
 
 type Msg
   = OnHover (List (CI.Product CI.General Datum))
-  | OnHover2 (List (CE.Group (CE.Stack Datum) CI.General Datum))
+  | OnHover2 (List (CE.Product CS.Bar Datum))
 
 
 update : Msg -> Model -> Model
@@ -208,36 +208,40 @@ section onMsg model =
               , CA.marginBottom 20
               , CA.paddingLeft 10
               , CA.static
-              , CE.onMouseMove (OnHover2 >> onMsg) (CE.getNearest CE.stack)
+              , CE.onMouseMove (OnHover2 >> onMsg) (CE.getNearest CE.bar)
               , CE.onMouseLeave (OnHover2 [] |> onMsg)
               ]
-              [ C.legendsAt CA.middle .max 0 50
+              [ C.legendsAt .max .max 0 50
                   [ CA.row
                   , CA.spacing 20
-                  , CA.alignMiddle
+                  , CA.alignRight
                   , CA.htmlAttrs [ HA.style "padding" "20px 10px" ]
                   ]
                   [ CA.fontSize 14
                   , CA.spacing 7
-                  , CA.width 25
-                  , CA.height 12
+                  , CA.width 10
+                  , CA.height 10
                   ]
+
               , C.grid []
               , C.xLabels []
               , C.yLabels [ CA.xOff -10 ]
-              , C.series .x
-                  [ C.stacked
-                      [ C.property .z [ CA.linear, CA.opacity 0, CA.dashed [ 3, 2 ] ] []
-                          |> C.named "Cats"
-                      , C.property .y [ CA.linear, CA.opacity 0 ] [ CA.circle ]
-                          |> C.named "Dogs"
-                      ]
-                  , C.property .v [ CA.linear ] [ CA.diamond ]
+              , C.bars
+                  [ CA.roundTop 0.5
+                  , CA.roundBottom 0.5
+                  , CA.margin 0.47
+                  , CA.ungroup
+                  ]
+                  [ C.property .v [] [ CA.roundTop 0.7 ]
+                      |> C.named "Cats"
+                  , C.property .z [] [ CA.roundTop 0.7 ]
+                      |> C.named "Dogs"
+                  , C.property .y [] [ CA.roundTop 0.7 ]
                       |> C.named "Fish"
                   ]
                   data
               , C.each model.hovering2 <| \p item ->
-                  [ C.tooltip item [ CA.onTop ] [] [] ]
+                  [ C.tooltip item [ CA.onLeftOrRight ] [] [] ]
               ]
         }
       ]

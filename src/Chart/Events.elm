@@ -13,13 +13,14 @@ module Chart.Events exposing
 
 -- TODO
 -- Rename General to Any
--- Legends
+-- stacked tooltip issue
 -- Auto examples
 -- Auto tooltip
 -- Remove tiles
 -- move things to internal
 -- find out what to expose in Svg
 -- stepped inter
+-- specify center of item for tooltip placement
 
 
 import Html as H exposing (Html)

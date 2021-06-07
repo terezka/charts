@@ -1394,7 +1394,7 @@ getNearestHelp toPosition items plane searched =
             [ item ]
   in
   List.foldl getClosest [] items
-    |> keepOne toPosition
+    --|> keepOne toPosition
 
 
 getNearestXHelp : (a -> Position) -> List a -> Plane -> Point -> List a
@@ -1416,7 +1416,7 @@ getNearestXHelp toPosition items plane searched =
             [ item ]
   in
   List.foldl getClosest [] items
-    |> keepOne toPosition
+    --|> keepOne toPosition
 
 
 distanceX : Plane -> Point -> Point -> Float
