@@ -17,7 +17,7 @@ module Chart.Attributes exposing
   , lowest, highest, orLower, orHigher, exactly, more, less, window, likeData, zero, middle
 
   , Tick(..), ints, times
-  , noGrid
+  , noGrid, title
   )
 
 
@@ -100,6 +100,12 @@ middle b =
 amount : Int -> Attribute { a | amount : Int }
 amount value config =
   { config | amount = value }
+
+
+{-| -}
+title : x -> Attribute { a | title : x }
+title value config =
+  { config | title = value }
 
 
 {-| -}
@@ -433,6 +439,13 @@ alignLeft config =
 alignRight : Attribute { a | anchor : Anchor }
 alignRight config =
   { config | anchor = End }
+
+
+{-| -}
+alignMiddle : Attribute { a | anchor : Anchor }
+alignMiddle config =
+  { config | anchor = Middle }
+
 
 
 -- TODO Move to internal

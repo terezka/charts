@@ -19,6 +19,7 @@ module Chart.Events exposing
 -- Remove tiles
 -- move things to internal
 -- find out what to expose in Svg
+-- stepped inter
 
 
 import Html as H exposing (Html)

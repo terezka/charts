@@ -208,6 +208,8 @@ section onMsg model =
               [ C.chart
                   [ CA.height 300
                   , CA.width 760
+                  , CA.marginBottom 20
+                  , CA.paddingLeft 10
                   , CE.onMouseMove (OnHover2 >> onMsg) (CE.getNearest CE.stack)
                   , CE.onMouseLeave (OnHover2 [] |> onMsg)
                   ]
@@ -227,6 +229,39 @@ section onMsg model =
                       data
                   , C.each model.hovering2 <| \p item ->
                       [ C.tooltip item [ CA.onTop ] [] [] ]
+
+                  , C.htmlAt .max .max -10 0
+                      [ HA.style "display" "flex"
+                      , HA.style "align-items" "baseline"
+                      , HA.style "transform" "translate(-100%, 0%)"
+                      ]
+                      [ CS.lineLegend
+                          [ CA.title "hello"
+                          , CA.fontSize 14
+                          , CA.spacing 7
+                          , CA.width 20
+                          , CA.height 10
+                          , CA.htmlAttrs
+                              [ HA.style "margin-right" "15px" ]
+                          ]
+                          [ CA.color CA.blue
+                          , CA.opacity 0.4
+                          , CA.linear
+                          ]
+                          [ CA.square
+                          , CA.size 5
+                          ]
+                      , CS.barLegend
+                          [ CA.title "longer text"
+                          , CA.fontSize 14
+                          , CA.spacing 7
+                          ]
+                          [ CA.borderWidth 1
+                          , CA.color CA.pink
+                          , CA.roundTop 0.6
+                          , CA.roundBottom 0.6
+                          ]
+                      ]
                   ]
               ]
         }
