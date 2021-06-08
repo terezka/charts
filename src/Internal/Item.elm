@@ -12,272 +12,182 @@ import Chart.Attributes as CA
 import Internal.Helpers as Helpers
 
 
-{-| -}
+
 type Item a =
   Item
-    { details : a
-    , render : Plane -> a -> Position -> Svg Never
-    , limits : a -> Position
-    , position : Plane -> a -> Position
-    , tooltip : a -> List (Html Never)
+    { config : a
+    , toLimits : a -> Position
+    , toPosition : Plane -> a -> Position
+    , toSvg : Plane -> a -> Position -> Svg Never
+    , toHtml : a -> List (Html Never)
     }
 
 
 {-| -}
-type alias Product config datum =
+type alias Product config value datum =
   Item
-    { datum : datum
-    , config : Generalizable config
-    , property : Int
-    , stack : Int
-    , name : Maybe String
-    , x1 : Float
-    , x2 : Float
-    , y : Maybe Float
-    , toGeneral : Generalizable config -> RealConfig
+    { product : config
+    , tooltipInfo : TooltipInfo
+    , values : Values value datum
+    , toAny : config -> Any
     }
 
 
+{-| -}
+type Any
+  = Dot S.Dot
+  | Bar S.Bar
+
 
 {-| -}
-getColor : Product { a | color : String } data -> String
-getColor (Item config) =
-  config.details.config.color
+type alias TooltipInfo =
+  { property : Int
+  , stack : Int
+  , name : Maybe String
+  , color : String
+  , border : String
+  , borderWidth : Float
+  }
 
 
 {-| -}
-getName : Product config data -> Maybe String
-getName (Item config) =
-  config.details.name
+type alias Values value datum =
+  { datum : datum
+  , x1 : Float
+  , x2 : Float
+  , y : Maybe Float
+  , yOrg : value
+  }
+
+
+
+-- ITEM
+
+
+{-| -}
+toSvg : Plane -> Item x -> Svg Never
+toSvg plane (Item item) =
+  item.toSvg plane item.config (item.toPosition plane item.config)
+
+
+{-| -}
+toHtml : Item x -> List (Html Never)
+toHtml (Item item) =
+  item.toHtml item.config
 
 
 {-| -}
 getPosition : Plane -> Item x -> Position
-getPosition plane (Item config) =
-  config.position plane config.details
+getPosition plane (Item item) =
+  item.toPosition plane item.config
 
 
 {-| -}
-getTop : Plane -> Item x -> Point
-getTop plane (Item config) =
-  let pos = config.position plane config.details in
-  { x = pos.x1 + (pos.x2 - pos.x1) / 2
-  , y = pos.y2
-  }
-
-
-{-| -}
-getBottom : Plane -> Item x -> Point
-getBottom plane (Item config) =
-  let pos = config.position plane config.details in
-  { x = pos.x1 + (pos.x2 - pos.x1) / 2
-  , y = pos.y1
-  }
-
-
-{-| -}
-getLeft : Plane -> Item x -> Point
-getLeft plane (Item config) =
-  let pos = config.position plane config.details in
-  { x = pos.x1
-  , y = pos.y1 + (pos.y2 - pos.y1) / 2
-  }
-
-
-{-| -}
-getRight : Plane -> Item x -> Point
-getRight plane (Item config) =
-  let pos = config.position plane config.details in
-  { x = pos.x2
-  , y = pos.y1 + (pos.y2 - pos.y1) / 2
-  }
-
-
-{-| -}
-getCenter : Plane -> Item x -> Point
-getCenter plane (Item config) =
-  let pos = config.position plane config.details in
-  { x = pos.x1 + (pos.x2 - pos.x1) / 2
-  , y = pos.y1 + (pos.y2 - pos.y1) / 2
-  }
-
-
-getX1 : Plane -> Item x -> Float
-getX1 plane (Item config) =
-  let pos = config.position plane config.details in
-  pos.x1
-
-
-getX2 : Plane -> Item x -> Float
-getX2 plane (Item config) =
-  let pos = config.position plane config.details in
-  pos.x2
-
-
-getY1 : Plane -> Item x -> Float
-getY1 plane (Item config) =
-  let pos = config.position plane config.details in
-  pos.y1
-
-
-getY2 : Plane -> Item x -> Float
-getY2 plane (Item config) =
-  let pos = config.position plane config.details in
-  pos.y2
-
-
 getLimits : Item x -> Position
-getLimits (Item config) =
-  config.limits config.details
+getLimits (Item item) =
+  item.toLimits item.config
+
+
+
+-- PRODUCT
 
 
 {-| -}
-getDatum : Item { config | datum : datum } -> datum
-getDatum (Item config) =
-  config.details.datum
+getColor : Product config value data -> String
+getColor (Item item) =
+  item.config.tooltipInfo.color
+
+
+{-| -}
+getName : Product config value data -> Maybe String
+getName (Item item) =
+  item.config.tooltipInfo.name
+
+
+{-| -}
+getDatum : Product config value data -> data
+getDatum (Item item) =
+  item.config.values.datum
 
 
 {-| -} -- TODO
-getInd : Item { config | x1 : Float } -> Float
-getInd (Item config) =
-  config.details.x1
+getIndependent : Product config value data -> Float
+getIndependent (Item item) =
+  item.config.values.x1
 
 
 {-| -}
-getValue : Item { config | y : value } -> value
-getValue (Item config) =
-  config.details.y
-
-
-{-| -}
-render : Plane -> Item x -> Svg Never
-render plane (Item config) =
-  config.render plane config.details (config.position plane config.details)
-
-
-renderTooltip : Item x -> List (Html Never)
-renderTooltip (Item config) =
-  config.tooltip config.details
+getDependent : Product config value data -> value
+getDependent (Item item) =
+  item.config.values.yOrg
 
 
 
 -- GENERALIZATION
 
 
-{-| -}
-type alias Generalizable a =
-  { a
-    | color : String
-    , border : String
-    , borderWidth : Float
-  }
-
-
-{-| -}
-type alias General =
-  { color : String
-  , border : String
-  , borderWidth : Float
-  , real : RealConfig
-  }
-
-
-{-| -}
-type RealConfig
-  = BarConfig S.Bar
-  | DotConfig S.Dot
-
-
-toGeneral : (Generalizable config -> RealConfig) -> Product config datum -> Product General datum
-toGeneral generalize (Item product) =
+generalize : (a -> Any) -> Product a value datum -> Product Any value datum
+generalize toAny (Item item) =
+   -- TODO make sure changes are reflected in rendering
   Item
-    { render = \plane details position ->
-        case details.y of
-          Nothing ->
-            S.text ""
-
-          Just y ->
-            case details.config.real of
-              BarConfig bar -> S.bar plane (toBarAttrs bar) position
-              DotConfig dot -> S.dot plane .x .y (toDotAttrs dot) { x = details.x1, y = y }
-
-    , limits = \_ -> product.limits product.details
-    , position = \plane _ -> product.position plane product.details
-    , tooltip = \c -> product.tooltip product.details
-    , details =
-        { datum = product.details.datum
-        , property = product.details.property
-        , stack = product.details.stack
-        , x1 = product.details.x1
-        , x2 = product.details.x2
-        , y = product.details.y
-        , name = product.details.name
-        , toGeneral = .real
-        , config =
-            { color = product.details.config.color
-            , border = product.details.config.border
-            , borderWidth = product.details.config.borderWidth
-            , real = generalize product.details.config
-            }
+    { toLimits = \_ -> item.toLimits item.config
+    , toPosition = \plane _ -> item.toPosition plane item.config
+    , toSvg = \plane _ _ -> toSvg plane (Item item)
+    , toHtml = \c -> toHtml (Item item)
+    , config =
+        { product = toAny item.config.product
+        , values = item.config.values
+        , tooltipInfo = item.config.tooltipInfo
+        , toAny = identity
         }
     }
 
 
-{-| -}
-isBarSeries : Product General datum -> Maybe (Product S.Bar datum)
-isBarSeries (Item product) =
-  case product.details.config.real of
-    DotConfig _ ->
-      Nothing
-
-    BarConfig bar ->
-      Just <| Item
-        { render = \plane details ->
-            S.bar plane (toBarAttrs details.config)
-        , limits = \_ -> product.limits product.details
-        , position = \plane _ -> product.position plane product.details
-        , tooltip = \c -> product.tooltip product.details
-        , details =
-            { datum = product.details.datum
-            , property = product.details.property
-            , stack = product.details.stack
-            , x1 = product.details.x1
-            , x2 = product.details.x2
-            , y = product.details.y
-            , name = product.details.name
-            , config = bar
-            , toGeneral = BarConfig
+isBar : Product Any value datum -> Maybe (Product S.Bar value datum)
+isBar (Item item) =
+  case item.config.product of
+    Bar bar ->
+      Item
+        { toLimits = \_ -> item.toLimits item.config
+        , toPosition = \plane _ -> item.toPosition plane item.config
+        , toSvg = \plane config -> S.bar plane (toBarAttrs config.product)
+        , toHtml = \c -> item.toHtml item.config
+        , config =
+            { product = bar
+            , values = item.config.values
+            , tooltipInfo = item.config.tooltipInfo
+            , toAny = Bar
             }
         }
+        |> Just
 
-
-isDotSeries : Product General datum -> Maybe (Product S.Dot datum)
-isDotSeries (Item product) =
-  case product.details.config.real of
-    BarConfig _ ->
+    Dot _ ->
       Nothing
 
-    DotConfig dot ->
-      Just <| Item
-        { render = \plane details _ ->
-            case details.y of
-              Nothing -> S.text ""
-              Just y -> S.dot plane .x .y (toDotAttrs details.config) { x = details.x1, y = y }
-        , limits = \_ -> product.limits product.details
-        , position = \plane _ -> product.position plane product.details
-        , tooltip = \c -> product.tooltip product.details
-        , details =
-            { datum = product.details.datum
-            , property = product.details.property
-            , stack = product.details.stack
-            , x1 = product.details.x1
-            , x2 = product.details.x2
-            , y = product.details.y
-            , name = product.details.name
-            , config = dot
-            , toGeneral = DotConfig
+
+isDot : Product Any value datum -> Maybe (Product S.Dot value datum)
+isDot (Item item) =
+  case item.config.product of
+    Dot dot ->
+      Item
+        { toLimits = \_ -> item.toLimits item.config
+        , toPosition = \plane _ -> item.toPosition plane item.config
+        , toSvg = \plane config pos ->
+            config.values.y
+              |> Maybe.map (\y -> S.dot plane .x .y (toDotAttrs config.product) { x = config.values.x1, y = y })
+              |> Maybe.withDefault (S.text "")
+        , toHtml = \c -> item.toHtml item.config
+        , config =
+            { product = dot
+            , values = item.config.values
+            , tooltipInfo = item.config.tooltipInfo
+            , toAny = Dot
             }
         }
+        |> Just
+
+    Bar _ ->
+      Nothing
 
 
 toBarAttrs : S.Bar -> List (CA.Attribute S.Bar)

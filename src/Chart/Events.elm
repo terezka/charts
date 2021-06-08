@@ -81,7 +81,7 @@ type Event data msg =
 
 
 type Decoder data msg =
-  Decoder (List (I.Product I.General data) -> Plane -> Point -> msg)
+  Decoder (List (I.Product I.Any (Maybe Float) data) -> Plane -> Point -> msg)
 
 
 {-| -}
@@ -153,31 +153,32 @@ map4 f (Decoder a) (Decoder b) (Decoder c) (Decoder d) =
 -- PRODUCT
 
 
-type alias Product config data =
-  I.Product config data
+type alias Product config value data =
+  I.Product config value data
 
 
-getDependent : Product config data -> Maybe Float
+
+getDependent : Product config value data -> value
 getDependent =
-  I.getValue
+  I.getDependent
 
 
-getIndependent : Product config data -> Float
+getIndependent : Product config value data -> Float
 getIndependent =
-  I.getInd
+  I.getIndependent
 
 
-getDatum : Item { config | datum : datum } -> datum
+getDatum : Product config value data -> data
 getDatum =
   I.getDatum
 
 
-getName : Product config data -> Maybe String
+getName : Product config value data -> Maybe String
 getName =
   I.getName
 
 
-getColor : Product { a | color : String } data -> String
+getColor : Product config value data -> String
 getColor =
   I.getColor
 
@@ -186,17 +187,17 @@ getColor =
 -- GROUP
 
 
-type alias Group inter config data =
-  G.Group inter config data
+type alias Group inter config value data =
+  G.Group inter config value data
 
 
 
-getProducts : Group inter config data -> List (Product I.General data)
+getProducts : Group inter config value data -> List (Product I.Any value data)
 getProducts =
   G.getProducts
 
 
-getCommonality : Group inter config data -> inter
+getCommonality : Group inter config value data -> inter
 getCommonality =
   G.getCommonality
 
@@ -209,32 +210,32 @@ type alias Grouping data result =
   G.Grouping data result
 
 
-group : Grouping data result -> List (Product I.General data) -> List result
+group : Grouping data result -> List (Product I.Any (Maybe Float) data) -> List result
 group =
   G.group
 
 
-regroup : Grouping data result -> Group i a data -> List result
+regroup : Grouping data result -> Group i a (Maybe Float) data -> List result
 regroup =
   G.regroup
 
 
-only : Grouping data (Product next data) -> Grouping data (Group inter config data) -> Grouping data (Group inter next data)
+only : Grouping data (Product next (Maybe Float) data) -> Grouping data (Group inter config (Maybe Float) data) -> Grouping data (Group inter next (Maybe Float) data)
 only =
   G.only
 
 
-product : Grouping data (Product I.General data)
+product : Grouping data (Product I.Any (Maybe Float) data)
 product =
   G.product
 
 
-dot : Grouping data (Product CS.Dot data)
+dot : Grouping data (Product CS.Dot (Maybe Float) data)
 dot =
   G.dot
 
 
-bar : Grouping data (Product CS.Bar data)
+bar : Grouping data (Product CS.Bar (Maybe Float) data)
 bar =
   G.bar
 
@@ -244,7 +245,7 @@ type alias SameX =
   G.SameX
 
 
-sameX : Grouping data (Group SameX I.General data)
+sameX : Grouping data (Group SameX I.Any (Maybe Float) data)
 sameX =
   G.sameX
 
@@ -254,7 +255,7 @@ type alias Stack datum =
   G.Stack datum
 
 
-stack : Grouping data (Group (Stack data) I.General data)
+stack : Grouping data (Group (Stack data) I.Any (Maybe Float) data)
 stack =
   G.stack
 
@@ -264,17 +265,17 @@ type alias Bin data =
   G.Bin data
 
 
-bin : Grouping data (Group (Bin data) I.General data)
+bin : Grouping data (Group (Bin data) I.Any (Maybe Float) data)
 bin =
   G.bin
 
 
-named : List String -> Grouping data (Product config data) -> Grouping data (Product config data)
+named : List String -> Grouping data (Product config value data) -> Grouping data (Product config value data)
 named =
   G.named
 
 
-custom : (Plane -> result -> Position) -> (List (Product I.General data) -> List result) -> Grouping data result
+custom : (Plane -> result -> Position) -> (List (Product I.Any (Maybe Float) data) -> List result) -> Grouping data result
 custom =
   G.Grouping
 
@@ -288,28 +289,28 @@ type alias Item a =
 
 
 getCenter : Plane -> Item a -> Point
-getCenter =
-  I.getCenter
+getCenter p =
+  I.getPosition p >> C.center
 
 
 getLeft : Plane -> Item a -> Point
-getLeft =
-  I.getLeft
+getLeft p =
+  I.getPosition p >> C.left
 
 
 getRight : Plane -> Item a -> Point
-getRight =
-  I.getRight
+getRight p =
+  I.getPosition p >> C.right
 
 
 getTop : Plane -> Item a -> Point
-getTop =
-  I.getTop
+getTop p =
+  I.getPosition p >> C.top
 
 
 getBottom : Plane -> Item a -> Point
-getBottom =
-  I.getBottom
+getBottom p =
+  I.getPosition p >> C.bottom
 
 
 getPosition : Plane -> Item a -> Position

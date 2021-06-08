@@ -10,6 +10,8 @@ module Svg.Coordinates
 
     , fromProps, Axis
     , foldPosition
+
+    , top, right, bottom, left, center
     )
 
 {-| This module contains helpers for cartesian/SVG coordinate translation.
@@ -71,6 +73,36 @@ type alias Position =
   , y1 : Float
   , y2 : Float
   }
+
+
+{-| -}
+center : Position -> Point
+center pos =
+  { x = pos.x1 + (pos.x2 - pos.x1) / 2, y = pos.y1 + (pos.y2 - pos.y1) / 2 }
+
+
+{-| -}
+top : Position -> Point
+top pos =
+  { x = pos.x1 + (pos.x2 - pos.x1) / 2, y = pos.y2 }
+
+
+{-| -}
+bottom : Position -> Point
+bottom pos =
+  { x = pos.x1 + (pos.x2 - pos.x1) / 2, y = pos.y1 }
+
+
+{-| -}
+left : Position -> Point
+left pos =
+  { x = pos.x1, y = pos.y1 + (pos.y2 - pos.y1) / 2 }
+
+
+{-| -}
+right : Position -> Point
+right pos =
+  { x = pos.x2, y = pos.y1 + (pos.y2 - pos.y1) / 2 }
 
 
 {-| -}

@@ -14,26 +14,26 @@ import Internal.Helpers as Helpers
 
 
 {-| -}
-type alias Group inter config datum =
+type alias Group inter config value datum =
   I.Item
     { config : inter -- TODO rename
-    , items : List (I.Product config datum)
+    , items : List (I.Product config value datum)
     }
 
 
 {-| -}
-getProducts : Group a config datum -> List (I.Product I.General datum)
+getProducts : Group a config value datum -> List (I.Product I.Any value datum)
 getProducts (I.Item group_) =
-  let toGeneral (I.Item product_) =
-        I.toGeneral product_.details.toGeneral (I.Item product_)
+  let generalize (I.Item item) =
+        I.generalize item.config.toAny (I.Item item)
   in
-  List.map toGeneral group_.details.items
+  List.map generalize group_.config.items
 
 
 {-| -}
-getCommonality : Group a config datum -> a
+getCommonality : Group a config value datum -> a
 getCommonality (I.Item item) =
-  item.details.config
+  item.config.config
 
 
 
@@ -43,20 +43,20 @@ getCommonality (I.Item item) =
 type Grouping data result =
   Grouping
     (Plane -> result -> Position)
-    (List (I.Product I.General data) -> List result)
+    (List (I.Product I.Any (Maybe Float) data) -> List result)
 
 
-group : Grouping data result -> List (I.Product I.General data) -> List result
+group : Grouping data result -> List (I.Product I.Any (Maybe Float) data) -> List result
 group (Grouping _ func) items =
   func items
 
 
-regroup : Grouping data result -> Group i a data -> List result
+regroup : Grouping data result -> Group i a (Maybe Float) data -> List result
 regroup (Grouping _ func) group_ =
   func (getProducts group_)
 
 
-only : Grouping data (I.Product next data) -> Grouping data (Group inter config data) -> Grouping data (Group inter next data)
+only : Grouping data (I.Product next (Maybe Float) data) -> Grouping data (Group inter config (Maybe Float) data) -> Grouping data (Group inter next (Maybe Float) data)
 only (Grouping _ filterProducts) (Grouping _ formGroups) = -- TODO position?
   Grouping I.getPosition <| \items ->
     let onlyValid group_ =
@@ -71,25 +71,25 @@ only (Grouping _ filterProducts) (Grouping _ formGroups) = -- TODO position?
 -- BASIC GROUPING
 
 
-product : Grouping data (I.Product I.General data)
+product : Grouping data (I.Product I.Any (Maybe Float) data)
 product =
   Grouping I.getPosition identity
 
 
-dot : Grouping data (I.Product S.Dot data)
+dot : Grouping data (I.Product S.Dot (Maybe Float) data)
 dot =
   let centerPosition plane item =
-        fromPoint (I.getCenter plane item)
+        fromPoint (I.getPosition plane item |> Coord.center)
   in
-  Grouping centerPosition (List.filterMap I.isDotSeries)
+  Grouping centerPosition (List.filterMap I.isDot)
 
 
-bar : Grouping data (I.Product S.Bar data)
+bar : Grouping data (I.Product S.Bar (Maybe Float) data)
 bar =
-  Grouping I.getPosition (List.filterMap I.isBarSeries)
+  Grouping I.getPosition (List.filterMap I.isBar)
 
 
-named : List String -> Grouping data (I.Product config data) -> Grouping data (I.Product config data)
+named : List String -> Grouping data (I.Product config value data) -> Grouping data (I.Product config value data)
 named names (Grouping toPos filter) =
   let onlyAcceptedNames i =
         case I.getName i of
@@ -110,7 +110,7 @@ type alias SameX =
   }
 
 
-sameX : Grouping data (Group SameX I.General data)
+sameX : Grouping data (Group SameX I.Any (Maybe Float) data)
 sameX =
   let fullVertialPosition plane item =
         I.getPosition plane item
@@ -118,7 +118,7 @@ sameX =
   in
   Grouping fullVertialPosition <|
     groupingHelp
-      { inter = \details -> { x1 = details.x1, x2 = details.x2 }
+      { inter = \config -> { x1 = config.values.x1, x2 = config.values.x2 }
       , equality = \a b -> a.x1 == b.x1 && a.x2 == b.x2
       , edits = identity
       }
@@ -137,15 +137,15 @@ type alias Stack datum =
   }
 
 
-stack : Grouping data (Group (Stack data) I.General data)
+stack : Grouping data (Group (Stack data) I.Any (Maybe Float) data)
 stack =
   Grouping I.getPosition <|
     groupingHelp
-      { inter = \details ->
-          { start = details.x1
-          , end = details.x2
-          , datum = details.datum
-          , index = details.property
+      { inter = \config ->
+          { start = config.values.x1
+          , end = config.values.x2
+          , datum = config.values.datum
+          , index = config.tooltipInfo.property
           }
       , equality = \a b -> a.index == b.index && a.start == b.start && a.end == b.end && a.datum == b.datum
       , edits = identity
@@ -164,11 +164,11 @@ type alias Bin data =
   }
 
 
-bin : Grouping data (Group (Bin data) I.General data)
+bin : Grouping data (Group (Bin data) I.Any (Maybe Float) data)
 bin =
   Grouping I.getPosition <|
     groupingHelp
-      { inter = \details -> { start = details.x1, end = details.x2, datum = details.datum }
+      { inter = \config -> { start = config.values.x1, end = config.values.x2, datum = config.values.datum }
       , equality = \a b -> a.start == b.start && a.end == b.end && a.datum == b.datum
       , edits = editLimits (\c pos -> { pos | x1 = c.config.start, x2 = c.config.end })
       }
@@ -179,24 +179,24 @@ bin =
 
 
 groupingHelp { inter, equality, edits } items =
-  let toInter (I.Item item) = inter item.details
+  let toInter (I.Item item) = inter item.config
       toEquality aO bO = equality (toInter aO) (toInter bO)
       toNewGroup ( i, is ) = toGroup (toInter i) (i :: is) |> edits
   in
   List.map toNewGroup (Helpers.gatherWith toEquality items)
 
 editLimits edit (I.Item group_) =
-  I.Item { group_ | limits = \c -> group_.limits c |> edit c }
+  I.Item { group_ | toLimits = \c -> group_.toLimits c |> edit c }
 
 
-toGroup : inter -> List (I.Product config datum) -> Group inter config datum
+toGroup : inter -> List (I.Product config value datum) -> Group inter config value datum
 toGroup inter products =
   I.Item
-    { details = { config = inter, items = products }
-    , limits = \c -> Coord.foldPosition I.getLimits c.items
-    , position = \p c -> Coord.foldPosition (I.getPosition p) c.items
-    , render = \p c _ -> S.g [ SA.class "elm-charts__group" ] (List.map (I.render p) c.items)
-    , tooltip = \c -> [ H.table [] (List.concatMap I.renderTooltip c.items) ]
+    { config = { config = inter, items = products }
+    , toLimits = \c -> Coord.foldPosition I.getLimits c.items
+    , toPosition = \p c -> Coord.foldPosition (I.getPosition p) c.items
+    , toSvg = \p c _ -> S.g [ SA.class "elm-charts__group" ] (List.map (I.toSvg p) c.items)
+    , toHtml = \c -> [ H.table [] (List.concatMap I.toHtml c.items) ]
     }
 
 

@@ -29,7 +29,7 @@ import Chart.Events
 
 type alias Model =
   { selection : Maybe { a : Coordinates.Point, b : Coordinates.Point }
-  , hovering : List (CI.Product CS.Dot Salary.Datum)
+  , hovering : List (CI.Product CS.Dot (Maybe Float) Salary.Datum)
   , window : Maybe Coordinates.Position
   , year : Float
   }
@@ -45,7 +45,7 @@ init =
 
 
 type Msg
-  = OnHover (List (CI.Product CS.Dot Salary.Datum)) Coordinates.Point
+  = OnHover (List (CI.Product CS.Dot (Maybe Float) Salary.Datum)) Coordinates.Point
   | OnMouseDown Coordinates.Point
   | OnMouseUp Coordinates.Point
   | OnReset
@@ -151,9 +151,9 @@ view model =
     , salarySeries model 0.7 5 200
 
     , C.eachProduct <| \p product ->
-        let datum = CI.getDatum product
-            color = CI.getColor product
-            top = CI.getTop p product
+        let datum = CE.getDatum product
+            color = CE.getColor product
+            top = CE.getTop p product
             toSvgX = Coordinates.scaleCartesianX p
             toSvgY = Coordinates.scaleCartesianY p
         in
@@ -305,7 +305,7 @@ salarySeries model border auraSize size =
       (List.filter (.year >> (==) model.year) Salary.data)
 
 
-tooltipContent : CI.Product CS.Dot Salary.Datum -> H.Html msg
+tooltipContent : CI.Product CS.Dot (Maybe Float) Salary.Datum -> H.Html msg
 tooltipContent hovered =
   let datum = CI.getDatum hovered
       precentOfWomen = round (Salary.womenPerc datum)

@@ -30,9 +30,9 @@ import Ui.Section as Section
 
 
 type alias Model =
-  { hovering : List (CI.Product CI.General Datum)
-  , hovering2 : List (CE.Group (CE.Stack Datum) CS.Dot Datum)
-  , hovering3 : List (CE.Group (CE.Stack Datum) CS.Bar Datum)
+  { hovering : List (CI.Product CI.Any (Maybe Float) Datum)
+  , hovering2 : List (CE.Group (CE.Stack Datum) CS.Dot (Maybe Float) Datum)
+  , hovering3 : List (CE.Group (CE.Stack Datum) CS.Bar (Maybe Float) Datum)
   }
 
 
@@ -45,10 +45,10 @@ init =
 
 
 type Msg
-  = OnHover (List (CI.Product CI.General Datum))
+  = OnHover (List (CI.Product CI.Any (Maybe Float) Datum))
   | OnHover2
-      (List (CE.Group (CE.Stack Datum) CS.Dot Datum))
-      (List (CE.Group (CE.Stack Datum) CS.Bar Datum))
+      (List (CE.Group (CE.Stack Datum) CS.Dot (Maybe Float) Datum))
+      (List (CE.Group (CE.Stack Datum) CS.Bar (Maybe Float) Datum))
 
 
 update : Msg -> Model -> Model
