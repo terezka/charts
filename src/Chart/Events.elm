@@ -9,14 +9,13 @@ module Chart.Events exposing
   , Product, Group, Bin, Stack
   , getDependent, getIndependent, getDatum, getColor, getName
   , getTop, getCenter, getLeft, getRight, getPosition, getLimits
-  , getProducts, getCommonality, group, ungroup, regroup, named
+  , getProducts, getCommonality, group, regroup, named
   )
 
 -- TODO
 -- Rename General to Any
 -- stacked tooltip issue
 -- Auto examples
--- Auto tooltip
 -- Remove tiles
 -- move things to internal
 -- find out what to expose in Svg
@@ -32,6 +31,8 @@ import Svg.Coordinates as C exposing (Point, Position, Plane)
 import Chart.Svg as CS
 import Chart.Attributes as CA exposing (Attribute)
 import Internal.Item as I
+import Internal.Helpers as Helpers
+import Internal.Group as G
 
 
 -- EVENTS
@@ -94,7 +95,7 @@ getCoords =
 
 {-| -}
 getNearest : Grouping data (Item result) -> Decoder data (List (Item result))
-getNearest (Grouping toPos _ as grouping) =
+getNearest (G.Grouping toPos _ as grouping) =
   Decoder <| \items plane ->
     let groups = group grouping items in
     CS.getNearest (toPos plane) groups plane
@@ -102,7 +103,7 @@ getNearest (Grouping toPos _ as grouping) =
 
 {-| -}
 getWithin : Float -> Grouping data (Item result) -> Decoder data (List (Item result))
-getWithin radius (Grouping toPos _ as grouping) =
+getWithin radius (G.Grouping toPos _ as grouping) =
   Decoder <| \items plane ->
     let groups = group grouping items in
     CS.getWithin radius (toPos plane) groups plane
@@ -110,7 +111,7 @@ getWithin radius (Grouping toPos _ as grouping) =
 
 {-| -}
 getNearestX : Grouping data (Item result) -> Decoder data (List (Item result))
-getNearestX (Grouping toPos _ as grouping) =
+getNearestX (G.Grouping toPos _ as grouping) =
   Decoder <| \items plane ->
     let groups = group grouping items in
     CS.getNearestX (toPos plane) groups plane
@@ -118,7 +119,7 @@ getNearestX (Grouping toPos _ as grouping) =
 
 {-| -}
 getWithinX : Float -> Grouping data (Item result) -> Decoder data (List (Item result))
-getWithinX radius (Grouping toPos _ as grouping) =
+getWithinX radius (G.Grouping toPos _ as grouping) =
   Decoder <| \items plane ->
     let groups = group grouping items in
     CS.getWithinX radius (toPos plane) groups plane
@@ -186,208 +187,96 @@ getColor =
 
 
 type alias Group inter config data =
-  I.Group inter config data
+  G.Group inter config data
 
 
-getProducts : Group inter config data -> List (Product config data)
+
+getProducts : Group inter config data -> List (Product I.General data)
 getProducts =
-  I.getProducts
-
-
-getGenerals : Group inter config data -> List (Product I.General data)
-getGenerals =
-  I.getGenerals
+  G.getProducts
 
 
 getCommonality : Group inter config data -> inter
 getCommonality =
-  I.getCommonality
-
-
-group : Grouping data result -> List (Product I.General data) -> List result
-group (Grouping _ func) items =
-  func items
-
-
-ungroup : Group inter config data -> List (Product config data)
-ungroup =
-  I.getProducts -- TODO
-
-
-regroup : Grouping data result -> Group i a data -> List result
-regroup (Grouping _ func) group_ =
-  func (getGenerals group_)
-
-
-only : Grouping data (Product next data) -> Grouping data (Group inter I.General data) -> Grouping data (Group inter next data)
-only (Grouping _ filterA) (Grouping getPosB filterB) =
-  Grouping getPosition <| \items ->
-    let newFilter : Group inter I.General data -> Maybe (Group inter next data)
-        newFilter g =
-          let generals : List (Product I.General data)
-              generals =
-                getProducts g
-
-              filtered : List (Product next data)
-              filtered =
-                filterA generals
-
-              newGroup : Group inter next data
-              newGroup =
-                I.Item
-                  { details = { config = getCommonality g, items = filtered }
-                  , limits = \c -> C.foldPosition getLimits c.items
-                  , position = \plane c -> C.foldPosition (getPosition plane) c.items
-                  , render = \plane c _ -> S.g [ SA.class "elm-charts__group" ] (List.map (I.render plane) c.items)
-                  , tooltip = \c -> [ H.table [] (List.concatMap I.renderTooltip c.items) ]
-                  }
-          in
-          if List.isEmpty filtered then Nothing else Just newGroup
-    in
-    List.filterMap newFilter (filterB items)
+  G.getCommonality
 
 
 
 -- GROUPING
 
 
-type Grouping data result =
-  Grouping
-    (Plane -> result -> Position)
-    (List (Product I.General data) -> List result)
+type alias Grouping data result =
+  G.Grouping data result
+
+
+group : Grouping data result -> List (Product I.General data) -> List result
+group =
+  G.group
+
+
+regroup : Grouping data result -> Group i a data -> List result
+regroup =
+  G.regroup
+
+
+only : Grouping data (Product next data) -> Grouping data (Group inter config data) -> Grouping data (Group inter next data)
+only =
+  G.only
 
 
 product : Grouping data (Product I.General data)
 product =
-  Grouping getPosition identity
+  G.product
 
 
 dot : Grouping data (Product CS.Dot data)
 dot =
-  Grouping (\p -> getCenter p >> fromPoint) I.onlyDotSeries
+  G.dot
 
 
 bar : Grouping data (Product CS.Bar data)
 bar =
-  Grouping getPosition I.onlyBarSeries
+  G.bar
 
 
 {-| -}
 type alias SameX =
-  { x1 : Float
-  , x2 : Float
-  }
+  G.SameX
 
 
 sameX : Grouping data (Group SameX I.General data)
 sameX =
-  Grouping (\p -> getPosition p >> \x -> { x | y1 = p.y.min, y2 = p.y.max }) <| \items ->
-    let toConfig (I.Item { details }) =
-          { x1 = details.x1
-          , x2 = details.x2
-          }
-
-        isSame ai bi =
-          let ( a, b ) = ( toConfig ai, toConfig bi ) in
-          a.x1 == b.x1 && a.x2 == b.x2
-
-        toGroup ( i, is ) =
-          I.Item
-            { details = { config = toConfig i, items = i :: is }
-            , limits = \c -> C.foldPosition getLimits c.items
-            , position = \plane c -> C.foldPosition (getPosition plane) c.items
-            , render = \plane c _ -> S.g [ SA.class "elm-charts__group" ] (List.map (I.render plane) c.items)
-            , tooltip = \c -> [ H.table [] (List.concatMap I.renderTooltip c.items) ]
-            }
-    in
-    List.map toGroup (gatherWith isSame items)
+  G.sameX
 
 
 {-| -}
 type alias Stack datum =
-  { datum : datum
-  , start : Float
-  , end : Float
-  , index : Int
-  }
+  G.Stack datum
 
 
 stack : Grouping data (Group (Stack data) I.General data)
 stack =
-  Grouping getPosition <| \items ->
-    let toConfig (I.Item { details }) =
-          { start = details.x1
-          , end = details.x2
-          , datum = details.datum
-          , index = details.property
-          }
-
-        isSame ai bi =
-          let ( a, b ) = ( toConfig ai, toConfig bi ) in
-          a.index == b.index && a.start == b.start && a.end == b.end && a.datum == b.datum
-
-        toGroup ( i, is ) =
-          I.Item
-            { details = { config = toConfig i, items = i :: is }
-            , limits = \c -> C.foldPosition getLimits c.items
-            , position = \plane c -> C.foldPosition (getPosition plane) c.items
-            , render = \plane c _ -> S.g [ SA.class "elm-charts__group" ] (List.map (I.render plane) c.items)
-            , tooltip = \c -> [ H.table [] (List.concatMap I.renderTooltip c.items) ]
-            }
-    in
-    List.map toGroup (gatherWith isSame items)
+  G.stack
 
 
 {-| -}
 type alias Bin data =
-  { datum : data
-  , start : Float
-  , end : Float
-  }
+  G.Bin data
 
 
 bin : Grouping data (Group (Bin data) I.General data)
 bin =
-  Grouping getPosition <| \items ->
-    let toConfig (I.Item { details }) =
-          { start = details.x1
-          , end = details.x2
-          , datum = details.datum
-          }
-
-        isSame ai bi =
-          let ( a, b ) = (toConfig ai, toConfig bi ) in
-          a.start == b.start && a.end == b.end && a.datum == b.datum
-
-        toGroup ( i, is ) =
-          I.Item
-            { details = { config = toConfig i, items = i :: is }
-            , limits = \c ->
-                let pos = C.foldPosition getLimits c.items in
-                { pos | x1 = c.config.start, x2 = c.config.end }
-            , position = \plane c -> C.foldPosition (getPosition plane) c.items
-            , render = \plane c _ -> S.g [ SA.class "elm-charts__group" ] (List.map (I.render plane) c.items)
-            , tooltip = \c -> [ H.table [] (List.concatMap I.renderTooltip c.items) ]
-            }
-    in
-    gatherWith isSame items
-      |> List.map toGroup
-
+  G.bin
 
 
 named : List String -> Grouping data (Product config data) -> Grouping data (Product config data)
-named names (Grouping toPos filter) =
-  let onlyAcceptedNames i =
-        case getName i of
-          Just name -> List.member name names
-          Nothing -> False
-  in
-  Grouping toPos (filter >> List.filter onlyAcceptedNames)
+named =
+  G.named
 
 
 custom : (Plane -> result -> Position) -> (List (Product I.General data) -> List result) -> Grouping data result
 custom =
-  Grouping
+  G.Grouping
 
 
 
@@ -431,24 +320,3 @@ getPosition =
 getLimits : Item a -> Position
 getLimits =
   I.getLimits
-
-
-
--- HELPERS
-
-
-gatherWith : (a -> a -> Bool) -> List a -> List ( a, List a )
-gatherWith testFn list =
-    let helper scattered gathered =
-          case scattered of
-            [] -> List.reverse gathered
-            toGather :: population ->
-              let ( gathering, remaining ) = List.partition (testFn toGather) population in
-              helper remaining <| ( toGather, gathering ) :: gathered
-    in
-    helper list []
-
-
-fromPoint : Point -> Position
-fromPoint point =
-  { x1 = point.x, y1 = point.y, x2 = point.x, y2 = point.y }

@@ -38,7 +38,9 @@ import Internal.Property as P
 import Time
 import Dict exposing (Dict)
 import Internal.Item as Item
+import Internal.Produce as Produce
 import Internal.Legend as Legend
+import Internal.Group as Group
 import Chart.Svg as CS
 import Chart.Attributes as CA
 import Chart.Events as CE
@@ -922,10 +924,10 @@ type alias Bars data =
 bars : List (CA.Attribute (Bars data)) -> List (Property data String () CS.Bar) -> List data -> Element data msg
 bars edits properties data =
   let items =
-        Item.toBarSeries edits properties data
+        Produce.toBarSeries edits properties data
 
       generalized =
-        List.concatMap Item.getGenerals items
+        List.concatMap Group.getProducts items
 
       bins =
         CE.group CE.bin generalized
@@ -952,10 +954,10 @@ bars edits properties data =
 series : (data -> Float) -> List (Property data String CS.Interpolation CS.Dot) -> List data -> Element data msg
 series toX properties data =
   let items =
-        Item.toDotSeries toX properties data
+        Produce.toDotSeries toX properties data
 
       generalized =
-        List.concatMap Item.getGenerals items
+        List.concatMap Group.getProducts items
 
       legends_ =
         Legend.toDotLegends properties
@@ -979,19 +981,19 @@ withPlane func =
 
 
 {-| -}
-withBins : (C.Plane -> List (Item.Group (CE.Bin data) Item.General data) -> List (Element data msg)) -> Element data msg
+withBins : (C.Plane -> List (CE.Group (CE.Bin data) Item.General data) -> List (Element data msg)) -> Element data msg
 withBins func =
   SubElements <| \p is -> func p (CE.group CE.bin is)
 
 
 {-| -}
-withStacks : (C.Plane -> List (Item.Group (CE.Stack data) Item.General data) -> List (Element data msg)) -> Element data msg
+withStacks : (C.Plane -> List (CE.Group (CE.Stack data) Item.General data) -> List (Element data msg)) -> Element data msg
 withStacks func =
   SubElements <| \p is -> func p (CE.group CE.stack is)
 
 
 {-| -}
-withProducts : (C.Plane -> List (Item.Product Item.General data) -> List (Element data msg)) -> Element data msg
+withProducts : (C.Plane -> List (CE.Product Item.General data) -> List (Element data msg)) -> Element data msg
 withProducts func =
   SubElements <| \p is -> func p is
 
@@ -1003,13 +1005,13 @@ each items func =
 
 
 {-| -}
-eachBin : (C.Plane -> Item.Group (CE.Bin data) Item.General data -> List (Element data msg)) -> Element data msg
+eachBin : (C.Plane -> CE.Group (CE.Bin data) Item.General data -> List (Element data msg)) -> Element data msg
 eachBin func =
   SubElements <| \p is -> List.concatMap (func p) (CE.group CE.bin is)
 
 
 {-| -}
-eachStack : (C.Plane -> Item.Group (CE.Stack data) Item.General data -> List (Element data msg)) -> Element data msg
+eachStack : (C.Plane -> CE.Group (CE.Stack data) Item.General data -> List (Element data msg)) -> Element data msg
 eachStack func =
   SubElements <| \p is -> List.concatMap (func p) (CE.group CE.stack is)
 

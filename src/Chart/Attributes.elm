@@ -24,6 +24,7 @@ module Chart.Attributes exposing
 
 import Time
 import Svg.Coordinates as C
+import Internal.Helpers as Helpers
 
 
 {-| -}
@@ -675,39 +676,39 @@ column config =
 {-| -}
 blue : String
 blue =
-  "#1976d2"
+  Helpers.blue
 
 
 {-| -}
 orange : String
 orange =
-  "#e47d32"
+  Helpers.orange
 
 
 {-| -}
 pink : String
 pink =
-  "#f56dbc"
+  Helpers.pink
 
 
 purple : String
 purple =
-  "#7c29ed"
+  Helpers.purple
 
 
 {-| -}
 green : String
 green =
-  "#388e3c"
+  Helpers.green
 
 
 {-| -}
 red : String
 red =
-  "#d32f2f"
+  Helpers.red
 
 
 {-| -}
 turquoise : String
 turquoise =
-  "#4eaea7"
+  Helpers.turquoise

@@ -33,6 +33,7 @@ import DOM
 import Time
 import DateFormat as F
 import Dict exposing (Dict)
+import Internal.Helpers as Helpers
 
 
 
@@ -509,7 +510,7 @@ lineLegend edits interAttrsOrg dotAttrsOrg =
 
       dotConfig =
         apply dotAttrs
-          { color = CA.blue
+          { color = Helpers.blue
           , opacity = 1
           , size = 6
           , border = "white"
@@ -522,7 +523,7 @@ lineLegend edits interAttrsOrg dotAttrsOrg =
       interConfig =
         apply interAttrs
           { method = Nothing
-          , color = blue
+          , color = Helpers.blue
           , width = 1
           , opacity = 0
           , design = Nothing
@@ -698,7 +699,7 @@ bar plane edits point =
           , roundBottom = 0
           , border = "white"
           , borderWidth = 0
-          , color = blue
+          , color = Helpers.blue
           , opacity = 1
           , design = Nothing
           }
@@ -811,7 +812,7 @@ interpolation plane toX toY edits data =
   let config =
         apply edits
           { method = Nothing
-          , color = blue
+          , color = Helpers.blue
           , width = 1
           , opacity = 0
           , design = Nothing
@@ -846,7 +847,7 @@ area plane toX toY2M toY edits data =
   let config =
         apply edits
           { method = Nothing
-          , color = blue
+          , color = Helpers.blue
           , width = 1
           , opacity = 0.2
           , design = Nothing
@@ -1062,7 +1063,7 @@ dot : Plane -> (data -> Float) -> (data -> Float) -> List (CA.Attribute Dot) -> 
 dot plane toX toY edits datum_ =
   let config =
         apply edits
-          { color = blue
+          { color = Helpers.blue
           , opacity = 1
           , size = 6
           , border = ""
@@ -1553,46 +1554,6 @@ apply funcs default =
 isWithinPlane : Plane -> Float -> Float -> Bool
 isWithinPlane plane x y =
   clamp plane.x.min plane.x.max x == x && clamp plane.y.min plane.y.max y == y
-
-
-
--- COLOR
-
-
-{-| -}
-blue : String
-blue =
-  "#1976d2"
-
-
-{-| -}
-orange : String
-orange =
-  "#ff8f00"
-
-
-{-| -}
-pink : String
-pink =
-  "#ec407a"
-
-
-{-| -}
-green : String
-green =
-  "#388e3c"
-
-
-{-| -}
-red : String
-red =
-  "#d32f2f"
-
-
-{-| -}
-purple : String
-purple =
-  "#8e24aa"
 
 
 
