@@ -213,11 +213,10 @@ section onMsg model =
               , CA.marginBottom 20
               , CA.paddingLeft 10
               , CA.static
-              --, CE.onMouseMove (OnHover2 >> onMsg) (CE.getNearest CE.product)
               , CE.onMouseLeave (OnHover2 [] [])
               , CE.on "mousemove" <|
                   CE.map2 OnHover2
-                    (CE.getNearest <| CE.andThen CE.stack <| CE.andThen CE.noMissing CE.dot)
+                    (CE.getNearest <| CE.filter CE.noMissing <| CE.filter CE.dot CE.stack)
                     (CE.getNearest <| CE.andThen CE.stack CE.bar)
               ]
               [ C.legendsAt .max .max 0 50

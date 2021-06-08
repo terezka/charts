@@ -56,6 +56,18 @@ regroup (Grouping _ func) group_ =
   func (getProducts group_)
 
 
+filter : Grouping (I.Product b v data) (I.Product c x data) -> Grouping a (Group i b v data) -> Grouping a (Group i c x data)
+filter (Grouping toPos2 func2) (Grouping toPos1 func1) =
+  Grouping I.getPosition <| \items ->
+    let func (I.Item item) =
+          case func2 item.config.items of
+            [] -> Nothing
+            some -> Just (toGroup item.config.config some)
+                      -- TODO preserving limits?
+    in
+    List.filterMap func (func1 items)
+
+
 andThen : Grouping b c -> Grouping a b -> Grouping a c
 andThen (Grouping toPos2 func2) (Grouping toPos1 func1)  =
   Grouping toPos2 (func1 >> func2)

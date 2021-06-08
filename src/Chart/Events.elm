@@ -9,7 +9,9 @@ module Chart.Events exposing
   , Product, Group, Bin, Stack
   , getDependent, getIndependent, getDatum, getColor, getName
   , getTop, getCenter, getLeft, getRight, getPosition, getLimits
-  , getProducts, getCommonality, group, regroup, named, andThen
+  , getProducts, getCommonality, group, regroup, named
+
+  , andThen, filter
   )
 
 -- TODO
@@ -218,6 +220,11 @@ group =
 andThen : Grouping b c -> Grouping a b -> Grouping a c
 andThen =
   G.andThen
+
+
+filter : Grouping (I.Product b v data) (I.Product c x data) -> Grouping a (Group i b v data) -> Grouping a (Group i c x data)
+filter =
+  G.filter
 
 
 regroup : Grouping (I.Product I.Any v data) b -> Group i a v data -> List b
