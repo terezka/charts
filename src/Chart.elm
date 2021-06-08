@@ -925,9 +925,7 @@ bars edits properties data =
         Item.toBarSeries edits properties data
 
       generalized =
-        items
-          |> List.concatMap Item.getProducts
-          |> List.map (Item.toGeneral Item.BarConfig)
+        List.concatMap Item.getGenerals items
 
       bins =
         CE.group CE.bin generalized
@@ -957,9 +955,7 @@ series toX properties data =
         Item.toDotSeries toX properties data
 
       generalized =
-        items
-          |> List.concatMap Item.getProducts
-          |> List.map (Item.toGeneral Item.DotConfig)
+        List.concatMap Item.getGenerals items
 
       legends_ =
         Legend.toDotLegends properties

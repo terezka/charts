@@ -26,14 +26,14 @@ type Item a =
 type alias Product config datum =
   Item
     { datum : datum
-    , config : config
+    , config : Generalizable config
     , property : Int
     , stack : Int
     , name : Maybe String
     , x1 : Float
     , x2 : Float
     , y : Maybe Float
-    , toGeneral : config -> RealConfig
+    , toGeneral : Generalizable config -> RealConfig
     }
 
 
@@ -52,7 +52,7 @@ getProducts (Item item) =
 
 
 {-| -}
-getGenerals : Group a (Generalizable config) datum -> List (Product General datum)
+getGenerals : Group a config datum -> List (Product General datum)
 getGenerals (Item item) =
   List.map (\(Item i) -> toGeneral i.details.toGeneral (Item i)) item.details.items
 
@@ -572,7 +572,7 @@ type RealConfig
   | DotConfig S.Dot
 
 
-toGeneral : (Generalizable config -> RealConfig) -> Product (Generalizable config) datum -> Product General datum
+toGeneral : (Generalizable config -> RealConfig) -> Product config datum -> Product General datum
 toGeneral generalize (Item product) =
   Item
     { render = \plane details position ->

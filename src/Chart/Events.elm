@@ -194,7 +194,7 @@ getProducts =
   I.getProducts
 
 
-getGenerals : Group inter (I.Generalizable config) data -> List (Product I.General data)
+getGenerals : Group inter config data -> List (Product I.General data)
 getGenerals =
   I.getGenerals
 
@@ -214,7 +214,7 @@ ungroup =
   I.getProducts -- TODO
 
 
-regroup : Grouping data result -> Group i (I.Generalizable a) data -> List result
+regroup : Grouping data result -> Group i a data -> List result
 regroup (Grouping _ func) group_ =
   func (getGenerals group_)
 
