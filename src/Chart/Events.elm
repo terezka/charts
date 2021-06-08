@@ -2,15 +2,14 @@ module Chart.Events exposing
   ( Event(..)
   , onMouseMove, onMouseLeave, onMouseUp, onMouseDown, onClick, on
   , Decoder(..), getCoords, getNearest, getNearestX, getWithin, getWithinX
-  , product, dot, bin, stack, bar, only
+  , product, dot, bin, stack, bar, noMissing
   , SameX, sameX
   , map, map2, map3, map4
 
   , Product, Group, Bin, Stack
   , getDependent, getIndependent, getDatum, getColor, getName
   , getTop, getCenter, getLeft, getRight, getPosition, getLimits
-  , getProducts, getCommonality, group, regroup, named
-  , noMissing, noMissingG
+  , getProducts, getCommonality, group, regroup, named, andThen
   )
 
 -- TODO
@@ -95,7 +94,7 @@ getCoords =
 
 
 {-| -}
-getNearest : Grouping data (Maybe Float) (Item result) -> Decoder data (List (Item result))
+getNearest : Grouping (Product I.Any (Maybe Float) data) (Item result) -> Decoder data (List (Item result))
 getNearest (G.Grouping toPos _ as grouping) =
   Decoder <| \items plane ->
     let groups = group grouping items in
@@ -103,7 +102,7 @@ getNearest (G.Grouping toPos _ as grouping) =
 
 
 {-| -}
-getWithin : Float -> Grouping data (Maybe Float) (Item result) -> Decoder data (List (Item result))
+getWithin : Float -> Grouping (Product I.Any (Maybe Float) data) (Item result) -> Decoder data (List (Item result))
 getWithin radius (G.Grouping toPos _ as grouping) =
   Decoder <| \items plane ->
     let groups = group grouping items in
@@ -111,7 +110,7 @@ getWithin radius (G.Grouping toPos _ as grouping) =
 
 
 {-| -}
-getNearestX : Grouping data (Maybe Float) (Item result) -> Decoder data (List (Item result))
+getNearestX : Grouping (Product I.Any (Maybe Float) data) (Item result) -> Decoder data (List (Item result))
 getNearestX (G.Grouping toPos _ as grouping) =
   Decoder <| \items plane ->
     let groups = group grouping items in
@@ -119,7 +118,7 @@ getNearestX (G.Grouping toPos _ as grouping) =
 
 
 {-| -}
-getWithinX : Float -> Grouping data (Maybe Float) (Item result) -> Decoder data (List (Item result))
+getWithinX : Float -> Grouping (Product I.Any (Maybe Float) data) (Item result) -> Decoder data (List (Item result))
 getWithinX radius (G.Grouping toPos _ as grouping) =
   Decoder <| \items plane ->
     let groups = group grouping items in
@@ -207,56 +206,48 @@ getCommonality =
 -- GROUPING
 
 
-type alias Grouping data value result =
-  G.Grouping data value result
+type alias Grouping a b =
+  G.Grouping a b
 
 
-group : Grouping data value result -> List (Product I.Any value data) -> List result
+group : Grouping a b -> List a -> List b
 group =
   G.group
 
 
-regroup : Grouping data value result -> Group i a value data -> List result
+andThen : Grouping b c -> Grouping a b -> Grouping a c
+andThen =
+  G.andThen
+
+
+regroup : Grouping (I.Product I.Any v data) b -> Group i a v data -> List b
 regroup =
   G.regroup
 
 
-only : Grouping data value (Product next value data) -> Grouping data value (Group inter config value data) -> Grouping data value (Group inter next value data)
-only =
-  G.only
-
-
-product : Grouping data value (Product I.Any value data)
+product : Grouping (I.Product I.Any value data) (I.Product I.Any value data)
 product =
   G.product
 
 
-dot : Grouping data value (Product CS.Dot value data)
+dot : Grouping (I.Product I.Any value data) (I.Product CS.Dot value data)
 dot =
   G.dot
 
 
-bar : Grouping data value (Product CS.Bar value data)
+bar : Grouping (I.Product I.Any value data) (I.Product CS.Bar value data)
 bar =
   G.bar
 
 
-noMissing : Grouping data (Maybe Float) (I.Product config (Maybe Float) data) -> Grouping data (Maybe Float) (I.Product config Float data)
+noMissing : Grouping (I.Product config (Maybe Float) data) (I.Product config Float data)
 noMissing =
   G.noMissing
 
 
-noMissingG : Grouping data (Maybe Float) (G.Group inter config (Maybe Float) data) -> Grouping data (Maybe Float) (G.Group inter config Float data)
-noMissingG (G.Grouping toPos formGroups) =
-  G.Grouping I.getPosition <| \items ->
-    let onlyValid : G.Group inter config (Maybe Float) data -> Maybe (G.Group inter config Float data)
-        onlyValid (I.Item item as group_) =
-          case List.filterMap I.toNonMissing item.config.items of
-            [] -> Nothing
-            some -> Just (G.toGroup (getCommonality group_) some)
-    in
-    List.filterMap onlyValid (formGroups items)
-
+named : List String -> Grouping (I.Product config value data) (I.Product config value data)
+named =
+  G.named
 
 
 {-| -}
@@ -264,7 +255,7 @@ type alias SameX =
   G.SameX
 
 
-sameX : Grouping data value (Group SameX I.Any value data)
+sameX : Grouping (I.Product config value data) (Group SameX config value data)
 sameX =
   G.sameX
 
@@ -274,7 +265,7 @@ type alias Stack datum =
   G.Stack datum
 
 
-stack : Grouping data value (Group (Stack data) I.Any value data)
+stack : Grouping (I.Product config value data) (Group (Stack data) config value data)
 stack =
   G.stack
 
@@ -284,17 +275,12 @@ type alias Bin data =
   G.Bin data
 
 
-bin : Grouping data value (Group (Bin data) I.Any value data)
+bin : Grouping (I.Product config value data) (Group (Bin data) config value data)
 bin =
   G.bin
 
 
-named : List String -> Grouping data value (Product config value data) -> Grouping data value (Product config value data)
-named =
-  G.named
-
-
-custom : (Plane -> result -> Position) -> (List (Product I.Any value data) -> List result) -> Grouping data value result
+custom : (Plane -> b -> Position) -> (List a -> List b) -> Grouping a b
 custom =
   G.Grouping
 

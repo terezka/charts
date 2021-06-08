@@ -217,8 +217,8 @@ section onMsg model =
               , CE.onMouseLeave (OnHover2 [] [])
               , CE.on "mousemove" <|
                   CE.map2 OnHover2
-                    (CE.getNearest <| CE.noMissingG <| CE.only CE.dot CE.stack)
-                    (CE.getNearest <| CE.only CE.bar CE.stack)
+                    (CE.getNearest <| CE.andThen CE.stack <| CE.andThen CE.noMissing CE.dot)
+                    (CE.getNearest <| CE.andThen CE.stack CE.bar)
               ]
               [ C.legendsAt .max .max 0 50
                   [ CA.row
@@ -239,14 +239,14 @@ section onMsg model =
               , C.bars
                   [ CA.roundTop 0.5
                   , CA.roundBottom 0.5
-                  , CA.ungroup
+                  --, CA.ungroup
                   ]
-                  [ C.stacked
+                  --[ C.stacked
                       [ C.named "Cats" (C.property .v [] [])
                       , C.named "Dogs" (C.property .z [] [])
                       , C.named "Fish" (C.property .y [] [])
                       ]
-                  ]
+                  --]
                   data
 
               , C.series .x

@@ -40,43 +40,36 @@ getCommonality (I.Item item) =
 -- GROUPING
 
 
-type Grouping data value result =
+type Grouping a b =
   Grouping
-    (Plane -> result -> Position)
-    (List (I.Product I.Any value data) -> List result)
+    (Plane -> b -> Position)
+    (List a -> List b)
 
 
-group : Grouping data value result -> List (I.Product I.Any value data) -> List result
+group : Grouping a b -> List a -> List b
 group (Grouping _ func) items =
   func items
 
 
-regroup : Grouping data value result -> Group i a value data -> List result
+regroup : Grouping (I.Product I.Any v data) b -> Group i a v data -> List b
 regroup (Grouping _ func) group_ =
   func (getProducts group_)
 
 
-only : Grouping data value (I.Product next value data) -> Grouping data value (Group inter config value data) -> Grouping data value (Group inter next value data)
-only (Grouping _ filterProducts) (Grouping _ formGroups) = -- TODO position?
-  Grouping I.getPosition <| \items ->
-    let onlyValid group_ =
-          case filterProducts (getProducts group_) of
-            [] -> Nothing
-            some -> Just (toGroup (getCommonality group_) some)
-    in
-    List.filterMap onlyValid (formGroups items)
-
+andThen : Grouping b c -> Grouping a b -> Grouping a c
+andThen (Grouping toPos2 func2) (Grouping toPos1 func1)  =
+  Grouping toPos2 (func1 >> func2)
 
 
 -- BASIC GROUPING
 
 
-product : Grouping data value (I.Product I.Any value data)
+product : Grouping (I.Product I.Any value data) (I.Product I.Any value data)
 product =
   Grouping I.getPosition identity
 
 
-dot : Grouping data value (I.Product S.Dot value data)
+dot : Grouping (I.Product I.Any value data) (I.Product S.Dot value data)
 dot =
   let centerPosition plane item =
         fromPoint (I.getPosition plane item |> Coord.center)
@@ -84,24 +77,24 @@ dot =
   Grouping centerPosition (List.filterMap I.isDot)
 
 
-bar : Grouping data value (I.Product S.Bar value data)
+bar : Grouping (I.Product I.Any value data) (I.Product S.Bar value data)
 bar =
   Grouping I.getPosition (List.filterMap I.isBar)
 
 
-named : List String -> Grouping data value (I.Product config value data) -> Grouping data value (I.Product config value data)
-named names (Grouping toPos filter) =
+noMissing : Grouping (I.Product config (Maybe Float) data) (I.Product config Float data)
+noMissing =
+  Grouping I.getPosition (List.filterMap I.toNonMissing)
+
+
+named : List String -> Grouping (I.Product config value data) (I.Product config value data)
+named names =
   let onlyAcceptedNames i =
         case I.getName i of
           Just name -> List.member name names
           Nothing -> False
   in
-  Grouping toPos (filter >> List.filter onlyAcceptedNames)
-
-
-noMissing : Grouping data (Maybe Float) (I.Product config (Maybe Float) data) -> Grouping data (Maybe Float) (I.Product config Float data)
-noMissing (Grouping toPos filter) =
-  Grouping I.getPosition (filter >> List.filterMap I.toNonMissing)
+  Grouping I.getPosition (List.filter onlyAcceptedNames)
 
 
 
@@ -115,7 +108,7 @@ type alias SameX =
   }
 
 
-sameX : Grouping data value (Group SameX I.Any value data)
+sameX : Grouping (I.Product config value data) (Group SameX config value data)
 sameX =
   let fullVertialPosition plane item =
         I.getPosition plane item
@@ -142,7 +135,7 @@ type alias Stack datum =
   }
 
 
-stack : Grouping data value (Group (Stack data) I.Any value data)
+stack : Grouping (I.Product config value data) (Group (Stack data) config value data)
 stack =
   Grouping I.getPosition <|
     groupingHelp
@@ -169,7 +162,7 @@ type alias Bin data =
   }
 
 
-bin : Grouping data value (Group (Bin data) I.Any value data)
+bin : Grouping (I.Product config value data) (Group (Bin data) config value data)
 bin =
   Grouping I.getPosition <|
     groupingHelp
