@@ -81,12 +81,12 @@ dot =
   let centerPosition plane item =
         fromPoint (I.getCenter plane item)
   in
-  Grouping centerPosition I.onlyDotSeries
+  Grouping centerPosition (List.filterMap I.isDotSeries)
 
 
 bar : Grouping data (I.Product S.Bar data)
 bar =
-  Grouping I.getPosition I.onlyBarSeries
+  Grouping I.getPosition (List.filterMap I.isBarSeries)
 
 
 named : List String -> Grouping data (I.Product config data) -> Grouping data (I.Product config data)

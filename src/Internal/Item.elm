@@ -38,17 +38,6 @@ type alias Product config datum =
     }
 
 
-{-| -}
-onlyBarSeries : List (Product General datum) -> List (Product S.Bar datum)
-onlyBarSeries =
-  List.filterMap isBarSeries
-
-
-{-| -}
-onlyDotSeries : List (Product General datum) -> List (Product S.Dot datum)
-onlyDotSeries =
-  List.filterMap isDotSeries
-
 
 {-| -}
 getColor : Product { a | color : String } data -> String
