@@ -10,6 +10,7 @@ module Chart.Events exposing
   , getDependent, getIndependent, getDatum, getColor, getName
   , getTop, getCenter, getLeft, getRight, getPosition, getLimits
   , getProducts, getCommonality, group, regroup, named
+  , noMissing, noMissingG
   )
 
 -- TODO
@@ -94,7 +95,7 @@ getCoords =
 
 
 {-| -}
-getNearest : Grouping data (Item result) -> Decoder data (List (Item result))
+getNearest : Grouping data (Maybe Float) (Item result) -> Decoder data (List (Item result))
 getNearest (G.Grouping toPos _ as grouping) =
   Decoder <| \items plane ->
     let groups = group grouping items in
@@ -102,7 +103,7 @@ getNearest (G.Grouping toPos _ as grouping) =
 
 
 {-| -}
-getWithin : Float -> Grouping data (Item result) -> Decoder data (List (Item result))
+getWithin : Float -> Grouping data (Maybe Float) (Item result) -> Decoder data (List (Item result))
 getWithin radius (G.Grouping toPos _ as grouping) =
   Decoder <| \items plane ->
     let groups = group grouping items in
@@ -110,7 +111,7 @@ getWithin radius (G.Grouping toPos _ as grouping) =
 
 
 {-| -}
-getNearestX : Grouping data (Item result) -> Decoder data (List (Item result))
+getNearestX : Grouping data (Maybe Float) (Item result) -> Decoder data (List (Item result))
 getNearestX (G.Grouping toPos _ as grouping) =
   Decoder <| \items plane ->
     let groups = group grouping items in
@@ -118,7 +119,7 @@ getNearestX (G.Grouping toPos _ as grouping) =
 
 
 {-| -}
-getWithinX : Float -> Grouping data (Item result) -> Decoder data (List (Item result))
+getWithinX : Float -> Grouping data (Maybe Float) (Item result) -> Decoder data (List (Item result))
 getWithinX radius (G.Grouping toPos _ as grouping) =
   Decoder <| \items plane ->
     let groups = group grouping items in
@@ -206,38 +207,56 @@ getCommonality =
 -- GROUPING
 
 
-type alias Grouping data result =
-  G.Grouping data result
+type alias Grouping data value result =
+  G.Grouping data value result
 
 
-group : Grouping data result -> List (Product I.Any (Maybe Float) data) -> List result
+group : Grouping data value result -> List (Product I.Any value data) -> List result
 group =
   G.group
 
 
-regroup : Grouping data result -> Group i a (Maybe Float) data -> List result
+regroup : Grouping data value result -> Group i a value data -> List result
 regroup =
   G.regroup
 
 
-only : Grouping data (Product next (Maybe Float) data) -> Grouping data (Group inter config (Maybe Float) data) -> Grouping data (Group inter next (Maybe Float) data)
+only : Grouping data value (Product next value data) -> Grouping data value (Group inter config value data) -> Grouping data value (Group inter next value data)
 only =
   G.only
 
 
-product : Grouping data (Product I.Any (Maybe Float) data)
+product : Grouping data value (Product I.Any value data)
 product =
   G.product
 
 
-dot : Grouping data (Product CS.Dot (Maybe Float) data)
+dot : Grouping data value (Product CS.Dot value data)
 dot =
   G.dot
 
 
-bar : Grouping data (Product CS.Bar (Maybe Float) data)
+bar : Grouping data value (Product CS.Bar value data)
 bar =
   G.bar
+
+
+noMissing : Grouping data (Maybe Float) (I.Product config (Maybe Float) data) -> Grouping data (Maybe Float) (I.Product config Float data)
+noMissing =
+  G.noMissing
+
+
+noMissingG : Grouping data (Maybe Float) (G.Group inter config (Maybe Float) data) -> Grouping data (Maybe Float) (G.Group inter config Float data)
+noMissingG (G.Grouping toPos formGroups) =
+  G.Grouping I.getPosition <| \items ->
+    let onlyValid : G.Group inter config (Maybe Float) data -> Maybe (G.Group inter config Float data)
+        onlyValid (I.Item item as group_) =
+          case List.filterMap I.toNonMissing item.config.items of
+            [] -> Nothing
+            some -> Just (G.toGroup (getCommonality group_) some)
+    in
+    List.filterMap onlyValid (formGroups items)
+
 
 
 {-| -}
@@ -245,7 +264,7 @@ type alias SameX =
   G.SameX
 
 
-sameX : Grouping data (Group SameX I.Any (Maybe Float) data)
+sameX : Grouping data value (Group SameX I.Any value data)
 sameX =
   G.sameX
 
@@ -255,7 +274,7 @@ type alias Stack datum =
   G.Stack datum
 
 
-stack : Grouping data (Group (Stack data) I.Any (Maybe Float) data)
+stack : Grouping data value (Group (Stack data) I.Any value data)
 stack =
   G.stack
 
@@ -265,17 +284,17 @@ type alias Bin data =
   G.Bin data
 
 
-bin : Grouping data (Group (Bin data) I.Any (Maybe Float) data)
+bin : Grouping data value (Group (Bin data) I.Any value data)
 bin =
   G.bin
 
 
-named : List String -> Grouping data (Product config value data) -> Grouping data (Product config value data)
+named : List String -> Grouping data value (Product config value data) -> Grouping data value (Product config value data)
 named =
   G.named
 
 
-custom : (Plane -> result -> Position) -> (List (Product I.Any (Maybe Float) data) -> List result) -> Grouping data result
+custom : (Plane -> result -> Position) -> (List (Product I.Any value data) -> List result) -> Grouping data value result
 custom =
   G.Grouping
 

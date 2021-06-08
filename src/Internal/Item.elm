@@ -123,6 +123,38 @@ getDependent (Item item) =
 
 
 
+-- CHANGE VALUE
+
+
+toNonMissing : Product a (Maybe Float) datum -> Maybe (Product a Float datum)
+toNonMissing (Item item) =
+  case item.config.values.yOrg of
+    Just yOrg ->
+      Item
+        { toLimits = \_ -> item.toLimits item.config
+        , toPosition = \plane _ -> item.toPosition plane item.config
+        , toSvg = \plane _ _ -> toSvg plane (Item item)
+        , toHtml = \c -> toHtml (Item item)
+        , config =
+            { product = item.config.product
+            , values =
+                { datum = item.config.values.datum
+                , x1 = item.config.values.x1
+                , x2 = item.config.values.x2
+                , y = item.config.values.y
+                , yOrg = yOrg
+                }
+            , tooltipInfo = item.config.tooltipInfo
+            , toAny = item.config.toAny
+            }
+        }
+        |> Just
+
+    Nothing ->
+      Nothing
+
+
+
 -- GENERALIZATION
 
 
