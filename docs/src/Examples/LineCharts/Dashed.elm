@@ -1,4 +1,4 @@
-module Examples.BarCharts.DataDependent exposing (..)
+module Examples.LineCharts.Dashed exposing (..)
 
 
 -- THIS IS A GENERATED MODULE!
@@ -18,11 +18,9 @@ view model =
     [ C.grid []
     , C.xLabels []
     , C.yLabels []
-    , C.bars
-        []
-        [ C.bar .y []
-            |> C.variation (\d -> if d.x == 3 then [ CA.color "red" ] else [])
-        , C.bar .z []
+    , C.series .x
+        [ C.property .y [ CA.linear, CA.dashed [ 2, 2 ] ] []
+        , C.property .z [ CA.linear, CA.dashed [ 5, 2 ] ] []
         ]
         data
     ]
@@ -60,19 +58,20 @@ type alias Datum =
 data : List Datum
 data =
   let toDatum x y z v w p q =
-        Datum x y (Just z) (Just v) (Just w) (Just p) q
+        Datum x (Just y) (Just z) (Just v) (Just w) (Just p) (Just q)
   in
-  [ toDatum 0.0 (Just 2.0) 4.0 4.6 6.9 7.3 (Just 8.0)
-  , toDatum 0.2 (Just 3.0) 4.2 5.2 6.2 7.0 (Just 7.0)
-  , toDatum 0.8 (Just 4.0) 4.6 5.5 5.2 7.2 (Just 5.0)
-  , toDatum 1.0 Nothing    4.2 5.3 5.7 6.2 (Just 4.0)
-  , toDatum 1.2 (Just 5.0) 3.5 4.9 5.9 6.7 Nothing
-  , toDatum 2.0 (Just 2.0) 3.2 4.8 5.4 7.2 (Just 7.0)
-  , toDatum 2.3 (Just 1.0) 4.3 5.3 5.1 7.8 (Just 6.0)
-  , toDatum 2.8 (Just 3.0) 2.9 5.4 3.9 7.6 (Just 6.0)
-  , toDatum 3.0 Nothing    3.6 5.8 4.6 6.5 (Just 5.0)
-  , toDatum 4.0 (Just 1.0) 4.2 4.5 5.3 6.3 (Just 7.0)
+  [ toDatum 1  2 1 4.6 6.9 7.3 8.0
+  , toDatum 2  3 2 5.2 6.2 7.0 8.7
+  , toDatum 3  4 3 5.5 5.2 7.2 8.1
+  , toDatum 4  3 4 5.3 5.7 6.2 7.8
+  , toDatum 5  2 3 4.9 5.9 6.7 8.2
+  , toDatum 6  4 1 4.8 5.4 7.2 8.3
+  , toDatum 7  5 2 5.3 5.1 7.8 7.1
+  , toDatum 8  6 3 5.4 3.9 7.6 8.5
+  , toDatum 9  5 4 5.8 4.6 6.5 6.9
+  , toDatum 10 4 3 4.5 5.3 6.3 7.0
   ]
+
 
 
 smallCode : String
@@ -86,11 +85,9 @@ smallCode =
     [ C.grid []
     , C.xLabels []
     , C.yLabels []
-    , C.bars
-        []
-        [ C.bar .y []
-            |> C.variation (\\d -> if d.x == 3 then [ CA.color "red" ] else [])
-        , C.bar .z []
+    , C.series .x
+        [ C.property .y [ CA.linear, CA.dashed [ 2, 2 ] ] []
+        , C.property .z [ CA.linear, CA.dashed [ 5, 2 ] ] []
         ]
         data
     ]
@@ -115,11 +112,9 @@ view model =
     [ C.grid []
     , C.xLabels []
     , C.yLabels []
-    , C.bars
-        []
-        [ C.bar .y []
-            |> C.variation (\\d -> if d.x == 3 then [ CA.color "red" ] else [])
-        , C.bar .z []
+    , C.series .x
+        [ C.property .y [ CA.linear, CA.dashed [ 2, 2 ] ] []
+        , C.property .z [ CA.linear, CA.dashed [ 5, 2 ] ] []
         ]
         data
     ]
