@@ -15,10 +15,8 @@ module Chart.Events exposing
   )
 
 -- TODO
--- Rename General to Any
--- stacked tooltip issue
+-- Make sure searched position is preserved through filters
 -- Auto examples
--- Remove tiles
 -- move things to internal
 -- find out what to expose in Svg
 -- stepped inter
