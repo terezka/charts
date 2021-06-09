@@ -249,10 +249,12 @@ section onMsg model =
               --    data
 
               , C.series .x
-                  --[ C.stacked
-                      [ C.named "Blues" (C.property .q [ CA.stepped, CA.color CA.turquoise ] [])
+                  [ C.stacked
+                      [ C.named "Blues" (C.property .v [ CA.stepped, CA.color CA.turquoise, CA.opacity 0 ] [])
+                      , C.named "Greens" (C.property .q [ CA.stepped, CA.color CA.green, CA.opacity 0 ] [])
+                      , C.named "Reds" (C.property .w [ CA.stepped, CA.color CA.red, CA.opacity 0 ] [])
                       ]
-                  --]
+                  ]
                   data
 
               --, C.each (List.concatMap CE.getProducts model.hovering2) <| \p item ->
