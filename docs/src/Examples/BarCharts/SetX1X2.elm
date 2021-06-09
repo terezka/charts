@@ -1,4 +1,4 @@
-module Examples.BarCharts.Basic exposing (..)
+module Examples.BarCharts.SetX1X2 exposing (..)
 
 
 -- THIS IS A GENERATED MODULE!
@@ -18,9 +18,12 @@ view model =
     [ C.grid []
     , C.xLabels []
     , C.yLabels []
-    , C.bars []
-        [ C.property .z [] []
-        , C.property .y [] []
+    , C.bars
+        [ CA.x1 .x1
+        , CA.x2 (\d -> d.x1 + 0.2)
+        ]
+        [ C.bar .y []
+        , C.bar .z []
         ]
         data
     ]
@@ -81,9 +84,12 @@ smallCode =
     [ C.grid []
     , C.xLabels []
     , C.yLabels []
-    , C.bars []
-        [ C.property .z [] []
-        , C.property .y [] []
+    , C.bars
+        [ CA.x1 .x1
+        , CA.x2 (\\d -> d.x1 + 0.2)
+        ]
+        [ C.bar .y []
+        , C.bar .z []
         ]
         data
     ]
@@ -108,9 +114,12 @@ view model =
     [ C.grid []
     , C.xLabels []
     , C.yLabels []
-    , C.bars []
-        [ C.property .z [] []
-        , C.property .y [] []
+    , C.bars
+        [ CA.x1 .x1
+        , CA.x2 (\\d -> d.x1 + 0.2)
+        ]
+        [ C.bar .y []
+        , C.bar .z []
         ]
         data
     ]

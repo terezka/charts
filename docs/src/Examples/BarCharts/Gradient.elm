@@ -1,4 +1,4 @@
-module Examples.BarCharts.Basic exposing (..)
+module Examples.BarCharts.Gradient exposing (..)
 
 
 -- THIS IS A GENERATED MODULE!
@@ -18,9 +18,12 @@ view model =
     [ C.grid []
     , C.xLabels []
     , C.yLabels []
-    , C.bars []
-        [ C.property .z [] []
-        , C.property .y [] []
+    , C.bars
+        [ CA.margin 0.4
+        , CA.roundTop 0.4
+        ]
+        [ C.bar .y [ CA.gradient [ CA.bottom "white" ] ]
+        , C.bar .z [ CA.gradient [ CA.bottom "white" ] ]
         ]
         data
     ]
@@ -81,9 +84,12 @@ smallCode =
     [ C.grid []
     , C.xLabels []
     , C.yLabels []
-    , C.bars []
-        [ C.property .z [] []
-        , C.property .y [] []
+    , C.bars
+        [ CA.margin 0.4
+        , CA.roundTop 0.4
+        ]
+        [ C.bar .y [ CA.gradient [ CA.bottom "white" ] ]
+        , C.bar .z [ CA.gradient [ CA.bottom "white" ] ]
         ]
         data
     ]
@@ -108,9 +114,12 @@ view model =
     [ C.grid []
     , C.xLabels []
     , C.yLabels []
-    , C.bars []
-        [ C.property .z [] []
-        , C.property .y [] []
+    , C.bars
+        [ CA.margin 0.4
+        , CA.roundTop 0.4
+        ]
+        [ C.bar .y [ CA.gradient [ CA.bottom "white" ] ]
+        , C.bar .z [ CA.gradient [ CA.bottom "white" ] ]
         ]
         data
     ]

@@ -1,4 +1,4 @@
-module Examples.BarCharts.Basic exposing (..)
+module Examples.BarCharts.Opacity exposing (..)
 
 
 -- THIS IS A GENERATED MODULE!
@@ -18,9 +18,10 @@ view model =
     [ C.grid []
     , C.xLabels []
     , C.yLabels []
-    , C.bars []
-        [ C.property .z [] []
-        , C.property .y [] []
+    , C.bars
+        []
+        [ C.bar .y [ CA.opacity 0.5 ]
+        , C.bar .z []
         ]
         data
     ]
@@ -81,9 +82,10 @@ smallCode =
     [ C.grid []
     , C.xLabels []
     , C.yLabels []
-    , C.bars []
-        [ C.property .z [] []
-        , C.property .y [] []
+    , C.bars
+        []
+        [ C.bar .y [ CA.opacity 0.5 ]
+        , C.bar .z []
         ]
         data
     ]
@@ -108,9 +110,10 @@ view model =
     [ C.grid []
     , C.xLabels []
     , C.yLabels []
-    , C.bars []
-        [ C.property .z [] []
-        , C.property .y [] []
+    , C.bars
+        []
+        [ C.bar .y [ CA.opacity 0.5 ]
+        , C.bar .z []
         ]
         data
     ]

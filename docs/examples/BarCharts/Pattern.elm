@@ -1,8 +1,6 @@
-module Examples.BarCharts.Basic exposing (..)
+module Examples.BarCharts.Pattern exposing (..)
 
-
--- THIS IS A GENERATED MODULE!
-
+{-| @LARGE -}
 import Html as H
 import Chart as C
 import Chart.Attributes as CA
@@ -10,6 +8,7 @@ import Chart.Attributes as CA
 
 view : Model -> H.Html Msg
 view model =
+{-| @SMALL -}
   C.chart
     [ CA.height 300
     , CA.width 760
@@ -18,12 +17,15 @@ view model =
     [ C.grid []
     , C.xLabels []
     , C.yLabels []
-    , C.bars []
-        [ C.property .z [] []
-        , C.property .y [] []
+    , C.bars
+        []
+        [ C.bar .y [ CA.striped [] ]
+        , C.bar .z [ CA.dotted [] ]
         ]
         data
     ]
+{-| @SMALL END -}
+{-| @LARGE END -}
 
 
 type alias Model =
@@ -68,50 +70,3 @@ data =
   , toDatum 3.0 0.8 2.3 3.6 5.8 4.6 6.5 6.9
   , toDatum 4.0 1.1 1.0 4.2 4.5 5.3 6.3 7.0
   ]
-
-
-smallCode : String
-smallCode =
-  """
-  C.chart
-    [ CA.height 300
-    , CA.width 760
-    , CA.static
-    ]
-    [ C.grid []
-    , C.xLabels []
-    , C.yLabels []
-    , C.bars []
-        [ C.property .z [] []
-        , C.property .y [] []
-        ]
-        data
-    ]
-  """
-
-
-largeCode : String
-largeCode =
-  """
-import Html as H
-import Chart as C
-import Chart.Attributes as CA
-
-
-view : Model -> H.Html Msg
-view model =
-  C.chart
-    [ CA.height 300
-    , CA.width 760
-    , CA.static
-    ]
-    [ C.grid []
-    , C.xLabels []
-    , C.yLabels []
-    , C.bars []
-        [ C.property .z [] []
-        , C.property .y [] []
-        ]
-        data
-    ]
-  """

@@ -1,4 +1,4 @@
-module Examples.BarCharts.Basic exposing (..)
+module Examples.BarCharts.Stacked exposing (..)
 
 
 -- THIS IS A GENERATED MODULE!
@@ -19,8 +19,10 @@ view model =
     , C.xLabels []
     , C.yLabels []
     , C.bars []
-        [ C.property .z [] []
-        , C.property .y [] []
+        [ C.stacked
+            [ C.bar .y []
+            , C.bar .z []
+            ]
         ]
         data
     ]
@@ -82,8 +84,10 @@ smallCode =
     , C.xLabels []
     , C.yLabels []
     , C.bars []
-        [ C.property .z [] []
-        , C.property .y [] []
+        [ C.stacked
+            [ C.bar .y []
+            , C.bar .z []
+            ]
         ]
         data
     ]
@@ -109,8 +113,10 @@ view model =
     , C.xLabels []
     , C.yLabels []
     , C.bars []
-        [ C.property .z [] []
-        , C.property .y [] []
+        [ C.stacked
+            [ C.bar .y []
+            , C.bar .z []
+            ]
         ]
         data
     ]

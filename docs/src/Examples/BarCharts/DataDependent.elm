@@ -1,4 +1,4 @@
-module Examples.BarCharts.Basic exposing (..)
+module Examples.BarCharts.DataDependent exposing (..)
 
 
 -- THIS IS A GENERATED MODULE!
@@ -18,9 +18,11 @@ view model =
     [ C.grid []
     , C.xLabels []
     , C.yLabels []
-    , C.bars []
-        [ C.property .z [] []
-        , C.property .y [] []
+    , C.bars
+        []
+        [ C.bar .y []
+            |> C.variation (\d -> if d.x == 3 then [ CA.color "red" ] else [])
+        , C.bar .z []
         ]
         data
     ]
@@ -81,9 +83,11 @@ smallCode =
     [ C.grid []
     , C.xLabels []
     , C.yLabels []
-    , C.bars []
-        [ C.property .z [] []
-        , C.property .y [] []
+    , C.bars
+        []
+        [ C.bar .y []
+            |> C.variation (\\d -> if d.x == 3 then [ CA.color "red" ] else [])
+        , C.bar .z []
         ]
         data
     ]
@@ -108,9 +112,11 @@ view model =
     [ C.grid []
     , C.xLabels []
     , C.yLabels []
-    , C.bars []
-        [ C.property .z [] []
-        , C.property .y [] []
+    , C.bars
+        []
+        [ C.bar .y []
+            |> C.variation (\\d -> if d.x == 3 then [ CA.color "red" ] else [])
+        , C.bar .z []
         ]
         data
     ]
