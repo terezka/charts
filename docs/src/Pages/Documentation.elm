@@ -9,12 +9,6 @@ import Ui.Layout as Layout
 import Ui.Menu as Menu
 import Ui.Code as Code
 import SyntaxHighlight as SH
-import Ui.Section as Section
-import Section.ScatterChart
-import Section.LineChart
-import Section.BarChart
-import Section.CustomAxes
-import Section.Interactivity
 import Dict
 import Element as E
 import Element.Font as F
@@ -38,18 +32,14 @@ page shared req =
 
 
 type alias Model =
-  { exploration : Section.Model
-  , interactivity : Section.Interactivity.Model
-  , examples : Examples.Model
+  { examples : Examples.Model
   , displayed : Examples.Id
   }
 
 
 init : Model
 init =
-  { exploration = Section.init Section.ScatterChart.section
-  , interactivity = Section.Interactivity.init
-  , examples = Examples.init
+  { examples = Examples.init
   , displayed = Examples.first
   }
 
