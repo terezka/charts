@@ -76,7 +76,9 @@ container plane edits below chartEls above =
 
       htmlAttrsSize =
         if config.responsive then
-          []
+          [ HA.style "width" "100%"
+          , HA.style "height" "100%"
+          ]
         else
           [ HA.style "width" (String.fromFloat plane.width ++ "px")
           , HA.style "height" (String.fromFloat plane.height ++ "px")

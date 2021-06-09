@@ -11,8 +11,8 @@ view model =
 {-| @SMALL -}
   C.chart
     [ CA.height 300
-    , CA.width 760
-    , CA.static
+    , CA.width 300
+
     ]
     [ C.grid []
     , C.xLabels []
@@ -27,6 +27,14 @@ view model =
     ]
 {-| @SMALL END -}
 {-| @LARGE END -}
+
+
+meta =
+  { category = "Line charts"
+  , name = "Ungroup"
+  , description = "Don't group bars."
+  , order = 4
+  }
 
 
 type alias Model =

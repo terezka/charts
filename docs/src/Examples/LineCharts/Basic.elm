@@ -12,8 +12,8 @@ view : Model -> H.Html Msg
 view model =
   C.chart
     [ CA.height 300
-    , CA.width 760
-    , CA.static
+    , CA.width 300
+
     ]
     [ C.grid []
     , C.xLabels []
@@ -24,6 +24,14 @@ view model =
         ]
         data
     ]
+
+
+meta =
+  { category = "Line charts"
+  , name = "Ungroup"
+  , description = "Don't group bars."
+  , order = 1
+  }
 
 
 type alias Model =
@@ -79,8 +87,8 @@ smallCode =
   """
   C.chart
     [ CA.height 300
-    , CA.width 760
-    , CA.static
+    , CA.width 300
+
     ]
     [ C.grid []
     , C.xLabels []
@@ -106,8 +114,8 @@ view : Model -> H.Html Msg
 view model =
   C.chart
     [ CA.height 300
-    , CA.width 760
-    , CA.static
+    , CA.width 300
+
     ]
     [ C.grid []
     , C.xLabels []

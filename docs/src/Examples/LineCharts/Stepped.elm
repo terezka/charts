@@ -1,6 +1,8 @@
-module Examples.LineCharts.Montone exposing (..)
+module Examples.LineCharts.Stepped exposing (..)
 
-{-| @LARGE -}
+
+-- THIS IS A GENERATED MODULE!
+
 import Html as H
 import Chart as C
 import Chart.Attributes as CA
@@ -8,7 +10,6 @@ import Chart.Attributes as CA
 
 view : Model -> H.Html Msg
 view model =
-{-| @SMALL -}
   C.chart
     [ CA.height 300
     , CA.width 300
@@ -18,20 +19,18 @@ view model =
     , C.xLabels []
     , C.yLabels []
     , C.series .x
-        [ C.property .y [ CA.monotone ] []
-        , C.property .z [ CA.monotone ] []
+        [ C.property .y [ CA.stepped ] []
+        , C.property .z [ CA.stepped ] []
         ]
         data
     ]
-{-| @SMALL END -}
-{-| @LARGE END -}
 
 
 meta =
   { category = "Line charts"
   , name = "Ungroup"
   , description = "Don't group bars."
-  , order = 2
+  , order = 3
   }
 
 
@@ -81,3 +80,50 @@ data =
   , toDatum 10 4 3 4.5 5.3 6.3 7.0
   ]
 
+
+
+smallCode : String
+smallCode =
+  """
+  C.chart
+    [ CA.height 300
+    , CA.width 300
+
+    ]
+    [ C.grid []
+    , C.xLabels []
+    , C.yLabels []
+    , C.series .x
+        [ C.property .y [ CA.stepped ] []
+        , C.property .z [ CA.stepped ] []
+        ]
+        data
+    ]
+  """
+
+
+largeCode : String
+largeCode =
+  """
+import Html as H
+import Chart as C
+import Chart.Attributes as CA
+
+
+view : Model -> H.Html Msg
+view model =
+  C.chart
+    [ CA.height 300
+    , CA.width 300
+
+    ]
+    [ C.grid []
+    , C.xLabels []
+    , C.yLabels []
+    , C.series .x
+        [ C.property .y [ CA.stepped ] []
+        , C.property .z [ CA.stepped ] []
+        ]
+        data
+    ]
+  """

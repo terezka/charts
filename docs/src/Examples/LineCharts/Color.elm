@@ -12,18 +12,26 @@ view : Model -> H.Html Msg
 view model =
   C.chart
     [ CA.height 300
-    , CA.width 760
-    , CA.static
+    , CA.width 300
+
     ]
     [ C.grid []
     , C.xLabels []
     , C.yLabels []
     , C.series .x
         [ C.property .y [ CA.linear, CA.color CA.red ] []
-        , C.property .z [ CA.linear ] []
+        , C.property .z [ CA.linear, CA.color CA.turquoise ] []
         ]
         data
     ]
+
+
+meta =
+  { category = "Line charts"
+  , name = "Ungroup"
+  , description = "Don't group bars."
+  , order = 6
+  }
 
 
 type alias Model =
@@ -79,15 +87,15 @@ smallCode =
   """
   C.chart
     [ CA.height 300
-    , CA.width 760
-    , CA.static
+    , CA.width 300
+
     ]
     [ C.grid []
     , C.xLabels []
     , C.yLabels []
     , C.series .x
         [ C.property .y [ CA.linear, CA.color CA.red ] []
-        , C.property .z [ CA.linear ] []
+        , C.property .z [ CA.linear, CA.color CA.turquoise ] []
         ]
         data
     ]
@@ -106,15 +114,15 @@ view : Model -> H.Html Msg
 view model =
   C.chart
     [ CA.height 300
-    , CA.width 760
-    , CA.static
+    , CA.width 300
+
     ]
     [ C.grid []
     , C.xLabels []
     , C.yLabels []
     , C.series .x
         [ C.property .y [ CA.linear, CA.color CA.red ] []
-        , C.property .z [ CA.linear ] []
+        , C.property .z [ CA.linear, CA.color CA.turquoise ] []
         ]
         data
     ]

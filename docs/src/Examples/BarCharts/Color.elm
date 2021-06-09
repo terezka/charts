@@ -4,6 +4,7 @@ module Examples.BarCharts.Color exposing (..)
 -- THIS IS A GENERATED MODULE!
 
 import Html as H
+import Svg as S
 import Chart as C
 import Chart.Attributes as CA
 
@@ -12,8 +13,7 @@ view : Model -> H.Html Msg
 view model =
   C.chart
     [ CA.height 300
-    , CA.width 760
-    , CA.static
+    , CA.width 300
     ]
     [ C.grid []
     , C.xLabels []
@@ -21,10 +21,17 @@ view model =
     , C.bars
         []
         [ C.bar .y [ CA.color CA.blue ]
-        , C.bar .z []
+        , C.bar .z [ CA.color CA.turquoise ]
         ]
         data
     ]
+
+meta =
+  { category = "Bar charts"
+  , name = "Color"
+  , description = "Change bar color."
+  , order = 7
+  }
 
 
 type alias Model =
@@ -64,11 +71,11 @@ data =
         Datum x x1 x1 (Just y) (Just z) (Just v) (Just w) (Just p) (Just q)
   in
   [ toDatum 0.0 0.0 1.2 4.0 4.6 6.9 7.3 8.0
-  , toDatum 1.0 0.4 2.2 4.2 5.3 5.7 6.2 7.8
-  , toDatum 2.0 0.6 1.0 3.2 4.8 5.4 7.2 8.3
-  , toDatum 3.0 0.8 2.3 3.6 5.8 4.6 6.5 6.9
-  , toDatum 4.0 1.1 1.0 4.2 4.5 5.3 6.3 7.0
+  , toDatum 2.0 0.4 2.2 4.2 5.3 5.7 6.2 7.8
+  , toDatum 3.0 0.6 1.0 3.2 4.8 5.4 7.2 8.3
+  , toDatum 4.0 0.2 1.2 3.0 4.1 5.5 7.9 8.1
   ]
+
 
 
 smallCode : String
@@ -76,8 +83,7 @@ smallCode =
   """
   C.chart
     [ CA.height 300
-    , CA.width 760
-    , CA.static
+    , CA.width 300
     ]
     [ C.grid []
     , C.xLabels []
@@ -85,7 +91,7 @@ smallCode =
     , C.bars
         []
         [ C.bar .y [ CA.color CA.blue ]
-        , C.bar .z []
+        , C.bar .z [ CA.color CA.turquoise ]
         ]
         data
     ]
@@ -96,6 +102,7 @@ largeCode : String
 largeCode =
   """
 import Html as H
+import Svg as S
 import Chart as C
 import Chart.Attributes as CA
 
@@ -104,8 +111,7 @@ view : Model -> H.Html Msg
 view model =
   C.chart
     [ CA.height 300
-    , CA.width 760
-    , CA.static
+    , CA.width 300
     ]
     [ C.grid []
     , C.xLabels []
@@ -113,7 +119,7 @@ view model =
     , C.bars
         []
         [ C.bar .y [ CA.color CA.blue ]
-        , C.bar .z []
+        , C.bar .z [ CA.color CA.turquoise ]
         ]
         data
     ]

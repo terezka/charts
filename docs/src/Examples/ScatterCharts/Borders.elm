@@ -12,19 +12,30 @@ view : Model -> H.Html Msg
 view model =
   C.chart
     [ CA.height 300
-    , CA.width 760
-    , CA.static
-    , CA.marginLeft 10
+    , CA.width 300
+    , CA.paddingLeft 10
     ]
     [ C.grid []
     , C.xLabels []
     , C.yLabels []
     , C.series .x
-        [ C.property .y [] [ CA.borderWidth 2, CA.border "red" ]
-        , C.property .z [] []
+        [ C.property .y []
+            [ CA.borderWidth 3
+            , CA.border CA.purple
+            , CA.size 12
+            , CA.opacity 0
+            ]
         ]
         data
     ]
+
+
+meta =
+  { category = "Scatter charts"
+  , name = "Basic"
+  , description = "Make a basic bar chart"
+  , order = 5
+  }
 
 
 type alias Model =
@@ -80,16 +91,19 @@ smallCode =
   """
   C.chart
     [ CA.height 300
-    , CA.width 760
-    , CA.static
-    , CA.marginLeft 10
+    , CA.width 300
+    , CA.paddingLeft 10
     ]
     [ C.grid []
     , C.xLabels []
     , C.yLabels []
     , C.series .x
-        [ C.property .y [] [ CA.borderWidth 2, CA.border "red" ]
-        , C.property .z [] []
+        [ C.property .y []
+            [ CA.borderWidth 3
+            , CA.border CA.purple
+            , CA.size 12
+            , CA.opacity 0
+            ]
         ]
         data
     ]
@@ -108,16 +122,19 @@ view : Model -> H.Html Msg
 view model =
   C.chart
     [ CA.height 300
-    , CA.width 760
-    , CA.static
-    , CA.marginLeft 10
+    , CA.width 300
+    , CA.paddingLeft 10
     ]
     [ C.grid []
     , C.xLabels []
     , C.yLabels []
     , C.series .x
-        [ C.property .y [] [ CA.borderWidth 2, CA.border "red" ]
-        , C.property .z [] []
+        [ C.property .y []
+            [ CA.borderWidth 3
+            , CA.border CA.purple
+            , CA.size 12
+            , CA.opacity 0
+            ]
         ]
         data
     ]

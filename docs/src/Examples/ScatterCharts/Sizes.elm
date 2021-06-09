@@ -12,9 +12,8 @@ view : Model -> H.Html Msg
 view model =
   C.chart
     [ CA.height 300
-    , CA.width 760
-    , CA.static
-    , CA.marginLeft 10
+    , CA.width 300
+    , CA.paddingLeft 15
     ]
     [ C.grid []
     , C.xLabels []
@@ -25,6 +24,14 @@ view model =
         ]
         data
     ]
+
+
+meta =
+  { category = "Scatter charts"
+  , name = "Basic"
+  , description = "Make a basic bar chart"
+  , order = 4
+  }
 
 
 type alias Model =
@@ -80,9 +87,8 @@ smallCode =
   """
   C.chart
     [ CA.height 300
-    , CA.width 760
-    , CA.static
-    , CA.marginLeft 10
+    , CA.width 300
+    , CA.paddingLeft 15
     ]
     [ C.grid []
     , C.xLabels []
@@ -108,9 +114,8 @@ view : Model -> H.Html Msg
 view model =
   C.chart
     [ CA.height 300
-    , CA.width 760
-    , CA.static
-    , CA.marginLeft 10
+    , CA.width 300
+    , CA.paddingLeft 15
     ]
     [ C.grid []
     , C.xLabels []

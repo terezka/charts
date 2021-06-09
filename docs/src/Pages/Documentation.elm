@@ -33,14 +33,14 @@ page shared req =
 
 type alias Model =
   { examples : Examples.Model
-  , displayed : Examples.Id
+  , displayed : Maybe Examples.Id
   }
 
 
 init : Model
 init =
   { examples = Examples.init
-  , displayed = Examples.first
+  , displayed = Nothing
   }
 
 
@@ -51,6 +51,7 @@ init =
 type Msg
   = OnExampleMsg Examples.Msg
   | OnDisplayExample Examples.Id
+  | OnResetExample
 
 
 
@@ -61,7 +62,10 @@ update msg model =
         { model | examples = Examples.update sub model.examples }
 
       OnDisplayExample id ->
-        { model | displayed = id }
+        { model | displayed = Just id }
+
+      OnResetExample ->
+        { model | displayed = Nothing }
 
 
 
@@ -72,133 +76,118 @@ view : Model -> View Msg
 view model =
   { title = "elm-charts | Documentation"
   , body =
-      Layout.view
-        [ Menu.small
-        , E.row
-            [ E.width E.fill
-            , E.paddingEach { top = 60, bottom = 70, left = 0, right = 0 }
-            ]
-            [ sidebar model
-            , content model
-            ]
-        ]
+      Layout.view <|
+        case model.displayed of
+            Just id ->
+              [ Menu.small
+              , content model id
+              ]
+
+            Nothing ->
+              let groupBy : Examples.Id -> Dict.Dict String (List Examples.Id) -> Dict.Dict String (List Examples.Id)
+                  groupBy id =
+                    Dict.update (Examples.meta id).category (updateCat id)
+
+                  updateCat id maybeIds =
+                    case maybeIds of
+                      Just ids -> Just (id :: ids)
+                      Nothing -> Just [id]
+
+                  groups =
+                    List.foldl groupBy Dict.empty Examples.all
+
+                  toThumbnails ( category, ids ) =
+                    E.column
+                      [ E.paddingXY 0 60 ]
+                      [ E.el [ F.size 24 ] (E.text category)
+                      , ids
+                          |> List.map (\id -> ( thumbnail model id, Examples.meta id ))
+                          |> List.sortBy (Tuple.second >> \meta -> ( meta.category, meta.order ))
+                          |> List.map Tuple.first
+                          |> E.wrappedRow
+                            [ E.width E.fill
+                            , E.height E.fill
+                            , E.spacing 100
+                            , E.paddingXY 0 30
+                            ]
+                      ]
+
+              in
+              Menu.small :: List.map toThumbnails (Dict.toList groups)
   }
 
 
-sidebar : Model -> E.Element Msg
-sidebar model =
-  let viewTitle ( category, subs ) =
-        if List.member model.displayed (List.map Tuple.second subs)
-        then viewOpen ( category, subs )
-        else viewClosed ( category, subs )
-
-      viewClosed ( category, subs ) =
-        I.button
-          [ F.size 16
-          , F.color (E.rgb255 80 80 80)
-          ]
-          { onPress =
-              subs
-                |> List.map Tuple.second
-                |> List.head
-                |> Maybe.withDefault Examples.first
-                |> OnDisplayExample
-                |> Just
-          , label = E.text category
-          }
-
-      viewOpen ( category, subs ) =
+thumbnail : Model -> Examples.Id -> E.Element Msg
+thumbnail model id =
+  I.button
+    [ E.height (E.px 265)
+    , E.width (E.px 265)
+    ]
+    { onPress = Just (OnDisplayExample id)
+    , label =
+        let meta = Examples.meta id in
         E.column
-          []
-          [ E.el
-              [ F.size 16
-              , F.color (E.rgb255 0 0 0)
-              , E.paddingEach { top = 0, bottom = 10, left = 0, right = 0 }
-              ]
-              (E.text category)
-          , E.column
-              [ E.width (E.fillPortion 1)
-              , E.paddingEach { top = 0, bottom = 0, left = 5, right = 0 }
-              ]
-              (List.map viewSub subs)
+          [ E.width E.fill
+          , E.height E.fill
+          , E.spacing 5
           ]
-
-      viewSub ( name, id ) =
-        let isSelected =
-              id == model.displayed
-        in
-        I.button
-          [ F.size 14
-          , E.paddingEach { top = 5, bottom = 5, left = 10, right = 0 }
-          , if isSelected
-              then F.color (E.rgb255 0 0 0)
-              else F.color (E.rgb255 80 80 80)
-          , B.widthEach { top = 0, bottom = 0, left = 1, right = 0 }
-          , if isSelected
-              then B.color (E.rgb255 180 180 180)
-              else B.color (E.rgb255 230 230 230)
-          , E.moveLeft 2
+          [ E.el [ F.size 16 ] (E.text meta.name)
+          , E.el [ F.size 12 ] (E.text meta.description)
+          , E.el
+              [ E.width E.fill
+              , E.height E.fill
+              , E.paddingXY 0 5
+              ] <|
+              E.map OnExampleMsg <| E.html <| Examples.view model.examples id
           ]
-          { onPress = Just (OnDisplayExample id)
-          , label = E.text name
-          }
-  in
-  E.column
-    [ E.alignTop
-    , E.width (E.fillPortion 4)
-    , E.spacing 20
-    ]
-    [ E.el [ F.size 14 ] (E.text "Documentation")
-    , E.column
-      [ E.spacing 15
-      ]
-      (List.map viewTitle groups)
-    ]
+    }
 
 
-content : Model -> E.Element Msg
-content model =
-  let ( cat, title ) = getCategoryAndTitle model.displayed in
+content : Model -> Examples.Id -> E.Element Msg
+content model id =
+  let ( cat, title ) = getCategoryAndTitle id in
   E.column
-    [ E.width (E.fillPortion 9)
+    [ E.width E.fill
     , E.height E.fill
+    , E.paddingEach { top = 50, bottom = 0, left = 0, right = 0 }
     ]
-    [ E.row
-        [ F.size 28
-        , E.paddingEach { top = 0, bottom = 25, left = 0, right = 0 }
-        ]
-        [ E.text cat
-        , E.el [ F.color (E.rgb255 130 130 130) ] (E.text <| " · " ++ title)
-        ]
-    , E.el
-      [ E.width E.fill
-      , E.height E.fill
-      , E.paddingEach { top = 0, bottom = 40, left = 0, right = 0 }
-      ]
-      (E.map OnExampleMsg <| E.html <| Examples.view model.examples model.displayed)
-    , E.column
+    [ I.button [ F.size 16 ]
+        { onPress = Just OnResetExample
+        , label = E.text "← Back to overview"
+        }
+    , E.row
         [ E.width E.fill
         , E.height E.fill
-        , BG.color (E.rgb255 250 250 250)
+        , E.spacing 50
+        , E.alignTop
         ]
-        [ Code.view { template = Examples.smallCode model.displayed, edits = [] } ]
-      ]
+        [ E.el
+            [ E.height (E.px 300)
+            , E.width (E.px 300)
+            , E.paddingEach { top = 0, bottom = 40, left = 0, right = 0 }
+            ]
+            (E.map OnExampleMsg <| E.html <| Examples.view model.examples id)
+        , E.column
+            [ E.width (E.fillPortion 8)
+            , E.height E.fill
+            ]
+            [ E.row
+                [ F.size 28
+                , E.paddingEach { top = 25, bottom = 25, left = 0, right = 0 }
+                ]
+                [ E.text cat
+                , E.el [ F.color (E.rgb255 130 130 130) ] (E.text <| " · " ++ title)
+                ]
+            , E.column
+                [ E.width E.fill
+                , E.height E.fill
+                , BG.color (E.rgb255 250 250 250)
+                ]
+                [ Code.view { template = Examples.smallCode id, edits = [] } ]
+            ]
+          ]
+    ]
 
-
-groups : List ( String, List ( String, Examples.Id ) )
-groups =
-  let func id acc =
-        case getCategoryAndTitle id of
-          ( category, title ) ->
-            let updateCat maybeSome =
-                  case maybeSome of
-                    Just some -> Just (( title, id ) :: some)
-                    Nothing -> Just [ ( title, id ) ]
-            in
-            Dict.update category updateCat acc
-  in
-  List.foldl func Dict.empty Examples.all
-    |> Dict.toList
 
 
 getCategoryAndTitle : Examples.Id -> ( String, String )

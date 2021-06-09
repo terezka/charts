@@ -11,9 +11,8 @@ view model =
 {-| @SMALL -}
   C.chart
     [ CA.height 300
-    , CA.width 760
-    , CA.static
-    , CA.marginLeft 10
+    , CA.width 300
+    , CA.paddingLeft 15
     ]
     [ C.grid []
     , C.xLabels []
@@ -27,6 +26,14 @@ view model =
     ]
 {-| @SMALL END -}
 {-| @LARGE END -}
+
+
+meta =
+  { category = "Scatter charts"
+  , name = "Basic"
+  , description = "Make a basic bar chart"
+  , order = 2
+  }
 
 
 type alias Model =

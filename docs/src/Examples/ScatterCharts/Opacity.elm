@@ -6,25 +6,33 @@ module Examples.ScatterCharts.Opacity exposing (..)
 import Html as H
 import Chart as C
 import Chart.Attributes as CA
+import Svg as S
 
 
 view : Model -> H.Html Msg
 view model =
   C.chart
     [ CA.height 300
-    , CA.width 760
-    , CA.static
-    , CA.marginLeft 10
+    , CA.width 300
+    , CA.paddingLeft 15
     ]
     [ C.grid []
     , C.xLabels []
     , C.yLabels []
     , C.series .x
-        [ C.property .y [] [ CA.opacity 0.5 ]
-        , C.property .z [] [ CA.opacity 0.5 ]
+        [ C.property .y [] [ CA.opacity 0.1 ]
+        , C.property .z [] [ CA.opacity 0.1 ]
         ]
         data
     ]
+
+
+meta =
+  { category = "Scatter charts"
+  , name = "Basic"
+  , description = "Make a basic bar chart"
+  , order = 6
+  }
 
 
 type alias Model =
@@ -80,16 +88,15 @@ smallCode =
   """
   C.chart
     [ CA.height 300
-    , CA.width 760
-    , CA.static
-    , CA.marginLeft 10
+    , CA.width 300
+    , CA.paddingLeft 15
     ]
     [ C.grid []
     , C.xLabels []
     , C.yLabels []
     , C.series .x
-        [ C.property .y [] [ CA.opacity 0.5 ]
-        , C.property .z [] [ CA.opacity 0.5 ]
+        [ C.property .y [] [ CA.opacity 0.1 ]
+        , C.property .z [] [ CA.opacity 0.1 ]
         ]
         data
     ]
@@ -102,22 +109,22 @@ largeCode =
 import Html as H
 import Chart as C
 import Chart.Attributes as CA
+import Svg as S
 
 
 view : Model -> H.Html Msg
 view model =
   C.chart
     [ CA.height 300
-    , CA.width 760
-    , CA.static
-    , CA.marginLeft 10
+    , CA.width 300
+    , CA.paddingLeft 15
     ]
     [ C.grid []
     , C.xLabels []
     , C.yLabels []
     , C.series .x
-        [ C.property .y [] [ CA.opacity 0.5 ]
-        , C.property .z [] [ CA.opacity 0.5 ]
+        [ C.property .y [] [ CA.opacity 0.1 ]
+        , C.property .z [] [ CA.opacity 0.1 ]
         ]
         data
     ]

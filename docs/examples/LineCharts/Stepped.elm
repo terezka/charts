@@ -1,4 +1,4 @@
-module Examples.LineCharts.Montone exposing (..)
+module Examples.LineCharts.Stepped exposing (..)
 
 {-| @LARGE -}
 import Html as H
@@ -18,8 +18,8 @@ view model =
     , C.xLabels []
     , C.yLabels []
     , C.series .x
-        [ C.property .y [ CA.monotone ] []
-        , C.property .z [ CA.monotone ] []
+        [ C.property .y [ CA.stepped ] []
+        , C.property .z [ CA.stepped ] []
         ]
         data
     ]
@@ -31,7 +31,7 @@ meta =
   { category = "Line charts"
   , name = "Ungroup"
   , description = "Don't group bars."
-  , order = 2
+  , order = 3
   }
 
 
