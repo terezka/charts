@@ -31,8 +31,8 @@ import Ui.Section as Section
 
 type alias Model =
   { hovering : List (CI.Product CI.Any (Maybe Float) Datum)
-  , hovering2 : List (CE.Group (CE.Stack Datum) CS.Dot Float Datum)
-  , hovering3 : List (CE.Group (CE.Stack Datum) CS.Bar (Maybe Float) Datum)
+  , hovering2 : List (CE.Group (CE.Bin Datum) CS.Dot (Maybe Float) Datum)
+  , hovering3 : List (CE.Group CE.SameX CS.Dot (Maybe Float) Datum)
   }
 
 
@@ -47,8 +47,8 @@ init =
 type Msg
   = OnHover (List (CI.Product CI.Any (Maybe Float) Datum))
   | OnHover2
-      (List (CE.Group (CE.Stack Datum) CS.Dot Float Datum))
-      (List (CE.Group (CE.Stack Datum) CS.Bar (Maybe Float) Datum))
+      (List (CE.Group (CE.Bin Datum) CS.Dot (Maybe Float) Datum))
+      (List (CE.Group CE.SameX CS.Dot (Maybe Float) Datum))
 
 
 update : Msg -> Model -> Model
@@ -216,8 +216,8 @@ section onMsg model =
               , CE.onMouseLeave (OnHover2 [] [])
               , CE.on "mousemove" <|
                   CE.map2 OnHover2
-                    (CE.getNearest <| CE.filter CE.noMissing <| CE.filter CE.dot CE.stack)
-                    (CE.getNearest <| CE.andThen CE.stack CE.bar)
+                    (CE.getNearest <| CE.filter CE.dot CE.bin)
+                    (CE.getNearest <| CE.filter CE.dot CE.sameX)
               ]
               [ C.legendsAt .max .max 0 50
                   [ CA.row
@@ -257,10 +257,10 @@ section onMsg model =
                   --]
                   data
 
-              , C.each model.hovering2 <| \p item ->
-                  [ C.tooltip item [ CA.onLeftOrRight ] [] [] ]
+              --, C.each (List.concatMap CE.getProducts model.hovering2) <| \p item ->
+              --    [ C.tooltip item [ CA.onTop ] [] [] ]
 
-              , C.each model.hovering3 <| \p item ->
+              , C.each (model.hovering3) <| \p item ->
                   [ C.tooltip item [ CA.onTop ] [] [] ]
               ]
         }
@@ -292,7 +292,7 @@ data =
   , toDatum 2.0 (Just 2.0) 3.2 4.8 5.4 7.2 8.3
   , toDatum 2.3 (Just 1.0) 4.3 5.3 5.1 7.8 7.1
   , toDatum 2.8 (Just 3.0) 2.9 5.4 3.9 7.6 8.5
-  , toDatum 3.0 (Just 2.0) 3.6 5.8 4.6 6.5 6.9
+  , toDatum 3.0 Nothing 3.6 5.8 4.6 6.5 6.9
   , toDatum 4.0 (Just 1.0) 4.2 4.5 5.3 6.3 7.0
   ]
 

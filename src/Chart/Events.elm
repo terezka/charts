@@ -11,7 +11,7 @@ module Chart.Events exposing
   , getTop, getCenter, getLeft, getRight, getPosition, getLimits
   , getProducts, getCommonality, group, regroup, named
 
-  , andThen, filter
+  , collect, filter
   )
 
 -- TODO
@@ -217,19 +217,19 @@ group =
   G.group
 
 
-andThen : Grouping b c -> Grouping a b -> Grouping a c
-andThen =
-  G.andThen
+regroup : Grouping (I.Product a v data) b -> Group i a v data -> List b
+regroup =
+  G.regroup
+
+
+collect : Grouping b c -> Grouping a b -> Grouping a c
+collect =
+  G.collect
 
 
 filter : Grouping (I.Product b v data) (I.Product c x data) -> Grouping a (Group i b v data) -> Grouping a (Group i c x data)
 filter =
   G.filter
-
-
-regroup : Grouping (I.Product I.Any v data) b -> Group i a v data -> List b
-regroup =
-  G.regroup
 
 
 product : Grouping (I.Product I.Any value data) (I.Product I.Any value data)

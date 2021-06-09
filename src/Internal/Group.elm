@@ -51,9 +51,9 @@ group (Grouping _ func) items =
   func items
 
 
-regroup : Grouping (I.Product I.Any v data) b -> Group i a v data -> List b
-regroup (Grouping _ func) group_ =
-  func (getProducts group_)
+regroup : Grouping (I.Product a v data) b -> Group i a v data -> List b
+regroup (Grouping _ func) (I.Item item) =
+  func item.config.items
 
 
 filter : Grouping (I.Product b v data) (I.Product c x data) -> Grouping a (Group i b v data) -> Grouping a (Group i c x data)
@@ -68,8 +68,8 @@ filter (Grouping toPos2 func2) (Grouping toPos1 func1) =
     List.filterMap func (func1 items)
 
 
-andThen : Grouping b c -> Grouping a b -> Grouping a c
-andThen (Grouping toPos2 func2) (Grouping toPos1 func1)  =
+collect : Grouping b c -> Grouping a b -> Grouping a c
+collect (Grouping toPos2 func2) (Grouping toPos1 func1)  =
   Grouping toPos2 (func1 >> func2)
 
 
