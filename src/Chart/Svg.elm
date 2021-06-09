@@ -912,6 +912,7 @@ toCommands method toX toY data =
         case method of
           CA.Linear -> Interpolation.linear points
           CA.Monotone -> Interpolation.monotone points
+          CA.Stepped -> Interpolation.stepped points
 
       toSets ps cmds =
         withBorder ps <| \first last_ -> ( first, cmds, last_ )

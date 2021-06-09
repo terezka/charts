@@ -3,7 +3,7 @@ module Chart.Attributes exposing
   , Anchor(..), alignLeft, alignRight, alignMiddle, content
   , rotate, length, roundTop, roundBottom, area, opacity, size, aura, auraWidth, ungroup, margin, spacing
   , Design(..), GradientConfig, Pattern, space, striped, dotted, gradient, top, bottom, dashed, break
-  , Method(..), linear, monotone
+  , Method(..), linear, monotone, stepped
   , Shape(..), circle, triangle, square, diamond, plus, cross, shape
   , Direction(..), onTop, onBottom, onRight, onLeft, onLeftOrRight, onTopOrBottom, noPointer
   , Alignment(..), row, column
@@ -455,6 +455,7 @@ alignMiddle config =
 type Method
   = Linear
   | Monotone
+  | Stepped
 
 
 {-| -}
@@ -467,6 +468,12 @@ linear config =
 monotone : Attribute { a | method : Maybe Method }
 monotone config =
   { config | method = Just Monotone }
+
+
+{-| -}
+stepped : Attribute { a | method : Maybe Method }
+stepped config =
+  { config | method = Just Stepped }
 
 
 {-| -}

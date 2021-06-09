@@ -19,7 +19,6 @@ module Chart.Events exposing
 -- Auto examples
 -- move things to internal
 -- find out what to expose in Svg
--- stepped inter
 -- specify center of item for tooltip placement
 
 

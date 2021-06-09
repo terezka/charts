@@ -1,14 +1,8 @@
-module Internal.Interpolation exposing (Interpolation(..), linear, monotone)
+module Internal.Interpolation exposing (linear, monotone, stepped)
 
 
 import Svg.Commands exposing (..)
 
-
-{-| -}
-type Interpolation
-  = Linear Float
-  | Monotone Float
-  -- TODO stepped
 
 
 {-| -}
@@ -149,3 +143,24 @@ sign x =
   if x < 0
     then -1
     else 1
+
+
+
+-- STEPPED
+
+
+stepped : List (List Point) -> List (List Command)
+stepped sections =
+  let
+    expand result section =
+      case section of
+        a :: b :: rest -> expand (result ++ after a b) (b :: rest)
+        last :: []     -> result
+        []             -> result
+  in
+  List.map (expand [] >> List.map (\{ x, y } -> Line x y)) sections
+
+
+after : Point -> Point -> List Point
+after a b =
+  [ a, Point b.x a.y, b ]
