@@ -21,7 +21,7 @@ view model =
     , C.bars
         []
         [ C.bar .y []
-            |> C.variation (\d -> if d.x == 3 then [ CA.color "red" ] else [])
+            |> C.variation (\d -> if d.x == 3 then [ CA.color CA.red ] else [])
         , C.bar .z []
         ]
         data
@@ -86,7 +86,7 @@ smallCode =
     , C.bars
         []
         [ C.bar .y []
-            |> C.variation (\\d -> if d.x == 3 then [ CA.color "red" ] else [])
+            |> C.variation (\\d -> if d.x == 3 then [ CA.color CA.red ] else [])
         , C.bar .z []
         ]
         data
@@ -115,7 +115,7 @@ view model =
     , C.bars
         []
         [ C.bar .y []
-            |> C.variation (\\d -> if d.x == 3 then [ CA.color "red" ] else [])
+            |> C.variation (\\d -> if d.x == 3 then [ CA.color CA.red ] else [])
         , C.bar .z []
         ]
         data
