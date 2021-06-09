@@ -1,4 +1,4 @@
-module Examples.BarCharts.Basic exposing (..)
+module Examples.BarCharts.TooltipBin exposing (..)
 
 
 -- THIS IS A GENERATED MODULE!
@@ -7,6 +7,27 @@ import Html as H
 import Svg as S
 import Chart as C
 import Chart.Attributes as CA
+import Chart.Events as CE
+
+
+type alias Model =
+  { hovering : List (CE.Group (CE.Bin Datum) CE.Any (Maybe Float) Datum) }
+
+
+init : Model
+init =
+  { hovering = [] }
+
+
+type Msg
+  = OnHover (List (CE.Group (CE.Bin Datum) CE.Any (Maybe Float) Datum))
+
+
+update : Msg -> Model -> Model
+update msg model =
+  case msg of
+    OnHover hovering ->
+      { model | hovering = hovering }
 
 
 view : Model -> H.Html Msg
@@ -14,6 +35,8 @@ view model =
   C.chart
     [ CA.height 300
     , CA.width 300
+    , CE.onMouseMove OnHover (CE.getNearest CE.bin)
+    , CE.onMouseLeave (OnHover [])
     ]
     [ C.grid []
     , C.xLabels []
@@ -23,33 +46,18 @@ view model =
         , C.property .y [] []
         ]
         data
+    , C.each model.hovering <| \p item ->
+        [ C.tooltip item [] [] [] ]
     ]
 
 
 meta =
   { category = "Bar charts"
-  , name = "Basic"
-  , description = "Make a basic bar chart."
-  , order = 1
+  , name = "Bin tooltip"
+  , description = "Add a tooltip for bin."
+  , order = 13
   }
 
-
-type alias Model =
-  ()
-
-
-init : Model
-init =
-  ()
-
-
-type Msg
-  = Msg
-
-
-update : Msg -> Model -> Model
-update msg model =
-  model
 
 
 type alias Datum =
@@ -84,6 +92,8 @@ smallCode =
   C.chart
     [ CA.height 300
     , CA.width 300
+    , CE.onMouseMove OnHover (CE.getNearest CE.bin)
+    , CE.onMouseLeave (OnHover [])
     ]
     [ C.grid []
     , C.xLabels []
@@ -93,6 +103,8 @@ smallCode =
         , C.property .y [] []
         ]
         data
+    , C.each model.hovering <| \\p item ->
+        [ C.tooltip item [] [] [] ]
     ]
   """
 
@@ -104,6 +116,27 @@ import Html as H
 import Svg as S
 import Chart as C
 import Chart.Attributes as CA
+import Chart.Events as CE
+
+
+type alias Model =
+  { hovering : List (CE.Group (CE.Bin Datum) CE.Any (Maybe Float) Datum) }
+
+
+init : Model
+init =
+  { hovering = [] }
+
+
+type Msg
+  = OnHover (List (CE.Group (CE.Bin Datum) CE.Any (Maybe Float) Datum))
+
+
+update : Msg -> Model -> Model
+update msg model =
+  case msg of
+    OnHover hovering ->
+      { model | hovering = hovering }
 
 
 view : Model -> H.Html Msg
@@ -111,6 +144,8 @@ view model =
   C.chart
     [ CA.height 300
     , CA.width 300
+    , CE.onMouseMove OnHover (CE.getNearest CE.bin)
+    , CE.onMouseLeave (OnHover [])
     ]
     [ C.grid []
     , C.xLabels []
@@ -120,5 +155,7 @@ view model =
         , C.property .y [] []
         ]
         data
+    , C.each model.hovering <| \\p item ->
+        [ C.tooltip item [] [] [] ]
     ]
   """

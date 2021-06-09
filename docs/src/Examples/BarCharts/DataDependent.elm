@@ -21,7 +21,7 @@ view model =
     , C.bars
         []
         [ C.bar .y []
-            |> C.variation (\d -> if d.x == 3 then [ CA.color CA.red ] else [])
+            |> C.variation (\d -> if d.x == 3 then [ CA.striped [] ] else [])
         , C.bar .z []
         ]
         data
@@ -31,7 +31,7 @@ meta =
   { category = "Bar charts"
   , name = "Data dependent"
   , description = "Change bar based on data."
-  , order = 10
+  , order = 12
   }
 
 
@@ -92,7 +92,7 @@ smallCode =
     , C.bars
         []
         [ C.bar .y []
-            |> C.variation (\\d -> if d.x == 3 then [ CA.color CA.red ] else [])
+            |> C.variation (\\d -> if d.x == 3 then [ CA.striped [] ] else [])
         , C.bar .z []
         ]
         data
@@ -121,7 +121,7 @@ view model =
     , C.bars
         []
         [ C.bar .y []
-            |> C.variation (\\d -> if d.x == 3 then [ CA.color CA.red ] else [])
+            |> C.variation (\\d -> if d.x == 3 then [ CA.striped [] ] else [])
         , C.bar .z []
         ]
         data

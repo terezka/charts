@@ -1,10 +1,31 @@
-module Examples.BarCharts.DataDependent exposing (..)
+module Examples.BarCharts.Tooltip exposing (..)
 
 {-| @LARGE -}
 import Html as H
 import Svg as S
 import Chart as C
 import Chart.Attributes as CA
+import Chart.Events as CE
+
+
+type alias Model =
+  { hovering : List (CE.Product CE.Bar (Maybe Float) Datum) }
+
+
+init : Model
+init =
+  { hovering = [] }
+
+
+type Msg
+  = OnHover (List (CE.Product CE.Bar (Maybe Float) Datum))
+
+
+update : Msg -> Model -> Model
+update msg model =
+  case msg of
+    OnHover hovering ->
+      { model | hovering = hovering }
 
 
 view : Model -> H.Html Msg
@@ -13,45 +34,27 @@ view model =
   C.chart
     [ CA.height 300
     , CA.width 300
+    , CE.onMouseMove OnHover (CE.getNearest CE.bar)
+    , CE.onMouseLeave (OnHover [])
     ]
     [ C.grid []
     , C.xLabels []
     , C.yLabels []
-    , C.bars
-        []
-        [ C.bar .y []
-            |> C.variation (\d -> if d.x == 3 then [ CA.striped [] ] else [])
-        , C.bar .z []
-        ]
-        data
+    , C.bars [] [ C.property .z [] [] ] data
+    , C.each model.hovering <| \p item ->
+        [ C.tooltip item [ CA.onTop ] [] [] ]
     ]
 {-| @SMALL END -}
 {-| @LARGE END -}
 
+
 meta =
   { category = "Bar charts"
-  , name = "Data dependent"
-  , description = "Change bar based on data."
+  , name = "Tooltip"
+  , description = "Add a basic tooltip."
   , order = 12
   }
 
-
-type alias Model =
-  ()
-
-
-init : Model
-init =
-  ()
-
-
-type Msg
-  = Msg
-
-
-update : Msg -> Model -> Model
-update msg model =
-  model
 
 
 type alias Datum =

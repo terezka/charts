@@ -30,7 +30,7 @@ meta =
   { category = "Bar charts"
   , name = "Gradient"
   , description = "Add gradient to bar."
-  , order = 11
+  , order = 10
   }
 
 

@@ -2,11 +2,11 @@ module Chart.Events exposing
   ( Event(..)
   , onMouseMove, onMouseLeave, onMouseUp, onMouseDown, onClick, on
   , Decoder(..), getCoords, getNearest, getNearestX, getWithin, getWithinX
-  , product, dot, bin, stack, bar, noMissing
-  , SameX, sameX
+  , product, dot, bin, stack, sameX, bar, noMissing
   , map, map2, map3, map4
 
-  , Product, Group, Bin, Stack
+  , Product, Any, Bar, Dot
+  , Group, Bin, Stack, SameX
   , getDependent, getIndependent, getDatum, getColor, getName
   , getTop, getCenter, getLeft, getRight, getPosition, getLimits
   , getProducts, getCommonality, group, regroup, named
@@ -229,17 +229,28 @@ filter =
   G.filter
 
 
+type alias Any =
+  I.Any
+
+
 product : Grouping (I.Product I.Any value data) (I.Product I.Any value data)
 product =
   G.product
 
 
-dot : Grouping (I.Product I.Any value data) (I.Product CS.Dot value data)
+type alias Dot =
+  CS.Dot
+
+
+dot : Grouping (I.Product I.Any value data) (I.Product Dot value data)
 dot =
   G.dot
 
 
-bar : Grouping (I.Product I.Any value data) (I.Product CS.Bar value data)
+type alias Bar =
+  CS.Bar
+
+bar : Grouping (I.Product I.Any value data) (I.Product Bar value data)
 bar =
   G.bar
 

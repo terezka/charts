@@ -13,7 +13,6 @@ view model =
   C.chart
     [ CA.height 300
     , CA.width 300
-
     ]
     [ C.grid []
     , C.xLabels []
@@ -31,7 +30,7 @@ view model =
 meta =
   { category = "Bar charts"
   , name = "Basic"
-  , description = "Make a basic bar chart"
+  , description = "Make a basic bar chart."
   , order = 1
   }
 

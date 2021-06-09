@@ -1,10 +1,31 @@
-module Examples.BarCharts.DataDependent exposing (..)
+module Examples.BarCharts.TooltipBin exposing (..)
 
 {-| @LARGE -}
 import Html as H
 import Svg as S
 import Chart as C
 import Chart.Attributes as CA
+import Chart.Events as CE
+
+
+type alias Model =
+  { hovering : List (CE.Group (CE.Bin Datum) CE.Any (Maybe Float) Datum) }
+
+
+init : Model
+init =
+  { hovering = [] }
+
+
+type Msg
+  = OnHover (List (CE.Group (CE.Bin Datum) CE.Any (Maybe Float) Datum))
+
+
+update : Msg -> Model -> Model
+update msg model =
+  case msg of
+    OnHover hovering ->
+      { model | hovering = hovering }
 
 
 view : Model -> H.Html Msg
@@ -13,45 +34,31 @@ view model =
   C.chart
     [ CA.height 300
     , CA.width 300
+    , CE.onMouseMove OnHover (CE.getNearest CE.bin)
+    , CE.onMouseLeave (OnHover [])
     ]
     [ C.grid []
     , C.xLabels []
     , C.yLabels []
-    , C.bars
-        []
-        [ C.bar .y []
-            |> C.variation (\d -> if d.x == 3 then [ CA.striped [] ] else [])
-        , C.bar .z []
+    , C.bars []
+        [ C.property .z [] []
+        , C.property .y [] []
         ]
         data
+    , C.each model.hovering <| \p item ->
+        [ C.tooltip item [] [] [] ]
     ]
 {-| @SMALL END -}
 {-| @LARGE END -}
 
+
 meta =
   { category = "Bar charts"
-  , name = "Data dependent"
-  , description = "Change bar based on data."
-  , order = 12
+  , name = "Bin tooltip"
+  , description = "Add a tooltip for bin."
+  , order = 13
   }
 
-
-type alias Model =
-  ()
-
-
-init : Model
-init =
-  ()
-
-
-type Msg
-  = Msg
-
-
-update : Msg -> Model -> Model
-update msg model =
-  model
 
 
 type alias Datum =

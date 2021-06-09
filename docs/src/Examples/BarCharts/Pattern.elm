@@ -30,7 +30,7 @@ meta =
   { category = "Bar charts"
   , name = "Pattern"
   , description = "Change pattern of bar."
-  , order = 12
+  , order = 11
   }
 
 
