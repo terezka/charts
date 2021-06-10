@@ -19,8 +19,8 @@ view model =
     , C.xLabels []
     , C.yLabels []
     , C.series .x
-        [ C.property .y [] [ CA.opacity 0.1 ]
-        , C.property .z [] [ CA.opacity 0.1 ]
+        [ C.property .y [] [ CA.opacity 0.1, CA.borderWidth 1 ]
+        , C.property .z [] [ CA.opacity 0.1, CA.borderWidth 1 ]
         ]
         data
     ]
@@ -30,8 +30,8 @@ view model =
 
 meta =
   { category = "Scatter charts"
-  , name = "Basic"
-  , description = "Make a basic bar chart"
+  , name = "Opacity"
+  , description = "Change opacity of dots."
   , order = 6
   }
 
@@ -70,7 +70,7 @@ data =
   let toDatum x y z v w p q =
         Datum x (Just y) (Just z) (Just v) (Just w) (Just p) (Just q)
   in
-  [ toDatum 0.0 2.0 4.0 4.6 6.9 7.3 8.0
+  [ toDatum 0.1 2.0 4.0 4.6 6.9 7.3 8.0
   , toDatum 0.2 3.0 4.2 5.2 6.2 7.0 8.7
   , toDatum 0.8 4.0 4.6 5.5 5.2 7.2 8.1
   , toDatum 1.0 2.0 4.2 5.3 5.7 6.2 7.8
