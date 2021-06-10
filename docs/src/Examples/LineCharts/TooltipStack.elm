@@ -43,10 +43,10 @@ view model =
     , C.series .x
         [ C.stacked
           [ C.property .y
-              [ CA.monotone, CA.color CA.pink, CA.gradient [] ]
+              [ CA.monotone, CA.gradient [] ]
               [ CA.circle, CA.color "white", CA.border CA.pink, CA.borderWidth 1 ]
           , C.property .z
-              [ CA.monotone, CA.color CA.purple, CA.gradient [] ]
+              [ CA.monotone, CA.gradient [] ]
               [ CA.circle, CA.color "white", CA.border CA.purple, CA.borderWidth 1 ]
           ]
         ]
@@ -109,10 +109,10 @@ smallCode =
     , C.series .x
         [ C.stacked
           [ C.property .y
-              [ CA.monotone, CA.color CA.pink, CA.gradient [] ]
+              [ CA.monotone, CA.gradient [] ]
               [ CA.circle, CA.color "white", CA.border CA.pink, CA.borderWidth 1 ]
           , C.property .z
-              [ CA.monotone, CA.color CA.purple, CA.gradient [] ]
+              [ CA.monotone, CA.gradient [] ]
               [ CA.circle, CA.color "white", CA.border CA.purple, CA.borderWidth 1 ]
           ]
         ]
@@ -166,10 +166,10 @@ view model =
     , C.series .x
         [ C.stacked
           [ C.property .y
-              [ CA.monotone, CA.color CA.pink, CA.gradient [] ]
+              [ CA.monotone, CA.gradient [] ]
               [ CA.circle, CA.color "white", CA.border CA.pink, CA.borderWidth 1 ]
           , C.property .z
-              [ CA.monotone, CA.color CA.purple, CA.gradient [] ]
+              [ CA.monotone, CA.gradient [] ]
               [ CA.circle, CA.color "white", CA.border CA.purple, CA.borderWidth 1 ]
           ]
         ]
