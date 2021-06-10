@@ -20,8 +20,10 @@ view model =
     , C.yLabels []
     , C.bars
         []
-        [ C.bar .y [ CA.border "red", CA.borderWidth 2 ]
-        , C.bar .z []
+        [ C.stacked
+            [ C.bar .z [ CA.borderWidth 2 ]
+            , C.bar .y [ CA.borderWidth 2 ]
+            ]
         ]
         data
     ]
@@ -91,8 +93,10 @@ smallCode =
     , C.yLabels []
     , C.bars
         []
-        [ C.bar .y [ CA.border "red", CA.borderWidth 2 ]
-        , C.bar .z []
+        [ C.stacked
+            [ C.bar .z [ CA.borderWidth 2 ]
+            , C.bar .y [ CA.borderWidth 2 ]
+            ]
         ]
         data
     ]
@@ -119,8 +123,10 @@ view model =
     , C.yLabels []
     , C.bars
         []
-        [ C.bar .y [ CA.border "red", CA.borderWidth 2 ]
-        , C.bar .z []
+        [ C.stacked
+            [ C.bar .z [ CA.borderWidth 2 ]
+            , C.bar .y [ CA.borderWidth 2 ]
+            ]
         ]
         data
     ]

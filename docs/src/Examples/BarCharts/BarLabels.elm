@@ -1,4 +1,4 @@
-module Examples.BarCharts.BinLabels exposing (..)
+module Examples.BarCharts.BarLabels exposing (..)
 
 
 -- THIS IS A GENERATED MODULE!
@@ -18,25 +18,35 @@ view model =
     ]
     [ C.grid []
 
+    , C.xLabels []
     , C.yLabels []
-    , C.eachBin <| \p bin ->
-        let common = CE.getCommonality bin
-            middle = common.start + (common.end - common.start) / 2
-        in
-        [ C.xLabel [ CA.x middle, CA.y 0 ] [ S.text common.datum.label ] ]
-
     , C.bars []
         [ C.property .q [] []
         , C.property .p [] []
         ]
         data
+    , C.eachProduct <| \p bar ->
+        let top = CE.getTop p bar
+            label =
+              CE.getDependent bar
+                |> Maybe.map String.fromFloat
+                |> Maybe.withDefault "N/A"
+        in
+        [ C.xLabel
+            [ CA.x top.x
+            , CA.y top.y
+            , CA.yOff -2
+            , CA.color "white"
+            ]
+            [ S.text label ]
+        ]
     ]
 
 
 meta =
   { category = "Bar charts"
-  , name = "Labels for bins"
-  , description = "Add custom bin labels."
+  , name = "Labels for bars"
+  , description = "Add custom bar labels."
   , order = 15
   }
 
@@ -95,18 +105,28 @@ smallCode =
     ]
     [ C.grid []
 
+    , C.xLabels []
     , C.yLabels []
-    , C.eachBin <| \\p bin ->
-        let common = CE.getCommonality bin
-            middle = common.start + (common.end - common.start) / 2
-        in
-        [ C.xLabel [ CA.x middle, CA.y 0 ] [ S.text common.datum.label ] ]
-
     , C.bars []
         [ C.property .q [] []
         , C.property .p [] []
         ]
         data
+    , C.eachProduct <| \\p bar ->
+        let top = CE.getTop p bar
+            label =
+              CE.getDependent bar
+                |> Maybe.map String.fromFloat
+                |> Maybe.withDefault "N/A"
+        in
+        [ C.xLabel
+            [ CA.x top.x
+            , CA.y top.y
+            , CA.yOff -2
+            , CA.color "white"
+            ]
+            [ S.text label ]
+        ]
     ]
   """
 
@@ -129,17 +149,27 @@ view model =
     ]
     [ C.grid []
 
+    , C.xLabels []
     , C.yLabels []
-    , C.eachBin <| \\p bin ->
-        let common = CE.getCommonality bin
-            middle = common.start + (common.end - common.start) / 2
-        in
-        [ C.xLabel [ CA.x middle, CA.y 0 ] [ S.text common.datum.label ] ]
-
     , C.bars []
         [ C.property .q [] []
         , C.property .p [] []
         ]
         data
+    , C.eachProduct <| \\p bar ->
+        let top = CE.getTop p bar
+            label =
+              CE.getDependent bar
+                |> Maybe.map String.fromFloat
+                |> Maybe.withDefault "N/A"
+        in
+        [ C.xLabel
+            [ CA.x top.x
+            , CA.y top.y
+            , CA.yOff -2
+            , CA.color "white"
+            ]
+            [ S.text label ]
+        ]
     ]
   """

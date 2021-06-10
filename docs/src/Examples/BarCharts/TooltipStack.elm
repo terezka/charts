@@ -1,4 +1,4 @@
-module Examples.BarCharts.TooltipBin exposing (..)
+module Examples.BarCharts.TooltipStack exposing (..)
 
 
 -- THIS IS A GENERATED MODULE!
@@ -11,7 +11,7 @@ import Chart.Events as CE
 
 
 type alias Model =
-  { hovering : List (CE.Group (CE.Bin Datum) CE.Any (Maybe Float) Datum) }
+  { hovering : List (CE.Group (CE.Stack Datum) CE.Any (Maybe Float) Datum) }
 
 
 init : Model
@@ -20,7 +20,7 @@ init =
 
 
 type Msg
-  = OnHover (List (CE.Group (CE.Bin Datum) CE.Any (Maybe Float) Datum))
+  = OnHover (List (CE.Group (CE.Stack Datum) CE.Any (Maybe Float) Datum))
 
 
 update : Msg -> Model -> Model
@@ -35,15 +35,18 @@ view model =
   C.chart
     [ CA.height 300
     , CA.width 300
-    , CE.onMouseMove OnHover (CE.getNearest CE.bin)
+    , CE.onMouseMove OnHover (CE.getNearest CE.stack)
     , CE.onMouseLeave (OnHover [])
     ]
     [ C.grid []
     , C.xLabels []
     , C.yLabels []
     , C.bars []
-        [ C.property .z [] []
-        , C.property .y [] []
+        [ C.stacked
+            [ C.bar .z []
+            , C.bar .y []
+            ]
+        , C.bar .v [ CA.color CA.purple, CA.striped [] ]
         ]
         data
     , C.each model.hovering <| \p item ->
@@ -53,9 +56,9 @@ view model =
 
 meta =
   { category = "Bar charts"
-  , name = "Bin tooltip"
-  , description = "Add a tooltip for nearest bin."
-  , order = 13
+  , name = "Stack tooltip"
+  , description = "Add a tooltip for nearest stack."
+  , order = 14
   }
 
 
@@ -92,15 +95,18 @@ smallCode =
   C.chart
     [ CA.height 300
     , CA.width 300
-    , CE.onMouseMove OnHover (CE.getNearest CE.bin)
+    , CE.onMouseMove OnHover (CE.getNearest CE.stack)
     , CE.onMouseLeave (OnHover [])
     ]
     [ C.grid []
     , C.xLabels []
     , C.yLabels []
     , C.bars []
-        [ C.property .z [] []
-        , C.property .y [] []
+        [ C.stacked
+            [ C.bar .z []
+            , C.bar .y []
+            ]
+        , C.bar .v [ CA.color CA.purple, CA.striped [] ]
         ]
         data
     , C.each model.hovering <| \\p item ->
@@ -120,7 +126,7 @@ import Chart.Events as CE
 
 
 type alias Model =
-  { hovering : List (CE.Group (CE.Bin Datum) CE.Any (Maybe Float) Datum) }
+  { hovering : List (CE.Group (CE.Stack Datum) CE.Any (Maybe Float) Datum) }
 
 
 init : Model
@@ -129,7 +135,7 @@ init =
 
 
 type Msg
-  = OnHover (List (CE.Group (CE.Bin Datum) CE.Any (Maybe Float) Datum))
+  = OnHover (List (CE.Group (CE.Stack Datum) CE.Any (Maybe Float) Datum))
 
 
 update : Msg -> Model -> Model
@@ -144,15 +150,18 @@ view model =
   C.chart
     [ CA.height 300
     , CA.width 300
-    , CE.onMouseMove OnHover (CE.getNearest CE.bin)
+    , CE.onMouseMove OnHover (CE.getNearest CE.stack)
     , CE.onMouseLeave (OnHover [])
     ]
     [ C.grid []
     , C.xLabels []
     , C.yLabels []
     , C.bars []
-        [ C.property .z [] []
-        , C.property .y [] []
+        [ C.stacked
+            [ C.bar .z []
+            , C.bar .y []
+            ]
+        , C.bar .v [ CA.color CA.purple, CA.striped [] ]
         ]
         data
     , C.each model.hovering <| \\p item ->

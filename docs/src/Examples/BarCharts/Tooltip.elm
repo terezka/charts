@@ -41,7 +41,14 @@ view model =
     [ C.grid []
     , C.xLabels []
     , C.yLabels []
-    , C.bars [] [ C.property .z [] [] ] data
+    , C.bars []
+        [ C.stacked
+            [ C.bar .z []
+            , C.bar .y []
+            ]
+        , C.bar .v [ CA.color CA.turquoise ]
+        ]
+        data
     , C.each model.hovering <| \p item ->
         [ C.tooltip item [ CA.onTop ] [] [] ]
     ]
@@ -50,7 +57,7 @@ view model =
 meta =
   { category = "Bar charts"
   , name = "Tooltip"
-  , description = "Add a basic tooltip."
+  , description = "Add a basic tooltip for nearest bar."
   , order = 12
   }
 
@@ -94,7 +101,14 @@ smallCode =
     [ C.grid []
     , C.xLabels []
     , C.yLabels []
-    , C.bars [] [ C.property .z [] [] ] data
+    , C.bars []
+        [ C.stacked
+            [ C.bar .z []
+            , C.bar .y []
+            ]
+        , C.bar .v [ CA.color CA.turquoise ]
+        ]
+        data
     , C.each model.hovering <| \\p item ->
         [ C.tooltip item [ CA.onTop ] [] [] ]
     ]
@@ -142,7 +156,14 @@ view model =
     [ C.grid []
     , C.xLabels []
     , C.yLabels []
-    , C.bars [] [ C.property .z [] [] ] data
+    , C.bars []
+        [ C.stacked
+            [ C.bar .z []
+            , C.bar .y []
+            ]
+        , C.bar .v [ CA.color CA.turquoise ]
+        ]
+        data
     , C.each model.hovering <| \\p item ->
         [ C.tooltip item [ CA.onTop ] [] [] ]
     ]

@@ -16,10 +16,11 @@ module Chart.Events exposing
 
 -- TODO
 -- Make sure searched position is preserved through filters
--- Auto examples
 -- move things to internal
 -- find out what to expose in Svg
 -- specify center of item for tooltip placement
+-- moveLeft, moveRight api
+-- use correct HTML elements
 
 
 import Html as H exposing (Html)
