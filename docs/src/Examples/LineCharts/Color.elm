@@ -20,7 +20,7 @@ view model =
     , C.yLabels []
     , C.series .x
         [ C.property .y [ CA.linear, CA.color CA.red ] []
-        , C.property .z [ CA.linear, CA.color CA.turquoise ] []
+        , C.property .z [ CA.linear, CA.color CA.orange ] []
         ]
         data
     ]
@@ -28,9 +28,9 @@ view model =
 
 meta =
   { category = "Line charts"
-  , name = "Ungroup"
-  , description = "Don't group bars."
-  , order = 6
+  , name = "Color"
+  , description = "Change color of line."
+  , order = 4
   }
 
 
@@ -95,7 +95,7 @@ smallCode =
     , C.yLabels []
     , C.series .x
         [ C.property .y [ CA.linear, CA.color CA.red ] []
-        , C.property .z [ CA.linear, CA.color CA.turquoise ] []
+        , C.property .z [ CA.linear, CA.color CA.orange ] []
         ]
         data
     ]
@@ -122,7 +122,7 @@ view model =
     , C.yLabels []
     , C.series .x
         [ C.property .y [ CA.linear, CA.color CA.red ] []
-        , C.property .z [ CA.linear, CA.color CA.turquoise ] []
+        , C.property .z [ CA.linear, CA.color CA.orange ] []
         ]
         data
     ]

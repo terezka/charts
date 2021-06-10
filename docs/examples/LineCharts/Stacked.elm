@@ -31,9 +31,9 @@ view model =
 
 meta =
   { category = "Line charts"
-  , name = "Ungroup"
-  , description = "Don't group bars."
-  , order = 4
+  , name = "Stacked"
+  , description = "Stack lines."
+  , order = 8
   }
 
 

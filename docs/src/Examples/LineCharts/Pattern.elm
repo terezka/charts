@@ -30,9 +30,9 @@ view model =
 
 meta =
   { category = "Line charts"
-  , name = "Ungroup"
-  , description = "Don't group bars."
-  , order = 8
+  , name = "Pattern"
+  , description = "Add a pattern to the area under the curve."
+  , order = 11
   }
 
 

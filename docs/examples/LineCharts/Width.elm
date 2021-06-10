@@ -18,8 +18,8 @@ view model =
     , C.xLabels []
     , C.yLabels []
     , C.series .x
-        [ C.property .y [ CA.linear, CA.width 3 ] []
-        , C.property .z [ CA.linear ] []
+        [ C.property .y [ CA.linear, CA.width 4 ] []
+        , C.property .z [ CA.linear, CA.width 3 ] []
         ]
         data
     ]
@@ -29,9 +29,9 @@ view model =
 
 meta =
   { category = "Line charts"
-  , name = "Ungroup"
-  , description = "Don't group bars."
-  , order = 9
+  , name = "Width"
+  , description = "Change width of line."
+  , order = 5
   }
 
 

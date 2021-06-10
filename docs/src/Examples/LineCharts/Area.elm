@@ -27,9 +27,9 @@ view model =
 
 meta =
   { category = "Line charts"
-  , name = "Ungroup"
-  , description = "Don't group bars."
-  , order = 5
+  , name = "Area under curve"
+  , description = "Set opacity of the area under curve."
+  , order = 9
   }
 
 

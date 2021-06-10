@@ -29,8 +29,8 @@ view model =
 
 meta =
   { category = "Line charts"
-  , name = "Ungroup"
-  , description = "Don't group bars."
+  , name = "Monotone"
+  , description = "Use a monotone interpolation."
   , order = 2
   }
 

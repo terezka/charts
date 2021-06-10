@@ -27,9 +27,9 @@ view model =
 
 meta =
   { category = "Line charts"
-  , name = "Ungroup"
-  , description = "Don't group bars."
-  , order = 11
+  , name = "Dots"
+  , description = "Add dots to a line."
+  , order = 7
   }
 
 

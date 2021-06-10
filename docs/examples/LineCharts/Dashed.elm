@@ -18,8 +18,8 @@ view model =
     , C.xLabels []
     , C.yLabels []
     , C.series .x
-        [ C.property .y [ CA.linear, CA.dashed [ 2, 2 ] ] []
-        , C.property .z [ CA.linear, CA.dashed [ 5, 2 ] ] []
+        [ C.property .y [ CA.monotone, CA.dashed [ 1, 2 ] ] []
+        , C.property .z [ CA.monotone, CA.dashed [ 10, 5 ] ] []
         ]
         data
     ]
@@ -29,9 +29,9 @@ view model =
 
 meta =
   { category = "Line charts"
-  , name = "Ungroup"
-  , description = "Don't group bars."
-  , order = 10
+  , name = "Dashed"
+  , description = "Make a line dashed."
+  , order = 6
   }
 
 

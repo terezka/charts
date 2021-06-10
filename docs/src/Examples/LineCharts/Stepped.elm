@@ -28,8 +28,8 @@ view model =
 
 meta =
   { category = "Line charts"
-  , name = "Ungroup"
-  , description = "Don't group bars."
+  , name = "Stepped"
+  , description = "Use a stepped interpolation."
   , order = 3
   }
 
