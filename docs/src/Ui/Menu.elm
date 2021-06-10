@@ -91,7 +91,7 @@ small : E.Element msg
 small =
   E.row
     [ E.width E.fill
-    , E.paddingEach { top = 0, bottom = 0, left = 0, right = 0 }
+    , E.paddingEach { top = 0, bottom = 40, left = 0, right = 0 }
     ]
     [ E.column
       [ E.alignTop

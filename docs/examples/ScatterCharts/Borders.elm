@@ -21,7 +21,7 @@ view model =
         [ C.property .y []
             [ CA.borderWidth 3
             , CA.border CA.purple
-            , CA.size 12
+            , CA.size 18
             , CA.opacity 0
             ]
         ]

@@ -33,6 +33,7 @@ page shared req =
 
 type alias Model =
   { examples : Examples.Model
+  , selectedTab : Int
   , displayed : Maybe Examples.Id
   }
 
@@ -40,6 +41,7 @@ type alias Model =
 init : Model
 init =
   { examples = Examples.init
+  , selectedTab = 0
   , displayed = Nothing
   }
 
@@ -50,6 +52,7 @@ init =
 
 type Msg
   = OnExampleMsg Examples.Msg
+  | OnSelectTab Int
   | OnDisplayExample Examples.Id
   | OnResetExample
 
@@ -60,6 +63,9 @@ update msg model =
     case msg of
       OnExampleMsg sub ->
         { model | examples = Examples.update sub model.examples }
+
+      OnSelectTab index ->
+        { model | selectedTab = index }
 
       OnDisplayExample id ->
         { model | displayed = Just id }
@@ -96,24 +102,69 @@ view model =
                   groups =
                     List.foldl groupBy Dict.empty Examples.all
 
+                  tabs =
+                    E.el [ E.width E.fill, E.paddingXY 0 30 ] <|
+                      E.row
+                        [ E.width E.fill
+                        , E.spacing 10
+                        , E.paddingXY 10 0
+                        , B.color (E.rgb255 220 220 220)
+                        , B.widthEach { top = 0, bottom = 1, left = 0, right = 0 }
+                        ]
+                        (List.indexedMap toTab (Dict.toList groups))
+
+                  toTab index ( category, _ ) =
+                    I.button
+                      [ F.size 14
+                      , E.paddingXY 30 10
+                      , E.moveDown 1
+                      , BG.color (E.rgb255 255 255 255)
+                      , B.color (E.rgb255 220 220 220)
+                      , if model.selectedTab == index then F.color (E.rgb255 0 0 0) else F.color (E.rgb255 120 120 120)
+                      , B.widthEach { top = 1, bottom = if model.selectedTab == index then 0 else 1, left = 1, right = 1 }
+                      , B.roundEach { topLeft = 5, topRight = 5, bottomLeft = 0, bottomRight = 0 }
+                      ]
+                      { onPress = Just (OnSelectTab index)
+                      , label = E.text category
+                      }
+
+                  thumbnails =
+                    List.indexedMap Tuple.pair (Dict.toList groups)
+                      |> Dict.fromList
+                      |> Dict.get model.selectedTab
+                      |> Maybe.withDefault ("", [])
+                      |> toThumbnails
+
                   toThumbnails ( category, ids ) =
                     E.column
-                      [ E.paddingXY 0 60 ]
-                      [ E.el [ F.size 24 ] (E.text category)
-                      , ids
+                      [ E.paddingEach { top = 30, bottom = 100, left = 0, right = 0 } ]
+                      [ ids
                           |> List.map (\id -> ( thumbnail model id, Examples.meta id ))
                           |> List.sortBy (Tuple.second >> \meta -> ( meta.category, meta.order ))
                           |> List.map Tuple.first
                           |> E.wrappedRow
-                            [ E.width E.fill
-                            , E.height E.fill
-                            , E.spacing 100
-                            , E.paddingXY 0 30
-                            ]
+                              [ E.width E.fill
+                              , E.height E.fill
+                              , E.spacing 100
+                              ]
                       ]
-
               in
-              Menu.small :: List.map toThumbnails (Dict.toList groups)
+              [ Menu.small
+              , E.el
+                  [ F.size 32
+                  , E.paddingXY 0 10
+                  ]
+                  (E.text "Documentation")
+              , E.paragraph
+                  [ E.paddingXY 0 10
+                  , F.size 14
+                  , E.width (E.px 700)
+                  ]
+                  [ E.text "This is an attempt at documentation through example. For documentation of exact API, see official Elm documentation."
+                  ]
+              , tabs
+              , thumbnails
+              ]
   }
 
 
