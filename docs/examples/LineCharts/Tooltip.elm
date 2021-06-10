@@ -1,53 +1,62 @@
-module Examples.LineCharts.Dots exposing (..)
+module Examples.LineCharts.Tooltip exposing (..)
 
-
--- THIS IS A GENERATED MODULE!
-
+{-| @LARGE -}
 import Html as H
 import Chart as C
 import Chart.Attributes as CA
+import Chart.Events as CE
+
+
+type alias Model =
+  { hovering : List (CE.Product CE.Dot (Maybe Float) Datum) }
+
+
+init : Model
+init =
+  { hovering = [] }
+
+
+type Msg
+  = OnHover (List (CE.Product CE.Dot (Maybe Float) Datum))
+
+
+update : Msg -> Model -> Model
+update msg model =
+  case msg of
+    OnHover hovering ->
+      { model | hovering = hovering }
 
 
 view : Model -> H.Html Msg
 view model =
+{-| @SMALL -}
   C.chart
     [ CA.height 300
     , CA.width 300
+    , CE.onMouseMove OnHover (CE.getNearest CE.dot)
+    , CE.onMouseLeave (OnHover [])
     ]
     [ C.grid []
     , C.xLabels []
     , C.yLabels []
     , C.series .x
-        [ C.property .y [ CA.linear ] [ CA.circle ]
+        [ C.property .y [ CA.linear ] [ CA.circle, CA.size 3 ]
+        , C.property .z [ CA.linear ] [ CA.circle, CA.size 3 ]
         ]
         data
+    , C.each model.hovering <| \p item ->
+        [ C.tooltip item [ CA.onTop ] [] [] ]
     ]
+{-| @SMALL END -}
+{-| @LARGE END -}
 
 
 meta =
   { category = "Line charts"
-  , name = "Dots"
-  , description = "Add dots to a line."
-  , order = 7
+  , name = "Tooltip"
+  , description = "Add basic tooltip."
+  , order = 13
   }
-
-
-type alias Model =
-  ()
-
-
-init : Model
-init =
-  ()
-
-
-type Msg
-  = Msg
-
-
-update : Msg -> Model -> Model
-update msg model =
-  model
 
 
 type alias Datum =
@@ -78,46 +87,3 @@ data =
   , toDatum 10 4 3 4.5 5.3 6.3 7.0
   ]
 
-
-
-smallCode : String
-smallCode =
-  """
-  C.chart
-    [ CA.height 300
-    , CA.width 300
-    ]
-    [ C.grid []
-    , C.xLabels []
-    , C.yLabels []
-    , C.series .x
-        [ C.property .y [ CA.linear ] [ CA.circle ]
-        ]
-        data
-    ]
-  """
-
-
-largeCode : String
-largeCode =
-  """
-import Html as H
-import Chart as C
-import Chart.Attributes as CA
-
-
-view : Model -> H.Html Msg
-view model =
-  C.chart
-    [ CA.height 300
-    , CA.width 300
-    ]
-    [ C.grid []
-    , C.xLabels []
-    , C.yLabels []
-    , C.series .x
-        [ C.property .y [ CA.linear ] [ CA.circle ]
-        ]
-        data
-    ]
-  """

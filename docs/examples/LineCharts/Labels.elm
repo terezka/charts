@@ -1,35 +1,54 @@
-module Examples.LineCharts.Dots exposing (..)
+module Examples.LineCharts.Labels exposing (..)
 
-
--- THIS IS A GENERATED MODULE!
-
+{-| @LARGE -}
 import Html as H
+import Svg as S
 import Chart as C
 import Chart.Attributes as CA
+import Chart.Events as CE
 
 
 view : Model -> H.Html Msg
 view model =
+{-| @SMALL -}
   C.chart
     [ CA.height 300
     , CA.width 300
+    , CA.paddingLeft 15
     ]
     [ C.grid []
     , C.xLabels []
     , C.yLabels []
     , C.series .x
-        [ C.property .y [ CA.linear ] [ CA.circle ]
+        [ C.property .y [ CA.monotone ] [ CA.circle, CA.size 40 ]
         ]
         data
+    , C.eachProduct <| \p point ->
+        let top = CE.getTop p point
+            label =
+              CE.getDependent point
+                |> Maybe.map String.fromFloat
+                |> Maybe.withDefault "N/A"
+        in
+        [ C.title
+            [ CA.yOff 13
+            , CA.color "white"
+            ]
+            [ S.text label ]
+            top
+        ]
     ]
+{-| @SMALL END -}
+{-| @LARGE END -}
 
 
 meta =
   { category = "Line charts"
-  , name = "Dots"
-  , description = "Add dots to a line."
-  , order = 7
+  , name = "Labels for each point"
+  , description = "Add custom labels on each data point."
+  , order = 12
   }
+
 
 
 type alias Model =
@@ -48,6 +67,7 @@ type Msg
 update : Msg -> Model -> Model
 update msg model =
   model
+
 
 
 type alias Datum =
@@ -78,46 +98,3 @@ data =
   , toDatum 10 4 3 4.5 5.3 6.3 7.0
   ]
 
-
-
-smallCode : String
-smallCode =
-  """
-  C.chart
-    [ CA.height 300
-    , CA.width 300
-    ]
-    [ C.grid []
-    , C.xLabels []
-    , C.yLabels []
-    , C.series .x
-        [ C.property .y [ CA.linear ] [ CA.circle ]
-        ]
-        data
-    ]
-  """
-
-
-largeCode : String
-largeCode =
-  """
-import Html as H
-import Chart as C
-import Chart.Attributes as CA
-
-
-view : Model -> H.Html Msg
-view model =
-  C.chart
-    [ CA.height 300
-    , CA.width 300
-    ]
-    [ C.grid []
-    , C.xLabels []
-    , C.yLabels []
-    , C.series .x
-        [ C.property .y [ CA.linear ] [ CA.circle ]
-        ]
-        data
-    ]
-  """

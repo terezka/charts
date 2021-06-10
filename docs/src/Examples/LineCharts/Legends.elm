@@ -1,4 +1,4 @@
-module Examples.LineCharts.Dots exposing (..)
+module Examples.LineCharts.Legends exposing (..)
 
 
 -- THIS IS A GENERATED MODULE!
@@ -18,17 +18,25 @@ view model =
     , C.xLabels []
     , C.yLabels []
     , C.series .x
-        [ C.property .y [ CA.linear ] [ CA.circle ]
+        [ C.property .y [ CA.linear ] [ CA.cross, CA.borderWidth 2, CA.border "white" ]
+            |> C.named "Cats"
+        , C.property .z [ CA.linear ] [ CA.cross, CA.borderWidth 2, CA.border "white" ]
+            |> C.named "Fish"
         ]
         data
+    , C.legendsAt .min .max 15 0
+        [ CA.column
+        , CA.spacing 5
+        ]
+        [ CA.width 20 ]
     ]
 
 
 meta =
   { category = "Line charts"
-  , name = "Dots"
-  , description = "Add dots to a line."
-  , order = 7
+  , name = "Legends"
+  , description = "Add legends to your chart."
+  , order = 12
   }
 
 
@@ -91,9 +99,17 @@ smallCode =
     , C.xLabels []
     , C.yLabels []
     , C.series .x
-        [ C.property .y [ CA.linear ] [ CA.circle ]
+        [ C.property .y [ CA.linear ] [ CA.cross, CA.borderWidth 2, CA.border "white" ]
+            |> C.named "Cats"
+        , C.property .z [ CA.linear ] [ CA.cross, CA.borderWidth 2, CA.border "white" ]
+            |> C.named "Fish"
         ]
         data
+    , C.legendsAt .min .max 15 0
+        [ CA.column
+        , CA.spacing 5
+        ]
+        [ CA.width 20 ]
     ]
   """
 
@@ -116,8 +132,16 @@ view model =
     , C.xLabels []
     , C.yLabels []
     , C.series .x
-        [ C.property .y [ CA.linear ] [ CA.circle ]
+        [ C.property .y [ CA.linear ] [ CA.cross, CA.borderWidth 2, CA.border "white" ]
+            |> C.named "Cats"
+        , C.property .z [ CA.linear ] [ CA.cross, CA.borderWidth 2, CA.border "white" ]
+            |> C.named "Fish"
         ]
         data
+    , C.legendsAt .min .max 15 0
+        [ CA.column
+        , CA.spacing 5
+        ]
+        [ CA.width 20 ]
     ]
   """

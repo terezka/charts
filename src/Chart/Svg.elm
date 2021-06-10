@@ -560,9 +560,9 @@ lineLegend edits interAttrsOrg dotAttrsOrg =
     ] ++ config.htmlAttrs)
     [ container fakePlane [ CA.static ]
         []
-        [ dot fakePlane .x .y dotAttrs (Point 5 5)
-        , interpolation fakePlane .x (.y >> Just) interAttrs [ Point 0 5, Point 10 5 ]
+        [ interpolation fakePlane .x (.y >> Just) interAttrs [ Point 0 5, Point 10 5 ]
         , area fakePlane .x Nothing (.y >> Just) interAttrs [ Point 0 5, Point 10 5 ]
+        , dot fakePlane .x .y dotAttrs (Point 5 5)
         ]
         []
     , H.div
@@ -1020,7 +1020,7 @@ toPattern defaultColor design =
             let config =
                   apply edits
                     { top = defaultColor
-                    , bottom = "transparent"
+                    , bottom = "white"
                     }
 
                 theId =

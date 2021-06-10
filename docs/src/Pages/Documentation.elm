@@ -90,8 +90,7 @@ view model =
               ]
 
             Nothing ->
-              let groupBy : Examples.Id -> Dict.Dict String (List Examples.Id) -> Dict.Dict String (List Examples.Id)
-                  groupBy id =
+              let groupBy id =
                     Dict.update (Examples.meta id).category (updateCat id)
 
                   updateCat id maybeIds =
@@ -145,7 +144,7 @@ view model =
                           |> E.wrappedRow
                               [ E.width E.fill
                               , E.height E.fill
-                              , E.spacing 100
+                              , E.spacingXY 100 70
                               ]
                       ]
               in
@@ -171,8 +170,7 @@ view model =
 thumbnail : Model -> Examples.Id -> E.Element Msg
 thumbnail model id =
   I.button
-    [ E.height (E.px 265)
-    , E.width (E.px 265)
+    [ E.width (E.px 265)
     ]
     { onPress = Just (OnDisplayExample id)
     , label =
@@ -187,7 +185,7 @@ thumbnail model id =
           , E.el
               [ E.width E.fill
               , E.height E.fill
-              , E.paddingXY 0 5
+              , E.paddingXY 0 15
               ] <|
               E.map OnExampleMsg <| E.html <| Examples.view model.examples id
           ]

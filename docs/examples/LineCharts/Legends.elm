@@ -1,8 +1,6 @@
-module Examples.LineCharts.Dots exposing (..)
+module Examples.LineCharts.Legends exposing (..)
 
-
--- THIS IS A GENERATED MODULE!
-
+{-| @LARGE -}
 import Html as H
 import Chart as C
 import Chart.Attributes as CA
@@ -10,6 +8,7 @@ import Chart.Attributes as CA
 
 view : Model -> H.Html Msg
 view model =
+{-| @SMALL -}
   C.chart
     [ CA.height 300
     , CA.width 300
@@ -18,17 +17,27 @@ view model =
     , C.xLabels []
     , C.yLabels []
     , C.series .x
-        [ C.property .y [ CA.linear ] [ CA.circle ]
+        [ C.property .y [ CA.linear ] [ CA.cross, CA.borderWidth 2, CA.border "white" ]
+            |> C.named "Cats"
+        , C.property .z [ CA.linear ] [ CA.cross, CA.borderWidth 2, CA.border "white" ]
+            |> C.named "Fish"
         ]
         data
+    , C.legendsAt .min .max 15 0
+        [ CA.column
+        , CA.spacing 5
+        ]
+        [ CA.width 20 ]
     ]
+{-| @SMALL END -}
+{-| @LARGE END -}
 
 
 meta =
   { category = "Line charts"
-  , name = "Dots"
-  , description = "Add dots to a line."
-  , order = 7
+  , name = "Legends"
+  , description = "Add legends to your chart."
+  , order = 12
   }
 
 
@@ -78,46 +87,3 @@ data =
   , toDatum 10 4 3 4.5 5.3 6.3 7.0
   ]
 
-
-
-smallCode : String
-smallCode =
-  """
-  C.chart
-    [ CA.height 300
-    , CA.width 300
-    ]
-    [ C.grid []
-    , C.xLabels []
-    , C.yLabels []
-    , C.series .x
-        [ C.property .y [ CA.linear ] [ CA.circle ]
-        ]
-        data
-    ]
-  """
-
-
-largeCode : String
-largeCode =
-  """
-import Html as H
-import Chart as C
-import Chart.Attributes as CA
-
-
-view : Model -> H.Html Msg
-view model =
-  C.chart
-    [ CA.height 300
-    , CA.width 300
-    ]
-    [ C.grid []
-    , C.xLabels []
-    , C.yLabels []
-    , C.series .x
-        [ C.property .y [ CA.linear ] [ CA.circle ]
-        ]
-        data
-    ]
-  """

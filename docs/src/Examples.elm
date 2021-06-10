@@ -27,6 +27,8 @@ import Examples.BarCharts.Basic
 import Examples.LineCharts.Area
 import Examples.LineCharts.Gradient
 import Examples.LineCharts.Width
+import Examples.LineCharts.TooltipStack
+import Examples.LineCharts.Tooltip
 import Examples.LineCharts.Montone
 import Examples.LineCharts.Pattern
 import Examples.LineCharts.Dots
@@ -34,6 +36,8 @@ import Examples.LineCharts.Dashed
 import Examples.LineCharts.Color
 import Examples.LineCharts.Stepped
 import Examples.LineCharts.Stacked
+import Examples.LineCharts.Labels
+import Examples.LineCharts.Legends
 import Examples.LineCharts.Basic
 import Examples.ScatterCharts.Colors
 import Examples.ScatterCharts.Shapes
@@ -69,6 +73,8 @@ type Id
   | LineCharts__Area
   | LineCharts__Gradient
   | LineCharts__Width
+  | LineCharts__TooltipStack
+  | LineCharts__Tooltip
   | LineCharts__Montone
   | LineCharts__Pattern
   | LineCharts__Dots
@@ -76,6 +82,8 @@ type Id
   | LineCharts__Color
   | LineCharts__Stepped
   | LineCharts__Stacked
+  | LineCharts__Labels
+  | LineCharts__Legends
   | LineCharts__Basic
   | ScatterCharts__Colors
   | ScatterCharts__Shapes
@@ -111,22 +119,26 @@ type alias Model =
   , example20 : Examples.LineCharts.Area.Model
   , example21 : Examples.LineCharts.Gradient.Model
   , example22 : Examples.LineCharts.Width.Model
-  , example23 : Examples.LineCharts.Montone.Model
-  , example24 : Examples.LineCharts.Pattern.Model
-  , example25 : Examples.LineCharts.Dots.Model
-  , example26 : Examples.LineCharts.Dashed.Model
-  , example27 : Examples.LineCharts.Color.Model
-  , example28 : Examples.LineCharts.Stepped.Model
-  , example29 : Examples.LineCharts.Stacked.Model
-  , example30 : Examples.LineCharts.Basic.Model
-  , example31 : Examples.ScatterCharts.Colors.Model
-  , example32 : Examples.ScatterCharts.Shapes.Model
-  , example33 : Examples.ScatterCharts.Highlight.Model
-  , example34 : Examples.ScatterCharts.DataDependent.Model
-  , example35 : Examples.ScatterCharts.Borders.Model
-  , example36 : Examples.ScatterCharts.Opacity.Model
-  , example37 : Examples.ScatterCharts.Sizes.Model
-  , example38 : Examples.ScatterCharts.Basic.Model
+  , example23 : Examples.LineCharts.TooltipStack.Model
+  , example24 : Examples.LineCharts.Tooltip.Model
+  , example25 : Examples.LineCharts.Montone.Model
+  , example26 : Examples.LineCharts.Pattern.Model
+  , example27 : Examples.LineCharts.Dots.Model
+  , example28 : Examples.LineCharts.Dashed.Model
+  , example29 : Examples.LineCharts.Color.Model
+  , example30 : Examples.LineCharts.Stepped.Model
+  , example31 : Examples.LineCharts.Stacked.Model
+  , example32 : Examples.LineCharts.Labels.Model
+  , example33 : Examples.LineCharts.Legends.Model
+  , example34 : Examples.LineCharts.Basic.Model
+  , example35 : Examples.ScatterCharts.Colors.Model
+  , example36 : Examples.ScatterCharts.Shapes.Model
+  , example37 : Examples.ScatterCharts.Highlight.Model
+  , example38 : Examples.ScatterCharts.DataDependent.Model
+  , example39 : Examples.ScatterCharts.Borders.Model
+  , example40 : Examples.ScatterCharts.Opacity.Model
+  , example41 : Examples.ScatterCharts.Sizes.Model
+  , example42 : Examples.ScatterCharts.Basic.Model
   }
 
 
@@ -155,22 +167,26 @@ init =
   , example20 = Examples.LineCharts.Area.init
   , example21 = Examples.LineCharts.Gradient.init
   , example22 = Examples.LineCharts.Width.init
-  , example23 = Examples.LineCharts.Montone.init
-  , example24 = Examples.LineCharts.Pattern.init
-  , example25 = Examples.LineCharts.Dots.init
-  , example26 = Examples.LineCharts.Dashed.init
-  , example27 = Examples.LineCharts.Color.init
-  , example28 = Examples.LineCharts.Stepped.init
-  , example29 = Examples.LineCharts.Stacked.init
-  , example30 = Examples.LineCharts.Basic.init
-  , example31 = Examples.ScatterCharts.Colors.init
-  , example32 = Examples.ScatterCharts.Shapes.init
-  , example33 = Examples.ScatterCharts.Highlight.init
-  , example34 = Examples.ScatterCharts.DataDependent.init
-  , example35 = Examples.ScatterCharts.Borders.init
-  , example36 = Examples.ScatterCharts.Opacity.init
-  , example37 = Examples.ScatterCharts.Sizes.init
-  , example38 = Examples.ScatterCharts.Basic.init
+  , example23 = Examples.LineCharts.TooltipStack.init
+  , example24 = Examples.LineCharts.Tooltip.init
+  , example25 = Examples.LineCharts.Montone.init
+  , example26 = Examples.LineCharts.Pattern.init
+  , example27 = Examples.LineCharts.Dots.init
+  , example28 = Examples.LineCharts.Dashed.init
+  , example29 = Examples.LineCharts.Color.init
+  , example30 = Examples.LineCharts.Stepped.init
+  , example31 = Examples.LineCharts.Stacked.init
+  , example32 = Examples.LineCharts.Labels.init
+  , example33 = Examples.LineCharts.Legends.init
+  , example34 = Examples.LineCharts.Basic.init
+  , example35 = Examples.ScatterCharts.Colors.init
+  , example36 = Examples.ScatterCharts.Shapes.init
+  , example37 = Examples.ScatterCharts.Highlight.init
+  , example38 = Examples.ScatterCharts.DataDependent.init
+  , example39 = Examples.ScatterCharts.Borders.init
+  , example40 = Examples.ScatterCharts.Opacity.init
+  , example41 = Examples.ScatterCharts.Sizes.init
+  , example42 = Examples.ScatterCharts.Basic.init
   }
 
 
@@ -198,22 +214,26 @@ type Msg
   | ExampleMsg20 Examples.LineCharts.Area.Msg
   | ExampleMsg21 Examples.LineCharts.Gradient.Msg
   | ExampleMsg22 Examples.LineCharts.Width.Msg
-  | ExampleMsg23 Examples.LineCharts.Montone.Msg
-  | ExampleMsg24 Examples.LineCharts.Pattern.Msg
-  | ExampleMsg25 Examples.LineCharts.Dots.Msg
-  | ExampleMsg26 Examples.LineCharts.Dashed.Msg
-  | ExampleMsg27 Examples.LineCharts.Color.Msg
-  | ExampleMsg28 Examples.LineCharts.Stepped.Msg
-  | ExampleMsg29 Examples.LineCharts.Stacked.Msg
-  | ExampleMsg30 Examples.LineCharts.Basic.Msg
-  | ExampleMsg31 Examples.ScatterCharts.Colors.Msg
-  | ExampleMsg32 Examples.ScatterCharts.Shapes.Msg
-  | ExampleMsg33 Examples.ScatterCharts.Highlight.Msg
-  | ExampleMsg34 Examples.ScatterCharts.DataDependent.Msg
-  | ExampleMsg35 Examples.ScatterCharts.Borders.Msg
-  | ExampleMsg36 Examples.ScatterCharts.Opacity.Msg
-  | ExampleMsg37 Examples.ScatterCharts.Sizes.Msg
-  | ExampleMsg38 Examples.ScatterCharts.Basic.Msg
+  | ExampleMsg23 Examples.LineCharts.TooltipStack.Msg
+  | ExampleMsg24 Examples.LineCharts.Tooltip.Msg
+  | ExampleMsg25 Examples.LineCharts.Montone.Msg
+  | ExampleMsg26 Examples.LineCharts.Pattern.Msg
+  | ExampleMsg27 Examples.LineCharts.Dots.Msg
+  | ExampleMsg28 Examples.LineCharts.Dashed.Msg
+  | ExampleMsg29 Examples.LineCharts.Color.Msg
+  | ExampleMsg30 Examples.LineCharts.Stepped.Msg
+  | ExampleMsg31 Examples.LineCharts.Stacked.Msg
+  | ExampleMsg32 Examples.LineCharts.Labels.Msg
+  | ExampleMsg33 Examples.LineCharts.Legends.Msg
+  | ExampleMsg34 Examples.LineCharts.Basic.Msg
+  | ExampleMsg35 Examples.ScatterCharts.Colors.Msg
+  | ExampleMsg36 Examples.ScatterCharts.Shapes.Msg
+  | ExampleMsg37 Examples.ScatterCharts.Highlight.Msg
+  | ExampleMsg38 Examples.ScatterCharts.DataDependent.Msg
+  | ExampleMsg39 Examples.ScatterCharts.Borders.Msg
+  | ExampleMsg40 Examples.ScatterCharts.Opacity.Msg
+  | ExampleMsg41 Examples.ScatterCharts.Sizes.Msg
+  | ExampleMsg42 Examples.ScatterCharts.Basic.Msg
 
 
 update : Msg -> Model -> Model
@@ -242,22 +262,26 @@ update msg model =
     ExampleMsg20 sub -> { model | example20 = Examples.LineCharts.Area.update sub model.example20 }
     ExampleMsg21 sub -> { model | example21 = Examples.LineCharts.Gradient.update sub model.example21 }
     ExampleMsg22 sub -> { model | example22 = Examples.LineCharts.Width.update sub model.example22 }
-    ExampleMsg23 sub -> { model | example23 = Examples.LineCharts.Montone.update sub model.example23 }
-    ExampleMsg24 sub -> { model | example24 = Examples.LineCharts.Pattern.update sub model.example24 }
-    ExampleMsg25 sub -> { model | example25 = Examples.LineCharts.Dots.update sub model.example25 }
-    ExampleMsg26 sub -> { model | example26 = Examples.LineCharts.Dashed.update sub model.example26 }
-    ExampleMsg27 sub -> { model | example27 = Examples.LineCharts.Color.update sub model.example27 }
-    ExampleMsg28 sub -> { model | example28 = Examples.LineCharts.Stepped.update sub model.example28 }
-    ExampleMsg29 sub -> { model | example29 = Examples.LineCharts.Stacked.update sub model.example29 }
-    ExampleMsg30 sub -> { model | example30 = Examples.LineCharts.Basic.update sub model.example30 }
-    ExampleMsg31 sub -> { model | example31 = Examples.ScatterCharts.Colors.update sub model.example31 }
-    ExampleMsg32 sub -> { model | example32 = Examples.ScatterCharts.Shapes.update sub model.example32 }
-    ExampleMsg33 sub -> { model | example33 = Examples.ScatterCharts.Highlight.update sub model.example33 }
-    ExampleMsg34 sub -> { model | example34 = Examples.ScatterCharts.DataDependent.update sub model.example34 }
-    ExampleMsg35 sub -> { model | example35 = Examples.ScatterCharts.Borders.update sub model.example35 }
-    ExampleMsg36 sub -> { model | example36 = Examples.ScatterCharts.Opacity.update sub model.example36 }
-    ExampleMsg37 sub -> { model | example37 = Examples.ScatterCharts.Sizes.update sub model.example37 }
-    ExampleMsg38 sub -> { model | example38 = Examples.ScatterCharts.Basic.update sub model.example38 }
+    ExampleMsg23 sub -> { model | example23 = Examples.LineCharts.TooltipStack.update sub model.example23 }
+    ExampleMsg24 sub -> { model | example24 = Examples.LineCharts.Tooltip.update sub model.example24 }
+    ExampleMsg25 sub -> { model | example25 = Examples.LineCharts.Montone.update sub model.example25 }
+    ExampleMsg26 sub -> { model | example26 = Examples.LineCharts.Pattern.update sub model.example26 }
+    ExampleMsg27 sub -> { model | example27 = Examples.LineCharts.Dots.update sub model.example27 }
+    ExampleMsg28 sub -> { model | example28 = Examples.LineCharts.Dashed.update sub model.example28 }
+    ExampleMsg29 sub -> { model | example29 = Examples.LineCharts.Color.update sub model.example29 }
+    ExampleMsg30 sub -> { model | example30 = Examples.LineCharts.Stepped.update sub model.example30 }
+    ExampleMsg31 sub -> { model | example31 = Examples.LineCharts.Stacked.update sub model.example31 }
+    ExampleMsg32 sub -> { model | example32 = Examples.LineCharts.Labels.update sub model.example32 }
+    ExampleMsg33 sub -> { model | example33 = Examples.LineCharts.Legends.update sub model.example33 }
+    ExampleMsg34 sub -> { model | example34 = Examples.LineCharts.Basic.update sub model.example34 }
+    ExampleMsg35 sub -> { model | example35 = Examples.ScatterCharts.Colors.update sub model.example35 }
+    ExampleMsg36 sub -> { model | example36 = Examples.ScatterCharts.Shapes.update sub model.example36 }
+    ExampleMsg37 sub -> { model | example37 = Examples.ScatterCharts.Highlight.update sub model.example37 }
+    ExampleMsg38 sub -> { model | example38 = Examples.ScatterCharts.DataDependent.update sub model.example38 }
+    ExampleMsg39 sub -> { model | example39 = Examples.ScatterCharts.Borders.update sub model.example39 }
+    ExampleMsg40 sub -> { model | example40 = Examples.ScatterCharts.Opacity.update sub model.example40 }
+    ExampleMsg41 sub -> { model | example41 = Examples.ScatterCharts.Sizes.update sub model.example41 }
+    ExampleMsg42 sub -> { model | example42 = Examples.ScatterCharts.Basic.update sub model.example42 }
 
 
 view : Model -> Id -> Html.Html Msg
@@ -286,22 +310,26 @@ view model chosen =
     LineCharts__Area -> Html.map ExampleMsg20 (Examples.LineCharts.Area.view model.example20)
     LineCharts__Gradient -> Html.map ExampleMsg21 (Examples.LineCharts.Gradient.view model.example21)
     LineCharts__Width -> Html.map ExampleMsg22 (Examples.LineCharts.Width.view model.example22)
-    LineCharts__Montone -> Html.map ExampleMsg23 (Examples.LineCharts.Montone.view model.example23)
-    LineCharts__Pattern -> Html.map ExampleMsg24 (Examples.LineCharts.Pattern.view model.example24)
-    LineCharts__Dots -> Html.map ExampleMsg25 (Examples.LineCharts.Dots.view model.example25)
-    LineCharts__Dashed -> Html.map ExampleMsg26 (Examples.LineCharts.Dashed.view model.example26)
-    LineCharts__Color -> Html.map ExampleMsg27 (Examples.LineCharts.Color.view model.example27)
-    LineCharts__Stepped -> Html.map ExampleMsg28 (Examples.LineCharts.Stepped.view model.example28)
-    LineCharts__Stacked -> Html.map ExampleMsg29 (Examples.LineCharts.Stacked.view model.example29)
-    LineCharts__Basic -> Html.map ExampleMsg30 (Examples.LineCharts.Basic.view model.example30)
-    ScatterCharts__Colors -> Html.map ExampleMsg31 (Examples.ScatterCharts.Colors.view model.example31)
-    ScatterCharts__Shapes -> Html.map ExampleMsg32 (Examples.ScatterCharts.Shapes.view model.example32)
-    ScatterCharts__Highlight -> Html.map ExampleMsg33 (Examples.ScatterCharts.Highlight.view model.example33)
-    ScatterCharts__DataDependent -> Html.map ExampleMsg34 (Examples.ScatterCharts.DataDependent.view model.example34)
-    ScatterCharts__Borders -> Html.map ExampleMsg35 (Examples.ScatterCharts.Borders.view model.example35)
-    ScatterCharts__Opacity -> Html.map ExampleMsg36 (Examples.ScatterCharts.Opacity.view model.example36)
-    ScatterCharts__Sizes -> Html.map ExampleMsg37 (Examples.ScatterCharts.Sizes.view model.example37)
-    ScatterCharts__Basic -> Html.map ExampleMsg38 (Examples.ScatterCharts.Basic.view model.example38)
+    LineCharts__TooltipStack -> Html.map ExampleMsg23 (Examples.LineCharts.TooltipStack.view model.example23)
+    LineCharts__Tooltip -> Html.map ExampleMsg24 (Examples.LineCharts.Tooltip.view model.example24)
+    LineCharts__Montone -> Html.map ExampleMsg25 (Examples.LineCharts.Montone.view model.example25)
+    LineCharts__Pattern -> Html.map ExampleMsg26 (Examples.LineCharts.Pattern.view model.example26)
+    LineCharts__Dots -> Html.map ExampleMsg27 (Examples.LineCharts.Dots.view model.example27)
+    LineCharts__Dashed -> Html.map ExampleMsg28 (Examples.LineCharts.Dashed.view model.example28)
+    LineCharts__Color -> Html.map ExampleMsg29 (Examples.LineCharts.Color.view model.example29)
+    LineCharts__Stepped -> Html.map ExampleMsg30 (Examples.LineCharts.Stepped.view model.example30)
+    LineCharts__Stacked -> Html.map ExampleMsg31 (Examples.LineCharts.Stacked.view model.example31)
+    LineCharts__Labels -> Html.map ExampleMsg32 (Examples.LineCharts.Labels.view model.example32)
+    LineCharts__Legends -> Html.map ExampleMsg33 (Examples.LineCharts.Legends.view model.example33)
+    LineCharts__Basic -> Html.map ExampleMsg34 (Examples.LineCharts.Basic.view model.example34)
+    ScatterCharts__Colors -> Html.map ExampleMsg35 (Examples.ScatterCharts.Colors.view model.example35)
+    ScatterCharts__Shapes -> Html.map ExampleMsg36 (Examples.ScatterCharts.Shapes.view model.example36)
+    ScatterCharts__Highlight -> Html.map ExampleMsg37 (Examples.ScatterCharts.Highlight.view model.example37)
+    ScatterCharts__DataDependent -> Html.map ExampleMsg38 (Examples.ScatterCharts.DataDependent.view model.example38)
+    ScatterCharts__Borders -> Html.map ExampleMsg39 (Examples.ScatterCharts.Borders.view model.example39)
+    ScatterCharts__Opacity -> Html.map ExampleMsg40 (Examples.ScatterCharts.Opacity.view model.example40)
+    ScatterCharts__Sizes -> Html.map ExampleMsg41 (Examples.ScatterCharts.Sizes.view model.example41)
+    ScatterCharts__Basic -> Html.map ExampleMsg42 (Examples.ScatterCharts.Basic.view model.example42)
 
 
 smallCode : Id -> String
@@ -330,6 +358,8 @@ smallCode chosen =
     LineCharts__Area -> Examples.LineCharts.Area.smallCode
     LineCharts__Gradient -> Examples.LineCharts.Gradient.smallCode
     LineCharts__Width -> Examples.LineCharts.Width.smallCode
+    LineCharts__TooltipStack -> Examples.LineCharts.TooltipStack.smallCode
+    LineCharts__Tooltip -> Examples.LineCharts.Tooltip.smallCode
     LineCharts__Montone -> Examples.LineCharts.Montone.smallCode
     LineCharts__Pattern -> Examples.LineCharts.Pattern.smallCode
     LineCharts__Dots -> Examples.LineCharts.Dots.smallCode
@@ -337,6 +367,8 @@ smallCode chosen =
     LineCharts__Color -> Examples.LineCharts.Color.smallCode
     LineCharts__Stepped -> Examples.LineCharts.Stepped.smallCode
     LineCharts__Stacked -> Examples.LineCharts.Stacked.smallCode
+    LineCharts__Labels -> Examples.LineCharts.Labels.smallCode
+    LineCharts__Legends -> Examples.LineCharts.Legends.smallCode
     LineCharts__Basic -> Examples.LineCharts.Basic.smallCode
     ScatterCharts__Colors -> Examples.ScatterCharts.Colors.smallCode
     ScatterCharts__Shapes -> Examples.ScatterCharts.Shapes.smallCode
@@ -374,6 +406,8 @@ largeCode chosen =
     LineCharts__Area -> Examples.LineCharts.Area.largeCode
     LineCharts__Gradient -> Examples.LineCharts.Gradient.largeCode
     LineCharts__Width -> Examples.LineCharts.Width.largeCode
+    LineCharts__TooltipStack -> Examples.LineCharts.TooltipStack.largeCode
+    LineCharts__Tooltip -> Examples.LineCharts.Tooltip.largeCode
     LineCharts__Montone -> Examples.LineCharts.Montone.largeCode
     LineCharts__Pattern -> Examples.LineCharts.Pattern.largeCode
     LineCharts__Dots -> Examples.LineCharts.Dots.largeCode
@@ -381,6 +415,8 @@ largeCode chosen =
     LineCharts__Color -> Examples.LineCharts.Color.largeCode
     LineCharts__Stepped -> Examples.LineCharts.Stepped.largeCode
     LineCharts__Stacked -> Examples.LineCharts.Stacked.largeCode
+    LineCharts__Labels -> Examples.LineCharts.Labels.largeCode
+    LineCharts__Legends -> Examples.LineCharts.Legends.largeCode
     LineCharts__Basic -> Examples.LineCharts.Basic.largeCode
     ScatterCharts__Colors -> Examples.ScatterCharts.Colors.largeCode
     ScatterCharts__Shapes -> Examples.ScatterCharts.Shapes.largeCode
@@ -418,6 +454,8 @@ name chosen =
     LineCharts__Area -> "Examples.LineCharts.Area"
     LineCharts__Gradient -> "Examples.LineCharts.Gradient"
     LineCharts__Width -> "Examples.LineCharts.Width"
+    LineCharts__TooltipStack -> "Examples.LineCharts.TooltipStack"
+    LineCharts__Tooltip -> "Examples.LineCharts.Tooltip"
     LineCharts__Montone -> "Examples.LineCharts.Montone"
     LineCharts__Pattern -> "Examples.LineCharts.Pattern"
     LineCharts__Dots -> "Examples.LineCharts.Dots"
@@ -425,6 +463,8 @@ name chosen =
     LineCharts__Color -> "Examples.LineCharts.Color"
     LineCharts__Stepped -> "Examples.LineCharts.Stepped"
     LineCharts__Stacked -> "Examples.LineCharts.Stacked"
+    LineCharts__Labels -> "Examples.LineCharts.Labels"
+    LineCharts__Legends -> "Examples.LineCharts.Legends"
     LineCharts__Basic -> "Examples.LineCharts.Basic"
     ScatterCharts__Colors -> "Examples.ScatterCharts.Colors"
     ScatterCharts__Shapes -> "Examples.ScatterCharts.Shapes"
@@ -461,6 +501,8 @@ meta chosen =
     LineCharts__Area -> Examples.LineCharts.Area.meta
     LineCharts__Gradient -> Examples.LineCharts.Gradient.meta
     LineCharts__Width -> Examples.LineCharts.Width.meta
+    LineCharts__TooltipStack -> Examples.LineCharts.TooltipStack.meta
+    LineCharts__Tooltip -> Examples.LineCharts.Tooltip.meta
     LineCharts__Montone -> Examples.LineCharts.Montone.meta
     LineCharts__Pattern -> Examples.LineCharts.Pattern.meta
     LineCharts__Dots -> Examples.LineCharts.Dots.meta
@@ -468,6 +510,8 @@ meta chosen =
     LineCharts__Color -> Examples.LineCharts.Color.meta
     LineCharts__Stepped -> Examples.LineCharts.Stepped.meta
     LineCharts__Stacked -> Examples.LineCharts.Stacked.meta
+    LineCharts__Labels -> Examples.LineCharts.Labels.meta
+    LineCharts__Legends -> Examples.LineCharts.Legends.meta
     LineCharts__Basic -> Examples.LineCharts.Basic.meta
     ScatterCharts__Colors -> Examples.ScatterCharts.Colors.meta
     ScatterCharts__Shapes -> Examples.ScatterCharts.Shapes.meta
@@ -504,6 +548,8 @@ all =
   , LineCharts__Area
   , LineCharts__Gradient
   , LineCharts__Width
+  , LineCharts__TooltipStack
+  , LineCharts__Tooltip
   , LineCharts__Montone
   , LineCharts__Pattern
   , LineCharts__Dots
@@ -511,6 +557,8 @@ all =
   , LineCharts__Color
   , LineCharts__Stepped
   , LineCharts__Stacked
+  , LineCharts__Labels
+  , LineCharts__Legends
   , LineCharts__Basic
   , ScatterCharts__Colors
   , ScatterCharts__Shapes

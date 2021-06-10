@@ -1,11 +1,13 @@
-module Examples.LineCharts.Dots exposing (..)
+module Examples.LineCharts.Labels exposing (..)
 
 
 -- THIS IS A GENERATED MODULE!
 
 import Html as H
+import Svg as S
 import Chart as C
 import Chart.Attributes as CA
+import Chart.Events as CE
 
 
 view : Model -> H.Html Msg
@@ -13,23 +15,39 @@ view model =
   C.chart
     [ CA.height 300
     , CA.width 300
+    , CA.paddingLeft 15
     ]
     [ C.grid []
     , C.xLabels []
     , C.yLabels []
     , C.series .x
-        [ C.property .y [ CA.linear ] [ CA.circle ]
+        [ C.property .y [ CA.monotone ] [ CA.circle, CA.size 40 ]
         ]
         data
+    , C.eachProduct <| \p point ->
+        let top = CE.getTop p point
+            label =
+              CE.getDependent point
+                |> Maybe.map String.fromFloat
+                |> Maybe.withDefault "N/A"
+        in
+        [ C.title
+            [ CA.yOff 13
+            , CA.color "white"
+            ]
+            [ S.text label ]
+            top
+        ]
     ]
 
 
 meta =
   { category = "Line charts"
-  , name = "Dots"
-  , description = "Add dots to a line."
-  , order = 7
+  , name = "Labels for each point"
+  , description = "Add custom labels on each data point."
+  , order = 12
   }
+
 
 
 type alias Model =
@@ -48,6 +66,7 @@ type Msg
 update : Msg -> Model -> Model
 update msg model =
   model
+
 
 
 type alias Datum =
@@ -86,14 +105,29 @@ smallCode =
   C.chart
     [ CA.height 300
     , CA.width 300
+    , CA.paddingLeft 15
     ]
     [ C.grid []
     , C.xLabels []
     , C.yLabels []
     , C.series .x
-        [ C.property .y [ CA.linear ] [ CA.circle ]
+        [ C.property .y [ CA.monotone ] [ CA.circle, CA.size 40 ]
         ]
         data
+    , C.eachProduct <| \\p point ->
+        let top = CE.getTop p point
+            label =
+              CE.getDependent point
+                |> Maybe.map String.fromFloat
+                |> Maybe.withDefault "N/A"
+        in
+        [ C.title
+            [ CA.yOff 13
+            , CA.color "white"
+            ]
+            [ S.text label ]
+            top
+        ]
     ]
   """
 
@@ -102,8 +136,10 @@ largeCode : String
 largeCode =
   """
 import Html as H
+import Svg as S
 import Chart as C
 import Chart.Attributes as CA
+import Chart.Events as CE
 
 
 view : Model -> H.Html Msg
@@ -111,13 +147,28 @@ view model =
   C.chart
     [ CA.height 300
     , CA.width 300
+    , CA.paddingLeft 15
     ]
     [ C.grid []
     , C.xLabels []
     , C.yLabels []
     , C.series .x
-        [ C.property .y [ CA.linear ] [ CA.circle ]
+        [ C.property .y [ CA.monotone ] [ CA.circle, CA.size 40 ]
         ]
         data
+    , C.eachProduct <| \\p point ->
+        let top = CE.getTop p point
+            label =
+              CE.getDependent point
+                |> Maybe.map String.fromFloat
+                |> Maybe.withDefault "N/A"
+        in
+        [ C.title
+            [ CA.yOff 13
+            , CA.color "white"
+            ]
+            [ S.text label ]
+            top
+        ]
     ]
   """
