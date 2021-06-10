@@ -18,8 +18,8 @@ view model =
     , C.xLabels []
     , C.yLabels []
     , C.bars []
-        [ C.property .z [] []
-        , C.property .y [] []
+        [ C.bar .z []
+        , C.bar .y []
         ]
         data
     ]

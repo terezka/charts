@@ -1,31 +1,10 @@
-module Examples.BarCharts.TooltipBin exposing (..)
+module Examples.BarCharts.Title exposing (..)
 
 {-| @LARGE -}
 import Html as H
 import Svg as S
 import Chart as C
 import Chart.Attributes as CA
-import Chart.Events as CE
-
-
-type alias Model =
-  { hovering : List (CE.Group (CE.Bin Datum) CE.Any (Maybe Float) Datum) }
-
-
-init : Model
-init =
-  { hovering = [] }
-
-
-type Msg
-  = OnHover (List (CE.Group (CE.Bin Datum) CE.Any (Maybe Float) Datum))
-
-
-update : Msg -> Model -> Model
-update msg model =
-  case msg of
-    OnHover hovering ->
-      { model | hovering = hovering }
 
 
 view : Model -> H.Html Msg
@@ -34,19 +13,18 @@ view model =
   C.chart
     [ CA.height 300
     , CA.width 300
-    , CE.onMouseMove OnHover (CE.getNearest CE.bin)
-    , CE.onMouseLeave (OnHover [])
     ]
     [ C.grid []
     , C.xLabels []
     , C.yLabels []
+    , C.titleAt .max .max [ CA.xOff -15, CA.yOff 10, CA.alignRight ] [ S.text "Quarterly revenue" ]
+    , C.titleAt CA.middle .min [ CA.yOff 30 ] [ S.text "Quarter" ]
+    , C.titleAt .min CA.middle [ CA.xOff -20, CA.rotate 90 ] [ S.text "Revenue" ]
     , C.bars []
         [ C.bar .z []
         , C.bar .y []
         ]
         data
-    , C.each model.hovering <| \p item ->
-        [ C.tooltip item [] [] [] ]
     ]
 {-| @SMALL END -}
 {-| @LARGE END -}
@@ -54,11 +32,28 @@ view model =
 
 meta =
   { category = "Bar charts"
-  , name = "Bin tooltip"
-  , description = "Add a tooltip for nearest bin."
-  , order = 13
+  , name = "Titles"
+  , description = "Add titles to bar chart."
+  , order = 16
   }
 
+
+type alias Model =
+  ()
+
+
+init : Model
+init =
+  ()
+
+
+type Msg
+  = Msg
+
+
+update : Msg -> Model -> Model
+update msg model =
+  model
 
 
 type alias Datum =

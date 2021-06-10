@@ -1,31 +1,10 @@
-module Examples.BarCharts.TooltipBin exposing (..)
+module Examples.BarCharts.Legends exposing (..)
 
 {-| @LARGE -}
 import Html as H
 import Svg as S
 import Chart as C
 import Chart.Attributes as CA
-import Chart.Events as CE
-
-
-type alias Model =
-  { hovering : List (CE.Group (CE.Bin Datum) CE.Any (Maybe Float) Datum) }
-
-
-init : Model
-init =
-  { hovering = [] }
-
-
-type Msg
-  = OnHover (List (CE.Group (CE.Bin Datum) CE.Any (Maybe Float) Datum))
-
-
-update : Msg -> Model -> Model
-update msg model =
-  case msg of
-    OnHover hovering ->
-      { model | hovering = hovering }
 
 
 view : Model -> H.Html Msg
@@ -34,19 +13,23 @@ view model =
   C.chart
     [ CA.height 300
     , CA.width 300
-    , CE.onMouseMove OnHover (CE.getNearest CE.bin)
-    , CE.onMouseLeave (OnHover [])
     ]
     [ C.grid []
     , C.xLabels []
     , C.yLabels []
-    , C.bars []
+    , C.bars [ CA.roundTop 0.3 ]
         [ C.bar .z []
-        , C.bar .y []
+            |> C.named "Cats"
+        , C.bar .y [ CA.striped [] ]
+            |> C.named "Fish"
         ]
         data
-    , C.each model.hovering <| \p item ->
-        [ C.tooltip item [] [] [] ]
+    , C.legendsAt .max .max -15 0
+        [ CA.column
+        , CA.alignRight
+        , CA.spacing 5
+        ]
+        []
     ]
 {-| @SMALL END -}
 {-| @LARGE END -}
@@ -54,11 +37,28 @@ view model =
 
 meta =
   { category = "Bar charts"
-  , name = "Bin tooltip"
-  , description = "Add a tooltip for nearest bin."
-  , order = 13
+  , name = "Legends"
+  , description = "Add legends to bar chart."
+  , order = 16
   }
 
+
+type alias Model =
+  ()
+
+
+init : Model
+init =
+  ()
+
+
+type Msg
+  = Msg
+
+
+update : Msg -> Model -> Model
+update msg model =
+  model
 
 
 type alias Datum =

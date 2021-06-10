@@ -1,4 +1,4 @@
-module Examples.BarCharts.DataDependent exposing (..)
+module Examples.BarCharts.Legends exposing (..)
 
 
 -- THIS IS A GENERATED MODULE!
@@ -18,20 +18,27 @@ view model =
     [ C.grid []
     , C.xLabels []
     , C.yLabels []
-    , C.bars
-        []
-        [ C.bar .y []
-            |> C.variation (\d -> if d.x == 3 then [ CA.striped [] ] else [])
-        , C.bar .z []
+    , C.bars [ CA.roundTop 0.3 ]
+        [ C.bar .z []
+            |> C.named "Cats"
+        , C.bar .y [ CA.striped [] ]
+            |> C.named "Fish"
         ]
         data
+    , C.legendsAt .max .max -15 0
+        [ CA.column
+        , CA.alignRight
+        , CA.spacing 5
+        ]
+        []
     ]
+
 
 meta =
   { category = "Bar charts"
-  , name = "Data dependent styling"
-  , description = "Change bar based on data."
-  , order = 12
+  , name = "Legends"
+  , description = "Add legends to bar chart."
+  , order = 16
   }
 
 
@@ -89,13 +96,19 @@ smallCode =
     [ C.grid []
     , C.xLabels []
     , C.yLabels []
-    , C.bars
-        []
-        [ C.bar .y []
-            |> C.variation (\\d -> if d.x == 3 then [ CA.striped [] ] else [])
-        , C.bar .z []
+    , C.bars [ CA.roundTop 0.3 ]
+        [ C.bar .z []
+            |> C.named "Cats"
+        , C.bar .y [ CA.striped [] ]
+            |> C.named "Fish"
         ]
         data
+    , C.legendsAt .max .max -15 0
+        [ CA.column
+        , CA.alignRight
+        , CA.spacing 5
+        ]
+        []
     ]
   """
 
@@ -118,12 +131,18 @@ view model =
     [ C.grid []
     , C.xLabels []
     , C.yLabels []
-    , C.bars
-        []
-        [ C.bar .y []
-            |> C.variation (\\d -> if d.x == 3 then [ CA.striped [] ] else [])
-        , C.bar .z []
+    , C.bars [ CA.roundTop 0.3 ]
+        [ C.bar .z []
+            |> C.named "Cats"
+        , C.bar .y [ CA.striped [] ]
+            |> C.named "Fish"
         ]
         data
+    , C.legendsAt .max .max -15 0
+        [ CA.column
+        , CA.alignRight
+        , CA.spacing 5
+        ]
+        []
     ]
   """

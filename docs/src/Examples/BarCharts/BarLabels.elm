@@ -21,8 +21,8 @@ view model =
     , C.xLabels []
     , C.yLabels []
     , C.bars []
-        [ C.property .q [] []
-        , C.property .p [] []
+        [ C.bar .q []
+        , C.bar .p []
         ]
         data
     , C.eachProduct <| \p bar ->
@@ -108,8 +108,8 @@ smallCode =
     , C.xLabels []
     , C.yLabels []
     , C.bars []
-        [ C.property .q [] []
-        , C.property .p [] []
+        [ C.bar .q []
+        , C.bar .p []
         ]
         data
     , C.eachProduct <| \\p bar ->
@@ -152,8 +152,8 @@ view model =
     , C.xLabels []
     , C.yLabels []
     , C.bars []
-        [ C.property .q [] []
-        , C.property .p [] []
+        [ C.bar .q []
+        , C.bar .p []
         ]
         data
     , C.eachProduct <| \\p bar ->

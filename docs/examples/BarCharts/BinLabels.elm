@@ -25,8 +25,8 @@ view model =
         [ C.xLabel [ CA.x middle, CA.y 0 ] [ S.text common.datum.label ] ]
 
     , C.bars []
-        [ C.property .q [] []
-        , C.property .p [] []
+        [ C.bar .q []
+        , C.bar .p []
         ]
         data
     ]
