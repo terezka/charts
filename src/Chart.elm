@@ -17,7 +17,7 @@ module Chart exposing
 
   , generate, floats, ints, times
 
-  , binned
+  , binned, amongst
   )
 
 
@@ -892,8 +892,19 @@ bar y_ =
 
 {-| -}
 variation : (data -> List (CA.Attribute deco)) -> Property data String inter deco -> Property data String inter deco
-variation =
-  P.variation
+variation func =
+  P.variation <| \_ _ _ -> func
+
+
+{-| -}
+amongst : List (CE.Product config value data) -> (data -> List (CA.Attribute deco)) -> Property data String inter deco -> Property data String inter deco
+amongst inQuestion func =
+  P.variation <| \p s meta d ->
+    let check product =
+          if Item.getPropertyIndex product == p && Item.getStackIndex product == s && Item.getDatum product == d
+          then func d else []
+    in
+    List.concatMap check inQuestion
 
 
 {-| -}

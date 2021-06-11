@@ -110,7 +110,7 @@ getDatum (Item item) =
   item.config.values.datum
 
 
-{-| -} -- TODO
+{-| -}
 getIndependent : Product config value data -> Float
 getIndependent (Item item) =
   item.config.values.x1
@@ -120,6 +120,18 @@ getIndependent (Item item) =
 getDependent : Product config value data -> value
 getDependent (Item item) =
   item.config.values.yOrg
+
+
+{-| -}
+getPropertyIndex : Product config value data -> Int
+getPropertyIndex (Item item) =
+  item.config.tooltipInfo.property
+
+
+{-| -}
+getStackIndex : Product config value data -> Int
+getStackIndex (Item item) =
+  item.config.tooltipInfo.stack
 
 
 

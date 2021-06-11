@@ -41,9 +41,11 @@ import Examples.LineCharts.Legends
 import Examples.LineCharts.Basic
 import Examples.ScatterCharts.Colors
 import Examples.ScatterCharts.Shapes
+import Examples.ScatterCharts.Tooltip
 import Examples.ScatterCharts.Highlight
 import Examples.ScatterCharts.DataDependent
 import Examples.ScatterCharts.Borders
+import Examples.ScatterCharts.Labels
 import Examples.ScatterCharts.Opacity
 import Examples.ScatterCharts.Sizes
 import Examples.ScatterCharts.Basic
@@ -87,9 +89,11 @@ type Id
   | LineCharts__Basic
   | ScatterCharts__Colors
   | ScatterCharts__Shapes
+  | ScatterCharts__Tooltip
   | ScatterCharts__Highlight
   | ScatterCharts__DataDependent
   | ScatterCharts__Borders
+  | ScatterCharts__Labels
   | ScatterCharts__Opacity
   | ScatterCharts__Sizes
   | ScatterCharts__Basic
@@ -133,12 +137,14 @@ type alias Model =
   , example34 : Examples.LineCharts.Basic.Model
   , example35 : Examples.ScatterCharts.Colors.Model
   , example36 : Examples.ScatterCharts.Shapes.Model
-  , example37 : Examples.ScatterCharts.Highlight.Model
-  , example38 : Examples.ScatterCharts.DataDependent.Model
-  , example39 : Examples.ScatterCharts.Borders.Model
-  , example40 : Examples.ScatterCharts.Opacity.Model
-  , example41 : Examples.ScatterCharts.Sizes.Model
-  , example42 : Examples.ScatterCharts.Basic.Model
+  , example37 : Examples.ScatterCharts.Tooltip.Model
+  , example38 : Examples.ScatterCharts.Highlight.Model
+  , example39 : Examples.ScatterCharts.DataDependent.Model
+  , example40 : Examples.ScatterCharts.Borders.Model
+  , example41 : Examples.ScatterCharts.Labels.Model
+  , example42 : Examples.ScatterCharts.Opacity.Model
+  , example43 : Examples.ScatterCharts.Sizes.Model
+  , example44 : Examples.ScatterCharts.Basic.Model
   }
 
 
@@ -181,12 +187,14 @@ init =
   , example34 = Examples.LineCharts.Basic.init
   , example35 = Examples.ScatterCharts.Colors.init
   , example36 = Examples.ScatterCharts.Shapes.init
-  , example37 = Examples.ScatterCharts.Highlight.init
-  , example38 = Examples.ScatterCharts.DataDependent.init
-  , example39 = Examples.ScatterCharts.Borders.init
-  , example40 = Examples.ScatterCharts.Opacity.init
-  , example41 = Examples.ScatterCharts.Sizes.init
-  , example42 = Examples.ScatterCharts.Basic.init
+  , example37 = Examples.ScatterCharts.Tooltip.init
+  , example38 = Examples.ScatterCharts.Highlight.init
+  , example39 = Examples.ScatterCharts.DataDependent.init
+  , example40 = Examples.ScatterCharts.Borders.init
+  , example41 = Examples.ScatterCharts.Labels.init
+  , example42 = Examples.ScatterCharts.Opacity.init
+  , example43 = Examples.ScatterCharts.Sizes.init
+  , example44 = Examples.ScatterCharts.Basic.init
   }
 
 
@@ -228,12 +236,14 @@ type Msg
   | ExampleMsg34 Examples.LineCharts.Basic.Msg
   | ExampleMsg35 Examples.ScatterCharts.Colors.Msg
   | ExampleMsg36 Examples.ScatterCharts.Shapes.Msg
-  | ExampleMsg37 Examples.ScatterCharts.Highlight.Msg
-  | ExampleMsg38 Examples.ScatterCharts.DataDependent.Msg
-  | ExampleMsg39 Examples.ScatterCharts.Borders.Msg
-  | ExampleMsg40 Examples.ScatterCharts.Opacity.Msg
-  | ExampleMsg41 Examples.ScatterCharts.Sizes.Msg
-  | ExampleMsg42 Examples.ScatterCharts.Basic.Msg
+  | ExampleMsg37 Examples.ScatterCharts.Tooltip.Msg
+  | ExampleMsg38 Examples.ScatterCharts.Highlight.Msg
+  | ExampleMsg39 Examples.ScatterCharts.DataDependent.Msg
+  | ExampleMsg40 Examples.ScatterCharts.Borders.Msg
+  | ExampleMsg41 Examples.ScatterCharts.Labels.Msg
+  | ExampleMsg42 Examples.ScatterCharts.Opacity.Msg
+  | ExampleMsg43 Examples.ScatterCharts.Sizes.Msg
+  | ExampleMsg44 Examples.ScatterCharts.Basic.Msg
 
 
 update : Msg -> Model -> Model
@@ -276,12 +286,14 @@ update msg model =
     ExampleMsg34 sub -> { model | example34 = Examples.LineCharts.Basic.update sub model.example34 }
     ExampleMsg35 sub -> { model | example35 = Examples.ScatterCharts.Colors.update sub model.example35 }
     ExampleMsg36 sub -> { model | example36 = Examples.ScatterCharts.Shapes.update sub model.example36 }
-    ExampleMsg37 sub -> { model | example37 = Examples.ScatterCharts.Highlight.update sub model.example37 }
-    ExampleMsg38 sub -> { model | example38 = Examples.ScatterCharts.DataDependent.update sub model.example38 }
-    ExampleMsg39 sub -> { model | example39 = Examples.ScatterCharts.Borders.update sub model.example39 }
-    ExampleMsg40 sub -> { model | example40 = Examples.ScatterCharts.Opacity.update sub model.example40 }
-    ExampleMsg41 sub -> { model | example41 = Examples.ScatterCharts.Sizes.update sub model.example41 }
-    ExampleMsg42 sub -> { model | example42 = Examples.ScatterCharts.Basic.update sub model.example42 }
+    ExampleMsg37 sub -> { model | example37 = Examples.ScatterCharts.Tooltip.update sub model.example37 }
+    ExampleMsg38 sub -> { model | example38 = Examples.ScatterCharts.Highlight.update sub model.example38 }
+    ExampleMsg39 sub -> { model | example39 = Examples.ScatterCharts.DataDependent.update sub model.example39 }
+    ExampleMsg40 sub -> { model | example40 = Examples.ScatterCharts.Borders.update sub model.example40 }
+    ExampleMsg41 sub -> { model | example41 = Examples.ScatterCharts.Labels.update sub model.example41 }
+    ExampleMsg42 sub -> { model | example42 = Examples.ScatterCharts.Opacity.update sub model.example42 }
+    ExampleMsg43 sub -> { model | example43 = Examples.ScatterCharts.Sizes.update sub model.example43 }
+    ExampleMsg44 sub -> { model | example44 = Examples.ScatterCharts.Basic.update sub model.example44 }
 
 
 view : Model -> Id -> Html.Html Msg
@@ -324,12 +336,14 @@ view model chosen =
     LineCharts__Basic -> Html.map ExampleMsg34 (Examples.LineCharts.Basic.view model.example34)
     ScatterCharts__Colors -> Html.map ExampleMsg35 (Examples.ScatterCharts.Colors.view model.example35)
     ScatterCharts__Shapes -> Html.map ExampleMsg36 (Examples.ScatterCharts.Shapes.view model.example36)
-    ScatterCharts__Highlight -> Html.map ExampleMsg37 (Examples.ScatterCharts.Highlight.view model.example37)
-    ScatterCharts__DataDependent -> Html.map ExampleMsg38 (Examples.ScatterCharts.DataDependent.view model.example38)
-    ScatterCharts__Borders -> Html.map ExampleMsg39 (Examples.ScatterCharts.Borders.view model.example39)
-    ScatterCharts__Opacity -> Html.map ExampleMsg40 (Examples.ScatterCharts.Opacity.view model.example40)
-    ScatterCharts__Sizes -> Html.map ExampleMsg41 (Examples.ScatterCharts.Sizes.view model.example41)
-    ScatterCharts__Basic -> Html.map ExampleMsg42 (Examples.ScatterCharts.Basic.view model.example42)
+    ScatterCharts__Tooltip -> Html.map ExampleMsg37 (Examples.ScatterCharts.Tooltip.view model.example37)
+    ScatterCharts__Highlight -> Html.map ExampleMsg38 (Examples.ScatterCharts.Highlight.view model.example38)
+    ScatterCharts__DataDependent -> Html.map ExampleMsg39 (Examples.ScatterCharts.DataDependent.view model.example39)
+    ScatterCharts__Borders -> Html.map ExampleMsg40 (Examples.ScatterCharts.Borders.view model.example40)
+    ScatterCharts__Labels -> Html.map ExampleMsg41 (Examples.ScatterCharts.Labels.view model.example41)
+    ScatterCharts__Opacity -> Html.map ExampleMsg42 (Examples.ScatterCharts.Opacity.view model.example42)
+    ScatterCharts__Sizes -> Html.map ExampleMsg43 (Examples.ScatterCharts.Sizes.view model.example43)
+    ScatterCharts__Basic -> Html.map ExampleMsg44 (Examples.ScatterCharts.Basic.view model.example44)
 
 
 smallCode : Id -> String
@@ -372,9 +386,11 @@ smallCode chosen =
     LineCharts__Basic -> Examples.LineCharts.Basic.smallCode
     ScatterCharts__Colors -> Examples.ScatterCharts.Colors.smallCode
     ScatterCharts__Shapes -> Examples.ScatterCharts.Shapes.smallCode
+    ScatterCharts__Tooltip -> Examples.ScatterCharts.Tooltip.smallCode
     ScatterCharts__Highlight -> Examples.ScatterCharts.Highlight.smallCode
     ScatterCharts__DataDependent -> Examples.ScatterCharts.DataDependent.smallCode
     ScatterCharts__Borders -> Examples.ScatterCharts.Borders.smallCode
+    ScatterCharts__Labels -> Examples.ScatterCharts.Labels.smallCode
     ScatterCharts__Opacity -> Examples.ScatterCharts.Opacity.smallCode
     ScatterCharts__Sizes -> Examples.ScatterCharts.Sizes.smallCode
     ScatterCharts__Basic -> Examples.ScatterCharts.Basic.smallCode
@@ -420,9 +436,11 @@ largeCode chosen =
     LineCharts__Basic -> Examples.LineCharts.Basic.largeCode
     ScatterCharts__Colors -> Examples.ScatterCharts.Colors.largeCode
     ScatterCharts__Shapes -> Examples.ScatterCharts.Shapes.largeCode
+    ScatterCharts__Tooltip -> Examples.ScatterCharts.Tooltip.largeCode
     ScatterCharts__Highlight -> Examples.ScatterCharts.Highlight.largeCode
     ScatterCharts__DataDependent -> Examples.ScatterCharts.DataDependent.largeCode
     ScatterCharts__Borders -> Examples.ScatterCharts.Borders.largeCode
+    ScatterCharts__Labels -> Examples.ScatterCharts.Labels.largeCode
     ScatterCharts__Opacity -> Examples.ScatterCharts.Opacity.largeCode
     ScatterCharts__Sizes -> Examples.ScatterCharts.Sizes.largeCode
     ScatterCharts__Basic -> Examples.ScatterCharts.Basic.largeCode
@@ -468,9 +486,11 @@ name chosen =
     LineCharts__Basic -> "Examples.LineCharts.Basic"
     ScatterCharts__Colors -> "Examples.ScatterCharts.Colors"
     ScatterCharts__Shapes -> "Examples.ScatterCharts.Shapes"
+    ScatterCharts__Tooltip -> "Examples.ScatterCharts.Tooltip"
     ScatterCharts__Highlight -> "Examples.ScatterCharts.Highlight"
     ScatterCharts__DataDependent -> "Examples.ScatterCharts.DataDependent"
     ScatterCharts__Borders -> "Examples.ScatterCharts.Borders"
+    ScatterCharts__Labels -> "Examples.ScatterCharts.Labels"
     ScatterCharts__Opacity -> "Examples.ScatterCharts.Opacity"
     ScatterCharts__Sizes -> "Examples.ScatterCharts.Sizes"
     ScatterCharts__Basic -> "Examples.ScatterCharts.Basic"
@@ -515,9 +535,11 @@ meta chosen =
     LineCharts__Basic -> Examples.LineCharts.Basic.meta
     ScatterCharts__Colors -> Examples.ScatterCharts.Colors.meta
     ScatterCharts__Shapes -> Examples.ScatterCharts.Shapes.meta
+    ScatterCharts__Tooltip -> Examples.ScatterCharts.Tooltip.meta
     ScatterCharts__Highlight -> Examples.ScatterCharts.Highlight.meta
     ScatterCharts__DataDependent -> Examples.ScatterCharts.DataDependent.meta
     ScatterCharts__Borders -> Examples.ScatterCharts.Borders.meta
+    ScatterCharts__Labels -> Examples.ScatterCharts.Labels.meta
     ScatterCharts__Opacity -> Examples.ScatterCharts.Opacity.meta
     ScatterCharts__Sizes -> Examples.ScatterCharts.Sizes.meta
     ScatterCharts__Basic -> Examples.ScatterCharts.Basic.meta
@@ -562,9 +584,11 @@ all =
   , LineCharts__Basic
   , ScatterCharts__Colors
   , ScatterCharts__Shapes
+  , ScatterCharts__Tooltip
   , ScatterCharts__Highlight
   , ScatterCharts__DataDependent
   , ScatterCharts__Borders
+  , ScatterCharts__Labels
   , ScatterCharts__Opacity
   , ScatterCharts__Sizes
   , ScatterCharts__Basic

@@ -119,7 +119,7 @@ toBarSeries barsAttrs properties data =
             roundBottom = if isSingle || isFirst then barsConfig.roundBottom else 0
             color = Helpers.toDefaultColor colorIndex
             defaultAttrs = [ CA.roundTop roundTop, CA.roundBottom roundBottom, CA.color color ]
-            attrs = defaultAttrs ++ section.attrs ++ section.extra bin.datum
+            attrs = defaultAttrs ++ section.attrs ++ section.extra barIndex sectionIndex section.meta bin.datum
             product = toBarConfig attrs
         in
         I.Item
@@ -212,7 +212,7 @@ toDotSeries toX properties data =
 
       toDotItem lineIndex sublineIndex colorIndex prop interConfig datum_ =
         let defaultAttrs = [ CA.color interConfig.color, if interConfig.method == Nothing then CA.circle else identity ]
-            dotAttrs = defaultAttrs ++ prop.attrs ++ prop.extra datum_
+            dotAttrs = defaultAttrs ++ prop.attrs ++ prop.extra lineIndex sublineIndex prop.meta datum_
             config = toDotConfig dotAttrs
             x_ = toX datum_
             y_ = Maybe.withDefault 0 (prop.visual datum_)
