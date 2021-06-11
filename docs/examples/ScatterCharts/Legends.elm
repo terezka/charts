@@ -1,11 +1,10 @@
-module Examples.ScatterCharts.Labels exposing (..)
+module Examples.ScatterCharts.Legends exposing (..)
 
 {-| @LARGE -}
 import Html as H
-import Svg as S
 import Chart as C
 import Chart.Attributes as CA
-import Chart.Events as CE
+import Svg as S
 
 
 view : Model -> H.Html Msg
@@ -14,29 +13,23 @@ view model =
   C.chart
     [ CA.height 300
     , CA.width 300
-    , CA.paddingLeft 30
+    , CA.paddingLeft 15
     ]
     [ C.grid []
     , C.xLabels []
     , C.yLabels []
     , C.series .x
-        [ C.property .y [] [ CA.opacity 0.2, CA.borderWidth 1 ]
-            |> C.variation (\d -> [ CA.size (Maybe.withDefault 6 d.w * 30) ])
+        [ C.property .y [] []
+        , C.property .z [] []
         ]
         data
-    , C.eachProduct <| \p point ->
-        let center = CE.getCenter p point
-            label =
-              (CE.getDatum point).w
-                |> Maybe.map String.fromFloat
-                |> Maybe.withDefault "N/A"
-        in
-        [ C.title
-            [ CA.yOff 4
-            , CA.color CA.pink
-            ]
-            [ S.text label ]
-            center
+    , C.legendsAt .max .max -12 0
+        [ CA.column
+        , CA.spacing 0
+        , CA.alignRight
+        ]
+        [ CA.width 10
+        , CA.spacing 5
         ]
     ]
 {-| @SMALL END -}
@@ -45,9 +38,9 @@ view model =
 
 meta =
   { category = "Scatter charts"
-  , name = "Labels"
-  , description = "Add labels to each dot."
-  , order = 9
+  , name = "Legends"
+  , description = "Add legends to scatter chart."
+  , order = 10
   }
 
 
@@ -85,8 +78,8 @@ data =
   let toDatum x y z v w p q =
         Datum x (Just y) (Just z) (Just v) (Just w) (Just p) (Just q)
   in
-  [ toDatum 0.6 2.0 4.0 4.6 6.9 7.3 8.0
-  , toDatum 0.7 3.0 4.2 5.2 6.2 7.0 8.7
+  [ toDatum 0.1 2.0 4.0 4.6 6.9 7.3 8.0
+  , toDatum 0.2 3.0 4.2 5.2 6.2 7.0 8.7
   , toDatum 0.8 4.0 4.6 5.5 5.2 7.2 8.1
   , toDatum 1.0 2.0 4.2 5.3 5.7 6.2 7.8
   , toDatum 1.2 5.0 3.5 4.9 5.9 6.7 8.2

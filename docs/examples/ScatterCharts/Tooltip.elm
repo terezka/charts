@@ -59,8 +59,8 @@ view model =
 
 meta =
   { category = "Scatter charts"
-  , name = "Labels"
-  , description = "Add labels to each dot."
+  , name = "Tooltip"
+  , description = "Add basic tooltip."
   , order = 8
   }
 

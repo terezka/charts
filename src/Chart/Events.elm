@@ -21,6 +21,7 @@ module Chart.Events exposing
 -- specify center of item for tooltip placement
 -- moveLeft, moveRight api
 -- use correct HTML elements
+-- Add element index
 
 
 import Html as H exposing (Html)

@@ -46,7 +46,7 @@ meta =
   { category = "Scatter charts"
   , name = "Labels"
   , description = "Add labels to each dot."
-  , order = 8
+  , order = 9
   }
 
 

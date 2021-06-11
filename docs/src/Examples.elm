@@ -48,6 +48,7 @@ import Examples.ScatterCharts.Borders
 import Examples.ScatterCharts.Labels
 import Examples.ScatterCharts.Opacity
 import Examples.ScatterCharts.Sizes
+import Examples.ScatterCharts.Legends
 import Examples.ScatterCharts.Basic
 
 
@@ -96,6 +97,7 @@ type Id
   | ScatterCharts__Labels
   | ScatterCharts__Opacity
   | ScatterCharts__Sizes
+  | ScatterCharts__Legends
   | ScatterCharts__Basic
 
 
@@ -144,7 +146,8 @@ type alias Model =
   , example41 : Examples.ScatterCharts.Labels.Model
   , example42 : Examples.ScatterCharts.Opacity.Model
   , example43 : Examples.ScatterCharts.Sizes.Model
-  , example44 : Examples.ScatterCharts.Basic.Model
+  , example44 : Examples.ScatterCharts.Legends.Model
+  , example45 : Examples.ScatterCharts.Basic.Model
   }
 
 
@@ -194,7 +197,8 @@ init =
   , example41 = Examples.ScatterCharts.Labels.init
   , example42 = Examples.ScatterCharts.Opacity.init
   , example43 = Examples.ScatterCharts.Sizes.init
-  , example44 = Examples.ScatterCharts.Basic.init
+  , example44 = Examples.ScatterCharts.Legends.init
+  , example45 = Examples.ScatterCharts.Basic.init
   }
 
 
@@ -243,7 +247,8 @@ type Msg
   | ExampleMsg41 Examples.ScatterCharts.Labels.Msg
   | ExampleMsg42 Examples.ScatterCharts.Opacity.Msg
   | ExampleMsg43 Examples.ScatterCharts.Sizes.Msg
-  | ExampleMsg44 Examples.ScatterCharts.Basic.Msg
+  | ExampleMsg44 Examples.ScatterCharts.Legends.Msg
+  | ExampleMsg45 Examples.ScatterCharts.Basic.Msg
 
 
 update : Msg -> Model -> Model
@@ -293,7 +298,8 @@ update msg model =
     ExampleMsg41 sub -> { model | example41 = Examples.ScatterCharts.Labels.update sub model.example41 }
     ExampleMsg42 sub -> { model | example42 = Examples.ScatterCharts.Opacity.update sub model.example42 }
     ExampleMsg43 sub -> { model | example43 = Examples.ScatterCharts.Sizes.update sub model.example43 }
-    ExampleMsg44 sub -> { model | example44 = Examples.ScatterCharts.Basic.update sub model.example44 }
+    ExampleMsg44 sub -> { model | example44 = Examples.ScatterCharts.Legends.update sub model.example44 }
+    ExampleMsg45 sub -> { model | example45 = Examples.ScatterCharts.Basic.update sub model.example45 }
 
 
 view : Model -> Id -> Html.Html Msg
@@ -343,7 +349,8 @@ view model chosen =
     ScatterCharts__Labels -> Html.map ExampleMsg41 (Examples.ScatterCharts.Labels.view model.example41)
     ScatterCharts__Opacity -> Html.map ExampleMsg42 (Examples.ScatterCharts.Opacity.view model.example42)
     ScatterCharts__Sizes -> Html.map ExampleMsg43 (Examples.ScatterCharts.Sizes.view model.example43)
-    ScatterCharts__Basic -> Html.map ExampleMsg44 (Examples.ScatterCharts.Basic.view model.example44)
+    ScatterCharts__Legends -> Html.map ExampleMsg44 (Examples.ScatterCharts.Legends.view model.example44)
+    ScatterCharts__Basic -> Html.map ExampleMsg45 (Examples.ScatterCharts.Basic.view model.example45)
 
 
 smallCode : Id -> String
@@ -393,6 +400,7 @@ smallCode chosen =
     ScatterCharts__Labels -> Examples.ScatterCharts.Labels.smallCode
     ScatterCharts__Opacity -> Examples.ScatterCharts.Opacity.smallCode
     ScatterCharts__Sizes -> Examples.ScatterCharts.Sizes.smallCode
+    ScatterCharts__Legends -> Examples.ScatterCharts.Legends.smallCode
     ScatterCharts__Basic -> Examples.ScatterCharts.Basic.smallCode
 
 
@@ -443,6 +451,7 @@ largeCode chosen =
     ScatterCharts__Labels -> Examples.ScatterCharts.Labels.largeCode
     ScatterCharts__Opacity -> Examples.ScatterCharts.Opacity.largeCode
     ScatterCharts__Sizes -> Examples.ScatterCharts.Sizes.largeCode
+    ScatterCharts__Legends -> Examples.ScatterCharts.Legends.largeCode
     ScatterCharts__Basic -> Examples.ScatterCharts.Basic.largeCode
 
 
@@ -493,6 +502,7 @@ name chosen =
     ScatterCharts__Labels -> "Examples.ScatterCharts.Labels"
     ScatterCharts__Opacity -> "Examples.ScatterCharts.Opacity"
     ScatterCharts__Sizes -> "Examples.ScatterCharts.Sizes"
+    ScatterCharts__Legends -> "Examples.ScatterCharts.Legends"
     ScatterCharts__Basic -> "Examples.ScatterCharts.Basic"
 
 
@@ -542,6 +552,7 @@ meta chosen =
     ScatterCharts__Labels -> Examples.ScatterCharts.Labels.meta
     ScatterCharts__Opacity -> Examples.ScatterCharts.Opacity.meta
     ScatterCharts__Sizes -> Examples.ScatterCharts.Sizes.meta
+    ScatterCharts__Legends -> Examples.ScatterCharts.Legends.meta
     ScatterCharts__Basic -> Examples.ScatterCharts.Basic.meta
 
 
@@ -591,6 +602,7 @@ all =
   , ScatterCharts__Labels
   , ScatterCharts__Opacity
   , ScatterCharts__Sizes
+  , ScatterCharts__Legends
   , ScatterCharts__Basic
   ]
 
