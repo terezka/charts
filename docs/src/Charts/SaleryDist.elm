@@ -279,28 +279,23 @@ salarySeries model border auraSize size =
   C.series .salaryBoth
       [ C.property Salary.womenSalaryPerc []
           [ CA.opacity 0.5, CA.circle, CA.border CA.blue, CA.borderWidth border ]
-          |> C.variation (\d ->
-                let precentOfWomen = Salary.womenPerc d
-                    isHovered = List.any (CI.getDatum >> (==) d) model.hovering
+            |> C.variation (\d ->
+                  let precentOfWomen = Salary.womenPerc d
 
-                    color =
-                      if precentOfWomen < 20
-                      then [ CA.border "#58a9f6", CA.color "#58a9f6" ]
-                      else if precentOfWomen < 40
-                      then [ CA.border "#8a91f7", CA.color "#8a91f7" ]
-                      else if precentOfWomen < 60
-                      then [ CA.border "#c579f2", CA.color "#c579f2" ]
-                      else if precentOfWomen < 80
-                      then [ CA.border "#de74d7", CA.color "#de74d7" ]
-                      else [ CA.border "#f56dbc", CA.color "#f56dbc" ]
-
-                    aura =
-                      if isHovered
-                      then [ CA.aura 0.4, CA.auraWidth auraSize, CA.opacity 0.7 ]
-                      else []
-                in
-                [ CA.size (d.numOfBoth / size) ] ++ color ++ aura
-              )
+                      color =
+                        if precentOfWomen < 20
+                        then [ CA.border "#58a9f6", CA.color "#58a9f6" ]
+                        else if precentOfWomen < 40
+                        then [ CA.border "#8a91f7", CA.color "#8a91f7" ]
+                        else if precentOfWomen < 60
+                        then [ CA.border "#c579f2", CA.color "#c579f2" ]
+                        else if precentOfWomen < 80
+                        then [ CA.border "#de74d7", CA.color "#de74d7" ]
+                        else [ CA.border "#f56dbc", CA.color "#f56dbc" ]
+                  in
+                  [ CA.size (d.numOfBoth / size) ] ++ color
+                )
+          |> C.amongst model.hovering (\d -> [ CA.aura 0.4, CA.auraWidth auraSize, CA.opacity 0.7 ])
       ]
       (List.filter (.year >> (==) model.year) Salary.data)
 

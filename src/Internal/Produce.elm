@@ -247,7 +247,10 @@ toDotSeries toX properties data =
                   { property = lineIndex
                   , stack = sublineIndex
                   , name = prop.meta
-                  , color = interConfig.color -- TODO ? config.color
+                  , color =
+                      case config.color of
+                        "white" -> interConfig.color
+                        _ -> config.color
                   , border = config.border
                   , borderWidth = config.borderWidth
                   }
