@@ -1,6 +1,6 @@
-module Pages.Documentation exposing (Model, Msg, page)
+module Pages.Documentation.Id_ exposing (Model, Msg, page)
 
-import Gen.Params.Documentation exposing (Params)
+import Gen.Params.Documentation.Id_ exposing (Params)
 import Page
 import Request
 import Shared
@@ -23,7 +23,7 @@ import Ui.Tabs
 page : Shared.Model -> Request.With Params -> Page.With Model Msg
 page shared req =
   Page.sandbox
-    { init = init
+    { init = init req
     , update = update
     , view = view
     }
@@ -35,12 +35,14 @@ page shared req =
 
 type alias Model =
   { examples : Examples.Model
+  , selectedTab : String
   }
 
 
-init : Model
-init =
+init : Request.With Params -> Model
+init req =
   { examples = Examples.init
+  , selectedTab = req.params.id
   }
 
 
@@ -58,7 +60,6 @@ update msg model =
     case msg of
       OnExampleMsg sub ->
         { model | examples = Examples.update sub model.examples }
-
 
 
 -- VIEW
@@ -85,10 +86,10 @@ view model =
         , Ui.Tabs.view
             { toUrl = Ui.Thumbnail.toUrlGroup << .title
             , toTitle = .title
-            , selected = ""
+            , selected = "/documentation/" ++ model.selectedTab
             , all = Ui.Thumbnail.groups
             }
         , E.map OnExampleMsg
-            (Ui.Thumbnail.viewSelected model.examples "")
+            (Ui.Thumbnail.viewSelected model.examples <| "/documentation/" ++ model.selectedTab)
         ]
   }
