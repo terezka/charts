@@ -27,6 +27,7 @@ view model =
 
 meta =
   { category = "Line charts"
+  , categoryOrder = 3
   , name = "Dashed"
   , description = "Make a line dashed."
   , order = 6

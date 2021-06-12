@@ -52,6 +52,7 @@ view model =
 
 meta =
   { category = "Interactivity"
+  , categoryOrder = 5
   , name = "Basic tooltip for dots"
   , description = "Add basic tooltip for line or scatter charts."
   , order = 4

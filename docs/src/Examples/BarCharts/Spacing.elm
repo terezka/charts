@@ -28,6 +28,7 @@ view model =
 
 meta =
   { category = "Bar charts"
+  , categoryOrder = 1
   , name = "Spacing"
   , description = "Remove or add spacing between bars."
   , order = 5

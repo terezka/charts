@@ -28,6 +28,7 @@ view model =
 
 meta =
   { category = "Line charts"
+  , categoryOrder = 3
   , name = "Monotone"
   , description = "Use a monotone interpolation."
   , order = 2

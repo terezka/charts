@@ -27,6 +27,7 @@ view model =
 
 meta =
   { category = "Line charts"
+  , categoryOrder = 3
   , name = "Gradient"
   , description = "Add a gradient to your area under the curve."
   , order = 10

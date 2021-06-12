@@ -28,6 +28,7 @@ view model =
 
 meta =
   { category = "Bar charts"
+  , categoryOrder = 1
   , name = "Basic"
   , description = "Make a basic bar chart."
   , order = 1

@@ -52,6 +52,7 @@ view model =
 
 meta =
   { category = "Line charts"
+  , categoryOrder = 3
   , name = "Tooltip"
   , description = "Add basic tooltip."
   , order = 13

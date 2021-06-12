@@ -31,6 +31,7 @@ view model =
 
 meta =
   { category = "Bar charts"
+  , categoryOrder = 1
   , name = "Borders"
   , description = "Add border to bar."
   , order = 8

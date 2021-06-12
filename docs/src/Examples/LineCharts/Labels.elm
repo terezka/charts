@@ -43,6 +43,7 @@ view model =
 
 meta =
   { category = "Line charts"
+  , categoryOrder = 3
   , name = "Labels for each point"
   , description = "Add custom labels on each data point."
   , order = 12

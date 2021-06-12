@@ -75,6 +75,7 @@ data =
 
 meta =
   { category = "Frame and navigation"
+  , categoryOrder = 4
   , name = "Titles"
   , description = "Add titles to chart."
   , order = 20

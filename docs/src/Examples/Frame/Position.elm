@@ -24,6 +24,7 @@ view model =
 
 meta =
   { category = "Frame and navigation"
+  , categoryOrder = 4
   , name = "Position"
   , description = "Change color of position."
   , order = 3

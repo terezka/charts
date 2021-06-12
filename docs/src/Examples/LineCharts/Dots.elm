@@ -26,6 +26,7 @@ view model =
 
 meta =
   { category = "Line charts"
+  , categoryOrder = 3
   , name = "Dots"
   , description = "Add dots to a line."
   , order = 7

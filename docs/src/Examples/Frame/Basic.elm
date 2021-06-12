@@ -27,6 +27,7 @@ view model =
 
 meta =
   { category = "Frame and navigation"
+  , categoryOrder = 4
   , name = "Basic"
   , description = "Add grid, axes, ticks, and labels."
   , order = 1

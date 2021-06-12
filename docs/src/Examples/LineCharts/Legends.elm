@@ -34,6 +34,7 @@ view model =
 
 meta =
   { category = "Line charts"
+  , categoryOrder = 3
   , name = "Legends"
   , description = "Add legends to your chart."
   , order = 12

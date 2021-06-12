@@ -37,6 +37,7 @@ view model =
 
 meta =
   { category = "Frame and navigation"
+  , categoryOrder = 4
   , name = "Rectangle"
   , description = "Add a rectangle."
   , order = 31

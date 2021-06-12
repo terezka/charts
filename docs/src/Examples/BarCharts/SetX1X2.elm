@@ -30,6 +30,7 @@ view model =
 
 meta =
   { category = "Bar charts"
+  , categoryOrder = 1
   , name = "Set x1 and x2"
   , description = "Change position of bar."
   , order = 2

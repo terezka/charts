@@ -28,6 +28,7 @@ view model =
 
 meta =
   { category = "Line charts"
+  , categoryOrder = 3
   , name = "Linear"
   , description = "Use a linear interpolation."
   , order = 1

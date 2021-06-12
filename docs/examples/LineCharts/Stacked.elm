@@ -30,6 +30,7 @@ view model =
 
 meta =
   { category = "Line charts"
+  , categoryOrder = 3
   , name = "Stacked"
   , description = "Stack lines."
   , order = 8

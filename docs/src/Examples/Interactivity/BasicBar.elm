@@ -56,6 +56,7 @@ view model =
 
 meta =
   { category = "Interactivity"
+  , categoryOrder = 5
   , name = "Basic bar tooltip"
   , description = "Add a tooltip for nearest bar."
   , order = 1

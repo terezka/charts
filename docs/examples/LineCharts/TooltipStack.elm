@@ -59,6 +59,7 @@ view model =
 
 meta =
   { category = "Line charts"
+  , categoryOrder = 3
   , name = "Tooltip for stacks"
   , description = "Add tooltip for nearest stack."
   , order = 14

@@ -29,6 +29,7 @@ view model =
 
 meta =
   { category = "Bar charts"
+  , categoryOrder = 1
   , name = "Margin"
   , description = "Change margins around bin."
   , order = 6

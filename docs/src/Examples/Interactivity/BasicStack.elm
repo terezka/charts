@@ -57,6 +57,7 @@ view model =
 
 meta =
   { category = "Interactivity"
+  , categoryOrder = 5
   , name = "Basic stack tooltip"
   , description = "Add a tooltip for nearest stack."
   , order = 2

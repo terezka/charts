@@ -45,6 +45,7 @@ view model =
 
 meta =
   { category = "Bar charts"
+  , categoryOrder = 1
   , name = "Labels for bars"
   , description = "Add custom bar labels."
   , order = 15

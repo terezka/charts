@@ -53,6 +53,7 @@ view model =
 
 meta =
   { category = "Bar charts"
+  , categoryOrder = 1
   , name = "Bin tooltip"
   , description = "Add a tooltip for nearest bin."
   , order = 13

@@ -30,6 +30,7 @@ view model =
 
 meta =
   { category = "Frame and navigation"
+  , categoryOrder = 4
   , name = "Timeline"
   , description = "Use dates as labels."
   , order = 8

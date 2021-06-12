@@ -30,6 +30,7 @@ view model =
 
 meta =
   { category = "Bar charts"
+  , categoryOrder = 1
   , name = "Data dependent styling"
   , description = "Change bar based on data."
   , order = 12

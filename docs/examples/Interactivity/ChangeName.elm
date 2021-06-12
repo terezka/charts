@@ -58,6 +58,7 @@ view model =
 
 meta =
   { category = "Interactivity"
+  , categoryOrder = 5
   , name = "Change name"
   , description = "Change the default series name in tooltip."
   , order = 6

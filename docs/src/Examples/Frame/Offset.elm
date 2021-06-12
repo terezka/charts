@@ -22,6 +22,7 @@ view model =
 
 meta =
   { category = "Frame and navigation"
+  , categoryOrder = 4
   , name = "Move labels"
   , description = "Change position of labels."
   , order = 4

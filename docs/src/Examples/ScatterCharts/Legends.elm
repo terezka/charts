@@ -37,6 +37,7 @@ view model =
 
 meta =
   { category = "Scatter charts"
+  , categoryOrder = 2
   , name = "Legends"
   , description = "Add legends to scatter chart."
   , order = 10

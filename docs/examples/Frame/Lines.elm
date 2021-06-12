@@ -44,6 +44,7 @@ view model =
 
 meta =
   { category = "Frame and navigation"
+  , categoryOrder = 4
   , name = "Lines"
   , description = "Add a guidence line."
   , order = 30

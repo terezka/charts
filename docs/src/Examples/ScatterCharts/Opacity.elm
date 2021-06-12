@@ -29,6 +29,7 @@ view model =
 
 meta =
   { category = "Scatter charts"
+  , categoryOrder = 2
   , name = "Opacity"
   , description = "Change opacity of dots."
   , order = 6

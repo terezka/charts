@@ -36,6 +36,7 @@ view model =
 
 meta =
   { category = "Bar charts"
+  , categoryOrder = 1
   , name = "Labels for bins"
   , description = "Add custom bin labels."
   , order = 15

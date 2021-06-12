@@ -28,6 +28,7 @@ view model =
 
 meta =
   { category = "Bar charts"
+  , categoryOrder = 1
   , name = "Ungroup"
   , description = "Have bars overlap rather than be side-by-side."
   , order = 4

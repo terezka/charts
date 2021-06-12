@@ -58,6 +58,7 @@ view model =
 
 meta =
   { category = "Interactivity"
+  , categoryOrder = 5
   , name = "Basic tooltip for area charts"
   , description = "Add tooltip for nearest stack in line or scatter chart."
   , order = 5

@@ -28,6 +28,7 @@ view model =
 
 meta =
   { category = "Line charts"
+  , categoryOrder = 3
   , name = "Color"
   , description = "Change color of line."
   , order = 4

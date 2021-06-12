@@ -28,6 +28,7 @@ view model =
 
 meta =
   { category = "Bar charts"
+  , categoryOrder = 1
   , name = "Color"
   , description = "Change bar color."
   , order = 7

@@ -31,6 +31,7 @@ view model =
 
 meta =
   { category = "Bar charts"
+  , categoryOrder = 1
   , name = "Titles"
   , description = "Add titles to bar chart."
   , order = 16

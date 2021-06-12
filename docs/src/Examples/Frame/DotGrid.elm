@@ -27,6 +27,7 @@ view model =
 
 meta =
   { category = "Frame and navigation"
+  , categoryOrder = 4
   , name = "Dotted grid"
   , description = "Use dots instead of grid lines."
   , order = 13

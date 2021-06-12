@@ -27,6 +27,7 @@ view model =
 
 meta =
   { category = "Line charts"
+  , categoryOrder = 3
   , name = "Area under curve"
   , description = "Set opacity of the area under curve."
   , order = 9

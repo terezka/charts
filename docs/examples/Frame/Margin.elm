@@ -38,6 +38,7 @@ view model =
 
 meta =
   { category = "Frame and navigation"
+  , categoryOrder = 4
   , name = "Margin"
   , description = "Add margin to frame."
   , order = 17

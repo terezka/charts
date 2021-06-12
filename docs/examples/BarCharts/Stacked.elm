@@ -30,6 +30,7 @@ view model =
 
 meta =
   { category = "Bar charts"
+  , categoryOrder = 1
   , name = "Stacked"
   , description = "Stack bars."
   , order = 3

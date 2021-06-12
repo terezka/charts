@@ -28,6 +28,7 @@ view model =
 
 meta =
   { category = "Scatter charts"
+  , categoryOrder = 2
   , name = "Basic"
   , description = "Make a basic scatter chart."
   , order = 1

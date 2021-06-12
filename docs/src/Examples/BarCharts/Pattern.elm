@@ -28,6 +28,7 @@ view model =
 
 meta =
   { category = "Bar charts"
+  , categoryOrder = 1
   , name = "Pattern"
   , description = "Change pattern of bar."
   , order = 11

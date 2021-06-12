@@ -33,6 +33,7 @@ view model =
 
 meta =
   { category = "Scatter charts"
+  , categoryOrder = 2
   , name = "Borders"
   , description = "Change border of dots."
   , order = 5

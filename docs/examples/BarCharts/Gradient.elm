@@ -29,6 +29,7 @@ view model =
 
 meta =
   { category = "Bar charts"
+  , categoryOrder = 1
   , name = "Gradient"
   , description = "Add gradient to bar."
   , order = 10

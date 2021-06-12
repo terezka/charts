@@ -29,6 +29,7 @@ view model =
 
 meta =
   { category = "Line charts"
+  , categoryOrder = 3
   , name = "Pattern"
   , description = "Add a pattern to the area under the curve."
   , order = 11

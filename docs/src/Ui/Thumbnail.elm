@@ -15,14 +15,14 @@ import Examples
 
 type alias Group =
   { title : String
+  , order : Int
   , ids : List Examples.Id
   }
 
 
 toUrl : Examples.Id -> String
 toUrl id =
-  let meta = Examples.meta id
-  in
+  let meta = Examples.meta id in
   "/documentation/" ++ urlify meta.category ++ "/" ++ urlify meta.name
 
 
@@ -39,12 +39,13 @@ urlify =
 groups : List Group
 groups =
   Dict.values dictGroups
+    |> List.sortBy .order
 
 
 firstGroup : Group
 firstGroup =
   List.head groups
-    |> Maybe.withDefault (Group "" [])
+    |> Maybe.withDefault (Group "" 1 [])
 
 
 dictGroups : Dict.Dict String Group
@@ -56,7 +57,7 @@ dictGroups =
       updateCat meta id maybeIds =
         case maybeIds of
           Just group -> Just { group | ids = id :: group.ids }
-          Nothing -> Just (Group meta.category  [ id ])
+          Nothing -> Just (Group meta.category meta.categoryOrder [ id ])
   in
   List.foldl groupBy Dict.empty Examples.all
 

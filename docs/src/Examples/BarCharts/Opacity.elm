@@ -28,6 +28,7 @@ view model =
 
 meta =
   { category = "Bar charts"
+  , categoryOrder = 1
   , name = "Opacity"
   , description = "Change opacity of bar."
   , order = 10

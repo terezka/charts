@@ -34,6 +34,7 @@ view model =
 
 meta =
   { category = "Frame and navigation"
+  , categoryOrder = 4
   , name = "Padding"
   , description = "Add padding to frame."
   , order = 16

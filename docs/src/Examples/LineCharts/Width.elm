@@ -28,6 +28,7 @@ view model =
 
 meta =
   { category = "Line charts"
+  , categoryOrder = 3
   , name = "Width"
   , description = "Change width of line."
   , order = 5

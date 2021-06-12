@@ -28,6 +28,7 @@ view model =
 
 meta =
   { category = "Scatter charts"
+  , categoryOrder = 2
   , name = "Highlight"
   , description = "Highlight dots."
   , order = 6

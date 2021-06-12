@@ -44,6 +44,7 @@ view model =
 
 meta =
   { category = "Scatter charts"
+  , categoryOrder = 2
   , name = "Labels"
   , description = "Add labels to each dot."
   , order = 9

@@ -39,6 +39,7 @@ view model =
 
 meta =
   { category = "Frame and navigation"
+  , categoryOrder = 4
   , name = "Adjust axis line"
   , description = "Change the length of your axis line."
   , order = 12

@@ -30,6 +30,7 @@ view model =
 
 meta =
   { category = "Scatter charts"
+  , categoryOrder = 2
   , name = "Data dependent styling"
   , description = "Change styling of individual dots."
   , order = 7

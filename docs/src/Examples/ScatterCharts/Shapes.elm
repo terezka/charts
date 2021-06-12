@@ -29,6 +29,7 @@ view model =
 
 meta =
   { category = "Scatter charts"
+  , categoryOrder = 2
   , name = "Shapes"
   , description = "Change shape of dots."
   , order = 2

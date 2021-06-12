@@ -29,6 +29,7 @@ view model =
 
 meta =
   { category = "Bar charts"
+  , categoryOrder = 1
   , name = "Corners"
   , description = "Add rounded corners to bar."
   , order = 9

@@ -55,6 +55,7 @@ view model =
 
 meta =
   { category = "Interactivity"
+  , categoryOrder = 5
   , name = "Basic bin tooltip"
   , description = "Add a tooltip for nearest bin."
   , order = 3
