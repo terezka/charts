@@ -1,11 +1,10 @@
-module Examples.Navigation.CustomLabels exposing (..)
+module Examples.Navigation.AxisLength exposing (..)
 
 {-| @LARGE -}
 import Html as H
 import Svg as S
 import Chart as C
 import Chart.Attributes as CA
-import Chart.Svg as CS
 
 
 view : Model -> H.Html Msg
@@ -14,20 +13,25 @@ view model =
   C.chart
     [ CA.height 300
     , CA.width 300
+    , CA.paddingTop 0
+    , CA.paddingRight 0
+    , CA.range
+        [ CA.lowest 0 CA.orLower
+        , CA.highest 100 CA.orHigher
+        ]
+    , CA.domain
+        [ CA.lowest 0 CA.orLower
+        , CA.highest 100 CA.orHigher
+        ]
     ]
     [ C.grid []
-    , C.xAxis []
-    , C.generate 12 CS.ints .x [] <| \p num ->
-        let isEven = remainderBy 2 num == 0 in
-        [ C.xLabel
-            [ CA.x (toFloat num)
-            , if isEven then identity else CA.y p.y.max
-            , if isEven then identity else CA.moveUp 28
-            , if isEven then identity else CA.fontSize 10
-            , if isEven then identity else CA.color CA.blue
-            ]
-            [ S.text (String.fromInt num ++ "°") ]
+    , C.series .x
+        [ C.property .y [ CA.linear ] [] ]
+        [ { x = 10, y = Just 20 }
+        , { x = 85, y = Just 80 }
         ]
+    , C.xAxis [ CA.noArrow, CA.limits [ CA.likeData ] ]
+    , C.xLabels []
     ]
 {-| @SMALL END -}
 {-| @LARGE END -}
@@ -35,9 +39,9 @@ view model =
 
 meta =
   { category = "Navigation"
-  , name = "Custom labels"
-  , description = "Control labels entirely."
-  , order = 9
+  , name = "Adjust axis line"
+  , description = "Change the length of your axis line."
+  , order = 12
   }
 
 

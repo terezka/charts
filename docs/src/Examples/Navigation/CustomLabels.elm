@@ -20,11 +20,12 @@ view model =
     , C.xAxis []
     , C.generate 12 CS.ints .x [] <| \p num ->
         let isEven = remainderBy 2 num == 0 in
-        [ C.xTick [ CA.x (toFloat num) ]
-        , C.xLabel
+        [ C.xLabel
             [ CA.x (toFloat num)
-            , if isEven then CA.color CA.blue else identity
+            , if isEven then identity else CA.y p.y.max
+            , if isEven then identity else CA.moveUp 28
             , if isEven then identity else CA.fontSize 10
+            , if isEven then identity else CA.color CA.blue
             ]
             [ S.text (String.fromInt num ++ "°") ]
         ]
@@ -94,11 +95,12 @@ smallCode =
     , C.xAxis []
     , C.generate 12 CS.ints .x [] <| \\p num ->
         let isEven = remainderBy 2 num == 0 in
-        [ C.xTick [ CA.x (toFloat num) ]
-        , C.xLabel
+        [ C.xLabel
             [ CA.x (toFloat num)
-            , if isEven then CA.color CA.blue else identity
+            , if isEven then identity else CA.y p.y.max
+            , if isEven then identity else CA.moveUp 28
             , if isEven then identity else CA.fontSize 10
+            , if isEven then identity else CA.color CA.blue
             ]
             [ S.text (String.fromInt num ++ "°") ]
         ]
@@ -126,11 +128,12 @@ view model =
     , C.xAxis []
     , C.generate 12 CS.ints .x [] <| \\p num ->
         let isEven = remainderBy 2 num == 0 in
-        [ C.xTick [ CA.x (toFloat num) ]
-        , C.xLabel
+        [ C.xLabel
             [ CA.x (toFloat num)
-            , if isEven then CA.color CA.blue else identity
+            , if isEven then identity else CA.y p.y.max
+            , if isEven then identity else CA.moveUp 28
             , if isEven then identity else CA.fontSize 10
+            , if isEven then identity else CA.color CA.blue
             ]
             [ S.text (String.fromInt num ++ "°") ]
         ]

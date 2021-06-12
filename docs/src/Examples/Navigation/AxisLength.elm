@@ -1,4 +1,4 @@
-module Examples.Navigation.Dimensions exposing (..)
+module Examples.Navigation.AxisLength exposing (..)
 
 
 -- THIS IS A GENERATED MODULE!
@@ -17,11 +17,11 @@ view model =
     , CA.paddingTop 0
     , CA.paddingRight 0
     , CA.range
-        [ CA.lowest 5 CA.orLower
-        , CA.highest 90 CA.orHigher
+        [ CA.lowest 0 CA.orLower
+        , CA.highest 100 CA.orHigher
         ]
     , CA.domain
-        [ CA.lowest 5 CA.orLower
+        [ CA.lowest 0 CA.orLower
         , CA.highest 100 CA.orHigher
         ]
     ]
@@ -29,18 +29,18 @@ view model =
     , C.series .x
         [ C.property .y [ CA.linear ] [] ]
         [ { x = 10, y = Just 20 }
-        , { x = 80, y = Just 80 }
+        , { x = 85, y = Just 80 }
         ]
-    , C.xLabels [ CA.amount 10 ]
-    , C.yLabels [ CA.amount 10 ]
+    , C.xAxis [ CA.noArrow, CA.limits [ CA.likeData ] ]
+    , C.xLabels []
     ]
 
 
 meta =
   { category = "Navigation"
-  , name = "Control dimensions"
-  , description = "Limit or extend your range and domain."
-  , order = 11
+  , name = "Adjust axis line"
+  , description = "Change the length of your axis line."
+  , order = 12
   }
 
 
@@ -97,11 +97,11 @@ smallCode =
     , CA.paddingTop 0
     , CA.paddingRight 0
     , CA.range
-        [ CA.lowest 5 CA.orLower
-        , CA.highest 90 CA.orHigher
+        [ CA.lowest 0 CA.orLower
+        , CA.highest 100 CA.orHigher
         ]
     , CA.domain
-        [ CA.lowest 5 CA.orLower
+        [ CA.lowest 0 CA.orLower
         , CA.highest 100 CA.orHigher
         ]
     ]
@@ -109,10 +109,10 @@ smallCode =
     , C.series .x
         [ C.property .y [ CA.linear ] [] ]
         [ { x = 10, y = Just 20 }
-        , { x = 80, y = Just 80 }
+        , { x = 85, y = Just 80 }
         ]
-    , C.xLabels [ CA.amount 10 ]
-    , C.yLabels [ CA.amount 10 ]
+    , C.xAxis [ CA.noArrow, CA.limits [ CA.likeData ] ]
+    , C.xLabels []
     ]
   """
 
@@ -134,11 +134,11 @@ view model =
     , CA.paddingTop 0
     , CA.paddingRight 0
     , CA.range
-        [ CA.lowest 5 CA.orLower
-        , CA.highest 90 CA.orHigher
+        [ CA.lowest 0 CA.orLower
+        , CA.highest 100 CA.orHigher
         ]
     , CA.domain
-        [ CA.lowest 5 CA.orLower
+        [ CA.lowest 0 CA.orLower
         , CA.highest 100 CA.orHigher
         ]
     ]
@@ -146,9 +146,9 @@ view model =
     , C.series .x
         [ C.property .y [ CA.linear ] [] ]
         [ { x = 10, y = Just 20 }
-        , { x = 80, y = Just 80 }
+        , { x = 85, y = Just 80 }
         ]
-    , C.xLabels [ CA.amount 10 ]
-    , C.yLabels [ CA.amount 10 ]
+    , C.xAxis [ CA.noArrow, CA.limits [ CA.likeData ] ]
+    , C.xLabels []
     ]
   """
