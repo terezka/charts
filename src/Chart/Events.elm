@@ -17,11 +17,15 @@ module Chart.Events exposing
 -- TODO
 -- Make sure searched position is preserved through filters
 -- move things to internal
--- find out what to expose in Svg
+-- find out what to expose in Svg / Coord
 -- specify center of item for tooltip placement
 -- moveLeft, moveRight api
 -- use correct HTML elements
 -- Add element index
+-- add dot labels examples
+-- document break line label
+-- rename C.title to C.label
+-- maybe seperate bar from line labels somehow
 
 
 import Html as H exposing (Html)
