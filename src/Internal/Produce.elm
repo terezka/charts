@@ -21,6 +21,7 @@ type alias Bars data =
   , roundTop : Float
   , roundBottom : Float
   , grouped : Bool
+  , grid : Bool
   , x1 : Maybe (data -> Float)
   , x2 : Maybe (data -> Float)
   }
@@ -35,6 +36,7 @@ toBarSeries barsAttrs properties data =
           , roundTop = 0
           , roundBottom = 0
           , grouped = True
+          , grid = True
           , x1 = Nothing
           , x2 = Nothing
           }

@@ -17,7 +17,7 @@ module Chart.Attributes exposing
   , pinned, dotGrid, noArrow
   , range, domain, limits, amount
 
-  , lowest, highest, orLower, orHigher, exactly, more, less, window, likeData, zero, middle
+  , lowest, highest, orLower, orHigher, exactly, more, less, window, likeData, zero, middle, percent
 
   , Tick(..), ints, times
   , noGrid, title
@@ -98,6 +98,12 @@ zero b =
 middle : C.Axis -> Float
 middle b =
   b.min + (b.max - b.min) / 2
+
+
+{-| -}
+percent : Float -> C.Axis -> Float
+percent per b =
+  b.min + (b.max - b.min) * per
 
 
 {-| -}

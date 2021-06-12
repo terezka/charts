@@ -945,6 +945,7 @@ type alias Bars data =
   , roundTop : Float
   , roundBottom : Float
   , grouped : Bool
+  , grid : Bool
   , x1 : Maybe (data -> Float)
   , x2 : Maybe (data -> Float)
   }
@@ -953,7 +954,19 @@ type alias Bars data =
 {-| -}
 bars : List (CA.Attribute (Bars data)) -> List (Property data String () CS.Bar) -> List data -> Element data msg
 bars edits properties data =
-  let items =
+  let barsConfig =
+        Helpers.apply edits
+          { spacing = 0.05
+          , margin = 0.1
+          , roundTop = 0
+          , roundBottom = 0
+          , grouped = True
+          , grid = True
+          , x1 = Nothing
+          , x2 = Nothing
+          }
+
+      items =
         Produce.toBarSeries edits properties data
 
       generalized =
@@ -966,7 +979,12 @@ bars edits properties data =
         Legend.toBarLegends edits properties
 
       toTicks plane acc =
-        { acc | xs = List.concatMap (CE.getLimits >> \pos -> [ pos.x1, pos.x2 ]) bins }
+        { acc | xs = acc.xs ++
+            if barsConfig.grid then
+              List.concatMap (CE.getLimits >> \pos -> [ pos.x1, pos.x2 ]) bins
+            else
+              []
+        }
 
       toLimits =
         List.map Item.getLimits bins

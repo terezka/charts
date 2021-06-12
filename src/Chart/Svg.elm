@@ -389,7 +389,7 @@ legendsAt plane x y xOff yOff edits children =
         case config.alignment of
           CA.Row ->
             ( [ HA.style "display" "flex"
-              , HA.style "align-items" "baseline"
+              , HA.style "align-items" "center"
               ]
             , "right"
             )
@@ -488,7 +488,6 @@ barLegend edits barAttrs =
         ]
         [ H.text config.title ]
     ]
-
 
 
 lineLegend : List (CA.Attribute (Legend msg)) -> List (CA.Attribute Interpolation) -> List (CA.Attribute Dot) -> Html msg
