@@ -1,4 +1,4 @@
-module Examples.Navigation.GridColor exposing (..)
+module Examples.Frame.GridColor exposing (..)
 
 
 -- THIS IS A GENERATED MODULE!
@@ -22,7 +22,7 @@ view model =
 
 
 meta =
-  { category = "Navigation"
+  { category = "Frame and navigation"
   , name = "Color of grid"
   , description = "Change color of grid."
   , order = 14

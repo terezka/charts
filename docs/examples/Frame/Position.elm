@@ -1,4 +1,4 @@
-module Examples.Navigation.DotGrid exposing (..)
+module Examples.Frame.Position exposing (..)
 
 {-| @LARGE -}
 import Html as H
@@ -14,23 +14,20 @@ view model =
     [ CA.height 300
     , CA.width 300
     ]
-    [ C.grid [ CA.dotGrid ]
-    , C.xAxis []
-    , C.xTicks []
-    , C.xLabels []
-    , C.yAxis []
-    , C.yTicks []
-    , C.yLabels []
+    [ C.grid []
+    , C.yAxis [ CA.pinned .max ]
+    , C.yTicks [ CA.pinned .max, CA.flip ]
+    , C.yLabels [ CA.pinned .max, CA.flip ]
     ]
 {-| @SMALL END -}
 {-| @LARGE END -}
 
 
 meta =
-  { category = "Navigation"
-  , name = "Dotted grid"
-  , description = "Use dots instead of grid lines."
-  , order = 13
+  { category = "Frame and navigation"
+  , name = "Position"
+  , description = "Change color of position."
+  , order = 3
   }
 
 

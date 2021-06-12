@@ -1,4 +1,4 @@
-module Examples.Navigation.GridColor exposing (..)
+module Examples.Frame.Offset exposing (..)
 
 
 -- THIS IS A GENERATED MODULE!
@@ -15,17 +15,16 @@ view model =
     [ CA.height 300
     , CA.width 300
     ]
-    [ C.grid [ CA.color CA.blue ]
-    , C.xLabels []
-    , C.yLabels []
+    [ C.grid []
+    , C.xLabels [ CA.moveRight 5, CA.moveUp 18, CA.alignRight ]
     ]
 
 
 meta =
-  { category = "Navigation"
-  , name = "Color of grid"
-  , description = "Change color of grid."
-  , order = 14
+  { category = "Frame and navigation"
+  , name = "Move labels"
+  , description = "Change position of labels."
+  , order = 4
   }
 
 
@@ -55,9 +54,8 @@ smallCode =
     [ CA.height 300
     , CA.width 300
     ]
-    [ C.grid [ CA.color CA.blue ]
-    , C.xLabels []
-    , C.yLabels []
+    [ C.grid []
+    , C.xLabels [ CA.moveRight 5, CA.moveUp 18, CA.alignRight ]
     ]
   """
 
@@ -77,8 +75,7 @@ view model =
     [ CA.height 300
     , CA.width 300
     ]
-    [ C.grid [ CA.color CA.blue ]
-    , C.xLabels []
-    , C.yLabels []
+    [ C.grid []
+    , C.xLabels [ CA.moveRight 5, CA.moveUp 18, CA.alignRight ]
     ]
   """

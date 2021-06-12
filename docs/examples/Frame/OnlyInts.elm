@@ -1,4 +1,4 @@
-module Examples.Navigation.NoArrow exposing (..)
+module Examples.Frame.OnlyInts exposing (..)
 
 {-| @LARGE -}
 import Html as H
@@ -13,21 +13,25 @@ view model =
   C.chart
     [ CA.height 300
     , CA.width 300
+    , CA.range
+        [ CA.highest 3 CA.exactly
+        , CA.lowest 0 CA.exactly
+        ]
     ]
     [ C.grid []
-    , C.xAxis [ CA.noArrow ]
-    , C.xTicks []
-    , C.xLabels []
+    , C.xAxis []
+    , C.xTicks [ CA.ints ]
+    , C.xLabels [ CA.ints ]
     ]
 {-| @SMALL END -}
 {-| @LARGE END -}
 
 
 meta =
-  { category = "Navigation"
-  , name = "Remove arrow"
-  , description = "Remove arrow from axis line."
-  , order = 5
+  { category = "Frame and navigation"
+  , name = "Only integers"
+  , description = "Only show integer labels."
+  , order = 8
   }
 
 

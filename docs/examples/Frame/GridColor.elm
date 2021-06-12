@@ -1,4 +1,4 @@
-module Examples.Navigation.GridFilter exposing (..)
+module Examples.Frame.GridColor exposing (..)
 
 {-| @LARGE -}
 import Html as H
@@ -14,8 +14,8 @@ view model =
     [ CA.height 300
     , CA.width 300
     ]
-    [ C.grid []
-    , C.xLabels [ CA.noGrid ]
+    [ C.grid [ CA.color CA.blue ]
+    , C.xLabels []
     , C.yLabels []
     ]
 {-| @SMALL END -}
@@ -23,10 +23,10 @@ view model =
 
 
 meta =
-  { category = "Navigation"
-  , name = "Remove grid lines"
-  , description = "Prevent automatically added gridlines."
-  , order = 13
+  { category = "Frame and navigation"
+  , name = "Color of grid"
+  , description = "Change color of grid."
+  , order = 14
   }
 
 

@@ -1,4 +1,4 @@
-module Examples.Navigation.GridColor exposing (..)
+module Examples.Frame.GridFilter exposing (..)
 
 
 -- THIS IS A GENERATED MODULE!
@@ -15,17 +15,17 @@ view model =
     [ CA.height 300
     , CA.width 300
     ]
-    [ C.grid [ CA.color CA.blue ]
-    , C.xLabels []
+    [ C.grid []
+    , C.xLabels [ CA.noGrid ]
     , C.yLabels []
     ]
 
 
 meta =
-  { category = "Navigation"
-  , name = "Color of grid"
-  , description = "Change color of grid."
-  , order = 14
+  { category = "Frame and navigation"
+  , name = "Remove grid lines"
+  , description = "Prevent automatically added gridlines."
+  , order = 15
   }
 
 
@@ -55,8 +55,8 @@ smallCode =
     [ CA.height 300
     , CA.width 300
     ]
-    [ C.grid [ CA.color CA.blue ]
-    , C.xLabels []
+    [ C.grid []
+    , C.xLabels [ CA.noGrid ]
     , C.yLabels []
     ]
   """
@@ -77,8 +77,8 @@ view model =
     [ CA.height 300
     , CA.width 300
     ]
-    [ C.grid [ CA.color CA.blue ]
-    , C.xLabels []
+    [ C.grid []
+    , C.xLabels [ CA.noGrid ]
     , C.yLabels []
     ]
   """

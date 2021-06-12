@@ -1,4 +1,4 @@
-module Examples.Navigation.GridFilter exposing (..)
+module Examples.Frame.OnlyInts exposing (..)
 
 
 -- THIS IS A GENERATED MODULE!
@@ -14,18 +14,23 @@ view model =
   C.chart
     [ CA.height 300
     , CA.width 300
+    , CA.range
+        [ CA.highest 3 CA.exactly
+        , CA.lowest 0 CA.exactly
+        ]
     ]
     [ C.grid []
-    , C.xLabels [ CA.noGrid ]
-    , C.yLabels []
+    , C.xAxis []
+    , C.xTicks [ CA.ints ]
+    , C.xLabels [ CA.ints ]
     ]
 
 
 meta =
-  { category = "Navigation"
-  , name = "Remove grid lines"
-  , description = "Prevent automatically added gridlines."
-  , order = 15
+  { category = "Frame and navigation"
+  , name = "Only integers"
+  , description = "Only show integer labels."
+  , order = 8
   }
 
 
@@ -54,10 +59,15 @@ smallCode =
   C.chart
     [ CA.height 300
     , CA.width 300
+    , CA.range
+        [ CA.highest 3 CA.exactly
+        , CA.lowest 0 CA.exactly
+        ]
     ]
     [ C.grid []
-    , C.xLabels [ CA.noGrid ]
-    , C.yLabels []
+    , C.xAxis []
+    , C.xTicks [ CA.ints ]
+    , C.xLabels [ CA.ints ]
     ]
   """
 
@@ -76,9 +86,14 @@ view model =
   C.chart
     [ CA.height 300
     , CA.width 300
+    , CA.range
+        [ CA.highest 3 CA.exactly
+        , CA.lowest 0 CA.exactly
+        ]
     ]
     [ C.grid []
-    , C.xLabels [ CA.noGrid ]
-    , C.yLabels []
+    , C.xAxis []
+    , C.xTicks [ CA.ints ]
+    , C.xLabels [ CA.ints ]
     ]
   """

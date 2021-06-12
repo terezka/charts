@@ -1,4 +1,4 @@
-module Examples.Navigation.AxisLength exposing (..)
+module Examples.Frame.Dimensions exposing (..)
 
 {-| @LARGE -}
 import Html as H
@@ -16,11 +16,11 @@ view model =
     , CA.paddingTop 0
     , CA.paddingRight 0
     , CA.range
-        [ CA.lowest 0 CA.orLower
-        , CA.highest 100 CA.orHigher
+        [ CA.lowest 5 CA.orLower
+        , CA.highest 90 CA.orHigher
         ]
     , CA.domain
-        [ CA.lowest 0 CA.orLower
+        [ CA.lowest 5 CA.orLower
         , CA.highest 100 CA.orHigher
         ]
     ]
@@ -28,20 +28,20 @@ view model =
     , C.series .x
         [ C.property .y [ CA.linear ] [] ]
         [ { x = 10, y = Just 20 }
-        , { x = 85, y = Just 80 }
+        , { x = 80, y = Just 80 }
         ]
-    , C.xAxis [ CA.noArrow, CA.limits [ CA.likeData ] ]
-    , C.xLabels []
+    , C.xLabels [ CA.amount 10 ]
+    , C.yLabels [ CA.amount 10 ]
     ]
 {-| @SMALL END -}
 {-| @LARGE END -}
 
 
 meta =
-  { category = "Navigation"
-  , name = "Adjust axis line"
-  , description = "Change the length of your axis line."
-  , order = 12
+  { category = "Frame and navigation"
+  , name = "Control dimensions"
+  , description = "Limit or extend your range and domain."
+  , order = 11
   }
 
 
@@ -61,5 +61,4 @@ type Msg
 update : Msg -> Model -> Model
 update msg model =
   model
-
 

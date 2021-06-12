@@ -124,17 +124,21 @@ view model =
 
     , C.generate 10 CS.ints .x [] <| \p t ->
         [ C.xLabel
-            [ CA.alignLeft, CA.yOff -20, CA.xOff 3, CA.x (toFloat t)
+            [ CA.alignRight, CA.yOff -20, CA.xOff 3, CA.x (toFloat t)
             , if t == 20000 then CA.noGrid else identity
             ]
             [ S.text (String.fromInt t) ]
         ]
 
     , C.generate 8 CS.ints .y [] <| \p t ->
-        [ if t == 100 then
-            C.title [ CA.alignLeft, CA.yOff -7, CA.xOff 1 ] [ S.text (String.fromInt t) ] { x = p.x.min, y = toFloat t }
-          else
-            C.yLabel [ CA.alignLeft, CA.yOff -7, CA.xOff 10, CA.y (toFloat t) ] [ S.text (String.fromInt t) ]
+        [ C.yLabel
+            [ CA.alignRight
+            , CA.moveUp 7
+            , CA.moveRight 10
+            , CA.y (toFloat t)
+            , if t == 100 then CA.noGrid else identity
+            ]
+            [ S.text (String.fromInt t) ]
       ]
 
     , C.withPlane <| \p ->
@@ -278,7 +282,7 @@ salarySeries : Model -> Float -> Float -> Float -> C.Element Salary.Datum Msg
 salarySeries model border auraSize size =
   C.series .salaryBoth
       [ C.property Salary.womenSalaryPerc []
-          [ CA.opacity 0.5, CA.circle, CA.border CA.blue, CA.borderWidth border ]
+          [ CA.opacity 0.3, CA.circle, CA.border CA.blue, CA.borderWidth border ]
             |> C.variation (\d ->
                   let precentOfWomen = Salary.womenPerc d
 
@@ -295,7 +299,7 @@ salarySeries model border auraSize size =
                   in
                   [ CA.size (d.numOfBoth / size) ] ++ color
                 )
-          |> C.amongst model.hovering (\d -> [ CA.aura 0.4, CA.auraWidth auraSize, CA.opacity 0.7 ])
+          |> C.amongst model.hovering (\d -> [ CA.aura 0.4, CA.auraWidth auraSize, CA.opacity 0.6 ])
       ]
       (List.filter (.year >> (==) model.year) Salary.data)
 

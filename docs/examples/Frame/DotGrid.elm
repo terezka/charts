@@ -1,4 +1,4 @@
-module Examples.Navigation.Basic exposing (..)
+module Examples.Frame.DotGrid exposing (..)
 
 {-| @LARGE -}
 import Html as H
@@ -14,7 +14,7 @@ view model =
     [ CA.height 300
     , CA.width 300
     ]
-    [ C.grid []
+    [ C.grid [ CA.dotGrid ]
     , C.xAxis []
     , C.xTicks []
     , C.xLabels []
@@ -27,10 +27,10 @@ view model =
 
 
 meta =
-  { category = "Navigation"
-  , name = "Basic"
-  , description = "Add grid, axes, ticks, and labels."
-  , order = 1
+  { category = "Frame and navigation"
+  , name = "Dotted grid"
+  , description = "Use dots instead of grid lines."
+  , order = 13
   }
 
 

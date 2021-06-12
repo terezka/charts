@@ -1,4 +1,4 @@
-module Examples.Navigation.GridColor exposing (..)
+module Examples.Frame.Color exposing (..)
 
 
 -- THIS IS A GENERATED MODULE!
@@ -15,17 +15,21 @@ view model =
     [ CA.height 300
     , CA.width 300
     ]
-    [ C.grid [ CA.color CA.blue ]
+    [ C.grid []
+    , C.xAxis []
+    , C.xTicks []
     , C.xLabels []
-    , C.yLabels []
+    , C.yAxis [ CA.color CA.pink ]
+    , C.yTicks [ CA.color CA.pink ]
+    , C.yLabels [ CA.color CA.pink ]
     ]
 
 
 meta =
-  { category = "Navigation"
-  , name = "Color of grid"
-  , description = "Change color of grid."
-  , order = 14
+  { category = "Frame and navigation"
+  , name = "Color"
+  , description = "Change color of items."
+  , order = 2
   }
 
 
@@ -55,9 +59,13 @@ smallCode =
     [ CA.height 300
     , CA.width 300
     ]
-    [ C.grid [ CA.color CA.blue ]
+    [ C.grid []
+    , C.xAxis []
+    , C.xTicks []
     , C.xLabels []
-    , C.yLabels []
+    , C.yAxis [ CA.color CA.pink ]
+    , C.yTicks [ CA.color CA.pink ]
+    , C.yLabels [ CA.color CA.pink ]
     ]
   """
 
@@ -77,8 +85,12 @@ view model =
     [ CA.height 300
     , CA.width 300
     ]
-    [ C.grid [ CA.color CA.blue ]
+    [ C.grid []
+    , C.xAxis []
+    , C.xTicks []
     , C.xLabels []
-    , C.yLabels []
+    , C.yAxis [ CA.color CA.pink ]
+    , C.yTicks [ CA.color CA.pink ]
+    , C.yLabels [ CA.color CA.pink ]
     ]
   """

@@ -1,4 +1,4 @@
-module Examples.Navigation.Position exposing (..)
+module Examples.Frame.Color exposing (..)
 
 {-| @LARGE -}
 import Html as H
@@ -15,19 +15,22 @@ view model =
     , CA.width 300
     ]
     [ C.grid []
-    , C.yAxis [ CA.pinned .max ]
-    , C.yTicks [ CA.pinned .max, CA.flip ]
-    , C.yLabels [ CA.pinned .max, CA.flip ]
+    , C.xAxis []
+    , C.xTicks []
+    , C.xLabels []
+    , C.yAxis [ CA.color CA.pink ]
+    , C.yTicks [ CA.color CA.pink ]
+    , C.yLabels [ CA.color CA.pink ]
     ]
 {-| @SMALL END -}
 {-| @LARGE END -}
 
 
 meta =
-  { category = "Navigation"
-  , name = "Position"
-  , description = "Change color of position."
-  , order = 3
+  { category = "Frame and navigation"
+  , name = "Color"
+  , description = "Change color of items."
+  , order = 2
   }
 
 

@@ -1,4 +1,4 @@
-module Examples.Navigation.GridColor exposing (..)
+module Examples.Frame.Amount exposing (..)
 
 {-| @LARGE -}
 import Html as H
@@ -14,19 +14,20 @@ view model =
     [ CA.height 300
     , CA.width 300
     ]
-    [ C.grid [ CA.color CA.blue ]
-    , C.xLabels []
-    , C.yLabels []
+    [ C.grid []
+    , C.xAxis []
+    , C.xTicks [ CA.amount 4 ]
+    , C.xLabels [ CA.amount 4 ]
     ]
 {-| @SMALL END -}
 {-| @LARGE END -}
 
 
 meta =
-  { category = "Navigation"
-  , name = "Color of grid"
-  , description = "Change color of grid."
-  , order = 13
+  { category = "Frame and navigation"
+  , name = "Amount of labels/ticks"
+  , description = "Change the number of labels or ticks."
+  , order = 6
   }
 
 
@@ -46,4 +47,3 @@ type Msg
 update : Msg -> Model -> Model
 update msg model =
   model
-

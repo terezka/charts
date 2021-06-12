@@ -1,4 +1,4 @@
-module Examples.Navigation.Amount exposing (..)
+module Examples.Frame.GridFilter exposing (..)
 
 {-| @LARGE -}
 import Html as H
@@ -15,19 +15,18 @@ view model =
     , CA.width 300
     ]
     [ C.grid []
-    , C.xAxis []
-    , C.xTicks [ CA.amount 4 ]
-    , C.xLabels [ CA.amount 4 ]
+    , C.xLabels [ CA.noGrid ]
+    , C.yLabels []
     ]
 {-| @SMALL END -}
 {-| @LARGE END -}
 
 
 meta =
-  { category = "Navigation"
-  , name = "Amount of labels/ticks"
-  , description = "Change the number of labels or ticks."
-  , order = 6
+  { category = "Frame and navigation"
+  , name = "Remove grid lines"
+  , description = "Prevent automatically added gridlines."
+  , order = 15
   }
 
 
@@ -47,3 +46,4 @@ type Msg
 update : Msg -> Model -> Model
 update msg model =
   model
+

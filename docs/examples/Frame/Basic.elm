@@ -1,4 +1,4 @@
-module Examples.Navigation.Offset exposing (..)
+module Examples.Frame.Basic exposing (..)
 
 {-| @LARGE -}
 import Html as H
@@ -15,17 +15,22 @@ view model =
     , CA.width 300
     ]
     [ C.grid []
-    , C.xLabels [ CA.moveRight 5, CA.moveUp 18, CA.alignRight ]
+    , C.xAxis []
+    , C.xTicks []
+    , C.xLabels []
+    , C.yAxis []
+    , C.yTicks []
+    , C.yLabels []
     ]
 {-| @SMALL END -}
 {-| @LARGE END -}
 
 
 meta =
-  { category = "Navigation"
-  , name = "Move labels"
-  , description = "Change position of labels."
-  , order = 4
+  { category = "Frame and navigation"
+  , name = "Basic"
+  , description = "Add grid, axes, ticks, and labels."
+  , order = 1
   }
 
 

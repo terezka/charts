@@ -1,4 +1,4 @@
-module Examples.Navigation.CustomLabels exposing (..)
+module Examples.Frame.CustomLabels exposing (..)
 
 {-| @LARGE -}
 import Html as H
@@ -34,7 +34,7 @@ view model =
 
 
 meta =
-  { category = "Navigation"
+  { category = "Frame and navigation"
   , name = "Custom labels"
   , description = "Control labels entirely."
   , order = 9

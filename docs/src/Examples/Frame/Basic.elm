@@ -1,4 +1,4 @@
-module Examples.Navigation.GridColor exposing (..)
+module Examples.Frame.Basic exposing (..)
 
 
 -- THIS IS A GENERATED MODULE!
@@ -15,17 +15,21 @@ view model =
     [ CA.height 300
     , CA.width 300
     ]
-    [ C.grid [ CA.color CA.blue ]
+    [ C.grid []
+    , C.xAxis []
+    , C.xTicks []
     , C.xLabels []
+    , C.yAxis []
+    , C.yTicks []
     , C.yLabels []
     ]
 
 
 meta =
-  { category = "Navigation"
-  , name = "Color of grid"
-  , description = "Change color of grid."
-  , order = 14
+  { category = "Frame and navigation"
+  , name = "Basic"
+  , description = "Add grid, axes, ticks, and labels."
+  , order = 1
   }
 
 
@@ -55,8 +59,12 @@ smallCode =
     [ CA.height 300
     , CA.width 300
     ]
-    [ C.grid [ CA.color CA.blue ]
+    [ C.grid []
+    , C.xAxis []
+    , C.xTicks []
     , C.xLabels []
+    , C.yAxis []
+    , C.yTicks []
     , C.yLabels []
     ]
   """
@@ -77,8 +85,12 @@ view model =
     [ CA.height 300
     , CA.width 300
     ]
-    [ C.grid [ CA.color CA.blue ]
+    [ C.grid []
+    , C.xAxis []
+    , C.xTicks []
     , C.xLabels []
+    , C.yAxis []
+    , C.yTicks []
     , C.yLabels []
     ]
   """

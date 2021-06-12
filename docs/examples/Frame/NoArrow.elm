@@ -1,4 +1,4 @@
-module Examples.Navigation.Color exposing (..)
+module Examples.Frame.NoArrow exposing (..)
 
 {-| @LARGE -}
 import Html as H
@@ -15,22 +15,19 @@ view model =
     , CA.width 300
     ]
     [ C.grid []
-    , C.xAxis []
+    , C.xAxis [ CA.noArrow ]
     , C.xTicks []
     , C.xLabels []
-    , C.yAxis [ CA.color CA.pink ]
-    , C.yTicks [ CA.color CA.pink ]
-    , C.yLabels [ CA.color CA.pink ]
     ]
 {-| @SMALL END -}
 {-| @LARGE END -}
 
 
 meta =
-  { category = "Navigation"
-  , name = "Color"
-  , description = "Change color of items."
-  , order = 2
+  { category = "Frame and navigation"
+  , name = "Remove arrow"
+  , description = "Remove arrow from axis line."
+  , order = 5
   }
 
 
