@@ -1,4 +1,4 @@
-module Examples.Navigation.OnlyInts exposing (..)
+module Examples.Navigation.DotGrid exposing (..)
 
 {-| @LARGE -}
 import Html as H
@@ -13,15 +13,14 @@ view model =
   C.chart
     [ CA.height 300
     , CA.width 300
-    , CA.range
-        [ CA.highest 3 CA.exactly
-        , CA.lowest 0 CA.exactly
-        ]
     ]
-    [ C.grid []
+    [ C.grid [ CA.dotGrid ]
     , C.xAxis []
-    , C.xTicks [ CA.ints ]
-    , C.xLabels [ CA.ints ]
+    , C.xTicks []
+    , C.xLabels []
+    , C.yAxis []
+    , C.yTicks []
+    , C.yLabels []
     ]
 {-| @SMALL END -}
 {-| @LARGE END -}
@@ -29,9 +28,9 @@ view model =
 
 meta =
   { category = "Navigation"
-  , name = "Only integers"
-  , description = "Only show integer labels."
-  , order = 8
+  , name = "Dotted grid"
+  , description = "Use dots instead of grid lines."
+  , order = 13
   }
 
 

@@ -1,4 +1,4 @@
-module Examples.Navigation.NoArrow exposing (..)
+module Examples.Navigation.GridFilter exposing (..)
 
 
 -- THIS IS A GENERATED MODULE!
@@ -16,17 +16,16 @@ view model =
     , CA.width 300
     ]
     [ C.grid []
-    , C.xAxis [ CA.noArrow ]
-    , C.xTicks []
-    , C.xLabels []
+    , C.xLabels [ CA.noGrid ]
+    , C.yLabels []
     ]
 
 
 meta =
   { category = "Navigation"
-  , name = "Remove arrow"
-  , description = "Remove arrow from axis line."
-  , order = 5
+  , name = "Remove grid lines"
+  , description = "Prevent automatically added gridlines."
+  , order = 13
   }
 
 
@@ -57,9 +56,8 @@ smallCode =
     , CA.width 300
     ]
     [ C.grid []
-    , C.xAxis [ CA.noArrow ]
-    , C.xTicks []
-    , C.xLabels []
+    , C.xLabels [ CA.noGrid ]
+    , C.yLabels []
     ]
   """
 
@@ -80,8 +78,7 @@ view model =
     , CA.width 300
     ]
     [ C.grid []
-    , C.xAxis [ CA.noArrow ]
-    , C.xTicks []
-    , C.xLabels []
+    , C.xLabels [ CA.noGrid ]
+    , C.yLabels []
     ]
   """

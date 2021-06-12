@@ -95,3 +95,14 @@ red =
 turquoise : String
 turquoise =
   "#4eaea7"
+
+
+gray : String
+gray =
+  "#EFF2FA"
+
+
+darkGray : String
+darkGray =
+  "rgb(200 200 200)"
+

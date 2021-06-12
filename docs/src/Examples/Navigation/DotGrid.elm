@@ -1,4 +1,4 @@
-module Examples.Navigation.NoArrow exposing (..)
+module Examples.Navigation.DotGrid exposing (..)
 
 
 -- THIS IS A GENERATED MODULE!
@@ -15,18 +15,21 @@ view model =
     [ CA.height 300
     , CA.width 300
     ]
-    [ C.grid []
-    , C.xAxis [ CA.noArrow ]
+    [ C.grid [ CA.dotGrid ]
+    , C.xAxis []
     , C.xTicks []
     , C.xLabels []
+    , C.yAxis []
+    , C.yTicks []
+    , C.yLabels []
     ]
 
 
 meta =
   { category = "Navigation"
-  , name = "Remove arrow"
-  , description = "Remove arrow from axis line."
-  , order = 5
+  , name = "Dotted grid"
+  , description = "Use dots instead of grid lines."
+  , order = 13
   }
 
 
@@ -56,10 +59,13 @@ smallCode =
     [ CA.height 300
     , CA.width 300
     ]
-    [ C.grid []
-    , C.xAxis [ CA.noArrow ]
+    [ C.grid [ CA.dotGrid ]
+    , C.xAxis []
     , C.xTicks []
     , C.xLabels []
+    , C.yAxis []
+    , C.yTicks []
+    , C.yLabels []
     ]
   """
 
@@ -79,9 +85,12 @@ view model =
     [ CA.height 300
     , CA.width 300
     ]
-    [ C.grid []
-    , C.xAxis [ CA.noArrow ]
+    [ C.grid [ CA.dotGrid ]
+    , C.xAxis []
     , C.xTicks []
     , C.xLabels []
+    , C.yAxis []
+    , C.yTicks []
+    , C.yLabels []
     ]
   """

@@ -41,6 +41,7 @@ import Internal.Item as Item
 import Internal.Produce as Produce
 import Internal.Legend as Legend
 import Internal.Group as Group
+import Internal.Helpers as Helpers
 import Chart.Svg as CS
 import Chart.Attributes as CA
 import Chart.Events as CE
@@ -824,8 +825,6 @@ type alias Grid =
     { color : String
     , width : Float
     , dotGrid : Bool
-    , filterX : C.Axis -> List Float
-    , filterY : C.Axis -> List Float
     }
 
 
@@ -834,33 +833,43 @@ grid : List (CA.Attribute Grid) -> Element item msg
 grid edits =
   let config =
         applyAttrs edits
-          { color = "#EFF2FA"
-          , filterX = always []
-          , filterY = always []
-          , width = 1
+          { color = ""
+          , width = 0
           , dotGrid = False
           }
 
       notTheseX vs p =
-        config.filterX p.x ++ vs.xAxis
+        vs.xAxis
 
       notTheseY vs p =
-        config.filterY p.y ++ vs.yAxis
+        vs.yAxis
+
+      color =
+        if String.isEmpty config.color then
+          if config.dotGrid then Helpers.darkGray else Helpers.gray
+        else
+          config.color
+
+      width =
+        if config.width == 0 then
+          if config.dotGrid then 0.5 else 1
+        else
+          config.width
 
       toXGrid vs p v =
         if List.member v (notTheseX vs p)
         then Nothing else Just <|
-          CS.line p [ CA.color config.color, CA.width config.width, CA.x1 v ]
+          CS.line p [ CA.color color, CA.width width, CA.x1 v ]
 
       toYGrid vs p v =
         if List.member v (notTheseY vs p)
         then Nothing else Just <|
-          CS.line p [ CA.color config.color, CA.width config.width, CA.y1 v ]
+          CS.line p [ CA.color color, CA.width width, CA.y1 v ]
 
       toDot vs p x y =
         if List.member x (notTheseX vs p) || List.member y (notTheseY vs p)
         then Nothing
-        else Just <| CS.dot p .x .y [ CA.color config.color, CA.size config.width, CA.circle ] { x = x, y = y }
+        else Just <| CS.dot p .x .y [ CA.color color, CA.size width, CA.circle ] { x = x, y = y }
   in
   GridElement <| \p vs ->
     S.g [ SA.class "elm-charts__grid" ] <|

@@ -1,4 +1,4 @@
-module Examples.Navigation.OnlyInts exposing (..)
+module Examples.Navigation.GridFilter exposing (..)
 
 {-| @LARGE -}
 import Html as H
@@ -13,15 +13,10 @@ view model =
   C.chart
     [ CA.height 300
     , CA.width 300
-    , CA.range
-        [ CA.highest 3 CA.exactly
-        , CA.lowest 0 CA.exactly
-        ]
     ]
     [ C.grid []
-    , C.xAxis []
-    , C.xTicks [ CA.ints ]
-    , C.xLabels [ CA.ints ]
+    , C.xLabels [ CA.noGrid ]
+    , C.yLabels []
     ]
 {-| @SMALL END -}
 {-| @LARGE END -}
@@ -29,9 +24,9 @@ view model =
 
 meta =
   { category = "Navigation"
-  , name = "Only integers"
-  , description = "Only show integer labels."
-  , order = 8
+  , name = "Remove grid lines"
+  , description = "Prevent automatically added gridlines."
+  , order = 13
   }
 
 
