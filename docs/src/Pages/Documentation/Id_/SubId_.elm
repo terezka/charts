@@ -112,15 +112,26 @@ viewContent model =
           |> Dict.get ( model.selectedTab, model.selectedThumb )
           |> Maybe.withDefault Examples.first
 
-      ( cat, title ) =
-        getCategoryAndTitle currentId
+      meta =
+        Examples.meta currentId
   in
   E.column
     [ E.width E.fill
     , E.height E.fill
-    , E.paddingEach { top = 50, bottom = 0, left = 0, right = 0 }
+    , E.paddingEach { top = 20, bottom = 0, left = 0, right = 0 }
     ]
     [ E.row
+        [ F.size 28
+        , E.paddingEach { top = 0, bottom = 20, left = 0, right = 0 }
+        ]
+        [ E.text meta.name ]
+
+    , E.row
+        [ F.size 14
+        , E.paddingEach { top = 0, bottom = 40, left = 0, right = 0 }
+        ]
+        [ E.text meta.description ]
+    , E.row
         [ E.width E.fill
         , E.height E.fill
         , E.spacing 50
@@ -137,14 +148,7 @@ viewContent model =
             [ E.width (E.fillPortion 8)
             , E.height E.fill
             ]
-            [ E.row
-                [ F.size 28
-                , E.paddingEach { top = 25, bottom = 25, left = 0, right = 0 }
-                ]
-                [ E.text cat
-                , E.el [ F.color (E.rgb255 130 130 130) ] (E.text <| " · " ++ title)
-                ]
-            , E.column
+            [ E.column
                 [ E.width E.fill
                 , E.height E.fill
                 , BG.color (E.rgb255 250 250 250)

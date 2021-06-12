@@ -369,7 +369,7 @@ rect plane edits =
 
 type alias Legends msg =
   { alignment : CA.Alignment
-  , anchor : CA.Anchor
+  , anchor : Maybe CA.Anchor
   , spacing : Float
   , htmlAttrs : List (H.Attribute msg)
   }
@@ -380,7 +380,7 @@ legendsAt plane x y xOff yOff edits children =
   let config =
         apply edits
           { alignment = CA.Row
-          , anchor = CA.Start
+          , anchor = Nothing
           , spacing = 10
           , htmlAttrs = []
           }
@@ -416,9 +416,10 @@ legendsAt plane x y xOff yOff edits children =
         """
       anchorAttrs =
         case config.anchor of
-          CA.End -> [ HA.style "transform" "translate(-100%, 0%)" ]
-          CA.Start -> [ HA.style "transform" "translate(-0%, 0%)" ]
-          CA.Middle -> [ HA.style "transform" "translate(-50%, 0%)" ]
+          Nothing -> [ HA.style "transform" "translate(-0%, 0%)" ]
+          Just CA.End -> [ HA.style "transform" "translate(-100%, 0%)" ]
+          Just CA.Start -> [ HA.style "transform" "translate(-0%, 0%)" ]
+          Just CA.Middle -> [ HA.style "transform" "translate(-50%, 0%)" ]
   in
   positionHtml plane x y xOff yOff
     (anchorAttrs ++ alignmentAttrs ++ classAttrs ++ config.htmlAttrs)
@@ -585,7 +586,7 @@ type alias Label =
   , borderWidth : Float
   , fontSize : Maybe Int
   , color : String
-  , anchor : CA.Anchor
+  , anchor : Maybe CA.Anchor
   , rotate : Float
   }
 
@@ -601,7 +602,7 @@ label plane edits inner point =
           , borderWidth = 0.1
           , fontSize = Nothing
           , color = "#808BAB"
-          , anchor = CA.Middle
+          , anchor = Nothing
           , rotate = 0
           }
 
@@ -612,9 +613,10 @@ label plane edits inner point =
 
       anchorStyle =
         case config.anchor of
-          CA.End -> "text-anchor: end;"
-          CA.Start -> "text-anchor: start;"
-          CA.Middle -> "text-anchor: middle;"
+          Nothing -> "text-anchor: middle;"
+          Just CA.End -> "text-anchor: end;"
+          Just CA.Start -> "text-anchor: start;"
+          Just CA.Middle -> "text-anchor: middle;"
   in
   S.text_
     [ SA.class "elm-charts__label"

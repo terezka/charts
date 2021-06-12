@@ -17,7 +17,6 @@ view model =
     , CA.width 300
     ]
     [ C.grid []
-
     , C.xLabels []
     , C.yLabels []
     , C.bars []
@@ -25,6 +24,7 @@ view model =
         , C.bar .p []
         ]
         data
+
     , C.eachProduct <| \p bar ->
         let top = CE.getTop p bar
             label =
@@ -32,13 +32,12 @@ view model =
                 |> Maybe.map String.fromFloat
                 |> Maybe.withDefault "N/A"
         in
-        [ C.xLabel
-            [ CA.x top.x
-            , CA.y top.y
-            , CA.yOff -2
+        [ C.title
+            [ CA.yOff 15
             , CA.color "white"
             ]
             [ S.text label ]
+            top
         ]
     ]
 
@@ -104,7 +103,6 @@ smallCode =
     , CA.width 300
     ]
     [ C.grid []
-
     , C.xLabels []
     , C.yLabels []
     , C.bars []
@@ -112,6 +110,7 @@ smallCode =
         , C.bar .p []
         ]
         data
+
     , C.eachProduct <| \\p bar ->
         let top = CE.getTop p bar
             label =
@@ -119,13 +118,12 @@ smallCode =
                 |> Maybe.map String.fromFloat
                 |> Maybe.withDefault "N/A"
         in
-        [ C.xLabel
-            [ CA.x top.x
-            , CA.y top.y
-            , CA.yOff -2
+        [ C.title
+            [ CA.yOff 15
             , CA.color "white"
             ]
             [ S.text label ]
+            top
         ]
     ]
   """
@@ -148,7 +146,6 @@ view model =
     , CA.width 300
     ]
     [ C.grid []
-
     , C.xLabels []
     , C.yLabels []
     , C.bars []
@@ -156,6 +153,7 @@ view model =
         , C.bar .p []
         ]
         data
+
     , C.eachProduct <| \\p bar ->
         let top = CE.getTop p bar
             label =
@@ -163,13 +161,12 @@ view model =
                 |> Maybe.map String.fromFloat
                 |> Maybe.withDefault "N/A"
         in
-        [ C.xLabel
-            [ CA.x top.x
-            , CA.y top.y
-            , CA.yOff -2
+        [ C.title
+            [ CA.yOff 15
             , CA.color "white"
             ]
             [ S.text label ]
+            top
         ]
     ]
   """

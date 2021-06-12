@@ -1,5 +1,7 @@
 module Chart.Attributes exposing
-  ( Attribute, x, x1, x2, y, y1, y2, xOff, yOff, flip, border, borderWidth, fontSize, format, color, width, height, offset
+  ( Attribute, x, x1, x2, y, y1, y2, xOff, yOff, flip
+  , moveLeft, moveRight, moveUp, moveDown
+  , border, borderWidth, fontSize, format, color, width, height, offset
   , Anchor(..), alignLeft, alignRight, alignMiddle, content
   , rotate, length, roundTop, roundBottom, area, opacity, size, aura, auraWidth, ungroup, margin, spacing
   , Design(..), GradientConfig, Pattern, space, striped, dotted, gradient, top, bottom, dashed, break
@@ -262,6 +264,30 @@ break config =
 
 
 {-| -}
+moveLeft : Float -> Attribute { a | xOff : Float }
+moveLeft v config =
+  { config | xOff = config.xOff - v }
+
+
+{-| -}
+moveRight : Float -> Attribute { a | xOff : Float }
+moveRight v config =
+  { config | xOff = config.xOff + v }
+
+
+{-| -}
+moveUp : Float -> Attribute { a | yOff : Float }
+moveUp v config =
+  { config | yOff = config.yOff - v }
+
+
+{-| -}
+moveDown : Float -> Attribute { a | yOff : Float }
+moveDown v config =
+  { config | yOff = config.yOff + v }
+
+
+{-| -}
 xOff : Float -> Attribute { a | xOff : Float }
 xOff v config =
   { config | xOff = config.xOff + v }
@@ -432,21 +458,21 @@ type Anchor
 
 
 {-| -}
-alignLeft : Attribute { a | anchor : Anchor }
+alignLeft : Attribute { a | anchor : Maybe Anchor }
 alignLeft config =
-  { config | anchor = Start }
+  { config | anchor = Just Start }
 
 
 {-| -}
-alignRight : Attribute { a | anchor : Anchor }
+alignRight : Attribute { a | anchor : Maybe Anchor }
 alignRight config =
-  { config | anchor = End }
+  { config | anchor = Just End }
 
 
 {-| -}
-alignMiddle : Attribute { a | anchor : Anchor }
+alignMiddle : Attribute { a | anchor : Maybe Anchor }
 alignMiddle config =
-  { config | anchor = Middle }
+  { config | anchor = Just Middle }
 
 
 

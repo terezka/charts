@@ -226,19 +226,25 @@ definePlane config elements =
 
       scalePadY =
         C.scaleCartesianY unpadded
+
+      xMin = calcRange.min - scalePadX config.paddingLeft
+      xMax = calcRange.max + scalePadX config.paddingRight
+
+      yMin = calcDomain.min - scalePadY config.paddingBottom
+      yMax = calcDomain.max + scalePadY config.paddingTop
   in
   { width = config.width
   , height = config.height
   , margin = margin
   , x =
       { calcRange
-      | min = calcRange.min - scalePadX config.paddingLeft
-      , max = calcRange.max + scalePadX config.paddingRight
+      | min = min xMin xMax
+      , max = max xMin xMax
       }
   , y =
       { calcDomain
-      | min = calcDomain.min - scalePadY config.paddingBottom
-      , max = calcDomain.max + scalePadY config.paddingTop
+      | min = min yMin yMax
+      , max = max yMin yMax
       }
   }
 
@@ -540,7 +546,7 @@ type alias Labels =
     , yOff : Float
     , flip : Bool
     , amount : Int
-    , anchor : CA.Anchor
+    , anchor : Maybe CA.Anchor
     , generate : CA.Tick
     , grid : Bool
     }
@@ -557,7 +563,7 @@ xLabels edits =
           , amount = 5
           , generate = CA.Floats
           , flip = False
-          , anchor = CA.Middle
+          , anchor = Nothing
           , xOff = 0
           , yOff = 18
           , grid = True
@@ -578,9 +584,10 @@ xLabels edits =
             , CA.xOff config.xOff
             , CA.yOff (if config.flip then -config.yOff + 10 else config.yOff)
             , case config.anchor of
-                CA.Middle -> identity
-                CA.End -> CA.alignLeft
-                CA.Start -> CA.alignRight
+                Nothing -> identity
+                Just CA.Middle -> CA.alignMiddle
+                Just CA.End -> CA.alignLeft
+                Just CA.Start -> CA.alignRight
             ]
             [ S.text item.label ]
             { x = item.value
@@ -600,9 +607,9 @@ yLabels edits =
           , pinned = CA.zero
           , amount = 5
           , generate = CA.Floats
-          , anchor = CA.Middle
+          , anchor = Nothing
           , flip = False
-          , xOff = -8
+          , xOff = -10
           , yOff = 3
           , grid = True
           }
@@ -622,9 +629,10 @@ yLabels edits =
             , CA.xOff (if config.flip then -config.xOff else config.xOff)
             , CA.yOff config.yOff
             , case config.anchor of
-                CA.Middle -> identity
-                CA.End -> CA.alignLeft
-                CA.Start -> CA.alignRight
+                Nothing -> if config.flip then CA.alignLeft else CA.alignRight
+                Just CA.Middle -> CA.alignMiddle
+                Just CA.End -> CA.alignLeft
+                Just CA.Start -> CA.alignRight
             ]
             [ S.text item.label ]
             { x = config.pinned p.x
@@ -644,7 +652,7 @@ type alias Label =
   , borderWidth : Float
   , fontSize : Maybe Int
   , color : String
-  , anchor : CA.Anchor
+  , anchor : Maybe CA.Anchor
   , rotate : Float
   , flip : Bool
   , grid : Bool
@@ -664,7 +672,7 @@ xLabel edits inner =
           , borderWidth = 0.1
           , fontSize = Nothing
           , color = "#808BAB"
-          , anchor = CA.Middle
+          , anchor = Nothing
           , rotate = 0
           , flip = False
           , grid = True
@@ -690,9 +698,10 @@ xLabel edits inner =
           Nothing -> identity
       , CA.color config.color
       , case config.anchor of
-          CA.Middle -> identity
-          CA.End -> CA.alignRight
-          CA.Start -> CA.alignLeft
+          Nothing -> identity
+          Just CA.Middle -> CA.alignMiddle
+          Just CA.End -> CA.alignLeft
+          Just CA.Start -> CA.alignRight
       , CA.rotate config.rotate
       ]
       string
@@ -712,7 +721,7 @@ yLabel edits inner =
           , borderWidth = 0.1
           , fontSize = Nothing
           , color = "#808BAB"
-          , anchor = CA.Start
+          , anchor = Nothing
           , rotate = 0
           , flip = False
           , grid = True
@@ -738,9 +747,10 @@ yLabel edits inner =
           Nothing -> identity
       , CA.color config.color
       , case config.anchor of
-          CA.Middle -> identity
-          CA.End -> CA.alignRight
-          CA.Start -> CA.alignLeft
+          Nothing -> if config.flip then CA.alignLeft else CA.alignRight
+          Just CA.Middle -> CA.alignMiddle
+          Just CA.End -> CA.alignLeft
+          Just CA.Start -> CA.alignRight
       , CA.rotate config.rotate
       ]
       string

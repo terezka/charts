@@ -68,7 +68,7 @@ view =
             , C.xLabels []
             , C.yAxis []
             , C.yTicks []
-            , C.yLabels [ CA.xOff -8 ]
+            , C.yLabels []
             ]
         ]
   }

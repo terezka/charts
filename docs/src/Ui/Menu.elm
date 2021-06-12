@@ -47,12 +47,12 @@ expanded =
               [ { title = "Documentation"
                 , links =
                     [ Link "/quick-start" "Quick start"
-                    , Link "/documentation#scatter-charts" "Scatter charts"
-                    , Link "/documentation#line-charts" "Line charts"
-                    , Link "/documentation#bar-charts" "Bar charts"
-                    , Link "/documentation#interactivity" "Interactivity"
-                    , Link "/documentation#custom-axes" "Custom axes"
-                    , Link "/documentation#custom-labels" "Custom labels"
+                    , Link "/documentation/scatter-charts" "Scatter charts"
+                    , Link "/documentation/line-charts" "Line charts"
+                    , Link "/documentation/bar-charts" "Bar charts"
+                    , Link "/documentation/interactivity" "Interactivity"
+                    , Link "/documentation/custom-axes" "Custom axes"
+                    , Link "/documentation/custom-labels" "Custom labels"
                     ]
                 }
               , { title = "Real data examples"
