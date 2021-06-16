@@ -1,7 +1,7 @@
 module Chart.Events exposing
   ( Event(..)
   , onMouseMove, onMouseLeave, onMouseUp, onMouseDown, onClick, on
-  , Decoder(..), getCoords, getNearest, getNearestX, getWithin, getWithinX
+  , Decoder(..), Point, getCoords, getNearest, getNearestX, getWithin, getWithinX
   , product, dot, bin, stack, sameX, bar, noMissing
   , map, map2, map3, map4
 
@@ -28,6 +28,7 @@ module Chart.Events exposing
 -- maybe seperate bar from line labels somehow
 -- make sure tooltip offset is adjusted for arrow length
 -- more clear names for width/height tooltip func
+-- make sure dot tooltip is accesible when overlapping with bars
 
 
 import Html as H exposing (Html)
@@ -89,6 +90,10 @@ type Event data msg =
 
 type Decoder data msg =
   Decoder (List (I.Product I.Any (Maybe Float) data) -> Plane -> Point -> msg)
+
+
+type alias Point =
+  C.Point
 
 
 {-| -}
