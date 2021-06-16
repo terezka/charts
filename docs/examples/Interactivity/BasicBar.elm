@@ -49,7 +49,7 @@ view model =
         ]
         data
     , C.each model.hovering <| \p item ->
-        [ C.tooltip item [ CA.onTop ] [] [] ]
+        [ C.tooltip item [] [] [] ]
     ]
 {-| @SMALL END -}
 {-| @LARGE END -}

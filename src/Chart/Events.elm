@@ -26,6 +26,8 @@ module Chart.Events exposing
 -- document break line label
 -- rename C.title to C.label
 -- maybe seperate bar from line labels somehow
+-- make sure tooltip offset is adjusted for arrow length
+-- more clear names for width/height tooltip func
 
 
 import Html as H exposing (Html)

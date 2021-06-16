@@ -1,16 +1,17 @@
-module Examples.Interactivity.BasicLine exposing (..)
+module Examples.Interactivity.Background exposing (..)
 
 
 -- THIS IS A GENERATED MODULE!
 
 import Html as H
+import Svg as S
 import Chart as C
 import Chart.Attributes as CA
 import Chart.Events as CE
 
 
 type alias Model =
-  { hovering : List (CE.Product CE.Dot (Maybe Float) Datum) }
+  { hovering : List (CE.Product CE.Bar (Maybe Float) Datum) }
 
 
 init : Model
@@ -19,7 +20,7 @@ init =
 
 
 type Msg
-  = OnHover (List (CE.Product CE.Dot (Maybe Float) Datum))
+  = OnHover (List (CE.Product CE.Bar (Maybe Float) Datum))
 
 
 update : Msg -> Model -> Model
@@ -34,33 +35,36 @@ view model =
   C.chart
     [ CA.height 300
     , CA.width 300
-    , CE.onMouseMove OnHover (CE.getNearest CE.dot)
+    , CE.onMouseMove OnHover (CE.getNearest CE.bar)
     , CE.onMouseLeave (OnHover [])
     ]
     [ C.grid []
     , C.xLabels []
     , C.yLabels []
-    , C.series .x
-        [ C.property .y [ CA.linear ] [ CA.circle, CA.size 3 ]
-        , C.property .z [ CA.linear ] [ CA.circle, CA.size 3 ]
+    , C.bars []
+        [ C.bar .y [ CA.opacity 0.3, CA.borderWidth 1, CA.border CA.pink ]
+        , C.bar .z [ CA.opacity 0.3, CA.borderWidth 1, CA.striped [], CA.border CA.purple ]
         ]
         data
     , C.each model.hovering <| \p item ->
-        [ C.tooltip item [] [] [] ]
+        [ C.tooltip item [ CA.background "#fcf9e9" ] [] [] ]
     ]
 
 
 meta =
   { category = "Interactivity"
   , categoryOrder = 5
-  , name = "Basic tooltip for dots"
-  , description = "Add basic tooltip for line or scatter charts."
-  , order = 4
+  , name = "Edit background"
+  , description = "Change background of tooltip."
+  , order = 12
   }
+
 
 
 type alias Datum =
   { x : Float
+  , x1 : Float
+  , x2 : Float
   , y : Maybe Float
   , z : Maybe Float
   , v : Maybe Float
@@ -72,19 +76,13 @@ type alias Datum =
 
 data : List Datum
 data =
-  let toDatum x y z v w p q =
-        Datum x (Just y) (Just z) (Just v) (Just w) (Just p) (Just q)
+  let toDatum x x1 y z v w p q =
+        Datum x x1 x1 (Just y) (Just z) (Just v) (Just w) (Just p) (Just q)
   in
-  [ toDatum 1  2 1 4.6 6.9 7.3 8.0
-  , toDatum 2  3 2 5.2 6.2 7.0 8.7
-  , toDatum 3  4 3 5.5 5.2 7.2 8.1
-  , toDatum 4  3 4 5.3 5.7 6.2 7.8
-  , toDatum 5  2 3 4.9 5.9 6.7 8.2
-  , toDatum 6  4 1 4.8 5.4 7.2 8.3
-  , toDatum 7  5 2 5.3 5.1 7.8 7.1
-  , toDatum 8  6 3 5.4 3.9 7.6 8.5
-  , toDatum 9  5 4 5.8 4.6 6.5 6.9
-  , toDatum 10 4 3 4.5 5.3 6.3 7.0
+  [ toDatum 0.0 0.0 1.2 4.0 4.6 6.9 7.3 8.0
+  , toDatum 2.0 0.4 2.2 4.2 5.3 5.7 6.2 7.8
+  , toDatum 3.0 0.6 1.0 3.2 4.8 5.4 7.2 8.3
+  , toDatum 4.0 0.2 1.2 3.0 4.1 5.5 7.9 8.1
   ]
 
 
@@ -95,19 +93,19 @@ smallCode =
   C.chart
     [ CA.height 300
     , CA.width 300
-    , CE.onMouseMove OnHover (CE.getNearest CE.dot)
+    , CE.onMouseMove OnHover (CE.getNearest CE.bar)
     , CE.onMouseLeave (OnHover [])
     ]
     [ C.grid []
     , C.xLabels []
     , C.yLabels []
-    , C.series .x
-        [ C.property .y [ CA.linear ] [ CA.circle, CA.size 3 ]
-        , C.property .z [ CA.linear ] [ CA.circle, CA.size 3 ]
+    , C.bars []
+        [ C.bar .y [ CA.opacity 0.3, CA.borderWidth 1, CA.border CA.pink ]
+        , C.bar .z [ CA.opacity 0.3, CA.borderWidth 1, CA.striped [], CA.border CA.purple ]
         ]
         data
     , C.each model.hovering <| \\p item ->
-        [ C.tooltip item [] [] [] ]
+        [ C.tooltip item [ CA.background "#fcf9e9" ] [] [] ]
     ]
   """
 
@@ -116,13 +114,14 @@ largeCode : String
 largeCode =
   """
 import Html as H
+import Svg as S
 import Chart as C
 import Chart.Attributes as CA
 import Chart.Events as CE
 
 
 type alias Model =
-  { hovering : List (CE.Product CE.Dot (Maybe Float) Datum) }
+  { hovering : List (CE.Product CE.Bar (Maybe Float) Datum) }
 
 
 init : Model
@@ -131,7 +130,7 @@ init =
 
 
 type Msg
-  = OnHover (List (CE.Product CE.Dot (Maybe Float) Datum))
+  = OnHover (List (CE.Product CE.Bar (Maybe Float) Datum))
 
 
 update : Msg -> Model -> Model
@@ -146,18 +145,18 @@ view model =
   C.chart
     [ CA.height 300
     , CA.width 300
-    , CE.onMouseMove OnHover (CE.getNearest CE.dot)
+    , CE.onMouseMove OnHover (CE.getNearest CE.bar)
     , CE.onMouseLeave (OnHover [])
     ]
     [ C.grid []
     , C.xLabels []
     , C.yLabels []
-    , C.series .x
-        [ C.property .y [ CA.linear ] [ CA.circle, CA.size 3 ]
-        , C.property .z [ CA.linear ] [ CA.circle, CA.size 3 ]
+    , C.bars []
+        [ C.bar .y [ CA.opacity 0.3, CA.borderWidth 1, CA.border CA.pink ]
+        , C.bar .z [ CA.opacity 0.3, CA.borderWidth 1, CA.striped [], CA.border CA.purple ]
         ]
         data
     , C.each model.hovering <| \\p item ->
-        [ C.tooltip item [] [] [] ]
+        [ C.tooltip item [ CA.background "#fcf9e9" ] [] [] ]
     ]
   """

@@ -1,4 +1,4 @@
-module Examples.BarCharts.Tooltip exposing (..)
+module Examples.Interactivity.Border exposing (..)
 
 {-| @LARGE -}
 import Html as H
@@ -41,26 +41,23 @@ view model =
     , C.xLabels []
     , C.yLabels []
     , C.bars []
-        [ C.stacked
-            [ C.bar .z []
-            , C.bar .y []
-            ]
-        , C.bar .v [ CA.color CA.turquoise ]
+        [ C.bar .y [ CA.opacity 0.3, CA.borderWidth 1, CA.border CA.pink ]
+        , C.bar .z [ CA.opacity 0.3, CA.borderWidth 1, CA.border CA.purple ]
         ]
         data
     , C.each model.hovering <| \p item ->
-        [ C.tooltip item [] [] [] ]
+        [ C.tooltip item [ CA.border CA.red ] [] [] ]
     ]
 {-| @SMALL END -}
 {-| @LARGE END -}
 
 
 meta =
-  { category = "Bar charts"
-  , categoryOrder = 1
-  , name = "Tooltip"
-  , description = "Add a basic tooltip for nearest bar."
-  , order = 12
+  { category = "Interactivity"
+  , categoryOrder = 5
+  , name = "Edit border"
+  , description = "Change border of tooltip."
+  , order = 11
   }
 
 

@@ -1,4 +1,4 @@
-module Examples.BarCharts.Tooltip exposing (..)
+module Examples.Interactivity.Offset exposing (..)
 
 {-| @LARGE -}
 import Html as H
@@ -9,7 +9,7 @@ import Chart.Events as CE
 
 
 type alias Model =
-  { hovering : List (CE.Product CE.Bar (Maybe Float) Datum) }
+  { hovering : List (CE.Product CE.Dot (Maybe Float) Datum) }
 
 
 init : Model
@@ -18,7 +18,7 @@ init =
 
 
 type Msg
-  = OnHover (List (CE.Product CE.Bar (Maybe Float) Datum))
+  = OnHover (List (CE.Product CE.Dot (Maybe Float) Datum))
 
 
 update : Msg -> Model -> Model
@@ -34,33 +34,30 @@ view model =
   C.chart
     [ CA.height 300
     , CA.width 300
-    , CE.onMouseMove OnHover (CE.getNearest CE.bar)
+    , CE.onMouseMove OnHover (CE.getNearest CE.dot)
     , CE.onMouseLeave (OnHover [])
     ]
     [ C.grid []
     , C.xLabels []
     , C.yLabels []
-    , C.bars []
-        [ C.stacked
-            [ C.bar .z []
-            , C.bar .y []
-            ]
-        , C.bar .v [ CA.color CA.turquoise ]
+    , C.series .x
+        [ C.property .y [] [ CA.size 60, CA.opacity 0.3, CA.borderWidth 1 ]
+        , C.property .z [] [ CA.size 50, CA.opacity 0.3, CA.borderWidth 1 ]
         ]
         data
     , C.each model.hovering <| \p item ->
-        [ C.tooltip item [] [] [] ]
+        [ C.tooltip item [ CA.offset 0 ] [] [] ]
     ]
 {-| @SMALL END -}
 {-| @LARGE END -}
 
 
 meta =
-  { category = "Bar charts"
-  , categoryOrder = 1
-  , name = "Tooltip"
-  , description = "Add a basic tooltip for nearest bar."
-  , order = 12
+  { category = "Interactivity"
+  , categoryOrder = 5
+  , name = "Edit offset"
+  , description = "Change distance of tooltip to item."
+  , order = 9
   }
 
 
