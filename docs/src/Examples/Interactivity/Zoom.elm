@@ -14,9 +14,27 @@ import Chart.Events as CE
 
 type Model
   = NoZoom
-  | ZoomStart CE.Point
-  | ZoomProgress CE.Point CE.Point
-  | ZoomDone CE.Point CE.Point
+  | Zooming CE.Point CE.Point
+  | ReZooming CE.Point CE.Point CE.Point CE.Point
+  | Zoomed CE.Point CE.Point
+
+
+getNewSelection : Model -> Maybe ( CE.Point, CE.Point )
+getNewSelection model =
+  case model of
+    NoZoom -> Nothing
+    Zooming start end -> Just ( start, end )
+    ReZooming _ _ start end -> Just ( start, end )
+    Zoomed _ _ -> Nothing
+
+
+getCurrentWindow : Model -> Maybe ( CE.Point, CE.Point )
+getCurrentWindow model =
+  case model of
+    NoZoom -> Nothing
+    Zooming _ _ -> Nothing
+    ReZooming start end _ _ -> Just ( start, end )
+    Zoomed start end -> Just ( start, end )
 
 
 
@@ -35,28 +53,38 @@ type Msg
 update : Msg -> Model -> Model
 update msg model =
   case msg of
-    OnDown coords ->
+    OnDown point ->
       case model of
-        NoZoom -> ZoomStart coords
+        NoZoom ->
+          Zooming point point
+
+        Zoomed start end ->
+          ReZooming start end point point
+
         _ -> model
 
-    OnMove coords ->
+    OnMove point ->
       case model of
-        ZoomStart start ->
-          ZoomProgress start coords
+        Zooming start _ ->
+          Zooming start point
 
-        ZoomProgress start _ ->
-          ZoomProgress start coords
+        ReZooming startOld endOld start _ ->
+          ReZooming startOld endOld start point
 
         _ ->
           model
 
-    OnUp coords ->
+    OnUp point ->
       case model of
-        ZoomProgress start _ ->
-          ZoomDone
-            { x = min start.x coords.x, y = min start.y coords.y }
-            { x = max start.x coords.x, y = max start.y coords.y }
+        Zooming start _ ->
+          Zoomed
+            { x = min start.x point.x, y = min start.y point.y }
+            { x = max start.x point.x, y = max start.y point.y }
+
+        ReZooming _ _ start _ ->
+          Zoomed
+            { x = min start.x point.x, y = min start.y point.y }
+            { x = max start.x point.x, y = max start.y point.y }
 
         _ ->
           model
@@ -77,24 +105,24 @@ view model =
     , CE.onMouseMove OnMove CE.getCoords
     , CE.onMouseUp OnUp CE.getCoords
 
-    , case model of
-        ZoomDone start end ->
+    , case getCurrentWindow model of
+        Just ( start, end ) ->
           CA.range
             [ CA.lowest start.x CA.exactly
             , CA.highest end.x CA.exactly
             ]
 
-        _ ->
+        Nothing ->
           CA.range []
 
-    , case model of
-        ZoomDone start end ->
+    , case getCurrentWindow model of
+        Just ( start, end ) ->
           CA.domain
             [ CA.lowest start.y CA.exactly
             , CA.highest end.y CA.exactly
             ]
 
-        _ ->
+        Nothing ->
           CA.range []
     ]
     [ C.grid []
@@ -102,23 +130,17 @@ view model =
     , C.yLabels []
 
     , C.series .x
-        [ C.property .y [ CA.monotone ] [ CA.circle ]
-        , C.property .z [ CA.monotone ] [ CA.circle ]
-        , C.property .v [ CA.monotone ] [ CA.circle ]
-        , C.property .w [ CA.monotone ] [ CA.circle ]
-        , C.property .p [ CA.monotone ] [ CA.circle ]
-        , C.property .q [ CA.monotone ] [ CA.circle ]
+        [ C.property .y [ CA.monotone ] [ CA.circle, CA.color "white", CA.borderWidth 1 ]
+        , C.property .z [ CA.monotone ] [ CA.circle, CA.color "white", CA.borderWidth 1 ]
+        , C.property .v [ CA.monotone ] [ CA.circle, CA.color "white", CA.borderWidth 1 ]
+        , C.property .w [ CA.monotone ] [ CA.circle, CA.color "white", CA.borderWidth 1 ]
+        , C.property .p [ CA.monotone ] [ CA.circle, CA.color "white", CA.borderWidth 1 ]
+        , C.property .q [ CA.monotone ] [ CA.circle, CA.color "white", CA.borderWidth 1 ]
         ]
         data
 
-    , case model of
-        NoZoom ->
-          C.none
-
-        ZoomStart start ->
-          C.none
-
-        ZoomProgress start end ->
+    , case getNewSelection model of
+        Just ( start, end ) ->
           C.rect
             [ CA.x1 start.x
             , CA.x2 end.x
@@ -126,19 +148,27 @@ view model =
             , CA.y2 end.y
             ]
 
-        ZoomDone start end ->
+        Nothing ->
+          C.none
+
+    , case getCurrentWindow model of
+        Just ( start, end ) ->
           C.htmlAt .max .max -10 -10
             [ HA.style "transform" "translateX(-100%)"
             ]
             [ H.button
                 [ HE.onClick OnReset
                 , HA.style "border" "1px solid black"
+                , HA.style "border-radius" "5px"
                 , HA.style "padding" "2px 10px"
                 , HA.style "background" "white"
                 , HA.style "font-size" "14px"
                 ]
                 [ H.text "Reset" ]
             ]
+
+        Nothing ->
+          C.none
     ]
 
 
@@ -191,24 +221,24 @@ smallCode =
     , CE.onMouseMove OnMove CE.getCoords
     , CE.onMouseUp OnUp CE.getCoords
 
-    , case model of
-        ZoomDone start end ->
+    , case getCurrentWindow model of
+        Just ( start, end ) ->
           CA.range
             [ CA.lowest start.x CA.exactly
             , CA.highest end.x CA.exactly
             ]
 
-        _ ->
+        Nothing ->
           CA.range []
 
-    , case model of
-        ZoomDone start end ->
+    , case getCurrentWindow model of
+        Just ( start, end ) ->
           CA.domain
             [ CA.lowest start.y CA.exactly
             , CA.highest end.y CA.exactly
             ]
 
-        _ ->
+        Nothing ->
           CA.range []
     ]
     [ C.grid []
@@ -216,23 +246,17 @@ smallCode =
     , C.yLabels []
 
     , C.series .x
-        [ C.property .y [ CA.monotone ] [ CA.circle ]
-        , C.property .z [ CA.monotone ] [ CA.circle ]
-        , C.property .v [ CA.monotone ] [ CA.circle ]
-        , C.property .w [ CA.monotone ] [ CA.circle ]
-        , C.property .p [ CA.monotone ] [ CA.circle ]
-        , C.property .q [ CA.monotone ] [ CA.circle ]
+        [ C.property .y [ CA.monotone ] [ CA.circle, CA.color "white", CA.borderWidth 1 ]
+        , C.property .z [ CA.monotone ] [ CA.circle, CA.color "white", CA.borderWidth 1 ]
+        , C.property .v [ CA.monotone ] [ CA.circle, CA.color "white", CA.borderWidth 1 ]
+        , C.property .w [ CA.monotone ] [ CA.circle, CA.color "white", CA.borderWidth 1 ]
+        , C.property .p [ CA.monotone ] [ CA.circle, CA.color "white", CA.borderWidth 1 ]
+        , C.property .q [ CA.monotone ] [ CA.circle, CA.color "white", CA.borderWidth 1 ]
         ]
         data
 
-    , case model of
-        NoZoom ->
-          C.none
-
-        ZoomStart start ->
-          C.none
-
-        ZoomProgress start end ->
+    , case getNewSelection model of
+        Just ( start, end ) ->
           C.rect
             [ CA.x1 start.x
             , CA.x2 end.x
@@ -240,19 +264,27 @@ smallCode =
             , CA.y2 end.y
             ]
 
-        ZoomDone start end ->
+        Nothing ->
+          C.none
+
+    , case getCurrentWindow model of
+        Just ( start, end ) ->
           C.htmlAt .max .max -10 -10
             [ HA.style "transform" "translateX(-100%)"
             ]
             [ H.button
                 [ HE.onClick OnReset
                 , HA.style "border" "1px solid black"
+                , HA.style "border-radius" "5px"
                 , HA.style "padding" "2px 10px"
                 , HA.style "background" "white"
                 , HA.style "font-size" "14px"
                 ]
                 [ H.text "Reset" ]
             ]
+
+        Nothing ->
+          C.none
     ]
   """
 
@@ -271,9 +303,27 @@ import Chart.Events as CE
 
 type Model
   = NoZoom
-  | ZoomStart CE.Point
-  | ZoomProgress CE.Point CE.Point
-  | ZoomDone CE.Point CE.Point
+  | Zooming CE.Point CE.Point
+  | ReZooming CE.Point CE.Point CE.Point CE.Point
+  | Zoomed CE.Point CE.Point
+
+
+getNewSelection : Model -> Maybe ( CE.Point, CE.Point )
+getNewSelection model =
+  case model of
+    NoZoom -> Nothing
+    Zooming start end -> Just ( start, end )
+    ReZooming _ _ start end -> Just ( start, end )
+    Zoomed _ _ -> Nothing
+
+
+getCurrentWindow : Model -> Maybe ( CE.Point, CE.Point )
+getCurrentWindow model =
+  case model of
+    NoZoom -> Nothing
+    Zooming _ _ -> Nothing
+    ReZooming start end _ _ -> Just ( start, end )
+    Zoomed start end -> Just ( start, end )
 
 
 
@@ -292,28 +342,38 @@ type Msg
 update : Msg -> Model -> Model
 update msg model =
   case msg of
-    OnDown coords ->
+    OnDown point ->
       case model of
-        NoZoom -> ZoomStart coords
+        NoZoom ->
+          Zooming point point
+
+        Zoomed start end ->
+          ReZooming start end point point
+
         _ -> model
 
-    OnMove coords ->
+    OnMove point ->
       case model of
-        ZoomStart start ->
-          ZoomProgress start coords
+        Zooming start _ ->
+          Zooming start point
 
-        ZoomProgress start _ ->
-          ZoomProgress start coords
+        ReZooming startOld endOld start _ ->
+          ReZooming startOld endOld start point
 
         _ ->
           model
 
-    OnUp coords ->
+    OnUp point ->
       case model of
-        ZoomProgress start _ ->
-          ZoomDone
-            { x = min start.x coords.x, y = min start.y coords.y }
-            { x = max start.x coords.x, y = max start.y coords.y }
+        Zooming start _ ->
+          Zoomed
+            { x = min start.x point.x, y = min start.y point.y }
+            { x = max start.x point.x, y = max start.y point.y }
+
+        ReZooming _ _ start _ ->
+          Zoomed
+            { x = min start.x point.x, y = min start.y point.y }
+            { x = max start.x point.x, y = max start.y point.y }
 
         _ ->
           model
@@ -334,24 +394,24 @@ view model =
     , CE.onMouseMove OnMove CE.getCoords
     , CE.onMouseUp OnUp CE.getCoords
 
-    , case model of
-        ZoomDone start end ->
+    , case getCurrentWindow model of
+        Just ( start, end ) ->
           CA.range
             [ CA.lowest start.x CA.exactly
             , CA.highest end.x CA.exactly
             ]
 
-        _ ->
+        Nothing ->
           CA.range []
 
-    , case model of
-        ZoomDone start end ->
+    , case getCurrentWindow model of
+        Just ( start, end ) ->
           CA.domain
             [ CA.lowest start.y CA.exactly
             , CA.highest end.y CA.exactly
             ]
 
-        _ ->
+        Nothing ->
           CA.range []
     ]
     [ C.grid []
@@ -359,23 +419,17 @@ view model =
     , C.yLabels []
 
     , C.series .x
-        [ C.property .y [ CA.monotone ] [ CA.circle ]
-        , C.property .z [ CA.monotone ] [ CA.circle ]
-        , C.property .v [ CA.monotone ] [ CA.circle ]
-        , C.property .w [ CA.monotone ] [ CA.circle ]
-        , C.property .p [ CA.monotone ] [ CA.circle ]
-        , C.property .q [ CA.monotone ] [ CA.circle ]
+        [ C.property .y [ CA.monotone ] [ CA.circle, CA.color "white", CA.borderWidth 1 ]
+        , C.property .z [ CA.monotone ] [ CA.circle, CA.color "white", CA.borderWidth 1 ]
+        , C.property .v [ CA.monotone ] [ CA.circle, CA.color "white", CA.borderWidth 1 ]
+        , C.property .w [ CA.monotone ] [ CA.circle, CA.color "white", CA.borderWidth 1 ]
+        , C.property .p [ CA.monotone ] [ CA.circle, CA.color "white", CA.borderWidth 1 ]
+        , C.property .q [ CA.monotone ] [ CA.circle, CA.color "white", CA.borderWidth 1 ]
         ]
         data
 
-    , case model of
-        NoZoom ->
-          C.none
-
-        ZoomStart start ->
-          C.none
-
-        ZoomProgress start end ->
+    , case getNewSelection model of
+        Just ( start, end ) ->
           C.rect
             [ CA.x1 start.x
             , CA.x2 end.x
@@ -383,18 +437,26 @@ view model =
             , CA.y2 end.y
             ]
 
-        ZoomDone start end ->
+        Nothing ->
+          C.none
+
+    , case getCurrentWindow model of
+        Just ( start, end ) ->
           C.htmlAt .max .max -10 -10
             [ HA.style "transform" "translateX(-100%)"
             ]
             [ H.button
                 [ HE.onClick OnReset
                 , HA.style "border" "1px solid black"
+                , HA.style "border-radius" "5px"
                 , HA.style "padding" "2px 10px"
                 , HA.style "background" "white"
                 , HA.style "font-size" "14px"
                 ]
                 [ H.text "Reset" ]
             ]
+
+        Nothing ->
+          C.none
     ]
   """

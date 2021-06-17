@@ -213,7 +213,7 @@ toDotSeries toX properties data =
           }
 
       toDotItem lineIndex sublineIndex colorIndex prop interConfig datum_ =
-        let defaultAttrs = [ CA.color interConfig.color, if interConfig.method == Nothing then CA.circle else identity ]
+        let defaultAttrs = [ CA.color interConfig.color, CA.border interConfig.color, if interConfig.method == Nothing then CA.circle else identity ]
             dotAttrs = defaultAttrs ++ prop.attrs ++ prop.extra lineIndex sublineIndex prop.meta datum_
             config = toDotConfig dotAttrs
             x_ = toX datum_

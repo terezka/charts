@@ -29,6 +29,7 @@ module Chart.Events exposing
 -- make sure tooltip offset is adjusted for arrow length
 -- more clear names for width/height tooltip func
 -- make sure dot tooltip is accesible when overlapping with bars
+-- make sure zoom works without CA.static
 
 
 import Html as H exposing (Html)
