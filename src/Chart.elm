@@ -350,6 +350,7 @@ viewElements config plane tickValues allItems allLegends elements =
 
 type alias Tooltip =
   { direction : Maybe CA.Direction
+  , focal : Maybe (C.Position -> C.Position)
   , height : Float
   , width : Float
   , offset : Float

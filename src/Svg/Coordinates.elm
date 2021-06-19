@@ -12,6 +12,8 @@ module Svg.Coordinates
     , foldPosition
 
     , top, right, bottom, left, center
+    , topLeft, topRight, bottomLeft, bottomRight
+    , pointToPosition
     )
 
 {-| This module contains helpers for cartesian/SVG coordinate translation.
@@ -103,6 +105,35 @@ left pos =
 right : Position -> Point
 right pos =
   { x = pos.x2, y = pos.y1 + (pos.y2 - pos.y1) / 2 }
+
+
+{-| -}
+topLeft : Position -> Point
+topLeft pos =
+  { x = pos.x1, y = pos.y2 }
+
+
+{-| -}
+topRight : Position -> Point
+topRight pos =
+  { x = pos.x2, y = pos.y2 }
+
+
+{-| -}
+bottomLeft : Position -> Point
+bottomLeft pos =
+  { x = pos.x1, y = pos.y1 }
+
+
+{-| -}
+bottomRight : Position -> Point
+bottomRight pos =
+  { x = pos.x2, y = pos.y1 }
+
+
+pointToPosition : Point -> Position
+pointToPosition point =
+  { x1 = point.x, x2 = point.x, y1 = point.y, y2 = point.y }
 
 
 {-| -}

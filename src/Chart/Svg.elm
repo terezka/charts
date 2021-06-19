@@ -1020,23 +1020,22 @@ toPattern defaultColor design =
           CA.Gradient edits ->
             let config =
                   apply edits
-                    { top = defaultColor
-                    , bottom = "white"
-                    }
+                    { colors = [ defaultColor, "white" ] }
 
-                theId =
-                  toPatternId
-                    [ config.top
-                    , config.bottom
+                theId = toPatternId config.colors
+                totalColors = List.length config.colors
+                toPercentage i = toFloat i * 100 / toFloat (totalColors - 1)
+                toStop i c =
+                  S.stop
+                    [ SA.offset (String.fromFloat (toPercentage i) ++ "%")
+                    , SA.stopColor c
                     ]
-
+                    []
             in
             ( S.defs []
                 [ S.linearGradient
                     [ SA.id theId, SA.x1 "0", SA.x2 "0", SA.y1 "0", SA.y2 "1" ]
-                    [ S.stop [ SA.offset "0%", SA.stopColor config.top ] []
-                    , S.stop [ SA.offset "100%", SA.stopColor config.bottom ] []
-                    ]
+                    (List.indexedMap toStop config.colors)
                 ]
             , theId
             )
@@ -1215,6 +1214,7 @@ plusPath area_ off x_ y_ =
 {-| -}
 type alias Tooltip =
   { direction : Maybe CA.Direction
+  , focal : Maybe (Position -> Position)
   , height : Float
   , width : Float
   , offset : Float
@@ -1230,6 +1230,7 @@ tooltip plane pos edits htmlAttrs content =
   let config =
         apply edits
           { direction = Nothing
+          , focal = Nothing
           , height = 0
           , width = 0
           , offset = 12
@@ -1255,7 +1256,9 @@ tooltip plane pos edits htmlAttrs content =
             then if distanceTop > (config.height + config.offset) then CA.Top else CA.Bottom
             else if distanceTop > distanceBottom then CA.Top else CA.Bottom
 
-          Just dir -> dir
+          Just dir ->
+            dir
+
           Nothing ->
             let isLargest a = List.all (\b -> a >= b) in
             if isLargest distanceTop [ distanceBottom, distanceLeft, distanceRight ] then CA.Top
@@ -1288,16 +1291,27 @@ tooltip plane pos edits htmlAttrs content =
         , HA.style "pointer-events" "none"
         ] ++ htmlAttrs
 
-      ( x, y ) =
-        case direction of
-          CA.Top         -> ( pos.x1 + (pos.x2 - pos.x1) / 2, pos.y2 )
-          CA.Bottom      -> ( pos.x1 + (pos.x2 - pos.x1) / 2, pos.y1 )
-          CA.Left        -> ( pos.x1, pos.y1 + (pos.y2 - pos.y1) / 2 )
-          CA.Right       -> ( pos.x2, pos.y1 + (pos.y2 - pos.y1) / 2 )
-          CA.LeftOrRight -> ( pos.x2, pos.y1 + (pos.y2 - pos.y1) / 2 )
-          CA.TopOrBottom -> ( pos.x1 + (pos.x2 - pos.x1) / 2, pos.y2 )
+      focalPoint =
+        case config.focal of
+          Just focal ->
+            case direction of
+              CA.Top         -> Coord.top (focal pos)
+              CA.Bottom      -> Coord.bottom (focal pos)
+              CA.Left        -> Coord.left (focal pos)
+              CA.Right       -> Coord.right (focal pos)
+              CA.LeftOrRight -> Coord.left (focal pos)
+              CA.TopOrBottom -> Coord.right (focal pos)
+
+          Nothing ->
+            case direction of
+              CA.Top         -> Coord.top pos
+              CA.Bottom      -> Coord.bottom pos
+              CA.Left        -> Coord.left pos
+              CA.Right       -> Coord.right pos
+              CA.LeftOrRight -> Coord.left pos
+              CA.TopOrBottom -> Coord.right pos
   in
-  positionHtml plane x y xOff yOff attributes children
+  positionHtml plane focalPoint.x focalPoint.y xOff yOff attributes children
     |> H.map never
 
 

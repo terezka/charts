@@ -18,7 +18,12 @@ view model =
     , C.xLabels []
     , C.yLabels []
     , C.series .x
-        [ C.property .y [ CA.linear, CA.opacity 0.6, CA.gradient [ CA.bottom "white" ] ] []
+        [ C.property .y
+            [ CA.linear
+            , CA.opacity 0.6
+            , CA.gradient []
+            ]
+            []
         ]
         data
     ]
@@ -92,7 +97,12 @@ smallCode =
     , C.xLabels []
     , C.yLabels []
     , C.series .x
-        [ C.property .y [ CA.linear, CA.opacity 0.6, CA.gradient [ CA.bottom "white" ] ] []
+        [ C.property .y
+            [ CA.linear
+            , CA.opacity 0.6
+            , CA.gradient []
+            ]
+            []
         ]
         data
     ]
@@ -117,7 +127,12 @@ view model =
     , C.xLabels []
     , C.yLabels []
     , C.series .x
-        [ C.property .y [ CA.linear, CA.opacity 0.6, CA.gradient [ CA.bottom "white" ] ] []
+        [ C.property .y
+            [ CA.linear
+            , CA.opacity 0.6
+            , CA.gradient []
+            ]
+            []
         ]
         data
     ]

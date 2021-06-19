@@ -16,20 +16,20 @@ module Chart.Events exposing
 
 -- TODO
 -- Make sure searched position is preserved through filters
+-- specify center of item for tooltip placement
+-- make sure tooltip offset is adjusted for arrow length
+-- document break line label
+-- rename C.title to C.label
 -- move things to internal
 -- find out what to expose in Svg / Coord
--- specify center of item for tooltip placement
--- moveLeft, moveRight api
 -- use correct HTML elements
 -- Add element index
 -- add dot labels examples
--- document break line label
--- rename C.title to C.label
 -- maybe seperate bar from line labels somehow
--- make sure tooltip offset is adjusted for arrow length
 -- more clear names for width/height tooltip func
 -- make sure dot tooltip is accesible when overlapping with bars
 -- make sure zoom works without CA.static
+-- allow custom attributes
 
 
 import Html as H exposing (Html)

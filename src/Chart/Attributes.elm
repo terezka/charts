@@ -4,7 +4,7 @@ module Chart.Attributes exposing
   , border, borderWidth, fontSize, format, color, width, height, offset
   , Anchor(..), alignLeft, alignRight, alignMiddle, content
   , rotate, length, roundTop, roundBottom, area, opacity, size, aura, auraWidth, ungroup, margin, spacing
-  , Design(..), GradientConfig, Pattern, space, striped, dotted, gradient, top, bottom, dashed, break
+  , Design(..), GradientConfig, Pattern, space, striped, dotted, gradient, colors, dashed, break
   , Method(..), linear, monotone, stepped
   , Shape(..), circle, triangle, square, diamond, plus, cross, shape
   , Direction(..), onTop, onBottom, onRight, onLeft, onLeftOrRight, onTopOrBottom, noPointer
@@ -21,6 +21,11 @@ module Chart.Attributes exposing
 
   , Tick(..), ints, times
   , noGrid, title
+
+  , topLeft, topRight, topCenter
+  , bottomLeft, bottomRight, bottomCenter
+  , leftCenter, rightCenter
+  , focal
   )
 
 
@@ -482,6 +487,70 @@ alignMiddle config =
 
 
 
+-- FOCAL
+
+
+{-| -}
+topCenter : Attribute { a | focal : Maybe (C.Position -> C.Position) }
+topCenter config =
+  { config | focal = Just (\pos -> { pos | y1 = pos.y2 }) }
+
+
+{-| -}
+bottomCenter : Attribute { a | focal : Maybe (C.Position -> C.Position) }
+bottomCenter config =
+  { config | focal = Just (C.bottom >> C.pointToPosition) }
+
+
+{-| -}
+leftCenter : Attribute { a | focal : Maybe (C.Position -> C.Position) }
+leftCenter config =
+  { config | focal = Just (C.left >> C.pointToPosition) }
+
+
+{-| -}
+rightCenter : Attribute { a | focal : Maybe (C.Position -> C.Position) }
+rightCenter config =
+  { config | focal = Just (C.right >> C.pointToPosition) }
+
+
+{-| -}
+topLeft : Attribute { a | focal : Maybe (C.Position -> C.Position) }
+topLeft config =
+  { config | focal = Just (C.topLeft >> C.pointToPosition) }
+
+
+{-| -}
+topRight : Attribute { a | focal : Maybe (C.Position -> C.Position) }
+topRight config =
+  { config | focal = Just (C.topRight >> C.pointToPosition) }
+
+
+{-| -}
+bottomLeft : Attribute { a | focal : Maybe (C.Position -> C.Position) }
+bottomLeft config =
+  { config | focal = Just (C.bottomLeft >> C.pointToPosition) }
+
+
+{-| -}
+bottomRight : Attribute { a | focal : Maybe (C.Position -> C.Position) }
+bottomRight config =
+  { config | focal = Just (C.bottomRight >> C.pointToPosition) }
+
+
+{-| -}
+center : Attribute { a | focal : Maybe (C.Position -> C.Position) }
+center config =
+  { config | focal = Just (C.center >> C.pointToPosition) }
+
+
+{-| -}
+focal : (C.Position -> C.Position) -> Attribute { a | focal : Maybe (C.Position -> C.Position) }
+focal given config =
+  { config | focal = Just given }
+
+
+
 -- TODO Move to internal
 {-| -}
 type Method
@@ -537,9 +606,7 @@ type alias Pattern =
 
 {-| -}
 type alias GradientConfig =
-  { top : String
-  , bottom : String
-  }
+  { colors : List String }
 
 
 {-| -}
@@ -567,15 +634,9 @@ gradient attrs_ config =
 
 
 {-| -}
-top : x -> Attribute { a | top : x }
-top value config =
-  { config | top = value }
-
-
-{-| -}
-bottom : x -> Attribute { a | bottom : x }
-bottom value config =
-  { config | bottom = value }
+colors : x -> Attribute { a | colors : x }
+colors value config =
+  { config | colors = value }
 
 
 {-| -}

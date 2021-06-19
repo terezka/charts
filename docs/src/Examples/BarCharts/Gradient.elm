@@ -20,8 +20,7 @@ view model =
     , C.yLabels []
     , C.bars
         []
-        [ C.bar .y [ CA.gradient [ CA.bottom "white" ] ]
-        , C.bar .z [ CA.gradient [ CA.bottom "white" ] ]
+        [ C.bar .y [ CA.gradient [ CA.colors [ CA.purple, CA.pink, "white" ] ] ]
         ]
         data
     ]
@@ -91,8 +90,7 @@ smallCode =
     , C.yLabels []
     , C.bars
         []
-        [ C.bar .y [ CA.gradient [ CA.bottom "white" ] ]
-        , C.bar .z [ CA.gradient [ CA.bottom "white" ] ]
+        [ C.bar .y [ CA.gradient [ CA.colors [ CA.purple, CA.pink, "white" ] ] ]
         ]
         data
     ]
@@ -119,8 +117,7 @@ view model =
     , C.yLabels []
     , C.bars
         []
-        [ C.bar .y [ CA.gradient [ CA.bottom "white" ] ]
-        , C.bar .z [ CA.gradient [ CA.bottom "white" ] ]
+        [ C.bar .y [ CA.gradient [ CA.colors [ CA.purple, CA.pink, "white" ] ] ]
         ]
         data
     ]
