@@ -16,7 +16,6 @@ module Chart.Events exposing
 
 -- TODO
 -- Make sure searched position is preserved through filters
--- rename C.title to C.label
 -- move things to internal
 -- find out what to expose in Svg / Coord
 -- use correct HTML elements

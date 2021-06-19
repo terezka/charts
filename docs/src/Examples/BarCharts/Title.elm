@@ -18,9 +18,9 @@ view model =
     [ C.grid []
     , C.xLabels []
     , C.yLabels []
-    , C.titleAt .max .max [ CA.xOff -15, CA.yOff 10, CA.alignRight ] [ S.text "Quarterly revenue" ]
-    , C.titleAt CA.middle .min [ CA.yOff 30 ] [ S.text "Quarter" ]
-    , C.titleAt .min CA.middle [ CA.xOff -20, CA.rotate 90 ] [ S.text "Revenue" ]
+    , C.labelAt .max .max [ CA.xOff -15, CA.yOff 10, CA.alignRight ] [ S.text "Quarterly revenue" ]
+    , C.labelAt CA.middle .min [ CA.yOff 30 ] [ S.text "Quarter" ]
+    , C.labelAt .min CA.middle [ CA.xOff -20, CA.rotate 90 ] [ S.text "Revenue" ]
     , C.bars []
         [ C.bar .z []
         , C.bar .y []
@@ -33,7 +33,7 @@ meta =
   { category = "Bar charts"
   , categoryOrder = 1
   , name = "Titles"
-  , description = "Add titles to bar chart."
+  , description = "Add labels to bar chart."
   , order = 16
   }
 
@@ -92,9 +92,9 @@ smallCode =
     [ C.grid []
     , C.xLabels []
     , C.yLabels []
-    , C.titleAt .max .max [ CA.xOff -15, CA.yOff 10, CA.alignRight ] [ S.text "Quarterly revenue" ]
-    , C.titleAt CA.middle .min [ CA.yOff 30 ] [ S.text "Quarter" ]
-    , C.titleAt .min CA.middle [ CA.xOff -20, CA.rotate 90 ] [ S.text "Revenue" ]
+    , C.labelAt .max .max [ CA.xOff -15, CA.yOff 10, CA.alignRight ] [ S.text "Quarterly revenue" ]
+    , C.labelAt CA.middle .min [ CA.yOff 30 ] [ S.text "Quarter" ]
+    , C.labelAt .min CA.middle [ CA.xOff -20, CA.rotate 90 ] [ S.text "Revenue" ]
     , C.bars []
         [ C.bar .z []
         , C.bar .y []
@@ -122,9 +122,9 @@ view model =
     [ C.grid []
     , C.xLabels []
     , C.yLabels []
-    , C.titleAt .max .max [ CA.xOff -15, CA.yOff 10, CA.alignRight ] [ S.text "Quarterly revenue" ]
-    , C.titleAt CA.middle .min [ CA.yOff 30 ] [ S.text "Quarter" ]
-    , C.titleAt .min CA.middle [ CA.xOff -20, CA.rotate 90 ] [ S.text "Revenue" ]
+    , C.labelAt .max .max [ CA.xOff -15, CA.yOff 10, CA.alignRight ] [ S.text "Quarterly revenue" ]
+    , C.labelAt CA.middle .min [ CA.yOff 30 ] [ S.text "Quarter" ]
+    , C.labelAt .min CA.middle [ CA.xOff -20, CA.rotate 90 ] [ S.text "Revenue" ]
     , C.bars []
         [ C.bar .z []
         , C.bar .y []

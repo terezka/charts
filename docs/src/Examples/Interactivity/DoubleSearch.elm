@@ -74,7 +74,7 @@ view model =
                 |> Maybe.map String.fromFloat
                 |> Maybe.withDefault "N/A"
         in
-        [ C.title
+        [ C.label
             [ CA.color CA.purple
             , CA.moveUp 8
             , CA.fontSize 14
@@ -160,7 +160,7 @@ smallCode =
                 |> Maybe.map String.fromFloat
                 |> Maybe.withDefault "N/A"
         in
-        [ C.title
+        [ C.label
             [ CA.color CA.purple
             , CA.moveUp 8
             , CA.fontSize 14
@@ -246,7 +246,7 @@ view model =
                 |> Maybe.map String.fromFloat
                 |> Maybe.withDefault "N/A"
         in
-        [ C.title
+        [ C.label
             [ CA.color CA.purple
             , CA.moveUp 8
             , CA.fontSize 14

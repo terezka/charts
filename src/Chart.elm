@@ -7,7 +7,7 @@ module Chart exposing
   , xAxis, yAxis, xTicks, yTicks, xLabels, yLabels, grid
 
   , xLabel, yLabel, xTick, yTick
-  , title, titleAt, tooltip, line, rect
+  , label, labelAt, tooltip, line, rect
 
   , svgAt, htmlAt, svg, html, none
 
@@ -1110,14 +1110,14 @@ times =
 
 
 {-| -}
-title : List (CA.Attribute CS.Label) -> List (S.Svg msg) -> C.Point -> Element data msg
-title attrs inner point =
+label : List (CA.Attribute CS.Label) -> List (S.Svg msg) -> C.Point -> Element data msg
+label attrs inner point =
   SvgElement <| \p -> CS.label p attrs inner point
 
 
 {-| -}
-titleAt : (C.Axis -> Float) -> (C.Axis -> Float) -> List (CA.Attribute CS.Label) -> List (S.Svg msg) -> Element data msg
-titleAt toX toY attrs inner =
+labelAt : (C.Axis -> Float) -> (C.Axis -> Float) -> List (CA.Attribute CS.Label) -> List (S.Svg msg) -> Element data msg
+labelAt toX toY attrs inner =
   SvgElement <| \p -> CS.label p attrs inner { x = toX p.x, y = toY p.y }
 
 

@@ -27,7 +27,7 @@ view model =
     , C.yLabels []
     , C.series .age [ C.property .toys [] [] ] data
 
-    , C.title
+    , C.label
         [ CA.moveRight 14, CA.moveUp 8, CA.alignLeft ]
         [ S.text "The dot in question" ]
         { x = 5, y = 6 }

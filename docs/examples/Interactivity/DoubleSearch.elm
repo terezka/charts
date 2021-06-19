@@ -73,7 +73,7 @@ view model =
                 |> Maybe.map String.fromFloat
                 |> Maybe.withDefault "N/A"
         in
-        [ C.title
+        [ C.label
             [ CA.color CA.purple
             , CA.moveUp 8
             , CA.fontSize 14

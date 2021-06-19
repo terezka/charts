@@ -30,7 +30,7 @@ view model =
                 |> Maybe.map String.fromFloat
                 |> Maybe.withDefault "N/A"
         in
-        [ C.title
+        [ C.label
             [ CA.yOff 4
             , CA.color "white"
             ]

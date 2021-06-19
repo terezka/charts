@@ -142,10 +142,10 @@ view model =
       ]
 
     , C.withPlane <| \p ->
-        [ C.title [ CA.fontSize 14, CA.yOff -3 ] [ S.text ("Salary distribution in Denmark " ++ String.fromFloat model.year) ] { x = CA.middle p.x, y = p.y.max }
-        , C.title [ CA.fontSize 11, CA.yOff 12 ] [ S.text "Data from Danmarks Statestik" ] { x = CA.middle p.x, y = p.y.max }
-        , C.title [ CA.fontSize 12, CA.yOff 25 ] [ S.text "Average salary in DKK" ] { x = CA.middle p.x, y = p.y.min }
-        , C.title [ CA.fontSize 12, CA.xOff -15, CA.rotate 90 ] [ S.text "Womens percentage of mens salary" ] { x = p.x.min, y = CA.middle p.y }
+        [ C.label [ CA.fontSize 14, CA.yOff -3 ] [ S.text ("Salary distribution in Denmark " ++ String.fromFloat model.year) ] { x = CA.middle p.x, y = p.y.max }
+        , C.label [ CA.fontSize 11, CA.yOff 12 ] [ S.text "Data from Danmarks Statestik" ] { x = CA.middle p.x, y = p.y.max }
+        , C.label [ CA.fontSize 12, CA.yOff 25 ] [ S.text "Average salary in DKK" ] { x = CA.middle p.x, y = p.y.min }
+        , C.label [ CA.fontSize 12, CA.xOff -15, CA.rotate 90 ] [ S.text "Womens percentage of mens salary" ] { x = p.x.min, y = CA.middle p.y }
         , C.line [ CA.dashed [ 4, 2 ], CA.opacity 0.7, CA.color "#f56dbc", CA.x1 Salary.avgSalaryWomen ]
         , C.line [ CA.dashed [ 4, 2 ], CA.opacity 0.7, CA.color "#58a9f6", CA.x1 Salary.avgSalaryMen ]
         ]
@@ -163,7 +163,7 @@ view model =
         in
         if String.startsWith "251 " datum.sector then
           [ C.line [ CA.color color, CA.break, CA.x1 top.x, CA.x2 (top.x + toSvgX 10), CA.y1 top.y, CA.y2 (top.y + toSvgY 10) ]
-          , C.title [ CA.color color,CA.alignLeft, CA.xOff 5, CA.yOff 3 ] [ S.text "Software engineering" ] { x = top.x + toSvgX 10, y = top.y + toSvgY 10 }
+          , C.label [ CA.color color,CA.alignLeft, CA.xOff 5, CA.yOff 3 ] [ S.text "Software engineering" ] { x = top.x + toSvgX 10, y = top.y + toSvgY 10 }
           ]
         else
           []
@@ -233,8 +233,8 @@ view model =
             y2 = p.y.max - toSvgY 10
         in
         [ C.rect [ CA.borderWidth 0, CA.x1 x1, CA.x2 x2, CA.y1 y1, CA.y2 y2, CA.color "url(#colorscale)" ]
-        , C.title [ CA.fontSize 10 ] [ S.text "more women" ] { x = x1, y = p.y.max - toSvgY 25 }
-        , C.title [ CA.fontSize 10 ] [ S.text "more men" ] { x = x2, y = p.y.max - toSvgY 25 }
+        , C.label [ CA.fontSize 10 ] [ S.text "more women" ] { x = x1, y = p.y.max - toSvgY 25 }
+        , C.label [ CA.fontSize 10 ] [ S.text "more men" ] { x = x2, y = p.y.max - toSvgY 25 }
         , C.htmlAt .max .max -45 -45
             [ HA.style "color" "rgb(90 90 90)"
             , HA.style "cursor" "pointer"

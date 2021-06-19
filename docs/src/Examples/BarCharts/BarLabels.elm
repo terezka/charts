@@ -32,7 +32,7 @@ view model =
                 |> Maybe.map String.fromFloat
                 |> Maybe.withDefault "N/A"
         in
-        [ C.title
+        [ C.label
             [ CA.yOff 15
             , CA.color "white"
             ]
@@ -119,7 +119,7 @@ smallCode =
                 |> Maybe.map String.fromFloat
                 |> Maybe.withDefault "N/A"
         in
-        [ C.title
+        [ C.label
             [ CA.yOff 15
             , CA.color "white"
             ]
@@ -162,7 +162,7 @@ view model =
                 |> Maybe.map String.fromFloat
                 |> Maybe.withDefault "N/A"
         in
-        [ C.title
+        [ C.label
             [ CA.yOff 15
             , CA.color "white"
             ]
