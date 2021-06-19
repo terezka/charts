@@ -42,8 +42,8 @@ view model =
     , C.xLabels []
     , C.yLabels []
     , C.bars []
-        [ C.bar .y [ CA.opacity 0.3, CA.borderWidth 1, CA.border CA.pink ]
-        , C.bar .z [ CA.opacity 0.3, CA.borderWidth 1, CA.border CA.purple ]
+        [ C.bar .y [ CA.opacity 0.6, CA.borderWidth 1, CA.color CA.green ]
+        , C.bar .z [ CA.opacity 0.6, CA.borderWidth 1, CA.color CA.blue ]
         ]
         data
     , C.each model.hovering <| \p item ->
@@ -101,8 +101,8 @@ smallCode =
     , C.xLabels []
     , C.yLabels []
     , C.bars []
-        [ C.bar .y [ CA.opacity 0.3, CA.borderWidth 1, CA.border CA.pink ]
-        , C.bar .z [ CA.opacity 0.3, CA.borderWidth 1, CA.border CA.purple ]
+        [ C.bar .y [ CA.opacity 0.6, CA.borderWidth 1, CA.color CA.green ]
+        , C.bar .z [ CA.opacity 0.6, CA.borderWidth 1, CA.color CA.blue ]
         ]
         data
     , C.each model.hovering <| \\p item ->
@@ -154,8 +154,8 @@ view model =
     , C.xLabels []
     , C.yLabels []
     , C.bars []
-        [ C.bar .y [ CA.opacity 0.3, CA.borderWidth 1, CA.border CA.pink ]
-        , C.bar .z [ CA.opacity 0.3, CA.borderWidth 1, CA.border CA.purple ]
+        [ C.bar .y [ CA.opacity 0.6, CA.borderWidth 1, CA.color CA.green ]
+        , C.bar .z [ CA.opacity 0.6, CA.borderWidth 1, CA.color CA.blue ]
         ]
         data
     , C.each model.hovering <| \\p item ->
