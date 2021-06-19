@@ -16,8 +16,6 @@ module Chart.Events exposing
 
 -- TODO
 -- Make sure searched position is preserved through filters
--- maybe seperate bar from line labels somehow
--- make sure dot tooltip is accesible when overlapping with bars
 -- make sure zoom works without CA.static
 
 -- Add element index

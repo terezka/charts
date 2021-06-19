@@ -24,7 +24,7 @@ view model =
             |> C.variation (\d -> [ CA.size (Maybe.withDefault 6 d.w * 30) ])
         ]
         data
-    , C.eachProduct <| \p point ->
+    , C.eachDot <| \p point ->
         let center = CE.getCenter p point
             label =
               (CE.getDatum point).w

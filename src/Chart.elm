@@ -11,8 +11,8 @@ module Chart exposing
 
   , svgAt, htmlAt, svg, html, none
 
-  , each, eachBin, eachStack, eachProduct
-  , withPlane, withBins, withStacks, withProducts
+  , each, eachBin, eachStack, eachBar, eachDot, eachProduct
+  , withPlane, withBins, withStacks, withBars, withDots, withProducts
   , legendsAt
 
   , generate, floats, ints, times
@@ -129,12 +129,12 @@ chart edits elements =
 type Element data msg
   = SeriesElement
       (List C.Position)
-      (List (Item.Product Item.Any (Maybe Float) data))
+      (List (Item.Product CE.Any (Maybe Float) data))
       (List (Legend.Legend))
       (C.Plane -> S.Svg msg)
   | BarsElement
       (List C.Position)
-      (List (Item.Product Item.Any (Maybe Float) data))
+      (List (Item.Product CE.Any (Maybe Float) data))
       (List (Legend.Legend))
       (C.Plane -> TickValues -> TickValues)
       (C.Plane -> S.Svg msg)
@@ -159,7 +159,7 @@ type Element data msg
   | GridElement
       (C.Plane -> TickValues -> S.Svg msg)
   | SubElements
-      (C.Plane -> List (Item.Product Item.Any (Maybe Float) data) -> List (Element data msg))
+      (C.Plane -> List (Item.Product CE.Any (Maybe Float) data) -> List (Element data msg))
   | ListOfElements
       (List (Element data msg))
   | SvgElement
@@ -250,7 +250,7 @@ definePlane config elements =
   }
 
 
-getItems : C.Plane -> List (Element data msg) -> List (Item.Product Item.Any (Maybe Float) data)
+getItems : C.Plane -> List (Element data msg) -> List (Item.Product CE.Any (Maybe Float) data)
 getItems plane elements =
   let toItems el acc =
         case el of
@@ -300,7 +300,7 @@ type alias TickValues =
   }
 
 
-getTickValues : C.Plane -> List (Item.Product Item.Any (Maybe Float) data) -> List (Element data msg) -> TickValues
+getTickValues : C.Plane -> List (Item.Product CE.Any (Maybe Float) data) -> List (Element data msg) -> TickValues
 getTickValues plane items elements =
   let toValues el acc =
         case el of
@@ -320,7 +320,7 @@ getTickValues plane items elements =
   List.foldl toValues (TickValues [] [] [] []) elements
 
 
-viewElements : Container data msg -> C.Plane -> TickValues -> List (Item.Product Item.Any (Maybe Float) data) -> List Legend.Legend -> List (Element data msg) -> ( List (H.Html msg), List (S.Svg msg), List (H.Html msg) )
+viewElements : Container data msg -> C.Plane -> TickValues -> List (Item.Product CE.Any (Maybe Float) data) -> List Legend.Legend -> List (Element data msg) -> ( List (H.Html msg), List (S.Svg msg), List (H.Html msg) )
 viewElements config plane tickValues allItems allLegends elements =
   let viewOne el ( before, chart_, after ) =
         case el of
@@ -1030,19 +1030,31 @@ withPlane func =
 
 
 {-| -}
-withBins : (C.Plane -> List (CE.Group (CE.Bin data) Item.Any (Maybe Float) data) -> List (Element data msg)) -> Element data msg
+withBins : (C.Plane -> List (CE.Group (CE.Bin data) CE.Any (Maybe Float) data) -> List (Element data msg)) -> Element data msg
 withBins func =
   SubElements <| \p is -> func p (CE.group CE.bin is)
 
 
 {-| -}
-withStacks : (C.Plane -> List (CE.Group (CE.Stack data) Item.Any (Maybe Float) data) -> List (Element data msg)) -> Element data msg
+withStacks : (C.Plane -> List (CE.Group (CE.Stack data) CE.Any (Maybe Float) data) -> List (Element data msg)) -> Element data msg
 withStacks func =
   SubElements <| \p is -> func p (CE.group CE.stack is)
 
 
 {-| -}
-withProducts : (C.Plane -> List (CE.Product Item.Any (Maybe Float) data) -> List (Element data msg)) -> Element data msg
+withBars : (C.Plane -> List (CE.Product CE.Bar (Maybe Float) data) -> List (Element data msg)) -> Element data msg
+withBars func =
+  SubElements <| \p is -> func p (CE.group CE.bar is)
+
+
+{-| -}
+withDots : (C.Plane -> List (CE.Product CE.Dot (Maybe Float) data) -> List (Element data msg)) -> Element data msg
+withDots func =
+  SubElements <| \p is -> func p (CE.group CE.dot is)
+
+
+{-| -}
+withProducts : (C.Plane -> List (CE.Product CE.Any (Maybe Float) data) -> List (Element data msg)) -> Element data msg
 withProducts func =
   SubElements <| \p is -> func p is
 
@@ -1054,19 +1066,31 @@ each items func =
 
 
 {-| -}
-eachBin : (C.Plane -> CE.Group (CE.Bin data) Item.Any (Maybe Float) data -> List (Element data msg)) -> Element data msg
+eachBin : (C.Plane -> CE.Group (CE.Bin data) CE.Any (Maybe Float) data -> List (Element data msg)) -> Element data msg
 eachBin func =
   SubElements <| \p is -> List.concatMap (func p) (CE.group CE.bin is)
 
 
 {-| -}
-eachStack : (C.Plane -> CE.Group (CE.Stack data) Item.Any (Maybe Float) data -> List (Element data msg)) -> Element data msg
+eachStack : (C.Plane -> CE.Group (CE.Stack data) CE.Any (Maybe Float) data -> List (Element data msg)) -> Element data msg
 eachStack func =
   SubElements <| \p is -> List.concatMap (func p) (CE.group CE.stack is)
 
 
 {-| -}
-eachProduct : (C.Plane -> Item.Product Item.Any (Maybe Float) data -> List (Element data msg)) -> Element data msg
+eachBar : (C.Plane -> Item.Product CE.Bar (Maybe Float) data -> List (Element data msg)) -> Element data msg
+eachBar func =
+  SubElements <| \p is -> List.concatMap (func p) (CE.group CE.bar is)
+
+
+{-| -}
+eachDot : (C.Plane -> Item.Product CE.Dot (Maybe Float) data -> List (Element data msg)) -> Element data msg
+eachDot func =
+  SubElements <| \p is -> List.concatMap (func p) (CE.group CE.dot is)
+
+
+{-| -}
+eachProduct : (C.Plane -> Item.Product CE.Any (Maybe Float) data -> List (Element data msg)) -> Element data msg
 eachProduct func =
   SubElements <| \p is -> List.concatMap (func p) is
 
