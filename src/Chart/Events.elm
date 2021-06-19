@@ -16,7 +16,6 @@ module Chart.Events exposing
 
 -- TODO
 -- Make sure searched position is preserved through filters
--- document break line label
 -- rename C.title to C.label
 -- move things to internal
 -- find out what to expose in Svg / Coord
@@ -24,7 +23,6 @@ module Chart.Events exposing
 -- Add element index
 -- add dot labels examples
 -- maybe seperate bar from line labels somehow
--- more clear names for width/height tooltip func
 -- make sure dot tooltip is accesible when overlapping with bars
 -- make sure zoom works without CA.static
 -- allow custom attributes

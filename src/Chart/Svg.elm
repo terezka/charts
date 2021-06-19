@@ -172,6 +172,8 @@ type alias Line =
   , x2 : Maybe Float
   , y1 : Maybe Float
   , y2 : Maybe Float
+  , xOff : Float
+  , yOff : Float
   , color : String
   , width : Float
   , dashed : List Float
@@ -189,6 +191,8 @@ line plane edits =
           , x2 = Nothing
           , y1 = Nothing
           , y2 = Nothing
+          , xOff = 0
+          , yOff = 0
           , color = "rgb(210, 210, 210)"
           , width = 1
           , dashed = []
@@ -197,43 +201,67 @@ line plane edits =
           }
 
       ( ( x1_, x2_ ), ( y1_, y2_ ) ) =
-        case ( ( config.x1, config.x2 ), ( config.y1, config.y2 ) ) of
+        case ( ( config.x1, config.x2 ), ( config.y1, config.y2 ), ( round config.xOff, round config.yOff ) ) of
           -- ONLY X
-          ( ( Just a, Just b ), ( Nothing, Nothing ) ) ->
+          ( ( Just a, Just b ), ( Nothing, Nothing ), _ ) ->
             ( ( a, b ), ( plane.y.min, plane.y.min ) )
 
-          ( ( Just a, Nothing ), ( Nothing, Nothing ) ) ->
+          ( ( Just a, Nothing ), ( Nothing, Nothing ), _ ) ->
             ( ( a, a ), ( plane.y.min, plane.y.max ) )
 
-          ( ( Nothing, Just b ), ( Nothing, Nothing ) ) ->
+          ( ( Nothing, Just b ), ( Nothing, Nothing ), _ ) ->
             ( ( b, b ), ( plane.y.min, plane.y.max ) )
 
           -- ONLY Y
-          ( ( Nothing, Nothing ), ( Just a, Just b ) ) ->
+          ( ( Nothing, Nothing ), ( Just a, Just b ), _ ) ->
             ( ( plane.x.min, plane.x.min ), ( a, b ) )
 
-          ( ( Nothing, Nothing ), ( Just a, Nothing ) ) ->
+          ( ( Nothing, Nothing ), ( Just a, Nothing ), _ ) ->
             ( ( plane.x.min, plane.x.max ), ( a, a ) )
 
-          ( ( Nothing, Nothing ), ( Nothing, Just b ) ) ->
+          ( ( Nothing, Nothing ), ( Nothing, Just b ), _ ) ->
             ( ( plane.x.min, plane.x.max ), ( b, b ) )
 
           -- MIXED
-
-          ( ( Nothing, Just c ), ( Just a, Just b ) ) ->
+          ( ( Nothing, Just c ), ( Just a, Just b ), _ ) ->
             ( ( c, c ), ( a, b ) )
 
-          ( ( Just c, Nothing ), ( Just a, Just b ) ) ->
+          ( ( Just c, Nothing ), ( Just a, Just b ), _ ) ->
             ( ( c, c ), ( a, b ) )
 
-          ( ( Just a, Just b ), ( Nothing, Just c ) ) ->
+          ( ( Just a, Just b ), ( Nothing, Just c ), _ ) ->
             ( ( a, b ), ( c, c ) )
 
-          ( ( Just a, Just b ), ( Just c, Nothing ) ) ->
+          ( ( Just a, Just b ), ( Just c, Nothing ), _ ) ->
             ( ( a, b ), ( c, c ) )
+
+          -- ONE FULL POINT
+          ( ( Just a, Nothing ), ( Nothing, Just b ), ( 0, 0 ) ) ->
+            ( ( a, plane.x.max ), ( b, b ) )
+
+          ( ( Just a, Nothing ), ( Nothing, Just b ), ( xOff, yOff ) ) ->
+            ( ( a, a + Coord.scaleCartesianX plane config.xOff ), ( b, b + Coord.scaleCartesianY plane config.yOff ) )
+
+          ( ( Just a, Nothing ), ( Just b, Nothing ), ( 0, 0 ) ) ->
+            ( ( a, plane.x.max ), ( b, b ) )
+
+          ( ( Just a, Nothing ), ( Just b, Nothing ), ( xOff, yOff ) ) ->
+            ( ( a, a + Coord.scaleCartesianX plane config.xOff ), ( b, b + Coord.scaleCartesianY plane config.yOff ) )
+
+          ( ( Nothing, Just a ), ( Nothing, Just b ), ( 0, 0 ) ) ->
+            ( ( a, plane.x.max ), ( b, b ) )
+
+          ( ( Nothing, Just a ), ( Nothing, Just b ), ( xOff, yOff ) ) ->
+            ( ( a, a + Coord.scaleCartesianX plane config.xOff ), ( b, b + Coord.scaleCartesianY plane config.yOff ) )
+
+          ( ( Nothing, Just a ), ( Just b, Nothing ), ( 0, 0 ) ) ->
+            ( ( a, plane.x.max ), ( b, b ) )
+
+          ( ( Nothing, Just a ), ( Just b, Nothing ), ( xOff, yOff ) ) ->
+            ( ( a, a + Coord.scaleCartesianX plane config.xOff ), ( b, b + Coord.scaleCartesianY plane config.yOff ) )
 
           -- NEITHER
-          ( ( Nothing, Nothing ), ( Nothing, Nothing ) ) ->
+          ( ( Nothing, Nothing ), ( Nothing, Nothing ), _ ) ->
             ( ( plane.x.min, plane.x.max ), ( plane.y.min, plane.y.max ) )
 
           _ ->
