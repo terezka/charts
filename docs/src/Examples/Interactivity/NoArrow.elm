@@ -47,7 +47,7 @@ view model =
         ]
         data
     , C.each model.hovering <| \p item ->
-        [ C.tooltip item [ CA.noPointer ] [] [] ]
+        [ C.tooltip item [ CA.noArrow ] [] [] ]
     ]
 
 
@@ -105,7 +105,7 @@ smallCode =
         ]
         data
     , C.each model.hovering <| \\p item ->
-        [ C.tooltip item [ CA.noPointer ] [] [] ]
+        [ C.tooltip item [ CA.noArrow ] [] [] ]
     ]
   """
 
@@ -157,6 +157,6 @@ view model =
         ]
         data
     , C.each model.hovering <| \\p item ->
-        [ C.tooltip item [ CA.noPointer ] [] [] ]
+        [ C.tooltip item [ CA.noArrow ] [] [] ]
     ]
   """

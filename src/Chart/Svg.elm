@@ -1246,7 +1246,7 @@ type alias Tooltip =
   , height : Float
   , width : Float
   , offset : Float
-  , pointer : Bool
+  , arrow : Bool
   , border : String
   , background : String
   }
@@ -1262,7 +1262,7 @@ tooltip plane pos edits htmlAttrs content =
           , height = 0
           , width = 0
           , offset = 8
-          , pointer = True
+          , arrow = True
           , border = "#D8D8D8"
           , background = "white"
           }
@@ -1295,7 +1295,7 @@ tooltip plane pos edits htmlAttrs content =
             else CA.Right
 
       arrowWidth =
-        if config.pointer then 4 else 0
+        if config.arrow then 4 else 0
 
       { xOff, yOff, transformation, className } =
         case direction of
@@ -1307,7 +1307,7 @@ tooltip plane pos edits htmlAttrs content =
           CA.TopOrBottom -> { xOff = 0, yOff = config.offset + arrowWidth, transformation =  "translate(-50%, -100%)", className = "elm-charts__tooltip-topOrBottom" }
 
       children =
-        if config.pointer then
+        if config.arrow then
           H.node "style" [] [ H.text (tooltipPointerStyle direction className config.background config.border) ] :: content
         else
           content

@@ -354,7 +354,7 @@ type alias Tooltip =
   , height : Float
   , width : Float
   , offset : Float
-  , pointer : Bool
+  , arrow : Bool
   , border : String
   , background : String
   }

@@ -17,15 +17,14 @@ module Chart.Events exposing
 -- TODO
 -- Make sure searched position is preserved through filters
 -- move things to internal
--- find out what to expose in Svg / Coord
--- use correct HTML elements
 -- Add element index
 -- add dot labels examples
 -- maybe seperate bar from line labels somehow
 -- make sure dot tooltip is accesible when overlapping with bars
 -- make sure zoom works without CA.static
 -- allow custom attributes
--- arrow / pointer
+-- find out what to expose in Svg / Coord
+-- use correct HTML elements
 
 
 import Html as H exposing (Html)
