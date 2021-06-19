@@ -47,7 +47,8 @@ view model =
         ]
         data
     , C.each model.hovering <| \p item ->
-        [ C.tooltip item [ CA.topCenter, CA.onLeftOrRight ] [] [] ]
+        [ C.tooltip item [ CA.onLeftOrRight, CA.top ] [] []
+        ]
     ]
 
 
@@ -105,7 +106,8 @@ smallCode =
         ]
         data
     , C.each model.hovering <| \\p item ->
-        [ C.tooltip item [ CA.topCenter, CA.onLeftOrRight ] [] [] ]
+        [ C.tooltip item [ CA.onLeftOrRight, CA.top ] [] []
+        ]
     ]
   """
 
@@ -157,6 +159,7 @@ view model =
         ]
         data
     , C.each model.hovering <| \\p item ->
-        [ C.tooltip item [ CA.topCenter, CA.onLeftOrRight ] [] [] ]
+        [ C.tooltip item [ CA.onLeftOrRight, CA.top ] [] []
+        ]
     ]
   """

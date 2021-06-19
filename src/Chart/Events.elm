@@ -16,8 +16,6 @@ module Chart.Events exposing
 
 -- TODO
 -- Make sure searched position is preserved through filters
--- specify center of item for tooltip placement
--- make sure tooltip offset is adjusted for arrow length
 -- document break line label
 -- rename C.title to C.label
 -- move things to internal
@@ -30,6 +28,7 @@ module Chart.Events exposing
 -- make sure dot tooltip is accesible when overlapping with bars
 -- make sure zoom works without CA.static
 -- allow custom attributes
+-- arrow / pointer
 
 
 import Html as H exposing (Html)

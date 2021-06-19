@@ -25,6 +25,7 @@ module Chart.Attributes exposing
   , topLeft, topRight, topCenter
   , bottomLeft, bottomRight, bottomCenter
   , leftCenter, rightCenter
+  , top, bottom, left, right, center
   , focal
   )
 
@@ -491,9 +492,33 @@ alignMiddle config =
 
 
 {-| -}
+top : Attribute { a | focal : Maybe (C.Position -> C.Position) }
+top config =
+  { config | focal = Just (\pos -> { pos | y1 = pos.y2 }) }
+
+
+{-| -}
+bottom : Attribute { a | focal : Maybe (C.Position -> C.Position) }
+bottom config =
+  { config | focal = Just (\pos -> { pos | y2 = pos.y1 }) }
+
+
+{-| -}
+left : Attribute { a | focal : Maybe (C.Position -> C.Position) }
+left config =
+  { config | focal = Just (\pos -> { pos | x2 = pos.x1 }) }
+
+
+{-| -}
+right : Attribute { a | focal : Maybe (C.Position -> C.Position) }
+right config =
+  { config | focal = Just (\pos -> { pos | x1 = pos.x2 }) }
+
+
+{-| -}
 topCenter : Attribute { a | focal : Maybe (C.Position -> C.Position) }
 topCenter config =
-  { config | focal = Just (\pos -> { pos | y1 = pos.y2 }) }
+  { config | focal = Just (C.top >> C.pointToPosition) }
 
 
 {-| -}

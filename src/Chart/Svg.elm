@@ -1233,7 +1233,7 @@ tooltip plane pos edits htmlAttrs content =
           , focal = Nothing
           , height = 0
           , width = 0
-          , offset = 12
+          , offset = 8
           , pointer = True
           , border = "#D8D8D8"
           , background = "white"
@@ -1266,14 +1266,17 @@ tooltip plane pos edits htmlAttrs content =
             else if isLargest distanceLeft [ distanceTop, distanceBottom, distanceRight ] then CA.Left
             else CA.Right
 
+      arrowWidth =
+        if config.pointer then 4 else 0
+
       { xOff, yOff, transformation, className } =
         case direction of
-          CA.Top         -> { xOff = 0, yOff = config.offset, transformation = "translate(-50%, -100%)", className = "elm-charts__tooltip-top" }
-          CA.Bottom      -> { xOff = 0, yOff = -config.offset, transformation = "translate(-50%, 0%)", className = "elm-charts__tooltip-bottom" }
-          CA.Left        -> { xOff = -config.offset, yOff = 0, transformation = "translate(-100%, -50%)", className = "elm-charts__tooltip-left" }
-          CA.Right       -> { xOff = config.offset, yOff = 0, transformation = "translate(0, -50%)", className = "elm-charts__tooltip-right" }
-          CA.LeftOrRight -> { xOff = -config.offset, yOff = 0, transformation = "translate(0, -50%)", className = "elm-charts__tooltip-leftOrRight" }
-          CA.TopOrBottom -> { xOff = 0, yOff = config.offset, transformation =  "translate(-50%, -100%)", className = "elm-charts__tooltip-topOrBottom" }
+          CA.Top         -> { xOff = 0, yOff = config.offset + arrowWidth, transformation = "translate(-50%, -100%)", className = "elm-charts__tooltip-top" }
+          CA.Bottom      -> { xOff = 0, yOff = -config.offset - arrowWidth, transformation = "translate(-50%, 0%)", className = "elm-charts__tooltip-bottom" }
+          CA.Left        -> { xOff = -config.offset - arrowWidth, yOff = 0, transformation = "translate(-100%, -50%)", className = "elm-charts__tooltip-left" }
+          CA.Right       -> { xOff = config.offset + arrowWidth, yOff = 0, transformation = "translate(0, -50%)", className = "elm-charts__tooltip-right" }
+          CA.LeftOrRight -> { xOff = -config.offset - arrowWidth, yOff = 0, transformation = "translate(0, -50%)", className = "elm-charts__tooltip-leftOrRight" }
+          CA.TopOrBottom -> { xOff = 0, yOff = config.offset + arrowWidth, transformation =  "translate(-50%, -100%)", className = "elm-charts__tooltip-topOrBottom" }
 
       children =
         if config.pointer then
