@@ -43,10 +43,10 @@ view model =
     , C.xLabels []
     , C.yLabels []
     , C.series .x
-        [ C.scatter .z []
-        , C.scatter .y []
-        , C.scatter .w []
-        , C.scatter .p []
+        [ C.scatter .z [ CA.opacity 0.5, CA.borderWidth 1 ]
+        , C.scatter .y [ CA.opacity 0.5, CA.borderWidth 1 ]
+        , C.scatter .w [ CA.opacity 0.5, CA.borderWidth 1 ]
+        , C.scatter .p [ CA.opacity 0.5, CA.borderWidth 1 ]
         ]
         data
     , C.each model.hovering <| \p dot ->
@@ -115,10 +115,10 @@ smallCode =
     , C.xLabels []
     , C.yLabels []
     , C.series .x
-        [ C.scatter .z []
-        , C.scatter .y []
-        , C.scatter .w []
-        , C.scatter .p []
+        [ C.scatter .z [ CA.opacity 0.5, CA.borderWidth 1 ]
+        , C.scatter .y [ CA.opacity 0.5, CA.borderWidth 1 ]
+        , C.scatter .w [ CA.opacity 0.5, CA.borderWidth 1 ]
+        , C.scatter .p [ CA.opacity 0.5, CA.borderWidth 1 ]
         ]
         data
     , C.each model.hovering <| \\p dot ->
@@ -181,10 +181,10 @@ view model =
     , C.xLabels []
     , C.yLabels []
     , C.series .x
-        [ C.scatter .z []
-        , C.scatter .y []
-        , C.scatter .w []
-        , C.scatter .p []
+        [ C.scatter .z [ CA.opacity 0.5, CA.borderWidth 1 ]
+        , C.scatter .y [ CA.opacity 0.5, CA.borderWidth 1 ]
+        , C.scatter .w [ CA.opacity 0.5, CA.borderWidth 1 ]
+        , C.scatter .p [ CA.opacity 0.5, CA.borderWidth 1 ]
         ]
         data
     , C.each model.hovering <| \\p dot ->
