@@ -17,7 +17,7 @@ module Chart.Svg exposing
   , Legends, legendsAt
   , Legend, lineLegend, barLegend
 
-  , Plane
+  , Plane, Position, Point
   , fromSvg, fromCartesian
   , lengthInSvgX, lengthInSvgY
   , lengthInCartesianX, lengthInCartesianY
@@ -28,8 +28,8 @@ import Html.Attributes as HA
 import Svg as S exposing (Svg)
 import Svg.Attributes as SA
 import Svg.Events as SE
-import Svg.Coordinates as Coord exposing (Point, Position, place, toSVGX, toSVGY, toCartesianX, toCartesianY, placeWithOffset)
-import Svg.Commands as C exposing (..)
+import Internal.Coordinates as Coord
+import Internal.Commands as C exposing (..)
 import Chart.Attributes as CA
 import Internal.Interpolation as Interpolation
 import Intervals as I
@@ -159,10 +159,10 @@ tick plane edits isX point =
     [ SA.class "elm-charts__tick"
     , SA.stroke config.color
     , SA.strokeWidth (String.fromFloat config.width)
-    , SA.x1 <| String.fromFloat (toSVGX plane point.x)
-    , SA.x2 <| String.fromFloat (toSVGX plane point.x + if isX then 0 else -config.length)
-    , SA.y1 <| String.fromFloat (toSVGY plane point.y)
-    , SA.y2 <| String.fromFloat (toSVGY plane point.y + if isX then config.length else 0)
+    , SA.x1 <| String.fromFloat (Coord.toSVGX plane point.x)
+    , SA.x2 <| String.fromFloat (Coord.toSVGX plane point.x + if isX then 0 else -config.length)
+    , SA.y1 <| String.fromFloat (Coord.toSVGY plane point.y)
+    , SA.y2 <| String.fromFloat (Coord.toSVGY plane point.y + if isX then config.length else 0)
     ]
     []
 
@@ -1109,8 +1109,8 @@ dot plane toX toY edits datum_ =
           , shape = Nothing
           }
 
-      x_ = toSVGX plane (toX datum_)
-      y_ = toSVGY plane (toY datum_)
+      x_ = Coord.toSVGX plane (toX datum_)
+      y_ = Coord.toSVGY plane (toY datum_)
       area_ = 2 * pi * config.size
 
       styleAttrs =
@@ -1272,10 +1272,10 @@ tooltip plane pos edits htmlAttrs content =
           , background = "white"
           }
 
-      distanceTop = toSVGY plane pos.y2
-      distanceBottom = plane.height - toSVGY plane pos.y1
-      distanceLeft = toSVGX plane pos.x2
-      distanceRight = plane.width - toSVGX plane pos.x1
+      distanceTop = Coord.toSVGY plane pos.y2
+      distanceBottom = plane.height - Coord.toSVGY plane pos.y1
+      distanceLeft = Coord.toSVGX plane pos.x2
+      distanceRight = plane.width - Coord.toSVGX plane pos.x1
 
       direction =
         case config.direction of
@@ -1355,8 +1355,8 @@ tooltip plane pos edits htmlAttrs content =
 positionHtml : Plane -> Float -> Float -> Float -> Float -> List (H.Attribute msg) -> List (H.Html msg) -> H.Html msg
 positionHtml plane x y xOff yOff attrs content =
     let
-        xPercentage = (toSVGX plane x + xOff) * 100 / plane.width
-        yPercentage = (toSVGY plane y + -yOff) * 100 / plane.height
+        xPercentage = (Coord.toSVGX plane x + xOff) * 100 / plane.width
+        yPercentage = (Coord.toSVGY plane y + -yOff) * 100 / plane.height
 
         posititonStyles =
           [ HA.style "left" (String.fromFloat xPercentage ++ "%")
@@ -1376,8 +1376,8 @@ positionHtml plane x y xOff yOff attrs content =
 getNearest : (a -> Position) -> List a -> Plane -> Point -> List a
 getNearest toPosition items plane searchedSvg =
   let searched =
-        { x = toCartesianX plane searchedSvg.x
-        , y = toCartesianY plane searchedSvg.y
+        { x = Coord.toCartesianX plane searchedSvg.x
+        , y = Coord.toCartesianY plane searchedSvg.y
         }
   in
   getNearestHelp toPosition items plane searched
@@ -1390,8 +1390,8 @@ getWithin radius toPosition items plane searchedSvg =
           closestPoint (toPosition i) searched
 
         searched =
-          { x = toCartesianX plane searchedSvg.x
-          , y = toCartesianY plane searchedSvg.y
+          { x = Coord.toCartesianX plane searchedSvg.x
+          , y = Coord.toCartesianY plane searchedSvg.y
           }
 
         keepIfEligible closest =
@@ -1405,8 +1405,8 @@ getWithin radius toPosition items plane searchedSvg =
 getNearestX : (a -> Position) -> List a -> Plane -> Point -> List a
 getNearestX toPosition items plane searchedSvg =
     let searched =
-          { x = toCartesianX plane searchedSvg.x
-          , y = toCartesianY plane searchedSvg.y
+          { x = Coord.toCartesianX plane searchedSvg.x
+          , y = Coord.toCartesianY plane searchedSvg.y
           }
     in
     getNearestXHelp toPosition items plane searched
@@ -1419,8 +1419,8 @@ getWithinX radius toPosition items plane searchedSvg =
           closestPoint (toPosition i) searched
 
         searched =
-          { x = toCartesianX plane searchedSvg.x
-          , y = toCartesianY plane searchedSvg.y
+          { x = Coord.toCartesianX plane searchedSvg.x
+          , y = Coord.toCartesianY plane searchedSvg.y
           }
 
         keepIfEligible =
@@ -1476,12 +1476,12 @@ getNearestXHelp toPosition items plane searched =
 
 distanceX : Plane -> Point -> Point -> Float
 distanceX plane searched point =
-    abs <| toSVGX plane point.x - toSVGX plane searched.x
+    abs <| Coord.toSVGX plane point.x - Coord.toSVGX plane searched.x
 
 
 distanceY : Plane -> Point -> Point -> Float
 distanceY plane searched point =
-    abs <| toSVGY plane point.y - toSVGY plane searched.y
+    abs <| Coord.toSVGY plane point.y - Coord.toSVGY plane searched.y
 
 
 distance : Plane -> Point -> Point -> Float
@@ -1572,7 +1572,7 @@ decodePosition =
 
 position : Plane -> Float -> Float -> Float -> Float -> Float -> S.Attribute msg
 position plane rotation x_ y_ xOff_ yOff_ =
-  SA.transform <| "translate(" ++ String.fromFloat (toSVGX plane x_ + xOff_) ++ "," ++ String.fromFloat (toSVGY plane y_ + yOff_) ++ ") rotate(" ++ String.fromFloat rotation ++ ")"
+  SA.transform <| "translate(" ++ String.fromFloat (Coord.toSVGX plane x_ + xOff_) ++ "," ++ String.fromFloat (Coord.toSVGY plane y_ + yOff_) ++ ") rotate(" ++ String.fromFloat rotation ++ ")"
 
 
 
@@ -1832,6 +1832,20 @@ formatWeekday =
 
 type alias Plane =
   Coord.Plane
+
+
+type alias Point =
+  { x : Float
+  , y : Float
+  }
+
+
+type alias Position =
+  { x1 : Float
+  , x2 : Float
+  , y1 : Float
+  , y2 : Float
+  }
 
 
 fromSvg : Plane -> Point -> Point

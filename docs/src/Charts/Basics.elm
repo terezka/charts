@@ -6,7 +6,6 @@ import Html.Attributes as HA
 import Html.Events as HE
 import Svg as S exposing (Svg, svg, g, circle, text_, text)
 import Svg.Attributes as SA exposing (width, height, stroke, fill, r, transform)
-import Svg.Coordinates as Coordinates
 
 import Chart as C
 import Chart.Attributes as CA

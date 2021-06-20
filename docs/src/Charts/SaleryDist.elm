@@ -5,7 +5,6 @@ import Html.Attributes as HA
 import Html.Events as HE
 import Svg as S exposing (Svg, svg, g, circle, text_, text)
 import Svg.Attributes as SA exposing (width, height, stroke, fill, r, transform)
-import Svg.Coordinates as Coordinates
 import Browser
 import Time
 import Data.Iris as Iris
@@ -27,9 +26,9 @@ import Chart.Events
 
 
 type alias Model =
-  { selection : Maybe { a : Coordinates.Point, b : Coordinates.Point }
+  { selection : Maybe { a : CS.Point, b : CS.Point }
   , hovering : List (CE.Product CS.Dot (Maybe Float) Salary.Datum)
-  , window : Maybe Coordinates.Position
+  , window : Maybe CS.Position
   , year : Float
   }
 
@@ -44,9 +43,9 @@ init =
 
 
 type Msg
-  = OnHover (List (CE.Product CS.Dot (Maybe Float) Salary.Datum)) Coordinates.Point
-  | OnMouseDown Coordinates.Point
-  | OnMouseUp Coordinates.Point
+  = OnHover (List (CE.Product CS.Dot (Maybe Float) Salary.Datum)) CS.Point
+  | OnMouseDown CS.Point
+  | OnMouseUp CS.Point
   | OnReset
   | OnExitWindow
   | OnYear Float
@@ -157,12 +156,10 @@ view model =
         let datum = CE.getDatum product
             color = CE.getColor product
             top = CE.getTop p product
-            toSvgX = Coordinates.scaleCartesianX p
-            toSvgY = Coordinates.scaleCartesianY p
         in
         if String.startsWith "251 " datum.sector then
-          [ C.line [ CA.color color, CA.break, CA.x1 top.x, CA.x2 (top.x + toSvgX 10), CA.y1 top.y, CA.y2 (top.y + toSvgY 10) ]
-          , C.label [ CA.color color,CA.alignLeft, CA.xOff 5, CA.yOff 3 ] [ S.text "Software engineering" ] { x = top.x + toSvgX 10, y = top.y + toSvgY 10 }
+          [ C.line [ CA.color color, CA.break, CA.x1 top.x, CA.y1 top.y, CA.xOff 10, CA.yOff 10 ]
+          , C.label [ CA.color color,CA.alignLeft, CA.xOff 13, CA.yOff -7 ] [ S.text "Software engineering" ] top
           ]
         else
           []
@@ -224,16 +221,16 @@ view model =
           ]
 
     , C.withPlane <| \p ->
-        let toSvgX = Coordinates.scaleCartesianX p
-            toSvgY = Coordinates.scaleCartesianY p
-            x1 = p.x.max - toSvgX 150
-            x2 = p.x.max - toSvgX 20
-            y1 = p.y.max - toSvgY 13
-            y2 = p.y.max - toSvgY 10
+        let scaleX = CS.lengthInCartesianX p
+            scaleY = CS.lengthInCartesianY p
+            x1 = p.x.max - scaleX 150
+            x2 = p.x.max - scaleX 20
+            y1 = p.y.max - scaleY 13
+            y2 = p.y.max - scaleY 10
         in
         [ C.rect [ CA.borderWidth 0, CA.x1 x1, CA.x2 x2, CA.y1 y1, CA.y2 y2, CA.color "url(#colorscale)" ]
-        , C.label [ CA.fontSize 10 ] [ S.text "more women" ] { x = x1, y = p.y.max - toSvgY 25 }
-        , C.label [ CA.fontSize 10 ] [ S.text "more men" ] { x = x2, y = p.y.max - toSvgY 25 }
+        , C.label [ CA.fontSize 10 ] [ S.text "more women" ] { x = x1, y = p.y.max - scaleY 25 }
+        , C.label [ CA.fontSize 10 ] [ S.text "more men" ] { x = x2, y = p.y.max - scaleY 25 }
         , C.htmlAt .max .max -45 -45
             [ HA.style "color" "rgb(90 90 90)"
             , HA.style "cursor" "pointer"

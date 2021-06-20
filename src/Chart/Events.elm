@@ -29,7 +29,7 @@ import Html as H exposing (Html)
 import Html.Attributes as HA
 import Svg as S exposing (Svg)
 import Svg.Attributes as SA
-import Svg.Coordinates as C exposing (Point, Position, Plane)
+import Internal.Coordinates as C exposing (Point, Position, Plane)
 import Chart.Svg as CS
 import Chart.Attributes as CA exposing (Attribute)
 import Internal.Item as I

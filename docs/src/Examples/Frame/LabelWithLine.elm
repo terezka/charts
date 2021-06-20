@@ -7,7 +7,6 @@ import Html as H
 import Svg as S
 import Chart as C
 import Chart.Attributes as CA
-import Svg.Coordinates as Coord
 
 
 view : Model -> H.Html Msg
@@ -122,7 +121,6 @@ import Html as H
 import Svg as S
 import Chart as C
 import Chart.Attributes as CA
-import Svg.Coordinates as Coord
 
 
 view : Model -> H.Html Msg

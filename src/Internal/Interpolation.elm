@@ -1,7 +1,7 @@
 module Internal.Interpolation exposing (linear, monotone, stepped)
 
 
-import Svg.Commands exposing (..)
+import Internal.Commands exposing (..)
 
 
 

@@ -1,4 +1,4 @@
-module Svg.Coordinates
+module Internal.Coordinates
   exposing
     ( Plane, Limit, Margin
     , scaleSVGX, scaleSVGY

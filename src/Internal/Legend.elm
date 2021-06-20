@@ -4,7 +4,7 @@ import Html as H exposing (Html)
 import Html.Attributes as HA
 import Svg as S exposing (Svg)
 import Svg.Attributes as SA
-import Svg.Coordinates as Coord exposing (Point, Position, Plane)
+import Internal.Coordinates as Coord exposing (Point, Position, Plane)
 import Dict exposing (Dict)
 import Internal.Property as P exposing (Property)
 import Chart.Svg as S

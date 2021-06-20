@@ -1,9 +1,9 @@
-module Svg.Commands exposing (Command(..), description)
+module Internal.Commands exposing (Command(..), description)
 
 {-| SVG path commands.
 -}
 
-import Svg.Coordinates exposing (Plane, toSVGX, toSVGY)
+import Internal.Coordinates exposing (Plane, toSVGX, toSVGY)
 
 
 {-| -}

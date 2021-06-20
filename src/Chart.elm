@@ -27,7 +27,7 @@ module Chart exposing
 -}
 
 
-import Svg.Coordinates as C
+import Internal.Coordinates as C
 import Svg as S
 import Svg.Attributes as SA
 import Svg.Events as SE

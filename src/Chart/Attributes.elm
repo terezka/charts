@@ -31,7 +31,7 @@ module Chart.Attributes exposing
 
 
 import Time
-import Svg.Coordinates as C
+import Internal.Coordinates as C
 import Internal.Helpers as Helpers
 
 
