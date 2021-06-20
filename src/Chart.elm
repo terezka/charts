@@ -23,6 +23,31 @@ module Chart exposing
 
 {-| Make a chart!
 
+@docs chart, Element
+
+# Data elements
+@docs bars, series
+@docs Property, bar, scatter, interpolated, stacked, named, variation, amongst
+
+# Navigation elements
+@docs xAxis, yAxis, xTicks, yTicks, xLabels, yLabels, grid
+
+@docs xLabel, yLabel, xTick, yTick
+@docs generate, floats, ints, times
+
+@docs label, labelAt, tooltip, line, rect
+
+@docs legendsAt
+
+# Arbitrary elements
+@docs svgAt, htmlAt, svg, html, none
+
+# Advanced elements
+@docs each, eachBin, eachStack, eachBar, eachDot, eachProduct
+@docs withPlane, withBins, withStacks, withBars, withDots, withProducts
+
+# Data helper
+@docs binned
 
 -}
 
