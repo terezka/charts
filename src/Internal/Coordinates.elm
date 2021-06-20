@@ -5,7 +5,6 @@ module Internal.Coordinates
     , toSVGX, toSVGY
     , scaleCartesianX, scaleCartesianY
     , toCartesianX, toCartesianY
-    , place, placeWithOffset
     , Point, Position
 
     , fromProps, Axis
@@ -57,9 +56,6 @@ the domain and range.
 @docs place, placeWithOffset
 
 -}
-
-import Svg exposing (Attribute)
-import Svg.Attributes exposing (transform)
 
 
 
@@ -271,34 +267,6 @@ toCartesianX plane value =
 toCartesianY : Plane -> Float -> Float
 toCartesianY plane value =
   range plane.y - scaleCartesianY plane (value - plane.margin.top) + plane.y.min
-
-
-
--- PLACING HELPERS
-
-
-{-| A `transform translate(x, y)` SVG attribute. Beware that using this and
-  and another transform attribute on the same node, will overwrite the first.
-  If that's the case, just make one yourself:
-
-    myTransformAttribute : Svg.Attribute msg
-    myTransformAttribute =
-      transform <|
-        "translate("
-        ++ String.fromFloat (toSVGX plane x) ++ ","
-        ++ String.fromFloat (toSVGY plane y) ++ ") "
-        ++ "rotateX(" ++ whatever ++ ")"
--}
-place : Plane -> Float -> Float -> Attribute msg
-place plane x y =
-  placeWithOffset plane x y 0 0
-
-
-{-| Place at coordinate, but you may add a SVG offset. See `place` above for important notes.
--}
-placeWithOffset : Plane -> Float -> Float -> Float -> Float -> Attribute msg
-placeWithOffset plane x y offsetX offsetY =
-  transform ("translate(" ++ String.fromFloat (toSVGX plane x + offsetX) ++ "," ++ String.fromFloat (toSVGY plane y + offsetY) ++ ")")
 
 
 
