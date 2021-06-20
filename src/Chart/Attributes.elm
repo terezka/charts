@@ -1,32 +1,57 @@
 module Chart.Attributes exposing
-  ( Attribute, x, x1, x2, y, y1, y2, xOff, yOff, flip
-  , moveLeft, moveRight, moveUp, moveDown
-  , border, borderWidth, fontSize, format, color, width, height, offset
-  , Anchor(..), alignLeft, alignRight, alignMiddle, content
-  , rotate, length, roundTop, roundBottom, area, opacity, size, aura, auraWidth, ungroup, margin, spacing
-  , Design(..), GradientConfig, Pattern, space, striped, dotted, gradient, colors, dashed, break
-  , Method(..), linear, monotone, stepped
-  , Shape(..), circle, triangle, square, diamond, plus, cross, shape
-  , Direction(..), onTop, onBottom, onRight, onLeft, onLeftOrRight, onTopOrBottom
-  , Alignment(..), row, column
-  , blue, pink, orange, green, purple, red, turquoise
-  , background, attrs, htmlAttrs, static, events
+  ( Attribute
 
+  -- CONTAINER
+  , width, height, attrs, htmlAttrs, static, events
   , marginTop, marginBottom, marginLeft, marginRight
   , paddingTop, paddingBottom, paddingLeft, paddingRight
-  , pinned, dotGrid, noArrow
-  , range, domain, limits, amount
 
+  -- LIMITS
+  , range, domain, limits
   , lowest, highest, orLower, orHigher, exactly, more, less, window, likeData, zero, middle, percent
 
-  , Tick(..), ints, times
-  , noGrid, title
+  -- LABELS
+  , fontSize, format
+  , Anchor(..), alignLeft, alignRight, alignMiddle, content
 
+  -- AXIS
+  , amount, flip, pinned
+  , Tick(..), ints, times
+
+  -- COORDINATES
+  , x, y, x1, y1, x2, y2, xOff, yOff, length
+  , moveLeft, moveRight, moveUp, moveDown
+
+  -- DECORATION
+  , border, borderWidth, color, opacity, aura, auraWidth, background, noArrow, rotate
+  , Design(..), GradientConfig, Pattern, striped, dotted, gradient, colors
+
+  -- BAR
+  , ungroup, roundTop, roundBottom, margin, spacing
+
+  -- LINES
+  , area, size, dashed, break
+  , Method(..), linear, monotone, stepped
+  , Shape(..), circle, triangle, square, diamond, plus, cross, shape
+
+  -- TOOLTIP
+  , Direction(..), onTop, onBottom, onRight, onLeft, onLeftOrRight, onTopOrBottom
+  , offset
+  , focal
   , topLeft, topRight, topCenter
   , bottomLeft, bottomRight, bottomCenter
   , leftCenter, rightCenter
   , top, bottom, left, right, center
-  , focal
+
+  -- LEGENDS
+  , title
+  , Alignment(..), row, column
+
+  -- GRID
+  , noGrid, dotGrid
+
+  -- COLORS
+  , blue, pink, orange, green, purple, red, turquoise
   )
 
 
@@ -624,7 +649,7 @@ type Design
 type alias Pattern =
   { color : String
   , width : Float
-  , space : Float
+  , spacing : Float
   , rotate : Float
   }
 
@@ -632,12 +657,6 @@ type alias Pattern =
 {-| -}
 type alias GradientConfig =
   { colors : List String }
-
-
-{-| -}
-space : x -> Attribute { a | space : x }
-space value config =
-  { config | space = value }
 
 
 {-| -}

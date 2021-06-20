@@ -977,13 +977,13 @@ toPattern defaultColor design =
               CA.Gradient _ -> "gradient"
           ] ++ props
 
-      toPatternDefs id space rotate inside =
+      toPatternDefs id spacing rotate inside =
         S.defs []
           [ S.pattern
               [ SA.id id
               , SA.patternUnits "userSpaceOnUse"
-              , SA.width (String.fromFloat space)
-              , SA.height (String.fromFloat space)
+              , SA.width (String.fromFloat spacing)
+              , SA.height (String.fromFloat spacing)
               , SA.patternTransform ("rotate(" ++ String.fromFloat rotate ++ ")")
               ]
               [ inside ]
@@ -996,7 +996,7 @@ toPattern defaultColor design =
                   apply edits
                     { color = defaultColor
                     , width = 3
-                    , space = 4
+                    , spacing = 4
                     , rotate = 45
                     }
 
@@ -1004,16 +1004,16 @@ toPattern defaultColor design =
                   toPatternId
                     [ config.color
                     , String.fromFloat config.width
-                    , String.fromFloat config.space
+                    , String.fromFloat config.spacing
                     , String.fromFloat config.rotate
                     ]
             in
-            ( toPatternDefs theId config.space config.rotate <|
+            ( toPatternDefs theId config.spacing config.rotate <|
                 S.line
                   [ SA.x1 "0"
                   , SA.y "0"
                   , SA.x2 "0"
-                  , SA.y2 (String.fromFloat config.space)
+                  , SA.y2 (String.fromFloat config.spacing)
                   , SA.stroke config.color
                   , SA.strokeWidth (String.fromFloat config.width)
                   ]
@@ -1027,7 +1027,7 @@ toPattern defaultColor design =
                   apply edits
                     { color = defaultColor
                     , width = 3
-                    , space = 4
+                    , spacing = 4
                     , rotate = 45
                     }
 
@@ -1035,11 +1035,11 @@ toPattern defaultColor design =
                   toPatternId
                     [ config.color
                     , String.fromFloat config.width
-                    , String.fromFloat config.space
+                    , String.fromFloat config.spacing
                     , String.fromFloat config.rotate
                     ]
             in
-            ( toPatternDefs theId config.space config.rotate <|
+            ( toPatternDefs theId config.spacing config.rotate <|
                 S.circle
                   [ SA.fill config.color
                   , SA.cx (String.fromFloat <| config.width / 3)
