@@ -839,12 +839,6 @@ grid edits =
           , dotGrid = False
           }
 
-      notTheseX vs p =
-        vs.xAxis
-
-      notTheseY vs p =
-        vs.yAxis
-
       color =
         if String.isEmpty config.color then
           if config.dotGrid then Helpers.darkGray else Helpers.gray
@@ -858,17 +852,17 @@ grid edits =
           config.width
 
       toXGrid vs p v =
-        if List.member v (notTheseX vs p)
+        if List.member v vs.xAxis
         then Nothing else Just <|
           CS.line p [ CA.color color, CA.width width, CA.x1 v ]
 
       toYGrid vs p v =
-        if List.member v (notTheseY vs p)
+        if List.member v vs.yAxis
         then Nothing else Just <|
           CS.line p [ CA.color color, CA.width width, CA.y1 v ]
 
       toDot vs p x y =
-        if List.member x (notTheseX vs p) || List.member y (notTheseY vs p)
+        if List.member x vs.xAxis || List.member y vs.yAxis
         then Nothing
         else Just <| CS.dot p .x .y [ CA.color color, CA.size width, CA.circle ] { x = x, y = y }
   in
@@ -883,47 +877,46 @@ grid edits =
 
 
 
-
--- BARS
-
-
-{-| -}
-type alias Property data meta inter deco =
-  P.Property data meta inter deco
+-- PROPERTIES
 
 
 {-| -}
-interpolated : (data -> Maybe Float) -> List (CA.Attribute CS.Interpolation) -> List (CA.Attribute deco) -> Property data String CS.Interpolation deco
+type alias Property data inter deco =
+  P.Property data String inter deco
+
+
+{-| -}
+interpolated : (data -> Maybe Float) -> List (CA.Attribute CS.Interpolation) -> List (CA.Attribute CS.Dot) -> Property data CS.Interpolation CS.Dot
 interpolated y_ inter =
   P.property y_ ([ CA.linear ] ++ inter)
 
 
 {-| -}
-scatter : (data -> Maybe Float) -> List (CA.Attribute deco) -> Property data String inter deco
+scatter : (data -> Maybe Float) -> List (CA.Attribute CS.Dot) -> Property data inter CS.Dot
 scatter y_ =
   P.property y_ []
 
 
 {-| -}
-bar : (data -> Maybe Float) -> List (CA.Attribute deco) -> Property data String inter deco
+bar : (data -> Maybe Float) -> List (CA.Attribute CS.Bar) -> Property data inter CS.Bar
 bar y_ =
   P.property y_ []
 
 
 {-| -}
-named : String -> Property data String inter deco -> Property data String inter deco
+named : String -> Property data inter deco -> Property data inter deco
 named name =
   P.meta name
 
 
 {-| -}
-variation : (data -> List (CA.Attribute deco)) -> Property data String inter deco -> Property data String inter deco
+variation : (data -> List (CA.Attribute deco)) -> Property data inter deco -> Property data inter deco
 variation func =
   P.variation <| \_ _ _ -> func
 
 
 {-| -}
-amongst : List (CE.Product config value data) -> (data -> List (CA.Attribute deco)) -> Property data String inter deco -> Property data String inter deco
+amongst : List (CE.Product config value data) -> (data -> List (CA.Attribute deco)) -> Property data inter deco -> Property data inter deco
 amongst inQuestion func =
   P.variation <| \p s meta d ->
     let check product =
@@ -934,10 +927,13 @@ amongst inQuestion func =
 
 
 {-| -}
-stacked : List (Property data meta inter deco) -> Property data meta inter deco
+stacked : List (Property data inter deco) -> Property data inter deco
 stacked =
   P.stacked
 
+
+
+-- BARS
 
 
 {-| -}
@@ -954,7 +950,7 @@ type alias Bars data =
 
 
 {-| -}
-bars : List (CA.Attribute (Bars data)) -> List (Property data String () CS.Bar) -> List data -> Element data msg
+bars : List (CA.Attribute (Bars data)) -> List (Property data () CS.Bar) -> List data -> Element data msg
 bars edits properties data =
   let barsConfig =
         Helpers.apply edits
@@ -1001,7 +997,7 @@ bars edits properties data =
 
 
 {-| -}
-series : (data -> Float) -> List (Property data String CS.Interpolation CS.Dot) -> List data -> Element data msg
+series : (data -> Float) -> List (Property data CS.Interpolation CS.Dot) -> List data -> Element data msg
 series toX properties data =
   let items =
         Produce.toDotSeries toX properties data
@@ -1192,27 +1188,6 @@ none =
 
 
 -- HELPERS
-
-
-mapWithPrev : (Maybe a -> a -> b) -> List a -> List b
-mapWithPrev =
-  let fold prev acc func ds =
-        case ds of
-          a :: rest -> fold (Just a) (func prev a :: acc) func rest
-          [] -> acc
-  in
-  fold Nothing []
-
-
-mapSurrounding : (Maybe a -> a -> Maybe a -> b) -> List a -> List b
-mapSurrounding =
-  let fold prev acc func ds =
-        case ds of
-          a :: b :: rest -> fold (Just a) (func prev a (Just b) :: acc) func rest
-          a :: rest -> fold (Just a) (func prev a Nothing :: acc) func rest
-          [] -> acc
-  in
-  fold Nothing []
 
 
 applyAttrs : List (a -> a) -> a -> a
