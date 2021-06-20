@@ -18,8 +18,8 @@ view model =
     , C.yLabels []
     , C.series .x
         [ C.stacked
-          [ C.property .y [ CA.linear, CA.striped [ CA.width 3, CA.spacing 4, CA.rotate 90 ] ] []
-          , C.property .z [ CA.linear, CA.dotted [ CA.width 3, CA.spacing 4 ] ] []
+          [ C.interpolated .y [ CA.striped [ CA.width 3, CA.spacing 4, CA.rotate 90 ] ] []
+          , C.interpolated .z [ CA.dotted [ CA.width 3, CA.spacing 4 ] ] []
           ]
         ]
         data

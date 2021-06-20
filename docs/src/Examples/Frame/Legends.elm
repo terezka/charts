@@ -34,12 +34,12 @@ view model =
     -- LINE CHART
     , C.series .x
         [ C.named "A1" <|
-            C.property .p
-              [ CA.linear ]
+            C.interpolated .p
+              [  ]
               [ CA.cross, CA.borderWidth 2, CA.border "white" ]
         , C.named "A2" <|
-            C.property .q
-              [ CA.linear ]
+            C.interpolated .q
+              [  ]
               [ CA.cross, CA.borderWidth 2, CA.border "white" ]
         ]
         data
@@ -130,12 +130,12 @@ smallCode =
     -- LINE CHART
     , C.series .x
         [ C.named "A1" <|
-            C.property .p
-              [ CA.linear ]
+            C.interpolated .p
+              [  ]
               [ CA.cross, CA.borderWidth 2, CA.border "white" ]
         , C.named "A2" <|
-            C.property .q
-              [ CA.linear ]
+            C.interpolated .q
+              [  ]
               [ CA.cross, CA.borderWidth 2, CA.border "white" ]
         ]
         data
@@ -184,12 +184,12 @@ view model =
     -- LINE CHART
     , C.series .x
         [ C.named "A1" <|
-            C.property .p
-              [ CA.linear ]
+            C.interpolated .p
+              [  ]
               [ CA.cross, CA.borderWidth 2, CA.border "white" ]
         , C.named "A2" <|
-            C.property .q
-              [ CA.linear ]
+            C.interpolated .q
+              [  ]
               [ CA.cross, CA.borderWidth 2, CA.border "white" ]
         ]
         data

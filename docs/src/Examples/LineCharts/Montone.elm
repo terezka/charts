@@ -18,8 +18,8 @@ view model =
     , C.xLabels []
     , C.yLabels []
     , C.series .x
-        [ C.property .y [ CA.monotone ] []
-        , C.property .z [ CA.monotone ] []
+        [ C.interpolated .y [ CA.monotone ] []
+        , C.interpolated .z [ CA.monotone ] []
         ]
         data
     ]
@@ -93,8 +93,8 @@ smallCode =
     , C.xLabels []
     , C.yLabels []
     , C.series .x
-        [ C.property .y [ CA.monotone ] []
-        , C.property .z [ CA.monotone ] []
+        [ C.interpolated .y [ CA.monotone ] []
+        , C.interpolated .z [ CA.monotone ] []
         ]
         data
     ]
@@ -119,8 +119,8 @@ view model =
     , C.xLabels []
     , C.yLabels []
     , C.series .x
-        [ C.property .y [ CA.monotone ] []
-        , C.property .z [ CA.monotone ] []
+        [ C.interpolated .y [ CA.monotone ] []
+        , C.interpolated .z [ CA.monotone ] []
         ]
         data
     ]

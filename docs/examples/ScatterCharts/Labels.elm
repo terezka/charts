@@ -20,7 +20,7 @@ view model =
     , C.xLabels []
     , C.yLabels []
     , C.series .x
-        [ C.property .y [] [ CA.opacity 0.2, CA.borderWidth 1 ]
+        [ C.scatter .y [ CA.opacity 0.2, CA.borderWidth 1 ]
             |> C.variation (\d -> [ CA.size (Maybe.withDefault 6 d.w * 30) ])
         ]
         data

@@ -42,10 +42,10 @@ view model =
     , C.xLabels []
     , C.yLabels []
     , C.series .x
-        [ C.property .y [] [ CA.opacity 0.2, CA.borderWidth 1 ]
+        [ C.scatter .y [ CA.opacity 0.2, CA.borderWidth 1 ]
             |> C.variation (\d -> [ CA.size (d.q * 20) ])
             |> C.amongst model.hovering (\d -> [ CA.aura 0.15 ])
-        , C.property .z [] [ CA.opacity 0.2, CA.borderWidth 1 ]
+        , C.scatter .z [ CA.opacity 0.2, CA.borderWidth 1 ]
             |> C.variation (\d -> [ CA.size (d.q * 20) ])
             |> C.amongst model.hovering (\d -> [ CA.aura 0.15 ])
         ]

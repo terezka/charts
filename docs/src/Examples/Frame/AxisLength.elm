@@ -27,7 +27,7 @@ view model =
     ]
     [ C.grid []
     , C.series .x
-        [ C.property .y [ CA.linear ] [] ]
+        [ C.interpolated .y [  ] [] ]
         [ { x = 10, y = Just 20 }
         , { x = 85, y = Just 80 }
         ]
@@ -84,7 +84,7 @@ smallCode =
     ]
     [ C.grid []
     , C.series .x
-        [ C.property .y [ CA.linear ] [] ]
+        [ C.interpolated .y [  ] [] ]
         [ { x = 10, y = Just 20 }
         , { x = 85, y = Just 80 }
         ]
@@ -121,7 +121,7 @@ view model =
     ]
     [ C.grid []
     , C.series .x
-        [ C.property .y [ CA.linear ] [] ]
+        [ C.interpolated .y [  ] [] ]
         [ { x = 10, y = Just 20 }
         , { x = 85, y = Just 80 }
         ]

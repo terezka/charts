@@ -18,9 +18,9 @@ view model =
     , C.xLabels []
     , C.yLabels []
     , C.series .x
-        [ C.property .z [] [ CA.opacity 0.5, CA.borderWidth 1 ]
+        [ C.scatter .z [ CA.opacity 0.5, CA.borderWidth 1 ]
             |> C.variation (\d -> [ CA.size (d.x * 20 + 2) ])
-        , C.property .y [] []
+        , C.scatter .y []
             |> C.variation (\d -> [ CA.aura (if d.x == 3 then 0.5 else 0) ])
         ]
         data

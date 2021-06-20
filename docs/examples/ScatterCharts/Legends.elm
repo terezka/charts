@@ -19,8 +19,8 @@ view model =
     , C.xLabels []
     , C.yLabels []
     , C.series .x
-        [ C.property .y [] []
-        , C.property .z [] []
+        [ C.scatter .y []
+        , C.scatter .z []
         ]
         data
     , C.legendsAt .max .max -12 0

@@ -20,7 +20,7 @@ view model =
     , C.xLabels []
     , C.yLabels []
     , C.series .x
-        [ C.property .y [ CA.monotone ] [ CA.circle, CA.size 40 ]
+        [ C.interpolated .y [ CA.monotone ] [ CA.circle, CA.size 40 ]
         ]
         data
     , C.eachProduct <| \p point ->

@@ -40,8 +40,8 @@ view model =
     , C.xLabels []
     , C.yLabels []
     , C.series .x
-        [ C.property .y [ CA.linear ] [ CA.circle, CA.size 3 ]
-        , C.property .z [ CA.linear ] [ CA.circle, CA.size 3 ]
+        [ C.interpolated .y [  ] [ CA.circle, CA.size 3 ]
+        , C.interpolated .z [  ] [ CA.circle, CA.size 3 ]
         ]
         data
     , C.each model.hovering <| \p item ->

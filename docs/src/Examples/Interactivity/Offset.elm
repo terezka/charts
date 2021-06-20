@@ -42,8 +42,8 @@ view model =
     , C.xLabels []
     , C.yLabels []
     , C.series .x
-        [ C.property .y [] [ CA.size 60, CA.opacity 0.3, CA.borderWidth 1 ]
-        , C.property .z [] [ CA.size 50, CA.opacity 0.3, CA.borderWidth 1 ]
+        [ C.scatter .y [ CA.size 60, CA.opacity 0.3, CA.borderWidth 1 ]
+        , C.scatter .z [ CA.size 50, CA.opacity 0.3, CA.borderWidth 1 ]
         ]
         data
     , C.each model.hovering <| \p item ->
@@ -100,8 +100,8 @@ smallCode =
     , C.xLabels []
     , C.yLabels []
     , C.series .x
-        [ C.property .y [] [ CA.size 60, CA.opacity 0.3, CA.borderWidth 1 ]
-        , C.property .z [] [ CA.size 50, CA.opacity 0.3, CA.borderWidth 1 ]
+        [ C.scatter .y [ CA.size 60, CA.opacity 0.3, CA.borderWidth 1 ]
+        , C.scatter .z [ CA.size 50, CA.opacity 0.3, CA.borderWidth 1 ]
         ]
         data
     , C.each model.hovering <| \\p item ->
@@ -152,8 +152,8 @@ view model =
     , C.xLabels []
     , C.yLabels []
     , C.series .x
-        [ C.property .y [] [ CA.size 60, CA.opacity 0.3, CA.borderWidth 1 ]
-        , C.property .z [] [ CA.size 50, CA.opacity 0.3, CA.borderWidth 1 ]
+        [ C.scatter .y [ CA.size 60, CA.opacity 0.3, CA.borderWidth 1 ]
+        , C.scatter .z [ CA.size 50, CA.opacity 0.3, CA.borderWidth 1 ]
         ]
         data
     , C.each model.hovering <| \\p item ->

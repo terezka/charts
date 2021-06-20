@@ -54,8 +54,8 @@ view model =
 
     , C.series .x
         [ C.stacked
-          [ C.property .p [ CA.linear ] [ CA.circle ]
-          , C.property .q [ CA.linear ] [ CA.circle ]
+          [ C.interpolated .p [  ] [ CA.circle ]
+          , C.interpolated .q [  ] [ CA.circle ]
           ]
         ]
         data
@@ -140,8 +140,8 @@ smallCode =
 
     , C.series .x
         [ C.stacked
-          [ C.property .p [ CA.linear ] [ CA.circle ]
-          , C.property .q [ CA.linear ] [ CA.circle ]
+          [ C.interpolated .p [  ] [ CA.circle ]
+          , C.interpolated .q [  ] [ CA.circle ]
           ]
         ]
         data
@@ -226,8 +226,8 @@ view model =
 
     , C.series .x
         [ C.stacked
-          [ C.property .p [ CA.linear ] [ CA.circle ]
-          , C.property .q [ CA.linear ] [ CA.circle ]
+          [ C.interpolated .p [  ] [ CA.circle ]
+          , C.interpolated .q [  ] [ CA.circle ]
           ]
         ]
         data

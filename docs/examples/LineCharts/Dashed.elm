@@ -17,8 +17,8 @@ view model =
     , C.xLabels []
     , C.yLabels []
     , C.series .x
-        [ C.property .y [ CA.monotone, CA.dashed [ 1, 2 ] ] []
-        , C.property .z [ CA.monotone, CA.dashed [ 10, 5 ] ] []
+        [ C.interpolated .y [ CA.monotone, CA.dashed [ 1, 2 ] ] []
+        , C.interpolated .z [ CA.monotone, CA.dashed [ 10, 5 ] ] []
         ]
         data
     ]

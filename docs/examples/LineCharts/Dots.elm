@@ -17,7 +17,7 @@ view model =
     , C.xLabels []
     , C.yLabels []
     , C.series .x
-        [ C.property .y [ CA.linear ] [ CA.circle ]
+        [ C.interpolated .y [  ] [ CA.circle ]
         ]
         data
     ]

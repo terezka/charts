@@ -2,7 +2,7 @@ module Chart exposing
   ( chart
 
   , Element, bars, series
-  , Property, stacked, bar, property, variation, named, just
+  , Property, bar, scatter, interpolated, stacked, named, variation, amongst
 
   , xAxis, yAxis, xTicks, yTicks, xLabels, yLabels, grid
 
@@ -17,7 +17,7 @@ module Chart exposing
 
   , generate, floats, ints, times
 
-  , binned, amongst
+  , binned
   )
 
 
@@ -893,21 +893,27 @@ type alias Property data meta inter deco =
 
 
 {-| -}
-property : (data -> Maybe Float) -> List (CA.Attribute inter) -> List (CA.Attribute deco) -> Property data String inter deco
-property y_ =
-  P.property y_
+interpolated : (data -> Maybe Float) -> List (CA.Attribute CS.Interpolation) -> List (CA.Attribute deco) -> Property data String CS.Interpolation deco
+interpolated y_ inter =
+  P.property y_ ([ CA.linear ] ++ inter)
 
 
 {-| -}
-named : String -> Property data String inter deco -> Property data String inter deco
-named name =
-  P.meta name
+scatter : (data -> Maybe Float) -> List (CA.Attribute deco) -> Property data String inter deco
+scatter y_ =
+  P.property y_ []
 
 
 {-| -}
 bar : (data -> Maybe Float) -> List (CA.Attribute deco) -> Property data String inter deco
 bar y_ =
   P.property y_ []
+
+
+{-| -}
+named : String -> Property data String inter deco -> Property data String inter deco
+named name =
+  P.meta name
 
 
 {-| -}
@@ -932,11 +938,6 @@ stacked : List (Property data meta inter deco) -> Property data meta inter deco
 stacked =
   P.stacked
 
-
-{-| -}
-just : (data -> Float) -> (data -> Maybe Float)
-just toY =
-  toY >> Just
 
 
 {-| -}

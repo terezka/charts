@@ -50,8 +50,8 @@ view model =
         data
 
     , C.series .x
-        [ C.property .p [ CA.linear ] []
-        , C.property .q [ CA.linear ] []
+        [ C.interpolated .p [  ] []
+        , C.interpolated .q [  ] []
         ]
         data
 

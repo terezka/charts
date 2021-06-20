@@ -88,8 +88,8 @@ scatter =
         , C.xLabels []
         , C.yLabels []
         , C.series .x
-            [ C.property .y [] [ CA.circle ]
-            , C.property .z [] [ CA.square ]
+            [ C.scatter .y [ CA.circle ]
+            , C.scatter .z [ CA.square ]
             ]
             [ { x = 1, y = Just 2, z = Just 3 }
             , { x = 2, y = Just 3, z = Just 5 }
@@ -115,8 +115,8 @@ scatter =
             , C.xLabels []
             , C.yLabels []
             , C.series .x
-                [ C.property .y [] [ CA.circle ]
-                , C.property .z [] [ CA.square ]
+                [ C.scatter .y [ CA.circle ]
+                , C.scatter .z [ CA.square ]
                 ]
                 [ { x = 1, y = Just 2, z = Just 3 }
                 , { x = 2, y = Just 3, z = Just 5 }
@@ -144,8 +144,8 @@ lines =
         , C.xLabels []
         , C.yLabels []
         , C.series .x
-            [ C.property .y [ CA.monotone ] [ CA.circle ]
-            , C.property .z [ CA.monotone ] [ CA.square ]
+            [ C.interpolated .y [ CA.monotone ] [ CA.circle ]
+            , C.interpolated .z [ CA.monotone ] [ CA.square ]
             ]
             [ { x = 1, y = Just 2, z = Just 3 }
             , { x = 5, y = Just 4, z = Just 1 }
@@ -169,8 +169,8 @@ lines =
             , C.xLabels []
             , C.yLabels []
             , C.series .x
-                [ C.property .y [ CA.monotone ] [ CA.circle ]
-                , C.property .z [ CA.monotone ] [ CA.square ]
+                [ C.interpolated .y [ CA.monotone ] [ CA.circle ]
+                , C.interpolated .z [ CA.monotone ] [ CA.square ]
                 ]
                 [ { x = 1, y = Just 2, z = Just 3 }
                 , { x = 5, y = Just 4, z = Just 1 }
@@ -195,8 +195,8 @@ areas =
         , C.yLabels []
         , C.series .x
             [ C.stacked
-                [ C.property .y [ CA.linear, CA.dotted [] ] []
-                , C.property .z [ CA.linear ] []
+                [ C.interpolated .y [ CA.dotted [] ] []
+                , C.interpolated .z [] []
                 ]
             ]
             [ { x = 1, y = Just 1, z = Just 3 }
@@ -220,8 +220,8 @@ areas =
             , C.yLabels []
             , C.series .x
                 [ C.stacked
-                    [ C.property .y [ CA.linear, CA.color purple, CA.dotted [] ] []
-                    , C.property .z [ CA.linear, CA.color pink ] []
+                    [ C.interpolated .y [ CA.color purple, CA.dotted [] ] []
+                    , C.interpolated .z [ CA.color pink ] []
                     ]
                 ]
                 [ { x = 1, y = Just 1, z = Just 3 }

@@ -19,7 +19,7 @@ view model =
     , C.xLabels []
     , C.yLabels []
     , C.series .x
-        [ C.property .y []
+        [ C.scatter .y
             [ CA.borderWidth 3
             , CA.border CA.purple
             , CA.size 18
@@ -99,7 +99,7 @@ smallCode =
     , C.xLabels []
     , C.yLabels []
     , C.series .x
-        [ C.property .y []
+        [ C.scatter .y
             [ CA.borderWidth 3
             , CA.border CA.purple
             , CA.size 18
@@ -130,7 +130,7 @@ view model =
     , C.xLabels []
     , C.yLabels []
     , C.series .x
-        [ C.property .y []
+        [ C.scatter .y
             [ CA.borderWidth 3
             , CA.border CA.purple
             , CA.size 18

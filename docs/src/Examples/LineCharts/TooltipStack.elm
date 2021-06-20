@@ -42,10 +42,10 @@ view model =
     , C.yLabels []
     , C.series .x
         [ C.stacked
-          [ C.property .y
+          [ C.interpolated .y
               [ CA.monotone, CA.gradient [] ]
               [ CA.circle, CA.color "white", CA.border CA.pink, CA.borderWidth 1 ]
-          , C.property .z
+          , C.interpolated .z
               [ CA.monotone, CA.gradient [] ]
               [ CA.circle, CA.color "white", CA.border CA.purple, CA.borderWidth 1 ]
           ]
@@ -109,10 +109,10 @@ smallCode =
     , C.yLabels []
     , C.series .x
         [ C.stacked
-          [ C.property .y
+          [ C.interpolated .y
               [ CA.monotone, CA.gradient [] ]
               [ CA.circle, CA.color "white", CA.border CA.pink, CA.borderWidth 1 ]
-          , C.property .z
+          , C.interpolated .z
               [ CA.monotone, CA.gradient [] ]
               [ CA.circle, CA.color "white", CA.border CA.purple, CA.borderWidth 1 ]
           ]
@@ -166,10 +166,10 @@ view model =
     , C.yLabels []
     , C.series .x
         [ C.stacked
-          [ C.property .y
+          [ C.interpolated .y
               [ CA.monotone, CA.gradient [] ]
               [ CA.circle, CA.color "white", CA.border CA.pink, CA.borderWidth 1 ]
-          , C.property .z
+          , C.interpolated .z
               [ CA.monotone, CA.gradient [] ]
               [ CA.circle, CA.color "white", CA.border CA.purple, CA.borderWidth 1 ]
           ]

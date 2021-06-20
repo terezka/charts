@@ -18,8 +18,8 @@ view model =
     , C.xLabels []
     , C.yLabels []
     , C.series .x
-        [ C.property .y [ CA.stepped ] []
-        , C.property .z [ CA.stepped ] []
+        [ C.interpolated .y [ CA.stepped ] []
+        , C.interpolated .z [ CA.stepped ] []
         ]
         data
     ]
@@ -93,8 +93,8 @@ smallCode =
     , C.xLabels []
     , C.yLabels []
     , C.series .x
-        [ C.property .y [ CA.stepped ] []
-        , C.property .z [ CA.stepped ] []
+        [ C.interpolated .y [ CA.stepped ] []
+        , C.interpolated .z [ CA.stepped ] []
         ]
         data
     ]
@@ -119,8 +119,8 @@ view model =
     , C.xLabels []
     , C.yLabels []
     , C.series .x
-        [ C.property .y [ CA.stepped ] []
-        , C.property .z [ CA.stepped ] []
+        [ C.interpolated .y [ CA.stepped ] []
+        , C.interpolated .z [ CA.stepped ] []
         ]
         data
     ]

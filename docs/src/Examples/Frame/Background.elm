@@ -26,7 +26,7 @@ view model =
     , C.xAxis []
     , C.yAxis []
     , C.series .x
-        [ C.property .y [ CA.linear ] [] ]
+        [ C.interpolated .y [  ] [] ]
         [ { x = 0, y = Just 0 }
         , { x = 10, y = Just 10 }
         ]
@@ -80,7 +80,7 @@ smallCode =
     , C.xAxis []
     , C.yAxis []
     , C.series .x
-        [ C.property .y [ CA.linear ] [] ]
+        [ C.interpolated .y [  ] [] ]
         [ { x = 0, y = Just 0 }
         , { x = 10, y = Just 10 }
         ]
@@ -116,7 +116,7 @@ view model =
     , C.xAxis []
     , C.yAxis []
     , C.series .x
-        [ C.property .y [ CA.linear ] [] ]
+        [ C.interpolated .y [  ] [] ]
         [ { x = 0, y = Just 0 }
         , { x = 10, y = Just 10 }
         ]

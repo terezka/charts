@@ -18,8 +18,8 @@ view model =
     , C.xLabels []
     , C.yLabels []
     , C.series .x
-        [ C.property .y [] []
-        , C.property .z [] [ CA.aura 0.4 ]
+        [ C.scatter .y []
+        , C.scatter .z [ CA.aura 0.4 ]
         ]
         data
     ]

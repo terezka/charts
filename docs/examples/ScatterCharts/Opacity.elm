@@ -19,8 +19,8 @@ view model =
     , C.xLabels []
     , C.yLabels []
     , C.series .x
-        [ C.property .y [] [ CA.opacity 0.1, CA.borderWidth 1 ]
-        , C.property .z [] [ CA.opacity 0.1, CA.borderWidth 1 ]
+        [ C.scatter .y [ CA.opacity 0.1, CA.borderWidth 1 ]
+        , C.scatter .z [ CA.opacity 0.1, CA.borderWidth 1 ]
         ]
         data
     ]

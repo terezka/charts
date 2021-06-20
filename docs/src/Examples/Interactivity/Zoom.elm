@@ -130,12 +130,12 @@ view model =
     , C.yLabels []
 
     , C.series .x
-        [ C.property .y [ CA.monotone ] [ CA.circle, CA.color "white", CA.borderWidth 1 ]
-        , C.property .z [ CA.monotone ] [ CA.circle, CA.color "white", CA.borderWidth 1 ]
-        , C.property .v [ CA.monotone ] [ CA.circle, CA.color "white", CA.borderWidth 1 ]
-        , C.property .w [ CA.monotone ] [ CA.circle, CA.color "white", CA.borderWidth 1 ]
-        , C.property .p [ CA.monotone ] [ CA.circle, CA.color "white", CA.borderWidth 1 ]
-        , C.property .q [ CA.monotone ] [ CA.circle, CA.color "white", CA.borderWidth 1 ]
+        [ C.interpolated .y [ CA.monotone ] [ CA.circle, CA.color "white", CA.borderWidth 1 ]
+        , C.interpolated .z [ CA.monotone ] [ CA.circle, CA.color "white", CA.borderWidth 1 ]
+        , C.interpolated .v [ CA.monotone ] [ CA.circle, CA.color "white", CA.borderWidth 1 ]
+        , C.interpolated .w [ CA.monotone ] [ CA.circle, CA.color "white", CA.borderWidth 1 ]
+        , C.interpolated .p [ CA.monotone ] [ CA.circle, CA.color "white", CA.borderWidth 1 ]
+        , C.interpolated .q [ CA.monotone ] [ CA.circle, CA.color "white", CA.borderWidth 1 ]
         ]
         data
 
@@ -246,12 +246,12 @@ smallCode =
     , C.yLabels []
 
     , C.series .x
-        [ C.property .y [ CA.monotone ] [ CA.circle, CA.color "white", CA.borderWidth 1 ]
-        , C.property .z [ CA.monotone ] [ CA.circle, CA.color "white", CA.borderWidth 1 ]
-        , C.property .v [ CA.monotone ] [ CA.circle, CA.color "white", CA.borderWidth 1 ]
-        , C.property .w [ CA.monotone ] [ CA.circle, CA.color "white", CA.borderWidth 1 ]
-        , C.property .p [ CA.monotone ] [ CA.circle, CA.color "white", CA.borderWidth 1 ]
-        , C.property .q [ CA.monotone ] [ CA.circle, CA.color "white", CA.borderWidth 1 ]
+        [ C.interpolated .y [ CA.monotone ] [ CA.circle, CA.color "white", CA.borderWidth 1 ]
+        , C.interpolated .z [ CA.monotone ] [ CA.circle, CA.color "white", CA.borderWidth 1 ]
+        , C.interpolated .v [ CA.monotone ] [ CA.circle, CA.color "white", CA.borderWidth 1 ]
+        , C.interpolated .w [ CA.monotone ] [ CA.circle, CA.color "white", CA.borderWidth 1 ]
+        , C.interpolated .p [ CA.monotone ] [ CA.circle, CA.color "white", CA.borderWidth 1 ]
+        , C.interpolated .q [ CA.monotone ] [ CA.circle, CA.color "white", CA.borderWidth 1 ]
         ]
         data
 
@@ -419,12 +419,12 @@ view model =
     , C.yLabels []
 
     , C.series .x
-        [ C.property .y [ CA.monotone ] [ CA.circle, CA.color "white", CA.borderWidth 1 ]
-        , C.property .z [ CA.monotone ] [ CA.circle, CA.color "white", CA.borderWidth 1 ]
-        , C.property .v [ CA.monotone ] [ CA.circle, CA.color "white", CA.borderWidth 1 ]
-        , C.property .w [ CA.monotone ] [ CA.circle, CA.color "white", CA.borderWidth 1 ]
-        , C.property .p [ CA.monotone ] [ CA.circle, CA.color "white", CA.borderWidth 1 ]
-        , C.property .q [ CA.monotone ] [ CA.circle, CA.color "white", CA.borderWidth 1 ]
+        [ C.interpolated .y [ CA.monotone ] [ CA.circle, CA.color "white", CA.borderWidth 1 ]
+        , C.interpolated .z [ CA.monotone ] [ CA.circle, CA.color "white", CA.borderWidth 1 ]
+        , C.interpolated .v [ CA.monotone ] [ CA.circle, CA.color "white", CA.borderWidth 1 ]
+        , C.interpolated .w [ CA.monotone ] [ CA.circle, CA.color "white", CA.borderWidth 1 ]
+        , C.interpolated .p [ CA.monotone ] [ CA.circle, CA.color "white", CA.borderWidth 1 ]
+        , C.interpolated .q [ CA.monotone ] [ CA.circle, CA.color "white", CA.borderWidth 1 ]
         ]
         data
 

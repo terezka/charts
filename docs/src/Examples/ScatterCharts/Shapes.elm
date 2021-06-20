@@ -19,9 +19,9 @@ view model =
     , C.xLabels []
     , C.yLabels []
     , C.series .x
-        [ C.property .y [] [ CA.plus ]
-        , C.property .z [] [ CA.square ]
-        , C.property .w [] [ CA.triangle ]
+        [ C.scatter .y [ CA.plus ]
+        , C.scatter .z [ CA.square ]
+        , C.scatter .w [ CA.triangle ]
         ]
         data
     ]
@@ -96,9 +96,9 @@ smallCode =
     , C.xLabels []
     , C.yLabels []
     , C.series .x
-        [ C.property .y [] [ CA.plus ]
-        , C.property .z [] [ CA.square ]
-        , C.property .w [] [ CA.triangle ]
+        [ C.scatter .y [ CA.plus ]
+        , C.scatter .z [ CA.square ]
+        , C.scatter .w [ CA.triangle ]
         ]
         data
     ]
@@ -124,9 +124,9 @@ view model =
     , C.xLabels []
     , C.yLabels []
     , C.series .x
-        [ C.property .y [] [ CA.plus ]
-        , C.property .z [] [ CA.square ]
-        , C.property .w [] [ CA.triangle ]
+        [ C.scatter .y [ CA.plus ]
+        , C.scatter .z [ CA.square ]
+        , C.scatter .w [ CA.triangle ]
         ]
         data
     ]

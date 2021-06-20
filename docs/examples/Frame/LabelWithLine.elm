@@ -24,7 +24,7 @@ view model =
     , C.yAxis []
     , C.yTicks []
     , C.yLabels []
-    , C.series .age [ C.property .toys [] [] ] data
+    , C.series .age [ C.scatter .toys [] ] data
 
     , C.label
         [ CA.moveRight 14, CA.moveUp 8, CA.alignLeft ]

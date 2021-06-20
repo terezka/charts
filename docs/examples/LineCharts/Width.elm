@@ -18,8 +18,8 @@ view model =
     , C.xLabels []
     , C.yLabels []
     , C.series .x
-        [ C.property .y [ CA.linear, CA.width 4 ] []
-        , C.property .z [ CA.linear, CA.width 3 ] []
+        [ C.interpolated .y [ CA.width 4 ] []
+        , C.interpolated .z [ CA.width 3 ] []
         ]
         data
     ]

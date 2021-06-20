@@ -18,9 +18,9 @@ view model =
     , C.xLabels []
     , C.yLabels []
     , C.series .x
-        [ C.property .y [ CA.linear ] [ CA.cross, CA.borderWidth 2, CA.border "white" ]
+        [ C.interpolated .y [  ] [ CA.cross, CA.borderWidth 2, CA.border "white" ]
             |> C.named "Cats"
-        , C.property .z [ CA.linear ] [ CA.cross, CA.borderWidth 2, CA.border "white" ]
+        , C.interpolated .z [  ] [ CA.cross, CA.borderWidth 2, CA.border "white" ]
             |> C.named "Fish"
         ]
         data
@@ -100,9 +100,9 @@ smallCode =
     , C.xLabels []
     , C.yLabels []
     , C.series .x
-        [ C.property .y [ CA.linear ] [ CA.cross, CA.borderWidth 2, CA.border "white" ]
+        [ C.interpolated .y [  ] [ CA.cross, CA.borderWidth 2, CA.border "white" ]
             |> C.named "Cats"
-        , C.property .z [ CA.linear ] [ CA.cross, CA.borderWidth 2, CA.border "white" ]
+        , C.interpolated .z [  ] [ CA.cross, CA.borderWidth 2, CA.border "white" ]
             |> C.named "Fish"
         ]
         data
@@ -133,9 +133,9 @@ view model =
     , C.xLabels []
     , C.yLabels []
     , C.series .x
-        [ C.property .y [ CA.linear ] [ CA.cross, CA.borderWidth 2, CA.border "white" ]
+        [ C.interpolated .y [  ] [ CA.cross, CA.borderWidth 2, CA.border "white" ]
             |> C.named "Cats"
-        , C.property .z [ CA.linear ] [ CA.cross, CA.borderWidth 2, CA.border "white" ]
+        , C.interpolated .z [  ] [ CA.cross, CA.borderWidth 2, CA.border "white" ]
             |> C.named "Fish"
         ]
         data

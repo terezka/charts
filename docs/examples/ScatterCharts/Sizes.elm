@@ -18,8 +18,8 @@ view model =
     , C.xLabels []
     , C.yLabels []
     , C.series .x
-        [ C.property .y [] [ CA.size 14 ]
-        , C.property .z [] [ CA.size 3 ]
+        [ C.scatter .y [ CA.size 14 ]
+        , C.scatter .z [ CA.size 3 ]
         ]
         data
     ]

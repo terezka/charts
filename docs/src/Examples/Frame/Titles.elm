@@ -25,8 +25,7 @@ view model =
     , C.yTicks [ CA.ints ]
     , C.yLabels [ CA.ints ]
     , C.series .age
-        [ C.property .toys []
-            [ CA.opacity 0, CA.borderWidth 1 ]
+        [ C.scatter .toys [ CA.opacity 0, CA.borderWidth 1 ]
         ]
         data
 
@@ -117,8 +116,7 @@ smallCode =
     , C.yTicks [ CA.ints ]
     , C.yLabels [ CA.ints ]
     , C.series .age
-        [ C.property .toys []
-            [ CA.opacity 0, CA.borderWidth 1 ]
+        [ C.scatter .toys [ CA.opacity 0, CA.borderWidth 1 ]
         ]
         data
 
@@ -159,8 +157,7 @@ view model =
     , C.yTicks [ CA.ints ]
     , C.yLabels [ CA.ints ]
     , C.series .age
-        [ C.property .toys []
-            [ CA.opacity 0, CA.borderWidth 1 ]
+        [ C.scatter .toys [ CA.opacity 0, CA.borderWidth 1 ]
         ]
         data
 
