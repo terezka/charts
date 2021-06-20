@@ -8,12 +8,12 @@ module Chart exposing
 
   , xLabel, yLabel, xTick, yTick
   , label, labelAt, tooltip, line, rect
+  , legendsAt
 
   , svgAt, htmlAt, svg, html, none
 
   , each, eachBin, eachStack, eachBar, eachDot, eachProduct
   , withPlane, withBins, withStacks, withBars, withDots, withProducts
-  , legendsAt
 
   , generate, floats, ints, times
 
