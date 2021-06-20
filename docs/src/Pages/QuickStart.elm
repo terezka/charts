@@ -20,10 +20,18 @@ view =
       Layout.view
         [ Menu.small
         , E.el
-            [ F.size 30
-            , E.paddingEach { top = 60, bottom = 40, left = 0, right = 0 }
+            [ F.size 32
+            , E.paddingXY 0 10
             ]
             (E.text "Quick start")
+
+        , E.paragraph
+            [ E.paddingEach { top = 10, bottom = 70, left = 0, right = 0 }
+            , F.size 14
+            , E.width (E.px 700)
+            ]
+            [ E.text "Here's how to make basic charts. If your needs exceed these, check out the many other examples and the API documentation, too!"
+            ]
 
         , E.column
             [ E.width E.fill

@@ -16,7 +16,6 @@ import Dict
 import Chart as C
 import Chart.Attributes as CA
 import Chart.Events as CE
-import Internal.Item as CI -- TODO
 import Chart.Svg as CS
 
 import Element as E
@@ -29,7 +28,7 @@ import Chart.Events
 
 type alias Model =
   { selection : Maybe { a : Coordinates.Point, b : Coordinates.Point }
-  , hovering : List (CI.Product CS.Dot (Maybe Float) Salary.Datum)
+  , hovering : List (CE.Product CS.Dot (Maybe Float) Salary.Datum)
   , window : Maybe Coordinates.Position
   , year : Float
   }
@@ -45,7 +44,7 @@ init =
 
 
 type Msg
-  = OnHover (List (CI.Product CS.Dot (Maybe Float) Salary.Datum)) Coordinates.Point
+  = OnHover (List (CE.Product CS.Dot (Maybe Float) Salary.Datum)) Coordinates.Point
   | OnMouseDown Coordinates.Point
   | OnMouseUp Coordinates.Point
   | OnReset
@@ -282,7 +281,7 @@ salarySeries : Model -> Float -> Float -> Float -> C.Element Salary.Datum Msg
 salarySeries model border auraSize size =
   C.series .salaryBoth
       [ C.property Salary.womenSalaryPerc []
-          [ CA.opacity 0.3, CA.circle, CA.border CA.blue, CA.borderWidth border ]
+          [ CA.opacity 0.4, CA.circle, CA.border CA.blue, CA.borderWidth border ]
             |> C.variation (\d ->
                   let precentOfWomen = Salary.womenPerc d
 
@@ -304,9 +303,9 @@ salarySeries model border auraSize size =
       (List.filter (.year >> (==) model.year) Salary.data)
 
 
-tooltipContent : CI.Product CS.Dot (Maybe Float) Salary.Datum -> H.Html msg
+tooltipContent : CE.Product CS.Dot (Maybe Float) Salary.Datum -> H.Html msg
 tooltipContent hovered =
-  let datum = CI.getDatum hovered
+  let datum = CE.getDatum hovered
       precentOfWomen = round (Salary.womenPerc datum)
       percentOfSalary = round (Maybe.withDefault 0 (Salary.womenSalaryPerc datum))
       percentOfSalaryMen = round (Maybe.withDefault 0 (Salary.menSalaryPerc datum))
@@ -319,7 +318,7 @@ tooltipContent hovered =
         , HA.style "line-break" "normal"
         , HA.style "white-space" "normal"
         , HA.style "line-height" "1.25"
-        , HA.style "color" (CI.getColor hovered)
+        , HA.style "color" (CE.getColor hovered)
         ]
         [ H.text datum.sector ]
 

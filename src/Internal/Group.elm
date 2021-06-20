@@ -73,6 +73,7 @@ collect (Grouping toPos2 func2) (Grouping toPos1 func1)  =
   Grouping toPos2 (func1 >> func2)
 
 
+
 -- BASIC GROUPING
 
 
