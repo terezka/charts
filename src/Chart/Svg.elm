@@ -16,6 +16,11 @@ module Chart.Svg exposing
 
   , Legends, legendsAt
   , Legend, lineLegend, barLegend
+
+  , Plane
+  , fromSvg, fromCartesian
+  , lengthInSvgX, lengthInSvgY
+  , lengthInCartesianX, lengthInCartesianY
   )
 
 import Html as H exposing (Html)
@@ -23,7 +28,7 @@ import Html.Attributes as HA
 import Svg as S exposing (Svg)
 import Svg.Attributes as SA
 import Svg.Events as SE
-import Svg.Coordinates as Coord exposing (Point, Position, Plane, place, toSVGX, toSVGY, toCartesianX, toCartesianY, placeWithOffset)
+import Svg.Coordinates as Coord exposing (Point, Position, place, toSVGX, toSVGY, toCartesianX, toCartesianY, placeWithOffset)
 import Svg.Commands as C exposing (..)
 import Chart.Attributes as CA
 import Internal.Interpolation as Interpolation
@@ -1820,3 +1825,44 @@ formatWeekday =
     F.format
         [ F.dayOfWeekNameFull ]
 
+
+
+-- SYSTEM
+
+
+type alias Plane =
+  Coord.Plane
+
+
+fromSvg : Plane -> Point -> Point
+fromSvg plane point =
+  { x = Coord.toCartesianX plane point.x
+  , y = Coord.toCartesianY plane point.y
+  }
+
+
+fromCartesian : Plane -> Point -> Point
+fromCartesian plane point =
+  { x = Coord.toSVGX plane point.x
+  , y = Coord.toSVGY plane point.y
+  }
+
+
+lengthInSvgX : Plane -> Float -> Float
+lengthInSvgX =
+  Coord.scaleSVGX
+
+
+lengthInSvgY : Plane -> Float -> Float
+lengthInSvgY =
+  Coord.scaleSVGY
+
+
+lengthInCartesianX : Plane -> Float -> Float
+lengthInCartesianX =
+  Coord.scaleCartesianX
+
+
+lengthInCartesianY : Plane -> Float -> Float
+lengthInCartesianY =
+  Coord.scaleCartesianY
