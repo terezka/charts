@@ -179,7 +179,7 @@ getDatum =
   I.getDatum
 
 
-getName : Product config value data -> Maybe String
+getName : Product config value data -> String
 getName =
   I.getName
 

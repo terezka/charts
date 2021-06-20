@@ -43,6 +43,7 @@ type Any
 type alias TooltipInfo =
   { property : Int
   , stack : Int
+  , index : Int
   , name : Maybe String
   , color : String
   , border : String
@@ -99,9 +100,11 @@ getColor (Item item) =
 
 
 {-| -}
-getName : Product config value data -> Maybe String
+getName : Product config value data -> String
 getName (Item item) =
-  item.config.tooltipInfo.name
+  case item.config.tooltipInfo.name of
+    Just name -> name
+    Nothing -> "Property #" ++ String.fromInt (item.config.tooltipInfo.index + 1)
 
 
 {-| -}

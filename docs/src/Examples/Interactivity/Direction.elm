@@ -56,7 +56,7 @@ meta =
   , categoryOrder = 5
   , name = "Direction"
   , description = "Change direction of tooltip."
-  , order = 7
+  , order = 8
   }
 
 

@@ -103,9 +103,7 @@ noMissing =
 named : List String -> Grouping (I.Product config value data) (I.Product config value data)
 named names =
   let onlyAcceptedNames i =
-        case I.getName i of
-          Just name -> List.member name names
-          Nothing -> False
+        List.member (I.getName i) names
   in
   Grouping I.getPosition (List.filter onlyAcceptedNames)
 

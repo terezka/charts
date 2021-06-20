@@ -17,10 +17,9 @@ view model =
     [ C.grid []
     , C.xLabels []
     , C.yLabels []
-    , C.bars
-        []
-        [ C.bar .y [ CA.striped [] ]
-        , C.bar .z [ CA.dotted [] ]
+    , C.bars []
+        [ C.bar .y [ CA.striped [ CA.spacing 6 ] ]
+        , C.bar .z [ CA.dotted [ CA.rotate 45 ] ]
         ]
         data
     ]

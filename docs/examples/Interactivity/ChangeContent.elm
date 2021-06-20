@@ -1,7 +1,8 @@
-module Examples.Interactivity.Direction exposing (..)
+module Examples.Interactivity.ChangeContent exposing (..)
 
 {-| @LARGE -}
 import Html as H
+import Html.Attributes as HA
 import Svg as S
 import Chart as C
 import Chart.Attributes as CA
@@ -9,7 +10,7 @@ import Chart.Events as CE
 
 
 type alias Model =
-  { hovering : List (CE.Product CE.Dot (Maybe Float) Datum) }
+  { hovering : List (CE.Product CE.Dot Float Datum) }
 
 
 init : Model
@@ -18,7 +19,7 @@ init =
 
 
 type Msg
-  = OnHover (List (CE.Product CE.Dot (Maybe Float) Datum))
+  = OnHover (List (CE.Product CE.Dot Float Datum))
 
 
 update : Msg -> Model -> Model
@@ -34,19 +35,32 @@ view model =
   C.chart
     [ CA.height 300
     , CA.width 300
-    , CE.onMouseMove OnHover (CE.getNearest CE.dot)
+    , CE.onMouseMove OnHover (CE.getNearest <| CE.collect CE.noMissing CE.dot)
     , CE.onMouseLeave (OnHover [])
     ]
     [ C.grid []
     , C.xLabels []
     , C.yLabels []
     , C.series .x
-        [ C.scatter .y []
-        , C.scatter .z []
+        [ C.scatter .z []
+        , C.scatter .y []
+        , C.scatter .w []
+        , C.scatter .p []
         ]
         data
-    , C.each model.hovering <| \p item ->
-        [ C.tooltip item [ CA.onTopOrBottom ] [] [] ]
+    , C.each model.hovering <| \p dot ->
+        let color = CE.getColor dot
+            x = CE.getIndependent dot
+            y = CE.getDependent dot
+        in
+        [ C.tooltip dot []
+            [ HA.style "color" color ]
+            [ H.text "x: "
+            , H.text (String.fromFloat x)
+            , H.text " y: "
+            , H.text (String.fromFloat y)
+            ]
+        ]
     ]
 {-| @SMALL END -}
 {-| @LARGE END -}
@@ -55,9 +69,9 @@ view model =
 meta =
   { category = "Interactivity"
   , categoryOrder = 5
-  , name = "Direction"
-  , description = "Change direction of tooltip."
-  , order = 8
+  , name = "Change content"
+  , description = "Change the content of the tooltip."
+  , order = 7
   }
 
 
@@ -81,6 +95,7 @@ data =
         Datum x x1 x1 (Just y) (Just z) (Just v) (Just w) (Just p) (Just q)
   in
   [ toDatum 0.0 0.0 1.2 4.0 4.6 6.9 7.3 8.0
+  , toDatum 1.0 0.3 2.5 3.1 5.1 4.9 5.3 7.0
   , toDatum 2.0 0.4 2.2 4.2 5.3 5.7 6.2 7.8
   , toDatum 3.0 0.6 1.0 3.2 4.8 5.4 7.2 8.3
   , toDatum 4.0 0.2 1.2 3.0 4.1 5.5 7.9 8.1

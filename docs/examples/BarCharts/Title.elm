@@ -19,7 +19,7 @@ view model =
     , C.yLabels []
     , C.labelAt .max .max [ CA.xOff -15, CA.yOff 10, CA.alignRight ] [ S.text "Quarterly revenue" ]
     , C.labelAt CA.middle .min [ CA.yOff 30 ] [ S.text "Quarter" ]
-    , C.labelAt .min CA.middle [ CA.xOff -20, CA.rotate 90 ] [ S.text "Revenue" ]
+    , C.labelAt .min CA.middle [ CA.xOff -23, CA.rotate 90 ] [ S.text "Revenue" ]
     , C.bars []
         [ C.bar .z []
         , C.bar .y []

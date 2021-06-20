@@ -137,6 +137,7 @@ toBarSeries barsAttrs properties data =
               , tooltipInfo =
                   { property = barIndex
                   , stack = sectionIndex
+                  , index = colorIndex
                   , name = section.meta
                   , color = product.color
                   , border = product.border
@@ -248,6 +249,7 @@ toDotSeries toX properties data =
               , tooltipInfo =
                   { property = lineIndex
                   , stack = sublineIndex
+                  , index = colorIndex
                   , name = prop.meta
                   , color =
                       case config.color of
