@@ -51,7 +51,7 @@ type alias GenderBin =
 init : Model
 init =
   { hovering = []
-  , binSize = 10000
+  , binSize = 5000
   , year = 2019
   }
 
@@ -80,10 +80,11 @@ view model =
   E.column
     [ EE.onMouseLeave (OnHover [])
     , E.width (E.px 1000)
+    , E.height E.fill
     ]
     [ I.slider
         [ E.height (E.px 30)
-        , E.width (E.px 200)
+        , E.width (E.px 150)
 
         -- Here is where we're creating/styling the "track"
         , E.behindContent
@@ -108,7 +109,11 @@ view model =
 
     , E.html <| viewChart model
 
-    , E.row [ E.width E.fill, E.spacing 20 ] (List.concatMap viewTooltip model.hovering)
+    , E.row
+        [ E.width E.fill
+        , E.spacing 20
+        ]
+        (List.concatMap viewTooltip model.hovering)
     ]
 
 
@@ -176,9 +181,9 @@ viewChart model =
         , CA.roundTop 0.2
         , CA.roundBottom 0.2
         ]
-        [ C.bar (howMany "women") [ CA.color "#f56dbc", CA.gradient [ CA.colors [ "#de74d7", "#f56dbc80" ]] ]
+        [ C.bar (howMany "women") [ CA.color "#f56dbc", CA.gradient [ CA.colors [ "#de74d7EE", "#f56dbc80" ]] ]
             |> C.named "women"
-        , C.bar (howMany "men") [ CA.color "#58a9f6", CA.gradient [ CA.colors [ "#8a91f7", "#58a9f680" ]] ]
+        , C.bar (howMany "men") [ CA.color "#58a9f6", CA.gradient [ CA.colors [ "#8a91f7EE", "#58a9f680" ]] ]
             |> C.named "men"
         ]
         (C.binned model.binSize .salary (womensData ++ mensData))
@@ -247,6 +252,7 @@ viewTooltip chartBin =
         E.textColumn
           [ E.alignTop
           , E.width E.fill
+          , E.height E.fill
           ]
           (E.el [ F.size 14, E.paddingXY 0 10 ] (E.text title) :: List.map (viewJob color name) dataBin.data)
 

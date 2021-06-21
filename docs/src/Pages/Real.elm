@@ -81,7 +81,7 @@ view model =
               (E.text "Real data examples")
 
           , E.paragraph
-              [ E.paddingEach { top = 10, bottom = 70, left = 0, right = 0 }
+              [ E.paddingEach { top = 10, bottom = 40, left = 0, right = 0 }
               , F.size 14
               , E.width (E.px 700)
               ]
@@ -92,7 +92,7 @@ view model =
               [ F.size 20
               , E.paddingXY 0 10
               ]
-              (E.text "1. Salary distribution in Denmark")
+              (E.text "Salary distribution in Denmark")
 
           , E.paragraph
               [ E.paddingEach { top = 10, bottom = 10, left = 0, right = 0 }

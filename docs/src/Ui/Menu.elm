@@ -50,9 +50,8 @@ expanded =
                     , Link "/documentation/scatter-charts" "Scatter charts"
                     , Link "/documentation/line-charts" "Line charts"
                     , Link "/documentation/bar-charts" "Bar charts"
+                    , Link "/documentation/frame-and-navigation" "Frame and navigation"
                     , Link "/documentation/interactivity" "Interactivity"
-                    , Link "/documentation/custom-axes" "Custom axes"
-                    , Link "/documentation/custom-labels" "Custom labels"
                     ]
                 }
               , { title = Link "/real" "Real data examples"
@@ -84,7 +83,7 @@ description =
     , E.width (E.px 300)
     , E.alignTop
     ]
-    [ E.text "Alpha version. Feel free to use, but please do not share publicly yet. Documentation is unfinished/wrong and API liable to breaking changes." ]
+    [ E.text "A SVG chart library for making beautiful charts painlessly. Written in all Elm. " ]
 
 
 small : E.Element msg

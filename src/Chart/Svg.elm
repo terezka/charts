@@ -355,7 +355,6 @@ rect plane edits =
             ( ( plane.x.min, plane.x.max ), ( b, b ) )
 
           -- MIXED
-
           ( ( Nothing, Just c ), ( Just a, Just b ) ) ->
             ( ( c, c ), ( a, b ) )
 
