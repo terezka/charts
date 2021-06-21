@@ -20,7 +20,6 @@ module Chart.Events exposing
 
 -- allow custom attributes
 -- find out what to expose in Svg / Coord
--- use correct HTML elements
 -- move things to internal
 
 
