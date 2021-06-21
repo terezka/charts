@@ -198,7 +198,7 @@ viewChart model =
 
               , C.label
                   [ CA.alignLeft
-                  , CA.moveLeft 5
+                  , CA.moveLeft 3
                   , CA.moveUp 5
                   , CA.fontSize 10
                   , CA.color (CE.getColor bar)
