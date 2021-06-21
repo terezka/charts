@@ -1,4 +1,4 @@
-module Charts.SaleryDist exposing (Model, Msg, init, update, view)
+module Charts.SalaryDist exposing (Model, Msg, init, update, view)
 
 import Html as H
 import Html.Attributes as HA

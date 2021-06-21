@@ -5,8 +5,8 @@ import Page
 import Request
 import Shared
 import View exposing (View)
-import Charts.SaleryDist as SaleryDist
-import Charts.SaleryDistBar as SaleryDistBar
+import Charts.SalaryDist as SalaryDist
+import Charts.SalaryDistBar as SalaryDistBar
 import Charts.Basics exposing (Example)
 import Html as H
 import Element as E
@@ -33,15 +33,15 @@ page shared req =
 
 
 type alias Model =
-    { saleryDist : SaleryDist.Model
-    , saleryDistBar : SaleryDistBar.Model
+    { salaryDist : SalaryDist.Model
+    , salaryDistBar : SalaryDistBar.Model
     }
 
 
 init : Model
 init =
-    { saleryDist = SaleryDist.init
-    , saleryDistBar = SaleryDistBar.init
+    { salaryDist = SalaryDist.init
+    , salaryDistBar = SalaryDistBar.init
     }
 
 
@@ -50,18 +50,18 @@ init =
 
 
 type Msg
-    = SaleryDistMsg SaleryDist.Msg
-    | SaleryDistBarMsg SaleryDistBar.Msg
+    = SalaryDistMsg SalaryDist.Msg
+    | SalaryDistBarMsg SalaryDistBar.Msg
 
 
 update : Msg -> Model -> Model
 update msg model =
     case msg of
-      SaleryDistMsg subMsg ->
-          { model | saleryDist = SaleryDist.update subMsg model.saleryDist }
+      SalaryDistMsg subMsg ->
+          { model | salaryDist = SalaryDist.update subMsg model.salaryDist }
 
-      SaleryDistBarMsg subMsg ->
-          { model | saleryDistBar = SaleryDistBar.update subMsg model.saleryDistBar }
+      SalaryDistBarMsg subMsg ->
+          { model | salaryDistBar = SalaryDistBar.update subMsg model.salaryDistBar }
 
 
 
@@ -108,10 +108,10 @@ view model =
 
           , E.el
               [ E.paddingEach { top = 50, bottom = 40, left = 0, right = 0 } ]
-              (E.html <| H.map SaleryDistMsg (SaleryDist.view model.saleryDist))
+              (E.html <| H.map SalaryDistMsg (SalaryDist.view model.salaryDist))
           , E.el
               [ E.paddingEach { top = 0, bottom = 80, left = 0, right = 0 } ]
-              (E.map SaleryDistBarMsg (SaleryDistBar.view model.saleryDistBar))
+              (E.map SalaryDistBarMsg (SalaryDistBar.view model.salaryDistBar))
           ]
     }
 

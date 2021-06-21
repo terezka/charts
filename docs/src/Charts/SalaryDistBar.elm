@@ -1,4 +1,4 @@
-module Charts.SaleryDistBar exposing (Model, Msg, init, update, view)
+module Charts.SalaryDistBar exposing (Model, Msg, init, update, view)
 
 import Html as H
 import Html.Attributes as HA
@@ -41,7 +41,7 @@ type alias Binned =
 
 
 type alias GenderBin =
-  { salery : Float
+  { salary : Float
   , amount : Float
   , kind : String
   , sector : String
@@ -118,14 +118,14 @@ viewChart model =
 
       womensData =
         yearData
-          |> List.map (\datum -> { salery = datum.salaryWomen, amount = datum.numOfWomen, kind = "women", sector = datum.sector })
-          |> List.sortBy .salery
-          |> List.filter (\d -> d.salery /= 0)
+          |> List.map (\datum -> { salary = datum.salaryWomen, amount = datum.numOfWomen, kind = "women", sector = datum.sector })
+          |> List.sortBy .salary
+          |> List.filter (\d -> d.salary /= 0)
 
       mensData =
         yearData
-          |> List.map (\datum -> { salery = datum.salaryMen, amount = datum.numOfMen, kind = "men", sector = datum.sector })
-          |> List.filter (\d -> d.salery /= 0)
+          |> List.map (\datum -> { salary = datum.salaryMen, amount = datum.numOfMen, kind = "men", sector = datum.sector })
+          |> List.filter (\d -> d.salary /= 0)
 
       howMany kind bin =
         bin.data
@@ -180,7 +180,7 @@ viewChart model =
         , C.bar (howMany "men") [ CA.color "#58a9f6", CA.gradient [ CA.colors [ "#8a91f7", "#58a9f680" ]] ]
             |> C.named "men"
         ]
-        (C.binned model.binSize .salery (womensData ++ mensData))
+        (C.binned model.binSize .salary (womensData ++ mensData))
 
     , C.withPlane <| \p ->
         let hoveredBars = List.concatMap CE.getProducts model.hovering
@@ -211,11 +211,11 @@ viewChart model =
         List.indexedMap viewLabel hoveredBars
           |> List.concat
 
-    , C.labelAt CA.middle .max [ CA.fontSize 14, CA.moveUp 20 ] [ S.text "How many people in each salery bracket?" ]
+    , C.labelAt CA.middle .max [ CA.fontSize 14, CA.moveUp 20 ] [ S.text "How many people in each salary bracket?" ]
     , C.labelAt CA.middle .max [ CA.fontSize 11, CA.moveUp 5 ] [ S.text "Data from Danmarks Statestik" ]
 
     , C.labelAt .min .max [ CA.fontSize 10, CA.alignRight, CA.moveLeft 8, CA.moveUp 5 ] [ S.text "# of people" ]
-    , C.labelAt CA.middle .min [ CA.fontSize 10, CA.moveDown 30 ] [ S.text "Salery brackets" ]
+    , C.labelAt CA.middle .min [ CA.fontSize 10, CA.moveDown 30 ] [ S.text "Salary brackets" ]
 
     , C.legendsAt .max .max -20 0 [ CA.alignRight ] []
 
@@ -240,7 +240,7 @@ viewTooltip chartBin =
         let color = CE.getColor chartBar
             dataBin = CE.getDatum chartBar
             name = CE.getName chartBar
-            title = "Sectors where " ++ name ++ " on average is payed within selected salery bracket."
+            title = "Sectors where " ++ name ++ " on average is payed within selected salary bracket."
         in
         E.textColumn
           [ E.alignTop

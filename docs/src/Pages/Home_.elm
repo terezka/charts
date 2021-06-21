@@ -5,7 +5,7 @@ import Page
 import Request
 import Shared
 import View exposing (View)
-import Charts.SaleryDist as SaleryDist
+import Charts.SalaryDist as SalaryDist
 import Charts.Basics exposing (Example)
 import Html as H
 import Element as E
@@ -32,13 +32,13 @@ page shared req =
 
 
 type alias Model =
-    { saleryDist : SaleryDist.Model
+    { salaryDist : SalaryDist.Model
     }
 
 
 init : Model
 init =
-    { saleryDist = SaleryDist.init
+    { salaryDist = SalaryDist.init
     }
 
 
@@ -47,14 +47,14 @@ init =
 
 
 type Msg
-    = SaleryDistMsg SaleryDist.Msg
+    = SalaryDistMsg SalaryDist.Msg
 
 
 update : Msg -> Model -> Model
 update msg model =
     case msg of
-      SaleryDistMsg subMsg ->
-          { model | saleryDist = SaleryDist.update subMsg model.saleryDist }
+      SalaryDistMsg subMsg ->
+          { model | salaryDist = SalaryDist.update subMsg model.salaryDist }
 
 
 
@@ -68,7 +68,7 @@ view model =
         Layout.view
           [ E.el
               [ E.paddingEach { top = 0, bottom = 40, left = 0, right = 0 } ]
-              (E.html <| H.map SaleryDistMsg (SaleryDist.view model.saleryDist))
+              (E.html <| H.map SalaryDistMsg (SalaryDist.view model.salaryDist))
           , Menu.expanded
           ]
     }

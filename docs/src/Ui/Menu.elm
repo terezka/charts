@@ -57,7 +57,7 @@ expanded =
                 }
               , { title = Link "/real" "Real data examples"
                 , links =
-                    [ Link "/real#salery-distribution" "Salary distribution in Denmark"
+                    [ Link "/real#salary-distribution" "Salary distribution in Denmark"
                     , Link "/real#perceptions-of-probability" "Perceptions of Probability"
                     , Link "/real#community-examples" "Community examples"
                     ]
