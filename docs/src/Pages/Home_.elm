@@ -6,6 +6,7 @@ import Request
 import Shared
 import View exposing (View)
 import Charts.SaleryDist as SaleryDist
+import Charts.SaleryDistGender as SaleryDistGender
 import Charts.Basics exposing (Example)
 import Html as H
 import Element as E
@@ -32,12 +33,14 @@ page shared req =
 
 
 type alias Model =
-    { saleryDist : SaleryDist.Model }
+    { saleryDist : SaleryDist.Model
+    }
 
 
 init : Model
 init =
-    { saleryDist = SaleryDist.init }
+    { saleryDist = SaleryDist.init
+    }
 
 
 
@@ -51,8 +54,8 @@ type Msg
 update : Msg -> Model -> Model
 update msg model =
     case msg of
-        SaleryDistMsg subMsg ->
-            { model | saleryDist = SaleryDist.update subMsg model.saleryDist }
+      SaleryDistMsg subMsg ->
+          { model | saleryDist = SaleryDist.update subMsg model.saleryDist }
 
 
 

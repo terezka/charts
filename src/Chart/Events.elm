@@ -8,7 +8,7 @@ module Chart.Events exposing
   , Product, Any, Bar, Dot
   , Group, Bin, Stack, SameX
   , getDependent, getIndependent, getDatum, getColor, getName
-  , getTop, getCenter, getLeft, getRight, getPosition, getLimits
+  , getTop, getTopLeft, getCenter, getLeft, getRight, getPosition, getLimits, getTooltip
   , getProducts, getCommonality, group, regroup, named
 
   , collect, filter
@@ -335,6 +335,11 @@ getTop p =
   I.getPosition p >> C.top
 
 
+getTopLeft : Plane -> Item a -> Point
+getTopLeft p =
+  I.getPosition p >> C.topLeft
+
+
 getBottom : Plane -> Item a -> Point
 getBottom p =
   I.getPosition p >> C.bottom
@@ -348,3 +353,8 @@ getPosition =
 getLimits : Item a -> Position
 getLimits =
   I.getLimits
+
+
+getTooltip : Item a -> List (Html Never)
+getTooltip =
+  I.toHtml

@@ -9,7 +9,7 @@ import Element.Background as BG
 
 
 type alias Group =
-  { title : String
+  { title : Link
   , links : List Link
   }
 
@@ -44,7 +44,7 @@ expanded =
               , E.width E.fill
               , E.alignRight
               ] <| List.map viewGroup
-              [ { title = "Documentation"
+              [ { title = Link "/documentation" "Documentation"
                 , links =
                     [ Link "/quick-start" "Quick start"
                     , Link "/documentation/scatter-charts" "Scatter charts"
@@ -55,14 +55,14 @@ expanded =
                     , Link "/documentation/custom-labels" "Custom labels"
                     ]
                 }
-              , { title = "Real data examples"
+              , { title = Link "/real" "Real data examples"
                 , links =
                     [ Link "/real#salery-distribution" "Salary distribution in Denmark"
                     , Link "/real#perceptions-of-probability" "Perceptions of Probability"
                     , Link "/real#community-examples" "Community examples"
                     ]
                 }
-              , { title = "Administration"
+              , { title = Link "/administration" "Administration"
                 , links =
                     [ Link "/roadmap" "Roadmap"
                     , Link "/donating" "Donating"
@@ -129,7 +129,7 @@ viewGroup group =
         [ F.size 16
         , E.paddingEach { top = 0, bottom = 10, left = 0, right = 0 }
         ]
-        (E.text group.title)
+        (viewLink group.title)
     , group.links
         |> List.map viewLink
         |> E.column [ E.spacing 5, F.size 13 ]

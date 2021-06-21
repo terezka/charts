@@ -1,0 +1,257 @@
+module Charts.SaleryDistGender exposing (Model, Msg, init, update, view)
+
+import Html as H
+import Html.Attributes as HA
+import Html.Events as HE
+import Svg as S exposing (Svg, svg, g, circle, text_, text)
+import Svg.Attributes as SA exposing (width, height, stroke, fill, r, transform)
+import Browser
+import Time
+import Data.Iris as Iris
+import Data.Salary as Salary
+import Data.Education as Education
+import Dict
+
+import Chart as C
+import Chart.Attributes as CA
+import Chart.Events as CE
+import Chart.Svg as CS
+
+import Element as E
+import Element.Font as F
+import Element.Border as B
+import Element.Input as I
+import Element.Background as BG
+import Element.Events as EE
+
+import Chart.Events
+
+
+type alias Model =
+  { hovering : List (CE.Group (CE.Bin Binned) CS.Bar Float Binned)
+  , binSize : Float
+  , year : Float
+  }
+
+
+type alias Binned =
+  { bin : Float
+  , data : List GenderBin
+  }
+
+
+type alias GenderBin =
+  { salery : Float
+  , amount : Float
+  , kind : String
+  , sector : String
+  }
+
+
+init : Model
+init =
+  { hovering = []
+  , binSize = 10000
+  , year = 2019
+  }
+
+
+type Msg
+  = OnHover (List (CE.Group (CE.Bin Binned) CS.Bar Float Binned))
+  | OnYear Float
+  | OnBinSize Float
+
+
+update : Msg -> Model -> Model
+update msg model =
+  case msg of
+    OnHover hovering ->
+      { model | hovering = hovering }
+
+    OnYear year ->
+      { model | year = year, hovering = [] }
+
+    OnBinSize binSize ->
+      { model | binSize = binSize, hovering = [] }
+
+
+view : Model -> E.Element Msg
+view model =
+  E.column
+    [ EE.onMouseLeave (OnHover []) ]
+    [ I.slider
+        [ E.height (E.px 30)
+        , E.width (E.px 200)
+
+        -- Here is where we're creating/styling the "track"
+        , E.behindContent
+            (E.el
+                [ E.width E.fill
+                , E.height (E.px 2)
+                , E.centerY
+                , BG.color (E.rgb255 180 180 180)
+                , B.rounded 2
+                ]
+                E.none
+            )
+        ]
+        { onChange = OnBinSize
+        , label = I.labelAbove [] (E.text "Bin size")
+        , min = 5000
+        , max = 20000
+        , step = Just 1000
+        , value = model.binSize
+        , thumb = I.defaultThumb
+        }
+
+    , E.html <| viewChart model
+
+    , E.row [ E.width E.fill, E.spacing 20 ] (List.concatMap viewTooltip model.hovering)
+    ]
+
+
+viewChart : Model -> H.Html Msg
+viewChart model =
+  let yearData =
+        Salary.data
+          |> List.filter (.year >> (==) model.year)
+
+      womensData =
+        yearData
+          |> List.map (\datum -> { salery = datum.salaryWomen, amount = datum.numOfWomen, kind = "women", sector = datum.sector })
+          |> List.sortBy .salery
+          |> List.filter (\d -> d.salery /= 0)
+
+      mensData =
+        yearData
+          |> List.map (\datum -> { salery = datum.salaryMen, amount = datum.numOfMen, kind = "men", sector = datum.sector })
+          |> List.filter (\d -> d.salery /= 0)
+
+      howMany kind bin =
+        bin.data
+          |> List.filter (\d -> d.kind == kind)
+          |> List.map .amount
+          |> List.sum
+          |> Just
+  in
+  C.chart
+    [ CA.height 430
+    , CA.width 1000
+    , CA.static
+    , CA.marginLeft 0
+    , CA.marginRight 0
+    , CA.marginTop 40
+    , CA.marginBottom 50
+    , CA.paddingTop 15
+
+    , CE.onMouseMove OnHover (CE.getNearest <| CE.collect CE.bin <| CE.collect CE.noMissing <| CE.bar)
+    ]
+    [ C.grid []
+
+    , C.withPlane <| \p ->
+        let produceLabels current acc =
+              if current > p.x.max then acc else
+              produceLabels (current + model.binSize) (acc ++ viewLabels current)
+
+            viewLabels value =
+              [ C.xLabel
+                  [ CA.fontSize 8
+                  , CA.x value, CA.y 0, CA.yOff -5
+                  ]
+                  [ S.text (String.fromFloat (value / 1000) ++ "k") ]
+              , C.xTick
+                  [ CA.x value, CA.y 0 ]
+              ]
+        in
+        produceLabels p.x.min []
+
+    , C.generate 5 C.floats .y [] <| \p y ->
+        [ C.yLabel [ CA.fontSize 10, CA.x p.x.min, CA.y y ] [ S.text <| String.fromFloat (y / 1000) ++ "k" ] ]
+
+    , C.bars
+        [ CA.x1 .bin
+        , CA.x2 (.bin >> (+) model.binSize)
+        , CA.margin 0.25
+        , CA.roundTop 0.2
+        , CA.roundBottom 0.2
+        ]
+        [ C.bar (howMany "women") [ CA.color "#f56dbc", CA.gradient [ CA.colors [ "#de74d7", "#f56dbc80" ]] ]
+            |> C.named "women"
+        , C.bar (howMany "men") [ CA.color "#58a9f6", CA.gradient [ CA.colors [ "#8a91f7", "#58a9f680" ]] ]
+            |> C.named "men"
+        ]
+        (C.binned model.binSize .salery (womensData ++ mensData))
+
+    , C.withPlane <| \p ->
+        let hoveredBars = List.concatMap CE.getProducts model.hovering
+            highestValue = Maybe.withDefault 0 <| List.maximum (List.map CE.getDependent hoveredBars)
+            amountOfBars = List.length hoveredBars
+            viewLabel index bar =
+              let offset = CS.lengthInCartesianY p <| 10 + toFloat (amountOfBars - index - 1) * 20 in
+              [ C.line
+                  [ CA.x1 (CE.getTop p bar).x
+                  , CA.y1 (CE.getTop p bar).y
+                  , CA.x2 (CE.getTop p bar).x
+                  , CA.y2 <| highestValue + offset
+                  , CA.color (CE.getColor bar)
+                  ]
+
+              , C.label
+                  [ CA.alignLeft
+                  , CA.moveLeft 5
+                  , CA.moveUp 5
+                  , CA.fontSize 10
+                  , CA.color (CE.getColor bar)
+                  ]
+                  [ S.text (String.fromFloat <| CE.getDependent bar) ]
+                  { x = (CE.getTop p bar).x, y = highestValue + offset }
+              ]
+
+        in
+        List.indexedMap viewLabel hoveredBars
+          |> List.concat
+
+    , C.labelAt CA.middle .max [ CA.fontSize 14, CA.moveUp 20 ] [ S.text "How many people in each salery bracket?" ]
+    , C.labelAt CA.middle .max [ CA.fontSize 11, CA.moveUp 5 ] [ S.text "Data from Danmarks Statestik" ]
+
+    , C.labelAt .min .max [ CA.fontSize 10, CA.alignRight, CA.moveLeft 8, CA.moveUp 5 ] [ S.text "# of people" ]
+    , C.labelAt CA.middle .min [ CA.fontSize 10, CA.moveDown 30 ] [ S.text "Salery brackets" ]
+
+    , C.legendsAt .max .max -20 0 [ CA.alignRight ] []
+
+    , let viewYear year =
+            H.div
+              [ HE.onClick (OnYear year) ]
+              [ H.text (if model.year == year then "→ " else "")
+              , H.text (String.fromFloat year)
+              ]
+      in
+      C.htmlAt .max .max -60 -20
+        [ HA.style "color" "rgb(90 90 90)"
+        , HA.style "cursor" "pointer"
+        , HA.style "text-align" "right"
+        ]
+        (List.map viewYear [ 2016, 2017, 2018, 2019 ])
+    ]
+
+
+viewTooltip chartBin =
+  let viewJobs chartBar =
+        let color = CE.getColor chartBar
+            dataBin = CE.getDatum chartBar
+            name = CE.getName chartBar
+            title = "Sectors where " ++ name ++ " on average is payed within selected salery bracket."
+        in
+        E.textColumn
+          [ E.alignTop
+          , E.width E.fill
+          ]
+          (E.el [ F.size 14, E.paddingXY 0 10 ] (E.text title) :: List.map (viewJob color name) dataBin.data)
+
+      viewJob color name datum =
+        if datum.kind == name
+          then E.paragraph [ E.htmlAttribute (HA.style "color" color) ] [ E.text datum.sector ]
+          else E.none
+  in
+  List.map viewJobs (CE.getProducts chartBin)
+

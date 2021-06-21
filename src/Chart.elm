@@ -486,6 +486,7 @@ type alias Ticks =
     , limits : List (CA.Attribute C.Axis)
     , amount : Int
     , flip : Bool
+    , grid : Bool
     , generate : CA.Tick
     }
 
@@ -502,6 +503,7 @@ xTicks edits =
           , generate = CA.Floats
           , height = 5
           , flip = False
+          , grid = True
           , width = 1
           }
 
@@ -511,6 +513,7 @@ xTicks edits =
           |> List.map .value
 
       addTickValues p ts =
+        if not config.grid then ts else
         { ts | xs = ts.xs ++ toTicks p }
   in
   TicksElement addTickValues <| \p ->
@@ -539,6 +542,7 @@ yTicks edits =
           , generate = CA.Floats
           , height = 5
           , flip = False
+          , grid = True
           , width = 1
           }
 
@@ -793,6 +797,7 @@ type alias Tick =
   , width : Float
   , length : Float
   , flip : Bool
+  , grid : Bool
   }
 
 
@@ -807,9 +812,11 @@ xTick edits =
           , color = "rgb(210, 210, 210)"
           , width = 1
           , flip = False
+          , grid = True
           }
 
       toTickValues p config ts =
+        if not config.grid then ts else
         { ts | xs = ts.xs ++ [ config.x ] }
   in
   TickElement toConfig toTickValues <| \p config ->
@@ -832,9 +839,11 @@ yTick edits val =
           , color = "rgb(210, 210, 210)"
           , width = 1
           , flip = False
+          , grid = True
           }
 
       toTickValues p config ts =
+        if not config.grid then ts else
         { ts | ys = ts.ys ++ [ config.y ] }
   in
   TickElement toConfig toTickValues <| \p config ->
@@ -1212,6 +1221,28 @@ none =
 
 
 
+-- DATA HELPERS
+
+
+binned : Float -> (data -> Float) -> List data -> List { bin : Float, data : List data }
+binned binWidth func data =
+  let fold datum =
+        Dict.update (toBin datum) (updateDict datum)
+
+      updateDict datum maybePrev =
+        case maybePrev of
+          Just prev -> Just (datum :: prev)
+          Nothing -> Just [ datum ]
+
+      toBin datum =
+        floor (func datum / binWidth)
+  in
+  List.foldr fold Dict.empty data
+    |> Dict.toList
+    |> List.map (\( bin, ds ) -> { bin = toFloat bin * binWidth, data = ds })
+
+
+
 -- HELPERS
 
 
@@ -1219,24 +1250,6 @@ applyAttrs : List (a -> a) -> a -> a
 applyAttrs funcs default =
   let apply f a = f a in
   List.foldl apply default funcs
-
-
-
--- HELPERS
-
-
-binned : Float -> (data -> Float) -> List data -> List { bin : Float, data : List data }
-binned w func =
-  let fold datum acc =
-        Dict.update (ceiling (func datum)) (Maybe.map (\ds -> datum :: ds) >> Maybe.withDefault [datum] >> Just) acc
-
-      ceiling b =
-        let floored = toFloat (floor (b / w)) * w in
-        b - (b - floored) + w
-  in
-  List.foldr fold Dict.empty
-    >> Dict.toList
-    >> List.map (\(bin, ds) -> { bin = bin, data = ds })
 
 
 generateValues : Int -> CA.Tick -> C.Axis -> List CS.TickValue
