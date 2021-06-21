@@ -95,7 +95,7 @@ type alias Container data msg =
 
 {-| -}
 chart : List (CA.Attribute (Container data msg)) -> List (Element data msg) -> H.Html msg
-chart edits elements =
+chart edits unindexedElements =
   let config =
         applyAttrs edits
           { width = 500
@@ -115,6 +115,19 @@ chart edits elements =
           , attrs = [ SA.style "overflow: visible;" ]
           , htmlAttrs = []
           }
+
+      elements =
+        let toIndexedEl el ( acc, index ) =
+              case el of
+                Indexed toElAndIndex ->
+                  let ( newEl, newIndex ) = toElAndIndex index in
+                  ( acc ++ [ newEl ], newIndex )
+
+                _ ->
+                  ( acc ++ [ el ], index )
+        in
+        List.foldl toIndexedEl ( [], 0 ) unindexedElements
+          |> Tuple.first
 
       plane =
         definePlane config elements
@@ -152,15 +165,16 @@ chart edits elements =
 
 {-| -}
 type Element data msg
-  = SeriesElement
+  = Indexed (Int -> ( Element data msg, Int ))
+  | SeriesElement
       (List C.Position)
       (List (Item.Product CE.Any (Maybe Float) data))
-      (List (Legend.Legend))
+      (List Legend.Legend)
       (C.Plane -> S.Svg msg)
   | BarsElement
       (List C.Position)
       (List (Item.Product CE.Any (Maybe Float) data))
-      (List (Legend.Legend))
+      (List Legend.Legend)
       (C.Plane -> TickValues -> TickValues)
       (C.Plane -> S.Svg msg)
   | AxisElement
@@ -197,6 +211,7 @@ definePlane : Container data msg -> List (Element data msg) -> C.Plane
 definePlane config elements =
   let collectLimits el acc =
         case el of
+          Indexed _ -> acc
           SeriesElement lims _ _ _ -> acc ++ lims
           BarsElement lims _ _ _ _ -> acc ++ lims
           AxisElement _ _ -> acc
@@ -279,6 +294,7 @@ getItems : C.Plane -> List (Element data msg) -> List (Item.Product CE.Any (Mayb
 getItems plane elements =
   let toItems el acc =
         case el of
+          Indexed _ -> acc
           SeriesElement _ items _ _ -> acc ++ items
           BarsElement _ items _ _ _ -> acc ++ items
           AxisElement func _ -> acc
@@ -299,6 +315,7 @@ getLegends : List (Element data msg) -> List Legend.Legend
 getLegends elements =
   let toLegends el acc =
         case el of
+          Indexed _ -> acc
           SeriesElement _ _ legends_ _ -> acc ++ legends_
           BarsElement _ _ legends_ _ _ -> acc ++ legends_
           AxisElement _ _ -> acc
@@ -329,6 +346,7 @@ getTickValues : C.Plane -> List (Item.Product CE.Any (Maybe Float) data) -> List
 getTickValues plane items elements =
   let toValues el acc =
         case el of
+          Indexed _ -> acc
           SeriesElement _ _ _ _     -> acc
           BarsElement _ _ _ func _  -> func plane acc
           AxisElement func _        -> func plane acc
@@ -349,6 +367,7 @@ viewElements : Container data msg -> C.Plane -> TickValues -> List (Item.Product
 viewElements config plane tickValues allItems allLegends elements =
   let viewOne el ( before, chart_, after ) =
         case el of
+          Indexed _                 -> ( before,chart_, after )
           SeriesElement _ _ _ view  -> ( before, view plane :: chart_, after )
           BarsElement _ _ _ _ view  -> ( before, view plane :: chart_, after )
           AxisElement _ view        -> ( before, view plane :: chart_, after )
@@ -986,44 +1005,47 @@ type alias Bars data =
 {-| -}
 bars : List (CA.Attribute (Bars data)) -> List (Property data () CS.Bar) -> List data -> Element data msg
 bars edits properties data =
-  let barsConfig =
-        Helpers.apply edits
-          { spacing = 0.05
-          , margin = 0.1
-          , roundTop = 0
-          , roundBottom = 0
-          , grouped = True
-          , grid = True
-          , x1 = Nothing
-          , x2 = Nothing
+  Indexed <| \index ->
+    let barsConfig =
+          Helpers.apply edits
+            { spacing = 0.05
+            , margin = 0.1
+            , roundTop = 0
+            , roundBottom = 0
+            , grouped = True
+            , grid = True
+            , x1 = Nothing
+            , x2 = Nothing
+            }
+
+        items =
+          Produce.toBarSeries index edits properties data
+
+        generalized =
+          List.concatMap Group.getProducts items
+
+        bins =
+          CE.group CE.bin generalized
+
+        legends_ =
+          Legend.toBarLegends index edits properties
+
+        toTicks plane acc =
+          { acc | xs = acc.xs ++
+              if barsConfig.grid then
+                List.concatMap (CE.getLimits >> \pos -> [ pos.x1, pos.x2 ]) bins
+              else
+                []
           }
 
-      items =
-        Produce.toBarSeries edits properties data
-
-      generalized =
-        List.concatMap Group.getProducts items
-
-      bins =
-        CE.group CE.bin generalized
-
-      legends_ =
-        Legend.toBarLegends edits properties
-
-      toTicks plane acc =
-        { acc | xs = acc.xs ++
-            if barsConfig.grid then
-              List.concatMap (CE.getLimits >> \pos -> [ pos.x1, pos.x2 ]) bins
-            else
-              []
-        }
-
-      toLimits =
-        List.map Item.getLimits bins
-  in
-  BarsElement toLimits generalized legends_ toTicks <| \ plane ->
-    S.g [ SA.class "elm-charts__bar-series" ] (List.map (Item.toSvg plane) items)
-      |> S.map never
+        toLimits =
+          List.map Item.getLimits bins
+    in
+    ( BarsElement toLimits generalized legends_ toTicks <| \plane ->
+      S.g [ SA.class "elm-charts__bar-series" ] (List.map (Item.toSvg plane) items)
+        |> S.map never
+    , index + List.length (List.concatMap P.toConfigs properties)
+    )
 
 
 
@@ -1033,21 +1055,24 @@ bars edits properties data =
 {-| -}
 series : (data -> Float) -> List (Property data CS.Interpolation CS.Dot) -> List data -> Element data msg
 series toX properties data =
-  let items =
-        Produce.toDotSeries toX properties data
+  Indexed <| \index ->
+    let items =
+          Produce.toDotSeries index toX properties data
 
-      generalized =
-        List.concatMap Group.getProducts items
+        generalized =
+          List.concatMap Group.getProducts items
 
-      legends_ =
-        Legend.toDotLegends properties
+        legends_ =
+          Legend.toDotLegends index properties
 
-      toLimits =
-        List.map Item.getLimits items
-  in
-  SeriesElement toLimits generalized legends_ <| \p ->
-    S.g [ SA.class "elm-charts__dot-series" ] (List.map (Item.toSvg p) items)
-      |> S.map never
+        toLimits =
+          List.map Item.getLimits items
+    in
+    ( SeriesElement toLimits generalized legends_ <| \p ->
+        S.g [ SA.class "elm-charts__dot-series" ] (List.map (Item.toSvg p) items)
+          |> S.map never
+    , index + List.length (List.concatMap P.toConfigs properties)
+    )
 
 
 

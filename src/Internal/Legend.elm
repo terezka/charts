@@ -31,8 +31,8 @@ type alias Bars data =
   }
 
 
-toBarLegends : List (CA.Attribute (Bars data)) -> List (Property data String () S.Bar) -> List Legend
-toBarLegends barsAttrs properties =
+toBarLegends : Int -> List (CA.Attribute (Bars data)) -> List (Property data String () S.Bar) -> List Legend
+toBarLegends elIndex barsAttrs properties =
   let barsConfig =
         Helpers.apply barsAttrs
           { spacing = 0.05
@@ -53,12 +53,12 @@ toBarLegends barsAttrs properties =
         BarLegend (Maybe.withDefault defaultName prop.meta) (defaultAttrs ++ prop.attrs)
   in
   List.concatMap P.toConfigs properties
-    |> List.indexedMap toBarLegend
+    |> List.indexedMap (\propIndex -> toBarLegend (elIndex + propIndex))
 
 
 
-toDotLegends : List (Property data String S.Interpolation S.Dot) -> List Legend
-toDotLegends properties =
+toDotLegends : Int ->  List (Property data String S.Interpolation S.Dot) -> List Legend
+toDotLegends elIndex properties =
   let toInterConfig attrs =
         Helpers.apply attrs
           { method = Nothing
@@ -81,5 +81,5 @@ toDotLegends properties =
   in
   List.map P.toConfigs properties
     |> List.concatMap (\ps -> List.map (toDotLegend ps) ps)
-    |> List.indexedMap (\colorIndex f -> f colorIndex)
+    |> List.indexedMap (\propIndex f -> f (elIndex + propIndex))
 

@@ -144,7 +144,7 @@ viewChart model =
     , CA.marginBottom 50
     , CA.paddingTop 15
 
-    , CE.onMouseMove OnHover (CE.getNearest <| CE.collect CE.bin <| CE.collect CE.noMissing <| CE.bar)
+    , CE.onMouseMove OnHover (CE.getNearest <| CE.filter CE.bar <| CE.filter CE.noMissing <| CE.bin)
     ]
     [ C.grid []
 

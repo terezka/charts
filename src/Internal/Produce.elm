@@ -27,8 +27,8 @@ type alias Bars data =
   }
 
 
-toBarSeries : List (CA.Attribute (Bars data)) -> List (P.Property data String () S.Bar) -> List data -> List (G.Group () S.Bar (Maybe Float) data)
-toBarSeries barsAttrs properties data =
+toBarSeries : Int -> List (CA.Attribute (Bars data)) -> List (P.Property data String () S.Bar) -> List data -> List (G.Group () S.Bar (Maybe Float) data)
+toBarSeries elIndex barsAttrs properties data =
   let barsConfig =
         Helpers.apply barsAttrs
           { spacing = 0.05
@@ -155,7 +155,7 @@ toBarSeries barsAttrs properties data =
     List.map P.toConfigs properties
       |> List.indexedMap (\barIndex props -> List.indexedMap (toSeriesItem bins props barIndex) (List.reverse props))
       |> List.concat
-      |> List.indexedMap (\colorIndex f -> f colorIndex)
+      |> List.indexedMap (\propIndex f -> f (elIndex + propIndex))
 
 
 
@@ -163,8 +163,8 @@ toBarSeries barsAttrs properties data =
 
 
 {-| -}
-toDotSeries : (data -> Float) -> List (Property data String S.Interpolation S.Dot) -> List data -> List (G.Group S.Interpolation S.Dot (Maybe Float) data)
-toDotSeries toX properties data =
+toDotSeries : Int -> (data -> Float) -> List (Property data String S.Interpolation S.Dot) -> List data -> List (G.Group S.Interpolation S.Dot (Maybe Float) data)
+toDotSeries elIndex toX properties data =
   let toInterConfig attrs =
         Helpers.apply attrs
           { method = Nothing
@@ -265,7 +265,7 @@ toDotSeries toX properties data =
   List.map P.toConfigs properties
     |> List.indexedMap (\lineIndex ps -> List.indexedMap (toSeriesItem lineIndex ps) ps)
     |> List.concat
-    |> List.indexedMap (\colorIndex f -> f colorIndex)
+    |> List.indexedMap (\propIndex f -> f (elIndex + propIndex))
 
 
 
