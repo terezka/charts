@@ -211,7 +211,7 @@ viewChart model =
         List.indexedMap viewLabel hoveredBars
           |> List.concat
 
-    , C.labelAt CA.middle .max [ CA.fontSize 14, CA.moveUp 20 ] [ S.text "How many people in each salary bracket?" ]
+    , C.labelAt CA.middle .max [ CA.fontSize 14, CA.moveUp 20 ] [ S.text "How many women and men in each salary bracket?" ]
     , C.labelAt CA.middle .max [ CA.fontSize 11, CA.moveUp 5 ] [ S.text "Data from Danmarks Statestik" ]
 
     , C.labelAt .min .max [ CA.fontSize 10, CA.alignRight, CA.moveLeft 8, CA.moveUp 10 ] [ S.text "# of people" ]
