@@ -6,7 +6,7 @@ import Request
 import Shared
 import View exposing (View)
 import Charts.SaleryDist as SaleryDist
-import Charts.SaleryDistGender as SaleryDistGender
+import Charts.SaleryDistBar as SaleryDistBar
 import Charts.Basics exposing (Example)
 import Html as H
 import Element as E
@@ -34,14 +34,14 @@ page shared req =
 
 type alias Model =
     { saleryDist : SaleryDist.Model
-    , saleryDistGender : SaleryDistGender.Model
+    , saleryDistBar : SaleryDistBar.Model
     }
 
 
 init : Model
 init =
     { saleryDist = SaleryDist.init
-    , saleryDistGender = SaleryDistGender.init
+    , saleryDistBar = SaleryDistBar.init
     }
 
 
@@ -51,7 +51,7 @@ init =
 
 type Msg
     = SaleryDistMsg SaleryDist.Msg
-    | SaleryDistGenderMsg SaleryDistGender.Msg
+    | SaleryDistBarMsg SaleryDistBar.Msg
 
 
 update : Msg -> Model -> Model
@@ -60,8 +60,8 @@ update msg model =
       SaleryDistMsg subMsg ->
           { model | saleryDist = SaleryDist.update subMsg model.saleryDist }
 
-      SaleryDistGenderMsg subMsg ->
-          { model | saleryDistGender = SaleryDistGender.update subMsg model.saleryDistGender }
+      SaleryDistBarMsg subMsg ->
+          { model | saleryDistBar = SaleryDistBar.update subMsg model.saleryDistBar }
 
 
 
@@ -111,7 +111,7 @@ view model =
               (E.html <| H.map SaleryDistMsg (SaleryDist.view model.saleryDist))
           , E.el
               [ E.paddingEach { top = 0, bottom = 80, left = 0, right = 0 } ]
-              (E.map SaleryDistGenderMsg (SaleryDistGender.view model.saleryDistGender))
+              (E.map SaleryDistBarMsg (SaleryDistBar.view model.saleryDistBar))
           ]
     }
 

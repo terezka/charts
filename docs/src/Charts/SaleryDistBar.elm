@@ -1,4 +1,4 @@
-module Charts.SaleryDistGender exposing (Model, Msg, init, update, view)
+module Charts.SaleryDistBar exposing (Model, Msg, init, update, view)
 
 import Html as H
 import Html.Attributes as HA

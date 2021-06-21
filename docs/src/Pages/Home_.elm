@@ -6,7 +6,6 @@ import Request
 import Shared
 import View exposing (View)
 import Charts.SaleryDist as SaleryDist
-import Charts.SaleryDistGender as SaleryDistGender
 import Charts.Basics exposing (Example)
 import Html as H
 import Element as E
