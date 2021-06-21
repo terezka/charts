@@ -214,7 +214,7 @@ viewChart model =
     , C.labelAt CA.middle .max [ CA.fontSize 14, CA.moveUp 20 ] [ S.text "How many people in each salary bracket?" ]
     , C.labelAt CA.middle .max [ CA.fontSize 11, CA.moveUp 5 ] [ S.text "Data from Danmarks Statestik" ]
 
-    , C.labelAt .min .max [ CA.fontSize 10, CA.alignRight, CA.moveLeft 8, CA.moveUp 5 ] [ S.text "# of people" ]
+    , C.labelAt .min .max [ CA.fontSize 10, CA.alignRight, CA.moveLeft 8, CA.moveUp 10 ] [ S.text "# of people" ]
     , C.labelAt CA.middle .min [ CA.fontSize 10, CA.moveDown 30 ] [ S.text "Salary brackets" ]
 
     , C.legendsAt .max .max -20 0 [ CA.alignRight ] []
