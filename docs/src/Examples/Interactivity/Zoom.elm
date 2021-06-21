@@ -98,7 +98,6 @@ view model =
   C.chart
     [ CA.height 300
     , CA.width 300
-    , CA.static
     , CA.htmlAttrs [ HA.style "cursor" "crosshair" ]
 
     , CE.onMouseDown OnDown CE.getCoords
@@ -214,7 +213,6 @@ smallCode =
   C.chart
     [ CA.height 300
     , CA.width 300
-    , CA.static
     , CA.htmlAttrs [ HA.style "cursor" "crosshair" ]
 
     , CE.onMouseDown OnDown CE.getCoords
@@ -387,7 +385,6 @@ view model =
   C.chart
     [ CA.height 300
     , CA.width 300
-    , CA.static
     , CA.htmlAttrs [ HA.style "cursor" "crosshair" ]
 
     , CE.onMouseDown OnDown CE.getCoords

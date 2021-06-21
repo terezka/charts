@@ -73,8 +73,7 @@ container plane edits below chartEls above =
           }
 
       htmlAttrsDef =
-        [ HA.class "elm-charts__container"
-        , HA.style "position" "relative"
+        [ HA.class "elm-charts__container-inner"
         , HA.style "display" "flex"
         , HA.style "flex-direction" "column"
         ]
@@ -119,7 +118,13 @@ container plane edits below chartEls above =
         , SA.fill "transparent"
         ]
   in
-  H.div htmlAttrs (below ++ [ chart ] ++ above)
+  H.div
+    [ HA.class "elm-charts__container"
+    , HA.style "position" "relative"
+    , HA.style "height" "100%"
+    , HA.style "width" "100%"
+    ]
+    [ H.div htmlAttrs (below ++ [ chart ] ++ above) ]
 
 
 

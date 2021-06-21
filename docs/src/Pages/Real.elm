@@ -107,10 +107,15 @@ view model =
               ]
 
           , E.el
-              [ E.paddingEach { top = 50, bottom = 40, left = 0, right = 0 } ]
+              [ E.paddingEach { top = 50, bottom = 40, left = 0, right = 0 }
+              , E.width (E.px 1000)
+              ]
               (E.html <| H.map SalaryDistMsg (SalaryDist.view model.salaryDist))
+
           , E.el
-              [ E.paddingEach { top = 0, bottom = 80, left = 0, right = 0 } ]
+              [ E.paddingEach { top = 0, bottom = 80, left = 0, right = 0 }
+              , E.width (E.px 1000)
+              ]
               (E.map SalaryDistBarMsg (SalaryDistBar.view model.salaryDistBar))
           ]
     }

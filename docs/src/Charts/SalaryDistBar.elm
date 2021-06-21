@@ -78,7 +78,9 @@ update msg model =
 view : Model -> E.Element Msg
 view model =
   E.column
-    [ EE.onMouseLeave (OnHover []) ]
+    [ EE.onMouseLeave (OnHover [])
+    , E.width (E.px 1000)
+    ]
     [ I.slider
         [ E.height (E.px 30)
         , E.width (E.px 200)
@@ -137,7 +139,6 @@ viewChart model =
   C.chart
     [ CA.height 430
     , CA.width 1000
-    , CA.static
     , CA.marginLeft 0
     , CA.marginRight 0
     , CA.marginTop 40
@@ -226,10 +227,11 @@ viewChart model =
               , H.text (String.fromFloat year)
               ]
       in
-      C.htmlAt .max .max -60 -20
+      C.htmlAt .max .max -20 -30
         [ HA.style "color" "rgb(90 90 90)"
         , HA.style "cursor" "pointer"
         , HA.style "text-align" "right"
+        , HA.style "transform" "translateX(-100%)"
         ]
         (List.map viewYear [ 2016, 2017, 2018, 2019 ])
     ]

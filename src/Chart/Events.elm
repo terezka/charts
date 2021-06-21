@@ -16,7 +16,6 @@ module Chart.Events exposing
 
 -- TODO
 -- Make sure searched position is preserved through filters
--- make sure zoom works without CA.static
 
 -- allow custom attributes
 -- find out what to expose in Svg / Coord

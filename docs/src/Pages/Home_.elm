@@ -67,7 +67,10 @@ view model =
     , body =
         Layout.view
           [ E.el
-              [ E.paddingEach { top = 0, bottom = 40, left = 0, right = 0 } ]
+              [ E.paddingEach { top = 0, bottom = 10, left = 0, right = 0 }
+              , E.width E.fill
+              , E.height (E.px 530)
+              ]
               (E.html <| H.map SalaryDistMsg (SalaryDist.view model.salaryDist))
           , Menu.expanded
           ]

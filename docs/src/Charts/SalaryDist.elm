@@ -93,9 +93,9 @@ view model =
   C.chart
     [ CA.height 530
     , CA.width 1000
-    , CA.static
     , CA.marginLeft 0
     , CA.marginRight 0
+    , CA.marginBottom 50
     , CA.paddingTop 15
 
     , CA.range <|
