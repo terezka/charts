@@ -67,6 +67,7 @@ toDotLegends elIndex properties =
           , opacity = 0
           , design = Nothing
           , dashed = []
+          , attrs = []
           }
 
       toDotLegend props prop colorIndex =

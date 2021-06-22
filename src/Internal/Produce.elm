@@ -50,6 +50,7 @@ toBarSeries elIndex barsAttrs properties data =
           , borderWidth = 0
           , opacity = 1
           , design = Nothing
+          , attrs = []
           }
 
       toBin index prevM curr nextM =
@@ -173,6 +174,7 @@ toDotSeries elIndex toX properties data =
           , opacity = 0
           , design = Nothing
           , dashed = []
+          , attrs = []
           }
 
       toDotConfig attrs =

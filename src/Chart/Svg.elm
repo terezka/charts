@@ -9,7 +9,8 @@ module Chart.Svg exposing
   , Dot, dot, toRadius
   , Tooltip, tooltip
   , Rect, rect
-  , decoder, getNearest, getNearestX, getWithin, getWithinX, isWithinPlane
+  , decoder, getNearest, getNearestX, getWithin, getWithinX
+  , isWithinPlane
   , position, positionHtml
   , Generator, generate, floats, ints, times
   , TickValue, toTickValues, formatTime
@@ -136,6 +137,7 @@ type alias Tick =
   { color : String
   , width : Float
   , length : Float
+  , attrs : List (S.Attribute Never)
   }
 
 
@@ -158,9 +160,10 @@ tick plane edits isX point =
           { length = 5
           , color = "rgb(210, 210, 210)"
           , width = 1
+          , attrs = []
           }
   in
-  S.line
+  withAttrs config.attrs S.line
     [ SA.class "elm-charts__tick"
     , SA.stroke config.color
     , SA.strokeWidth (String.fromFloat config.width)
@@ -189,6 +192,7 @@ type alias Line =
   , dashed : List Float
   , opacity : Float
   , break : Bool
+  , attrs : List (S.Attribute Never)
   }
 
 
@@ -208,6 +212,7 @@ line plane edits =
           , dashed = []
           , opacity = 1
           , break = False
+          , attrs = []
           }
 
       ( ( x1_, x2_ ), ( y1_, y2_ ) ) =
@@ -291,7 +296,7 @@ line plane edits =
         then [ C.Line x1_ y2_, C.Line x2_ y2_ ]
         else [ C.Line x2_ y2_ ]
   in
-  S.path
+  withAttrs config.attrs S.path
     [ SA.class "elm-charts__line"
     , SA.fill "transparent"
     , SA.stroke config.color
@@ -314,6 +319,7 @@ type alias Rect =
   , border : String
   , borderWidth : Float
   , opacity : Float
+  , attrs : List (S.Attribute Never)
   }
 
 
@@ -330,6 +336,7 @@ rect plane edits =
           , border = "rgba(210, 210, 210, 1)"
           , borderWidth = 1
           , opacity = 1
+          , attrs = []
           }
 
       ( ( x1_, x2_ ), ( y1_, y2_ ) ) =
@@ -389,7 +396,7 @@ rect plane edits =
         , C.Line x1_ y1_
         ]
   in
-  S.path
+  withAttrs config.attrs S.path
     [ SA.class "elm-charts__rect"
     , SA.fill config.color
     , SA.fillOpacity (String.fromFloat config.opacity)
@@ -567,6 +574,7 @@ lineLegend edits interAttrsOrg dotAttrsOrg =
           , opacity = 0
           , design = Nothing
           , dashed = []
+          , attrs = []
           }
 
       topMargin =
@@ -624,6 +632,7 @@ type alias Label =
   , color : String
   , anchor : Maybe CA.Anchor
   , rotate : Float
+  , attrs : List (S.Attribute Never)
   }
 
 
@@ -640,6 +649,7 @@ label plane edits inner point =
           , color = "#808BAB"
           , anchor = Nothing
           , rotate = 0
+          , attrs = []
           }
 
       fontStyle =
@@ -654,7 +664,7 @@ label plane edits inner point =
           Just CA.Start -> "text-anchor: start;"
           Just CA.Middle -> "text-anchor: middle;"
   in
-  S.text_
+  withAttrs config.attrs S.text_
     [ SA.class "elm-charts__label"
     , SA.stroke config.border
     , SA.strokeWidth (String.fromFloat config.borderWidth)
@@ -677,6 +687,7 @@ type alias Arrow =
   , width : Float
   , length : Float
   , rotate : Float
+  , attrs : List (S.Attribute Never)
   }
 
 
@@ -691,6 +702,7 @@ arrow plane edits point =
           , width = 4
           , length = 7
           , rotate = 0
+          , attrs = []
           }
 
       points_ =
@@ -703,7 +715,7 @@ arrow plane edits point =
     [ SA.class "elm-charts__arrow"
     , position plane 0 point.x point.y config.xOff config.yOff
     ]
-    [ S.polygon
+    [ withAttrs config.attrs S.polygon
         [ SA.fill config.color
         , SA.points points_
         , SA.transform commands
@@ -725,6 +737,7 @@ type alias Bar =
   , borderWidth : Float
   , opacity : Float
   , design : Maybe CA.Design
+  , attrs : List (S.Attribute Never)
   -- TODO aura
   }
 
@@ -742,6 +755,7 @@ bar plane edits point =
           , color = Helpers.blue
           , opacity = 1
           , design = Nothing
+          , attrs = []
           }
 
       x1_ = point.x1 + Coord.scaleCartesianX plane (config.borderWidth / 2)
@@ -807,7 +821,7 @@ bar plane edits point =
               ]
 
       actualBar fill =
-        S.path
+        withAttrs config.attrs S.path
           [ SA.class "elm-charts__bar"
           , SA.fill fill
           , SA.fillOpacity (String.fromFloat config.opacity)
@@ -843,6 +857,7 @@ type alias Interpolation =
   , opacity : Float
   , design : Maybe CA.Design
   , dashed : List Float
+  , attrs : List (S.Attribute Never)
   }
 
 
@@ -857,13 +872,14 @@ interpolation plane toX toY edits data =
           , opacity = 0
           , design = Nothing
           , dashed = []
+          , attrs = []
           }
 
       limits =
         Coord.fromProps [toX >> Just] [toY] data
 
       view ( first, cmds, _ ) =
-        S.path
+        withAttrs config.attrs S.path
           [ SA.class "elm-charts__interpolation-section"
           , SA.fill "transparent"
           , SA.stroke config.color
@@ -892,6 +908,7 @@ area plane toX toY2M toY edits data =
           , opacity = 0.2
           , design = Nothing
           , dashed = []
+          , attrs = []
           }
 
       limits =
@@ -903,7 +920,7 @@ area plane toX toY2M toY edits data =
           Just design -> toPattern config.color design
 
       view cmds =
-        S.path
+        withAttrs config.attrs S.path
           [ SA.class "elm-charts__area-section"
           , SA.fill fill
           , SA.fillOpacity (String.fromFloat config.opacity)
@@ -1884,3 +1901,12 @@ lengthInCartesianX =
 lengthInCartesianY : Plane -> Float -> Float
 lengthInCartesianY =
   Coord.scaleCartesianY
+
+
+-- HELPERS
+
+
+withAttrs : List (S.Attribute Never) -> (List (S.Attribute msg) -> List (S.Svg msg) -> S.Svg msg) -> List (S.Attribute msg) -> List (S.Svg msg) -> S.Svg msg
+withAttrs attrs toEl defaultAttrs =
+  toEl (defaultAttrs ++ List.map (HA.map never) attrs)
+
