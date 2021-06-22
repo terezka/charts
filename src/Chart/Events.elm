@@ -2,21 +2,24 @@ module Chart.Events exposing
   ( Event(..)
   , onMouseMove, onMouseLeave, onMouseUp, onMouseDown, onClick, on
   , Decoder(..), Point, getCoords, getNearest, getNearestX, getWithin, getWithinX
-  , product, dot, bin, stack, sameX, bar, noMissing
   , map, map2, map3, map4
+  , product, dot, bin, stack, sameX, bar, realValues, named
+  , keep, collect
+  , group, regroup
 
   , Product, Any, Bar, Dot
   , Group, Bin, Stack, SameX
   , getDependent, getIndependent, getDatum, getColor, getName
-  , getTop, getTopLeft, getCenter, getLeft, getRight, getPosition, getLimits, getTooltip
-  , getProducts, getCommonality, group, regroup, named
+  , getTop, getTopLeft, getTopRight
+  , getBottom, getBottomLeft, getBottomRight
+  , getLeft, getRight
+  , getCenter, getPosition, getLimits
+  , getDefaultTooltip
 
-  , collect, filter
+  , getProducts, getCommonality
   )
 
 -- TODO
--- Make sure searched position is preserved through filters
-
 -- allow custom attributes
 -- find out what to expose in Svg / Coord
 -- move things to internal
@@ -80,7 +83,7 @@ type Event data msg =
 
 
 type Decoder data msg =
-  Decoder (List (I.Product I.Any (Maybe Float) data) -> Plane -> Point -> msg)
+  Decoder (List (I.Product Any (Maybe Float) data) -> Plane -> Point -> msg)
 
 
 type alias Point =
@@ -97,7 +100,7 @@ getCoords =
 
 
 {-| -}
-getNearest : Grouping (Product I.Any (Maybe Float) data) (Item result) -> Decoder data (List (Item result))
+getNearest : Grouping (Product Any (Maybe Float) data) (Item result) -> Decoder data (List (Item result))
 getNearest (G.Grouping toPos _ as grouping) =
   Decoder <| \items plane ->
     let groups = group grouping items in
@@ -105,7 +108,7 @@ getNearest (G.Grouping toPos _ as grouping) =
 
 
 {-| -}
-getWithin : Float -> Grouping (Product I.Any (Maybe Float) data) (Item result) -> Decoder data (List (Item result))
+getWithin : Float -> Grouping (Product Any (Maybe Float) data) (Item result) -> Decoder data (List (Item result))
 getWithin radius (G.Grouping toPos _ as grouping) =
   Decoder <| \items plane ->
     let groups = group grouping items in
@@ -113,7 +116,7 @@ getWithin radius (G.Grouping toPos _ as grouping) =
 
 
 {-| -}
-getNearestX : Grouping (Product I.Any (Maybe Float) data) (Item result) -> Decoder data (List (Item result))
+getNearestX : Grouping (Product Any (Maybe Float) data) (Item result) -> Decoder data (List (Item result))
 getNearestX (G.Grouping toPos _ as grouping) =
   Decoder <| \items plane ->
     let groups = group grouping items in
@@ -121,7 +124,7 @@ getNearestX (G.Grouping toPos _ as grouping) =
 
 
 {-| -}
-getWithinX : Float -> Grouping (Product I.Any (Maybe Float) data) (Item result) -> Decoder data (List (Item result))
+getWithinX : Float -> Grouping (Product Any (Maybe Float) data) (Item result) -> Decoder data (List (Item result))
 getWithinX radius (G.Grouping toPos _ as grouping) =
   Decoder <| \items plane ->
     let groups = group grouping items in
@@ -195,7 +198,7 @@ type alias Group inter config value data =
 
 
 
-getProducts : Group inter config value data -> List (Product I.Any value data)
+getProducts : Group inter config value data -> List (Product Any value data)
 getProducts =
   G.getProducts
 
@@ -218,9 +221,14 @@ group =
   G.group
 
 
-regroup : Grouping (I.Product a v data) b -> Group i a v data -> List b
+regroup : Grouping (Product a v data) b -> Group i a v data -> List b
 regroup =
   G.regroup
+
+
+keep : Grouping (Product b v data) (Product c x data) -> Grouping a (Product b v data) -> Grouping a (Product c x data)
+keep =
+  G.keep
 
 
 collect : Grouping b c -> Grouping a b -> Grouping a c
@@ -228,16 +236,11 @@ collect =
   G.collect
 
 
-filter : Grouping (I.Product b v data) (I.Product c x data) -> Grouping a (Group i b v data) -> Grouping a (Group i c x data)
-filter =
-  G.filter
-
-
 type alias Any =
   I.Any
 
 
-product : Grouping (I.Product I.Any value data) (I.Product I.Any value data)
+product : Grouping (Product Any value data) (Product Any value data)
 product =
   G.product
 
@@ -246,7 +249,7 @@ type alias Dot =
   CS.Dot
 
 
-dot : Grouping (I.Product I.Any value data) (I.Product Dot value data)
+dot : Grouping (Product Any value data) (Product Dot value data)
 dot =
   G.dot
 
@@ -254,17 +257,18 @@ dot =
 type alias Bar =
   CS.Bar
 
-bar : Grouping (I.Product I.Any value data) (I.Product Bar value data)
+
+bar : Grouping (Product Any value data) (Product Bar value data)
 bar =
   G.bar
 
 
-noMissing : Grouping (I.Product config (Maybe Float) data) (I.Product config Float data)
-noMissing =
-  G.noMissing
+realValues : Grouping (Product config (Maybe Float) data) (Product config Float data)
+realValues =
+  G.realValues
 
 
-named : List String -> Grouping (I.Product config value data) (I.Product config value data)
+named : List String -> Grouping (Product config value data) (Product config value data)
 named =
   G.named
 
@@ -274,7 +278,7 @@ type alias SameX =
   G.SameX
 
 
-sameX : Grouping (I.Product config value data) (Group SameX config value data)
+sameX : Grouping (Product config value data) (Group SameX config value data)
 sameX =
   G.sameX
 
@@ -284,7 +288,7 @@ type alias Stack datum =
   G.Stack datum
 
 
-stack : Grouping (I.Product config value data) (Group (Stack data) config value data)
+stack : Grouping (Product config value data) (Group (Stack data) config value data)
 stack =
   G.stack
 
@@ -294,7 +298,7 @@ type alias Bin data =
   G.Bin data
 
 
-bin : Grouping (I.Product config value data) (Group (Bin data) config value data)
+bin : Grouping (Product config value data) (Group (Bin data) config value data)
 bin =
   G.bin
 
@@ -337,9 +341,24 @@ getTopLeft p =
   I.getPosition p >> C.topLeft
 
 
+getTopRight : Plane -> Item a -> Point
+getTopRight p =
+  I.getPosition p >> C.topRight
+
+
 getBottom : Plane -> Item a -> Point
 getBottom p =
   I.getPosition p >> C.bottom
+
+
+getBottomLeft : Plane -> Item a -> Point
+getBottomLeft p =
+  I.getPosition p >> C.bottomLeft
+
+
+getBottomRight : Plane -> Item a -> Point
+getBottomRight p =
+  I.getPosition p >> C.bottomRight
 
 
 getPosition : Plane -> Item a -> Position
@@ -352,6 +371,6 @@ getLimits =
   I.getLimits
 
 
-getTooltip : Item a -> List (Html Never)
-getTooltip =
+getDefaultTooltip : Item a -> List (Html Never)
+getDefaultTooltip =
   I.toHtml

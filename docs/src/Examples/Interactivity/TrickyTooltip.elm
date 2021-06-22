@@ -1,4 +1,4 @@
-module Examples.Interactivity.FilterSearch exposing (..)
+module Examples.Interactivity.TrickyTooltip exposing (..)
 
 
 -- THIS IS A GENERATED MODULE!
@@ -11,7 +11,7 @@ import Chart.Events as CE
 
 
 type alias Model =
-  { hovering : List (CE.Group (CE.Stack Datum) CE.Dot (Maybe Float) Datum) }
+  { hovering : List (CE.Group (CE.Bin Datum) CE.Bar (Maybe Float) Datum) }
 
 
 init : Model
@@ -20,7 +20,7 @@ init =
 
 
 type Msg
-  = OnHover (List (CE.Group (CE.Stack Datum) CE.Dot (Maybe Float) Datum))
+  = OnHover (List (CE.Group (CE.Bin Datum) CE.Bar (Maybe Float) Datum))
 
 
 update : Msg -> Model -> Model
@@ -35,8 +35,8 @@ view model =
   C.chart
     [ CA.height 300
     , CA.width 300
-    , CE.dot
-        |> CE.collect CE.stack
+    , CE.bar
+        |> CE.collect CE.bin
         |> CE.getNearest
         |> CE.onMouseMove OnHover
     , CE.onMouseLeave (OnHover [])
@@ -44,28 +44,29 @@ view model =
     [ C.grid []
     , C.xLabels []
     , C.yLabels []
-    , C.series .x
-        [ C.stacked
-          [ C.interpolated .p [  ] [ CA.circle ]
-          , C.interpolated .q [  ] [ CA.circle ]
-          ]
+    , C.bars
+        []
+        [ C.bar .w []
+        , C.stacked
+            [ C.bar .p []
+            , C.bar .q []
+            ]
         ]
         data
-    , C.bars [ CA.x1 .x1, CA.x2 .x2 ]
-        [ C.bar .z [ CA.color CA.purple ]
-        ]
-        data
-    , C.each model.hovering <| \p item ->
-        [ C.tooltip item [] [] [] ]
+    , C.each model.hovering <| \p bin ->
+        let stacks = CE.regroup CE.stack bin
+            toTooltip stack = C.tooltip stack [ CA.onLeftOrRight ] [] []
+        in
+        List.map toTooltip stacks
     ]
 
 
 meta =
   { category = "Interactivity"
   , categoryOrder = 5
-  , name = "Filter item search"
-  , description = "Narrow down tooltip item search."
-  , order = 15
+  , name = "Several tooltips for single item"
+  , description = "Add tooltip for each stack in hovered bin."
+  , order = 20
   }
 
 
@@ -102,8 +103,8 @@ smallCode =
   C.chart
     [ CA.height 300
     , CA.width 300
-    , CE.dot
-        |> CE.collect CE.stack
+    , CE.bar
+        |> CE.collect CE.bin
         |> CE.getNearest
         |> CE.onMouseMove OnHover
     , CE.onMouseLeave (OnHover [])
@@ -111,19 +112,20 @@ smallCode =
     [ C.grid []
     , C.xLabels []
     , C.yLabels []
-    , C.series .x
-        [ C.stacked
-          [ C.interpolated .p [  ] [ CA.circle ]
-          , C.interpolated .q [  ] [ CA.circle ]
-          ]
+    , C.bars
+        []
+        [ C.bar .w []
+        , C.stacked
+            [ C.bar .p []
+            , C.bar .q []
+            ]
         ]
         data
-    , C.bars [ CA.x1 .x1, CA.x2 .x2 ]
-        [ C.bar .z [ CA.color CA.purple ]
-        ]
-        data
-    , C.each model.hovering <| \\p item ->
-        [ C.tooltip item [] [] [] ]
+    , C.each model.hovering <| \\p bin ->
+        let stacks = CE.regroup CE.stack bin
+            toTooltip stack = C.tooltip stack [ CA.onLeftOrRight ] [] []
+        in
+        List.map toTooltip stacks
     ]
   """
 
@@ -139,7 +141,7 @@ import Chart.Events as CE
 
 
 type alias Model =
-  { hovering : List (CE.Group (CE.Stack Datum) CE.Dot (Maybe Float) Datum) }
+  { hovering : List (CE.Group (CE.Bin Datum) CE.Bar (Maybe Float) Datum) }
 
 
 init : Model
@@ -148,7 +150,7 @@ init =
 
 
 type Msg
-  = OnHover (List (CE.Group (CE.Stack Datum) CE.Dot (Maybe Float) Datum))
+  = OnHover (List (CE.Group (CE.Bin Datum) CE.Bar (Maybe Float) Datum))
 
 
 update : Msg -> Model -> Model
@@ -163,8 +165,8 @@ view model =
   C.chart
     [ CA.height 300
     , CA.width 300
-    , CE.dot
-        |> CE.collect CE.stack
+    , CE.bar
+        |> CE.collect CE.bin
         |> CE.getNearest
         |> CE.onMouseMove OnHover
     , CE.onMouseLeave (OnHover [])
@@ -172,18 +174,19 @@ view model =
     [ C.grid []
     , C.xLabels []
     , C.yLabels []
-    , C.series .x
-        [ C.stacked
-          [ C.interpolated .p [  ] [ CA.circle ]
-          , C.interpolated .q [  ] [ CA.circle ]
-          ]
+    , C.bars
+        []
+        [ C.bar .w []
+        , C.stacked
+            [ C.bar .p []
+            , C.bar .q []
+            ]
         ]
         data
-    , C.bars [ CA.x1 .x1, CA.x2 .x2 ]
-        [ C.bar .z [ CA.color CA.purple ]
-        ]
-        data
-    , C.each model.hovering <| \\p item ->
-        [ C.tooltip item [] [] [] ]
+    , C.each model.hovering <| \\p bin ->
+        let stacks = CE.regroup CE.stack bin
+            toTooltip stack = C.tooltip stack [ CA.onLeftOrRight ] [] []
+        in
+        List.map toTooltip stacks
     ]
   """

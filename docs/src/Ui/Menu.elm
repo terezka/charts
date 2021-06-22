@@ -83,7 +83,7 @@ description =
     , E.width (E.px 300)
     , E.alignTop
     ]
-    [ E.text "A SVG chart library for making beautiful charts painlessly. Written in all Elm. " ]
+    [ E.text "A SVG chart library for making beautiful charts painlessly. Written in all Elm." ]
 
 
 small : E.Element msg

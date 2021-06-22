@@ -16,7 +16,7 @@ import Internal.Helpers as Helpers
 {-| -}
 type alias Group inter config value datum =
   I.Item
-    { config : inter -- TODO rename
+    { config : inter
     , items : List (I.Product config value datum)
     }
 
@@ -56,16 +56,10 @@ regroup (Grouping _ func) (I.Item item) =
   func item.config.items
 
 
-filter : Grouping (I.Product b v data) (I.Product c x data) -> Grouping a (Group i b v data) -> Grouping a (Group i c x data)
-filter (Grouping toPos2 func2) (Grouping toPos1 func1) =
-  Grouping I.getPosition <| \items ->
-    let func (I.Item item) =
-          case func2 item.config.items of
-            [] -> Nothing
-            some -> Just (toGroup item.config.config some)
-                      -- TODO preserving limits?
-    in
-    List.filterMap func (func1 items)
+keep : Grouping (I.Product b v data) (I.Product c x data) -> Grouping a (I.Product b v data) -> Grouping a (I.Product c x data)
+keep (Grouping toPos2 func2) (Grouping toPos1 func1) =
+  Grouping toPos2 <| \items ->
+    func2 (func1 items)
 
 
 collect : Grouping b c -> Grouping a b -> Grouping a c
@@ -95,8 +89,8 @@ bar =
   Grouping I.getPosition (List.filterMap I.isBar)
 
 
-noMissing : Grouping (I.Product config (Maybe Float) data) (I.Product config Float data)
-noMissing =
+realValues : Grouping (I.Product config (Maybe Float) data) (I.Product config Float data)
+realValues =
   Grouping I.getPosition (List.filterMap I.toNonMissing)
 
 

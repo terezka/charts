@@ -36,7 +36,7 @@ view model =
   C.chart
     [ CA.height 300
     , CA.width 300
-    , CE.onMouseMove OnHover (CE.getNearest <| CE.collect CE.noMissing CE.dot)
+    , CE.onMouseMove OnHover (CE.getNearest <| CE.collect CE.realValues CE.dot)
     , CE.onMouseLeave (OnHover [])
     ]
     [ C.grid []
@@ -108,7 +108,7 @@ smallCode =
   C.chart
     [ CA.height 300
     , CA.width 300
-    , CE.onMouseMove OnHover (CE.getNearest <| CE.collect CE.noMissing CE.dot)
+    , CE.onMouseMove OnHover (CE.getNearest <| CE.collect CE.realValues CE.dot)
     , CE.onMouseLeave (OnHover [])
     ]
     [ C.grid []
@@ -174,7 +174,7 @@ view model =
   C.chart
     [ CA.height 300
     , CA.width 300
-    , CE.onMouseMove OnHover (CE.getNearest <| CE.collect CE.noMissing CE.dot)
+    , CE.onMouseMove OnHover (CE.getNearest <| CE.collect CE.realValues CE.dot)
     , CE.onMouseLeave (OnHover [])
     ]
     [ C.grid []
