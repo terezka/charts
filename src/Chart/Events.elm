@@ -22,6 +22,7 @@ module Chart.Events exposing
 -- TODO
 -- find out what to expose in Svg / Coord
 -- move things to internal
+-- aura -> highlight?
 
 
 import Html as H exposing (Html)
@@ -34,6 +35,7 @@ import Chart.Attributes as CA exposing (Attribute)
 import Internal.Item as I
 import Internal.Helpers as Helpers
 import Internal.Group as G
+
 
 
 -- EVENTS

@@ -738,14 +738,14 @@ type alias Bar =
   , opacity : Float
   , design : Maybe CA.Design
   , attrs : List (S.Attribute Never)
-  -- TODO aura
+  , aura : Float
+  , auraWidth : Float
   }
 
 
 {-| -}
 bar : Plane -> List (CA.Attribute Bar) -> Position -> Svg msg
 bar plane edits point =
-  -- TODO round via clipPath
   let config =
         apply edits
           { roundTop = 0
@@ -756,12 +756,26 @@ bar plane edits point =
           , opacity = 1
           , design = Nothing
           , attrs = []
+          , aura = 0
+          , auraWidth = 10
           }
 
-      x1_ = point.x1 + Coord.scaleCartesianX plane (config.borderWidth / 2)
-      x2_ = point.x2 - Coord.scaleCartesianX plane (config.borderWidth / 2)
-      y1_ = point.y1 + Coord.scaleCartesianY plane (config.borderWidth / 2)
-      y2_ = point.y2 - Coord.scaleCartesianY plane (config.borderWidth / 2)
+      borderWidthCarX = Coord.scaleCartesianX plane (config.borderWidth / 2)
+      borderWidthCarY = Coord.scaleCartesianY plane (config.borderWidth / 2)
+      auraWidthCarX = borderWidthCarX + Coord.scaleCartesianX plane (config.auraWidth / 2)
+      auraWidthCarY = borderWidthCarY + Coord.scaleCartesianY plane (config.auraWidth / 2)
+
+      auraPos =
+        { x1 = x_ - auraWidthCarX
+        , x2 = x_ + auraWidthCarX + w
+        , y1 = bs - auraWidthCarY
+        , y2 = y_ + auraWidthCarY
+        }
+
+      x1_ = point.x1 + borderWidthCarX
+      x2_ = point.x2 - borderWidthCarX
+      y1_ = point.y1 + borderWidthCarY
+      y2_ = point.y2 - borderWidthCarY
 
       x_ = x1_
       y_ = max y1_ y2_
@@ -775,73 +789,116 @@ bar plane edits point =
       rxB = Coord.scaleCartesianX plane bB
       ryB = Coord.scaleCartesianY plane bB
 
-      commands =
+      ( commands, highlightCommands ) =
         if bs == y_ then
-          []
+          ( [], [] )
         else
           case ( config.roundTop > 0, config.roundBottom > 0 ) of
             ( False, False ) ->
-              [ C.Move x_ bs
-              , C.Line x_ y_
-              , C.Line (x_ + w) y_
-              , C.Line (x_ + w) bs
-              , C.Line x_ bs
-              ]
+              ( [ C.Move x_ bs
+                , C.Line x_ y_
+                , C.Line (x_ + w) y_
+                , C.Line (x_ + w) bs
+                , C.Line x_ bs
+                ]
+              , [ C.Move auraPos.x1 auraPos.y1
+                , C.Line auraPos.x1 auraPos.y2
+                , C.Line auraPos.x2 auraPos.y2
+                , C.Line auraPos.x2 auraPos.y1
+                ]
+              )
 
             ( True, False ) ->
-              [ C.Move x_ bs
-              , C.Line x_ (y_ + -ryT)
-              , C.Arc bT bT -45 False True (x_ + rxT) y_
-              , C.Line (x_ + w - rxT) y_
-              , C.Arc bT bT -45 False True (x_ + w) (y_ + -ryT)
-              , C.Line (x_ + w) bs
-              , C.Line x_ bs
-              ]
+              ( [ C.Move x_ bs
+                , C.Line x_ (y_ + -ryT)
+                , C.Arc bT bT -45 False True (x_ + rxT) y_
+                , C.Line (x_ + w - rxT) y_
+                , C.Arc bT bT -45 False True (x_ + w) (y_ + -ryT)
+                , C.Line (x_ + w) bs
+                , C.Line x_ bs
+                ]
+              , [ C.Move auraPos.x1 auraPos.y1
+                , C.Line auraPos.x1 (auraPos.y2 - ryT)
+                , C.Arc bT bT -45 False True (auraPos.x1 + rxT) auraPos.y2
+                , C.Line (auraPos.x2 - rxT) auraPos.y2
+                , C.Arc bT bT -45 False True auraPos.x2 (auraPos.y2 - ryT)
+                , C.Line auraPos.x2 auraPos.y1
+                ]
+              )
 
             ( False, True ) ->
-              [ C.Move (x_ + rxB) bs
-              , C.Arc bB bB -45 False True x_ (bs + ryB)
-              , C.Line x_ y_
-              , C.Line (x_ + w) y_
-              , C.Line (x_ + w) (bs + ryB)
-              , C.Arc bB bB -45 False True (x_ + w - rxB) bs
-              , C.Line (x_ + rxB) bs
-              ]
+              ( [ C.Move (x_ + rxB) bs
+                , C.Arc bB bB -45 False True x_ (bs + ryB)
+                , C.Line x_ y_
+                , C.Line (x_ + w) y_
+                , C.Line (x_ + w) (bs + ryB)
+                , C.Arc bB bB -45 False True (x_ + w - rxB) bs
+                , C.Line (x_ + rxB) bs
+                ]
+              , [ C.Move (x_ + rxB) bs
+                , C.Arc bB bB -45 False True x_ (bs + ryB)
+                , C.Line x_ y_
+                , C.Line (x_ + w) y_
+                , C.Line (x_ + w) (bs + ryB)
+                , C.Arc bB bB -45 False True (x_ + w - rxB) bs
+                ]
+              )
 
             ( True, True ) ->
-              [ C.Move (x_ + rxB) bs
-              , C.Arc bB bB -45 False True x_ (bs + ryB)
-              , C.Line x_ (y_ - ryT)
-              , C.Arc bT bT -45 False True (x_ + rxT) y_
-              , C.Line (x_ + w - rxT) y_
-              , C.Arc bT bT -45 False True (x_ + w) (y_ - ryT)
-              , C.Line (x_ + w) (bs + ryB)
-              , C.Arc bB bB -45 False True (x_ + w - rxB) bs
-              , C.Line (x_ + rxB) bs
-              ]
+              ( [ C.Move (x_ + rxB) bs
+                , C.Arc bB bB -45 False True x_ (bs + ryB)
+                , C.Line x_ (y_ - ryT)
+                , C.Arc bT bT -45 False True (x_ + rxT) y_
+                , C.Line (x_ + w - rxT) y_
+                , C.Arc bT bT -45 False True (x_ + w) (y_ - ryT)
+                , C.Line (x_ + w) (bs + ryB)
+                , C.Arc bB bB -45 False True (x_ + w - rxB) bs
+                , C.Line (x_ + rxB) bs
+                ]
+              , [ C.Move (x_ + rxB) bs
+                , C.Arc bB bB -45 False True x_ (bs + ryB)
+                , C.Line x_ (y_ - ryT)
+                , C.Arc bT bT -45 False True (x_ + rxT) y_
+                , C.Line (x_ + w - rxT) y_
+                , C.Arc bT bT -45 False True (x_ + w) (y_ - ryT)
+                , C.Line (x_ + w) (bs + ryB)
+                , C.Arc bB bB -45 False True (x_ + w - rxB) bs
+                ]
+              )
 
-      actualBar fill =
-        withAttrs config.attrs S.path
-          [ SA.class "elm-charts__bar"
-          , SA.fill fill
-          , SA.fillOpacity (String.fromFloat config.opacity)
-          , SA.stroke config.border
-          , SA.strokeWidth (String.fromFloat config.borderWidth)
-          , SA.d (C.description plane commands)
-          , SA.style (clipperStyle plane (Coord.Position x1_ x2_ bs y_))
+      viewAuraBar fill =
+        if config.aura == 0
+        then viewBar fill config.opacity config.border config.borderWidth 1 commands (Coord.Position x1_ x2_ bs y_)
+        else
+        S.g
+          [ SA.class "elm-charts__bar-with-aura" ]
+          [ viewBar fill 0 config.color config.auraWidth config.aura highlightCommands (Coord.Position (x1_ - auraWidthCarX) (x2_ + auraWidthCarX) (bs - auraWidthCarY) (y_ + auraWidthCarY))
+          , viewBar fill config.opacity config.border config.borderWidth 1 commands (Coord.Position x1_ x2_ bs y_)
           ]
-          []
+
+      viewBar fill fillOpacity border borderWidth strokeOpacity cmds limits =
+          withAttrs config.attrs S.path
+            [ SA.class "elm-charts__bar"
+            , SA.fill fill
+            , SA.fillOpacity (String.fromFloat fillOpacity)
+            , SA.stroke border
+            , SA.strokeWidth (String.fromFloat borderWidth)
+            , SA.strokeOpacity (String.fromFloat strokeOpacity)
+            , SA.d (C.description plane cmds)
+            , SA.style (clipperStyle plane limits)
+            ]
+            []
   in
   case config.design of
     Nothing ->
-      actualBar config.color
+      viewAuraBar config.color
 
     Just design ->
       let ( patternDefs, fill ) = toPattern config.color design in
       S.g
         [ SA.class "elm-charts__bar-with-pattern" ]
         [ patternDefs
-        , actualBar fill
+        , viewAuraBar fill
         ]
 
 
@@ -1686,7 +1743,6 @@ clipperStyle plane limits =
           ]
   in
   "clip-path: path('" ++ path ++ "');"
-
 
 
 

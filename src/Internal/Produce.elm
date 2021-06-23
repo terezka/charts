@@ -51,6 +51,8 @@ toBarSeries elIndex barsAttrs properties data =
           , opacity = 1
           , design = Nothing
           , attrs = []
+          , aura = 0
+          , auraWidth = 10
           }
 
       toBin index prevM curr nextM =
