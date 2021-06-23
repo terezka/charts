@@ -41,13 +41,15 @@ view model =
     , C.xLabels []
     , C.yLabels []
     , C.bars
-        [ CA.margin 0.2
+        [ CA.roundTop 0.7
+        --, CA.roundBottom 0.7
+        , CA.margin 0.2
         , CA.spacing 0.2
         ]
         [ C.bar .z [ CA.striped [] ]
-            |> C.amongst model.hovering (\_ -> [ CA.aura 0.5, CA.auraWidth 5 ])
+            |> C.amongst model.hovering (\_ -> [ CA.aura 0.5, CA.auraWidth 10 ])
         , C.bar .v [ CA.gradient [ CA.colors [ "#7c29ed", "#7c29ed1F" ] ] ]
-            |> C.amongst model.hovering (\_ -> [ CA.aura 0.5, CA.auraWidth 5 ])
+            |> C.amongst model.hovering (\_ -> [ CA.aura 0.5, CA.auraWidth 10 ])
         ]
         data
     , C.each model.hovering <| \p item ->

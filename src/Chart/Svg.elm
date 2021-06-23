@@ -823,6 +823,13 @@ bar plane edits point =
                 , C.Line (auraPos.x2 - rxT) auraPos.y2
                 , C.Arc bT bT -45 False True auraPos.x2 (auraPos.y2 - ryT)
                 , C.Line auraPos.x2 auraPos.y1
+                -- ^ outer
+                , C.Line (x_ + w) bs
+                , C.Line (x_ + w) (y_ - ryT)
+                , C.Arc bT bT -45 False False (x_ + w - rxT) y_
+                , C.Line (x_ + rxT) y_
+                , C.Arc bT bT -45 False False x_ (y_ - ryT)
+                , C.Line x_ bs
                 ]
               )
 
@@ -835,12 +842,12 @@ bar plane edits point =
                 , C.Arc bB bB -45 False True (x_ + w - rxB) bs
                 , C.Line (x_ + rxB) bs
                 ]
-              , [ C.Move (x_ + rxB) bs
-                , C.Arc bB bB -45 False True x_ (bs + ryB)
-                , C.Line x_ y_
-                , C.Line (x_ + w) y_
-                , C.Line (x_ + w) (bs + ryB)
-                , C.Arc bB bB -45 False True (x_ + w - rxB) bs
+              , [ C.Move (auraPos.x1 + rxB) bs
+                , C.Arc bB bB -45 False True auraPos.x1 (bs + ryB)
+                , C.Line auraPos.x1 y_
+                , C.Line (auraPos.x2) y_
+                , C.Line (auraPos.x2) (bs + ryB)
+                , C.Arc bB bB -45 False True (auraPos.x2 - rxB) bs
                 ]
               )
 
@@ -855,14 +862,14 @@ bar plane edits point =
                 , C.Arc bB bB -45 False True (x_ + w - rxB) bs
                 , C.Line (x_ + rxB) bs
                 ]
-              , [ C.Move (x_ + rxB) bs
-                , C.Arc bB bB -45 False True x_ (bs + ryB)
-                , C.Line x_ (y_ - ryT)
-                , C.Arc bT bT -45 False True (x_ + rxT) y_
-                , C.Line (x_ + w - rxT) y_
-                , C.Arc bT bT -45 False True (x_ + w) (y_ - ryT)
-                , C.Line (x_ + w) (bs + ryB)
-                , C.Arc bB bB -45 False True (x_ + w - rxB) bs
+              , [ C.Move (auraPos.x1 + rxB) auraPos.y1
+                , C.Arc bB bB -45 False True auraPos.x1 (auraPos.y1 + ryB)
+                , C.Line auraPos.x1 (auraPos.y2 - ryT)
+                , C.Arc bT bT -45 False True (auraPos.x1 + rxT) auraPos.y2
+                , C.Line (auraPos.x2 - rxT) auraPos.y2
+                , C.Arc bT bT -45 False True (auraPos.x2) (auraPos.y2 - ryT)
+                , C.Line (auraPos.x2) (auraPos.y1 + ryB)
+                , C.Arc bB bB -45 False True (auraPos.x2 - rxB) auraPos.y1
                 ]
               )
 
@@ -872,7 +879,7 @@ bar plane edits point =
         else
         S.g
           [ SA.class "elm-charts__bar-with-aura" ]
-          [ viewBar fill 0 config.color config.auraWidth config.aura highlightCommands (Coord.Position (x1_ - auraWidthCarX) (x2_ + auraWidthCarX) (bs - auraWidthCarY) (y_ + auraWidthCarY))
+          [ viewBar config.color config.aura "transparent" 0 0 highlightCommands (Coord.Position (x1_ - auraWidthCarX) (x2_ + auraWidthCarX) (bs - auraWidthCarY) (y_ + auraWidthCarY))
           , viewBar fill config.opacity config.border config.borderWidth 1 commands (Coord.Position x1_ x2_ bs y_)
           ]
 
