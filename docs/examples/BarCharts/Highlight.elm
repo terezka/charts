@@ -42,17 +42,14 @@ view model =
     , C.yLabels []
     , C.bars
         [ CA.roundTop 1
-        , CA.roundBottom 1
         , CA.margin 0.2
         , CA.spacing 0.15
         ]
-        --[ C.stacked
-            [ C.bar .z [ CA.striped [], CA.border CA.pink, CA.borderWidth 1 ]
-                |> C.amongst model.hovering (\_ -> [ CA.aura 0.25 ])
-            , C.bar .v [ CA.gradient [ CA.colors [ "#7c29ed", "#7c29ed1F" ] ] ]
-                |> C.amongst model.hovering (\_ -> [ CA.aura 0.25 ])
-            ]
-        --]
+        [ C.bar .z [ CA.striped [], CA.border CA.pink, CA.borderWidth 1 ]
+            |> C.amongst model.hovering (\_ -> [ CA.aura 0.25 ])
+        , C.bar .v [ CA.gradient [ CA.colors [ "#7c29ed", "#7c29ed1F" ] ] ]
+            |> C.amongst model.hovering (\_ -> [ CA.aura 0.25 ])
+        ]
         data
     , C.each model.hovering <| \p item ->
         [ C.tooltip item [] [] [] ]

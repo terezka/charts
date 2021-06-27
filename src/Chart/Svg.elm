@@ -783,7 +783,6 @@ bar plane edits point =
       w = x2_ - x_
       bT = Coord.scaleSVGX plane w * 0.5 * (clamp 0 1 config.roundTop)
       bB = Coord.scaleSVGX plane w * 0.5 * (clamp 0 1 config.roundBottom)
-      ys = abs (Coord.scaleSVGY plane y_)
       rxT = Coord.scaleCartesianX plane bT
       ryT = Coord.scaleCartesianY plane bT
       rxB = Coord.scaleCartesianX plane bB
@@ -801,10 +800,15 @@ bar plane edits point =
                 , C.Line (x_ + w) bs
                 , C.Line x_ bs
                 ]
-              , [ C.Move auraPos.x1 auraPos.y1
+              , [ C.Move auraPos.x1 bs
                 , C.Line auraPos.x1 auraPos.y2
                 , C.Line auraPos.x2 auraPos.y2
-                , C.Line auraPos.x2 auraPos.y1
+                , C.Line auraPos.x2 bs
+                -- ^ outer
+                , C.Line (x_ + w) bs
+                , C.Line (x_ + w) y_
+                , C.Line x_ y_
+                , C.Line x_ bs
                 ]
               )
 
@@ -878,6 +882,7 @@ bar plane edits point =
                 , C.Arc bT bT -45 False True auraPos.x2 (auraPos.y2 - ryT)
                 , C.Line auraPos.x2 (auraPos.y1 + ryB)
                 , C.Arc bB bB -45 False True (auraPos.x2 - rxB) auraPos.y1
+                , C.Line (auraPos.x1 + rxB) auraPos.y1
                 -- ^ outer
                 , C.Line (x_ + w - rxB) bs
                 , C.Arc bB bB -45 False False (x_ + w) (bs + ryB)
@@ -890,14 +895,17 @@ bar plane edits point =
                 ]
               )
 
+      cutLimitsBar = Coord.Position x1_ x2_ bs y_
+      cutLimitsAura = Coord.Position (x1_ - auraWidthCarX) (x2_ + auraWidthCarX) (bs - auraWidthCarY) (y_ + auraWidthCarY + auraWidthCarY)
+
       viewAuraBar fill =
         if config.aura == 0
-        then viewBar fill config.opacity config.border config.borderWidth 1 commands (Coord.Position x1_ x2_ bs y_)
+        then viewBar fill config.opacity config.border config.borderWidth 1 commands cutLimitsBar
         else
         S.g
           [ SA.class "elm-charts__bar-with-aura" ]
-          [ viewBar config.color config.aura "transparent" 0 0 highlightCommands (Coord.Position (x1_ - auraWidthCarX) (x2_ + auraWidthCarX) (bs - auraWidthCarY) (y_ + auraWidthCarY))
-          , viewBar fill config.opacity config.border config.borderWidth 1 commands (Coord.Position x1_ x2_ bs y_)
+          [ viewBar config.color config.aura "transparent" 0 0 highlightCommands cutLimitsAura
+          , viewBar fill config.opacity config.border config.borderWidth 1 commands cutLimitsBar
           ]
 
       viewBar fill fillOpacity border borderWidth strokeOpacity cmds limits =
