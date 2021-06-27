@@ -123,7 +123,7 @@ toBarSeries elIndex barsAttrs properties data =
             roundTop = if isSingle || isLast then barsConfig.roundTop else 0
             roundBottom = if isSingle || isFirst then barsConfig.roundBottom else 0
             color = Helpers.toDefaultColor colorIndex
-            defaultAttrs = [ CA.roundTop roundTop, CA.roundBottom roundBottom, CA.color color ]
+            defaultAttrs = [ CA.roundTop roundTop, CA.roundBottom roundBottom, CA.color color, CA.border color ]
             attrs = defaultAttrs ++ section.attrs ++ section.extra barIndex sectionIndex section.meta bin.datum
             product = toBarConfig attrs
         in

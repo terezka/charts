@@ -47,8 +47,9 @@ toBarLegends elIndex barsAttrs properties =
 
       toBarLegend colorIndex prop =
         let defaultName = "Property #" ++ String.fromInt (colorIndex + 1)
+            defaultColor = Helpers.toDefaultColor colorIndex
             rounding = max barsConfig.roundTop barsConfig.roundBottom
-            defaultAttrs = [ CA.roundTop rounding, CA.roundBottom rounding, CA.color (Helpers.toDefaultColor colorIndex) ]
+            defaultAttrs = [ CA.roundTop rounding, CA.roundBottom rounding, CA.color defaultColor, CA.border defaultColor ]
         in
         BarLegend (Maybe.withDefault defaultName prop.meta) (defaultAttrs ++ prop.attrs)
   in
