@@ -50,7 +50,7 @@ expanded =
                     , Link "/documentation/scatter-charts" "Scatter charts"
                     , Link "/documentation/line-charts" "Line charts"
                     , Link "/documentation/bar-charts" "Bar charts"
-                    , Link "/documentation/frame-and-navigation" "Frame and navigation"
+                    , Link "/documentation/navigation" "Navigation"
                     , Link "/documentation/interactivity" "Interactivity"
                     ]
                 }

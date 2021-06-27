@@ -37,7 +37,7 @@ view model =
 
 
 meta =
-  { category = "Frame and navigation"
+  { category = "Navigation"
   , categoryOrder = 4
   , name = "Background"
   , description = "Color the frame."

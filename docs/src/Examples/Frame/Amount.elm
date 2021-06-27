@@ -23,7 +23,7 @@ view model =
 
 
 meta =
-  { category = "Frame and navigation"
+  { category = "Navigation"
   , categoryOrder = 4
   , name = "Amount of labels/ticks"
   , description = "Change the number of labels or ticks."

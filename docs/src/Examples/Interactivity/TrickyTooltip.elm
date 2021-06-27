@@ -64,7 +64,7 @@ view model =
 meta =
   { category = "Interactivity"
   , categoryOrder = 5
-  , name = "Several tooltips for single item"
+  , name = "Multiple tooltips for single group"
   , description = "Add tooltip for each stack in hovered bin."
   , order = 20
   }

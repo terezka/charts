@@ -55,7 +55,7 @@ view model =
 
 
 meta =
-  { category = "Frame and navigation"
+  { category = "Navigation"
   , categoryOrder = 4
   , name = "Legends"
   , description = "Add legends to chart."

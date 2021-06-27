@@ -47,7 +47,7 @@ view model =
 
 
 meta =
-  { category = "Frame and navigation"
+  { category = "Navigation"
   , categoryOrder = 4
   , name = "Coordinates"
   , description = "Using the low level coordinate system."

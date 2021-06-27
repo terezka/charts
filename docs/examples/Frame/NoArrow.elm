@@ -24,7 +24,7 @@ view model =
 
 
 meta =
-  { category = "Frame and navigation"
+  { category = "Navigation"
   , categoryOrder = 4
   , name = "Remove arrow"
   , description = "Remove arrow from axis line."

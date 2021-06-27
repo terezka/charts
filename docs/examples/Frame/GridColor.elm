@@ -23,7 +23,7 @@ view model =
 
 
 meta =
-  { category = "Frame and navigation"
+  { category = "Navigation"
   , categoryOrder = 4
   , name = "Color of grid"
   , description = "Change color of grid."

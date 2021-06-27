@@ -22,7 +22,7 @@ view model =
 
 
 meta =
-  { category = "Frame and navigation"
+  { category = "Navigation"
   , categoryOrder = 4
   , name = "Remove grid lines"
   , description = "Prevent automatically added gridlines."

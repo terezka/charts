@@ -27,7 +27,7 @@ view model =
 
 
 meta =
-  { category = "Frame and navigation"
+  { category = "Navigation"
   , categoryOrder = 4
   , name = "Only integers"
   , description = "Only show integer labels."

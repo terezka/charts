@@ -33,7 +33,7 @@ view model =
 
 
 meta =
-  { category = "Frame and navigation"
+  { category = "Navigation"
   , categoryOrder = 4
   , name = "Custom labels"
   , description = "Control labels entirely."

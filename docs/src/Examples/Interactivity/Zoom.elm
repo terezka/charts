@@ -176,7 +176,7 @@ meta =
   , categoryOrder = 5
   , name = "Zoom"
   , description = "Add zoom effect."
-  , order = 17
+  , order = 20
   }
 
 

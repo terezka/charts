@@ -60,7 +60,7 @@ star x y =
 
 
 meta =
-  { category = "Frame and navigation"
+  { category = "Navigation"
   , categoryOrder = 4
   , name = "Arbitrary SVG and HTML"
   , description = "Add custom SVG/HTML to your chart."

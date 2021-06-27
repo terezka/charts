@@ -55,7 +55,7 @@ data =
 
 
 meta =
-  { category = "Frame and navigation"
+  { category = "Navigation"
   , categoryOrder = 4
   , name = "Label with line"
   , description = "Add a label and line to chart."

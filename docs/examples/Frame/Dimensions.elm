@@ -38,7 +38,7 @@ view model =
 
 
 meta =
-  { category = "Frame and navigation"
+  { category = "Navigation"
   , categoryOrder = 4
   , name = "Control dimensions"
   , description = "Limit or extend your range and domain."
