@@ -762,151 +762,148 @@ bar plane edits point =
 
       borderWidthCarX = Coord.scaleCartesianX plane (config.borderWidth / 2)
       borderWidthCarY = Coord.scaleCartesianY plane (config.borderWidth / 2)
+
+      pos =
+        { x1 = min point.x1 point.x2 + borderWidthCarX
+        , x2 = max point.x1 point.x2 - borderWidthCarX
+        , y1 = min point.y1 point.y2 + borderWidthCarY
+        , y2 = max point.y1 point.y2 - borderWidthCarY
+        }
+
       auraWidthCarX = borderWidthCarX + Coord.scaleCartesianX plane (config.auraWidth / 2)
       auraWidthCarY = borderWidthCarY + Coord.scaleCartesianY plane (config.auraWidth / 2)
 
       auraPos =
-        { x1 = x_ - auraWidthCarX
-        , x2 = x_ + auraWidthCarX + w
-        , y1 = bs - auraWidthCarY
-        , y2 = y_ + auraWidthCarY
+        { x1 = pos.x1 - auraWidthCarX
+        , x2 = pos.x2 + auraWidthCarX
+        , y1 = pos.y1 - auraWidthCarY
+        , y2 = pos.y2 + auraWidthCarY
         }
 
-      x1_ = point.x1 + borderWidthCarX
-      x2_ = point.x2 - borderWidthCarX
-      y1_ = point.y1 + borderWidthCarY
-      y2_ = point.y2 - borderWidthCarY
-
-      x_ = x1_
-      y_ = max y1_ y2_
-      bs = min y1_ y2_
-      w = x2_ - x_
-      bT = Coord.scaleSVGX plane w * 0.5 * (clamp 0 1 config.roundTop)
-      bB = Coord.scaleSVGX plane w * 0.5 * (clamp 0 1 config.roundBottom)
-      rxT = Coord.scaleCartesianX plane bT
-      ryT = Coord.scaleCartesianY plane bT
-      rxB = Coord.scaleCartesianX plane bB
-      ryB = Coord.scaleCartesianY plane bB
+      w = abs (pos.x2 - pos.x1)
+      roundingTop = Coord.scaleSVGX plane w * 0.5 * (clamp 0 1 config.roundTop)
+      roudningBottom = Coord.scaleSVGX plane w * 0.5 * (clamp 0 1 config.roundBottom)
+      radiusTopX = Coord.scaleCartesianX plane roundingTop
+      radiusTopY = Coord.scaleCartesianY plane roundingTop
+      radiusBottomX = Coord.scaleCartesianX plane roudningBottom
+      radiusBottomY = Coord.scaleCartesianY plane roudningBottom
 
       ( commands, highlightCommands ) =
-        if bs == y_ then
+        if pos.y1 == pos.y2 then
           ( [], [] )
         else
           case ( config.roundTop > 0, config.roundBottom > 0 ) of
             ( False, False ) ->
-              ( [ C.Move x_ bs
-                , C.Line x_ y_
-                , C.Line (x_ + w) y_
-                , C.Line (x_ + w) bs
-                , C.Line x_ bs
+              ( [ C.Move pos.x1 pos.y1
+                , C.Line pos.x1 pos.y2
+                , C.Line pos.x2 pos.y2
+                , C.Line pos.x2 pos.y1
+                , C.Line pos.x1 pos.y1
                 ]
-              , [ C.Move auraPos.x1 bs
+              , [ C.Move auraPos.x1 pos.y1
                 , C.Line auraPos.x1 auraPos.y2
                 , C.Line auraPos.x2 auraPos.y2
-                , C.Line auraPos.x2 bs
+                , C.Line auraPos.x2 pos.y1
                 -- ^ outer
-                , C.Line (x_ + w) bs
-                , C.Line (x_ + w) y_
-                , C.Line x_ y_
-                , C.Line x_ bs
+                , C.Line pos.x2 pos.y1
+                , C.Line pos.x2 pos.y2
+                , C.Line pos.x1 pos.y2
+                , C.Line pos.x1 pos.y1
                 ]
               )
 
             ( True, False ) ->
-              ( [ C.Move x_ bs
-                , C.Line x_ (y_ + -ryT)
-                , C.Arc bT bT -45 False True (x_ + rxT) y_
-                , C.Line (x_ + w - rxT) y_
-                , C.Arc bT bT -45 False True (x_ + w) (y_ + -ryT)
-                , C.Line (x_ + w) bs
-                , C.Line x_ bs
+              ( [ C.Move pos.x1 pos.y1
+                , C.Line pos.x1 (pos.y2 - radiusTopY)
+                , C.Arc roundingTop roundingTop -45 False True (pos.x1 + radiusTopX) pos.y2
+                , C.Line (pos.x2 - radiusTopX) pos.y2
+                , C.Arc roundingTop roundingTop -45 False True pos.x2 (pos.y2 - radiusTopY)
+                , C.Line pos.x2 pos.y1
+                , C.Line pos.x1 pos.y1
                 ]
-              , [ C.Move auraPos.x1 bs
-                , C.Line auraPos.x1 (auraPos.y2 - ryT)
-                , C.Arc bT bT -45 False True (auraPos.x1 + rxT) auraPos.y2
-                , C.Line (auraPos.x2 - rxT) auraPos.y2
-                , C.Arc bT bT -45 False True auraPos.x2 (auraPos.y2 - ryT)
-                , C.Line auraPos.x2 bs
+              , [ C.Move auraPos.x1 pos.y1
+                , C.Line auraPos.x1 (auraPos.y2 - radiusTopY)
+                , C.Arc roundingTop roundingTop -45 False True (auraPos.x1 + radiusTopX) auraPos.y2
+                , C.Line (auraPos.x2 - radiusTopX) auraPos.y2
+                , C.Arc roundingTop roundingTop -45 False True auraPos.x2 (auraPos.y2 - radiusTopY)
+                , C.Line auraPos.x2 pos.y1
                 -- ^ outer
-                , C.Line (x_ + w) bs
-                , C.Line (x_ + w) (y_ - ryT)
-                , C.Arc bT bT -45 False False (x_ + w - rxT) y_
-                , C.Line (x_ + rxT) y_
-                , C.Arc bT bT -45 False False x_ (y_ - ryT)
-                , C.Line x_ bs
+                , C.Line pos.x2 pos.y1
+                , C.Line pos.x2 (pos.y2 - radiusTopY)
+                , C.Arc roundingTop roundingTop -45 False False (pos.x2 - radiusTopX) pos.y2
+                , C.Line (pos.x1 + radiusTopX) pos.y2
+                , C.Arc roundingTop roundingTop -45 False False pos.x1 (pos.y2 - radiusTopY)
+                , C.Line pos.x1 pos.y1
                 ]
               )
 
             ( False, True ) ->
-              ( [ C.Move (x_ + rxB) bs
-                , C.Arc bB bB -45 False True x_ (bs + ryB)
-                , C.Line x_ y_
-                , C.Line (x_ + w) y_
-                , C.Line (x_ + w) (bs + ryB)
-                , C.Arc bB bB -45 False True (x_ + w - rxB) bs
-                , C.Line (x_ + rxB) bs
+              ( [ C.Move (pos.x1 + radiusBottomX) pos.y1
+                , C.Arc roudningBottom roudningBottom -45 False True pos.x1 (pos.y1 + radiusBottomY)
+                , C.Line pos.x1 pos.y2
+                , C.Line pos.x2 pos.y2
+                , C.Line pos.x2 (pos.y1 + radiusBottomY)
+                , C.Arc roudningBottom roudningBottom -45 False True (pos.x2 - radiusBottomX) pos.y1
+                , C.Line (pos.x1 + radiusBottomX) pos.y1
                 ]
-              , [ C.Move (auraPos.x1 + rxB) auraPos.y1
-                , C.Arc bB bB -45 False True auraPos.x1 (auraPos.y1 + ryB)
-                , C.Line auraPos.x1 y_
-                , C.Line auraPos.x2 y_
-                , C.Line auraPos.x2 (auraPos.y1 + ryB)
-                , C.Arc bB bB -45 False True (auraPos.x2 - rxB) auraPos.y1
-                , C.Line (auraPos.x1 + rxB) auraPos.y1
+              , [ C.Move (auraPos.x1 + radiusBottomX) auraPos.y1
+                , C.Arc roudningBottom roudningBottom -45 False True auraPos.x1 (auraPos.y1 + radiusBottomY)
+                , C.Line auraPos.x1 pos.y2
+                , C.Line auraPos.x2 pos.y2
+                , C.Line auraPos.x2 (auraPos.y1 + radiusBottomY)
+                , C.Arc roudningBottom roudningBottom -45 False True (auraPos.x2 - radiusBottomX) auraPos.y1
+                , C.Line (auraPos.x1 + radiusBottomX) auraPos.y1
                 -- ^ outer
-                , C.Line (x_ + w - rxB) bs
-                , C.Arc bB bB -45 False False (x_ + w) (bs + ryB)
-                , C.Line (x_ + w) y_
-                , C.Line x_ y_
-                , C.Line x_ (bs + ryB)
-                , C.Arc bB bB -45 False False (x_ + rxB) bs
+                , C.Line (pos.x2 - radiusBottomX) pos.y1
+                , C.Arc roudningBottom roudningBottom -45 False False pos.x2 (pos.y1 + radiusBottomY)
+                , C.Line pos.x2 pos.y2
+                , C.Line pos.x1 pos.y2
+                , C.Line pos.x1 (pos.y1 + radiusBottomY)
+                , C.Arc roudningBottom roudningBottom -45 False False (pos.x1 + radiusBottomX) pos.y1
                 ]
               )
 
             ( True, True ) ->
-              ( [ C.Move (x_ + rxB) bs
-                , C.Arc bB bB -45 False True x_ (bs + ryB)
-                , C.Line x_ (y_ - ryT)
-                , C.Arc bT bT -45 False True (x_ + rxT) y_
-                , C.Line (x_ + w - rxT) y_
-                , C.Arc bT bT -45 False True (x_ + w) (y_ - ryT)
-                , C.Line (x_ + w) (bs + ryB)
-                , C.Arc bB bB -45 False True (x_ + w - rxB) bs
-                , C.Line (x_ + rxB) bs
+              ( [ C.Move (pos.x1 + radiusBottomX) pos.y1
+                , C.Arc roudningBottom roudningBottom -45 False True pos.x1 (pos.y1 + radiusBottomY)
+                , C.Line pos.x1 (pos.y2 - radiusTopY)
+                , C.Arc roundingTop roundingTop -45 False True (pos.x1 + radiusTopX) pos.y2
+                , C.Line (pos.x2 - radiusTopX) pos.y2
+                , C.Arc roundingTop roundingTop -45 False True pos.x2 (pos.y2 - radiusTopY)
+                , C.Line pos.x2 (pos.y1 + radiusBottomY)
+                , C.Arc roudningBottom roudningBottom -45 False True (pos.x2 - radiusBottomX) pos.y1
+                , C.Line (pos.x1 + radiusBottomX) pos.y1
                 ]
-              , [ C.Move (auraPos.x1 + rxB) auraPos.y1
-                , C.Arc bB bB -45 False True auraPos.x1 (auraPos.y1 + ryB)
-                , C.Line auraPos.x1 (auraPos.y2 - ryT)
-                , C.Arc bT bT -45 False True (auraPos.x1 + rxT) auraPos.y2
-                , C.Line (auraPos.x2 - rxT) auraPos.y2
-                , C.Arc bT bT -45 False True auraPos.x2 (auraPos.y2 - ryT)
-                , C.Line auraPos.x2 (auraPos.y1 + ryB)
-                , C.Arc bB bB -45 False True (auraPos.x2 - rxB) auraPos.y1
-                , C.Line (auraPos.x1 + rxB) auraPos.y1
+              , [ C.Move (auraPos.x1 + radiusBottomX) auraPos.y1
+                , C.Arc roudningBottom roudningBottom -45 False True auraPos.x1 (auraPos.y1 + radiusBottomY)
+                , C.Line auraPos.x1 (auraPos.y2 - radiusTopY)
+                , C.Arc roundingTop roundingTop -45 False True (auraPos.x1 + radiusTopX) auraPos.y2
+                , C.Line (auraPos.x2 - radiusTopX) auraPos.y2
+                , C.Arc roundingTop roundingTop -45 False True auraPos.x2 (auraPos.y2 - radiusTopY)
+                , C.Line auraPos.x2 (auraPos.y1 + radiusBottomY)
+                , C.Arc roudningBottom roudningBottom -45 False True (auraPos.x2 - radiusBottomX) auraPos.y1
+                , C.Line (auraPos.x1 + radiusBottomX) auraPos.y1
                 -- ^ outer
-                , C.Line (x_ + w - rxB) bs
-                , C.Arc bB bB -45 False False (x_ + w) (bs + ryB)
-                , C.Line (x_ + w) (y_ - ryT)
-                , C.Arc bT bT -45 False False (x_ + w - rxT) y_
-                , C.Line (x_ + rxT) y_
-                , C.Arc bT bT -45 False False x_ (y_ - ryT)
-                , C.Line x_ (bs + ryB)
-                , C.Arc bB bB -45 False False (x_ + rxB) bs
+                , C.Line (pos.x2 - radiusBottomX) pos.y1
+                , C.Arc roudningBottom roudningBottom -45 False False pos.x2 (pos.y1 + radiusBottomY)
+                , C.Line pos.x2 (pos.y2 - radiusTopY)
+                , C.Arc roundingTop roundingTop -45 False False (pos.x2 - radiusTopX) pos.y2
+                , C.Line (pos.x1 + radiusTopX) pos.y2
+                , C.Arc roundingTop roundingTop -45 False False pos.x1 (pos.y2 - radiusTopY)
+                , C.Line pos.x1 (pos.y1 + radiusBottomY)
+                , C.Arc roudningBottom roudningBottom -45 False False (pos.x1 + radiusBottomX) pos.y1
                 ]
               )
 
-      cutLimitsBar = Coord.Position x1_ x2_ bs y_
-      cutLimitsAura = Coord.Position (x1_ - auraWidthCarX) (x2_ + auraWidthCarX) (bs - auraWidthCarY) (y_ + auraWidthCarY + auraWidthCarY)
-
       viewAuraBar fill =
-        if config.aura == 0
-        then viewBar fill config.opacity config.border config.borderWidth 1 commands cutLimitsBar
+        if config.aura == 0 then
+          viewBar fill config.opacity config.border config.borderWidth 1 commands pos
         else
-        S.g
-          [ SA.class "elm-charts__bar-with-aura" ]
-          [ viewBar config.color config.aura "transparent" 0 0 highlightCommands cutLimitsAura
-          , viewBar fill config.opacity config.border config.borderWidth 1 commands cutLimitsBar
-          ]
+          S.g
+            [ SA.class "elm-charts__bar-with-aura" ]
+            [ viewBar config.color config.aura "transparent" 0 0 highlightCommands { auraPos | y2 = pos.y2 + auraWidthCarY * 2 }
+            , viewBar fill config.opacity config.border config.borderWidth 1 commands pos
+            ]
 
       viewBar fill fillOpacity border borderWidth strokeOpacity cmds limits =
           withAttrs config.attrs S.path
@@ -926,7 +923,9 @@ bar plane edits point =
       viewAuraBar config.color
 
     Just design ->
-      let ( patternDefs, fill ) = toPattern config.color design in
+      let ( patternDefs, fill ) =
+            toPattern config.color design
+      in
       S.g
         [ SA.class "elm-charts__bar-with-pattern" ]
         [ patternDefs
