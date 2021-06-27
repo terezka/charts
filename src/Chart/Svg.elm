@@ -817,12 +817,12 @@ bar plane edits point =
                 , C.Line (x_ + w) bs
                 , C.Line x_ bs
                 ]
-              , [ C.Move auraPos.x1 auraPos.y1
+              , [ C.Move auraPos.x1 bs
                 , C.Line auraPos.x1 (auraPos.y2 - ryT)
                 , C.Arc bT bT -45 False True (auraPos.x1 + rxT) auraPos.y2
                 , C.Line (auraPos.x2 - rxT) auraPos.y2
                 , C.Arc bT bT -45 False True auraPos.x2 (auraPos.y2 - ryT)
-                , C.Line auraPos.x2 auraPos.y1
+                , C.Line auraPos.x2 bs
                 -- ^ outer
                 , C.Line (x_ + w) bs
                 , C.Line (x_ + w) (y_ - ryT)
@@ -842,12 +842,20 @@ bar plane edits point =
                 , C.Arc bB bB -45 False True (x_ + w - rxB) bs
                 , C.Line (x_ + rxB) bs
                 ]
-              , [ C.Move (auraPos.x1 + rxB) bs
-                , C.Arc bB bB -45 False True auraPos.x1 (bs + ryB)
+              , [ C.Move (auraPos.x1 + rxB) auraPos.y1
+                , C.Arc bB bB -45 False True auraPos.x1 (auraPos.y1 + ryB)
                 , C.Line auraPos.x1 y_
-                , C.Line (auraPos.x2) y_
-                , C.Line (auraPos.x2) (bs + ryB)
-                , C.Arc bB bB -45 False True (auraPos.x2 - rxB) bs
+                , C.Line auraPos.x2 y_
+                , C.Line auraPos.x2 (auraPos.y1 + ryB)
+                , C.Arc bB bB -45 False True (auraPos.x2 - rxB) auraPos.y1
+                , C.Line (auraPos.x1 + rxB) auraPos.y1
+                -- ^ outer
+                , C.Line (x_ + w - rxB) bs
+                , C.Arc bB bB -45 False False (x_ + w) (bs + ryB)
+                , C.Line (x_ + w) y_
+                , C.Line x_ y_
+                , C.Line x_ (bs + ryB)
+                , C.Arc bB bB -45 False False (x_ + rxB) bs
                 ]
               )
 
@@ -867,9 +875,18 @@ bar plane edits point =
                 , C.Line auraPos.x1 (auraPos.y2 - ryT)
                 , C.Arc bT bT -45 False True (auraPos.x1 + rxT) auraPos.y2
                 , C.Line (auraPos.x2 - rxT) auraPos.y2
-                , C.Arc bT bT -45 False True (auraPos.x2) (auraPos.y2 - ryT)
-                , C.Line (auraPos.x2) (auraPos.y1 + ryB)
+                , C.Arc bT bT -45 False True auraPos.x2 (auraPos.y2 - ryT)
+                , C.Line auraPos.x2 (auraPos.y1 + ryB)
                 , C.Arc bB bB -45 False True (auraPos.x2 - rxB) auraPos.y1
+                -- ^ outer
+                , C.Line (x_ + w - rxB) bs
+                , C.Arc bB bB -45 False False (x_ + w) (bs + ryB)
+                , C.Line (x_ + w) (y_ - ryT)
+                , C.Arc bT bT -45 False False (x_ + w - rxT) y_
+                , C.Line (x_ + rxT) y_
+                , C.Arc bT bT -45 False False x_ (y_ - ryT)
+                , C.Line x_ (bs + ryB)
+                , C.Arc bB bB -45 False False (x_ + rxB) bs
                 ]
               )
 
