@@ -20,7 +20,7 @@ view model =
     , C.yLabels []
     , C.series .x
         [ C.scatter .y []
-        , C.scatter .z [ CA.aura 0.4 ]
+        , C.scatter .z [ CA.highlight 0.4 ]
         ]
         data
     ]
@@ -96,7 +96,7 @@ smallCode =
     , C.yLabels []
     , C.series .x
         [ C.scatter .y []
-        , C.scatter .z [ CA.aura 0.4 ]
+        , C.scatter .z [ CA.highlight 0.4 ]
         ]
         data
     ]
@@ -123,7 +123,7 @@ view model =
     , C.yLabels []
     , C.series .x
         [ C.scatter .y []
-        , C.scatter .z [ CA.aura 0.4 ]
+        , C.scatter .z [ CA.highlight 0.4 ]
         ]
         data
     ]

@@ -561,8 +561,8 @@ lineLegend edits interAttrsOrg dotAttrsOrg =
           , size = 6
           , border = "white"
           , borderWidth = 1
-          , aura = 0
-          , auraWidth = 10
+          , highlight = 0
+          , highlightWidth = 10
           , shape = Nothing
           }
 
@@ -738,8 +738,8 @@ type alias Bar =
   , opacity : Float
   , design : Maybe CA.Design
   , attrs : List (S.Attribute Never)
-  , aura : Float
-  , auraWidth : Float
+  , highlight : Float
+  , highlightWidth : Float
   }
 
 
@@ -756,8 +756,8 @@ bar plane edits point =
           , opacity = 1
           , design = Nothing
           , attrs = []
-          , aura = 0
-          , auraWidth = 10
+          , highlight = 0
+          , highlightWidth = 10
           }
 
       borderWidthCarX = Coord.scaleCartesianX plane (config.borderWidth / 2)
@@ -770,14 +770,14 @@ bar plane edits point =
         , y2 = max point.y1 point.y2 - borderWidthCarY
         }
 
-      auraWidthCarX = borderWidthCarX + Coord.scaleCartesianX plane (config.auraWidth / 2)
-      auraWidthCarY = borderWidthCarY + Coord.scaleCartesianY plane (config.auraWidth / 2)
+      highlightWidthCarX = borderWidthCarX + Coord.scaleCartesianX plane (config.highlightWidth / 2)
+      highlightWidthCarY = borderWidthCarY + Coord.scaleCartesianY plane (config.highlightWidth / 2)
 
-      auraPos =
-        { x1 = pos.x1 - auraWidthCarX
-        , x2 = pos.x2 + auraWidthCarX
-        , y1 = pos.y1 - auraWidthCarY
-        , y2 = pos.y2 + auraWidthCarY
+      highlightPos =
+        { x1 = pos.x1 - highlightWidthCarX
+        , x2 = pos.x2 + highlightWidthCarX
+        , y1 = pos.y1 - highlightWidthCarY
+        , y2 = pos.y2 + highlightWidthCarY
         }
 
       w = abs (pos.x2 - pos.x1)
@@ -800,10 +800,10 @@ bar plane edits point =
                 , C.Line pos.x2 pos.y1
                 , C.Line pos.x1 pos.y1
                 ]
-              , [ C.Move auraPos.x1 pos.y1
-                , C.Line auraPos.x1 auraPos.y2
-                , C.Line auraPos.x2 auraPos.y2
-                , C.Line auraPos.x2 pos.y1
+              , [ C.Move highlightPos.x1 pos.y1
+                , C.Line highlightPos.x1 highlightPos.y2
+                , C.Line highlightPos.x2 highlightPos.y2
+                , C.Line highlightPos.x2 pos.y1
                 -- ^ outer
                 , C.Line pos.x2 pos.y1
                 , C.Line pos.x2 pos.y2
@@ -821,12 +821,12 @@ bar plane edits point =
                 , C.Line pos.x2 pos.y1
                 , C.Line pos.x1 pos.y1
                 ]
-              , [ C.Move auraPos.x1 pos.y1
-                , C.Line auraPos.x1 (auraPos.y2 - radiusTopY)
-                , C.Arc roundingTop roundingTop -45 False True (auraPos.x1 + radiusTopX) auraPos.y2
-                , C.Line (auraPos.x2 - radiusTopX) auraPos.y2
-                , C.Arc roundingTop roundingTop -45 False True auraPos.x2 (auraPos.y2 - radiusTopY)
-                , C.Line auraPos.x2 pos.y1
+              , [ C.Move highlightPos.x1 pos.y1
+                , C.Line highlightPos.x1 (highlightPos.y2 - radiusTopY)
+                , C.Arc roundingTop roundingTop -45 False True (highlightPos.x1 + radiusTopX) highlightPos.y2
+                , C.Line (highlightPos.x2 - radiusTopX) highlightPos.y2
+                , C.Arc roundingTop roundingTop -45 False True highlightPos.x2 (highlightPos.y2 - radiusTopY)
+                , C.Line highlightPos.x2 pos.y1
                 -- ^ outer
                 , C.Line pos.x2 pos.y1
                 , C.Line pos.x2 (pos.y2 - radiusTopY)
@@ -846,13 +846,13 @@ bar plane edits point =
                 , C.Arc roudningBottom roudningBottom -45 False True (pos.x2 - radiusBottomX) pos.y1
                 , C.Line (pos.x1 + radiusBottomX) pos.y1
                 ]
-              , [ C.Move (auraPos.x1 + radiusBottomX) auraPos.y1
-                , C.Arc roudningBottom roudningBottom -45 False True auraPos.x1 (auraPos.y1 + radiusBottomY)
-                , C.Line auraPos.x1 pos.y2
-                , C.Line auraPos.x2 pos.y2
-                , C.Line auraPos.x2 (auraPos.y1 + radiusBottomY)
-                , C.Arc roudningBottom roudningBottom -45 False True (auraPos.x2 - radiusBottomX) auraPos.y1
-                , C.Line (auraPos.x1 + radiusBottomX) auraPos.y1
+              , [ C.Move (highlightPos.x1 + radiusBottomX) highlightPos.y1
+                , C.Arc roudningBottom roudningBottom -45 False True highlightPos.x1 (highlightPos.y1 + radiusBottomY)
+                , C.Line highlightPos.x1 pos.y2
+                , C.Line highlightPos.x2 pos.y2
+                , C.Line highlightPos.x2 (highlightPos.y1 + radiusBottomY)
+                , C.Arc roudningBottom roudningBottom -45 False True (highlightPos.x2 - radiusBottomX) highlightPos.y1
+                , C.Line (highlightPos.x1 + radiusBottomX) highlightPos.y1
                 -- ^ outer
                 , C.Line (pos.x2 - radiusBottomX) pos.y1
                 , C.Arc roudningBottom roudningBottom -45 False False pos.x2 (pos.y1 + radiusBottomY)
@@ -874,15 +874,15 @@ bar plane edits point =
                 , C.Arc roudningBottom roudningBottom -45 False True (pos.x2 - radiusBottomX) pos.y1
                 , C.Line (pos.x1 + radiusBottomX) pos.y1
                 ]
-              , [ C.Move (auraPos.x1 + radiusBottomX) auraPos.y1
-                , C.Arc roudningBottom roudningBottom -45 False True auraPos.x1 (auraPos.y1 + radiusBottomY)
-                , C.Line auraPos.x1 (auraPos.y2 - radiusTopY)
-                , C.Arc roundingTop roundingTop -45 False True (auraPos.x1 + radiusTopX) auraPos.y2
-                , C.Line (auraPos.x2 - radiusTopX) auraPos.y2
-                , C.Arc roundingTop roundingTop -45 False True auraPos.x2 (auraPos.y2 - radiusTopY)
-                , C.Line auraPos.x2 (auraPos.y1 + radiusBottomY)
-                , C.Arc roudningBottom roudningBottom -45 False True (auraPos.x2 - radiusBottomX) auraPos.y1
-                , C.Line (auraPos.x1 + radiusBottomX) auraPos.y1
+              , [ C.Move (highlightPos.x1 + radiusBottomX) highlightPos.y1
+                , C.Arc roudningBottom roudningBottom -45 False True highlightPos.x1 (highlightPos.y1 + radiusBottomY)
+                , C.Line highlightPos.x1 (highlightPos.y2 - radiusTopY)
+                , C.Arc roundingTop roundingTop -45 False True (highlightPos.x1 + radiusTopX) highlightPos.y2
+                , C.Line (highlightPos.x2 - radiusTopX) highlightPos.y2
+                , C.Arc roundingTop roundingTop -45 False True highlightPos.x2 (highlightPos.y2 - radiusTopY)
+                , C.Line highlightPos.x2 (highlightPos.y1 + radiusBottomY)
+                , C.Arc roudningBottom roudningBottom -45 False True (highlightPos.x2 - radiusBottomX) highlightPos.y1
+                , C.Line (highlightPos.x1 + radiusBottomX) highlightPos.y1
                 -- ^ outer
                 , C.Line (pos.x2 - radiusBottomX) pos.y1
                 , C.Arc roudningBottom roudningBottom -45 False False pos.x2 (pos.y1 + radiusBottomY)
@@ -896,12 +896,12 @@ bar plane edits point =
               )
 
       viewAuraBar fill =
-        if config.aura == 0 then
+        if config.highlight == 0 then
           viewBar fill config.opacity config.border config.borderWidth 1 commands pos
         else
           S.g
-            [ SA.class "elm-charts__bar-with-aura" ]
-            [ viewBar config.color config.aura "transparent" 0 0 highlightCommands { auraPos | y2 = pos.y2 + auraWidthCarY * 2 }
+            [ SA.class "elm-charts__bar-with-highlight" ]
+            [ viewBar config.color config.highlight "transparent" 0 0 highlightCommands { highlightPos | y2 = pos.y2 + highlightWidthCarY * 2 }
             , viewBar fill config.opacity config.border config.borderWidth 1 commands pos
             ]
 
@@ -1197,8 +1197,8 @@ type alias Dot =
   , size : Float
   , border : String
   , borderWidth : Float
-  , aura : Float
-  , auraWidth : Float
+  , highlight : Float
+  , highlightWidth : Float
   , shape : Maybe CA.Shape
   }
 
@@ -1213,8 +1213,8 @@ dot plane toX toY edits datum_ =
           , size = 6
           , border = ""
           , borderWidth = 0
-          , aura = 0
-          , auraWidth = 5
+          , highlight = 0
+          , highlightWidth = 5
           , shape = Nothing
           }
 
@@ -1230,19 +1230,19 @@ dot plane toX toY edits datum_ =
         , SA.class "elm-charts__dot"
         ]
 
-      auraAttrs =
+      highlightAttrs =
         [ SA.stroke config.color
-        , SA.strokeWidth (String.fromFloat config.auraWidth)
-        , SA.strokeOpacity (String.fromFloat config.aura)
+        , SA.strokeWidth (String.fromFloat config.highlightWidth)
+        , SA.strokeOpacity (String.fromFloat config.highlight)
         , SA.fill "transparent"
-        , SA.class "elm-charts__dot-aura"
+        , SA.class "elm-charts__dot-highlight"
         ]
 
-      view toEl auraOff toAttrs =
-        if config.aura > 0 then
+      view toEl highlightOff toAttrs =
+        if config.highlight > 0 then
           S.g
             [ SA.class "elm-charts__dot-container" ]
-            [ toEl (toAttrs auraOff ++ auraAttrs) []
+            [ toEl (toAttrs highlightOff ++ highlightAttrs) []
             , toEl (toAttrs 0 ++ styleAttrs) []
             ]
         else
@@ -1254,7 +1254,7 @@ dot plane toX toY edits datum_ =
       S.text ""
 
     Just CA.Circle ->
-      view S.circle (config.auraWidth / 2) <| \off ->
+      view S.circle (config.highlightWidth / 2) <| \off ->
         let radius = sqrt (area_ / pi) in
         [ SA.cx (String.fromFloat x_)
         , SA.cy (String.fromFloat y_)
@@ -1262,11 +1262,11 @@ dot plane toX toY edits datum_ =
         ]
 
     Just CA.Triangle ->
-      view S.path config.auraWidth <| \off ->
+      view S.path config.highlightWidth <| \off ->
         [ SA.d (trianglePath area_ off x_ y_) ]
 
     Just CA.Square ->
-      view S.rect config.auraWidth <| \off ->
+      view S.rect config.highlightWidth <| \off ->
         let side = sqrt area_
             sideOff = side + off
         in
@@ -1277,7 +1277,7 @@ dot plane toX toY edits datum_ =
         ]
 
     Just CA.Diamond ->
-      view S.rect config.auraWidth <| \off ->
+      view S.rect config.highlightWidth <| \off ->
         let side = sqrt area_
             sideOff = side + off
         in
@@ -1289,13 +1289,13 @@ dot plane toX toY edits datum_ =
         ]
 
     Just CA.Cross ->
-      view S.path config.auraWidth <| \off ->
+      view S.path config.highlightWidth <| \off ->
         [ SA.d (plusPath area_ off x_ y_)
         , SA.transform ("rotate(45 " ++ String.fromFloat x_ ++ " " ++ String.fromFloat y_ ++ ")")
         ]
 
     Just CA.Plus ->
-      view S.path config.auraWidth <| \off ->
+      view S.path config.highlightWidth <| \off ->
         [ SA.d (plusPath area_ off x_ y_) ]
 
 

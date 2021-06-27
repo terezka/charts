@@ -275,7 +275,7 @@ viewSalaryDiscrepancyMini model =
 
 
 salarySeries : Model -> Float -> Float -> Float -> C.Element Salary.Datum Msg
-salarySeries model border auraSize size =
+salarySeries model border highlightSize size =
   C.series .salaryBoth
       [ C.scatter Salary.womenSalaryPerc
           [ CA.opacity 0.4, CA.circle, CA.border CA.blue, CA.borderWidth border ]
@@ -295,7 +295,7 @@ salarySeries model border auraSize size =
                   in
                   [ CA.size (d.numOfBoth / size) ] ++ color
                 )
-          |> C.amongst model.hovering (\d -> [ CA.aura 0.4, CA.auraWidth auraSize, CA.opacity 0.6 ])
+          |> C.amongst model.hovering (\d -> [ CA.highlight 0.4, CA.highlightWidth highlightSize, CA.opacity 0.6 ])
       ]
       (List.filter (.year >> (==) model.year) Salary.data)
 

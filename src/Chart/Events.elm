@@ -22,7 +22,6 @@ module Chart.Events exposing
 -- TODO
 -- find out what to expose in Svg / Coord
 -- move things to internal
--- aura -> highlight?
 
 
 import Html as H exposing (Html)

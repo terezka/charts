@@ -45,10 +45,10 @@ view model =
     , C.series .x
         [ C.scatter .y [ CA.opacity 0.2, CA.borderWidth 1 ]
             |> C.variation (\d -> [ CA.size (d.q * 20) ])
-            |> C.amongst model.hovering (\d -> [ CA.aura 0.15 ])
+            |> C.amongst model.hovering (\d -> [ CA.highlight 0.15 ])
         , C.scatter .z [ CA.opacity 0.2, CA.borderWidth 1 ]
             |> C.variation (\d -> [ CA.size (d.q * 20) ])
-            |> C.amongst model.hovering (\d -> [ CA.aura 0.15 ])
+            |> C.amongst model.hovering (\d -> [ CA.highlight 0.15 ])
         ]
         data
     , C.each model.hovering <| \p item ->
@@ -112,10 +112,10 @@ smallCode =
     , C.series .x
         [ C.scatter .y [ CA.opacity 0.2, CA.borderWidth 1 ]
             |> C.variation (\\d -> [ CA.size (d.q * 20) ])
-            |> C.amongst model.hovering (\\d -> [ CA.aura 0.15 ])
+            |> C.amongst model.hovering (\\d -> [ CA.highlight 0.15 ])
         , C.scatter .z [ CA.opacity 0.2, CA.borderWidth 1 ]
             |> C.variation (\\d -> [ CA.size (d.q * 20) ])
-            |> C.amongst model.hovering (\\d -> [ CA.aura 0.15 ])
+            |> C.amongst model.hovering (\\d -> [ CA.highlight 0.15 ])
         ]
         data
     , C.each model.hovering <| \\p item ->
@@ -169,10 +169,10 @@ view model =
     , C.series .x
         [ C.scatter .y [ CA.opacity 0.2, CA.borderWidth 1 ]
             |> C.variation (\\d -> [ CA.size (d.q * 20) ])
-            |> C.amongst model.hovering (\\d -> [ CA.aura 0.15 ])
+            |> C.amongst model.hovering (\\d -> [ CA.highlight 0.15 ])
         , C.scatter .z [ CA.opacity 0.2, CA.borderWidth 1 ]
             |> C.variation (\\d -> [ CA.size (d.q * 20) ])
-            |> C.amongst model.hovering (\\d -> [ CA.aura 0.15 ])
+            |> C.amongst model.hovering (\\d -> [ CA.highlight 0.15 ])
         ]
         data
     , C.each model.hovering <| \\p item ->

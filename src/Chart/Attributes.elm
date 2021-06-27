@@ -23,7 +23,7 @@ module Chart.Attributes exposing
   , moveLeft, moveRight, moveUp, moveDown
 
   -- DECORATION
-  , border, borderWidth, color, opacity, aura, auraWidth, background, noArrow, rotate
+  , border, borderWidth, color, opacity, highlight, highlightWidth, background, noArrow, rotate
   , Design(..), GradientConfig, Pattern, striped, dotted, gradient, colors
 
   -- BAR
@@ -385,15 +385,15 @@ opacity v config =
 
 
 {-| -}
-aura : Float -> Attribute { a | aura : Float }
-aura v config =
-  { config | aura = v }
+highlight : Float -> Attribute { a | highlight : Float }
+highlight v config =
+  { config | highlight = v }
 
 
 {-| -}
-auraWidth : Float -> Attribute { a | auraWidth : Float }
-auraWidth v config =
-  { config | auraWidth = v }
+highlightWidth : Float -> Attribute { a | highlightWidth : Float }
+highlightWidth v config =
+  { config | highlightWidth = v }
 
 
 {-| -}

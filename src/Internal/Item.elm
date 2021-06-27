@@ -244,6 +244,8 @@ toBarAttrs bar =
   , CA.roundBottom bar.roundBottom
   , CA.border bar.border
   , CA.borderWidth bar.borderWidth
+  , CA.highlight bar.highlight
+  , CA.highlightWidth bar.highlightWidth
   ]
 
 
@@ -254,8 +256,8 @@ toDotAttrs dot =
   , CA.size dot.size
   , CA.border dot.border
   , CA.borderWidth dot.borderWidth
-  , CA.aura dot.aura
-  , CA.auraWidth dot.auraWidth
+  , CA.highlight dot.highlight
+  , CA.highlightWidth dot.highlightWidth
   , CA.shape dot.shape
   ]
 

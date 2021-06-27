@@ -51,8 +51,8 @@ toBarSeries elIndex barsAttrs properties data =
           , opacity = 1
           , design = Nothing
           , attrs = []
-          , aura = 0
-          , auraWidth = 10
+          , highlight = 0
+          , highlightWidth = 10
           }
 
       toBin index prevM curr nextM =
@@ -122,10 +122,15 @@ toBarSeries elIndex barsAttrs properties data =
 
             roundTop = if isSingle || isLast then barsConfig.roundTop else 0
             roundBottom = if isSingle || isFirst then barsConfig.roundBottom else 0
-            color = Helpers.toDefaultColor colorIndex
-            defaultAttrs = [ CA.roundTop roundTop, CA.roundBottom roundBottom, CA.color color, CA.border color ]
-            attrs = defaultAttrs ++ section.attrs ++ section.extra barIndex sectionIndex section.meta bin.datum
-            product = toBarConfig attrs
+            defaultColor = Helpers.toDefaultColor colorIndex
+            defaultAttrs = [ CA.roundTop roundTop, CA.roundBottom roundBottom, CA.color defaultColor, CA.border defaultColor ]
+            attrsOrg = defaultAttrs ++ section.attrs ++ section.extra barIndex sectionIndex section.meta bin.datum
+            productOrg = toBarConfig attrsOrg
+            ( product, attrs ) =
+              if productOrg.border == defaultColor then
+                ( { productOrg | border = productOrg.color }, attrsOrg ++ [ CA.border productOrg.color ])
+              else
+                ( productOrg, attrsOrg )
         in
         I.Item
           { config =
@@ -186,8 +191,8 @@ toDotSeries elIndex toX properties data =
           , size = 6
           , border = "white"
           , borderWidth = 0
-          , aura = 0
-          , auraWidth = 10
+          , highlight = 0
+          , highlightWidth = 10
           , shape = Nothing
           }
 
