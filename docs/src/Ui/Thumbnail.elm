@@ -1,5 +1,6 @@
 module Ui.Thumbnail exposing (..)
 
+import Html.Attributes as HA
 import Ui.Layout as Layout
 import Ui.Menu as Menu
 import Ui.Code as Code
@@ -87,11 +88,7 @@ viewGroup model group =
 
 viewOne : Examples.Model -> Examples.Id -> E.Element Examples.Msg
 viewOne model id =
-  E.link
-    [ E.width (E.px 265) ]
-    { url = toUrl id
-    , label =
-        let meta = Examples.meta id in
+  let view meta =
         E.column
           [ E.width E.fill
           , E.height E.fill
@@ -106,4 +103,13 @@ viewOne model id =
                   , E.paddingXY 0 15
                   ]
           ]
+  in
+  E.link
+    [ E.width (E.px 265) ]
+    { url = toUrl id
+    , label =
+        let meta = Examples.meta id in
+        if String.contains "Zoom" meta.name
+        then E.el [ E.htmlAttribute (HA.style "pointer-events" "none"), E.width E.fill ] (view meta)
+        else view meta
     }
