@@ -19,18 +19,14 @@ module Chart.Events exposing
   , getProducts, getCommonality
   )
 
--- TODO
--- find out what to expose in Svg / Coord
--- move things to internal
-
 
 import Html as H exposing (Html)
 import Html.Attributes as HA
 import Svg as S exposing (Svg)
 import Svg.Attributes as SA
 import Internal.Coordinates as C exposing (Point, Position, Plane)
-import Chart.Svg as CS
 import Chart.Attributes as CA exposing (Attribute)
+import Internal.Svg as CS
 import Internal.Item as I
 import Internal.Helpers as Helpers
 import Internal.Group as G

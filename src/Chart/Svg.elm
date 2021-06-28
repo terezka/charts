@@ -1,6 +1,5 @@
 module Chart.Svg exposing
-  ( Container, Event, container
-  , Line, line
+  ( Line, line
   , Tick, xTick, yTick
   , Label, label
   , Arrow, arrow
@@ -9,11 +8,8 @@ module Chart.Svg exposing
   , Dot, dot
   , Tooltip, tooltip
   , Rect, rect
-  , decoder, getNearest, getNearestX, getWithin, getWithinX
-  , isWithinPlane
   , position, positionHtml
-  , Generator, generate, floats, ints, times
-  , TickValue, toTickValues, formatTime
+  , Generator, generate, floats, ints, times, formatTime
 
   , Legends, legendsAt
   , Legend, lineLegend, barLegend
@@ -22,7 +18,79 @@ module Chart.Svg exposing
   , fromSvg, fromCartesian
   , lengthInSvgX, lengthInSvgY
   , lengthInCartesianX, lengthInCartesianY
+  , isWithinPlane
   )
+
+{-| Render plain SVG chart elements!
+
+If the options in the `Chart` module does not fit your needs, perhaps
+you need to render some custom SVG. This is the low level SVG helpers I
+use in the library, and you can use them too however you'd like. You can
+embed your own SVG into your chart by using the `Chart.svg` and `Chart.svgAt`
+functions.
+
+    import Chart as C
+    import Chart.Svg as CS
+    import Svg as S
+
+    view : Html msg
+    view =
+      C.chart []
+        [ C.svg <| \plane ->
+            CS.label plane [] [ S.text "my custom label" ] { x = 5, y = 5 }
+        ]
+
+
+# Line
+@docs Line, line
+
+# Rectangels
+@docs Rect, rect
+
+# Ticks
+@docs Tick, xTick, yTick
+
+## Generation
+@docs Generator, generate, floats, ints, times
+
+## Formatting
+@docs formatTime
+
+# Labels
+@docs Label, label
+
+# Arrows
+@docs Arrow, arrow
+
+# Series
+
+## Bars
+@docs Bar, bar
+
+## Dots
+@docs Dot, dot
+
+## Interpolations
+@docs Interpolation, interpolation, area
+
+## Legends
+@docs Legends, legendsAt
+@docs Legend, lineLegend, barLegend
+
+# Tooltips
+@docs Tooltip, tooltip
+
+# Positioning
+@docs position, positionHtml
+
+# Working with the coordinate system
+@docs Plane, Position, Point
+@docs fromSvg, fromCartesian
+@docs lengthInSvgX, lengthInSvgY
+@docs lengthInCartesianX, lengthInCartesianY
+@docs isWithinPlane
+
+-}
 
 import Html as H exposing (Html)
 import Html.Attributes as HA
@@ -432,17 +500,6 @@ times =
 generate : Int -> Generator a -> Coord.Axis -> List a
 generate =
   Internal.Svg.generate
-
-
-type alias TickValue =
-  { value : Float
-  , label : String
-  }
-
-
-toTickValues : (a -> Float) -> (a -> String) -> List a -> List TickValue
-toTickValues =
-  Internal.Svg.toTickValues
 
 
 

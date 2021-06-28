@@ -147,7 +147,7 @@ chart edits unindexedElements =
 
       toEvent (CE.Event event_) =
         let (CE.Decoder decoder) = event_.decoder in
-        CS.Event event_.name (decoder items)
+        IS.Event event_.name (decoder items)
   in
   IS.container plane
     { attrs = config.attrs
@@ -1253,11 +1253,11 @@ binned binWidth func data =
 -- HELPERS
 
 
-generateValues : Int -> IS.TickType -> C.Axis -> List CS.TickValue
+generateValues : Int -> IS.TickType -> C.Axis -> List IS.TickValue
 generateValues amount tick axis =
   case tick of
-    IS.Floats -> CS.toTickValues identity String.fromFloat (CS.generate amount CS.floats axis)
-    IS.Ints -> CS.toTickValues toFloat String.fromInt (CS.generate amount CS.ints axis)
-    IS.Times zone -> CS.toTickValues (toFloat << Time.posixToMillis << .timestamp) (CS.formatTime zone) (CS.generate amount (CS.times zone) axis)
+    IS.Floats -> IS.toTickValues identity String.fromFloat (CS.generate amount CS.floats axis)
+    IS.Ints -> IS.toTickValues toFloat String.fromInt (CS.generate amount CS.ints axis)
+    IS.Times zone -> IS.toTickValues (toFloat << Time.posixToMillis << .timestamp) (CS.formatTime zone) (CS.generate amount (CS.times zone) axis)
 
 
