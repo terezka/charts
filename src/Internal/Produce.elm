@@ -135,7 +135,7 @@ toBarSeries elIndex barsAttrs properties data =
               }
           , toLimits = \config -> { x1 = x1, x2 = x2, y1 = min y1 y2, y2 = max y1 y2 }
           , toPosition = \_ config -> { x1 = x1, x2 = x2, y1 = y1, y2 = y2 }
-          , toSvg = \plane config position -> S.bar plane productOrg position
+          , toSvg = \plane config position -> S.bar plane product position
           , toHtml = \c -> [ tooltipRow c.tooltipInfo.color (toDefaultName colorIndex c.tooltipInfo.name) value ]
           }
   in

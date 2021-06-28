@@ -1194,7 +1194,7 @@ defaultDot =
   , border = ""
   , borderWidth = 0
   , highlight = 0
-  , highlightWidth = 10
+  , highlightWidth = 5
   , shape = Nothing
   }
 
