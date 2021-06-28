@@ -166,10 +166,12 @@ view model =
 
     , case model.window of
         Just _ ->
-         C.htmlAt .max .min -10 10
+         C.htmlAt .max .min -10 20
             [ HA.style "transform" "translate(-100%, -100%)"
             , HA.style "background" "white"
             , HA.style "border" "1px solid rgb(210, 210, 210)"
+            , HA.style "cursor" "pointer"
+            , HE.onClick OnExitWindow
             ]
             [ viewSalaryDiscrepancyMini model
             , H.button
@@ -184,7 +186,6 @@ view model =
                 , HA.style "padding" "0"
                 , HA.style "margin" "0"
                 , HA.style "cursor" "pointer"
-                , HE.onClick OnExitWindow
                 ]
                 [ H.span
                     [ HA.style "font-size" "28px"

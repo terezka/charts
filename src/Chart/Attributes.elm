@@ -51,7 +51,9 @@ module Chart.Attributes exposing
   , noGrid, dotGrid
 
   -- COLORS
-  , blue, pink, orange, green, purple, red, turquoise
+  , pink, purple, blue, green, orange, turquoise, red
+  , magenta, brown, mint, yellow, gray
+  , darkYellow, darkBlue, darkGray
   )
 
 
@@ -812,9 +814,26 @@ column config =
 
 
 {-| -}
+pink : String
+pink =
+  Helpers.pink
+
+
+{-| -}
+purple : String
+purple =
+  Helpers.purple
+
+
+{-| -}
 blue : String
 blue =
   Helpers.blue
+
+
+green : String
+green =
+  Helpers.green
 
 
 {-| -}
@@ -824,20 +843,9 @@ orange =
 
 
 {-| -}
-pink : String
-pink =
-  Helpers.pink
-
-
-purple : String
-purple =
-  Helpers.purple
-
-
-{-| -}
-green : String
-green =
-  Helpers.green
+turquoise : String
+turquoise =
+  Helpers.turquoise
 
 
 {-| -}
@@ -847,6 +855,46 @@ red =
 
 
 {-| -}
-turquoise : String
-turquoise =
-  Helpers.turquoise
+darkYellow : String
+darkYellow =
+  Helpers.darkYellow
+
+
+{-| -}
+darkBlue : String
+darkBlue =
+  Helpers.darkBlue
+
+
+{-| -}
+magenta : String
+magenta =
+  Helpers.magenta
+
+
+{-| -}
+brown : String
+brown =
+  Helpers.brown
+
+
+{-| -}
+mint : String
+mint =
+  Helpers.mint
+
+
+{-| -}
+yellow : String
+yellow =
+  Helpers.yellow
+
+
+gray : String
+gray =
+  Helpers.gray
+
+
+darkGray : String
+darkGray =
+  Helpers.darkGray

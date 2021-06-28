@@ -26,14 +26,16 @@ view model =
         data
     , C.eachDot <| \p point ->
         let center = CE.getCenter p point
+            color = CE.getColor point
+            datum = CE.getDatum point
             label =
-              (CE.getDatum point).w
+              datum.w
                 |> Maybe.map String.fromFloat
                 |> Maybe.withDefault "N/A"
         in
         [ C.label
             [ CA.yOff 4
-            , CA.color CA.pink
+            , CA.color color
             ]
             [ S.text label ]
             center

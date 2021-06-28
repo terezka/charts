@@ -45,13 +45,30 @@ toBarLegends elIndex barsAttrs properties =
           , x2 = Nothing
           }
 
+      toBarConfig attrs =
+        Helpers.apply attrs
+          { roundTop = 0
+          , roundBottom = 0
+          , color = Helpers.pink
+          , border = "white"
+          , borderWidth = 0
+          , opacity = 1
+          , design = Nothing
+          , attrs = []
+          , highlight = 0
+          , highlightWidth = 10
+          }
+
       toBarLegend colorIndex prop =
         let defaultName = "Property #" ++ String.fromInt (colorIndex + 1)
             defaultColor = Helpers.toDefaultColor colorIndex
             rounding = max barsConfig.roundTop barsConfig.roundBottom
             defaultAttrs = [ CA.roundTop rounding, CA.roundBottom rounding, CA.color defaultColor, CA.border defaultColor ]
+            attrsOrg = defaultAttrs ++ prop.attrs
+            productOrg = toBarConfig attrsOrg
+            attrs = if productOrg.border == defaultColor then attrsOrg ++ [ CA.border productOrg.color ] else attrsOrg
         in
-        BarLegend (Maybe.withDefault defaultName prop.meta) (defaultAttrs ++ prop.attrs)
+        BarLegend (Maybe.withDefault defaultName prop.meta) attrs
   in
   List.concatMap P.toConfigs properties
     |> List.indexedMap (\propIndex -> toBarLegend (elIndex + propIndex))
@@ -63,7 +80,7 @@ toDotLegends elIndex properties =
   let toInterConfig attrs =
         Helpers.apply attrs
           { method = Nothing
-          , color = Helpers.blue
+          , color = Helpers.pink
           , width = 1
           , opacity = 0
           , design = Nothing
@@ -75,7 +92,7 @@ toDotLegends elIndex properties =
         let defaultOpacity = if List.length props > 1 then 0.4 else 0
             interAttr = [ CA.color (Helpers.toDefaultColor colorIndex), CA.opacity defaultOpacity ] ++ prop.inter
             interConfig = toInterConfig interAttr
-            defaultAttrs = [ CA.color interConfig.color, if interConfig.method == Nothing then CA.circle else identity ]
+            defaultAttrs = [ CA.color interConfig.color, CA.border interConfig.color, if interConfig.method == Nothing then CA.circle else identity ]
             dotAttrs = defaultAttrs ++ prop.attrs
             defaultName = "Property #" ++ String.fromInt (colorIndex + 1)
         in

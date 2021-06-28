@@ -45,7 +45,7 @@ toBarSeries elIndex barsAttrs properties data =
         Helpers.apply attrs
           { roundTop = 0
           , roundBottom = 0
-          , color = CA.blue
+          , color = Helpers.pink
           , border = "white"
           , borderWidth = 0
           , opacity = 1
@@ -176,7 +176,7 @@ toDotSeries elIndex toX properties data =
   let toInterConfig attrs =
         Helpers.apply attrs
           { method = Nothing
-          , color = Helpers.blue
+          , color = Helpers.pink
           , width = 1
           , opacity = 0
           , design = Nothing
@@ -186,7 +186,7 @@ toDotSeries elIndex toX properties data =
 
       toDotConfig attrs =
         Helpers.apply attrs
-          { color = Helpers.blue
+          { color = Helpers.pink
           , opacity = 1
           , size = 6
           , border = "white"

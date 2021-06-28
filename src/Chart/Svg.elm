@@ -82,7 +82,6 @@ container plane edits below chartEls above =
       htmlAttrsSize =
         if config.responsive then
           [ HA.style "width" "100%"
-          , HA.style "height" "100%"
           ]
         else
           [ HA.style "width" (String.fromFloat plane.width ++ "px")
@@ -556,7 +555,7 @@ lineLegend edits interAttrsOrg dotAttrsOrg =
 
       dotConfig =
         apply dotAttrs
-          { color = Helpers.blue
+          { color = Helpers.pink
           , opacity = 1
           , size = 6
           , border = "white"
@@ -569,7 +568,7 @@ lineLegend edits interAttrsOrg dotAttrsOrg =
       interConfig =
         apply interAttrs
           { method = Nothing
-          , color = Helpers.blue
+          , color = Helpers.pink
           , width = 1
           , opacity = 0
           , design = Nothing
@@ -752,7 +751,7 @@ bar plane edits point =
           , roundBottom = 0
           , border = "white"
           , borderWidth = 0
-          , color = Helpers.blue
+          , color = Helpers.pink
           , opacity = 1
           , design = Nothing
           , attrs = []
@@ -955,7 +954,7 @@ interpolation plane toX toY edits data =
   let config =
         apply edits
           { method = Nothing
-          , color = Helpers.blue
+          , color = Helpers.pink
           , width = 1
           , opacity = 0
           , design = Nothing
@@ -991,7 +990,7 @@ area plane toX toY2M toY edits data =
   let config =
         apply edits
           { method = Nothing
-          , color = Helpers.blue
+          , color = Helpers.pink
           , width = 1
           , opacity = 0.2
           , design = Nothing
@@ -1208,7 +1207,7 @@ dot : Plane -> (data -> Float) -> (data -> Float) -> List (CA.Attribute Dot) -> 
 dot plane toX toY edits datum_ =
   let config =
         apply edits
-          { color = Helpers.blue
+          { color = Helpers.pink
           , opacity = 1
           , size = 6
           , border = ""

@@ -44,10 +44,10 @@ view model =
         [ C.stacked
           [ C.interpolated .y
               [ CA.monotone, CA.gradient [] ]
-              [ CA.circle, CA.color "white", CA.border CA.pink, CA.borderWidth 1 ]
+              [ CA.circle, CA.color "white", CA.borderWidth 1 ]
           , C.interpolated .z
               [ CA.monotone, CA.gradient [] ]
-              [ CA.circle, CA.color "white", CA.border CA.purple, CA.borderWidth 1 ]
+              [ CA.circle, CA.color "white", CA.borderWidth 1 ]
           ]
         ]
         data
@@ -111,10 +111,10 @@ smallCode =
         [ C.stacked
           [ C.interpolated .y
               [ CA.monotone, CA.gradient [] ]
-              [ CA.circle, CA.color "white", CA.border CA.pink, CA.borderWidth 1 ]
+              [ CA.circle, CA.color "white", CA.borderWidth 1 ]
           , C.interpolated .z
               [ CA.monotone, CA.gradient [] ]
-              [ CA.circle, CA.color "white", CA.border CA.purple, CA.borderWidth 1 ]
+              [ CA.circle, CA.color "white", CA.borderWidth 1 ]
           ]
         ]
         data
@@ -168,10 +168,10 @@ view model =
         [ C.stacked
           [ C.interpolated .y
               [ CA.monotone, CA.gradient [] ]
-              [ CA.circle, CA.color "white", CA.border CA.pink, CA.borderWidth 1 ]
+              [ CA.circle, CA.color "white", CA.borderWidth 1 ]
           , C.interpolated .z
               [ CA.monotone, CA.gradient [] ]
-              [ CA.circle, CA.color "white", CA.border CA.purple, CA.borderWidth 1 ]
+              [ CA.circle, CA.color "white", CA.borderWidth 1 ]
           ]
         ]
         data
