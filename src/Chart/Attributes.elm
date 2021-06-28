@@ -12,11 +12,11 @@ module Chart.Attributes exposing
 
   -- LABELS
   , fontSize, format
-  , Anchor(..), alignLeft, alignRight, alignMiddle, content
+  , alignLeft, alignRight, alignMiddle, content
 
   -- AXIS
   , amount, flip, pinned
-  , Tick(..), ints, times
+  , ints, times
 
   -- COORDINATES
   , x, y, x1, y1, x2, y2, xOff, yOff, length
@@ -24,18 +24,18 @@ module Chart.Attributes exposing
 
   -- DECORATION
   , border, borderWidth, color, opacity, highlight, highlightWidth, background, noArrow, rotate
-  , Design(..), GradientConfig, Pattern, striped, dotted, gradient, colors
+  , striped, dotted, gradient, colors
 
   -- BAR
   , ungroup, roundTop, roundBottom, margin, spacing
 
   -- LINES
   , area, size, dashed, break
-  , Method(..), linear, monotone, stepped
-  , Shape(..), circle, triangle, square, diamond, plus, cross, shape
+  , linear, monotone, stepped
+  , circle, triangle, square, diamond, plus, cross, shape
 
   -- TOOLTIP
-  , Direction(..), onTop, onBottom, onRight, onLeft, onLeftOrRight, onTopOrBottom
+  , onTop, onBottom, onRight, onLeft, onLeftOrRight, onTopOrBottom
   , offset
   , focal
   , topLeft, topRight, topCenter
@@ -44,8 +44,7 @@ module Chart.Attributes exposing
   , top, bottom, left, right, center
 
   -- LEGENDS
-  , title
-  , Alignment(..), row, column
+  , title, row, column
 
   -- GRID
   , noGrid, dotGrid
@@ -60,6 +59,7 @@ module Chart.Attributes exposing
 import Time
 import Internal.Coordinates as C
 import Internal.Helpers as Helpers
+import Internal.Svg as CS
 
 
 {-| -}
@@ -152,22 +152,15 @@ title value config =
 
 
 {-| -}
-type Tick
-  = Floats
-  | Ints
-  | Times Time.Zone
-
-
-{-| -}
-ints : Attribute { a | generate : Tick }
+ints : Attribute { a | generate : CS.TickType }
 ints config =
-  { config | generate = Ints }
+  { config | generate = CS.Ints }
 
 
 {-| -}
-times : Time.Zone -> Attribute { a | generate : Tick }
+times : Time.Zone -> Attribute { a | generate : CS.TickType }
 times zone config =
-  { config | generate = Times zone }
+  { config | generate = CS.Times zone }
 
 
 {-| -}
@@ -488,30 +481,22 @@ events v config =
   { config | events = v }
 
 
--- TODO Move to internal
 {-| -}
-type Anchor
-  = End
-  | Start
-  | Middle
-
-
-{-| -}
-alignLeft : Attribute { a | anchor : Maybe Anchor }
+alignLeft : Attribute { a | anchor : Maybe CS.Anchor }
 alignLeft config =
-  { config | anchor = Just Start }
+  { config | anchor = Just CS.Start }
 
 
 {-| -}
-alignRight : Attribute { a | anchor : Maybe Anchor }
+alignRight : Attribute { a | anchor : Maybe CS.Anchor }
 alignRight config =
-  { config | anchor = Just End }
+  { config | anchor = Just CS.End }
 
 
 {-| -}
-alignMiddle : Attribute { a | anchor : Maybe Anchor }
+alignMiddle : Attribute { a | anchor : Maybe CS.Anchor }
 alignMiddle config =
-  { config | anchor = Just Middle }
+  { config | anchor = Just CS.Middle }
 
 
 
@@ -602,81 +587,51 @@ focal given config =
   { config | focal = Just given }
 
 
-
--- TODO Move to internal
 {-| -}
-type Method
-  = Linear
-  | Monotone
-  | Stepped
-
-
-{-| -}
-linear : Attribute { a | method : Maybe Method }
+linear : Attribute { a | method : Maybe CS.Method }
 linear config =
-  { config | method = Just Linear }
+  { config | method = Just CS.Linear }
 
 
 {-| -}
-monotone : Attribute { a | method : Maybe Method }
+monotone : Attribute { a | method : Maybe CS.Method }
 monotone config =
-  { config | method = Just Monotone }
+  { config | method = Just CS.Monotone }
 
 
 {-| -}
-stepped : Attribute { a | method : Maybe Method }
+stepped : Attribute { a | method : Maybe CS.Method }
 stepped config =
-  { config | method = Just Stepped }
+  { config | method = Just CS.Stepped }
 
 
 {-| -}
-area : Float -> Attribute { a | area : Float, method : Maybe Method }
+area : Float -> Attribute { a | area : Float, method : Maybe CS.Method }
 area v config =
   { config | area = v
   , method =
       case config.method of
         Just _ -> config.method
-        Nothing -> Just Linear
+        Nothing -> Just CS.Linear
   }
 
 
 {-| -}
-type Design
-  = Striped (List (Attribute Pattern))
-  | Dotted (List (Attribute Pattern))
-  | Gradient (List (Attribute GradientConfig))
-
-
-{-| -}
-type alias Pattern =
-  { color : String
-  , width : Float
-  , spacing : Float
-  , rotate : Float
-  }
-
-
-{-| -}
-type alias GradientConfig =
-  { colors : List String }
-
-
-{-| -}
-striped : List (Attribute Pattern) -> Attribute { a | design : Maybe Design, opacity : Float }
+striped : List (Attribute CS.Pattern) -> Attribute { a | design : Maybe CS.Design, opacity : Float }
 striped attrs_ config =
-  { config | design = Just (Striped attrs_), opacity = if config.opacity == 0 then 1 else config.opacity }
+  { config | design = Just (CS.Striped attrs_), opacity = if config.opacity == 0 then 1 else config.opacity }
 
 
 {-| -}
-dotted : List (Attribute Pattern) -> Attribute { a | design : Maybe Design, opacity : Float }
+dotted : List (Attribute CS.Pattern) -> Attribute { a | design : Maybe CS.Design, opacity : Float }
 dotted attrs_ config =
-  { config | design = Just (Dotted attrs_), opacity = if config.opacity == 0 then 1 else config.opacity }
+  { config | design = Just (CS.Dotted attrs_), opacity = if config.opacity == 0 then 1 else config.opacity }
 
 
 {-| -}
-gradient : List (Attribute GradientConfig) -> Attribute { a | design : Maybe Design, opacity : Float }
+gradient : List (Attribute CS.GradientConfig) -> Attribute { a | design : Maybe CS.Design, opacity : Float }
 gradient attrs_ config =
-  { config | design = Just (Gradient attrs_), opacity = if config.opacity == 0 then 1 else config.opacity }
+  { config | design = Just (CS.Gradient attrs_), opacity = if config.opacity == 0 then 1 else config.opacity }
 
 
 {-| -}
@@ -691,55 +646,45 @@ dashed value config =
   { config | dashed = value }
 
 
--- TODO Move to internal
-{-| -}
-type Shape
-  = Circle
-  | Triangle
-  | Square
-  | Diamond
-  | Cross
-  | Plus
-
 
 {-| -}
-circle : Attribute { a | shape : Maybe Shape }
+circle : Attribute { a | shape : Maybe CS.Shape }
 circle config =
-  { config | shape = Just Circle }
+  { config | shape = Just CS.Circle }
 
 
 {-| -}
-triangle : Attribute { a | shape : Maybe Shape }
+triangle : Attribute { a | shape : Maybe CS.Shape }
 triangle config =
-  { config | shape = Just Triangle }
+  { config | shape = Just CS.Triangle }
 
 
 {-| -}
-square : Attribute { a | shape : Maybe Shape }
+square : Attribute { a | shape : Maybe CS.Shape }
 square config =
-  { config | shape = Just Square }
+  { config | shape = Just CS.Square }
 
 
 {-| -}
-diamond : Attribute { a | shape : Maybe Shape }
+diamond : Attribute { a | shape : Maybe CS.Shape }
 diamond config =
-  { config | shape = Just Diamond }
+  { config | shape = Just CS.Diamond }
 
 
 {-| -}
-plus : Attribute { a | shape : Maybe Shape }
+plus : Attribute { a | shape : Maybe CS.Shape }
 plus config =
-  { config | shape = Just Plus }
+  { config | shape = Just CS.Plus }
 
 
 {-| -}
-cross : Attribute { a | shape : Maybe Shape }
+cross : Attribute { a | shape : Maybe CS.Shape }
 cross config =
-  { config | shape = Just Cross }
+  { config | shape = Just CS.Cross }
 
 
 {-| -}
-shape : Maybe Shape -> Attribute { a | shape : Maybe Shape }
+shape : Maybe CS.Shape -> Attribute { a | shape : Maybe CS.Shape }
 shape v config =
   { config | shape = v }
 
@@ -750,63 +695,49 @@ content v config =
   { config | content = v }
 
 
-{-| -}
-type Direction
-  = Top
-  | Left
-  | Right
-  | Bottom
-  | LeftOrRight
-  | TopOrBottom
-
 
 {-| -}
-onTop : Attribute { a | direction : Maybe Direction }
+onTop : Attribute { a | direction : Maybe CS.Direction }
 onTop config =
-  { config | direction = Just Top }
+  { config | direction = Just CS.Top }
 
 
 {-| -}
-onBottom : Attribute { a | direction : Maybe Direction }
+onBottom : Attribute { a | direction : Maybe CS.Direction }
 onBottom config =
-  { config | direction = Just Bottom }
+  { config | direction = Just CS.Bottom }
 
 
 {-| -}
-onRight : Attribute { a | direction : Maybe Direction }
+onRight : Attribute { a | direction : Maybe CS.Direction }
 onRight config =
-  { config | direction = Just Right }
+  { config | direction = Just CS.Right }
 
 
 {-| -}
-onLeft : Attribute { a | direction : Maybe Direction }
+onLeft : Attribute { a | direction : Maybe CS.Direction }
 onLeft config =
-  { config | direction = Just Left }
+  { config | direction = Just CS.Left }
 
 
-onLeftOrRight : Attribute { a | direction : Maybe Direction }
+onLeftOrRight : Attribute { a | direction : Maybe CS.Direction }
 onLeftOrRight config =
-  { config | direction = Just LeftOrRight }
+  { config | direction = Just CS.LeftOrRight }
 
 
-onTopOrBottom : Attribute { a | direction : Maybe Direction }
+onTopOrBottom : Attribute { a | direction : Maybe CS.Direction }
 onTopOrBottom config =
-  { config | direction = Just TopOrBottom }
+  { config | direction = Just CS.TopOrBottom }
 
 
-type Alignment
-  = Row
-  | Column
-
-
-row : Attribute { a | alignment : Alignment }
+row : Attribute { a | alignment : CS.Alignment }
 row config =
-  { config | alignment = Row }
+  { config | alignment = CS.Row }
 
 
-column : Attribute { a | alignment : Alignment }
+column : Attribute { a | alignment : CS.Alignment }
 column config =
-  { config | alignment = Column }
+  { config | alignment = CS.Column }
 
 
 

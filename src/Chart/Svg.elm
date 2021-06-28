@@ -151,8 +151,8 @@ rect plane edits =
 
 
 type alias Legends msg =
-  { alignment : CA.Alignment
-  , anchor : Maybe CA.Anchor
+  { alignment : Internal.Svg.Alignment
+  , anchor : Maybe Internal.Svg.Anchor
   , spacing : Float
   , htmlAttrs : List (H.Attribute msg)
   }
@@ -217,7 +217,7 @@ type alias Label =
   , borderWidth : Float
   , fontSize : Maybe Int
   , color : String
-  , anchor : Maybe CA.Anchor
+  , anchor : Maybe Internal.Svg.Anchor
   , rotate : Float
   , attrs : List (S.Attribute Never)
   }
@@ -263,7 +263,7 @@ type alias Bar =
   , border : String
   , borderWidth : Float
   , opacity : Float
-  , design : Maybe CA.Design
+  , design : Maybe Internal.Svg.Design
   , attrs : List (S.Attribute Never)
   , highlight : Float
   , highlightWidth : Float
@@ -282,11 +282,11 @@ bar plane edits =
 
 {-| -}
 type alias Interpolation =
-  { method : Maybe CA.Method
+  { method : Maybe Internal.Svg.Method
   , color : String
   , width : Float
   , opacity : Float
-  , design : Maybe CA.Design
+  , design : Maybe Internal.Svg.Design
   , dashed : List Float
   , attrs : List (S.Attribute Never)
   }
@@ -317,7 +317,7 @@ type alias Dot =
   , borderWidth : Float
   , highlight : Float
   , highlightWidth : Float
-  , shape : Maybe CA.Shape
+  , shape : Maybe Internal.Svg.Shape
   }
 
 
@@ -333,7 +333,7 @@ dot plane toX toY edits =
 
 {-| -}
 type alias Tooltip =
-  { direction : Maybe CA.Direction
+  { direction : Maybe Internal.Svg.Direction
   , focal : Maybe (Position -> Position)
   , height : Float
   , width : Float

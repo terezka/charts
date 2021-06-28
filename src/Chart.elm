@@ -67,6 +67,7 @@ import Internal.Produce as Produce
 import Internal.Legend as Legend
 import Internal.Group as Group
 import Internal.Helpers as Helpers
+import Internal.Svg as IS
 import Chart.Svg as CS
 import Chart.Attributes as CA
 import Chart.Events as CE
@@ -74,23 +75,23 @@ import Chart.Events as CE
 
 {-| -}
 type alias Container data msg =
-    { width : Float
-    , height : Float
-    , marginTop : Float
-    , marginBottom : Float
-    , marginLeft : Float
-    , marginRight : Float
-    , paddingTop : Float
-    , paddingBottom : Float
-    , paddingLeft : Float
-    , paddingRight : Float
-    , responsive : Bool
-    , range : List (CA.Attribute C.Axis)
-    , domain : List (CA.Attribute C.Axis)
-    , events : List (CE.Event data msg)
-    , htmlAttrs : List (H.Attribute msg)
-    , attrs : List (S.Attribute msg)
-    }
+  { width : Float
+  , height : Float
+  , marginTop : Float
+  , marginBottom : Float
+  , marginLeft : Float
+  , marginRight : Float
+  , paddingTop : Float
+  , paddingBottom : Float
+  , paddingLeft : Float
+  , paddingRight : Float
+  , responsive : Bool
+  , range : List (CA.Attribute C.Axis)
+  , domain : List (CA.Attribute C.Axis)
+  , events : List (CE.Event data msg)
+  , htmlAttrs : List (H.Attribute msg)
+  , attrs : List (S.Attribute msg)
+  }
 
 
 {-| -}
@@ -148,12 +149,12 @@ chart edits unindexedElements =
         let (CE.Decoder decoder) = event_.decoder in
         CS.Event event_.name (decoder items)
   in
-  CS.container plane
-    [ CA.attrs config.attrs
-    , CA.htmlAttrs config.htmlAttrs
-    , if config.responsive then identity else CA.static
-    , CA.events (List.map toEvent config.events)
-    ]
+  IS.container plane
+    { attrs = config.attrs
+    , htmlAttrs = config.htmlAttrs
+    , responsive = config.responsive
+    , events = List.map toEvent config.events
+    }
     beforeEls
     chartEls
     afterEls
@@ -393,7 +394,7 @@ viewElements config plane tickValues allItems allLegends elements =
 
 
 type alias Tooltip =
-  { direction : Maybe CA.Direction
+  { direction : Maybe IS.Direction
   , focal : Maybe (C.Position -> C.Position)
   , height : Float
   , width : Float
@@ -454,7 +455,8 @@ xAxis edits =
           , CA.x2 (min p.x.max xLimit.max)
           ]
       , if config.arrow then
-          CS.arrow p [ CA.color config.color ]
+          CS.arrow p
+            [ CA.color config.color ]
             { x = xLimit.max
             , y = config.pinned p.y
             }
@@ -506,7 +508,7 @@ type alias Ticks =
     , amount : Int
     , flip : Bool
     , grid : Bool
-    , generate : CA.Tick
+    , generate : IS.TickType
     }
 
 
@@ -519,7 +521,7 @@ xTicks edits =
           , limits = []
           , pinned = CA.zero
           , amount = 5
-          , generate = CA.Floats
+          , generate = IS.Floats
           , height = 5
           , flip = False
           , grid = True
@@ -558,7 +560,7 @@ yTicks edits =
           , limits = []
           , pinned = CA.zero
           , amount = 5
-          , generate = CA.Floats
+          , generate = IS.Floats
           , height = 5
           , flip = False
           , grid = True
@@ -589,17 +591,18 @@ yTicks edits =
 
 
 type alias Labels =
-    { color : String
-    , pinned : C.Axis -> Float
-    , limits : List (CA.Attribute C.Axis)
-    , xOff : Float
-    , yOff : Float
-    , flip : Bool
-    , amount : Int
-    , anchor : Maybe CA.Anchor
-    , generate : CA.Tick
-    , grid : Bool
-    }
+  { color : String
+  , pinned : C.Axis -> Float
+  , limits : List (CA.Attribute C.Axis)
+  , xOff : Float
+  , yOff : Float
+  , flip : Bool
+  , amount : Int
+  , anchor : Maybe IS.Anchor
+  , generate : IS.TickType
+  , grid : Bool
+  }
+
 
 
 {-| -}
@@ -611,7 +614,7 @@ xLabels edits =
           , limits = []
           , pinned = CA.zero
           , amount = 5
-          , generate = CA.Floats
+          , generate = IS.Floats
           , flip = False
           , anchor = Nothing
           , xOff = 0
@@ -628,17 +631,15 @@ xLabels edits =
         { ts | xs = ts.xs ++ List.map .value (toTicks p config) }
   in
   LabelsElement toConfig toTickValues <| \p config ->
-    let toLabel item =
-          CS.label p
-            [ CA.color config.color
-            , CA.xOff config.xOff
-            , CA.yOff (if config.flip then -config.yOff + 10 else config.yOff)
-            , case config.anchor of
-                Nothing -> identity
-                Just CA.Middle -> CA.alignMiddle
-                Just CA.End -> CA.alignLeft
-                Just CA.Start -> CA.alignRight
-            ]
+    let default = IS.defaultLabel
+        toLabel item =
+          IS.label p
+            { default
+            | xOff = config.xOff
+            , yOff = if config.flip then -config.yOff + 10 else config.yOff
+            , color = config.color
+            , anchor = config.anchor
+            }
             [ S.text item.label ]
             { x = item.value
             , y = config.pinned p.y
@@ -656,7 +657,7 @@ yLabels edits =
           , limits = []
           , pinned = CA.zero
           , amount = 5
-          , generate = CA.Floats
+          , generate = IS.Floats
           , anchor = Nothing
           , flip = False
           , xOff = -10
@@ -673,17 +674,15 @@ yLabels edits =
         { ts | ys = ts.ys ++ List.map .value (toTicks p config) }
   in
   LabelsElement toConfig toTickValues <| \p config ->
-    let toLabel item =
-          CS.label p
-            [ CA.color config.color
-            , CA.xOff (if config.flip then -config.xOff else config.xOff)
-            , CA.yOff config.yOff
-            , case config.anchor of
-                Nothing -> if config.flip then CA.alignLeft else CA.alignRight
-                Just CA.Middle -> CA.alignMiddle
-                Just CA.End -> CA.alignLeft
-                Just CA.Start -> CA.alignRight
-            ]
+    let default = IS.defaultLabel
+        toLabel item =
+          IS.label p
+            { default
+            | xOff = if config.flip then -config.xOff else config.xOff
+            , yOff = config.yOff
+            , color = config.color
+            , anchor = config.anchor
+            }
             [ S.text item.label ]
             { x = config.pinned p.x
             , y = item.value
@@ -702,7 +701,7 @@ type alias Label =
   , borderWidth : Float
   , fontSize : Maybe Int
   , color : String
-  , anchor : Maybe CA.Anchor
+  , anchor : Maybe IS.Anchor
   , rotate : Float
   , flip : Bool
   , grid : Bool
@@ -738,22 +737,17 @@ xLabel edits inner =
           then [ S.text (String.fromFloat config.x) ]
           else inner
     in
-    CS.label p
-      [ CA.xOff config.xOff
-      , CA.yOff (if config.flip then -config.yOff + 10 else config.yOff)
-      , CA.border config.border
-      , CA.borderWidth config.borderWidth
-      , case config.fontSize of
-          Just s -> CA.fontSize s
-          Nothing -> identity
-      , CA.color config.color
-      , case config.anchor of
-          Nothing -> identity
-          Just CA.Middle -> CA.alignMiddle
-          Just CA.End -> CA.alignLeft
-          Just CA.Start -> CA.alignRight
-      , CA.rotate config.rotate
-      ]
+    IS.label p
+      { xOff = config.xOff
+      , yOff = if config.flip then -config.yOff + 10 else config.yOff
+      , border = config.border
+      , borderWidth = config.borderWidth
+      , fontSize = config.fontSize
+      , color = config.color
+      , anchor = config.anchor
+      , rotate = config.rotate
+      , attrs = []
+      }
       string
       { x = config.x, y = config.y }
 
@@ -787,22 +781,20 @@ yLabel edits inner =
           then [ S.text (String.fromFloat config.y) ]
           else inner
     in
-    CS.label p
-      [ CA.xOff (if config.flip then -config.xOff else config.xOff)
-      , CA.yOff config.yOff
-      , CA.border config.border
-      , CA.borderWidth config.borderWidth
-      , case config.fontSize of
-          Just s -> CA.fontSize s
-          Nothing -> identity
-      , CA.color config.color
-      , case config.anchor of
-          Nothing -> if config.flip then CA.alignLeft else CA.alignRight
-          Just CA.Middle -> CA.alignMiddle
-          Just CA.End -> CA.alignLeft
-          Just CA.Start -> CA.alignRight
-      , CA.rotate config.rotate
-      ]
+    IS.label p
+      { xOff = if config.flip then -config.xOff else config.xOff
+      , yOff = config.yOff
+      , border = config.border
+      , borderWidth = config.borderWidth
+      , fontSize = config.fontSize
+      , color = config.color
+      , anchor =
+          case config.anchor of
+            Nothing -> Just (if config.flip then IS.Start else IS.End)
+            Just anchor -> Just anchor
+      , rotate = config.rotate
+      , attrs = []
+      }
       string
       { x = config.x, y = config.y }
 
@@ -1277,11 +1269,11 @@ applyAttrs funcs default =
   List.foldl apply default funcs
 
 
-generateValues : Int -> CA.Tick -> C.Axis -> List CS.TickValue
+generateValues : Int -> IS.TickType -> C.Axis -> List CS.TickValue
 generateValues amount tick axis =
   case tick of
-    CA.Floats -> CS.toTickValues identity String.fromFloat (CS.generate amount CS.floats axis)
-    CA.Ints -> CS.toTickValues toFloat String.fromInt (CS.generate amount CS.ints axis)
-    CA.Times zone -> CS.toTickValues (toFloat << Time.posixToMillis << .timestamp) (CS.formatTime zone) (CS.generate amount (CS.times zone) axis)
+    IS.Floats -> CS.toTickValues identity String.fromFloat (CS.generate amount CS.floats axis)
+    IS.Ints -> CS.toTickValues toFloat String.fromInt (CS.generate amount CS.ints axis)
+    IS.Times zone -> CS.toTickValues (toFloat << Time.posixToMillis << .timestamp) (CS.formatTime zone) (CS.generate amount (CS.times zone) axis)
 
 

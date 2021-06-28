@@ -4,6 +4,11 @@ module Internal.Helpers exposing (..)
 import Dict exposing (Dict)
 
 
+{-| -}
+type alias Attribute c =
+  c -> c
+
+
 apply : List (a -> a) -> a -> a
 apply funcs default =
   let apply_ f a = f a in

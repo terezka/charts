@@ -7,7 +7,6 @@ import Svg.Attributes as SA
 import Svg.Events as SE
 import Internal.Coordinates as Coord
 import Internal.Commands as C exposing (..)
-import Chart.Attributes as CA
 import Internal.Interpolation as Interpolation
 import Intervals as I
 import Json.Decode as Json
@@ -106,6 +105,13 @@ container plane config below chartEls above =
 
 
 -- TICK
+
+
+{-| -}
+type TickType
+  = Floats
+  | Ints
+  | Times Time.Zone
 
 
 {-| -}
@@ -392,16 +398,28 @@ rect plane config =
 
 
 type alias Legends msg =
-  { alignment : CA.Alignment
-  , anchor : Maybe CA.Anchor
+  { alignment : Alignment
+  , anchor : Maybe Anchor
   , spacing : Float
   , htmlAttrs : List (H.Attribute msg)
   }
 
 
+type Alignment
+  = Row
+  | Column
+
+
+{-| -}
+type Anchor
+  = End
+  | Start
+  | Middle
+
+
 defaultLegends : Legends msg
 defaultLegends =
-  { alignment = CA.Row
+  { alignment = Row
   , anchor = Nothing
   , spacing = 10
   , htmlAttrs = []
@@ -412,14 +430,14 @@ legendsAt : Plane -> Float -> Float -> Float -> Float -> Legends msg -> List (Ht
 legendsAt plane x y xOff yOff config children =
   let ( alignmentAttrs, direction ) =
         case config.alignment of
-          CA.Row ->
+          Row ->
             ( [ HA.style "display" "flex"
               , HA.style "align-items" "center"
               ]
             , "right"
             )
 
-          CA.Column ->
+          Column ->
             ( [ HA.style "display" "flex"
               , HA.style "flex-direction" "column"
               , HA.style "align-items" "baseline"
@@ -442,9 +460,9 @@ legendsAt plane x y xOff yOff config children =
       anchorAttrs =
         case config.anchor of
           Nothing -> [ HA.style "transform" "translate(-0%, 0%)" ]
-          Just CA.End -> [ HA.style "transform" "translate(-100%, 0%)" ]
-          Just CA.Start -> [ HA.style "transform" "translate(-0%, 0%)" ]
-          Just CA.Middle -> [ HA.style "transform" "translate(-50%, 0%)" ]
+          Just End -> [ HA.style "transform" "translate(-100%, 0%)" ]
+          Just Start -> [ HA.style "transform" "translate(-0%, 0%)" ]
+          Just Middle -> [ HA.style "transform" "translate(-50%, 0%)" ]
   in
   positionHtml plane x y xOff yOff
     (anchorAttrs ++ alignmentAttrs ++ classAttrs ++ config.htmlAttrs)
@@ -582,7 +600,7 @@ type alias Label =
   , borderWidth : Float
   , fontSize : Maybe Int
   , color : String
-  , anchor : Maybe CA.Anchor
+  , anchor : Maybe Anchor
   , rotate : Float
   , attrs : List (S.Attribute Never)
   }
@@ -613,9 +631,9 @@ label plane config inner point =
       anchorStyle =
         case config.anchor of
           Nothing -> "text-anchor: middle;"
-          Just CA.End -> "text-anchor: end;"
-          Just CA.Start -> "text-anchor: start;"
-          Just CA.Middle -> "text-anchor: middle;"
+          Just End -> "text-anchor: end;"
+          Just Start -> "text-anchor: start;"
+          Just Middle -> "text-anchor: middle;"
   in
   withAttrs config.attrs S.text_
     [ SA.class "elm-charts__label"
@@ -716,11 +734,33 @@ type alias Bar =
   , border : String
   , borderWidth : Float
   , opacity : Float
-  , design : Maybe CA.Design
+  , design : Maybe Design
   , attrs : List (S.Attribute Never)
   , highlight : Float
   , highlightWidth : Float
   }
+
+
+{-| -}
+type Design
+  = Striped (List (Helpers.Attribute Pattern))
+  | Dotted (List (Helpers.Attribute Pattern))
+  | Gradient (List (Helpers.Attribute GradientConfig))
+
+
+{-| -}
+type alias Pattern =
+  { color : String
+  , width : Float
+  , spacing : Float
+  , rotate : Float
+  }
+
+
+{-| -}
+type alias GradientConfig =
+  { colors : List String }
+
 
 
 defaultBar : Bar
@@ -920,14 +960,21 @@ bar plane config point =
 
 {-| -}
 type alias Interpolation =
-  { method : Maybe CA.Method
+  { method : Maybe Method
   , color : String
   , width : Float
   , opacity : Float
-  , design : Maybe CA.Design
+  , design : Maybe Design
   , dashed : List Float
   , attrs : List (S.Attribute Never)
   }
+
+
+{-| -}
+type Method
+  = Linear
+  | Monotone
+  | Stepped
 
 
 defaultInterpolation : Interpolation
@@ -1021,7 +1068,7 @@ area plane toX toY2M toY config data =
           Just toY2 -> patternDefs :: List.map2 withUnder (toCommands method toX toY2 data) (toCommands method toX toY data)
 
 
-toCommands : CA.Method -> (data -> Float) -> (data -> Maybe Float) -> List data -> List ( Point, List C.Command, Point )
+toCommands : Method -> (data -> Float) -> (data -> Maybe Float) -> List data -> List ( Point, List C.Command, Point )
 toCommands method toX toY data =
   let fold datum_ acc =
         case toY datum_ of
@@ -1038,9 +1085,9 @@ toCommands method toX toY data =
 
       commands =
         case method of
-          CA.Linear -> Interpolation.linear points
-          CA.Monotone -> Interpolation.monotone points
-          CA.Stepped -> Interpolation.stepped points
+          Linear -> Interpolation.linear points
+          Monotone -> Interpolation.monotone points
+          Stepped -> Interpolation.stepped points
 
       toSets ps cmds =
         withBorder ps <| \first last_ -> ( first, cmds, last_ )
@@ -1061,8 +1108,17 @@ type alias Dot =
   , borderWidth : Float
   , highlight : Float
   , highlightWidth : Float
-  , shape : Maybe CA.Shape
+  , shape : Maybe Shape
   }
+
+
+type Shape
+  = Circle
+  | Triangle
+  | Square
+  | Diamond
+  | Cross
+  | Plus
 
 
 defaultDot : Dot
@@ -1116,7 +1172,7 @@ dot plane toX toY config datum_ =
     Nothing ->
       S.text ""
 
-    Just CA.Circle ->
+    Just Circle ->
       view S.circle (config.highlightWidth / 2) <| \off ->
         let radius = sqrt (area_ / pi) in
         [ SA.cx (String.fromFloat x_)
@@ -1124,11 +1180,11 @@ dot plane toX toY config datum_ =
         , SA.r (String.fromFloat (radius + off))
         ]
 
-    Just CA.Triangle ->
+    Just Triangle ->
       view S.path config.highlightWidth <| \off ->
         [ SA.d (trianglePath area_ off x_ y_) ]
 
-    Just CA.Square ->
+    Just Square ->
       view S.rect config.highlightWidth <| \off ->
         let side = sqrt area_
             sideOff = side + off
@@ -1139,7 +1195,7 @@ dot plane toX toY config datum_ =
         , SA.height (String.fromFloat sideOff)
         ]
 
-    Just CA.Diamond ->
+    Just Diamond ->
       view S.rect config.highlightWidth <| \off ->
         let side = sqrt area_
             sideOff = side + off
@@ -1151,27 +1207,27 @@ dot plane toX toY config datum_ =
         , SA.transform ("rotate(45 " ++ String.fromFloat x_ ++ " " ++ String.fromFloat y_ ++ ")")
         ]
 
-    Just CA.Cross ->
+    Just Cross ->
       view S.path config.highlightWidth <| \off ->
         [ SA.d (plusPath area_ off x_ y_)
         , SA.transform ("rotate(45 " ++ String.fromFloat x_ ++ " " ++ String.fromFloat y_ ++ ")")
         ]
 
-    Just CA.Plus ->
+    Just Plus ->
       view S.path config.highlightWidth <| \off ->
         [ SA.d (plusPath area_ off x_ y_) ]
 
 
-toRadius : Float -> CA.Shape -> Float
+toRadius : Float -> Shape -> Float
 toRadius size_ shape =
   let area_ = 2 * pi * size_ in
   case shape of
-    CA.Circle   -> sqrt (area_ / pi)
-    CA.Triangle -> let side = sqrt <| area_ * 4 / (sqrt 3) in (sqrt 3) * side
-    CA.Square   -> sqrt area_ / 2
-    CA.Diamond  -> sqrt area_ / 2
-    CA.Cross    -> sqrt (area_ / 4)
-    CA.Plus     -> sqrt (area_ / 4)
+    Circle   -> sqrt (area_ / pi)
+    Triangle -> let side = sqrt <| area_ * 4 / (sqrt 3) in (sqrt 3) * side
+    Square   -> sqrt area_ / 2
+    Diamond  -> sqrt area_ / 2
+    Cross    -> sqrt (area_ / 4)
+    Plus     -> sqrt (area_ / 4)
 
 
 trianglePath : Float -> Float -> Float -> Float -> String
@@ -1218,7 +1274,7 @@ plusPath area_ off x_ y_ =
 
 {-| -}
 type alias Tooltip =
-  { direction : Maybe CA.Direction
+  { direction : Maybe Direction
   , focal : Maybe (Position -> Position)
   , height : Float
   , width : Float
@@ -1227,6 +1283,15 @@ type alias Tooltip =
   , border : String
   , background : String
   }
+
+
+type Direction
+  = Top
+  | Left
+  | Right
+  | Bottom
+  | LeftOrRight
+  | TopOrBottom
 
 
 defaultTooltip : Tooltip
@@ -1252,37 +1317,37 @@ tooltip plane pos config htmlAttrs content =
 
       direction =
         case config.direction of
-          Just CA.LeftOrRight ->
+          Just LeftOrRight ->
             if config.width > 0
-            then if distanceLeft > (config.width + config.offset) then CA.Left else CA.Right
-            else if distanceLeft > distanceRight then CA.Left else CA.Right
+            then if distanceLeft > (config.width + config.offset) then Left else Right
+            else if distanceLeft > distanceRight then Left else Right
 
-          Just CA.TopOrBottom ->
+          Just TopOrBottom ->
             if config.height > 0
-            then if distanceTop > (config.height + config.offset) then CA.Top else CA.Bottom
-            else if distanceTop > distanceBottom then CA.Top else CA.Bottom
+            then if distanceTop > (config.height + config.offset) then Top else Bottom
+            else if distanceTop > distanceBottom then Top else Bottom
 
           Just dir ->
             dir
 
           Nothing ->
             let isLargest a = List.all (\b -> a >= b) in
-            if isLargest distanceTop [ distanceBottom, distanceLeft, distanceRight ] then CA.Top
-            else if isLargest distanceBottom [ distanceTop, distanceLeft, distanceRight ] then CA.Bottom
-            else if isLargest distanceLeft [ distanceTop, distanceBottom, distanceRight ] then CA.Left
-            else CA.Right
+            if isLargest distanceTop [ distanceBottom, distanceLeft, distanceRight ] then Top
+            else if isLargest distanceBottom [ distanceTop, distanceLeft, distanceRight ] then Bottom
+            else if isLargest distanceLeft [ distanceTop, distanceBottom, distanceRight ] then Left
+            else Right
 
       arrowWidth =
         if config.arrow then 4 else 0
 
       { xOff, yOff, transformation, className } =
         case direction of
-          CA.Top         -> { xOff = 0, yOff = config.offset + arrowWidth, transformation = "translate(-50%, -100%)", className = "elm-charts__tooltip-top" }
-          CA.Bottom      -> { xOff = 0, yOff = -config.offset - arrowWidth, transformation = "translate(-50%, 0%)", className = "elm-charts__tooltip-bottom" }
-          CA.Left        -> { xOff = -config.offset - arrowWidth, yOff = 0, transformation = "translate(-100%, -50%)", className = "elm-charts__tooltip-left" }
-          CA.Right       -> { xOff = config.offset + arrowWidth, yOff = 0, transformation = "translate(0, -50%)", className = "elm-charts__tooltip-right" }
-          CA.LeftOrRight -> { xOff = -config.offset - arrowWidth, yOff = 0, transformation = "translate(0, -50%)", className = "elm-charts__tooltip-leftOrRight" }
-          CA.TopOrBottom -> { xOff = 0, yOff = config.offset + arrowWidth, transformation =  "translate(-50%, -100%)", className = "elm-charts__tooltip-topOrBottom" }
+          Top         -> { xOff = 0, yOff = config.offset + arrowWidth, transformation = "translate(-50%, -100%)", className = "elm-charts__tooltip-top" }
+          Bottom      -> { xOff = 0, yOff = -config.offset - arrowWidth, transformation = "translate(-50%, 0%)", className = "elm-charts__tooltip-bottom" }
+          Left        -> { xOff = -config.offset - arrowWidth, yOff = 0, transformation = "translate(-100%, -50%)", className = "elm-charts__tooltip-left" }
+          Right       -> { xOff = config.offset + arrowWidth, yOff = 0, transformation = "translate(0, -50%)", className = "elm-charts__tooltip-right" }
+          LeftOrRight -> { xOff = -config.offset - arrowWidth, yOff = 0, transformation = "translate(0, -50%)", className = "elm-charts__tooltip-leftOrRight" }
+          TopOrBottom -> { xOff = 0, yOff = config.offset + arrowWidth, transformation =  "translate(-50%, -100%)", className = "elm-charts__tooltip-topOrBottom" }
 
       children =
         if config.arrow then
@@ -1304,21 +1369,21 @@ tooltip plane pos config htmlAttrs content =
         case config.focal of
           Just focal ->
             case direction of
-              CA.Top         -> Coord.top (focal pos)
-              CA.Bottom      -> Coord.bottom (focal pos)
-              CA.Left        -> Coord.left (focal pos)
-              CA.Right       -> Coord.right (focal pos)
-              CA.LeftOrRight -> Coord.left (focal pos)
-              CA.TopOrBottom -> Coord.right (focal pos)
+              Top         -> Coord.top (focal pos)
+              Bottom      -> Coord.bottom (focal pos)
+              Left        -> Coord.left (focal pos)
+              Right       -> Coord.right (focal pos)
+              LeftOrRight -> Coord.left (focal pos)
+              TopOrBottom -> Coord.right (focal pos)
 
           Nothing ->
             case direction of
-              CA.Top         -> Coord.top pos
-              CA.Bottom      -> Coord.bottom pos
-              CA.Left        -> Coord.left pos
-              CA.Right       -> Coord.right pos
-              CA.LeftOrRight -> Coord.left pos
-              CA.TopOrBottom -> Coord.right pos
+              Top         -> Coord.top pos
+              Bottom      -> Coord.bottom pos
+              Left        -> Coord.left pos
+              Right       -> Coord.right pos
+              LeftOrRight -> Coord.left pos
+              TopOrBottom -> Coord.right pos
   in
   positionHtml plane focalPoint.x focalPoint.y xOff yOff attributes children
     |> H.map never
@@ -1553,7 +1618,7 @@ decodePosition =
 -- PATTERN
 
 
-toPattern : String -> CA.Design -> ( S.Svg msg, String )
+toPattern : String -> Design -> ( S.Svg msg, String )
 toPattern defaultColor design =
   let toPatternId props =
         String.replace "(" "-" <|
@@ -1564,9 +1629,9 @@ toPattern defaultColor design =
         String.join "-" <|
           [ "elm-charts__pattern"
           , case design of
-              CA.Striped _ -> "striped"
-              CA.Dotted _ -> "dotted"
-              CA.Gradient _ -> "gradient"
+              Striped _ -> "striped"
+              Dotted _ -> "dotted"
+              Gradient _ -> "gradient"
           ] ++ props
 
       toPatternDefs id spacing rotate inside =
@@ -1583,7 +1648,7 @@ toPattern defaultColor design =
 
       ( patternDefs, patternId ) =
         case design of
-          CA.Striped edits ->
+          Striped edits ->
             let config =
                   apply edits
                     { color = defaultColor
@@ -1614,7 +1679,7 @@ toPattern defaultColor design =
             )
 
 
-          CA.Dotted edits ->
+          Dotted edits ->
             let config =
                   apply edits
                     { color = defaultColor
@@ -1642,7 +1707,7 @@ toPattern defaultColor design =
             , theId
             )
 
-          CA.Gradient edits ->
+          Gradient edits ->
             let config =
                   apply edits
                     { colors = [ defaultColor, "white" ] }
@@ -1707,16 +1772,16 @@ isWithinPlane plane x y =
 -- STYLES
 
 
-tooltipPointerStyle : CA.Direction -> String -> String -> String -> String
+tooltipPointerStyle : Direction -> String -> String -> String -> String
 tooltipPointerStyle direction className background borderColor =
   let config =
         case direction of
-          CA.Top          -> { a = "right", b = "top", c = "left" }
-          CA.Bottom       -> { a = "right", b = "bottom", c = "left" }
-          CA.Left         -> { a = "bottom", b = "left", c = "top" }
-          CA.Right        -> { a = "bottom", b = "right", c = "top" }
-          CA.LeftOrRight  -> { a = "bottom", b = "left", c = "top" }
-          CA.TopOrBottom  -> { a = "right", b = "top", c = "left" }
+          Top          -> { a = "right", b = "top", c = "left" }
+          Bottom       -> { a = "right", b = "bottom", c = "left" }
+          Left         -> { a = "bottom", b = "left", c = "top" }
+          Right        -> { a = "bottom", b = "right", c = "top" }
+          LeftOrRight  -> { a = "bottom", b = "left", c = "top" }
+          TopOrBottom  -> { a = "right", b = "top", c = "left" }
   in
   """
   .""" ++ className ++ """:before, .""" ++ className ++ """:after {
