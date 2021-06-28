@@ -7,8 +7,8 @@ import Svg.Attributes as SA
 import Internal.Coordinates as Coord exposing (Point, Position, Plane)
 import Dict exposing (Dict)
 import Internal.Property as P exposing (Property)
-import Chart.Svg as S
 import Chart.Attributes as CA
+import Internal.Svg as S
 import Internal.Helpers as Helpers
 
 
@@ -197,7 +197,7 @@ isBar (Item item) =
       Item
         { toLimits = \_ -> item.toLimits item.config
         , toPosition = \plane _ -> item.toPosition plane item.config
-        , toSvg = \plane config -> S.bar plane (toBarAttrs config.product)
+        , toSvg = \plane config -> S.bar plane config.product
         , toHtml = \c -> item.toHtml item.config
         , config =
             { product = bar
@@ -221,7 +221,7 @@ isDot (Item item) =
         , toPosition = \plane _ -> item.toPosition plane item.config
         , toSvg = \plane config pos ->
             config.values.y
-              |> Maybe.map (\y -> S.dot plane .x .y (toDotAttrs config.product) { x = config.values.x1, y = y })
+              |> Maybe.map (\y -> S.dot plane .x .y config.product { x = config.values.x1, y = y })
               |> Maybe.withDefault (S.text "")
         , toHtml = \c -> item.toHtml item.config
         , config =
@@ -235,29 +235,3 @@ isDot (Item item) =
 
     Bar _ ->
       Nothing
-
-
-toBarAttrs : S.Bar -> List (CA.Attribute S.Bar)
-toBarAttrs bar =
-  [ CA.color bar.color
-  , CA.roundTop bar.roundTop
-  , CA.roundBottom bar.roundBottom
-  , CA.border bar.border
-  , CA.borderWidth bar.borderWidth
-  , CA.highlight bar.highlight
-  , CA.highlightWidth bar.highlightWidth
-  ]
-
-
-toDotAttrs : S.Dot -> List (CA.Attribute S.Dot)
-toDotAttrs dot =
-  [ CA.color dot.color
-  , CA.opacity dot.opacity
-  , CA.size dot.size
-  , CA.border dot.border
-  , CA.borderWidth dot.borderWidth
-  , CA.highlight dot.highlight
-  , CA.highlightWidth dot.highlightWidth
-  , CA.shape dot.shape
-  ]
-

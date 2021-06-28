@@ -7,7 +7,7 @@ import Svg.Attributes as SA
 import Internal.Coordinates as Coord exposing (Point, Position, Plane)
 import Dict exposing (Dict)
 import Internal.Property as P exposing (Property)
-import Chart.Svg as S
+import Internal.Svg as S
 import Chart.Attributes as CA
 import Internal.Helpers as Helpers
 
@@ -34,30 +34,10 @@ type alias Bars data =
 toBarLegends : Int -> List (CA.Attribute (Bars data)) -> List (Property data String () S.Bar) -> List Legend
 toBarLegends elIndex barsAttrs properties =
   let barsConfig =
-        Helpers.apply barsAttrs
-          { spacing = 0.05
-          , margin = 0.1
-          , roundTop = 0
-          , roundBottom = 0
-          , grouped = True
-          , grid = True
-          , x1 = Nothing
-          , x2 = Nothing
-          }
+        Helpers.apply barsAttrs S.defaultBars
 
       toBarConfig attrs =
-        Helpers.apply attrs
-          { roundTop = 0
-          , roundBottom = 0
-          , color = Helpers.pink
-          , border = "white"
-          , borderWidth = 0
-          , opacity = 1
-          , design = Nothing
-          , attrs = []
-          , highlight = 0
-          , highlightWidth = 10
-          }
+        Helpers.apply attrs S.defaultBar
 
       toBarLegend colorIndex prop =
         let defaultName = "Property #" ++ String.fromInt (colorIndex + 1)
@@ -78,15 +58,7 @@ toBarLegends elIndex barsAttrs properties =
 toDotLegends : Int ->  List (Property data String S.Interpolation S.Dot) -> List Legend
 toDotLegends elIndex properties =
   let toInterConfig attrs =
-        Helpers.apply attrs
-          { method = Nothing
-          , color = Helpers.pink
-          , width = 1
-          , opacity = 0
-          , design = Nothing
-          , dashed = []
-          , attrs = []
-          }
+        Helpers.apply attrs S.defaultInterpolation
 
       toDotLegend props prop colorIndex =
         let defaultOpacity = if List.length props > 1 then 0.4 else 0

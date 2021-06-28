@@ -7,8 +7,8 @@ import Svg.Attributes as SA
 import Internal.Coordinates as Coord exposing (Point, Position, Plane)
 import Dict exposing (Dict)
 import Internal.Property as P exposing (Property)
-import Chart.Svg as S
 import Chart.Attributes as CA
+import Internal.Svg as S
 import Internal.Helpers as Helpers
 import Internal.Group as G
 import Internal.Item as I
@@ -30,30 +30,10 @@ type alias Bars data =
 toBarSeries : Int -> List (CA.Attribute (Bars data)) -> List (P.Property data String () S.Bar) -> List data -> List (G.Group () S.Bar (Maybe Float) data)
 toBarSeries elIndex barsAttrs properties data =
   let barsConfig =
-        Helpers.apply barsAttrs
-          { spacing = 0.05
-          , margin = 0.1
-          , roundTop = 0
-          , roundBottom = 0
-          , grouped = True
-          , grid = True
-          , x1 = Nothing
-          , x2 = Nothing
-          }
+        Helpers.apply barsAttrs S.defaultBars
 
       toBarConfig attrs =
-        Helpers.apply attrs
-          { roundTop = 0
-          , roundBottom = 0
-          , color = Helpers.pink
-          , border = "white"
-          , borderWidth = 0
-          , opacity = 1
-          , design = Nothing
-          , attrs = []
-          , highlight = 0
-          , highlightWidth = 10
-          }
+        Helpers.apply attrs S.defaultBar
 
       toBin index prevM curr nextM =
         case ( barsConfig.x1, barsConfig.x2 ) of
@@ -155,7 +135,7 @@ toBarSeries elIndex barsAttrs properties data =
               }
           , toLimits = \config -> { x1 = x1, x2 = x2, y1 = min y1 y2, y2 = max y1 y2 }
           , toPosition = \_ config -> { x1 = x1, x2 = x2, y1 = y1, y2 = y2 }
-          , toSvg = \plane config position -> S.bar plane attrs position
+          , toSvg = \plane config position -> S.bar plane productOrg position
           , toHtml = \c -> [ tooltipRow c.tooltipInfo.color (toDefaultName colorIndex c.tooltipInfo.name) value ]
           }
   in
@@ -174,27 +154,10 @@ toBarSeries elIndex barsAttrs properties data =
 toDotSeries : Int -> (data -> Float) -> List (Property data String S.Interpolation S.Dot) -> List data -> List (G.Group S.Interpolation S.Dot (Maybe Float) data)
 toDotSeries elIndex toX properties data =
   let toInterConfig attrs =
-        Helpers.apply attrs
-          { method = Nothing
-          , color = Helpers.pink
-          , width = 1
-          , opacity = 0
-          , design = Nothing
-          , dashed = []
-          , attrs = []
-          }
+        Helpers.apply attrs S.defaultInterpolation
 
       toDotConfig attrs =
-        Helpers.apply attrs
-          { color = Helpers.pink
-          , opacity = 1
-          , size = 6
-          , border = "white"
-          , borderWidth = 0
-          , highlight = 0
-          , highlightWidth = 10
-          , shape = Nothing
-          }
+        Helpers.apply attrs S.defaultDot
 
       toSeriesItem lineIndex props sublineIndex prop colorIndex =
         let dotItems = List.map (toDotItem lineIndex sublineIndex colorIndex prop interConfig) data
@@ -213,8 +176,8 @@ toDotSeries elIndex toX properties data =
               in
               S.g
                 [ SA.class "elm-charts__series" ]
-                [ S.area plane toX (Just toBottom) prop.visual interAttr data
-                , S.interpolation plane toX prop.visual interAttr data
+                [ S.area plane toX (Just toBottom) prop.visual interConfig data
+                , S.interpolation plane toX prop.visual interConfig data
                 , S.g [ SA.class "elm-charts__dots" ] (List.map (I.toSvg plane) dotItems)
                 ]
           , toLimits = \c -> Coord.foldPosition I.getLimits c.items
@@ -233,7 +196,7 @@ toDotSeries elIndex toX properties data =
           { toSvg = \plane _ _ ->
               case prop.value datum_ of
                 Nothing -> S.text ""
-                Just _ -> S.dot plane .x .y dotAttrs { x = x_, y = y_ }
+                Just _ -> S.dot plane .x .y config { x = x_, y = y_ }
           , toHtml = \c -> [ tooltipRow c.tooltipInfo.color (toDefaultName colorIndex c.tooltipInfo.name) (prop.value datum_) ]
           , toLimits = \_ -> { x1 = x_, x2 = x_, y1 = y_, y2 = y_ }
           , toPosition = \plane _ ->
