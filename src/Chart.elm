@@ -98,7 +98,7 @@ type alias Container data msg =
 chart : List (CA.Attribute (Container data msg)) -> List (Element data msg) -> H.Html msg
 chart edits unindexedElements =
   let config =
-        applyAttrs edits
+        Helpers.apply edits
           { width = 500
           , height = 200
           , marginTop = 0
@@ -423,18 +423,18 @@ tooltip i edits attrs_ content =
 
 {-| -}
 type alias Axis =
-    { limits : List (CA.Attribute C.Axis)
-    , pinned : C.Axis -> Float
-    , arrow : Bool
-    , color : String
-    }
+  { limits : List (CA.Attribute C.Axis)
+  , pinned : C.Axis -> Float
+  , arrow : Bool
+  , color : String
+  }
 
 
 {-| -}
 xAxis : List (CA.Attribute Axis) -> Element item msg
 xAxis edits =
   let config =
-        applyAttrs edits
+        Helpers.apply edits
           { limits = []
           , pinned = CA.zero
           , color = ""
@@ -469,7 +469,7 @@ xAxis edits =
 yAxis : List (CA.Attribute Axis) -> Element item msg
 yAxis edits =
   let config =
-        applyAttrs edits
+        Helpers.apply edits
           { limits = []
           , pinned = CA.zero
           , color = ""
@@ -500,23 +500,23 @@ yAxis edits =
 
 
 type alias Ticks =
-    { color : String
-    , height : Float
-    , width : Float
-    , pinned : C.Axis -> Float
-    , limits : List (CA.Attribute C.Axis)
-    , amount : Int
-    , flip : Bool
-    , grid : Bool
-    , generate : IS.TickType
-    }
+  { color : String
+  , height : Float
+  , width : Float
+  , pinned : C.Axis -> Float
+  , limits : List (CA.Attribute C.Axis)
+  , amount : Int
+  , flip : Bool
+  , grid : Bool
+  , generate : IS.TickType
+  }
 
 
 {-| -}
 xTicks : List (CA.Attribute Ticks) -> Element item msg
 xTicks edits =
   let config =
-        applyAttrs edits
+        Helpers.apply edits
           { color = ""
           , limits = []
           , pinned = CA.zero
@@ -555,7 +555,7 @@ xTicks edits =
 yTicks : List (CA.Attribute Ticks) -> Element item msg
 yTicks edits =
   let config =
-        applyAttrs edits
+        Helpers.apply edits
           { color = ""
           , limits = []
           , pinned = CA.zero
@@ -604,12 +604,11 @@ type alias Labels =
   }
 
 
-
 {-| -}
 xLabels : List (CA.Attribute Labels) -> Element item msg
 xLabels edits =
   let toConfig p =
-        applyAttrs edits
+        Helpers.apply edits
           { color = "#808BAB"
           , limits = []
           , pinned = CA.zero
@@ -652,7 +651,7 @@ xLabels edits =
 yLabels : List (CA.Attribute Labels) -> Element item msg
 yLabels edits =
   let toConfig p =
-        applyAttrs edits
+        Helpers.apply edits
           { color = "#808BAB"
           , limits = []
           , pinned = CA.zero
@@ -712,7 +711,7 @@ type alias Label =
 xLabel : List (CA.Attribute Label) -> List (S.Svg msg) -> Element data msg
 xLabel edits inner =
   let toConfig p =
-        applyAttrs edits
+        Helpers.apply edits
           { x = CA.middle p.x
           , y = CA.zero p.y
           , xOff = 0
@@ -756,7 +755,7 @@ xLabel edits inner =
 yLabel : List (CA.Attribute Label) -> List (S.Svg msg) -> Element data msg
 yLabel edits inner =
   let toConfig p =
-        applyAttrs edits
+        Helpers.apply edits
           { x = CA.zero p.x
           , y = CA.middle p.y
           , xOff = -8
@@ -816,7 +815,7 @@ type alias Tick =
 xTick : List (CA.Attribute Tick) -> Element data msg
 xTick edits =
   let toConfig p =
-        applyAttrs edits
+        Helpers.apply edits
           { x = CA.middle p.x
           , y = CA.zero p.y
           , length = 5
@@ -843,7 +842,7 @@ xTick edits =
 yTick : List (CA.Attribute Tick) -> Float -> Element data msg
 yTick edits val =
   let toConfig p =
-        applyAttrs edits
+        Helpers.apply edits
           { x = CA.middle p.x
           , y = CA.zero p.y
           , length = 5
@@ -878,7 +877,7 @@ type alias Grid =
 grid : List (CA.Attribute Grid) -> Element item msg
 grid edits =
   let config =
-        applyAttrs edits
+        Helpers.apply edits
           { color = ""
           , width = 0
           , dotGrid = False
@@ -999,16 +998,7 @@ bars : List (CA.Attribute (Bars data)) -> List (Property data () CS.Bar) -> List
 bars edits properties data =
   Indexed <| \index ->
     let barsConfig =
-          Helpers.apply edits
-            { spacing = 0.05
-            , margin = 0.1
-            , roundTop = 0
-            , roundBottom = 0
-            , grouped = True
-            , grid = True
-            , x1 = Nothing
-            , x2 = Nothing
-            }
+          Helpers.apply edits IS.defaultBars
 
         items =
           Produce.toBarSeries index edits properties data
@@ -1261,12 +1251,6 @@ binned binWidth func data =
 
 
 -- HELPERS
-
-
-applyAttrs : List (a -> a) -> a -> a
-applyAttrs funcs default =
-  let apply f a = f a in
-  List.foldl apply default funcs
 
 
 generateValues : Int -> IS.TickType -> C.Axis -> List CS.TickValue
