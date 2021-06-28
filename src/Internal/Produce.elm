@@ -14,20 +14,8 @@ import Internal.Group as G
 import Internal.Item as I
 
 
-{-| -}
-type alias Bars data =
-  { spacing : Float
-  , margin : Float
-  , roundTop : Float
-  , roundBottom : Float
-  , grouped : Bool
-  , grid : Bool
-  , x1 : Maybe (data -> Float)
-  , x2 : Maybe (data -> Float)
-  }
 
-
-toBarSeries : Int -> List (CA.Attribute (Bars data)) -> List (P.Property data String () S.Bar) -> List data -> List (G.Group () S.Bar (Maybe Float) data)
+toBarSeries : Int -> List (CA.Attribute (S.Bars data)) -> List (P.Property data String () S.Bar) -> List data -> List (G.Group () S.Bar (Maybe Float) data)
 toBarSeries elIndex barsAttrs properties data =
   let barsConfig =
         Helpers.apply barsAttrs S.defaultBars
@@ -102,15 +90,12 @@ toBarSeries elIndex barsAttrs properties data =
 
             roundTop = if isSingle || isLast then barsConfig.roundTop else 0
             roundBottom = if isSingle || isFirst then barsConfig.roundBottom else 0
+
             defaultColor = Helpers.toDefaultColor colorIndex
             defaultAttrs = [ CA.roundTop roundTop, CA.roundBottom roundBottom, CA.color defaultColor, CA.border defaultColor ]
-            attrsOrg = defaultAttrs ++ section.attrs ++ section.extra barIndex sectionIndex section.meta bin.datum
-            productOrg = toBarConfig attrsOrg
-            ( product, attrs ) =
-              if productOrg.border == defaultColor then
-                ( { productOrg | border = productOrg.color }, attrsOrg ++ [ CA.border productOrg.color ])
-              else
-                ( productOrg, attrsOrg )
+            attrs = defaultAttrs ++ section.attrs ++ section.extra barIndex sectionIndex section.meta bin.datum
+            productOrg = toBarConfig attrs
+            product = if productOrg.border == defaultColor then { productOrg | border = productOrg.color } else productOrg
         in
         I.Item
           { config =

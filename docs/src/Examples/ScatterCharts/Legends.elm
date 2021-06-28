@@ -29,8 +29,7 @@ view model =
         , CA.spacing 0
         , CA.alignRight
         ]
-        [ CA.width 10
-        , CA.spacing 5
+        [ CA.spacing 5
         ]
     ]
 
@@ -113,8 +112,7 @@ smallCode =
         , CA.spacing 0
         , CA.alignRight
         ]
-        [ CA.width 10
-        , CA.spacing 5
+        [ CA.spacing 5
         ]
     ]
   """
@@ -149,8 +147,7 @@ view model =
         , CA.spacing 0
         , CA.alignRight
         ]
-        [ CA.width 10
-        , CA.spacing 5
+        [ CA.spacing 5
         ]
     ]
   """

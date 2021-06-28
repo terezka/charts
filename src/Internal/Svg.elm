@@ -1049,127 +1049,6 @@ toCommands method toX toY data =
     |> List.filterMap identity
 
 
-
--- PATTERN
-
-
-toPattern : String -> CA.Design -> ( S.Svg msg, String )
-toPattern defaultColor design =
-  let toPatternId props =
-        String.replace "(" "-" <|
-        String.replace ")" "-" <|
-        String.replace "." "-" <|
-        String.replace "," "-" <|
-        String.replace " " "-" <|
-        String.join "-" <|
-          [ "elm-charts__pattern"
-          , case design of
-              CA.Striped _ -> "striped"
-              CA.Dotted _ -> "dotted"
-              CA.Gradient _ -> "gradient"
-          ] ++ props
-
-      toPatternDefs id spacing rotate inside =
-        S.defs []
-          [ S.pattern
-              [ SA.id id
-              , SA.patternUnits "userSpaceOnUse"
-              , SA.width (String.fromFloat spacing)
-              , SA.height (String.fromFloat spacing)
-              , SA.patternTransform ("rotate(" ++ String.fromFloat rotate ++ ")")
-              ]
-              [ inside ]
-          ]
-
-      ( patternDefs, patternId ) =
-        case design of
-          CA.Striped edits ->
-            let config =
-                  apply edits
-                    { color = defaultColor
-                    , width = 3
-                    , spacing = 4
-                    , rotate = 45
-                    }
-
-                theId =
-                  toPatternId
-                    [ config.color
-                    , String.fromFloat config.width
-                    , String.fromFloat config.spacing
-                    , String.fromFloat config.rotate
-                    ]
-            in
-            ( toPatternDefs theId config.spacing config.rotate <|
-                S.line
-                  [ SA.x1 "0"
-                  , SA.y "0"
-                  , SA.x2 "0"
-                  , SA.y2 (String.fromFloat config.spacing)
-                  , SA.stroke config.color
-                  , SA.strokeWidth (String.fromFloat config.width)
-                  ]
-                  []
-            , theId
-            )
-
-
-          CA.Dotted edits ->
-            let config =
-                  apply edits
-                    { color = defaultColor
-                    , width = 3
-                    , spacing = 4
-                    , rotate = 45
-                    }
-
-                theId =
-                  toPatternId
-                    [ config.color
-                    , String.fromFloat config.width
-                    , String.fromFloat config.spacing
-                    , String.fromFloat config.rotate
-                    ]
-            in
-            ( toPatternDefs theId config.spacing config.rotate <|
-                S.circle
-                  [ SA.fill config.color
-                  , SA.cx (String.fromFloat <| config.width / 3)
-                  , SA.cy (String.fromFloat <| config.width / 3)
-                  , SA.r (String.fromFloat <| config.width / 3)
-                  ]
-                  []
-            , theId
-            )
-
-          CA.Gradient edits ->
-            let config =
-                  apply edits
-                    { colors = [ defaultColor, "white" ] }
-
-                theId = toPatternId config.colors
-                totalColors = List.length config.colors
-                toPercentage i = toFloat i * 100 / toFloat (totalColors - 1)
-                toStop i c =
-                  S.stop
-                    [ SA.offset (String.fromFloat (toPercentage i) ++ "%")
-                    , SA.stopColor c
-                    ]
-                    []
-            in
-            ( S.defs []
-                [ S.linearGradient
-                    [ SA.id theId, SA.x1 "0", SA.x2 "0", SA.y1 "0", SA.y2 "1" ]
-                    (List.indexedMap toStop config.colors)
-                ]
-            , theId
-            )
-  in
-  ( patternDefs, "url(#" ++ patternId ++ ")" )
-
-
-
-
 -- DOTS
 
 
@@ -1445,6 +1324,16 @@ tooltip plane pos config htmlAttrs content =
     |> H.map never
 
 
+-- POSITIONING
+
+
+{-| -}
+position : Plane -> Float -> Float -> Float -> Float -> Float -> S.Attribute msg
+position plane rotation x_ y_ xOff_ yOff_ =
+  SA.transform <| "translate(" ++ String.fromFloat (Coord.toSVGX plane x_ + xOff_) ++ "," ++ String.fromFloat (Coord.toSVGY plane y_ + yOff_) ++ ") rotate(" ++ String.fromFloat rotation ++ ")"
+
+
+
 {-| -}
 positionHtml : Plane -> Float -> Float -> Float -> Float -> List (H.Attribute msg) -> List (H.Html msg) -> H.Html msg
 positionHtml plane x y xOff yOff attrs content =
@@ -1661,12 +1550,122 @@ decodePosition =
 
 
 
--- POSITIONING
+-- PATTERN
 
 
-position : Plane -> Float -> Float -> Float -> Float -> Float -> S.Attribute msg
-position plane rotation x_ y_ xOff_ yOff_ =
-  SA.transform <| "translate(" ++ String.fromFloat (Coord.toSVGX plane x_ + xOff_) ++ "," ++ String.fromFloat (Coord.toSVGY plane y_ + yOff_) ++ ") rotate(" ++ String.fromFloat rotation ++ ")"
+toPattern : String -> CA.Design -> ( S.Svg msg, String )
+toPattern defaultColor design =
+  let toPatternId props =
+        String.replace "(" "-" <|
+        String.replace ")" "-" <|
+        String.replace "." "-" <|
+        String.replace "," "-" <|
+        String.replace " " "-" <|
+        String.join "-" <|
+          [ "elm-charts__pattern"
+          , case design of
+              CA.Striped _ -> "striped"
+              CA.Dotted _ -> "dotted"
+              CA.Gradient _ -> "gradient"
+          ] ++ props
+
+      toPatternDefs id spacing rotate inside =
+        S.defs []
+          [ S.pattern
+              [ SA.id id
+              , SA.patternUnits "userSpaceOnUse"
+              , SA.width (String.fromFloat spacing)
+              , SA.height (String.fromFloat spacing)
+              , SA.patternTransform ("rotate(" ++ String.fromFloat rotate ++ ")")
+              ]
+              [ inside ]
+          ]
+
+      ( patternDefs, patternId ) =
+        case design of
+          CA.Striped edits ->
+            let config =
+                  apply edits
+                    { color = defaultColor
+                    , width = 3
+                    , spacing = 4
+                    , rotate = 45
+                    }
+
+                theId =
+                  toPatternId
+                    [ config.color
+                    , String.fromFloat config.width
+                    , String.fromFloat config.spacing
+                    , String.fromFloat config.rotate
+                    ]
+            in
+            ( toPatternDefs theId config.spacing config.rotate <|
+                S.line
+                  [ SA.x1 "0"
+                  , SA.y "0"
+                  , SA.x2 "0"
+                  , SA.y2 (String.fromFloat config.spacing)
+                  , SA.stroke config.color
+                  , SA.strokeWidth (String.fromFloat config.width)
+                  ]
+                  []
+            , theId
+            )
+
+
+          CA.Dotted edits ->
+            let config =
+                  apply edits
+                    { color = defaultColor
+                    , width = 3
+                    , spacing = 4
+                    , rotate = 45
+                    }
+
+                theId =
+                  toPatternId
+                    [ config.color
+                    , String.fromFloat config.width
+                    , String.fromFloat config.spacing
+                    , String.fromFloat config.rotate
+                    ]
+            in
+            ( toPatternDefs theId config.spacing config.rotate <|
+                S.circle
+                  [ SA.fill config.color
+                  , SA.cx (String.fromFloat <| config.width / 3)
+                  , SA.cy (String.fromFloat <| config.width / 3)
+                  , SA.r (String.fromFloat <| config.width / 3)
+                  ]
+                  []
+            , theId
+            )
+
+          CA.Gradient edits ->
+            let config =
+                  apply edits
+                    { colors = [ defaultColor, "white" ] }
+
+                theId = toPatternId config.colors
+                totalColors = List.length config.colors
+                toPercentage i = toFloat i * 100 / toFloat (totalColors - 1)
+                toStop i c =
+                  S.stop
+                    [ SA.offset (String.fromFloat (toPercentage i) ++ "%")
+                    , SA.stopColor c
+                    ]
+                    []
+            in
+            ( S.defs []
+                [ S.linearGradient
+                    [ SA.id theId, SA.x1 "0", SA.x2 "0", SA.y1 "0", SA.y2 "1" ]
+                    (List.indexedMap toStop config.colors)
+                ]
+            , theId
+            )
+  in
+  ( patternDefs, "url(#" ++ patternId ++ ")" )
 
 
 

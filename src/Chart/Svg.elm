@@ -185,9 +185,22 @@ barLegend edits barAttrs =
 
 
 lineLegend : List (CA.Attribute (Legend msg)) -> List (CA.Attribute Interpolation) -> List (CA.Attribute Dot) -> Html msg
-lineLegend edits interAttrs dotAttrs =
+lineLegend edits interAttrsOrg dotAttrsOrg =
+  let interpolationConfigOrg = Helpers.apply interAttrsOrg Internal.Svg.defaultInterpolation
+      dotConfigOrg = Helpers.apply dotAttrsOrg Internal.Svg.defaultDot
+
+      ( dotAttrs, interAttrs, lineLegendAttrs ) =
+        case ( interpolationConfigOrg.method, dotConfigOrg.shape ) of
+          ( Just _, Nothing )  -> ( CA.circle :: dotAttrsOrg, interAttrsOrg, CA.width 10 :: edits )
+          ( Nothing, Nothing ) -> ( dotAttrsOrg, CA.linear :: interAttrsOrg, CA.width 10 :: edits )
+          ( Nothing, Just _ )  -> ( dotAttrsOrg, interAttrsOrg, CA.width 10 :: edits )
+          _                    -> ( dotAttrsOrg, CA.opacity 0 :: interAttrsOrg, edits )
+
+      adjustWidth config =
+        { config | width = 10 }
+  in
   Internal.Svg.lineLegend
-    (Helpers.apply edits Internal.Svg.defaultLineLegend)
+    (Helpers.apply lineLegendAttrs Internal.Svg.defaultLineLegend)
     (Helpers.apply interAttrs Internal.Svg.defaultInterpolation)
     (Helpers.apply dotAttrs Internal.Svg.defaultDot)
 
@@ -335,6 +348,7 @@ type alias Tooltip =
 tooltip : Plane -> Position -> List (CA.Attribute Tooltip) -> List (H.Attribute Never) -> List (H.Html Never) -> H.Html msg
 tooltip plane pos edits =
   Internal.Svg.tooltip plane pos (Helpers.apply edits Internal.Svg.defaultTooltip)
+
 
 
 -- POSITIONING

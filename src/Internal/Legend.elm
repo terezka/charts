@@ -18,20 +18,7 @@ type Legend
   | LineLegend String (List (CA.Attribute S.Interpolation)) (List (CA.Attribute S.Dot))
 
 
-{-| -}
-type alias Bars data =
-  { spacing : Float
-  , margin : Float
-  , roundTop : Float
-  , roundBottom : Float
-  , grouped : Bool
-  , grid : Bool
-  , x1 : Maybe (data -> Float)
-  , x2 : Maybe (data -> Float)
-  }
-
-
-toBarLegends : Int -> List (CA.Attribute (Bars data)) -> List (Property data String () S.Bar) -> List Legend
+toBarLegends : Int -> List (CA.Attribute (S.Bars data)) -> List (Property data String () S.Bar) -> List Legend
 toBarLegends elIndex barsAttrs properties =
   let barsConfig =
         Helpers.apply barsAttrs S.defaultBars
