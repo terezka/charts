@@ -1808,7 +1808,7 @@ tooltipPointerStyle direction className background borderColor =
 
 clipperStyle : Plane -> Coord.Position -> String
 clipperStyle plane limits =
-  let x1 = plane.x.min - limits.x1
+  let x1 = Debug.log "x1" <| plane.x.min - limits.x1
       y1 = limits.y2 - plane.y.max
       x2 = x1 + abs (plane.x.max - plane.x.min)
       y2 = y1 + abs (plane.y.max - plane.y.min)
@@ -1819,7 +1819,7 @@ clipperStyle plane limits =
           , "V" ++ String.fromFloat (Coord.scaleSVGY plane y2)
           , "H" ++ String.fromFloat (Coord.scaleSVGX plane x2)
           , "V" ++ String.fromFloat (Coord.scaleSVGY plane y1)
-          , "H" ++ String.fromFloat (Coord.scaleSVGY plane x1)
+          , "H" ++ String.fromFloat (Coord.scaleSVGX plane x1)
           ]
   in
   "clip-path: path('" ++ path ++ "');"

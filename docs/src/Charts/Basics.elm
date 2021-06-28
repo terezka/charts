@@ -195,8 +195,8 @@ areas =
         , C.yLabels []
         , C.series .x
             [ C.stacked
-                [ C.interpolated .y [ CA.dotted [] ] []
-                , C.interpolated .z [] []
+                [ C.interpolated .y [ CA.opacity 0.2 ] []
+                , C.interpolated .z [ CA.opacity 1, CA.dotted [] ] []
                 ]
             ]
             [ { x = 1, y = Just 1, z = Just 3 }
@@ -220,8 +220,8 @@ areas =
             , C.yLabels []
             , C.series .x
                 [ C.stacked
-                    [ C.interpolated .y [ CA.color purple, CA.dotted [] ] []
-                    , C.interpolated .z [ CA.color pink ] []
+                    [ C.interpolated .y [ CA.opacity 0.2 ] []
+                    , C.interpolated .z [ CA.opacity 1, CA.dotted [] ] []
                     ]
                 ]
                 [ { x = 1, y = Just 1, z = Just 3 }

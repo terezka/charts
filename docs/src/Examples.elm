@@ -10,7 +10,7 @@ import Examples.BarCharts.TooltipStack
 import Examples.BarCharts.Tooltip
 import Examples.BarCharts.BarLabels
 import Examples.BarCharts.Pattern
-import Examples.BarCharts.SetX1X2
+import Examples.BarCharts.Histogram
 import Examples.BarCharts.Spacing
 import Examples.BarCharts.Highlight
 import Examples.BarCharts.DataDependent
@@ -102,7 +102,7 @@ type Id
   | BarCharts__Tooltip
   | BarCharts__BarLabels
   | BarCharts__Pattern
-  | BarCharts__SetX1X2
+  | BarCharts__Histogram
   | BarCharts__Spacing
   | BarCharts__Highlight
   | BarCharts__DataDependent
@@ -194,7 +194,7 @@ type alias Model =
   , example3 : Examples.BarCharts.Tooltip.Model
   , example4 : Examples.BarCharts.BarLabels.Model
   , example5 : Examples.BarCharts.Pattern.Model
-  , example6 : Examples.BarCharts.SetX1X2.Model
+  , example6 : Examples.BarCharts.Histogram.Model
   , example7 : Examples.BarCharts.Spacing.Model
   , example8 : Examples.BarCharts.Highlight.Model
   , example9 : Examples.BarCharts.DataDependent.Model
@@ -288,7 +288,7 @@ init =
   , example3 = Examples.BarCharts.Tooltip.init
   , example4 = Examples.BarCharts.BarLabels.init
   , example5 = Examples.BarCharts.Pattern.init
-  , example6 = Examples.BarCharts.SetX1X2.init
+  , example6 = Examples.BarCharts.Histogram.init
   , example7 = Examples.BarCharts.Spacing.init
   , example8 = Examples.BarCharts.Highlight.init
   , example9 = Examples.BarCharts.DataDependent.init
@@ -381,7 +381,7 @@ type Msg
   | ExampleMsg3 Examples.BarCharts.Tooltip.Msg
   | ExampleMsg4 Examples.BarCharts.BarLabels.Msg
   | ExampleMsg5 Examples.BarCharts.Pattern.Msg
-  | ExampleMsg6 Examples.BarCharts.SetX1X2.Msg
+  | ExampleMsg6 Examples.BarCharts.Histogram.Msg
   | ExampleMsg7 Examples.BarCharts.Spacing.Msg
   | ExampleMsg8 Examples.BarCharts.Highlight.Msg
   | ExampleMsg9 Examples.BarCharts.DataDependent.Msg
@@ -475,7 +475,7 @@ update msg model =
     ExampleMsg3 sub -> { model | example3 = Examples.BarCharts.Tooltip.update sub model.example3 }
     ExampleMsg4 sub -> { model | example4 = Examples.BarCharts.BarLabels.update sub model.example4 }
     ExampleMsg5 sub -> { model | example5 = Examples.BarCharts.Pattern.update sub model.example5 }
-    ExampleMsg6 sub -> { model | example6 = Examples.BarCharts.SetX1X2.update sub model.example6 }
+    ExampleMsg6 sub -> { model | example6 = Examples.BarCharts.Histogram.update sub model.example6 }
     ExampleMsg7 sub -> { model | example7 = Examples.BarCharts.Spacing.update sub model.example7 }
     ExampleMsg8 sub -> { model | example8 = Examples.BarCharts.Highlight.update sub model.example8 }
     ExampleMsg9 sub -> { model | example9 = Examples.BarCharts.DataDependent.update sub model.example9 }
@@ -569,7 +569,7 @@ view model chosen =
     BarCharts__Tooltip -> Html.map ExampleMsg3 (Examples.BarCharts.Tooltip.view model.example3)
     BarCharts__BarLabels -> Html.map ExampleMsg4 (Examples.BarCharts.BarLabels.view model.example4)
     BarCharts__Pattern -> Html.map ExampleMsg5 (Examples.BarCharts.Pattern.view model.example5)
-    BarCharts__SetX1X2 -> Html.map ExampleMsg6 (Examples.BarCharts.SetX1X2.view model.example6)
+    BarCharts__Histogram -> Html.map ExampleMsg6 (Examples.BarCharts.Histogram.view model.example6)
     BarCharts__Spacing -> Html.map ExampleMsg7 (Examples.BarCharts.Spacing.view model.example7)
     BarCharts__Highlight -> Html.map ExampleMsg8 (Examples.BarCharts.Highlight.view model.example8)
     BarCharts__DataDependent -> Html.map ExampleMsg9 (Examples.BarCharts.DataDependent.view model.example9)
@@ -663,7 +663,7 @@ smallCode chosen =
     BarCharts__Tooltip -> Examples.BarCharts.Tooltip.smallCode
     BarCharts__BarLabels -> Examples.BarCharts.BarLabels.smallCode
     BarCharts__Pattern -> Examples.BarCharts.Pattern.smallCode
-    BarCharts__SetX1X2 -> Examples.BarCharts.SetX1X2.smallCode
+    BarCharts__Histogram -> Examples.BarCharts.Histogram.smallCode
     BarCharts__Spacing -> Examples.BarCharts.Spacing.smallCode
     BarCharts__Highlight -> Examples.BarCharts.Highlight.smallCode
     BarCharts__DataDependent -> Examples.BarCharts.DataDependent.smallCode
@@ -757,7 +757,7 @@ largeCode chosen =
     BarCharts__Tooltip -> Examples.BarCharts.Tooltip.largeCode
     BarCharts__BarLabels -> Examples.BarCharts.BarLabels.largeCode
     BarCharts__Pattern -> Examples.BarCharts.Pattern.largeCode
-    BarCharts__SetX1X2 -> Examples.BarCharts.SetX1X2.largeCode
+    BarCharts__Histogram -> Examples.BarCharts.Histogram.largeCode
     BarCharts__Spacing -> Examples.BarCharts.Spacing.largeCode
     BarCharts__Highlight -> Examples.BarCharts.Highlight.largeCode
     BarCharts__DataDependent -> Examples.BarCharts.DataDependent.largeCode
@@ -851,7 +851,7 @@ name chosen =
     BarCharts__Tooltip -> "Examples.BarCharts.Tooltip"
     BarCharts__BarLabels -> "Examples.BarCharts.BarLabels"
     BarCharts__Pattern -> "Examples.BarCharts.Pattern"
-    BarCharts__SetX1X2 -> "Examples.BarCharts.SetX1X2"
+    BarCharts__Histogram -> "Examples.BarCharts.Histogram"
     BarCharts__Spacing -> "Examples.BarCharts.Spacing"
     BarCharts__Highlight -> "Examples.BarCharts.Highlight"
     BarCharts__DataDependent -> "Examples.BarCharts.DataDependent"
@@ -944,7 +944,7 @@ meta chosen =
     BarCharts__Tooltip -> Examples.BarCharts.Tooltip.meta
     BarCharts__BarLabels -> Examples.BarCharts.BarLabels.meta
     BarCharts__Pattern -> Examples.BarCharts.Pattern.meta
-    BarCharts__SetX1X2 -> Examples.BarCharts.SetX1X2.meta
+    BarCharts__Histogram -> Examples.BarCharts.Histogram.meta
     BarCharts__Spacing -> Examples.BarCharts.Spacing.meta
     BarCharts__Highlight -> Examples.BarCharts.Highlight.meta
     BarCharts__DataDependent -> Examples.BarCharts.DataDependent.meta
@@ -1037,7 +1037,7 @@ all =
   , BarCharts__Tooltip
   , BarCharts__BarLabels
   , BarCharts__Pattern
-  , BarCharts__SetX1X2
+  , BarCharts__Histogram
   , BarCharts__Spacing
   , BarCharts__Highlight
   , BarCharts__DataDependent

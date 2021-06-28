@@ -1,10 +1,11 @@
-module Examples.BarCharts.SetX1X2 exposing (..)
+module Examples.BarCharts.Histogram exposing (..)
 
 {-| @LARGE -}
 import Html as H
 import Svg as S
 import Chart as C
 import Chart.Attributes as CA
+import Time
 
 
 view : Model -> H.Html Msg
@@ -13,16 +14,17 @@ view model =
   C.chart
     [ CA.height 300
     , CA.width 300
+    , CA.paddingRight 0
     ]
     [ C.grid []
-    , C.xLabels []
+    , C.xLabels [ CA.times Time.utc ]
     , C.yLabels []
     , C.bars
         [ CA.x1 .x1
         , CA.x2 .x2
+        , CA.margin 0.05
         ]
         [ C.bar .y []
-        , C.bar .z []
         ]
         data
     ]
@@ -32,7 +34,7 @@ view model =
 meta =
   { category = "Bar charts"
   , categoryOrder = 1
-  , name = "Set x1 and x2"
+  , name = "Histogram"
   , description = "Change position of bar."
   , order = 2
   }
@@ -57,26 +59,20 @@ update msg model =
 
 
 type alias Datum =
-  { x : Float
-  , x1 : Float
+  { x1 : Float
   , x2 : Float
   , y : Maybe Float
-  , z : Maybe Float
-  , v : Maybe Float
-  , w : Maybe Float
-  , p : Maybe Float
-  , q : Maybe Float
   }
 
 
 data : List Datum
 data =
-  let toDatum x x1 y z v w p q =
-        Datum x x1 y (Just y) (Just z) (Just v) (Just w) (Just p) (Just q)
+  let toDatum x1 x2 y =
+        Datum x1 x2 (Just y)
   in
-  [ toDatum 0.0 0.0 2.0 4.0 4.6 6.9 7.3 8.0
-  , toDatum 2.0 2.0 3.0 4.2 5.3 5.7 6.2 7.8
-  , toDatum 3.0 3.0 4.0 3.2 4.8 5.4 7.2 8.3
-  , toDatum 4.0 4.0 5.0 3.0 4.1 5.5 7.9 8.1
+  [ toDatum 1609459200000 1612137600000 2
+  , toDatum 1612137600000 1614556800000 3
+  , toDatum 1614556800000 1617235200000 4
+  , toDatum 1617235200000 1619827200000 6
   ]
 
