@@ -680,7 +680,10 @@ yLabels edits =
             | xOff = if config.flip then -config.xOff else config.xOff
             , yOff = config.yOff
             , color = config.color
-            , anchor = config.anchor
+            , anchor =
+                case config.anchor of
+                  Nothing -> Just (if config.flip then IS.End else IS.Start)
+                  Just anchor -> Just anchor
             }
             [ S.text item.label ]
             { x = config.pinned p.x

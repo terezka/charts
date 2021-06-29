@@ -122,7 +122,7 @@ view model =
 
     , C.generate 10 CS.ints .x [] <| \p t ->
         [ C.xLabel
-            [ CA.alignRight, CA.yOff -20, CA.xOff 3, CA.x (toFloat t)
+            [ CA.alignLeft, CA.yOff -20, CA.xOff 3, CA.x (toFloat t)
             , if t == 20000 then CA.noGrid else identity
             ]
             [ S.text (String.fromInt t) ]
@@ -130,7 +130,7 @@ view model =
 
     , C.generate 8 CS.ints .y [] <| \p t ->
         [ C.yLabel
-            [ CA.alignRight
+            [ CA.alignLeft
             , CA.moveUp 7
             , CA.moveRight 10
             , CA.y (toFloat t)
@@ -259,13 +259,7 @@ viewSalaryDiscrepancyMini model =
     , CA.range [ CA.lowest 20000 CA.orHigher ]
     , CA.domain [ CA.lowest 76 CA.orHigher ]
     ]
-    [ C.generate 10 CS.ints .x [] <| \p t ->
-        [ C.xLabel [ CA.alignLeft, CA.yOff 15, CA.x (toFloat t) ] [ S.text "" ] ]
-
-    , C.generate 8 CS.ints .y [] <| \p t ->
-        [ C.yLabel [ CA.alignLeft, CA.yOff -5, CA.y (toFloat t) ] [ S.text "" ] ]
-
-    , C.line [ CA.dashed [ 3, 3 ], CA.y1 100, CA.width 0.5 ]
+    [ C.line [ CA.dashed [ 3, 3 ], CA.y1 100, CA.width 0.5 ]
 
      , case model.window of
         Just select -> C.rect [ CA.borderWidth 0, CA.x1 select.x1, CA.x2 select.x2, CA.y1 select.y1, CA.y2 select.y2 ]
