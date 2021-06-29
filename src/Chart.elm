@@ -600,6 +600,7 @@ type alias Labels =
   , amount : Int
   , anchor : Maybe IS.Anchor
   , generate : IS.TickType
+  , fontSize : Maybe Int
   , grid : Bool
   }
 
@@ -619,6 +620,7 @@ xLabels edits =
           , xOff = 0
           , yOff = 18
           , grid = True
+          , fontSize = Nothing
           }
 
       toTicks p config =
@@ -638,6 +640,7 @@ xLabels edits =
             , yOff = if config.flip then -config.yOff + 10 else config.yOff
             , color = config.color
             , anchor = config.anchor
+            , fontSize = config.fontSize
             }
             [ S.text item.label ]
             { x = item.value
@@ -662,6 +665,7 @@ yLabels edits =
           , xOff = -10
           , yOff = 3
           , grid = True
+          , fontSize = Nothing
           }
 
       toTicks p config =
@@ -680,9 +684,10 @@ yLabels edits =
             | xOff = if config.flip then -config.xOff else config.xOff
             , yOff = config.yOff
             , color = config.color
+            , fontSize = config.fontSize
             , anchor =
                 case config.anchor of
-                  Nothing -> Just (if config.flip then IS.End else IS.Start)
+                  Nothing -> Just (if config.flip then IS.Start else IS.End)
                   Just anchor -> Just anchor
             }
             [ S.text item.label ]
@@ -873,6 +878,7 @@ type alias Grid =
     { color : String
     , width : Float
     , dotGrid : Bool
+    , dashed : List Float
     }
 
 
@@ -884,6 +890,7 @@ grid edits =
           { color = ""
           , width = 0
           , dotGrid = False
+          , dashed = []
           }
 
       color =
@@ -901,12 +908,12 @@ grid edits =
       toXGrid vs p v =
         if List.member v vs.xAxis
         then Nothing else Just <|
-          CS.line p [ CA.color color, CA.width width, CA.x1 v ]
+          CS.line p [ CA.color color, CA.width width, CA.x1 v, CA.dashed config.dashed ]
 
       toYGrid vs p v =
         if List.member v vs.yAxis
         then Nothing else Just <|
-          CS.line p [ CA.color color, CA.width width, CA.y1 v ]
+          CS.line p [ CA.color color, CA.width width, CA.y1 v, CA.dashed config.dashed ]
 
       toDot vs p x y =
         if List.member x vs.xAxis || List.member y vs.yAxis
