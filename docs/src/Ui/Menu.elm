@@ -54,7 +54,7 @@ expanded =
                     , Link "/documentation/interactivity" "Interactivity"
                     ]
                 }
-              , { title = Link "/real" "Real data examples"
+              , { title = Link "/real" "Gallery"
                 , links =
                     [ Link "/real#salary-distribution" "Salary distribution in Denmark"
                     , Link "/real#perceptions-of-probability" "Perceptions of Probability"
@@ -111,7 +111,7 @@ small =
         ] <| List.map viewLink
         [ Link "/quick-start" "Quick start"
         , Link "/documentation" "Documentation"
-        , Link "/real" "Real data examples"
+        , Link "/real" "Gallery"
         , Link "/administration" "Administration"
         ]
     ]

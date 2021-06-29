@@ -21,12 +21,11 @@ view model =
     , C.xLabels [ CA.times Time.utc ]
     , C.yLabels []
     , C.bars
-        [ CA.x1 .x1
-        , CA.x2 .x2
-        , CA.margin 0.05
+        [ CA.x1 .start
+        , CA.x2 .end
+        , CA.margin 0.02
         ]
-        [ C.bar .y []
-        ]
+        [ C.bar .y [] ]
         data
     ]
 
@@ -34,7 +33,7 @@ meta =
   { category = "Bar charts"
   , categoryOrder = 1
   , name = "Histogram"
-  , description = "Change position of bar."
+  , description = "Make a histogram (control x value)."
   , order = 2
   }
 
@@ -58,16 +57,16 @@ update msg model =
 
 
 type alias Datum =
-  { x1 : Float
-  , x2 : Float
+  { start : Float
+  , end : Float
   , y : Maybe Float
   }
 
 
 data : List Datum
 data =
-  let toDatum x1 x2 y =
-        Datum x1 x2 (Just y)
+  let toDatum start end y =
+        Datum start end (Just y)
   in
   [ toDatum 1609459200000 1612137600000 2
   , toDatum 1612137600000 1614556800000 3
@@ -89,12 +88,11 @@ smallCode =
     , C.xLabels [ CA.times Time.utc ]
     , C.yLabels []
     , C.bars
-        [ CA.x1 .x1
-        , CA.x2 .x2
-        , CA.margin 0.05
+        [ CA.x1 .start
+        , CA.x2 .end
+        , CA.margin 0.02
         ]
-        [ C.bar .y []
-        ]
+        [ C.bar .y [] ]
         data
     ]
   """
@@ -121,12 +119,11 @@ view model =
     , C.xLabels [ CA.times Time.utc ]
     , C.yLabels []
     , C.bars
-        [ CA.x1 .x1
-        , CA.x2 .x2
-        , CA.margin 0.05
+        [ CA.x1 .start
+        , CA.x2 .end
+        , CA.margin 0.02
         ]
-        [ C.bar .y []
-        ]
+        [ C.bar .y [] ]
         data
     ]
   """

@@ -78,7 +78,7 @@ view model =
               [ F.size 32
               , E.paddingXY 0 10
               ]
-              (E.text "Real data examples")
+              (E.text "Gallery")
 
           , E.paragraph
               [ E.paddingEach { top = 10, bottom = 40, left = 0, right = 0 }

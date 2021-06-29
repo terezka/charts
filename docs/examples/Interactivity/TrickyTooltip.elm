@@ -34,6 +34,7 @@ view model =
   C.chart
     [ CA.height 300
     , CA.width 300
+    , CA.paddingLeft 10
     , CE.bar
         |> CE.collect CE.bin
         |> CE.getNearest
@@ -41,7 +42,7 @@ view model =
     , CE.onMouseLeave (OnHover [])
     ]
     [ C.grid []
-    , C.xLabels []
+    , C.yLabels [ CA.pinned .min ]
     , C.yLabels []
     , C.bars
         []

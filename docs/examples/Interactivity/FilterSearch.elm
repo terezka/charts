@@ -34,6 +34,7 @@ view model =
   C.chart
     [ CA.height 300
     , CA.width 300
+    , CA.paddingLeft 10
     , CE.dot
         |> CE.collect CE.stack
         |> CE.getNearest
@@ -42,7 +43,7 @@ view model =
     ]
     [ C.grid []
     , C.xLabels []
-    , C.yLabels []
+    , C.yLabels [ CA.pinned .min ]
     , C.series .x
         [ C.stacked
           [ C.interpolated .p [  ] [ CA.circle ]
