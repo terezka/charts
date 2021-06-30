@@ -73,7 +73,7 @@ view model =
         ]
         data
 
-    , C.labelAt .max CA.middle [ CA.rotate 90, CA.moveRight 18 ] [ S.text "test scores" ]
+    , C.labelAt .max CA.middle [ CA.rotate 90, CA.moveRight 18 ] [ S.text "scores" ]
     , C.each model.hovering <| \p bar ->
         let datum = CE.getDatum bar
             scoreText =

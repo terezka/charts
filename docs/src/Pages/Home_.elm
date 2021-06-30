@@ -12,6 +12,7 @@ import Charts.Dashboard3 as Dashboard3
 import Charts.Dashboard4 as Dashboard4
 import Charts.Dashboard5 as Dashboard5
 import Charts.Dashboard6 as Dashboard6
+import Charts.Dashboard7 as Dashboard7
 import Html as H
 import Element as E
 import Element.Font as F
@@ -44,6 +45,7 @@ type alias Model =
   , dashboard4 : Dashboard4.Model
   , dashboard5 : Dashboard5.Model
   , dashboard6 : Dashboard6.Model
+  , dashboard7 : Dashboard7.Model
   }
 
 
@@ -56,6 +58,7 @@ init =
   , dashboard4 = Dashboard4.init
   , dashboard5 = Dashboard5.init
   , dashboard6 = Dashboard6.init
+  , dashboard7 = Dashboard7.init
   }
 
 
@@ -71,6 +74,7 @@ type Msg
   | Dashboard4Msg Dashboard4.Msg
   | Dashboard5Msg Dashboard5.Msg
   | Dashboard6Msg Dashboard6.Msg
+  | Dashboard7Msg Dashboard7.Msg
 
 
 update : Msg -> Model -> Model
@@ -97,6 +101,9 @@ update msg model =
     Dashboard6Msg subMsg ->
       { model | dashboard6 = Dashboard6.update subMsg model.dashboard6 }
 
+    Dashboard7Msg subMsg ->
+      { model | dashboard7 = Dashboard7.update subMsg model.dashboard7 }
+
 
 
 -- VIEW
@@ -116,7 +123,7 @@ view model =
                   [ E.width E.fill
                   , E.spacing 15
                   ]
-                  [ section 5 (H.map Dashboard1Msg (Dashboard1.view model.dashboard1))
+                  [ section 1 (H.map Dashboard1Msg (Dashboard1.view model.dashboard1))
                   , E.column
                       [ E.alignTop
                       , E.width E.fill
@@ -127,10 +134,10 @@ view model =
                           , E.width E.fill
                           , E.spacing 15
                           ]
-                          [ section 5 (H.map Dashboard2Msg (Dashboard2.view model.dashboard2))
-                          , section 5 (H.map Dashboard3Msg (Dashboard3.view model.dashboard3))
+                          [ section 1 (H.map Dashboard2Msg (Dashboard2.view model.dashboard2))
+                          , section 1 (H.map Dashboard3Msg (Dashboard3.view model.dashboard3))
                           ]
-                      , section 5 (H.map Dashboard4Msg (Dashboard4.view model.dashboard4))
+                      , section 1 (H.map Dashboard4Msg (Dashboard4.view model.dashboard4))
                       ]
                   ]
               , E.row
@@ -141,7 +148,7 @@ view model =
                       [ E.width E.fill
                       , E.spacing 15
                       ]
-                      [ section 5 (H.map Dashboard5Msg (Dashboard5.view model.dashboard5))
+                      [ section 3 (H.map Dashboard6Msg (Dashboard6.view model.dashboard6))
                       ]
                   , E.column
                       [ E.width (E.fillPortion 2)
@@ -159,9 +166,8 @@ view model =
                   [ E.width E.fill
                   , E.spacing 20
                   ]
-                  [ E.el [ E.width E.fill ] E.none
-                  , E.el [ E.width E.fill ] E.none
-                  , section 5 (H.map Dashboard6Msg (Dashboard6.view model.dashboard6))
+                  [ section 1 (H.map Dashboard5Msg (Dashboard5.view model.dashboard5))
+                  , section 1 (H.map Dashboard7Msg (Dashboard7.view model.dashboard7))
                   ]
               ]
           ]
@@ -170,11 +176,11 @@ view model =
 
 
 section : Int -> H.Html msg -> E.Element msg
-section padding chart =
+section portion chart =
   E.column
     [ E.alignTop
-    , E.width E.fill
-    , E.padding padding
+    , E.width (E.fillPortion portion)
+    , E.padding 5
     ]
     [ E.html chart
     ]

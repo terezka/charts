@@ -222,6 +222,9 @@ type alias Legends msg =
   { alignment : Internal.Svg.Alignment
   , anchor : Maybe Internal.Svg.Anchor
   , spacing : Float
+  , background : String
+  , border : String
+  , borderWidth : Float
   , htmlAttrs : List (H.Attribute msg)
   }
 
@@ -259,9 +262,9 @@ lineLegend edits interAttrsOrg dotAttrsOrg =
 
       ( dotAttrs, interAttrs, lineLegendAttrs ) =
         case ( interpolationConfigOrg.method, dotConfigOrg.shape ) of
-          ( Just _, Nothing )  -> ( CA.circle :: dotAttrsOrg, interAttrsOrg, CA.width 10 :: edits )
-          ( Nothing, Nothing ) -> ( dotAttrsOrg, CA.linear :: interAttrsOrg, CA.width 10 :: edits )
-          ( Nothing, Just _ )  -> ( dotAttrsOrg, interAttrsOrg, CA.width 10 :: edits )
+          ( Just _, Nothing )  -> ( dotAttrsOrg, interAttrsOrg, CA.width 10 :: edits )
+          ( Nothing, Nothing ) -> ( CA.circle :: dotAttrsOrg, CA.linear :: interAttrsOrg, CA.width 10 :: edits )
+          ( Nothing, Just _ )  -> ( CA.circle :: dotAttrsOrg, interAttrsOrg, CA.width 10 :: edits )
           _                    -> ( dotAttrsOrg, CA.opacity 0 :: interAttrsOrg, edits )
 
       adjustWidth config =
@@ -336,6 +339,7 @@ type alias Bar =
   , attrs : List (S.Attribute Never)
   , highlight : Float
   , highlightWidth : Float
+  , highlightColor : String
   }
 
 
@@ -386,6 +390,7 @@ type alias Dot =
   , borderWidth : Float
   , highlight : Float
   , highlightWidth : Float
+  , highlightColor : String
   , shape : Maybe Internal.Svg.Shape
   }
 

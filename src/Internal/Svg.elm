@@ -401,6 +401,9 @@ type alias Legends msg =
   { alignment : Alignment
   , anchor : Maybe Anchor
   , spacing : Float
+  , background : String
+  , border : String
+  , borderWidth : Float
   , htmlAttrs : List (H.Attribute msg)
   }
 
@@ -422,6 +425,9 @@ defaultLegends =
   { alignment = Row
   , anchor = Nothing
   , spacing = 10
+  , background = ""
+  , border = ""
+  , borderWidth = 0
   , htmlAttrs = []
   }
 
@@ -445,8 +451,13 @@ legendsAt plane x y xOff yOff config children =
             , "bottom"
             )
 
-      classAttrs =
-        [ HA.class "elm-charts__legends" ]
+      otherAttrs =
+        [ HA.class "elm-charts__legends"
+        , HA.style "background" config.background
+        , HA.style "border-color" config.border
+        , HA.style "border-width" (String.fromFloat config.borderWidth ++ "px")
+        , HA.style "border-style" "solid"
+        ]
 
       paddingStyle =
         """ .elm-charts__legends .elm-charts__legend {
@@ -465,7 +476,7 @@ legendsAt plane x y xOff yOff config children =
           Just Middle -> [ HA.style "transform" "translate(-50%, 0%)" ]
   in
   positionHtml plane x y xOff yOff
-    (anchorAttrs ++ alignmentAttrs ++ classAttrs ++ config.htmlAttrs)
+    (anchorAttrs ++ alignmentAttrs ++ otherAttrs ++ config.htmlAttrs)
     (H.node "style" [] [ H.text paddingStyle ] :: children)
 
 
@@ -743,6 +754,7 @@ type alias Bar =
   , attrs : List (S.Attribute Never)
   , highlight : Float
   , highlightWidth : Float
+  , highlightColor : String
   }
 
 
@@ -780,13 +792,16 @@ defaultBar =
   , attrs = []
   , highlight = 0
   , highlightWidth = 10
+  , highlightColor = ""
   }
 
 
 {-| -}
 bar : Plane -> Bar -> Position -> Svg msg
 bar plane config point =
-  let borderWidthCarX = Coord.scaleCartesianX plane (config.borderWidth / 2)
+  let highlightColor = if config.highlightColor == "" then config.color else config.highlightColor
+
+      borderWidthCarX = Coord.scaleCartesianX plane (config.borderWidth / 2)
       borderWidthCarY = Coord.scaleCartesianY plane (config.borderWidth / 2)
 
       pos =
@@ -927,7 +942,7 @@ bar plane config point =
         else
           S.g
             [ SA.class "elm-charts__bar-with-highlight" ]
-            [ viewBar config.color config.highlight "transparent" 0 0 highlightCommands { highlightPos | y2 = pos.y2 + highlightWidthCarY * 2 }
+            [ viewBar highlightColor config.highlight "transparent" 0 0 highlightCommands { highlightPos | y2 = pos.y2 + highlightWidthCarY * 2 }
             , viewBar fill config.opacity config.border config.borderWidth 1 commands pos
             ]
 
@@ -1113,6 +1128,7 @@ type alias Dot =
   , borderWidth : Float
   , highlight : Float
   , highlightWidth : Float
+  , highlightColor : String
   , shape : Maybe Shape
   }
 
@@ -1135,6 +1151,7 @@ defaultDot =
   , borderWidth = 0
   , highlight = 0
   , highlightWidth = 5
+  , highlightColor = ""
   , shape = Nothing
   }
 
@@ -1145,6 +1162,7 @@ dot plane toX toY config datum_ =
   let x_ = Coord.toSVGX plane (toX datum_)
       y_ = Coord.toSVGY plane (toY datum_)
       area_ = 2 * pi * config.size
+      highlightColor = if config.highlightColor == "" then config.color else config.highlightColor
 
       styleAttrs =
         [ SA.stroke (if config.border == "" then config.color else config.border)
@@ -1155,7 +1173,7 @@ dot plane toX toY config datum_ =
         ]
 
       highlightAttrs =
-        [ SA.stroke config.color
+        [ SA.stroke highlightColor
         , SA.strokeWidth (String.fromFloat config.highlightWidth)
         , SA.strokeOpacity (String.fromFloat config.highlight)
         , SA.fill "transparent"
@@ -1813,7 +1831,7 @@ tooltipPointerStyle direction className background borderColor =
 
 clipperStyle : Plane -> Coord.Position -> String
 clipperStyle plane limits =
-  let x1 = Debug.log "x1" <| plane.x.min - limits.x1
+  let x1 = plane.x.min - limits.x1
       y1 = limits.y2 - plane.y.max
       x2 = x1 + abs (plane.x.max - plane.x.min)
       y2 = y1 + abs (plane.y.max - plane.y.min)
@@ -1827,7 +1845,7 @@ clipperStyle plane limits =
           , "H" ++ String.fromFloat (Coord.scaleSVGX plane x1)
           ]
   in
-  "clip-path: path('" ++ path ++ "');"
+  "clip-path: path('" ++ path ++ "'); -webkit-clip-path: path('" ++ path ++ "');"
 
 
 

@@ -51,10 +51,11 @@ update msg model =
 view : Model -> H.Html Msg
 view model =
   C.chart
-    [ CA.height 300
+    [ CA.height 350
     , CA.width 500
     , CA.paddingRight 0
-    , CA.marginLeft 18
+    , CA.marginLeft 20
+    , CA.marginBottom 15
     , CE.onMouseMove OnHover (CE.getNearestX CE.bar)
     , CE.onMouseLeave (OnHover [])
     ]
@@ -62,22 +63,22 @@ view model =
 
     , C.yTicks [ CA.height 0 ]
 
-    , C.generate 3 C.floats .y [] <| \p y ->
-        [ C.yLabel [ CA.fontSize 12, CA.x p.x.min, CA.y y ] [ S.text (String.fromFloat (y / 1000000) ++ "M") ] ]
+    --, C.generate 3 C.floats .y [] <| \p y ->
+    --    [ C.yLabel [ CA.fontSize 12, CA.x p.x.min, CA.y y ] [ S.text (String.fromFloat (y / 1000000) ++ "M") ] ]
 
     , C.bars
         [ CA.roundTop 0.5
-        , CA.margin 0.2
-        , CA.spacing 0.03
+        , CA.margin 0.1
+        , CA.spacing 0.05
         ]
-        [ C.bar (.denmark >> Just) [ CA.color CA.magenta, CA.opacity 0.8 ]
-            |> C.variation (\_ d -> if d.year > 2021 then [ CA.striped [], CA.opacity 1 ] else [])
+        [ C.bar (.denmark >> Just) [ CA.color CA.pink, CA.opacity 0.9 ]
+            |> C.variation (\_ d -> if d.year > 2021 then [ CA.striped [ CA.spacing 8 ], CA.opacity 1 ] else [])
             |> C.named "Denmark"
         , C.bar (.norway >> Just) [ CA.color CA.darkBlue, CA.opacity 0.8 ]
-            |> C.variation (\_ d -> if d.year > 2021 then [ CA.striped [], CA.opacity 1 ] else [])
+            |> C.variation (\_ d -> if d.year > 2021 then [ CA.striped [ CA.spacing 8 ], CA.opacity 1 ] else [])
             |> C.named "Norway"
         , C.bar (.sweden >> Just) [ CA.color CA.blue, CA.opacity 0.8 ]
-            |> C.variation (\_ d -> if d.year > 2021 then [ CA.striped [], CA.opacity 1 ] else [])
+            |> C.variation (\_ d -> if d.year > 2021 then [ CA.striped [ CA.spacing 8 ], CA.opacity 1 ] else [])
             |> C.named "Sweden"
         ]
         data
@@ -92,10 +93,11 @@ view model =
                   C.label
                     [ CA.rotate 90
                     , CA.alignLeft
-                    , CA.moveUp 6
                     , CA.color "white"
+                    , CA.moveUp 10
                     , CA.moveRight 4
                     , CA.fontSize 16
+                    , CA.uppercase
                     ]
                     [ S.text (CE.getName bar) ]
                     (CE.getBottom p bar)
@@ -104,7 +106,7 @@ view model =
 
     , C.eachBin <| \p bin ->
         let common = CE.getCommonality bin in
-        [ C.label [ CA.moveDown 20, CA.fontSize 13 ] [ S.text (String.fromFloat common.datum.year) ] (CE.getBottom p bin) ]
+        [ C.label [ CA.moveDown 20, CA.fontSize 16 ] [ S.text (String.fromFloat common.datum.year) ] (CE.getBottom p bin) ]
     ]
 
 

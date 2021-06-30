@@ -51,13 +51,14 @@ update msg model =
 view : Model -> H.Html Msg
 view model =
   C.chart
-    [ CA.height 180
-    , CA.width 300
+    [ CA.height 230
+    , CA.width 350
     , CA.marginLeft 10
     , CA.marginBottom 10
+    , CA.marginTop 5
     , CA.paddingRight 15
     , CA.paddingLeft 15
-    , CA.paddingBottom 20
+    , CA.paddingBottom 10
     , CA.paddingTop 15
     , CA.domain [ CA.likeData ]
     , CE.onMouseMove OnHover (CE.getNearest CE.dot)
@@ -65,28 +66,47 @@ view model =
     ]
     [ C.grid [ CA.dashed [ 5, 5 ] ]
     , C.yTicks []
-    , C.yLabels [ CA.ints, CA.fontSize 8, CA.moveRight 2 ]
+    --, C.yLabels [ CA.ints, CA.fontSize 8, CA.moveRight 2 ]
     , C.xTicks [ CA.amount 8 ]
-    , C.xLabels [ CA.ints, CA.fontSize 8, CA.moveUp 5 ]
+    --, C.xLabels [ CA.ints, CA.fontSize 8, CA.moveUp 5 ]
     , C.xAxis []
     , C.yAxis []
+
     , C.series .sepalLength
-        [ C.scatter (.sepalWidth >> Just) [ CA.opacity 0.6 ]
-            |> C.variation (\i d ->
-                let speciesColor =
-                      case d.species of
-                        Iris.Setosa -> CA.pink
-                        Iris.Versicolor -> CA.purple
-                        Iris.Virginica -> CA.turquoise
-
-                in [ CA.size d.petalLength, CA.color speciesColor ]
-            )
+        [ C.scatter (.sepalWidth >> Just) [ CA.circle, CA.size 12, CA.opacity 0.6, CA.color CA.pink ]
+            |> C.variation (\i d -> [ CA.size (d.petalLength * 1.5) ])
+            |> C.named "Setosa"
         ]
-        Iris.data
+        Iris.setosa
 
-    , C.labelAt CA.middle .max
-        [ CA.fontSize 9, CA.moveDown 2, CA.color "#aaa" ]
-        [ S.text "The Iris flower: Sepal length vs. sepal width" ]
+    , C.series .sepalLength
+        [ C.scatter (.sepalWidth >> Just) [ CA.circle, CA.size 12, CA.opacity 0.6, CA.color CA.purple ]
+            |> C.variation (\i d -> [ CA.size (d.petalLength * 1.5) ])
+            |> C.named "Versicolor"
+        ]
+        Iris.versicolor
+
+    , C.series .sepalLength
+        [ C.scatter (.sepalWidth >> Just) [ CA.circle, CA.size 12, CA.opacity 0.6, CA.color CA.blue ]
+            |> C.variation (\i d -> [ CA.size (d.petalLength * 1.5) ])
+            |> C.named "Virginica"
+        ]
+        Iris.virginica
+
+    , C.legendsAt .max .max -10 0
+          [ CA.column
+          , CA.alignRight
+          , CA.spacing 1
+          , CA.background "white"
+          , CA.border CA.gray
+          , CA.borderWidth 1
+          , CA.htmlAttrs [ HA.style "padding" "4px 8px" ]
+          ]
+          [ CA.spacing 6, CA.fontSize 12 ]
+
+    --, C.labelAt CA.middle .max
+    --    [ CA.fontSize 9, CA.moveDown 2, CA.color "#aaa" ]
+    --    [ S.text "The Iris flower: Sepal length vs. sepal width" ]
 
     , C.each model.hovering <| \p dot ->
         let datum = CE.getDatum dot in
@@ -96,15 +116,15 @@ view model =
             [ H.div
                 [ HA.style "color" (CE.getColor dot)
                 , HA.style "text-align" "center"
-                , HA.style "padding-bottom" "2px"
+                , HA.style "padding-bottom" "4px"
                 , HA.style "border-bottom" "1px solid lightgray"
-                , HA.style "font-size" "10px"
+                , HA.style "font-size" "12px"
                 ]
                 [ H.text (Iris.species datum) ]
             , H.table
                 [ HA.style "color" "rgb(90, 90, 90)"
                 , HA.style "width" "100%"
-                , HA.style "font-size" "9px"
+                , HA.style "font-size" "12px"
                 ]
                 [ H.tr []
                     [ H.th [] []

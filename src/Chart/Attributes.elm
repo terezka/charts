@@ -23,7 +23,7 @@ module Chart.Attributes exposing
   , moveLeft, moveRight, moveUp, moveDown
 
   -- DECORATION
-  , border, borderWidth, color, opacity, highlight, highlightWidth, background, noArrow, rotate
+  , border, borderWidth, color, opacity, highlight, highlightWidth, highlightColor, background, noArrow, rotate
   , striped, dotted, gradient, colors
 
   -- BAR
@@ -395,6 +395,12 @@ highlight v config =
 highlightWidth : Float -> Attribute { a | highlightWidth : Float }
 highlightWidth v config =
   { config | highlightWidth = v }
+
+
+{-| -}
+highlightColor : String -> Attribute { a | highlightColor : String }
+highlightColor v config =
+  { config | highlightColor = v }
 
 
 {-| -}
