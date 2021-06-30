@@ -51,7 +51,7 @@ update msg model =
 view : Model -> H.Html Msg
 view model =
   C.chart
-    [ CA.height 130
+    [ CA.height 125
     , CA.width 500
     , CA.marginRight 15
     , CA.paddingRight 0

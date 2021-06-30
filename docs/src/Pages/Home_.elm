@@ -97,48 +97,40 @@ view model =
     , body =
         Layout.view
           [ Menu.small
-          , E.row
+          , E.column
               [ E.width E.fill
               , E.spacing 15
               ]
-              [ section 18 5 "Overlay charts and combine" (H.map Dashboard1Msg (Dashboard1.view model.dashboard1))
-              , E.column
-                  [ E.alignTop
-                  , E.width E.fill
+              [ E.row
+                  [ E.width E.fill
                   , E.spacing 15
                   ]
-                  [ E.row
+                  [ section 5 "Overlay charts and combine" (H.map Dashboard1Msg (Dashboard1.view model.dashboard1))
+                  , E.column
                       [ E.alignTop
                       , E.width E.fill
                       , E.spacing 15
                       ]
-                      [ section 14 5 "Recolor and hide dots" (H.map Dashboard2Msg (Dashboard2.view model.dashboard2))
-                      , section 14 5 "Add gradients" (H.map Dashboard3Msg (Dashboard3.view model.dashboard3))
+                      [ E.row
+                          [ E.alignTop
+                          , E.width E.fill
+                          , E.spacing 15
+                          ]
+                          [ section 5 "Recolor and hide dots" (H.map Dashboard2Msg (Dashboard2.view model.dashboard2))
+                          , section 5 "Add gradients" (H.map Dashboard3Msg (Dashboard3.view model.dashboard3))
+                          ]
+                      , section 5 "Histograms" (H.map Dashboard4Msg (Dashboard4.view model.dashboard4))
                       ]
-                  , section 14 5 "Histograms" (H.map Dashboard4Msg (Dashboard4.view model.dashboard4))
                   ]
+              , E.el [ F.size 80 ] (E.text "elm-charts")
               ]
           ]
     }
 
 
 
-card : Int -> Int -> String -> H.Html msg -> E.Element msg
-card size padding title chart =
-  E.column
-    [ E.alignTop
-    , E.width E.fill
-    , E.padding padding
-    , B.color (E.rgb255 220 220 220)
-    , B.widthEach { top = 1, bottom = 1, left = 1, right = 1 }
-    , B.roundEach { topLeft = 5, topRight = 5, bottomLeft = 5, bottomRight = 5 }
-    ]
-    [ E.html chart
-    ]
-
-
-section : Int -> Int -> String -> H.Html msg -> E.Element msg
-section size padding title chart =
+section : Int -> String -> H.Html msg -> E.Element msg
+section padding title chart =
   E.column
     [ E.alignTop
     , E.width E.fill

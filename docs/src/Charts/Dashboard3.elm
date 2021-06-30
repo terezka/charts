@@ -69,6 +69,7 @@ view model =
             |> C.amongst model.hovering (\_ -> [ CA.size 40 ])
         ]
         lineData
+
     ]
 
 
@@ -83,6 +84,7 @@ lineData =
   [ Datum 1612137600000 (Just 80)
   , Datum 1614556800000 (Just 97)
   , Datum 1617235200000 (Just 65)
+  , Datum 1617235200001 Nothing
   , Datum 1619827200000 (Just 72)
   , Datum 1622505600000 (Just 56)
   , Datum 1625097600000 (Just 82)
