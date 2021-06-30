@@ -11,6 +11,7 @@ import Charts.Dashboard2 as Dashboard2
 import Charts.Dashboard3 as Dashboard3
 import Charts.Dashboard4 as Dashboard4
 import Charts.Dashboard5 as Dashboard5
+import Charts.Dashboard6 as Dashboard6
 import Html as H
 import Element as E
 import Element.Font as F
@@ -42,6 +43,7 @@ type alias Model =
   , dashboard3 : Dashboard3.Model
   , dashboard4 : Dashboard4.Model
   , dashboard5 : Dashboard5.Model
+  , dashboard6 : Dashboard6.Model
   }
 
 
@@ -53,6 +55,7 @@ init =
   , dashboard3 = Dashboard3.init
   , dashboard4 = Dashboard4.init
   , dashboard5 = Dashboard5.init
+  , dashboard6 = Dashboard6.init
   }
 
 
@@ -67,6 +70,7 @@ type Msg
   | Dashboard3Msg Dashboard3.Msg
   | Dashboard4Msg Dashboard4.Msg
   | Dashboard5Msg Dashboard5.Msg
+  | Dashboard6Msg Dashboard6.Msg
 
 
 update : Msg -> Model -> Model
@@ -90,6 +94,9 @@ update msg model =
     Dashboard5Msg subMsg ->
       { model | dashboard5 = Dashboard5.update subMsg model.dashboard5 }
 
+    Dashboard6Msg subMsg ->
+      { model | dashboard6 = Dashboard6.update subMsg model.dashboard6 }
+
 
 
 -- VIEW
@@ -103,7 +110,7 @@ view model =
           [ Menu.small
           , E.column
               [ E.width E.fill
-              , E.spacing 15
+              , E.spacing 20
               ]
               [ E.row
                   [ E.width E.fill
@@ -147,6 +154,14 @@ view model =
                           ]
                           [ E.text "An empowering charting library made in all Elm." ]
                       ]
+                  ]
+              , E.row
+                  [ E.width E.fill
+                  , E.spacing 20
+                  ]
+                  [ E.el [ E.width E.fill ] E.none
+                  , E.el [ E.width E.fill ] E.none
+                  , section 5 (H.map Dashboard6Msg (Dashboard6.view model.dashboard6))
                   ]
               ]
           ]

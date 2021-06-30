@@ -54,6 +54,7 @@ view model =
     [ CA.height 180
     , CA.width 300
     , CA.marginLeft 10
+    , CA.marginBottom 10
     , CA.paddingRight 15
     , CA.paddingLeft 15
     , CA.paddingBottom 20
