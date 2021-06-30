@@ -76,7 +76,7 @@ purple =
 {-| -}
 blue : String
 blue =
-  "#1976d2"
+  "#259fe7"
 
 
 green : String

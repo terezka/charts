@@ -36,6 +36,11 @@ getCommonality (I.Item item) =
   item.config.config
 
 
+mapData : (a -> b) -> Group inter config value a -> Group inter config value b
+mapData func (I.Item group_) =
+  toGroup group_.config.config (List.map (I.map func) group_.config.items)
+
+
 
 -- GROUPING
 

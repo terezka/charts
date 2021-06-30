@@ -287,6 +287,7 @@ type alias Label =
   , color : String
   , anchor : Maybe Internal.Svg.Anchor
   , rotate : Float
+  , uppercase : Bool
   , attrs : List (S.Attribute Never)
   }
 

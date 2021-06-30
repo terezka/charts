@@ -16,7 +16,7 @@ module Chart.Events exposing
   , getCenter, getPosition, getLimits
   , getDefaultTooltip
 
-  , getProducts, getCommonality
+  , getProducts, getCommonality, filterDatum
   )
 
 
@@ -202,6 +202,11 @@ getProducts =
 getCommonality : Group inter config value data -> inter
 getCommonality =
   G.getCommonality
+
+
+filterDatum : (a -> Maybe b) -> List (Product config value a) -> List (Product config value b)
+filterDatum =
+  I.filterMap
 
 
 

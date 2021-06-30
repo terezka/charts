@@ -137,6 +137,59 @@ getStackIndex (Item item) =
   item.config.tooltipInfo.stack
 
 
+{-| -}
+map : (a -> b) -> Product config value a -> Product config value b
+map func (Item item) =
+  Item
+    { toLimits = \_ -> item.toLimits item.config
+    , toPosition = \plane _ -> item.toPosition plane item.config
+    , toSvg = \plane _ _ -> toSvg plane (Item item)
+    , toHtml = \_ -> toHtml (Item item)
+    , config =
+        { product = item.config.product
+        , values =
+            { datum = func item.config.values.datum
+            , x1 = item.config.values.x1
+            , x2 = item.config.values.x2
+            , y = item.config.values.y
+            , yOrg = item.config.values.yOrg
+            }
+        , tooltipInfo = item.config.tooltipInfo
+        , toAny = item.config.toAny
+        }
+    }
+
+
+{-| -}
+filterMap : (a -> Maybe b) -> List (Product config value a) -> List (Product config value b)
+filterMap func =
+  List.filterMap <| \(Item item) ->
+    case func item.config.values.datum of
+      Just b ->
+        Item
+          { toLimits = \_ -> item.toLimits item.config
+          , toPosition = \plane _ -> item.toPosition plane item.config
+          , toSvg = \plane _ _ -> toSvg plane (Item item)
+          , toHtml = \_ -> toHtml (Item item)
+          , config =
+              { product = item.config.product
+              , values =
+                  { datum = b
+                  , x1 = item.config.values.x1
+                  , x2 = item.config.values.x2
+                  , y = item.config.values.y
+                  , yOrg = item.config.values.yOrg
+                  }
+              , tooltipInfo = item.config.tooltipInfo
+              , toAny = item.config.toAny
+              }
+          }
+          |> Just
+
+      Nothing ->
+        Nothing
+
+
 
 -- CHANGE VALUE
 

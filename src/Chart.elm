@@ -1,7 +1,7 @@
 module Chart exposing
   ( chart
 
-  , Element, bars, series
+  , Element, bars, barsMap, series, seriesMap
   , Property, bar, scatter, interpolated, stacked, named, variation, amongst
 
   , xAxis, yAxis, xTicks, yTicks, xLabels, yLabels, grid
@@ -601,6 +601,7 @@ type alias Labels =
   , anchor : Maybe IS.Anchor
   , generate : IS.TickType
   , fontSize : Maybe Int
+  , uppercase : Bool
   , grid : Bool
   }
 
@@ -620,6 +621,7 @@ xLabels edits =
           , xOff = 0
           , yOff = 18
           , grid = True
+          , uppercase = False
           , fontSize = Nothing
           }
 
@@ -641,6 +643,7 @@ xLabels edits =
             , color = config.color
             , anchor = config.anchor
             , fontSize = config.fontSize
+            , uppercase = config.uppercase
             }
             [ S.text item.label ]
             { x = item.value
@@ -665,6 +668,7 @@ yLabels edits =
           , xOff = -10
           , yOff = 3
           , grid = True
+          , uppercase = False
           , fontSize = Nothing
           }
 
@@ -685,6 +689,7 @@ yLabels edits =
             , yOff = config.yOff
             , color = config.color
             , fontSize = config.fontSize
+            , uppercase = config.uppercase
             , anchor =
                 case config.anchor of
                   Nothing -> Just (if config.flip then IS.Start else IS.End)
@@ -710,6 +715,7 @@ type alias Label =
   , color : String
   , anchor : Maybe IS.Anchor
   , rotate : Float
+  , uppercase : Bool
   , flip : Bool
   , grid : Bool
   }
@@ -726,6 +732,7 @@ xLabel edits inner =
           , yOff = 20
           , border = "white"
           , borderWidth = 0.1
+          , uppercase = False
           , fontSize = Nothing
           , color = "#808BAB"
           , anchor = Nothing
@@ -750,6 +757,7 @@ xLabel edits inner =
       , border = config.border
       , borderWidth = config.borderWidth
       , fontSize = config.fontSize
+      , uppercase = config.uppercase
       , color = config.color
       , anchor = config.anchor
       , rotate = config.rotate
@@ -770,6 +778,7 @@ yLabel edits inner =
           , yOff = 3
           , border = "white"
           , borderWidth = 0.1
+          , uppercase = False
           , fontSize = Nothing
           , color = "#808BAB"
           , anchor = Nothing
@@ -794,6 +803,7 @@ yLabel edits inner =
       , border = config.border
       , borderWidth = config.borderWidth
       , fontSize = config.fontSize
+      , uppercase = config.uppercase
       , color = config.color
       , anchor =
           case config.anchor of
@@ -974,7 +984,9 @@ amongst : List (CE.Product config value data) -> (data -> List (CA.Attribute dec
 amongst inQuestion func =
   P.variation <| \p s meta d ->
     let check product =
-          if Item.getPropertyIndex product == p && Item.getStackIndex product == s && Item.getDatum product == d
+          if Item.getPropertyIndex product == p &&
+             Item.getStackIndex product == s &&
+             Item.getDatum product == d
           then func d else []
     in
     List.concatMap check inQuestion
@@ -1006,6 +1018,12 @@ type alias Bars data =
 {-| -}
 bars : List (CA.Attribute (Bars data)) -> List (Property data () CS.Bar) -> List data -> Element data msg
 bars edits properties data =
+  barsMap identity edits properties data
+
+
+{-| -}
+barsMap : (data -> a) -> List (CA.Attribute (Bars data)) -> List (Property data () CS.Bar) -> List data -> Element a msg
+barsMap mapData edits properties data =
   Indexed <| \index ->
     let barsConfig =
           Helpers.apply edits IS.defaultBars
@@ -1015,6 +1033,7 @@ bars edits properties data =
 
         generalized =
           List.concatMap Group.getProducts items
+            |> List.map (Item.map mapData)
 
         bins =
           CE.group CE.bin generalized
@@ -1047,12 +1066,19 @@ bars edits properties data =
 {-| -}
 series : (data -> Float) -> List (Property data CS.Interpolation CS.Dot) -> List data -> Element data msg
 series toX properties data =
+  seriesMap identity toX properties data
+
+
+{-| -}
+seriesMap : (data -> a) -> (data -> Float) -> List (Property data CS.Interpolation CS.Dot) -> List data -> Element a msg
+seriesMap mapData toX properties data =
   Indexed <| \index ->
     let items =
           Produce.toDotSeries index toX properties data
 
         generalized =
           List.concatMap Group.getProducts items
+            |> List.map (Item.map mapData)
 
         legends_ =
           Legend.toDotLegends index properties

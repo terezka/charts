@@ -602,6 +602,7 @@ type alias Label =
   , color : String
   , anchor : Maybe Anchor
   , rotate : Float
+  , uppercase : Bool
   , attrs : List (S.Attribute Never)
   }
 
@@ -616,6 +617,7 @@ defaultLabel =
   , color = "#808BAB"
   , anchor = Nothing
   , rotate = 0
+  , uppercase = False
   , attrs = []
   }
 
@@ -634,6 +636,9 @@ label plane config inner point =
           Just End -> "text-anchor: end;"
           Just Start -> "text-anchor: start;"
           Just Middle -> "text-anchor: middle;"
+
+      uppercaseStyle =
+        if config.uppercase then "text-transform: uppercase;" else ""
   in
   withAttrs config.attrs S.text_
     [ SA.class "elm-charts__label"
@@ -641,7 +646,7 @@ label plane config inner point =
     , SA.strokeWidth (String.fromFloat config.borderWidth)
     , SA.fill config.color
     , position plane -config.rotate point.x point.y config.xOff config.yOff
-    , SA.style <| String.join " " [ "pointer-events: none;", fontStyle, anchorStyle ]
+    , SA.style <| String.join " " [ "pointer-events: none;", fontStyle, anchorStyle, uppercaseStyle ]
     ]
     [ S.tspan [] inner ]
 

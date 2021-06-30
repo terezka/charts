@@ -62,7 +62,6 @@ toBarSeries elIndex barsAttrs properties data =
           , toHtml = \c -> [ H.table [ HA.style "margin" "0" ] (List.concatMap I.toHtml c.items) ]
           }
 
-
       toBarItem sections barIndex sectionIndex section colorIndex bin =
         let numOfBars = if barsConfig.grouped then toFloat (List.length properties) else 1
             numOfSections = toFloat (List.length sections)
