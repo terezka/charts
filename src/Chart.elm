@@ -427,6 +427,7 @@ type alias Axis =
   , pinned : C.Axis -> Float
   , arrow : Bool
   , color : String
+  , width : Float
   }
 
 
@@ -439,6 +440,7 @@ xAxis edits =
           , pinned = CA.zero
           , color = ""
           , arrow = True
+          , width = 1
           }
 
       addTickValues p ts =
@@ -450,6 +452,7 @@ xAxis edits =
       [ SA.class "elm-charts__x-axis" ]
       [ CS.line p
           [ CA.color config.color
+          , CA.width config.width
           , CA.y1 (config.pinned p.y)
           , CA.x1 (max p.x.min xLimit.min)
           , CA.x2 (min p.x.max xLimit.max)
@@ -474,6 +477,7 @@ yAxis edits =
           , pinned = CA.zero
           , color = ""
           , arrow = True
+          , width = 1
           }
 
       addTickValues p ts =
@@ -485,6 +489,7 @@ yAxis edits =
       [ SA.class "elm-charts__y-axis" ]
       [ CS.line p
           [ CA.color config.color
+          , CA.width config.width
           , CA.x1 (config.pinned p.x)
           , CA.y1 (max p.y.min yLimit.min)
           , CA.y2 (min p.y.max yLimit.max)

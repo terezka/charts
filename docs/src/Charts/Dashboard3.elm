@@ -69,7 +69,6 @@ view model =
             |> C.amongst model.hovering (\_ -> [ CA.size 40 ])
         ]
         lineData
-
     ]
 
 

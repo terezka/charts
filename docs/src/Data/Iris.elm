@@ -1,4 +1,4 @@
-module Data.Iris exposing (Datum, Species(..), data, only)
+module Data.Iris exposing (Datum, Species(..), data, species, only)
 
 
 type alias Datum =
@@ -16,9 +16,17 @@ type Species
   | Virginica
 
 
+species : Datum -> String
+species datum =
+  case datum.species of
+    Setosa -> "Setosa"
+    Versicolor -> "Versicolor"
+    Virginica -> "Virginica"
+
+
 only : Species -> (Datum -> Float) -> Datum -> Maybe Float
-only species func datum =
-  if datum.species == species then Just (func datum) else Nothing
+only needed func datum =
+  if datum.species == needed then Just (func datum) else Nothing
 
 
 data : List Datum

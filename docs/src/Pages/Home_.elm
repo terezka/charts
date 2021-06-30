@@ -10,6 +10,7 @@ import Charts.Dashboard1 as Dashboard1
 import Charts.Dashboard2 as Dashboard2
 import Charts.Dashboard3 as Dashboard3
 import Charts.Dashboard4 as Dashboard4
+import Charts.Dashboard5 as Dashboard5
 import Html as H
 import Element as E
 import Element.Font as F
@@ -40,6 +41,7 @@ type alias Model =
   , dashboard2 : Dashboard2.Model
   , dashboard3 : Dashboard3.Model
   , dashboard4 : Dashboard4.Model
+  , dashboard5 : Dashboard5.Model
   }
 
 
@@ -50,6 +52,7 @@ init =
   , dashboard2 = Dashboard2.init
   , dashboard3 = Dashboard3.init
   , dashboard4 = Dashboard4.init
+  , dashboard5 = Dashboard5.init
   }
 
 
@@ -63,6 +66,7 @@ type Msg
   | Dashboard2Msg Dashboard2.Msg
   | Dashboard3Msg Dashboard3.Msg
   | Dashboard4Msg Dashboard4.Msg
+  | Dashboard5Msg Dashboard5.Msg
 
 
 update : Msg -> Model -> Model
@@ -83,8 +87,8 @@ update msg model =
     Dashboard4Msg subMsg ->
       { model | dashboard4 = Dashboard4.update subMsg model.dashboard4 }
 
-
-
+    Dashboard5Msg subMsg ->
+      { model | dashboard5 = Dashboard5.update subMsg model.dashboard5 }
 
 
 
@@ -105,7 +109,7 @@ view model =
                   [ E.width E.fill
                   , E.spacing 15
                   ]
-                  [ section 5 "Overlay charts and combine" (H.map Dashboard1Msg (Dashboard1.view model.dashboard1))
+                  [ section 5 (H.map Dashboard1Msg (Dashboard1.view model.dashboard1))
                   , E.column
                       [ E.alignTop
                       , E.width E.fill
@@ -116,21 +120,42 @@ view model =
                           , E.width E.fill
                           , E.spacing 15
                           ]
-                          [ section 5 "Recolor and hide dots" (H.map Dashboard2Msg (Dashboard2.view model.dashboard2))
-                          , section 5 "Add gradients" (H.map Dashboard3Msg (Dashboard3.view model.dashboard3))
+                          [ section 5 (H.map Dashboard2Msg (Dashboard2.view model.dashboard2))
+                          , section 5 (H.map Dashboard3Msg (Dashboard3.view model.dashboard3))
                           ]
-                      , section 5 "Histograms" (H.map Dashboard4Msg (Dashboard4.view model.dashboard4))
+                      , section 5 (H.map Dashboard4Msg (Dashboard4.view model.dashboard4))
                       ]
                   ]
-              , E.el [ F.size 80 ] (E.text "elm-charts")
+              , E.row
+                  [ E.width E.fill
+                  , E.spacing 40
+                  ]
+                  [ E.row
+                      [ E.width E.fill
+                      , E.spacing 15
+                      ]
+                      [ section 5 (H.map Dashboard5Msg (Dashboard5.view model.dashboard5))
+                      ]
+                  , E.column
+                      [ E.width (E.fillPortion 2)
+                      ]
+                      [ E.el [ F.size 125 ] (E.text "elm-charts")
+                      , E.paragraph
+                          [ F.size 24
+                          , F.color (E.rgb255 120 120 120)
+                          , E.paddingXY 10 5
+                          ]
+                          [ E.text "An empowering charting library made in all Elm." ]
+                      ]
+                  ]
               ]
           ]
     }
 
 
 
-section : Int -> String -> H.Html msg -> E.Element msg
-section padding title chart =
+section : Int -> H.Html msg -> E.Element msg
+section padding chart =
   E.column
     [ E.alignTop
     , E.width E.fill
