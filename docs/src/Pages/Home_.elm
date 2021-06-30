@@ -5,7 +5,6 @@ import Page
 import Request
 import Shared
 import View exposing (View)
-import Charts.SalaryDist as SalaryDist
 import Charts.Dashboard1 as Dashboard1
 import Charts.Dashboard2 as Dashboard2
 import Charts.Dashboard3 as Dashboard3
@@ -38,8 +37,7 @@ page shared req =
 
 
 type alias Model =
-  { salaryDist : SalaryDist.Model
-  , dashboard1 : Dashboard1.Model
+  { dashboard1 : Dashboard1.Model
   , dashboard2 : Dashboard2.Model
   , dashboard3 : Dashboard3.Model
   , dashboard4 : Dashboard4.Model
@@ -51,8 +49,7 @@ type alias Model =
 
 init : Model
 init =
-  { salaryDist = SalaryDist.init
-  , dashboard1 = Dashboard1.init
+  { dashboard1 = Dashboard1.init
   , dashboard2 = Dashboard2.init
   , dashboard3 = Dashboard3.init
   , dashboard4 = Dashboard4.init
@@ -67,8 +64,7 @@ init =
 
 
 type Msg
-  = SalaryDistMsg SalaryDist.Msg
-  | Dashboard1Msg Dashboard1.Msg
+  = Dashboard1Msg Dashboard1.Msg
   | Dashboard2Msg Dashboard2.Msg
   | Dashboard3Msg Dashboard3.Msg
   | Dashboard4Msg Dashboard4.Msg
@@ -80,9 +76,6 @@ type Msg
 update : Msg -> Model -> Model
 update msg model =
   case msg of
-    SalaryDistMsg subMsg ->
-      { model | salaryDist = SalaryDist.update subMsg model.salaryDist }
-
     Dashboard1Msg subMsg ->
       { model | dashboard1 = Dashboard1.update subMsg model.dashboard1 }
 

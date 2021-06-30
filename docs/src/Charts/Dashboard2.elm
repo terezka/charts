@@ -51,14 +51,14 @@ update msg model =
 view : Model -> H.Html Msg
 view model =
   C.chart
-    [ CA.height 300
-    , CA.width 500
+    [ CA.height 160
+    , CA.width 250
     , CE.onMouseMove OnHover (CE.getNearest <| CE.keep CE.realValues CE.dot)
     , CE.onMouseLeave (OnHover [])
     ]
     [ C.series .x
         [ C.interpolated .y
-            [ CA.monotone, CA.color "#555", CA.dashed [ 5, 5 ], CA.width 5, CA.opacity 0.1 ]
+            [ CA.monotone, CA.color "#555", CA.dashed [ 5, 5 ], CA.width 3, CA.opacity 0.1 ]
             []
             |> C.named "Combinations"
             |> C.amongst model.hovering (\_ -> [ CA.circle, CA.color CA.pink, CA.size 30 ])
@@ -81,10 +81,10 @@ view model =
             color = if value < 10 then "#6f6f6f" else "white"
         in
         if value == 0 then [] else
-        [ C.label [ CA.color color, CA.moveUp 10, CA.fontSize 26 ] [ S.text (String.fromFloat value) ] bottom ]
+        [ C.label [ CA.color color, CA.moveUp 10, CA.fontSize 14 ] [ S.text (String.fromFloat value) ] bottom ]
 
     , C.each model.hovering <| \p dot ->
-        [ C.label [ CA.fontSize 24, CA.moveUp 10 ] [ S.text (String.fromFloat <| CE.getDependent dot) ] (CE.getTop p dot) ]
+        [ C.label [ CA.fontSize 14, CA.moveUp 10 ] [ S.text (String.fromFloat <| CE.getDependent dot) ] (CE.getTop p dot) ]
     ]
 
 
@@ -99,7 +99,7 @@ barData =
   [ Datum 1612440000000 (Just 56)
   , Datum 1612440300000 (Just 32)
   , Datum 1612440600000 (Just 0)
-  , Datum 1612440900000 (Just 7)
+  , Datum 1612440900000 (Just 9)
   , Datum 1612441200000 (Just 48)
   , Datum 1612441500000 (Just 24)
   , Datum 1612441800000 (Just 0)

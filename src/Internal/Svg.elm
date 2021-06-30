@@ -1831,21 +1831,20 @@ tooltipPointerStyle direction className background borderColor =
 
 clipperStyle : Plane -> Coord.Position -> String
 clipperStyle plane limits =
-  let x1 = plane.x.min - limits.x1
-      y1 = limits.y2 - plane.y.max
-      x2 = x1 + abs (plane.x.max - plane.x.min)
-      y2 = y1 + abs (plane.y.max - plane.y.min)
+  let leftCut = (plane.x.min - limits.x1) / abs (limits.x2 - limits.x1) * 100
+      rightCut = (plane.x.max - limits.x2) / abs (limits.x2 - limits.x1) * 100
+      bottomCut = (plane.y.min - limits.y1) / abs (limits.y2 - limits.y1) * 100
+      topCut = (plane.y.max - limits.y2) / abs (limits.y2 - limits.y1) * 100
 
       path =
         String.join " "
-          [ "M" ++ String.fromFloat (Coord.scaleSVGX plane x1) ++ " " ++ String.fromFloat (Coord.scaleSVGY plane y1)
-          , "V" ++ String.fromFloat (Coord.scaleSVGY plane y2)
-          , "H" ++ String.fromFloat (Coord.scaleSVGX plane x2)
-          , "V" ++ String.fromFloat (Coord.scaleSVGY plane y1)
-          , "H" ++ String.fromFloat (Coord.scaleSVGX plane x1)
+          [ String.fromFloat -topCut ++ "%"
+          , String.fromFloat -rightCut ++ "%"
+          , String.fromFloat bottomCut ++ "%"
+          , String.fromFloat leftCut ++ "%"
           ]
   in
-  "clip-path: path('" ++ path ++ "'); -webkit-clip-path: path('" ++ path ++ "');"
+  "clip-path: inset(" ++ path ++ ");"
 
 
 

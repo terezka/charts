@@ -60,7 +60,8 @@ view model =
     , CA.marginRight 20
     , CA.paddingRight 20
     , CA.paddingLeft 20
-    , CA.paddingBottom 10
+    , CA.paddingTop 5
+    , CA.paddingBottom 5
     , CE.on "mousemove" <|
         CE.map2 OnHover
           (CE.getNearestX CE.bin)

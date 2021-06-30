@@ -51,22 +51,23 @@ update msg model =
 view : Model -> H.Html Msg
 view model =
   C.chart
-    [ CA.height 300
-    , CA.width 500
+    [ CA.height 150
+    , CA.width 250
     , CA.paddingRight 0
+    , CA.marginBottom 10
     , CE.onMouseMove OnHover (CE.getNearestX CE.dot)
     , CE.onMouseLeave (OnHover [])
     ]
-    [ C.xLabels [ CA.times Time.utc, CA.uppercase, CA.fontSize 18, CA.amount 10 ]
+    [ C.xLabels [ CA.times Time.utc, CA.uppercase, CA.fontSize 9, CA.amount 10 ]
 
     , C.each model.hovering <| \p dot ->
-        [ C.line [ CA.x1 (CE.getIndependent dot), CA.width 3, CA.dashed [ 10, 10 ] ] ]
+        [ C.line [ CA.x1 (CE.getIndependent dot), CA.width 2, CA.dashed [ 5, 5 ] ] ]
 
     , C.series .x
         [ C.interpolated .y
-            [ CA.linear, CA.color CA.blue, CA.width 3, CA.opacity 0.4, CA.gradient [ CA.colors [ CA.blue, "white" ] ] ]
-            [ CA.diamond, CA.color "white", CA.borderWidth 3, CA.size 20 ]
-            |> C.amongst model.hovering (\_ -> [ CA.size 40 ])
+            [ CA.linear, CA.color CA.blue, CA.width 1.5, CA.opacity 0.4, CA.gradient [ CA.colors [ CA.blue, "white" ] ] ]
+            [ CA.diamond, CA.color "white", CA.borderWidth 1.5, CA.size 8 ]
+            |> C.amongst model.hovering (\_ -> [ CA.size 14 ])
         ]
         lineData
     ]
