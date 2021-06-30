@@ -20,7 +20,7 @@ view model =
     , C.bars
         []
         [ C.bar .y []
-            |> C.variation (\d -> if d.x == 3 then [ CA.striped [] ] else [])
+            |> C.variation (\_ d -> if d.x == 3 then [ CA.striped [] ] else [])
         , C.bar .z []
         ]
         data

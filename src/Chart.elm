@@ -974,18 +974,19 @@ named name =
 
 
 {-| -}
-variation : (data -> List (CA.Attribute deco)) -> Property data inter deco -> Property data inter deco
+variation : (Int -> data -> List (CA.Attribute deco)) -> Property data inter deco -> Property data inter deco
 variation func =
-  P.variation <| \_ _ _ -> func
+  P.variation <| \_ _ index _ datum -> func index datum
 
 
 {-| -}
 amongst : List (CE.Product config value data) -> (data -> List (CA.Attribute deco)) -> Property data inter deco -> Property data inter deco
 amongst inQuestion func =
-  P.variation <| \p s meta d ->
+  P.variation <| \p s i meta d ->
     let check product =
           if Item.getPropertyIndex product == p &&
              Item.getStackIndex product == s &&
+             Item.getDataIndex product == i &&
              Item.getDatum product == d
           then func d else []
     in

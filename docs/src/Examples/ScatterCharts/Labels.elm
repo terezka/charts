@@ -22,7 +22,7 @@ view model =
     , C.yLabels []
     , C.series .x
         [ C.scatter .y [ CA.opacity 0.2, CA.borderWidth 1 ]
-            |> C.variation (\d -> [ CA.size (Maybe.withDefault 6 d.w * 30) ])
+            |> C.variation (\i d -> [ CA.size (Maybe.withDefault 6 d.w * 30) ])
         ]
         data
     , C.eachDot <| \p point ->
@@ -114,7 +114,7 @@ smallCode =
     , C.yLabels []
     , C.series .x
         [ C.scatter .y [ CA.opacity 0.2, CA.borderWidth 1 ]
-            |> C.variation (\\d -> [ CA.size (Maybe.withDefault 6 d.w * 30) ])
+            |> C.variation (\\i d -> [ CA.size (Maybe.withDefault 6 d.w * 30) ])
         ]
         data
     , C.eachDot <| \\p point ->
@@ -159,7 +159,7 @@ view model =
     , C.yLabels []
     , C.series .x
         [ C.scatter .y [ CA.opacity 0.2, CA.borderWidth 1 ]
-            |> C.variation (\\d -> [ CA.size (Maybe.withDefault 6 d.w * 30) ])
+            |> C.variation (\\i d -> [ CA.size (Maybe.withDefault 6 d.w * 30) ])
         ]
         data
     , C.eachDot <| \\p point ->

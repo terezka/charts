@@ -53,57 +53,95 @@ view model =
   C.chart
     [ CA.height 130
     , CA.width 500
-    , CE.onMouseMove OnHover (CE.getNearest CE.bar)
+    , CA.marginRight 15
+    , CA.paddingRight 0
+    , CE.onMouseMove OnHover (CE.getNearestX CE.bar)
     , CE.onMouseLeave (OnHover [])
     ]
-    [ C.bars
+    [ C.grid []
+    , C.yLabels [ CA.pinned .max, CA.amount 1, CA.flip, CA.fontSize 10 ]
+    , C.line [ CA.y1 50, CA.dashed [ 5, 5 ] ]
+    , C.bars
         [ CA.roundTop 1
         , CA.roundBottom 1
         , CA.margin 0.2
+        , CA.noGrid
         ]
-        [ C.bar .y [ CA.color "lightgray" ]
-            |> C.amongst model.hovering (\_ -> [ CA.color CA.mint, CA.opacity 0.8 ])
+        [ C.bar .score [ CA.opacity 0.5 ]
+            |> C.variation (\i d -> [ CA.color (toColor d.score) ])
+            |> C.amongst model.hovering (\_ -> [ CA.highlight 0.2, CA.highlightWidth 5 ])
         ]
         data
+
+    , C.labelAt .max CA.middle [ CA.rotate 90, CA.moveRight 18 ] [ S.text "test scores" ]
+    , C.each model.hovering <| \p bar ->
+        let datum = CE.getDatum bar
+            scoreText =
+              case datum.score of
+                Just score -> String.fromFloat score ++ "/100"
+                Nothing -> "Absent"
+        in
+        [ C.tooltip bar
+            [ CA.onTop ]
+            [ HA.style "color" (CE.getColor bar) ]
+            [ H.text datum.name, H.text ": ", H.text scoreText ]
+        ]
     ]
 
 
+
 type alias Datum =
-  { y : Maybe Float
+  { score : Maybe Float
+  , name : String
   }
 
 
 data : List Datum
 data =
-  [ Datum (Just 128)
-  , Datum (Just 123)
-  , Datum (Just 118)
-  , Datum (Just 127)
-  , Datum (Just 132)
-  , Datum (Just 143)
-  , Datum (Just 134)
-  , Datum (Just 145)
-  , Datum (Just 156)
-  , Datum (Just 136)
-  , Datum (Just 139)
-  , Datum (Just 129)
-  , Datum (Just 116)
-  , Datum (Just 112)
-  , Datum (Just 110)
-  , Datum (Just 125)
-  , Datum (Just 125)
-  , Datum (Just 135)
-  , Datum (Just 145)
-  , Datum (Just 149)
-  , Datum (Just 159)
-  , Datum (Just 154)
-  , Datum (Just 142)
-  , Datum (Just 137)
-  , Datum (Just 138)
-  , Datum (Just 129)
-  , Datum (Just 132)
-  , Datum (Just 148)
-  , Datum (Just 159)
-  , Datum (Just 164)
+  [ Datum (Just 23) "Alexander"
+  , Datum (Just 48) "Anne"
+  , Datum (Just 98) "Alice"
+  , Datum (Just 85) "Brian"
+  , Datum (Just 32) "Bobby"
+  , Datum Nothing "Byron"
+  , Datum (Just 72) "Cirkeline"
+  , Datum (Just 56) "Diana"
+  , Datum (Just 64) "Felicia"
+  , Datum (Just 45) "Felipa"
+  , Datum (Just 28) "Georgina"
+  , Datum (Just 45) "Helena"
+  , Datum (Just 56) "Irina"
+  , Datum (Just 52) "Iris"
+  , Datum (Just 68) "Jack"
+  , Datum (Just 72) "Kristine"
+  , Datum (Just 87) "Linea"
+  , Datum (Just 92) "Mina"
+  , Datum (Just 100) "Prudence"
+  , Datum (Just 65) "Pauline"
+  , Datum (Just 59) "Preston"
+  , Datum (Just 47) "Regina"
+  , Datum (Just 86) "Ruzena"
+  , Datum (Just 37) "Regitze"
+  , Datum (Just 59) "Selena"
+  , Datum (Just 62) "Sylvia"
+  , Datum (Just 76) "Tristen"
+  , Datum (Just 79) "Ursula"
+  , Datum (Just 65) "Virginia"
+  , Datum (Just 35) "Winston"
   ]
+
+
+toColor : Maybe Float -> String
+toColor score =
+  let key = floor (Maybe.withDefault 0 score / 10) in
+  Dict.get key colors
+    |> Maybe.withDefault "#00E58A"
+
+
+colors : Dict.Dict Int String
+colors =
+  [ "#00E58A", "#00E1CC", "#00AFDD", "#006BD9", "#0029D5", "#1600D2", "#5300CE", "#8F00CA", "#C600C5", "#C20086" ]
+    |> List.reverse
+    |> List.indexedMap Tuple.pair
+    |> Dict.fromList
 

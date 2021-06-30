@@ -28,7 +28,7 @@ view model =
     , C.svg <| \p ->
         S.g [] [ star 200 40, star 250 50 ]
 
-    , C.svgAt (CA.percent 0.8) (CA.percent 0.2) 0 0
+    , C.svgAt (CA.percent 80) (CA.percent 20) 0 0
         [ S.circle [ SA.r "10", SA.fill "blue" ] [] ]
 
     , C.htmlAt .min CA.middle 30 0

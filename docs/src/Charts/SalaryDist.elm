@@ -274,7 +274,7 @@ salarySeries model border highlightSize size =
   C.series .salaryBoth
       [ C.scatter Salary.womenSalaryPerc
           [ CA.opacity 0.4, CA.circle, CA.border CA.blue, CA.borderWidth border ]
-            |> C.variation (\d ->
+            |> C.variation (\i d ->
                   let precentOfWomen = Salary.womenPerc d
 
                       color =

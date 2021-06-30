@@ -54,7 +54,7 @@ toBarSeries elIndex barsAttrs properties data =
         I.Item
           { config =
               { config = ()
-              , items = List.map (toBarItem sections barIndex sectionIndex section colorIndex) bins
+              , items = List.indexedMap (toBarItem sections barIndex sectionIndex section colorIndex) bins
               }
           , toLimits = \c -> Coord.foldPosition I.getLimits c.items
           , toPosition = \plane c -> Coord.foldPosition (I.getPosition plane) c.items
@@ -62,7 +62,7 @@ toBarSeries elIndex barsAttrs properties data =
           , toHtml = \c -> [ H.table [ HA.style "margin" "0" ] (List.concatMap I.toHtml c.items) ]
           }
 
-      toBarItem sections barIndex sectionIndex section colorIndex bin =
+      toBarItem sections barIndex sectionIndex section colorIndex dataIndex bin =
         let numOfBars = if barsConfig.grouped then toFloat (List.length properties) else 1
             numOfSections = toFloat (List.length sections)
 
@@ -92,7 +92,7 @@ toBarSeries elIndex barsAttrs properties data =
 
             defaultColor = Helpers.toDefaultColor colorIndex
             defaultAttrs = [ CA.roundTop roundTop, CA.roundBottom roundBottom, CA.color defaultColor, CA.border defaultColor ]
-            attrs = defaultAttrs ++ section.attrs ++ section.extra barIndex sectionIndex section.meta bin.datum
+            attrs = defaultAttrs ++ section.attrs ++ section.extra barIndex sectionIndex dataIndex section.meta bin.datum
             productOrg = toBarConfig attrs
             product = if productOrg.border == defaultColor then { productOrg | border = productOrg.color } else productOrg
         in
@@ -109,6 +109,7 @@ toBarSeries elIndex barsAttrs properties data =
               , tooltipInfo =
                   { property = barIndex
                   , stack = sectionIndex
+                  , data = dataIndex
                   , index = colorIndex
                   , name = section.meta
                   , color = product.color
@@ -144,7 +145,7 @@ toDotSeries elIndex toX properties data =
         Helpers.apply attrs S.defaultDot
 
       toSeriesItem lineIndex props sublineIndex prop colorIndex =
-        let dotItems = List.map (toDotItem lineIndex sublineIndex colorIndex prop interConfig) data
+        let dotItems = List.indexedMap (toDotItem lineIndex sublineIndex colorIndex prop interConfig) data
             defaultOpacity = if List.length props > 1 then 0.4 else 0
             interAttr = [ CA.color (Helpers.toDefaultColor colorIndex), CA.opacity defaultOpacity ] ++ prop.inter
             interConfig = toInterConfig interAttr
@@ -169,9 +170,9 @@ toDotSeries elIndex toX properties data =
           , toHtml = \c -> [ H.table [ HA.style "margin" "0" ] (List.concatMap I.toHtml c.items) ]
           }
 
-      toDotItem lineIndex sublineIndex colorIndex prop interConfig datum_ =
+      toDotItem lineIndex sublineIndex colorIndex prop interConfig dataIndex datum_ =
         let defaultAttrs = [ CA.color interConfig.color, CA.border interConfig.color, if interConfig.method == Nothing then CA.circle else identity ]
-            dotAttrs = defaultAttrs ++ prop.attrs ++ prop.extra lineIndex sublineIndex prop.meta datum_
+            dotAttrs = defaultAttrs ++ prop.attrs ++ prop.extra lineIndex sublineIndex dataIndex prop.meta datum_
             config = toDotConfig dotAttrs
             x_ = toX datum_
             y_ = Maybe.withDefault 0 (prop.visual datum_)
@@ -205,6 +206,7 @@ toDotSeries elIndex toX properties data =
               , tooltipInfo =
                   { property = lineIndex
                   , stack = sublineIndex
+                  , data = dataIndex
                   , index = colorIndex
                   , name = prop.meta
                   , color =

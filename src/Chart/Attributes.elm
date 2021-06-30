@@ -136,7 +136,7 @@ middle b =
 {-| -}
 percent : Float -> C.Axis -> Float
 percent per b =
-  b.min + (b.max - b.min) * per
+  b.min + (b.max - b.min) * (per / 100)
 
 
 {-| -}

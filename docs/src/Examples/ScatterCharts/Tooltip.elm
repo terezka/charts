@@ -44,10 +44,10 @@ view model =
     , C.yLabels []
     , C.series .x
         [ C.scatter .y [ CA.opacity 0.2, CA.borderWidth 1 ]
-            |> C.variation (\d -> [ CA.size (d.q * 20) ])
+            |> C.variation (\i d -> [ CA.size (d.q * 20) ])
             |> C.amongst model.hovering (\d -> [ CA.highlight 0.15 ])
         , C.scatter .z [ CA.opacity 0.2, CA.borderWidth 1 ]
-            |> C.variation (\d -> [ CA.size (d.q * 20) ])
+            |> C.variation (\i d -> [ CA.size (d.q * 20) ])
             |> C.amongst model.hovering (\d -> [ CA.highlight 0.15 ])
         ]
         data
@@ -111,10 +111,10 @@ smallCode =
     , C.yLabels []
     , C.series .x
         [ C.scatter .y [ CA.opacity 0.2, CA.borderWidth 1 ]
-            |> C.variation (\\d -> [ CA.size (d.q * 20) ])
+            |> C.variation (\\i d -> [ CA.size (d.q * 20) ])
             |> C.amongst model.hovering (\\d -> [ CA.highlight 0.15 ])
         , C.scatter .z [ CA.opacity 0.2, CA.borderWidth 1 ]
-            |> C.variation (\\d -> [ CA.size (d.q * 20) ])
+            |> C.variation (\\i d -> [ CA.size (d.q * 20) ])
             |> C.amongst model.hovering (\\d -> [ CA.highlight 0.15 ])
         ]
         data
@@ -168,10 +168,10 @@ view model =
     , C.yLabels []
     , C.series .x
         [ C.scatter .y [ CA.opacity 0.2, CA.borderWidth 1 ]
-            |> C.variation (\\d -> [ CA.size (d.q * 20) ])
+            |> C.variation (\\i d -> [ CA.size (d.q * 20) ])
             |> C.amongst model.hovering (\\d -> [ CA.highlight 0.15 ])
         , C.scatter .z [ CA.opacity 0.2, CA.borderWidth 1 ]
-            |> C.variation (\\d -> [ CA.size (d.q * 20) ])
+            |> C.variation (\\i d -> [ CA.size (d.q * 20) ])
             |> C.amongst model.hovering (\\d -> [ CA.highlight 0.15 ])
         ]
         data

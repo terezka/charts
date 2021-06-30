@@ -43,6 +43,7 @@ type Any
 type alias TooltipInfo =
   { property : Int
   , stack : Int
+  , data : Int
   , index : Int
   , name : Maybe String
   , color : String
@@ -135,6 +136,12 @@ getPropertyIndex (Item item) =
 getStackIndex : Product config value data -> Int
 getStackIndex (Item item) =
   item.config.tooltipInfo.stack
+
+
+{-| -}
+getDataIndex : Product config value data -> Int
+getDataIndex (Item item) =
+  item.config.tooltipInfo.data
 
 
 {-| -}

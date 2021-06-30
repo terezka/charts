@@ -20,9 +20,9 @@ view model =
     , C.yLabels []
     , C.series .x
         [ C.scatter .z [ CA.opacity 0.5, CA.borderWidth 1 ]
-            |> C.variation (\d -> [ CA.size (d.x * 20 + 2) ])
+            |> C.variation (\i d -> [ CA.size (d.x * 20 + 2) ])
         , C.scatter .y []
-            |> C.variation (\d -> [ CA.highlight (if d.x == 3 then 0.5 else 0) ])
+            |> C.variation (\i d -> [ CA.highlight (if d.x == 3 then 0.5 else 0) ])
         ]
         data
     ]
@@ -98,9 +98,9 @@ smallCode =
     , C.yLabels []
     , C.series .x
         [ C.scatter .z [ CA.opacity 0.5, CA.borderWidth 1 ]
-            |> C.variation (\\d -> [ CA.size (d.x * 20 + 2) ])
+            |> C.variation (\\i d -> [ CA.size (d.x * 20 + 2) ])
         , C.scatter .y []
-            |> C.variation (\\d -> [ CA.highlight (if d.x == 3 then 0.5 else 0) ])
+            |> C.variation (\\i d -> [ CA.highlight (if d.x == 3 then 0.5 else 0) ])
         ]
         data
     ]
@@ -127,9 +127,9 @@ view model =
     , C.yLabels []
     , C.series .x
         [ C.scatter .z [ CA.opacity 0.5, CA.borderWidth 1 ]
-            |> C.variation (\\d -> [ CA.size (d.x * 20 + 2) ])
+            |> C.variation (\\i d -> [ CA.size (d.x * 20 + 2) ])
         , C.scatter .y []
-            |> C.variation (\\d -> [ CA.highlight (if d.x == 3 then 0.5 else 0) ])
+            |> C.variation (\\i d -> [ CA.highlight (if d.x == 3 then 0.5 else 0) ])
         ]
         data
     ]

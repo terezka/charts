@@ -27,7 +27,7 @@ import Chart.Events
 
 
 type alias Model =
-  { hovering : List (CE.Product CE.Dot (Maybe Float) Datum)
+  { hovering : List (CE.Product CE.Dot Float Datum)
   }
 
 
@@ -38,7 +38,7 @@ init =
 
 
 type Msg
-  = OnHover (List (CE.Product CE.Dot (Maybe Float) Datum))
+  = OnHover (List (CE.Product CE.Dot Float Datum))
 
 
 update : Msg -> Model -> Model
@@ -53,7 +53,7 @@ view model =
   C.chart
     [ CA.height 300
     , CA.width 500
-    , CE.onMouseMove OnHover (CE.getNearest CE.dot)
+    , CE.onMouseMove OnHover (CE.getNearest <| CE.keep CE.realValues CE.dot)
     , CE.onMouseLeave (OnHover [])
     ]
     [ C.series .x
@@ -82,6 +82,9 @@ view model =
         in
         if value == 0 then [] else
         [ C.label [ CA.color color, CA.moveUp 10, CA.fontSize 26 ] [ S.text (String.fromFloat value) ] bottom ]
+
+    , C.each model.hovering <| \p dot ->
+        [ C.label [ CA.fontSize 24, CA.moveUp 10 ] [ S.text (String.fromFloat <| CE.getDependent dot) ] (CE.getTop p dot) ]
     ]
 
 
