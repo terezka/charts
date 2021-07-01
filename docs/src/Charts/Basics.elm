@@ -1,4 +1,4 @@
-module Charts.Basics exposing (Example, empty, scatter, lines, areas, bars)
+module Charts.Basics exposing (Example, empty, scatter, lines, areas, bars, bubbles)
 
 
 import Html as H
@@ -123,6 +123,67 @@ scatter =
                 , { x = 3, y = Just 4, z = Just 2 }
                 , { x = 4, y = Just 1, z = Just 3 }
                 , { x = 5, y = Just 4, z = Just 1 }
+                ]
+            ]
+        ]
+  }
+
+
+bubbles : Example msg
+bubbles =
+  { title = "Scatter chart example"
+  , code =
+      """
+      C.chart
+        [ CA.height 300
+        , CA.width 300
+        , CA.paddingLeft 10
+        , CA.paddingBottom 5
+        ]
+        [ C.grid []
+        , C.xLabels []
+        , C.yLabels []
+        , C.series .x
+            [ C.scatter .y [ CA.opacity 0.3, CA.borderWidth 1 ]
+                |> C.variation (\\_ data -> [ CA.size data.size ])
+            , C.scatter .z [ CA.opacity 0.3, CA.borderWidth 1 ]
+                |> C.variation (\\_ data -> [ CA.size data.size ])
+            ]
+            [ { x = 1, y = Just 2, z = Just 3, size = 450 }
+            , { x = 2, y = Just 3, z = Just 5, size = 350 }
+            , { x = 3, y = Just 4, z = Just 2, size = 150 }
+            , { x = 4, y = Just 1, z = Just 3, size = 550 }
+            , { x = 5, y = Just 4, z = Just 1, size = 450 }
+            ]
+        ]
+      """
+  , chart = \_ ->
+      H.div
+        [ HA.style "width" "300px"
+        , HA.style "height" "300px"
+        ]
+        [ C.chart
+            [ CA.height 300
+            , CA.width 300
+            , CA.marginBottom 20
+            , CA.paddingLeft 40
+            , CA.paddingRight 40
+            , CA.paddingBottom 5
+            ]
+            [ C.grid []
+            , C.xLabels []
+            , C.yLabels []
+            , C.series .x
+                [ C.scatter .y [ CA.opacity 0.3, CA.borderWidth 1 ]
+                    |> C.variation (\_ data -> [ CA.size data.size ])
+                , C.scatter .z [ CA.opacity 0.3, CA.borderWidth 1 ]
+                    |> C.variation (\_ data -> [ CA.size data.size ])
+                ]
+                [ { x = 1, y = Just 2, z = Just 3, size = 450 }
+                , { x = 2, y = Just 3, z = Just 5, size = 350 }
+                , { x = 3, y = Just 4, z = Just 2, size = 150 }
+                , { x = 4, y = Just 1, z = Just 3, size = 550 }
+                , { x = 5, y = Just 4, z = Just 1, size = 450 }
                 ]
             ]
         ]

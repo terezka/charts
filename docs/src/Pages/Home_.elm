@@ -12,6 +12,7 @@ import Charts.Dashboard4 as Dashboard4
 import Charts.Dashboard5 as Dashboard5
 import Charts.Dashboard6 as Dashboard6
 import Charts.Dashboard7 as Dashboard7
+import Charts.Basics exposing (Example)
 import Html as H
 import Element as E
 import Element.Font as F
@@ -133,37 +134,34 @@ view model =
                       , section 1 (H.map Dashboard4Msg (Dashboard4.view model.dashboard4))
                       ]
                   ]
-              , E.row
+              , E.column
                   [ E.width E.fill
-                  , E.spacing 20
+                  , F.center
                   ]
-                  [ E.row
-                      [ E.width E.fill
-                      , E.spacing 20
+                  [ E.el [ E.width E.fill, F.size 125 ] (E.text "elm-charts")
+                  , E.paragraph
+                      [ F.size 24
+                      , F.color (E.rgb255 120 120 120)
+                      , E.paddingXY 10 5
                       ]
-                      [ section 3 (H.map Dashboard6Msg (Dashboard6.view model.dashboard6))
-                      ]
-                  , E.column
-                      [ E.width (E.fillPortion 2)
-                      ]
-                      [ E.el [ F.size 125 ] (E.text "elm-charts")
-                      , E.paragraph
-                          [ F.size 24
-                          , F.color (E.rgb255 120 120 120)
-                          , E.paddingXY 10 5
-                          ]
-                          [ E.text "An empowering charting library made in all Elm." ]
-                      ]
-                  ]
-              , E.row
-                  [ E.width E.fill
-                  , E.spacing 20
-                  ]
-                  [ section 1 (H.map Dashboard5Msg (Dashboard5.view model.dashboard5))
-                  , section 1 (H.map Dashboard7Msg (Dashboard7.view model.dashboard7))
-                  , E.el [ E.width E.fill ] E.none
+                      [ E.text "An empowering charting library made in all Elm." ]
                   ]
               ]
+
+          , E.column
+              [ E.width E.fill
+              , E.height E.fill
+              , E.spacing 50
+              , E.paddingEach { top = 100, bottom = 50, left = 0, right = 0 }
+              ]
+              <| List.map CompactExample.view
+                  [ Charts.Basics.empty
+                  , Charts.Basics.scatter
+                  , Charts.Basics.bubbles
+                  , Charts.Basics.lines
+                  , Charts.Basics.areas
+                  , Charts.Basics.bars
+                  ]
           ]
     }
 
