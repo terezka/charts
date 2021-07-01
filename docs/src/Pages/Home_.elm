@@ -160,7 +160,8 @@ view model =
                   , E.spacing 20
                   ]
                   [ section 1 (H.map Dashboard5Msg (Dashboard5.view model.dashboard5))
-                  , section 2 (H.map Dashboard7Msg (Dashboard7.view model.dashboard7))
+                  , section 1 (H.map Dashboard7Msg (Dashboard7.view model.dashboard7))
+                  , E.el [ E.width E.fill ] E.none
                   ]
               ]
           ]

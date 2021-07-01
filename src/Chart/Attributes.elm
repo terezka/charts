@@ -11,7 +11,7 @@ module Chart.Attributes exposing
   , lowest, highest, orLower, orHigher, exactly, more, less, window, likeData, zero, middle, percent
 
   -- LABELS
-  , fontSize, uppercase, format
+  , fontSize, uppercase
   , alignLeft, alignRight, alignMiddle, content
 
   -- AXIS
@@ -365,12 +365,6 @@ fontSize v config =
 uppercase : Attribute { a | uppercase : Bool }
 uppercase config =
   { config | uppercase = True }
-
-
-{-| -}
-format : String -> Attribute { a | format : String }
-format v config =
-  { config | format = v }
 
 
 {-| -}

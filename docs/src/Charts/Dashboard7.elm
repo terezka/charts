@@ -27,7 +27,7 @@ import Chart.Events
 
 
 type alias Model =
-  { hovering : List (CE.Product CE.Dot (Maybe Float) Datum)
+  { hovering : List (CE.Product CE.Dot Float Datum)
   }
 
 
@@ -38,7 +38,7 @@ init =
 
 
 type Msg
-  = OnHover (List (CE.Product CE.Dot (Maybe Float) Datum))
+  = OnHover (List (CE.Product CE.Dot Float Datum))
 
 
 update : Msg -> Model -> Model
@@ -51,69 +51,106 @@ update msg model =
 view : Model -> H.Html Msg
 view model =
   C.chart
-    [ CA.height 250
-    , CA.width 750
+    [ CA.height 230
+    , CA.width 350
     , CA.marginRight 20
-    , CA.marginBottom 25
-    , CA.paddingRight 20
-    , CA.paddingLeft 20
+    , CA.marginBottom 45
+    , CA.paddingRight 0
     , CA.paddingTop 5
     , CA.paddingBottom 5
-    , CE.onMouseMove OnHover (CE.getNearest CE.dot)
+    , CE.onMouseMove OnHover (CE.getNearest (CE.keep CE.realValues CE.dot))
     , CE.onMouseLeave (OnHover [])
     ]
     [ C.grid []
     , C.yTicks [ CA.height 0 ]
-    --, C.yLabels [ CA.fontSize 8, CA.moveUp 6, CA.moveRight 10, CA.alignLeft ]
-    , C.xLabels [ CA.noGrid, CA.pinned .min, CA.times Time.utc, CA.uppercase, CA.fontSize 10, CA.amount 8 ]
+    , C.generate 5 C.floats .y [] <| \p y ->
+        [ C.yLabel [ CA.fontSize 10, CA.flip, CA.y y, CA.x p.x.max ] [ S.text (String.fromFloat y ++ "k")] ]
+
+    , C.xAxis [ CA.noArrow ]
+    , C.xLabels [ CA.noGrid, CA.uppercase, CA.fontSize 10, CA.amount 8 ]
+    , C.xTicks [ CA.noGrid, CA.amount 8 ]
+
+    , C.labelAt .max .max [ CA.moveRight 7 ] [ S.text "Population" ]
 
     , C.each model.hovering <| \p dot ->
-        [ C.line [ CA.x1 (CE.getIndependent dot), CA.dashed [ 3, 3 ], CA.width 2 ] ]
+        [ C.line [ CA.x1 (CE.getIndependent dot), CA.dashed [ 3, 3 ], CA.width 1.5 ] ]
 
     , let isMemberOfBin datum =
             List.member datum (List.map CE.getDatum model.hovering)
       in
-      C.series .x
-        [ C.interpolated (.low >> (+) -10 >> Just) [ CA.stepped, CA.width 2, CA.color "#C600C5AF" ] []
-            |> C.variation (\_ d -> if isMemberOfBin d then [ CA.circle, CA.size 12 ] else [])
-            |> C.amongst model.hovering (\_ -> [ CA.color "white", CA.borderWidth 2, CA.size 18, CA.highlight 0.5, CA.highlightWidth 8, CA.highlightColor "#C600C5" ])
-            |> C.named "Lowest"
-        , C.interpolated (.avg >> Just) [ CA.monotone, CA.width 2, CA.color "#1600D2AF", CA.dashed [ 5, 5 ] ] []
-            |> C.variation (\_ d -> if isMemberOfBin d then [ CA.circle, CA.size 12 ] else [])
-            |> C.amongst model.hovering (\_ -> [ CA.color "white", CA.borderWidth 2, CA.size 18, CA.highlight 0.5, CA.highlightWidth 8, CA.highlightColor "#1600D2" ])
-            |> C.named "Average"
-        , C.interpolated (.high >> (+) 10 >> Just) [ CA.stepped, CA.width 2, CA.color "#00E58AAF" ] []
-            |> C.variation (\_ d -> if isMemberOfBin d then [ CA.circle, CA.size 12 ] else [])
-            |> C.amongst model.hovering (\_ -> [ CA.color "white", CA.borderWidth 2, CA.size 18, CA.highlight 0.5, CA.highlightWidth 8, CA.highlightColor "#00E58A" ])
-            |> C.named "Highest"
+      C.series .year
+        [ C.interpolated (.manhattan >> Just) [ CA.linear, CA.width 2, CA.color orange ] []
+            |> C.variation (\_ d -> if isMemberOfBin d then [ CA.circle, CA.size 8 ] else [])
+            |> C.amongst model.hovering (\_ -> [ CA.color "white", CA.borderWidth 2, CA.size 18, CA.highlight 0.5, CA.highlightColor orange ])
+            |> C.named "Manhattan"
+        , C.interpolated (.bronx >> Just) [ CA.linear, CA.width 2, CA.color green ] []
+            |> C.variation (\_ d -> if isMemberOfBin d then [ CA.circle, CA.size 8 ] else [])
+            |> C.amongst model.hovering (\_ -> [ CA.color "white", CA.borderWidth 2, CA.size 18, CA.highlight 0.5, CA.highlightColor green ])
+            |> C.named "Bronx"
+        , C.interpolated (.brooklyn >> Just) [ CA.linear, CA.width 2, CA.color blue ] []
+            |> C.variation (\_ d -> if isMemberOfBin d then [ CA.circle, CA.size 8 ] else [])
+            |> C.amongst model.hovering (\_ -> [ CA.color "white", CA.borderWidth 2, CA.size 18, CA.highlight 0.5, CA.highlightColor blue ])
+            |> C.named "Brooklyn"
+        , C.interpolated (.queens >> Just) [ CA.linear, CA.width 2, CA.color pink ] []
+            |> C.variation (\_ d -> if isMemberOfBin d then [ CA.circle, CA.size 8 ] else [])
+            |> C.amongst model.hovering (\_ -> [ CA.color "white", CA.borderWidth 2, CA.size 18, CA.highlight 0.5, CA.highlightColor pink ])
+            |> C.named "Queens"
+        , C.interpolated (.statenIsland >> Just) [ CA.linear, CA.width 2, CA.color purple ] []
+            |> C.variation (\_ d -> if isMemberOfBin d then [ CA.circle, CA.size 8 ] else [])
+            |> C.amongst model.hovering (\_ -> [ CA.color "white", CA.borderWidth 2, CA.size 18, CA.highlight 0.5, CA.highlightColor purple ])
+            |> C.named "Staten Island"
         ]
-        lineData
+        data
+
+    , C.each model.hovering <| \p dot ->
+        [ C.tooltip dot [ CA.onTop, CA.offset 8 ] []
+            [ H.span
+                [ HA.style "color" "#777" ]
+                [ H.text <| String.fromFloat (CE.getIndependent dot) ]
+            , H.text ": "
+            , H.text <| String.fromFloat (CE.getDependent dot) ++ "k"
+            ]
+
+        ]
+
+    , C.legendsAt .min .min 0 -25
+        [ CA.spacing 10
+        , CA.htmlAttrs [ HA.style "max-width" "350px", HA.style "flex-flow" "wrap" ]
+        ]
+        [ CA.fontSize 10
+        , CA.spacing 5
+        ]
     ]
 
 
+orange = "#ff9800"
+green = "#02a09b"
+blue = "#047ae8"
+pink = "#ed3c91"
+purple = "#6501e9"
+
 
 type alias Datum =
-  { x : Float
-  , low : Float
-  , avg : Float
-  , high : Float
+  { year : Float
+  , total : Float
+  , manhattan : Float
+  , bronx : Float
+  , brooklyn : Float
+  , queens : Float
+  , statenIsland : Float
   }
 
 
-lineData : List Datum
-lineData =
-  [ Datum 1609459200000 -12 -2  4
-  , Datum 1612137600000 -15 -3  2
-  , Datum 1614556800000 -4   0  6
-  , Datum 1617235200000 -2   3  6
-  , Datum 1619827200000  2   5 14
-  , Datum 1622505600000  4   8 17
-  , Datum 1625097600000  4  12 28
-  , Datum 1627776000000 11  16 32
-  , Datum 1630454400000 12  18 28
-  , Datum 1633046400000  8  13 22
-  , Datum 1635724800000  2   9 14
-  , Datum 1638316800000 -2   4 10
-  , Datum 1640995200000 -7   0  5
+data : List Datum
+data =
+  [ Datum 1930 6930 1867 1265 2560 1079 158
+  , Datum 1935 6945 1882 1280 2575 1084 164
+  , Datum 1940 7455 1890 1395 2698 1297 174
+  , Datum 1950 7892 1960 1451 2738 1551 192
+  , Datum 1960 7782 1698 1425 2627 1810 222
+  , Datum 1970 7896 1539 1472 2602 1987 295
+  , Datum 1980 7072 1428 1169 2231 1891 352
+  , Datum 1990 7323 1488 1204 2301 1952 379
+  , Datum 2000 8008 1537 1333 2465 2229 443
   ]
 
