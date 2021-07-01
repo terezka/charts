@@ -169,6 +169,7 @@ bubbles =
             , CA.paddingLeft 40
             , CA.paddingRight 40
             , CA.paddingBottom 5
+            , CA.paddingTop 30
             ]
             [ C.grid []
             , C.xLabels []

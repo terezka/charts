@@ -85,7 +85,7 @@ view model =
             color = if value < 10 then "#6f6f6f" else "white"
         in
         if value == 0 then [] else
-        [ C.label [ CA.color color, CA.moveUp 10, CA.fontSize 14 ] [ S.text (String.fromFloat value) ] bottom ]
+        [ C.label [ CA.color color, CA.moveUp 6, CA.fontSize 14 ] [ S.text (String.fromFloat value) ] bottom ]
 
     , C.each model.hovering <| \p dot ->
         [ C.label [ CA.fontSize 14, CA.moveUp 10 ] [ S.text (String.fromFloat <| CE.getDependent dot) ] (CE.getTop p dot) ]
@@ -103,7 +103,7 @@ barData =
   [ Datum 1612440000000 (Just 56)
   , Datum 1612440300000 (Just 32)
   , Datum 1612440600000 (Just 0)
-  , Datum 1612440900000 (Just 9)
+  , Datum 1612440900000 (Just 7)
   , Datum 1612441200000 (Just 48)
   , Datum 1612441500000 (Just 24)
   , Datum 1612441800000 (Just 0)
