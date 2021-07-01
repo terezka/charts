@@ -27,75 +27,69 @@ import Chart.Events
 
 
 type alias Model =
-  { hoveringBin : List (CE.Group (CE.Bin Datum) CE.Any (Maybe Float) Datum)
-  , hoveringDot : List (CE.Product CE.Dot (Maybe Float) Datum)
+  { hovering : List (CE.Product CE.Dot (Maybe Float) Datum)
   }
 
 
 init : Model
 init =
-  { hoveringBin = []
-  , hoveringDot = []
+  { hovering = []
   }
 
 
 type Msg
-  = OnHover
-      (List (CE.Group (CE.Bin Datum) CE.Any (Maybe Float) Datum))
-      (List (CE.Product CE.Dot (Maybe Float) Datum))
+  = OnHover (List (CE.Product CE.Dot (Maybe Float) Datum))
 
 
 update : Msg -> Model -> Model
 update msg model =
   case msg of
-    OnHover hoveringBin hoveringDot ->
-      { model | hoveringBin = hoveringBin, hoveringDot = hoveringDot }
+    OnHover hovering ->
+      { model | hovering = hovering }
 
 
 view : Model -> H.Html Msg
 view model =
   C.chart
-    [ CA.height 300
-    , CA.width 500
+    [ CA.height 250
+    , CA.width 750
     , CA.marginRight 20
+    , CA.marginBottom 25
     , CA.paddingRight 20
     , CA.paddingLeft 20
     , CA.paddingTop 5
     , CA.paddingBottom 5
-    , CE.on "mousemove" <|
-        CE.map2 OnHover
-          (CE.getNearestX CE.bin)
-          (CE.getNearest CE.dot)
-
-    , CE.onMouseLeave (OnHover [] [])
+    , CE.onMouseMove OnHover (CE.getNearest CE.dot)
+    , CE.onMouseLeave (OnHover [])
     ]
     [ C.grid []
     , C.yTicks [ CA.height 0 ]
     --, C.yLabels [ CA.fontSize 8, CA.moveUp 6, CA.moveRight 10, CA.alignLeft ]
     , C.xLabels [ CA.noGrid, CA.pinned .min, CA.times Time.utc, CA.uppercase, CA.fontSize 10, CA.amount 8 ]
 
-    , C.each model.hoveringBin <| \p bin ->
-        let common = CE.getCommonality bin in
-        [ C.line [ CA.x1 common.start, CA.dashed [ 3, 3 ], CA.width 2 ] ]
+    , C.each model.hovering <| \p dot ->
+        [ C.line [ CA.x1 (CE.getIndependent dot), CA.dashed [ 3, 3 ], CA.width 2 ] ]
 
-    , let binMembers = List.concatMap CE.getProducts model.hoveringBin
+    , let isMemberOfBin datum =
+            List.member datum (List.map CE.getDatum model.hovering)
       in
       C.series .x
         [ C.interpolated (.low >> (+) -10 >> Just) [ CA.stepped, CA.width 2, CA.color "#C600C5AF" ] []
-            |> C.amongst binMembers (\_ -> [ CA.circle, CA.size 12 ])
-            |> C.amongst model.hoveringDot (\_ -> [ CA.color "white", CA.borderWidth 2, CA.size 18, CA.highlight 0.5, CA.highlightWidth 8, CA.highlightColor "#C600C5" ])
+            |> C.variation (\_ d -> if isMemberOfBin d then [ CA.circle, CA.size 12 ] else [])
+            |> C.amongst model.hovering (\_ -> [ CA.color "white", CA.borderWidth 2, CA.size 18, CA.highlight 0.5, CA.highlightWidth 8, CA.highlightColor "#C600C5" ])
             |> C.named "Lowest"
         , C.interpolated (.avg >> Just) [ CA.monotone, CA.width 2, CA.color "#1600D2AF", CA.dashed [ 5, 5 ] ] []
-            |> C.amongst binMembers (\_ -> [ CA.circle, CA.size 12 ])
-            |> C.amongst model.hoveringDot (\_ -> [ CA.color "white", CA.borderWidth 2, CA.size 18, CA.highlight 0.5, CA.highlightWidth 8, CA.highlightColor "#1600D2" ])
+            |> C.variation (\_ d -> if isMemberOfBin d then [ CA.circle, CA.size 12 ] else [])
+            |> C.amongst model.hovering (\_ -> [ CA.color "white", CA.borderWidth 2, CA.size 18, CA.highlight 0.5, CA.highlightWidth 8, CA.highlightColor "#1600D2" ])
             |> C.named "Average"
         , C.interpolated (.high >> (+) 10 >> Just) [ CA.stepped, CA.width 2, CA.color "#00E58AAF" ] []
-            |> C.amongst binMembers (\_ -> [ CA.circle, CA.size 12 ])
-            |> C.amongst model.hoveringDot (\_ -> [ CA.color "white", CA.borderWidth 2, CA.size 18, CA.highlight 0.5, CA.highlightWidth 8, CA.highlightColor "#00E58A" ])
+            |> C.variation (\_ d -> if isMemberOfBin d then [ CA.circle, CA.size 12 ] else [])
+            |> C.amongst model.hovering (\_ -> [ CA.color "white", CA.borderWidth 2, CA.size 18, CA.highlight 0.5, CA.highlightWidth 8, CA.highlightColor "#00E58A" ])
             |> C.named "Highest"
         ]
         lineData
     ]
+
 
 
 type alias Datum =
