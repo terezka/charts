@@ -71,13 +71,13 @@ view model =
         , CA.margin 0.1
         , CA.spacing 0.05
         ]
-        [ C.bar (.denmark >> Just) [ CA.color CA.pink, CA.opacity 0.9 ]
+        [ C.bar .denmark [ CA.color CA.pink, CA.opacity 0.9 ]
             |> C.variation (\_ d -> if d.year > 2021 then [ CA.striped [ CA.spacing 8 ], CA.opacity 1 ] else [])
             |> C.named "Denmark"
-        , C.bar (.norway >> Just) [ CA.color CA.darkBlue, CA.opacity 0.8 ]
+        , C.bar .norway [ CA.color CA.darkBlue, CA.opacity 0.8 ]
             |> C.variation (\_ d -> if d.year > 2021 then [ CA.striped [ CA.spacing 8 ], CA.opacity 1 ] else [])
             |> C.named "Norway"
-        , C.bar (.sweden >> Just) [ CA.color CA.blue, CA.opacity 0.8 ]
+        , C.bar .sweden [ CA.color CA.blue, CA.opacity 0.8 ]
             |> C.variation (\_ d -> if d.year > 2021 then [ CA.striped [ CA.spacing 8 ], CA.opacity 1 ] else [])
             |> C.named "Sweden"
         ]

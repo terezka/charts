@@ -4,8 +4,8 @@ module Charts.Basics exposing (Example, empty, scatter, lines, areas, bars, bubb
 import Html as H
 import Html.Attributes as HA
 import Html.Events as HE
-import Svg as S exposing (Svg, svg, g, circle, text_, text)
-import Svg.Attributes as SA exposing (width, height, stroke, fill, r, transform)
+import Svg as S
+import Svg.Attributes as SA
 
 import Chart as C
 import Chart.Attributes as CA
@@ -91,11 +91,11 @@ scatter =
             [ C.scatter .y [ CA.circle ]
             , C.scatter .z [ CA.square ]
             ]
-            [ { x = 1, y = Just 2, z = Just 3 }
-            , { x = 2, y = Just 3, z = Just 5 }
-            , { x = 3, y = Just 4, z = Just 2 }
-            , { x = 4, y = Just 1, z = Just 3 }
-            , { x = 5, y = Just 4, z = Just 1 }
+            [ { x = 1, y = 2, z = 3 }
+            , { x = 2, y = 3, z = 5 }
+            , { x = 3, y = 4, z = 2 }
+            , { x = 4, y = 1, z = 3 }
+            , { x = 5, y = 4, z = 1 }
             ]
         ]
       """
@@ -118,11 +118,11 @@ scatter =
                 [ C.scatter .y [ CA.circle ]
                 , C.scatter .z [ CA.square ]
                 ]
-                [ { x = 1, y = Just 2, z = Just 3 }
-                , { x = 2, y = Just 3, z = Just 5 }
-                , { x = 3, y = Just 4, z = Just 2 }
-                , { x = 4, y = Just 1, z = Just 3 }
-                , { x = 5, y = Just 4, z = Just 1 }
+                [ { x = 1, y = 2, z = 3 }
+                , { x = 2, y = 3, z = 5 }
+                , { x = 3, y = 4, z = 2 }
+                , { x = 4, y = 1, z = 3 }
+                , { x = 5, y = 4, z = 1 }
                 ]
             ]
         ]
@@ -149,11 +149,11 @@ bubbles =
             , C.scatter .z [ CA.opacity 0.3, CA.borderWidth 1 ]
                 |> C.variation (\\_ data -> [ CA.size data.size ])
             ]
-            [ { x = 1, y = Just 2, z = Just 3, size = 450 }
-            , { x = 2, y = Just 3, z = Just 5, size = 350 }
-            , { x = 3, y = Just 4, z = Just 2, size = 150 }
-            , { x = 4, y = Just 1, z = Just 3, size = 550 }
-            , { x = 5, y = Just 4, z = Just 1, size = 450 }
+            [ { x = 1, y = 2, z = 3, size = 450 }
+            , { x = 2, y = 3, z = 5, size = 350 }
+            , { x = 3, y = 4, z = 2, size = 150 }
+            , { x = 4, y = 1, z = 3, size = 550 }
+            , { x = 5, y = 4, z = 1, size = 450 }
             ]
         ]
       """
@@ -180,11 +180,11 @@ bubbles =
                 , C.scatter .z [ CA.opacity 0.3, CA.borderWidth 1 ]
                     |> C.variation (\_ data -> [ CA.size data.size ])
                 ]
-                [ { x = 1, y = Just 2, z = Just 3, size = 450 }
-                , { x = 2, y = Just 3, z = Just 5, size = 350 }
-                , { x = 3, y = Just 4, z = Just 2, size = 150 }
-                , { x = 4, y = Just 1, z = Just 3, size = 550 }
-                , { x = 5, y = Just 4, z = Just 1, size = 450 }
+                [ { x = 1, y = 2, z = 3, size = 450 }
+                , { x = 2, y = 3, z = 5, size = 350 }
+                , { x = 3, y = 4, z = 2, size = 150 }
+                , { x = 4, y = 1, z = 3, size = 550 }
+                , { x = 5, y = 4, z = 1, size = 450 }
                 ]
             ]
         ]
@@ -209,9 +209,9 @@ lines =
             [ C.interpolated .y [ CA.monotone ] [ CA.circle ]
             , C.interpolated .z [ CA.monotone ] [ CA.square ]
             ]
-            [ { x = 1, y = Just 2, z = Just 3 }
-            , { x = 5, y = Just 4, z = Just 1 }
-            , { x = 10, y = Just 2, z = Just 4 }
+            [ { x = 1, y = 2, z = 3 }
+            , { x = 5, y = 4, z = 1 }
+            , { x = 10, y = 2, z = 4 }
             ]
         ]
       """
@@ -234,9 +234,9 @@ lines =
                 [ C.interpolated .y [ CA.monotone ] [ CA.circle ]
                 , C.interpolated .z [ CA.monotone ] [ CA.square ]
                 ]
-                [ { x = 1, y = Just 2, z = Just 3 }
-                , { x = 5, y = Just 4, z = Just 1 }
-                , { x = 10, y = Just 2, z = Just 4 }
+                [ { x = 1, y = 2, z = 3 }
+                , { x = 5, y = 4, z = 1 }
+                , { x = 10, y = 2, z = 4 }
                 ]
             ]
         ]
@@ -261,9 +261,9 @@ areas =
                 , C.interpolated .z [ CA.opacity 1, CA.dotted [] ] []
                 ]
             ]
-            [ { x = 1, y = Just 1, z = Just 3 }
-            , { x = 5, y = Just 2, z = Just 1 }
-            , { x = 10, y = Just 2, z = Just 4 }
+            [ { x = 1, y = 1, z = 3 }
+            , { x = 5, y = 2, z = 1 }
+            , { x = 10, y = 2, z = 4 }
             ]
         ]
       """
@@ -286,9 +286,9 @@ areas =
                     , C.interpolated .z [ CA.opacity 1, CA.dotted [] ] []
                     ]
                 ]
-                [ { x = 1, y = Just 1, z = Just 3 }
-                , { x = 5, y = Just 2, z = Just 1 }
-                , { x = 10, y = Just 2, z = Just 4 }
+                [ { x = 1, y = 1, z = 3 }
+                , { x = 5, y = 2, z = 1 }
+                , { x = 10, y = 2, z = 4 }
                 ]
             ]
         ]
@@ -312,9 +312,9 @@ bars =
             [ C.bar .z [ CA.striped [] ]
             , C.bar .y []
             ]
-            [ { x = 1, y = Just 3, z = Just 1 }
-            , { x = 2, y = Just 2, z = Just 3 }
-            , { x = 3, y = Just 4, z = Just 2 }
+            [ { x = 1, y = 3, z = 1 }
+            , { x = 2, y = 2, z = 3 }
+            , { x = 3, y = 4, z = 2 }
             ]
         ]
       """
@@ -336,9 +336,9 @@ bars =
                 [ C.bar .z [ CA.color purple, CA.striped [] ]
                 , C.bar .y [ CA.color pink ]
                 ]
-                [ { x = 1, y = Just 3, z = Just 1 }
-                , { x = 2, y = Just 2, z = Just 3 }
-                , { x = 3, y = Just 4, z = Just 2 }
+                [ { x = 1, y = 3, z = 1 }
+                , { x = 2, y = 2, z = 3 }
+                , { x = 3, y = 4, z = 2 }
                 ]
             ]
         ]

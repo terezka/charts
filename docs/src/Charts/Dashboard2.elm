@@ -94,33 +94,33 @@ view model =
 
 type alias Datum =
   { x : Float
-  , y : Maybe Float
+  , y : Float
   }
 
 
 barData : List Datum
 barData =
-  [ Datum 1612440000000 (Just 56)
-  , Datum 1612440300000 (Just 32)
-  , Datum 1612440600000 (Just 0)
-  , Datum 1612440900000 (Just 7)
-  , Datum 1612441200000 (Just 48)
-  , Datum 1612441500000 (Just 24)
-  , Datum 1612441800000 (Just 0)
-  , Datum 1612442100000 (Just 88)
+  [ Datum 1612440000000 56
+  , Datum 1612440300000 32
+  , Datum 1612440600000 0
+  , Datum 1612440900000 7
+  , Datum 1612441200000 48
+  , Datum 1612441500000 24
+  , Datum 1612441800000 0
+  , Datum 1612442100000 88
   ]
 
 
 lineData : List Datum
 lineData =
-  [ Datum 1612440000000 (Just 90)
-  , Datum 1612440300000 (Just 80)
-  , Datum 1612440600000 (Just 97)
-  , Datum 1612440900000 (Just 65)
-  , Datum 1612441200000 (Just 72)
-  , Datum 1612441500000 (Just 56)
-  , Datum 1612441800000 (Just 82)
-  , Datum 1612442100000 (Just 94)
-  , Datum 1612442400000 (Just 76)
+  [ Datum 1612440000000 90
+  , Datum 1612440300000 80
+  , Datum 1612440600000 97
+  , Datum 1612440900000 65
+  , Datum 1612441200000 72
+  , Datum 1612441500000 56
+  , Datum 1612441800000 82
+  , Datum 1612442100000 94
+  , Datum 1612442400000 76
   ]
 

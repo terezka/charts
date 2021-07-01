@@ -272,7 +272,7 @@ viewSalaryDiscrepancyMini model =
 salarySeries : Model -> Float -> Float -> Float -> C.Element Salary.Datum Msg
 salarySeries model border highlightSize size =
   C.series .salaryBoth
-      [ C.scatter Salary.womenSalaryPerc
+      [ C.scatterMaybe Salary.womenSalaryPerc
           [ CA.opacity 0.4, CA.circle, CA.border CA.blue, CA.borderWidth border ]
             |> C.variation (\i d ->
                   let precentOfWomen = Salary.womenPerc d

@@ -139,7 +139,6 @@ viewChart model =
           |> List.filter (\d -> d.kind == kind)
           |> List.map .amount
           |> List.sum
-          |> Just
   in
   C.chart
     [ CA.height 430

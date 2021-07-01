@@ -67,7 +67,7 @@ view model =
         , CA.margin 0.2
         , CA.noGrid
         ]
-        [ C.bar .score [ CA.opacity 0.5 ]
+        [ C.barMaybe .score [ CA.opacity 0.5 ]
             |> C.variation (\i d -> [ CA.color (toColor d.score) ])
             |> C.amongst model.hovering (\_ -> [ CA.highlight 0.2, CA.highlightWidth 5 ])
         ]

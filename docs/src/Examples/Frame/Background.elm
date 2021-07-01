@@ -27,8 +27,8 @@ view model =
     , C.yAxis []
     , C.series .x
         [ C.interpolated .y [  ] [] ]
-        [ { x = 0, y = Just 0 }
-        , { x = 10, y = Just 10 }
+        [ { x = 0, y = 0 }
+        , { x = 10, y = 10 }
         ]
     , C.xLabels []
     , C.yLabels []
@@ -81,8 +81,8 @@ smallCode =
     , C.yAxis []
     , C.series .x
         [ C.interpolated .y [  ] [] ]
-        [ { x = 0, y = Just 0 }
-        , { x = 10, y = Just 10 }
+        [ { x = 0, y = 0 }
+        , { x = 10, y = 10 }
         ]
     , C.xLabels []
     , C.yLabels []
@@ -117,8 +117,8 @@ view model =
     , C.yAxis []
     , C.series .x
         [ C.interpolated .y [  ] [] ]
-        [ { x = 0, y = Just 0 }
-        , { x = 10, y = Just 10 }
+        [ { x = 0, y = 0 }
+        , { x = 10, y = 10 }
         ]
     , C.xLabels []
     , C.yLabels []

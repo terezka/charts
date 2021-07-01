@@ -1,8 +1,10 @@
 module Chart exposing
   ( chart
 
-  , Element, bars, barsMap, series, seriesMap
-  , Property, bar, scatter, interpolated, stacked, named, variation, amongst
+  , Element, bars, series, seriesMap, barsMap
+  , Property, bar, scatter, interpolated
+  , barMaybe, scatterMaybe, interpolatedMaybe
+  , stacked, named, variation, amongst
 
   , xAxis, yAxis, xTicks, yTicks, xLabels, yLabels, grid
 
@@ -955,21 +957,39 @@ type alias Property data inter deco =
 
 
 {-| -}
-interpolated : (data -> Maybe Float) -> List (CA.Attribute CS.Interpolation) -> List (CA.Attribute CS.Dot) -> Property data CS.Interpolation CS.Dot
-interpolated y_ inter =
-  P.property y_ ([ CA.linear ] ++ inter)
+interpolated : (data -> Float) -> List (CA.Attribute CS.Interpolation) -> List (CA.Attribute CS.Dot) -> Property data CS.Interpolation CS.Dot
+interpolated y inter =
+  P.property (y >> Just) ([ CA.linear ] ++ inter)
 
 
 {-| -}
-scatter : (data -> Maybe Float) -> List (CA.Attribute CS.Dot) -> Property data inter CS.Dot
-scatter y_ =
-  P.property y_ []
+interpolatedMaybe : (data -> Maybe Float) -> List (CA.Attribute CS.Interpolation) -> List (CA.Attribute CS.Dot) -> Property data CS.Interpolation CS.Dot
+interpolatedMaybe y inter =
+  P.property y ([ CA.linear ] ++ inter)
 
 
 {-| -}
-bar : (data -> Maybe Float) -> List (CA.Attribute CS.Bar) -> Property data inter CS.Bar
-bar y_ =
-  P.property y_ []
+scatter : (data -> Float) -> List (CA.Attribute CS.Dot) -> Property data inter CS.Dot
+scatter y =
+  P.property (y >> Just) []
+
+
+{-| -}
+scatterMaybe : (data -> Maybe Float) -> List (CA.Attribute CS.Dot) -> Property data inter CS.Dot
+scatterMaybe y =
+  P.property y []
+
+
+{-| -}
+bar : (data -> Float) -> List (CA.Attribute CS.Bar) -> Property data inter CS.Bar
+bar y =
+  P.property (y >> Just) []
+
+
+{-| -}
+barMaybe : (data -> Maybe Float) -> List (CA.Attribute CS.Bar) -> Property data inter CS.Bar
+barMaybe y =
+  P.property y []
 
 
 {-| -}

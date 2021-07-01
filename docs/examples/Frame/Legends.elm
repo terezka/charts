@@ -83,25 +83,22 @@ update msg model =
 
 type alias Datum =
   { x : Float
-  , y : Maybe Float
-  , z : Maybe Float
-  , v : Maybe Float
-  , w : Maybe Float
-  , p : Maybe Float
-  , q : Maybe Float
+  , y : Float
+  , z : Float
+  , v : Float
+  , w : Float
+  , p : Float
+  , q : Float
   }
 
 
 data : List Datum
 data =
-  let toDatum x y z v w p q =
-        Datum x (Just y) (Just z) (Just v) (Just w) (Just p) (Just q)
-  in
-  [ toDatum 1  2 1 4.6 6.9 7.3 8.0
-  , toDatum 2  3 2 5.2 6.2 7.0 8.7
-  , toDatum 3  3 4 5.3 5.7 6.2 7.8
-  , toDatum 4  4 1 4.8 5.4 7.2 8.3
-  , toDatum 5  6 3 5.4 3.9 7.6 8.5
-  , toDatum 6 4 3 4.5 5.3 6.3 7.0
+  [ Datum 1  2 1 4.6 6.9 7.3 8.0
+  , Datum 2  3 2 5.2 6.2 7.0 8.7
+  , Datum 3  3 4 5.3 5.7 6.2 7.8
+  , Datum 4  4 1 4.8 5.4 7.2 8.3
+  , Datum 5  6 3 5.4 3.9 7.6 8.5
+  , Datum 6 4 3 4.5 5.3 6.3 7.0
   ]
 

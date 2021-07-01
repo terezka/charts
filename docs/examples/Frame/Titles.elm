@@ -42,30 +42,30 @@ view model =
 
 type alias Datum =
   { age : Float
-  , toys : Maybe Float
+  , toys : Float
   }
 
 data : List Datum
 data =
-  [ Datum 0.5 (Just 4)
-  , Datum 0.8 (Just 5)
-  , Datum 1.2 (Just 6)
-  , Datum 1.4 (Just 6)
-  , Datum 1.6 (Just 4)
-  , Datum 3 (Just 8)
-  , Datum 3 (Just 9)
-  , Datum 3.2 (Just 10)
-  , Datum 3.8 (Just 7)
-  , Datum 6 (Just 12)
-  , Datum 6.2 (Just 8)
-  , Datum 6 (Just 10)
-  , Datum 6 (Just 9)
-  , Datum 9.1 (Just 8)
-  , Datum 9.2 (Just 13)
-  , Datum 9.8 (Just 10)
-  , Datum 12 (Just 7)
-  , Datum 12.5 (Just 5)
-  , Datum 12.5 (Just 2)
+  [ Datum 0.5 4
+  , Datum 0.8 5
+  , Datum 1.2 6
+  , Datum 1.4 6
+  , Datum 1.6 4
+  , Datum 3 8
+  , Datum 3 9
+  , Datum 3.2 10
+  , Datum 3.8 7
+  , Datum 6 12
+  , Datum 6.2 8
+  , Datum 6 10
+  , Datum 6 9
+  , Datum 9.1 8
+  , Datum 9.2 13
+  , Datum 9.8 10
+  , Datum 12 7
+  , Datum 12.5 5
+  , Datum 12.5 2
   ]
 
 

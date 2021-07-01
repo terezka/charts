@@ -104,47 +104,47 @@ justDot datum =
 
 type alias BarDatum =
   { x : Float
-  , y : Maybe Float
-  , z : Maybe Float
+  , y : Float
+  , z : Float
   }
 
 
 barData : List BarDatum
 barData =
-  [ BarDatum 1612440000000 (Just 1000) (Just 200)
-  , BarDatum 1612440300000 (Just 1250) (Just 120)
-  , BarDatum 1612440600000 (Just 1500) (Just 230)
-  , BarDatum 1612440900000 (Just 850) (Just 80)
-  , BarDatum 1612441200000 (Just 540) (Just 120)
-  , BarDatum 1612441500000 (Just 300) (Just 0)
-  , BarDatum 1612441800000 (Just 760) (Just 230)
-  , BarDatum 1612442100000 (Just 870) (Just 180)
-  , BarDatum 1612442400000 (Just 900) (Just 60)
-  , BarDatum 1612442700000 (Just 1020) (Just 300)
-  , BarDatum 1612443000000 (Just 1220) (Just 340)
+  [ BarDatum 1612440000000 1000 200
+  , BarDatum 1612440300000 1250 120
+  , BarDatum 1612440600000 1500 230
+  , BarDatum 1612440900000 850 80
+  , BarDatum 1612441200000 540 120
+  , BarDatum 1612441500000 300 0
+  , BarDatum 1612441800000 760 230
+  , BarDatum 1612442100000 870 180
+  , BarDatum 1612442400000 900 60
+  , BarDatum 1612442700000 1020 300
+  , BarDatum 1612443000000 1220 340
   ]
 
 
 type alias DotDatum =
   { x : Float
-  , y : Maybe Float
+  , y : Float
   }
 
 
 lineData : List DotDatum
 lineData =
-  [ DotDatum 1612440000000 (Just 1400)
-  , DotDatum 1612440300000 (Just 1350)
-  , DotDatum 1612440600000 (Just 1600)
-  , DotDatum 1612440900000 (Just 950)
-  , DotDatum 1612441200000 (Just 740)
-  , DotDatum 1612441500000 (Just 320)
-  , DotDatum 1612441800000 (Just 860)
-  , DotDatum 1612442100000 (Just 830)
-  , DotDatum 1612442400000 (Just 600)
-  , DotDatum 1612442700000 (Just 920)
-  , DotDatum 1612443000000 (Just 720)
-  , DotDatum 1612443300000 (Just 520)
-  , DotDatum 1612443600000 (Just 620)
+  [ DotDatum 1612440000000 1400
+  , DotDatum 1612440300000 1350
+  , DotDatum 1612440600000 1600
+  , DotDatum 1612440900000 950
+  , DotDatum 1612441200000 740
+  , DotDatum 1612441500000 320
+  , DotDatum 1612441800000 860
+  , DotDatum 1612442100000 830
+  , DotDatum 1612442400000 600
+  , DotDatum 1612442700000 920
+  , DotDatum 1612443000000 720
+  , DotDatum 1612443300000 520
+  , DotDatum 1612443600000 620
   ]
 

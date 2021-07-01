@@ -73,21 +73,21 @@ view model =
     , C.yAxis []
 
     , C.series .sepalLength
-        [ C.scatter (.sepalWidth >> Just) [ CA.circle, CA.size 12, CA.opacity 0.6, CA.color CA.pink ]
+        [ C.scatter .sepalWidth [ CA.circle, CA.size 12, CA.opacity 0.6, CA.color CA.pink ]
             |> C.variation (\i d -> [ CA.size (d.petalLength * 1.5) ])
             |> C.named "Setosa"
         ]
         Iris.setosa
 
     , C.series .sepalLength
-        [ C.scatter (.sepalWidth >> Just) [ CA.circle, CA.size 12, CA.opacity 0.6, CA.color CA.purple ]
+        [ C.scatter .sepalWidth [ CA.circle, CA.size 12, CA.opacity 0.6, CA.color CA.purple ]
             |> C.variation (\i d -> [ CA.size (d.petalLength * 1.5) ])
             |> C.named "Versicolor"
         ]
         Iris.versicolor
 
     , C.series .sepalLength
-        [ C.scatter (.sepalWidth >> Just) [ CA.circle, CA.size 12, CA.opacity 0.6, CA.color CA.blue ]
+        [ C.scatter .sepalWidth [ CA.circle, CA.size 12, CA.opacity 0.6, CA.color CA.blue ]
             |> C.variation (\i d -> [ CA.size (d.petalLength * 1.5) ])
             |> C.named "Virginica"
         ]

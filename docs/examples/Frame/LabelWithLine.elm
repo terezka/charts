@@ -42,12 +42,12 @@ view model =
 
 type alias Datum =
   { age : Float
-  , toys : Maybe Float
+  , toys : Float
   }
 
 data : List Datum
 data =
-  [ Datum 5 (Just 6)
+  [ Datum 5 6
   ]
 
 

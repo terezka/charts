@@ -66,7 +66,7 @@ view model =
         [ C.line [ CA.x1 (CE.getIndependent dot), CA.width 2, CA.dashed [ 5, 5 ] ] ]
 
     , C.series .x
-        [ C.interpolated .y
+        [ C.interpolatedMaybe .y
             [ CA.linear, CA.color CA.blue, CA.width 1.5, CA.opacity 0.4, CA.gradient [ CA.colors [ CA.blue, "white" ] ] ]
             [ CA.diamond, CA.color "white", CA.borderWidth 1.5, CA.size 8 ]
             |> C.amongst model.hovering (\_ -> [ CA.size 14 ])

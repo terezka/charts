@@ -28,8 +28,8 @@ view model =
     [ C.grid []
     , C.series .x
         [ C.interpolated .y [  ] [] ]
-        [ { x = 10, y = Just 20 }
-        , { x = 85, y = Just 80 }
+        [ { x = 10, y = 20 }
+        , { x = 85, y = 80 }
         ]
     , C.xAxis [ CA.noArrow, CA.limits [ CA.likeData ] ]
     , C.xLabels []
@@ -85,8 +85,8 @@ smallCode =
     [ C.grid []
     , C.series .x
         [ C.interpolated .y [  ] [] ]
-        [ { x = 10, y = Just 20 }
-        , { x = 85, y = Just 80 }
+        [ { x = 10, y = 20 }
+        , { x = 85, y = 80 }
         ]
     , C.xAxis [ CA.noArrow, CA.limits [ CA.likeData ] ]
     , C.xLabels []
@@ -122,8 +122,8 @@ view model =
     [ C.grid []
     , C.series .x
         [ C.interpolated .y [  ] [] ]
-        [ { x = 10, y = Just 20 }
-        , { x = 85, y = Just 80 }
+        [ { x = 10, y = 20 }
+        , { x = 85, y = 80 }
         ]
     , C.xAxis [ CA.noArrow, CA.limits [ CA.likeData ] ]
     , C.xLabels []

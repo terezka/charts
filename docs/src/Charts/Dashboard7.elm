@@ -79,23 +79,23 @@ view model =
             List.member datum (List.map CE.getDatum model.hovering)
       in
       C.series .year
-        [ C.interpolated (.manhattan >> Just) [ CA.linear, CA.width 2, CA.color orange ] []
+        [ C.interpolated .manhattan [ CA.linear, CA.width 2, CA.color orange ] []
             |> C.variation (\_ d -> if isMemberOfBin d then [ CA.circle, CA.size 8 ] else [])
             |> C.amongst model.hovering (\_ -> [ CA.color "white", CA.borderWidth 2, CA.size 18, CA.highlight 0.5, CA.highlightColor orange ])
             |> C.named "Manhattan"
-        , C.interpolated (.bronx >> Just) [ CA.linear, CA.width 2, CA.color green ] []
+        , C.interpolated .bronx [ CA.linear, CA.width 2, CA.color green ] []
             |> C.variation (\_ d -> if isMemberOfBin d then [ CA.circle, CA.size 8 ] else [])
             |> C.amongst model.hovering (\_ -> [ CA.color "white", CA.borderWidth 2, CA.size 18, CA.highlight 0.5, CA.highlightColor green ])
             |> C.named "Bronx"
-        , C.interpolated (.brooklyn >> Just) [ CA.linear, CA.width 2, CA.color blue ] []
+        , C.interpolated .brooklyn [ CA.linear, CA.width 2, CA.color blue ] []
             |> C.variation (\_ d -> if isMemberOfBin d then [ CA.circle, CA.size 8 ] else [])
             |> C.amongst model.hovering (\_ -> [ CA.color "white", CA.borderWidth 2, CA.size 18, CA.highlight 0.5, CA.highlightColor blue ])
             |> C.named "Brooklyn"
-        , C.interpolated (.queens >> Just) [ CA.linear, CA.width 2, CA.color pink ] []
+        , C.interpolated .queens [ CA.linear, CA.width 2, CA.color pink ] []
             |> C.variation (\_ d -> if isMemberOfBin d then [ CA.circle, CA.size 8 ] else [])
             |> C.amongst model.hovering (\_ -> [ CA.color "white", CA.borderWidth 2, CA.size 18, CA.highlight 0.5, CA.highlightColor pink ])
             |> C.named "Queens"
-        , C.interpolated (.statenIsland >> Just) [ CA.linear, CA.width 2, CA.color purple ] []
+        , C.interpolated .statenIsland [ CA.linear, CA.width 2, CA.color purple ] []
             |> C.variation (\_ d -> if isMemberOfBin d then [ CA.circle, CA.size 8 ] else [])
             |> C.amongst model.hovering (\_ -> [ CA.color "white", CA.borderWidth 2, CA.size 18, CA.highlight 0.5, CA.highlightColor purple ])
             |> C.named "Staten Island"

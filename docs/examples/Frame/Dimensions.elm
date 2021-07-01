@@ -27,8 +27,8 @@ view model =
     [ C.grid []
     , C.series .x
         [ C.interpolated .y [  ] [] ]
-        [ { x = 10, y = Just 20 }
-        , { x = 80, y = Just 80 }
+        [ { x = 10, y = 20 }
+        , { x = 80, y = 80 }
         ]
     , C.xLabels [ CA.amount 10 ]
     , C.yLabels [ CA.amount 10 ]

@@ -60,18 +60,15 @@ update msg model =
 type alias Datum =
   { start : Float
   , end : Float
-  , y : Maybe Float
+  , y : Float
   }
 
 
 data : List Datum
 data =
-  let toDatum start end y =
-        Datum start end (Just y)
-  in
-  [ toDatum 1609459200000 1612137600000 2
-  , toDatum 1612137600000 1614556800000 3
-  , toDatum 1614556800000 1617235200000 4
-  , toDatum 1617235200000 1619827200000 6
+  [ Datum 1609459200000 1612137600000 2
+  , Datum 1612137600000 1614556800000 3
+  , Datum 1614556800000 1617235200000 4
+  , Datum 1617235200000 1619827200000 6
   ]
 
