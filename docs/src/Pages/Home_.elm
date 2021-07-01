@@ -114,18 +114,18 @@ view model =
               ]
               [ E.row
                   [ E.width E.fill
-                  , E.spacing 15
+                  , E.spacing 20
                   ]
                   [ section 1 (H.map Dashboard1Msg (Dashboard1.view model.dashboard1))
                   , E.column
                       [ E.alignTop
                       , E.width E.fill
-                      , E.spacing 15
+                      , E.spacing 20
                       ]
                       [ E.row
                           [ E.alignTop
                           , E.width E.fill
-                          , E.spacing 15
+                          , E.spacing 20
                           ]
                           [ section 1 (H.map Dashboard2Msg (Dashboard2.view model.dashboard2))
                           , section 1 (H.map Dashboard3Msg (Dashboard3.view model.dashboard3))
@@ -135,11 +135,11 @@ view model =
                   ]
               , E.row
                   [ E.width E.fill
-                  , E.spacing 40
+                  , E.spacing 20
                   ]
                   [ E.row
                       [ E.width E.fill
-                      , E.spacing 15
+                      , E.spacing 20
                       ]
                       [ section 3 (H.map Dashboard6Msg (Dashboard6.view model.dashboard6))
                       ]
@@ -174,7 +174,6 @@ section portion chart =
   E.column
     [ E.alignTop
     , E.width (E.fillPortion portion)
-    , E.padding 5
     ]
     [ E.html chart
     ]

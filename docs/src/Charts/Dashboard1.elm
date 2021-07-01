@@ -52,10 +52,11 @@ view : Model -> H.Html Msg
 view model =
   C.chart
     [ CA.height 300
-    , CA.width 500
+    , CA.width 490
+    , CA.static
     , CA.marginRight 10
     , CA.marginLeft 10
-    , CA.marginBottom 30
+    , CA.marginBottom 18
     , CA.paddingRight 35
     , CE.onMouseMove OnHover (CE.getNearest CE.dot)
     , CE.onMouseLeave (OnHover [])

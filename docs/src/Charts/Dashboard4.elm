@@ -51,8 +51,8 @@ update msg model =
 view : Model -> H.Html Msg
 view model =
   C.chart
-    [ CA.height 125
-    , CA.width 500
+    [ CA.height 140
+    , CA.width 490
     , CA.marginRight 15
     , CA.paddingRight 0
     , CE.onMouseMove OnHover (CE.getNearestX CE.bar)
@@ -73,7 +73,7 @@ view model =
         ]
         data
 
-    , C.labelAt .max CA.middle [ CA.rotate 90, CA.moveRight 18 ] [ S.text "scores" ]
+    , C.labelAt .max CA.middle [ CA.rotate 90, CA.moveRight 18 ] [ S.text "score" ]
     , C.each model.hovering <| \p bar ->
         let datum = CE.getDatum bar
             scoreText =

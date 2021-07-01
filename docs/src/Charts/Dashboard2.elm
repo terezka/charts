@@ -51,8 +51,12 @@ update msg model =
 view : Model -> H.Html Msg
 view model =
   C.chart
-    [ CA.height 160
-    , CA.width 250
+    [ CA.height 135
+    , CA.width 225
+    , CA.static
+    , CA.paddingRight 0
+    , CA.paddingBottom 0
+    , CA.paddingTop 0
     , CE.onMouseMove OnHover (CE.getNearest <| CE.keep CE.realValues CE.dot)
     , CE.onMouseLeave (OnHover [])
     ]

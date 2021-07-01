@@ -638,7 +638,7 @@ label : Plane -> Label -> List (Svg msg) -> Point -> Svg msg
 label plane config inner point =
   let fontStyle =
         case config.fontSize of
-          Just size_ -> "font-size: " ++ String.fromInt size_ ++ ";"
+          Just size_ -> "font-size: " ++ String.fromInt size_ ++ "px;"
           Nothing -> ""
 
       anchorStyle =
