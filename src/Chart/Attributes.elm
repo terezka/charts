@@ -28,6 +28,7 @@ module Chart.Attributes exposing
 
   -- BAR
   , ungroup, roundTop, roundBottom, margin, spacing
+  --, barLabel, binLabel
 
   -- LINES
   , area, size, dashed, break

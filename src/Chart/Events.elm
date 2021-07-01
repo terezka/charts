@@ -3,7 +3,7 @@ module Chart.Events exposing
   , onMouseMove, onMouseLeave, onMouseUp, onMouseDown, onClick, on
   , Decoder(..), Point, getCoords, getNearest, getNearestX, getWithin, getWithinX
   , map, map2, map3, map4
-  , product, dot, bin, stack, sameX, bar, realValues, named
+  , Grouping, product, dot, bin, stack, sameX, bar, realValues, named
   , keep, collect
   , group, regroup
 
@@ -14,7 +14,7 @@ module Chart.Events exposing
   , getBottom, getBottomLeft, getBottomRight
   , getLeft, getRight
   , getCenter, getPosition, getLimits
-  , getDefaultTooltip
+  , getDefaultTooltip, getSize
 
   , getProducts, getCommonality, filterDatum
   )
@@ -183,6 +183,12 @@ getName =
 getColor : Product config value data -> String
 getColor =
   I.getColor
+
+
+{-| -}
+getSize : Product Dot value data -> Float
+getSize =
+  I.getSize
 
 
 

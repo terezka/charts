@@ -717,32 +717,6 @@ arrow plane config point =
 
 
 {-| -}
-type alias Bars data =
-  { spacing : Float
-  , margin : Float
-  , roundTop : Float
-  , roundBottom : Float
-  , grouped : Bool
-  , grid : Bool
-  , x1 : Maybe (data -> Float)
-  , x2 : Maybe (data -> Float)
-  }
-
-
-defaultBars : Bars data
-defaultBars =
-  { spacing = 0.05
-  , margin = 0.1
-  , roundTop = 0
-  , roundBottom = 0
-  , grouped = True
-  , grid = True
-  , x1 = Nothing
-  , x2 = Nothing
-  }
-
-
-{-| -}
 type alias Bar =
   { roundTop : Float
   , roundBottom : Float

@@ -7,6 +7,7 @@ module Chart exposing
   , stacked, named, variation, amongst
 
   , xAxis, yAxis, xTicks, yTicks, xLabels, yLabels, grid
+  , binLabels, barLabels, dotLabels
 
   , xLabel, yLabel, xTick, yTick
   , label, labelAt, tooltip, line, rect
@@ -14,12 +15,13 @@ module Chart exposing
 
   , svgAt, htmlAt, svg, html, none
 
-  , each, eachBin, eachStack, eachBar, eachDot, eachProduct
+  , each, eachBin, eachStack, eachBar, eachDot, eachProduct, eachCustom
   , withPlane, withBins, withStacks, withBars, withDots, withProducts
 
   , generate, floats, ints, times
 
   , binned
+
   )
 
 
@@ -224,7 +226,7 @@ definePlane config elements =
           LabelElement _ _ _ -> acc
           GridElement _ -> acc
           SubElements _ -> acc
-          ListOfElements _ -> acc
+          ListOfElements subs -> List.foldl collectLimits acc subs
           SvgElement _ -> acc
           HtmlElement _ -> acc
 
@@ -307,7 +309,7 @@ getItems plane elements =
           LabelElement _ _ _ -> acc
           GridElement _ -> acc
           SubElements _ -> acc -- TODO add phantom type to only allow decorative els in this
-          ListOfElements _ -> acc
+          ListOfElements subs -> List.foldl toItems acc subs
           SvgElement _ -> acc
           HtmlElement _ -> acc
   in
@@ -328,7 +330,7 @@ getLegends elements =
           LabelElement _ _ _ -> acc
           GridElement _ -> acc
           SubElements _ -> acc
-          ListOfElements _ -> acc
+          ListOfElements subs -> List.foldl toLegends acc subs
           SvgElement _ -> acc
           HtmlElement _ -> acc
   in
@@ -359,7 +361,7 @@ getTickValues plane items elements =
           LabelElement toC func _   -> func plane (toC plane) acc
           SubElements func          -> List.foldl toValues acc (func plane items)
           GridElement _             -> acc
-          ListOfElements _          -> acc
+          ListOfElements subs       -> List.foldl toValues acc subs
           SvgElement _              -> acc
           HtmlElement _             -> acc
   in
@@ -1042,6 +1044,27 @@ type alias Bars data =
 
 
 {-| -}
+binLabels : (data -> String) -> (CS.Plane -> CE.Group (CE.Bin data) CE.Bar (Maybe Float) data -> CS.Point) -> List (CA.Attribute CS.Label) -> Element data msg
+binLabels toLabel toPosition labelAttrs =
+  eachCustom (CE.collect CE.bin CE.bar) <| \p item ->
+    [ label labelAttrs [ S.text (toLabel (CE.getCommonality item).datum) ] (toPosition p item) ]
+
+
+{-| -}
+barLabels : (CS.Plane -> CE.Product CE.Bar Float data -> CS.Point) -> List (CA.Attribute CS.Label) -> Element data msg
+barLabels toPosition labelAttrs =
+  eachBar <| \p item ->
+    [ label labelAttrs [ S.text (String.fromFloat (CE.getDependent item)) ] (toPosition p item) ]
+
+
+{-| -}
+dotLabels : (CS.Plane -> CE.Product CE.Dot Float data -> CS.Point) -> List (CA.Attribute CS.Label) -> Element data msg
+dotLabels toPosition labelAttrs =
+  eachDot <| \p item ->
+    [ label labelAttrs [ S.text (String.fromFloat (CE.getDependent item)) ] (toPosition p item) ]
+
+
+{-| -}
 bars : List (CA.Attribute (Bars data)) -> List (Property data () CS.Bar) -> List data -> Element data msg
 bars edits properties data =
   barsMap identity edits properties data
@@ -1052,7 +1075,7 @@ barsMap : (data -> a) -> List (CA.Attribute (Bars data)) -> List (Property data 
 barsMap mapData edits properties data =
   Indexed <| \index ->
     let barsConfig =
-          Helpers.apply edits IS.defaultBars
+          Helpers.apply edits Produce.defaultBars
 
         items =
           Produce.toBarSeries index edits properties data
@@ -1079,8 +1102,8 @@ barsMap mapData edits properties data =
           List.map Item.getLimits bins
     in
     ( BarsElement toLimits generalized legends_ toTicks <| \plane ->
-      S.g [ SA.class "elm-charts__bar-series" ] (List.map (Item.toSvg plane) items)
-        |> S.map never
+        S.g [ SA.class "elm-charts__bar-series" ] (List.map (Item.toSvg plane) items)
+          |> S.map never
     , index + List.length (List.concatMap P.toConfigs properties)
     )
 
@@ -1166,33 +1189,41 @@ each items func =
 
 
 {-| -}
-eachBin : (C.Plane -> CE.Group (CE.Bin data) CE.Any (Maybe Float) data -> List (Element data msg)) -> Element data msg
+eachBin : (C.Plane -> CE.Group (CE.Bin data) CE.Any Float data -> List (Element data msg)) -> Element data msg
 eachBin func =
-  SubElements <| \p is -> List.concatMap (func p) (CE.group CE.bin is)
+  SubElements <| \p is -> List.concatMap (func p) (CE.group (CE.collect CE.bin <| CE.keep CE.realValues CE.product) is)
 
 
 {-| -}
-eachStack : (C.Plane -> CE.Group (CE.Stack data) CE.Any (Maybe Float) data -> List (Element data msg)) -> Element data msg
+eachStack : (C.Plane -> CE.Group (CE.Stack data) CE.Any Float data -> List (Element data msg)) -> Element data msg
 eachStack func =
-  SubElements <| \p is -> List.concatMap (func p) (CE.group CE.stack is)
+  SubElements <| \p is -> List.concatMap (func p) (CE.group (CE.collect CE.stack <| CE.keep CE.realValues CE.product) is)
 
 
 {-| -}
-eachBar : (C.Plane -> Item.Product CE.Bar (Maybe Float) data -> List (Element data msg)) -> Element data msg
+eachBar : (C.Plane -> CE.Product CE.Bar Float data -> List (Element data msg)) -> Element data msg
 eachBar func =
-  SubElements <| \p is -> List.concatMap (func p) (CE.group CE.bar is)
+  SubElements <| \p is -> List.concatMap (func p) (CE.group (CE.keep CE.realValues CE.bar) is)
 
 
 {-| -}
-eachDot : (C.Plane -> Item.Product CE.Dot (Maybe Float) data -> List (Element data msg)) -> Element data msg
+eachDot : (C.Plane -> CE.Product CE.Dot Float data -> List (Element data msg)) -> Element data msg
 eachDot func =
-  SubElements <| \p is -> List.concatMap (func p) (CE.group CE.dot is)
+  SubElements <| \p is -> List.concatMap (func p) (CE.group (CE.keep CE.realValues CE.dot) is)
 
 
 {-| -}
-eachProduct : (C.Plane -> Item.Product CE.Any (Maybe Float) data -> List (Element data msg)) -> Element data msg
+eachProduct : (C.Plane -> CE.Product CE.Any Float data -> List (Element data msg)) -> Element data msg
 eachProduct func =
-  SubElements <| \p is -> List.concatMap (func p) is
+  SubElements <| \p is -> List.concatMap (func p) (CE.group (CE.keep CE.realValues CE.product) is)
+
+
+{-| -}
+eachCustom : CE.Grouping (CE.Product CE.Any (Maybe Float) data) a -> (C.Plane -> a -> List (Element data msg)) -> Element data msg
+eachCustom grouping func =
+  SubElements <| \p items ->
+    let processed = CE.group grouping items in
+    List.concatMap (func p) processed
 
 
 {-| -}

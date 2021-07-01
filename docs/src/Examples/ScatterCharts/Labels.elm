@@ -25,18 +25,12 @@ view model =
             |> C.variation (\i d -> [ CA.size (d.w * 30) ])
         ]
         data
-    , C.eachDot <| \p point ->
-        let center = CE.getCenter p point
-            color = CE.getColor point
-            datum = CE.getDatum point
-            label = String.fromFloat datum.w
-        in
+
+    , C.eachDot <| \p dot ->
         [ C.label
-            [ CA.yOff 4
-            , CA.color color
-            ]
-            [ S.text label ]
-            center
+            [ CA.moveDown 4, CA.color (CE.getColor dot) ]
+            [ S.text (String.fromFloat (CE.getDatum dot).w) ]
+            (CE.getCenter p dot)
         ]
     ]
 
@@ -111,18 +105,12 @@ smallCode =
             |> C.variation (\\i d -> [ CA.size (d.w * 30) ])
         ]
         data
-    , C.eachDot <| \\p point ->
-        let center = CE.getCenter p point
-            color = CE.getColor point
-            datum = CE.getDatum point
-            label = String.fromFloat datum.w
-        in
+
+    , C.eachDot <| \\p dot ->
         [ C.label
-            [ CA.yOff 4
-            , CA.color color
-            ]
-            [ S.text label ]
-            center
+            [ CA.moveDown 4, CA.color (CE.getColor dot) ]
+            [ S.text (String.fromFloat (CE.getDatum dot).w) ]
+            (CE.getCenter p dot)
         ]
     ]
   """
@@ -153,18 +141,12 @@ view model =
             |> C.variation (\\i d -> [ CA.size (d.w * 30) ])
         ]
         data
-    , C.eachDot <| \\p point ->
-        let center = CE.getCenter p point
-            color = CE.getColor point
-            datum = CE.getDatum point
-            label = String.fromFloat datum.w
-        in
+
+    , C.eachDot <| \\p dot ->
         [ C.label
-            [ CA.yOff 4
-            , CA.color color
-            ]
-            [ S.text label ]
-            center
+            [ CA.moveDown 4, CA.color (CE.getColor dot) ]
+            [ S.text (String.fromFloat (CE.getDatum dot).w) ]
+            (CE.getCenter p dot)
         ]
     ]
   """

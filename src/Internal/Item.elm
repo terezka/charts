@@ -7,7 +7,6 @@ import Svg.Attributes as SA
 import Internal.Coordinates as Coord exposing (Point, Position, Plane)
 import Dict exposing (Dict)
 import Internal.Property as P exposing (Property)
-import Chart.Attributes as CA
 import Internal.Svg as S
 import Internal.Helpers as Helpers
 
@@ -142,6 +141,12 @@ getStackIndex (Item item) =
 getDataIndex : Product config value data -> Int
 getDataIndex (Item item) =
   item.config.tooltipInfo.data
+
+
+{-| -}
+getSize : Product S.Dot value data -> Float
+getSize (Item item) =
+  item.config.product.size
 
 
 {-| -}

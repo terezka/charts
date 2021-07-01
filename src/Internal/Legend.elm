@@ -10,6 +10,7 @@ import Internal.Property as P exposing (Property)
 import Internal.Svg as S
 import Chart.Attributes as CA
 import Internal.Helpers as Helpers
+import Internal.Produce as Produce
 
 
 
@@ -18,10 +19,10 @@ type Legend
   | LineLegend String (List (CA.Attribute S.Interpolation)) (List (CA.Attribute S.Dot))
 
 
-toBarLegends : Int -> List (CA.Attribute (S.Bars data)) -> List (Property data String () S.Bar) -> List Legend
+toBarLegends : Int -> List (CA.Attribute (Produce.Bars data)) -> List (Property data String () S.Bar) -> List Legend
 toBarLegends elIndex barsAttrs properties =
   let barsConfig =
-        Helpers.apply barsAttrs S.defaultBars
+        Helpers.apply barsAttrs Produce.defaultBars
 
       toBarConfig attrs =
         Helpers.apply attrs S.defaultBar

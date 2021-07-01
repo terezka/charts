@@ -81,7 +81,7 @@ view model =
 
     , C.eachBar <| \p bar ->
         let bottom = CE.getBottom p bar
-            value = Maybe.withDefault 0 (CE.getDependent bar)
+            value = CE.getDependent bar
             color = if value < 10 then "#6f6f6f" else "white"
         in
         if value == 0 then [] else

@@ -8,17 +8,43 @@ import Internal.Coordinates as Coord exposing (Point, Position, Plane)
 import Dict exposing (Dict)
 import Internal.Property as P exposing (Property)
 import Chart.Attributes as CA
+import Chart.Events as CE
 import Internal.Svg as S
 import Internal.Helpers as Helpers
 import Internal.Group as G
 import Internal.Item as I
 
 
+{-| -}
+type alias Bars data =
+  { spacing : Float
+  , margin : Float
+  , roundTop : Float
+  , roundBottom : Float
+  , grouped : Bool
+  , grid : Bool
+  , x1 : Maybe (data -> Float)
+  , x2 : Maybe (data -> Float)
+  }
 
-toBarSeries : Int -> List (CA.Attribute (S.Bars data)) -> List (P.Property data String () S.Bar) -> List data -> List (G.Group () S.Bar (Maybe Float) data)
+
+defaultBars : Bars data
+defaultBars =
+  { spacing = 0.05
+  , margin = 0.1
+  , roundTop = 0
+  , roundBottom = 0
+  , grouped = True
+  , grid = True
+  , x1 = Nothing
+  , x2 = Nothing
+  }
+
+
+toBarSeries : Int -> List (CA.Attribute (Bars data)) -> List (P.Property data String () S.Bar) -> List data -> List (G.Group () S.Bar (Maybe Float) data)
 toBarSeries elIndex barsAttrs properties data =
   let barsConfig =
-        Helpers.apply barsAttrs S.defaultBars
+        Helpers.apply barsAttrs defaultBars
 
       toBarConfig attrs =
         Helpers.apply attrs S.defaultBar

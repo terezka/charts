@@ -24,20 +24,8 @@ view model =
         [ C.interpolated .y [ CA.monotone ] [ CA.circle, CA.size 40 ]
         ]
         data
-    , C.eachProduct <| \p point ->
-        let center = CE.getCenter p point
-            label =
-              CE.getDependent point
-                |> Maybe.map String.fromFloat
-                |> Maybe.withDefault "N/A"
-        in
-        [ C.label
-            [ CA.yOff 4
-            , CA.color "white"
-            ]
-            [ S.text label ]
-            center
-        ]
+
+    , C.dotLabels CE.getCenter [ CA.moveDown 4, CA.color "white" ]
     ]
 
 
@@ -111,20 +99,8 @@ smallCode =
         [ C.interpolated .y [ CA.monotone ] [ CA.circle, CA.size 40 ]
         ]
         data
-    , C.eachProduct <| \\p point ->
-        let center = CE.getCenter p point
-            label =
-              CE.getDependent point
-                |> Maybe.map String.fromFloat
-                |> Maybe.withDefault "N/A"
-        in
-        [ C.label
-            [ CA.yOff 4
-            , CA.color "white"
-            ]
-            [ S.text label ]
-            center
-        ]
+
+    , C.dotLabels CE.getCenter [ CA.moveDown 4, CA.color "white" ]
     ]
   """
 
@@ -153,19 +129,7 @@ view model =
         [ C.interpolated .y [ CA.monotone ] [ CA.circle, CA.size 40 ]
         ]
         data
-    , C.eachProduct <| \\p point ->
-        let center = CE.getCenter p point
-            label =
-              CE.getDependent point
-                |> Maybe.map String.fromFloat
-                |> Maybe.withDefault "N/A"
-        in
-        [ C.label
-            [ CA.yOff 4
-            , CA.color "white"
-            ]
-            [ S.text label ]
-            center
-        ]
+
+    , C.dotLabels CE.getCenter [ CA.moveDown 4, CA.color "white" ]
     ]
   """

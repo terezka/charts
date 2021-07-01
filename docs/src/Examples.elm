@@ -82,6 +82,8 @@ import Examples.LineCharts.Stacked
 import Examples.LineCharts.Labels
 import Examples.LineCharts.Legends
 import Examples.LineCharts.Basic
+import Examples.Frontpage.Concise
+import Examples.Frontpage.Familiar
 import Examples.ScatterCharts.Colors
 import Examples.ScatterCharts.Shapes
 import Examples.ScatterCharts.Tooltip
@@ -174,6 +176,8 @@ type Id
   | LineCharts__Labels
   | LineCharts__Legends
   | LineCharts__Basic
+  | Frontpage__Concise
+  | Frontpage__Familiar
   | ScatterCharts__Colors
   | ScatterCharts__Shapes
   | ScatterCharts__Tooltip
@@ -266,17 +270,19 @@ type alias Model =
   , example75 : Examples.LineCharts.Labels.Model
   , example76 : Examples.LineCharts.Legends.Model
   , example77 : Examples.LineCharts.Basic.Model
-  , example78 : Examples.ScatterCharts.Colors.Model
-  , example79 : Examples.ScatterCharts.Shapes.Model
-  , example80 : Examples.ScatterCharts.Tooltip.Model
-  , example81 : Examples.ScatterCharts.Highlight.Model
-  , example82 : Examples.ScatterCharts.DataDependent.Model
-  , example83 : Examples.ScatterCharts.Borders.Model
-  , example84 : Examples.ScatterCharts.Labels.Model
-  , example85 : Examples.ScatterCharts.Opacity.Model
-  , example86 : Examples.ScatterCharts.Sizes.Model
-  , example87 : Examples.ScatterCharts.Legends.Model
-  , example88 : Examples.ScatterCharts.Basic.Model
+  , example78 : Examples.Frontpage.Concise.Model
+  , example79 : Examples.Frontpage.Familiar.Model
+  , example80 : Examples.ScatterCharts.Colors.Model
+  , example81 : Examples.ScatterCharts.Shapes.Model
+  , example82 : Examples.ScatterCharts.Tooltip.Model
+  , example83 : Examples.ScatterCharts.Highlight.Model
+  , example84 : Examples.ScatterCharts.DataDependent.Model
+  , example85 : Examples.ScatterCharts.Borders.Model
+  , example86 : Examples.ScatterCharts.Labels.Model
+  , example87 : Examples.ScatterCharts.Opacity.Model
+  , example88 : Examples.ScatterCharts.Sizes.Model
+  , example89 : Examples.ScatterCharts.Legends.Model
+  , example90 : Examples.ScatterCharts.Basic.Model
   }
 
 
@@ -360,17 +366,19 @@ init =
   , example75 = Examples.LineCharts.Labels.init
   , example76 = Examples.LineCharts.Legends.init
   , example77 = Examples.LineCharts.Basic.init
-  , example78 = Examples.ScatterCharts.Colors.init
-  , example79 = Examples.ScatterCharts.Shapes.init
-  , example80 = Examples.ScatterCharts.Tooltip.init
-  , example81 = Examples.ScatterCharts.Highlight.init
-  , example82 = Examples.ScatterCharts.DataDependent.init
-  , example83 = Examples.ScatterCharts.Borders.init
-  , example84 = Examples.ScatterCharts.Labels.init
-  , example85 = Examples.ScatterCharts.Opacity.init
-  , example86 = Examples.ScatterCharts.Sizes.init
-  , example87 = Examples.ScatterCharts.Legends.init
-  , example88 = Examples.ScatterCharts.Basic.init
+  , example78 = Examples.Frontpage.Concise.init
+  , example79 = Examples.Frontpage.Familiar.init
+  , example80 = Examples.ScatterCharts.Colors.init
+  , example81 = Examples.ScatterCharts.Shapes.init
+  , example82 = Examples.ScatterCharts.Tooltip.init
+  , example83 = Examples.ScatterCharts.Highlight.init
+  , example84 = Examples.ScatterCharts.DataDependent.init
+  , example85 = Examples.ScatterCharts.Borders.init
+  , example86 = Examples.ScatterCharts.Labels.init
+  , example87 = Examples.ScatterCharts.Opacity.init
+  , example88 = Examples.ScatterCharts.Sizes.init
+  , example89 = Examples.ScatterCharts.Legends.init
+  , example90 = Examples.ScatterCharts.Basic.init
   }
 
 
@@ -453,17 +461,19 @@ type Msg
   | ExampleMsg75 Examples.LineCharts.Labels.Msg
   | ExampleMsg76 Examples.LineCharts.Legends.Msg
   | ExampleMsg77 Examples.LineCharts.Basic.Msg
-  | ExampleMsg78 Examples.ScatterCharts.Colors.Msg
-  | ExampleMsg79 Examples.ScatterCharts.Shapes.Msg
-  | ExampleMsg80 Examples.ScatterCharts.Tooltip.Msg
-  | ExampleMsg81 Examples.ScatterCharts.Highlight.Msg
-  | ExampleMsg82 Examples.ScatterCharts.DataDependent.Msg
-  | ExampleMsg83 Examples.ScatterCharts.Borders.Msg
-  | ExampleMsg84 Examples.ScatterCharts.Labels.Msg
-  | ExampleMsg85 Examples.ScatterCharts.Opacity.Msg
-  | ExampleMsg86 Examples.ScatterCharts.Sizes.Msg
-  | ExampleMsg87 Examples.ScatterCharts.Legends.Msg
-  | ExampleMsg88 Examples.ScatterCharts.Basic.Msg
+  | ExampleMsg78 Examples.Frontpage.Concise.Msg
+  | ExampleMsg79 Examples.Frontpage.Familiar.Msg
+  | ExampleMsg80 Examples.ScatterCharts.Colors.Msg
+  | ExampleMsg81 Examples.ScatterCharts.Shapes.Msg
+  | ExampleMsg82 Examples.ScatterCharts.Tooltip.Msg
+  | ExampleMsg83 Examples.ScatterCharts.Highlight.Msg
+  | ExampleMsg84 Examples.ScatterCharts.DataDependent.Msg
+  | ExampleMsg85 Examples.ScatterCharts.Borders.Msg
+  | ExampleMsg86 Examples.ScatterCharts.Labels.Msg
+  | ExampleMsg87 Examples.ScatterCharts.Opacity.Msg
+  | ExampleMsg88 Examples.ScatterCharts.Sizes.Msg
+  | ExampleMsg89 Examples.ScatterCharts.Legends.Msg
+  | ExampleMsg90 Examples.ScatterCharts.Basic.Msg
 
 
 update : Msg -> Model -> Model
@@ -547,17 +557,19 @@ update msg model =
     ExampleMsg75 sub -> { model | example75 = Examples.LineCharts.Labels.update sub model.example75 }
     ExampleMsg76 sub -> { model | example76 = Examples.LineCharts.Legends.update sub model.example76 }
     ExampleMsg77 sub -> { model | example77 = Examples.LineCharts.Basic.update sub model.example77 }
-    ExampleMsg78 sub -> { model | example78 = Examples.ScatterCharts.Colors.update sub model.example78 }
-    ExampleMsg79 sub -> { model | example79 = Examples.ScatterCharts.Shapes.update sub model.example79 }
-    ExampleMsg80 sub -> { model | example80 = Examples.ScatterCharts.Tooltip.update sub model.example80 }
-    ExampleMsg81 sub -> { model | example81 = Examples.ScatterCharts.Highlight.update sub model.example81 }
-    ExampleMsg82 sub -> { model | example82 = Examples.ScatterCharts.DataDependent.update sub model.example82 }
-    ExampleMsg83 sub -> { model | example83 = Examples.ScatterCharts.Borders.update sub model.example83 }
-    ExampleMsg84 sub -> { model | example84 = Examples.ScatterCharts.Labels.update sub model.example84 }
-    ExampleMsg85 sub -> { model | example85 = Examples.ScatterCharts.Opacity.update sub model.example85 }
-    ExampleMsg86 sub -> { model | example86 = Examples.ScatterCharts.Sizes.update sub model.example86 }
-    ExampleMsg87 sub -> { model | example87 = Examples.ScatterCharts.Legends.update sub model.example87 }
-    ExampleMsg88 sub -> { model | example88 = Examples.ScatterCharts.Basic.update sub model.example88 }
+    ExampleMsg78 sub -> { model | example78 = Examples.Frontpage.Concise.update sub model.example78 }
+    ExampleMsg79 sub -> { model | example79 = Examples.Frontpage.Familiar.update sub model.example79 }
+    ExampleMsg80 sub -> { model | example80 = Examples.ScatterCharts.Colors.update sub model.example80 }
+    ExampleMsg81 sub -> { model | example81 = Examples.ScatterCharts.Shapes.update sub model.example81 }
+    ExampleMsg82 sub -> { model | example82 = Examples.ScatterCharts.Tooltip.update sub model.example82 }
+    ExampleMsg83 sub -> { model | example83 = Examples.ScatterCharts.Highlight.update sub model.example83 }
+    ExampleMsg84 sub -> { model | example84 = Examples.ScatterCharts.DataDependent.update sub model.example84 }
+    ExampleMsg85 sub -> { model | example85 = Examples.ScatterCharts.Borders.update sub model.example85 }
+    ExampleMsg86 sub -> { model | example86 = Examples.ScatterCharts.Labels.update sub model.example86 }
+    ExampleMsg87 sub -> { model | example87 = Examples.ScatterCharts.Opacity.update sub model.example87 }
+    ExampleMsg88 sub -> { model | example88 = Examples.ScatterCharts.Sizes.update sub model.example88 }
+    ExampleMsg89 sub -> { model | example89 = Examples.ScatterCharts.Legends.update sub model.example89 }
+    ExampleMsg90 sub -> { model | example90 = Examples.ScatterCharts.Basic.update sub model.example90 }
 
 
 view : Model -> Id -> Html.Html Msg
@@ -641,17 +653,19 @@ view model chosen =
     LineCharts__Labels -> Html.map ExampleMsg75 (Examples.LineCharts.Labels.view model.example75)
     LineCharts__Legends -> Html.map ExampleMsg76 (Examples.LineCharts.Legends.view model.example76)
     LineCharts__Basic -> Html.map ExampleMsg77 (Examples.LineCharts.Basic.view model.example77)
-    ScatterCharts__Colors -> Html.map ExampleMsg78 (Examples.ScatterCharts.Colors.view model.example78)
-    ScatterCharts__Shapes -> Html.map ExampleMsg79 (Examples.ScatterCharts.Shapes.view model.example79)
-    ScatterCharts__Tooltip -> Html.map ExampleMsg80 (Examples.ScatterCharts.Tooltip.view model.example80)
-    ScatterCharts__Highlight -> Html.map ExampleMsg81 (Examples.ScatterCharts.Highlight.view model.example81)
-    ScatterCharts__DataDependent -> Html.map ExampleMsg82 (Examples.ScatterCharts.DataDependent.view model.example82)
-    ScatterCharts__Borders -> Html.map ExampleMsg83 (Examples.ScatterCharts.Borders.view model.example83)
-    ScatterCharts__Labels -> Html.map ExampleMsg84 (Examples.ScatterCharts.Labels.view model.example84)
-    ScatterCharts__Opacity -> Html.map ExampleMsg85 (Examples.ScatterCharts.Opacity.view model.example85)
-    ScatterCharts__Sizes -> Html.map ExampleMsg86 (Examples.ScatterCharts.Sizes.view model.example86)
-    ScatterCharts__Legends -> Html.map ExampleMsg87 (Examples.ScatterCharts.Legends.view model.example87)
-    ScatterCharts__Basic -> Html.map ExampleMsg88 (Examples.ScatterCharts.Basic.view model.example88)
+    Frontpage__Concise -> Html.map ExampleMsg78 (Examples.Frontpage.Concise.view model.example78)
+    Frontpage__Familiar -> Html.map ExampleMsg79 (Examples.Frontpage.Familiar.view model.example79)
+    ScatterCharts__Colors -> Html.map ExampleMsg80 (Examples.ScatterCharts.Colors.view model.example80)
+    ScatterCharts__Shapes -> Html.map ExampleMsg81 (Examples.ScatterCharts.Shapes.view model.example81)
+    ScatterCharts__Tooltip -> Html.map ExampleMsg82 (Examples.ScatterCharts.Tooltip.view model.example82)
+    ScatterCharts__Highlight -> Html.map ExampleMsg83 (Examples.ScatterCharts.Highlight.view model.example83)
+    ScatterCharts__DataDependent -> Html.map ExampleMsg84 (Examples.ScatterCharts.DataDependent.view model.example84)
+    ScatterCharts__Borders -> Html.map ExampleMsg85 (Examples.ScatterCharts.Borders.view model.example85)
+    ScatterCharts__Labels -> Html.map ExampleMsg86 (Examples.ScatterCharts.Labels.view model.example86)
+    ScatterCharts__Opacity -> Html.map ExampleMsg87 (Examples.ScatterCharts.Opacity.view model.example87)
+    ScatterCharts__Sizes -> Html.map ExampleMsg88 (Examples.ScatterCharts.Sizes.view model.example88)
+    ScatterCharts__Legends -> Html.map ExampleMsg89 (Examples.ScatterCharts.Legends.view model.example89)
+    ScatterCharts__Basic -> Html.map ExampleMsg90 (Examples.ScatterCharts.Basic.view model.example90)
 
 
 smallCode : Id -> String
@@ -735,6 +749,8 @@ smallCode chosen =
     LineCharts__Labels -> Examples.LineCharts.Labels.smallCode
     LineCharts__Legends -> Examples.LineCharts.Legends.smallCode
     LineCharts__Basic -> Examples.LineCharts.Basic.smallCode
+    Frontpage__Concise -> Examples.Frontpage.Concise.smallCode
+    Frontpage__Familiar -> Examples.Frontpage.Familiar.smallCode
     ScatterCharts__Colors -> Examples.ScatterCharts.Colors.smallCode
     ScatterCharts__Shapes -> Examples.ScatterCharts.Shapes.smallCode
     ScatterCharts__Tooltip -> Examples.ScatterCharts.Tooltip.smallCode
@@ -829,6 +845,8 @@ largeCode chosen =
     LineCharts__Labels -> Examples.LineCharts.Labels.largeCode
     LineCharts__Legends -> Examples.LineCharts.Legends.largeCode
     LineCharts__Basic -> Examples.LineCharts.Basic.largeCode
+    Frontpage__Concise -> Examples.Frontpage.Concise.largeCode
+    Frontpage__Familiar -> Examples.Frontpage.Familiar.largeCode
     ScatterCharts__Colors -> Examples.ScatterCharts.Colors.largeCode
     ScatterCharts__Shapes -> Examples.ScatterCharts.Shapes.largeCode
     ScatterCharts__Tooltip -> Examples.ScatterCharts.Tooltip.largeCode
@@ -923,6 +941,8 @@ name chosen =
     LineCharts__Labels -> "Examples.LineCharts.Labels"
     LineCharts__Legends -> "Examples.LineCharts.Legends"
     LineCharts__Basic -> "Examples.LineCharts.Basic"
+    Frontpage__Concise -> "Examples.Frontpage.Concise"
+    Frontpage__Familiar -> "Examples.Frontpage.Familiar"
     ScatterCharts__Colors -> "Examples.ScatterCharts.Colors"
     ScatterCharts__Shapes -> "Examples.ScatterCharts.Shapes"
     ScatterCharts__Tooltip -> "Examples.ScatterCharts.Tooltip"
@@ -1016,6 +1036,8 @@ meta chosen =
     LineCharts__Labels -> Examples.LineCharts.Labels.meta
     LineCharts__Legends -> Examples.LineCharts.Legends.meta
     LineCharts__Basic -> Examples.LineCharts.Basic.meta
+    Frontpage__Concise -> Examples.Frontpage.Concise.meta
+    Frontpage__Familiar -> Examples.Frontpage.Familiar.meta
     ScatterCharts__Colors -> Examples.ScatterCharts.Colors.meta
     ScatterCharts__Shapes -> Examples.ScatterCharts.Shapes.meta
     ScatterCharts__Tooltip -> Examples.ScatterCharts.Tooltip.meta
@@ -1109,6 +1131,8 @@ all =
   , LineCharts__Labels
   , LineCharts__Legends
   , LineCharts__Basic
+  , Frontpage__Concise
+  , Frontpage__Familiar
   , ScatterCharts__Colors
   , ScatterCharts__Shapes
   , ScatterCharts__Tooltip

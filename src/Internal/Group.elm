@@ -8,7 +8,6 @@ import Internal.Coordinates as Coord exposing (Point, Position, Plane)
 import Dict exposing (Dict)
 import Internal.Property as P exposing (Property)
 import Chart.Svg as S
-import Chart.Attributes as CA
 import Internal.Item as I
 import Internal.Helpers as Helpers
 

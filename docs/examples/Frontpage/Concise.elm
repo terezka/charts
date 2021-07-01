@@ -1,4 +1,4 @@
-module Examples.BarCharts.BarLabels exposing (..)
+module Examples.Frontpage.Concise exposing (..)
 
 {-| @LARGE -}
 import Html as H
@@ -14,29 +14,28 @@ view model =
   C.chart
     [ CA.height 300
     , CA.width 300
+    , CA.static
     ]
     [ C.grid []
-    , C.xLabels []
-    , C.yLabels []
+
     , C.bars []
         [ C.bar .q []
-        , C.bar .p []
+        , C.stacked
+            [ C.bar .p []
+            , C.bar .y []
+            ]
         ]
         data
 
-    , C.eachBar <| \p bar ->
-        [ C.label
-            [ CA.yOff 15, CA.color "white" ]
-            [ S.text (String.fromFloat (CE.getDependent bar)) ]
-            (CE.getTop p bar)
-        ]
+    , C.binLabels .country CE.getBottom [ CA.moveDown 15 ]
+    , C.barLabels CE.getTop [ CA.moveDown 15, CA.color "white" ]
     ]
 {-| @SMALL END -}
 {-| @LARGE END -}
 
 
 meta =
-  { category = "Bar charts"
+  { category = "Front page"
   , categoryOrder = 1
   , name = "Labels for bars"
   , description = "Add custom bar labels."
@@ -71,7 +70,7 @@ type alias Datum =
   , w : Float
   , p : Float
   , q : Float
-  , label : String
+  , country : String
   }
 
 
