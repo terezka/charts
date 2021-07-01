@@ -65,7 +65,7 @@ view model =
             [ CA.monotone, CA.color "#555", CA.dashed [ 5, 5 ], CA.width 3, CA.opacity 0.1 ]
             []
             |> C.named "Combinations"
-            |> C.amongst model.hovering (\_ -> [ CA.circle, CA.color CA.pink, CA.size 30 ])
+            |> C.amongst model.hovering (\_ -> [ CA.circle, CA.color CA.pink, CA.size 15 ])
         ]
         lineData
 
