@@ -8,6 +8,26 @@ import Chart.Attributes as CA
 import Chart.Events as CE
 
 
+type alias Model =
+  { hovering : List (CE.Group (CE.Stack Datum) CE.Any (Maybe Float) Datum) }
+
+
+init : Model
+init =
+  { hovering = [] }
+
+
+type Msg
+  = OnHover (List (CE.Group (CE.Stack Datum) CE.Any (Maybe Float) Datum))
+
+
+update : Msg -> Model -> Model
+update msg model =
+  case msg of
+    OnHover hovering ->
+      { model | hovering = hovering }
+
+
 view : Model -> H.Html Msg
 view model =
 {-| @SMALL -}
@@ -15,20 +35,24 @@ view model =
     [ CA.height 300
     , CA.width 300
     , CA.static
+    , CE.onMouseMove OnHover (CE.getNearest CE.stack)
+    , CE.onMouseLeave (OnHover [])
     ]
     [ C.grid []
+    , C.yLabels []
 
-    , C.bars []
-        [ C.bar .q []
-        , C.stacked
-            [ C.bar .p []
-            , C.bar .y []
+    , C.bars [ CA.roundTop 0.5 ]
+        [ C.stacked
+            [ C.bar .p [ CA.opacity 0.8 ]
+            , C.bar .w [ CA.opacity 0.8 ]
             ]
+        , C.bar .q [ CA.opacity 0.8, CA.dotted [ CA.spacing 2.2 ] ]
         ]
         data
 
     , C.binLabels .country CE.getBottom [ CA.moveDown 15 ]
     , C.barLabels CE.getTop [ CA.moveDown 15, CA.color "white" ]
+    , C.each model.hovering <| \p stack -> [ C.tooltip stack [] [] [] ]
     ]
 {-| @SMALL END -}
 {-| @LARGE END -}
@@ -41,24 +65,6 @@ meta =
   , description = "Add custom bar labels."
   , order = 15
   }
-
-
-type alias Model =
-  ()
-
-
-init : Model
-init =
-  ()
-
-
-type Msg
-  = Msg
-
-
-update : Msg -> Model -> Model
-update msg model =
-  model
 
 
 type alias Datum =

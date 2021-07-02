@@ -46,6 +46,7 @@ type alias Model =
   , dashboard5 : Dashboard5.Model
   , dashboard6 : Dashboard6.Model
   , dashboard7 : Dashboard7.Model
+  , concise : Concise.Model
   }
 
 
@@ -58,6 +59,7 @@ init =
   , dashboard5 = Dashboard5.init
   , dashboard6 = Dashboard6.init
   , dashboard7 = Dashboard7.init
+  , concise = Concise.init
   }
 
 
@@ -73,6 +75,7 @@ type Msg
   | Dashboard5Msg Dashboard5.Msg
   | Dashboard6Msg Dashboard6.Msg
   | Dashboard7Msg Dashboard7.Msg
+  | ConciseMsg Concise.Msg
   | None
 
 
@@ -99,6 +102,9 @@ update msg model =
 
     Dashboard7Msg subMsg ->
       { model | dashboard7 = Dashboard7.update subMsg model.dashboard7 }
+
+    ConciseMsg subMsg ->
+      { model | concise = Concise.update subMsg model.concise }
 
     None ->
       model
@@ -167,7 +173,7 @@ view model =
               , feature
                   { title = "Concise at any level"
                   , body = "No clutter even with tricky details!"
-                  , chart = H.map (\_ -> None) (Concise.view ())
+                  , chart = H.map ConciseMsg (Concise.view model.concise)
                   , code = Concise.smallCode
                   }
 

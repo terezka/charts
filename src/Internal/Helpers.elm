@@ -44,7 +44,7 @@ gatherWith testFn list =
 
 toDefaultColor : Int -> String
 toDefaultColor =
-  toDefault pink [ pink, purple, mint, blue, red, orange, turquoise, green, darkYellow, darkBlue, magenta, brown, yellow ]
+  toDefault pink [ pink, purple, blue, orange, red, mint, turquoise, green, darkYellow, darkBlue, magenta, brown, yellow ]
 
 
 toDefault : a -> List a -> Int -> a
