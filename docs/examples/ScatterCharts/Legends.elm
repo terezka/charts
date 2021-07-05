@@ -23,8 +23,9 @@ view model =
         , C.scatter .z []
         ]
         data
-    , C.legendsAt .max .max -12 0
+    , C.legendsAt .max .max
         [ CA.column
+        , CA.moveLeft 12
         , CA.spacing 0
         , CA.alignRight
         ]

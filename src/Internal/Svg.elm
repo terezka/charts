@@ -400,6 +400,8 @@ rect plane config =
 type alias Legends msg =
   { alignment : Alignment
   , anchor : Maybe Anchor
+  , xOff : Float
+  , yOff : Float
   , spacing : Float
   , background : String
   , border : String
@@ -425,6 +427,8 @@ defaultLegends =
   { alignment = Row
   , anchor = Nothing
   , spacing = 10
+  , xOff = 0
+  , yOff = 0
   , background = ""
   , border = ""
   , borderWidth = 0
@@ -432,8 +436,8 @@ defaultLegends =
   }
 
 
-legendsAt : Plane -> Float -> Float -> Float -> Float -> Legends msg -> List (Html msg) -> Html msg
-legendsAt plane x y xOff yOff config children =
+legendsAt : Plane -> Float -> Float -> Legends msg -> List (Html msg) -> Html msg
+legendsAt plane x y config children =
   let ( alignmentAttrs, direction ) =
         case config.alignment of
           Row ->
@@ -475,7 +479,7 @@ legendsAt plane x y xOff yOff config children =
           Just Start -> [ HA.style "transform" "translate(-0%, 0%)" ]
           Just Middle -> [ HA.style "transform" "translate(-50%, 0%)" ]
   in
-  positionHtml plane x y xOff yOff
+  positionHtml plane x y config.xOff config.yOff
     (anchorAttrs ++ alignmentAttrs ++ otherAttrs ++ config.htmlAttrs)
     (H.node "style" [] [ H.text paddingStyle ] :: children)
 

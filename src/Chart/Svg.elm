@@ -221,6 +221,8 @@ rect plane edits =
 type alias Legends msg =
   { alignment : Internal.Svg.Alignment
   , anchor : Maybe Internal.Svg.Anchor
+  , xOff : Float
+  , yOff : Float
   , spacing : Float
   , background : String
   , border : String
@@ -229,9 +231,9 @@ type alias Legends msg =
   }
 
 
-legendsAt : Plane -> Float -> Float -> Float -> Float -> List (CA.Attribute (Legends msg)) -> List (Html msg) -> Html msg
-legendsAt plane x y xOff yOff edits =
-  Internal.Svg.legendsAt plane x y xOff yOff  (Helpers.apply edits Internal.Svg.defaultLegends)
+legendsAt : Plane -> Float -> Float -> List (CA.Attribute (Legends msg)) -> List (Html msg) -> Html msg
+legendsAt plane x y edits =
+  Internal.Svg.legendsAt plane x y (Helpers.apply edits Internal.Svg.defaultLegends)
 
 
 

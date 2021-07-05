@@ -184,14 +184,19 @@ view model =
               , E.padding 40
               ] <| E.html <|
               C.chart []
-                [ C.series .age
-                    [ C.scatter .income [] ]
-                    [ { age = 34, income = 60 }
-                    , { age = 42, income = 70 }
-                    , { age = 48, income = 80 }
+                [ C.bars
+                    [ CA.x1 .bin
+                    , CA.x2 (.bin >> (+) 10)
                     ]
-
-                , C.dotLabels CE.getTop [ CA.moveUp 6 ]
+                    [ C.bar (.data >> List.length >> toFloat) [] ] <|
+                    C.binned 10 .score
+                      [ { name = "Anna", score = 43 }
+                      , { name = "Maya", score = 65 }
+                      , { name = "Joan", score = 69 }
+                      , { name = "Tina", score = 98 }
+                      ]
+                , C.binLabels (.bin >> String.fromFloat) CE.getBottom [ CA.moveDown 16 ]
+                , C.barLabels CE.getTop [ CA.moveUp 6 ]
                 ]
 
           , E.column

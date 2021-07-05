@@ -9,11 +9,11 @@ module Chart exposing
   , xAxis, yAxis, xTicks, yTicks, xLabels, yLabels, grid
   , binLabels, barLabels, dotLabels
 
-  , generate, floats, ints, times
   , xLabel, yLabel, xTick, yTick
-  , label, labelAt, legendsAt
+  , generate, floats, ints, times
+  , label, labelAt
 
-  , tooltip, line, rect
+  , tooltip, line, rect, legendsAt
 
   , svgAt, htmlAt, svg, html, none
 
@@ -79,8 +79,8 @@ too. If that is the case, I will make a note in the comment of the element.
 @docs svgAt, htmlAt, svg, html, none
 
 # Advanced elements
-@docs each, eachBin, eachStack, eachBar, eachDot, eachProduct
-@docs withPlane, withBins, withStacks, withBars, withDots, withProducts
+@docs eachBin, eachStack, eachBar, eachDot, eachProduct, each
+@docs withBins, withStacks, withBars, withDots, withProducts, withPlane
 
 # Data helper
 @docs binned
@@ -842,7 +842,7 @@ xLabels edits =
 
 {-| Produce a set of labels at "nice" numbers on the y-axis of your chart.
 The styling options are the same as for `xLabels`.
--}
+-} -- TODO add rotate
 yLabels : List (CA.Attribute Labels) -> Element item msg
 yLabels edits =
   let toConfig p =
@@ -1069,7 +1069,35 @@ type alias Tick =
   }
 
 
-{-| -}
+{-| Produce a single x tick. This is typically for cases where you need
+very custom ticks and `xTicks` does not cut it. It is especially useful
+in combination with the `generate` helper. An example use case:
+
+    C.chart []
+      [ -- Create ticks for 10 "nice" integers on the x-axis
+        -- and highlight the tick at x = 0.
+        C.generate 10 C.ints .x [] <| \plane int ->
+          let color = if int == 0 then "red" else "gray" in
+          [ C.xTick [ CA.x (toFloat int), CA.color color ] ]
+      ]
+
+
+A full list of possible attributes:
+
+    C.xTick
+      [ CA.x 5  -- Set x coordinate
+      , CA.y 8  -- Set y coordinate
+
+      , CA.color "red" -- Change color
+      , CA.height 8    -- Change height
+      , CA.width 2     -- Change width
+      , CA.amount 15   -- Change amount of ticks
+      , CA.flip        -- Flip to opposite direction
+      , CA.noGrid      -- By default a grid line is added
+                       -- for each tick. This removes them.
+      ]
+
+-}
 xTick : List (CA.Attribute Tick) -> Element data msg
 xTick edits =
   let toConfig p =
@@ -1096,7 +1124,11 @@ xTick edits =
       { x = config.x, y = config.y }
 
 
-{-| -}
+{-| Produce a single y tick. This is typically for cases where you need
+very custom ticks and `yTicks` does not cut it. See `xTick` for
+usage and customization.
+
+-}
 yTick : List (CA.Attribute Tick) -> Float -> Element data msg
 yTick edits val =
   let toConfig p =
@@ -1132,7 +1164,25 @@ type alias Grid =
     }
 
 
-{-| -}
+{-| Add a grid to your chart.
+
+    C.chart []
+      [ C.grid []
+      , C.xLabels []
+      , C.yLabels []
+      ]
+
+Grid lines are added where labels or ticks are added.
+
+Customizations:
+
+    C.grid
+      [ CA.color "blue"     -- Change color
+      , CA.width 3          -- Change width
+      , CA.dashed [ 5, 5 ]  -- Add dashing (only for line grids)
+      , CA.dotGrid          -- Use dot grid instead of line grid
+      ]
+-}
 grid : List (CA.Attribute Grid) -> Element item msg
 grid edits =
   let config =
@@ -1767,79 +1817,106 @@ seriesMap mapData toX properties data =
 -- OTHER
 
 
-{-| -}
+{-| Using the information about your coordinate system, add a list
+of elements.
+
+-}
 withPlane : (C.Plane -> List (Element data msg)) -> Element data msg
 withPlane func =
   SubElements <| \p is -> func p
 
 
-{-| -}
+{-| Given all your bins, add a list of elements.
+
+-}
 withBins : (C.Plane -> List (CE.Group (CE.Bin data) CE.Any (Maybe Float) data) -> List (Element data msg)) -> Element data msg
 withBins func =
   SubElements <| \p is -> func p (CE.group CE.bin is)
 
 
-{-| -}
+{-| Given all your stacks, add a list of elements.
+
+-}
 withStacks : (C.Plane -> List (CE.Group (CE.Stack data) CE.Any (Maybe Float) data) -> List (Element data msg)) -> Element data msg
 withStacks func =
   SubElements <| \p is -> func p (CE.group CE.stack is)
 
 
-{-| -}
+{-| Given all your bars, add a list of elements.
+
+-}
 withBars : (C.Plane -> List (CE.Product CE.Bar (Maybe Float) data) -> List (Element data msg)) -> Element data msg
 withBars func =
   SubElements <| \p is -> func p (CE.group CE.bar is)
 
 
-{-| -}
+{-| Given all your dots, add a list of elements.
+
+-}
 withDots : (C.Plane -> List (CE.Product CE.Dot (Maybe Float) data) -> List (Element data msg)) -> Element data msg
 withDots func =
   SubElements <| \p is -> func p (CE.group CE.dot is)
 
 
-{-| -}
+{-| Given all your products, add a list of elements.
+
+-}
 withProducts : (C.Plane -> List (CE.Product CE.Any (Maybe Float) data) -> List (Element data msg)) -> Element data msg
 withProducts func =
   SubElements <| \p is -> func p is
 
 
-{-| -}
+{-| Add elements for each item of whatever list in the first argument.
+
+-}
 each : List a -> (C.Plane -> a -> List (Element data msg)) -> Element data msg
 each items func =
   SubElements <| \p _ -> List.concatMap (func p) items
 
 
-{-| -}
+{-| Add elements for each bin.
+
+-}
 eachBin : (C.Plane -> CE.Group (CE.Bin data) CE.Any Float data -> List (Element data msg)) -> Element data msg
 eachBin func =
   SubElements <| \p is -> List.concatMap (func p) (CE.group (CE.collect CE.bin <| CE.keep CE.realValues CE.product) is)
 
 
-{-| -}
+{-| Add elements for each stack.
+
+-}
 eachStack : (C.Plane -> CE.Group (CE.Stack data) CE.Any Float data -> List (Element data msg)) -> Element data msg
 eachStack func =
   SubElements <| \p is -> List.concatMap (func p) (CE.group (CE.collect CE.stack <| CE.keep CE.realValues CE.product) is)
 
 
-{-| -}
+{-| Add elements for each bar.
+
+-}
 eachBar : (C.Plane -> CE.Product CE.Bar Float data -> List (Element data msg)) -> Element data msg
 eachBar func =
   SubElements <| \p is -> List.concatMap (func p) (CE.group (CE.keep CE.realValues CE.bar) is)
 
 
-{-| -}
+{-| Add elements for each dot.
+
+-}
 eachDot : (C.Plane -> CE.Product CE.Dot Float data -> List (Element data msg)) -> Element data msg
 eachDot func =
   SubElements <| \p is -> List.concatMap (func p) (CE.group (CE.keep CE.realValues CE.dot) is)
 
 
-{-| -}
+{-| Add elements for each product.
+
+-}
 eachProduct : (C.Plane -> CE.Product CE.Any Float data -> List (Element data msg)) -> Element data msg
 eachProduct func =
   SubElements <| \p is -> List.concatMap (func p) (CE.group (CE.keep CE.realValues CE.product) is)
 
 
-{-| -}
+{-| Filter and group products in any way you'd like and add elements for each of them.
+
+-}
 eachCustom : CE.Grouping (CE.Product CE.Any (Maybe Float) data) a -> (C.Plane -> a -> List (Element data msg)) -> Element data msg
 eachCustom grouping func =
   SubElements <| \p items ->
@@ -1848,18 +1925,30 @@ eachCustom grouping func =
 
 
 {-| -}
-legendsAt : (C.Axis -> Float) -> (C.Axis -> Float) -> Float -> Float -> List (CA.Attribute (CS.Legends msg)) -> List (CA.Attribute (CS.Legend msg)) -> Element data msg
-legendsAt toX toY xOff yOff attrs children =
+legendsAt : (C.Axis -> Float) -> (C.Axis -> Float) -> List (CA.Attribute (CS.Legends msg)) -> List (CA.Attribute (CS.Legend msg)) -> Element data msg
+legendsAt toX toY attrs children =
   HtmlElement <| \p legends_ ->
     let viewLegend legend =
           case legend of
             Legend.BarLegend name barAttrs -> CS.barLegend (CA.title name :: children) barAttrs
             Legend.LineLegend name interAttrs dotAttrs -> CS.lineLegend (CA.title name :: children) interAttrs dotAttrs
     in
-    CS.legendsAt p (toX p.x) (toY p.y) xOff yOff attrs (List.map viewLegend legends_)
+    CS.legendsAt p (toX p.x) (toY p.y) attrs (List.map viewLegend legends_)
 
 
-{-| -}
+{-| Generate "nice" numbers. Useful in combination with `xLabel`, `yLabel`, `xTick`, and `yTick`.
+
+    C.chart []
+      [ C.generate 10 C.ints .x [ CA.lowest -5 CA.exactly, CA.highest 15 CA.exactly ] <| \plane int ->
+          [ C.xTick [ CA.x (toFloat int) ]
+          , C.xLabel [ CA.x (toFloat int) ] [ S.text (String.fromInt int) ]
+          ]
+      ]
+
+The example above generates 10 ints on the x axis between x = -5 and x = 15. For each of those
+ints, it adds a tick and a label.
+
+-}
 generate : Int -> CS.Generator a -> (C.Plane -> C.Axis) -> List (CA.Attribute C.Axis) -> (C.Plane -> a -> List (Element data msg)) -> Element data msg
 generate num gen limit attrs func =
   SubElements <| \p _ ->
@@ -1867,75 +1956,103 @@ generate num gen limit attrs func =
     List.concatMap (func p) items
 
 
-{-| -}
+{-| Generate "nice" floats.
+-}
 floats : CS.Generator Float
 floats =
   CS.floats
 
 
-{-| -}
+{-| Generate "nice" ints.
+-}
 ints : CS.Generator Int
 ints =
   CS.ints
 
 
-{-| -}
+{-| Generate "nice" times.
+-}
 times : Time.Zone -> CS.Generator I.Time
 times =
   CS.times
 
 
-{-| -}
+{-| Add a label, such as a chart title or other note, at a specific coordinate.
+
+    C.chart []
+      [ C.label [] [ S.text "Data from Fruits.com" ] { x = 5, y = 10 } ]
+
+-}
 label : List (CA.Attribute CS.Label) -> List (S.Svg msg) -> C.Point -> Element data msg
 label attrs inner point =
   SvgElement <| \p -> CS.label p attrs inner point
 
 
-{-| -}
+{-| Add a label, such as a chart title or other note, at a position relative to your axes.
+
+    C.chart []
+      [ C.label (CA.percent 20) (CA.percent 90) [] [ S.text "Data from Fruits.com" ] ]
+
+The example above adds your label at 20% the length of your range and 90% of your domain.
+
+-}
 labelAt : (C.Axis -> Float) -> (C.Axis -> Float) -> List (CA.Attribute CS.Label) -> List (S.Svg msg) -> Element data msg
 labelAt toX toY attrs inner =
   SvgElement <| \p -> CS.label p attrs inner { x = toX p.x, y = toY p.y }
 
 
-{-| -}
+{-| Add a line.
+
+-}
 line : List (CA.Attribute CS.Line) -> Element data msg
 line attrs =
   SvgElement <| \p -> CS.line p attrs
 
 
-{-| -}
+{-| Add a rect.
+
+-}
 rect : List (CA.Attribute CS.Rect) -> Element data msg
 rect attrs =
   SvgElement <| \p -> CS.rect p attrs
 
 
-{-| -}
+{-| Add arbitrary SVG.
+
+-}
 svg : (C.Plane -> S.Svg msg) -> Element data msg
 svg func =
   SvgElement <| \p -> func p
 
 
-{-| -}
+{-| Add arbitrary HTML.
+
+-}
 html : (C.Plane -> H.Html msg) -> Element data msg
 html func =
   HtmlElement <| \p _ -> func p
 
 
-{-| -}
+{-| Add arbitrary SVG at a specific location.
+
+-}
 svgAt : (C.Axis -> Float) -> (C.Axis -> Float) -> Float -> Float -> List (S.Svg msg) -> Element data msg
 svgAt toX toY xOff yOff view =
   SvgElement <| \p ->
     S.g [ CS.position p 0 (toX p.x) (toY p.y) xOff yOff ] view
 
 
-{-| -}
+{-| Add arbitrary HTML at a specific location.
+
+-}
 htmlAt : (C.Axis -> Float) -> (C.Axis -> Float) -> Float -> Float -> List (H.Attribute msg) -> List (H.Html msg) -> Element data msg
 htmlAt toX toY xOff yOff att view =
   HtmlElement <| \p _ ->
     CS.positionHtml p (toX p.x) (toY p.y) xOff yOff att view
 
 
-{-| -}
+{-| No element.
+-}
 none : Element data msg
 none =
   HtmlElement <| \_ _ -> H.text ""
@@ -1945,6 +2062,26 @@ none =
 -- DATA HELPERS
 
 
+{-| Gather data points into bins. Arguments:
+
+  1. The desired bin width.
+  2. The function to access the binned quality on the data
+  3. The list of data.
+
+    C.binned 10 .score
+      [ Result "Anna" 43
+      , Result "Maya" 65
+      , Result "Joan" 69
+      , Result "Tina" 98
+      ]
+      == [ { bin = 40, data = [ Result "Anna" 43 ] }
+         , { bin = 60, data = [ Result "Maya" 65, Result "Joan" 69 ] }
+         , { bin = 90, data = [ Result "Tina" 98 ] }
+         ]
+
+    type alias Result = { name : String, score : Float }
+
+-}
 binned : Float -> (data -> Float) -> List data -> List { bin : Float, data : List data }
 binned binWidth func data =
   let fold datum =

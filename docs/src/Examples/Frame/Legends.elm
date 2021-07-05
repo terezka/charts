@@ -45,8 +45,10 @@ view model =
         data
 
     -- LEGENDS
-    , C.legendsAt .min .max 10 25
+    , C.legendsAt .min .max
         [ CA.row
+        , CA.moveRight 10
+        , CA.moveUp 25
         , CA.spacing 15
         ]
         [ CA.width 20 ]
@@ -138,8 +140,10 @@ smallCode =
         data
 
     -- LEGENDS
-    , C.legendsAt .min .max 10 25
+    , C.legendsAt .min .max
         [ CA.row
+        , CA.moveRight 10
+        , CA.moveUp 25
         , CA.spacing 15
         ]
         [ CA.width 20 ]
@@ -192,8 +196,10 @@ view model =
         data
 
     -- LEGENDS
-    , C.legendsAt .min .max 10 25
+    , C.legendsAt .min .max
         [ CA.row
+        , CA.moveRight 10
+        , CA.moveUp 25
         , CA.spacing 15
         ]
         [ CA.width 20 ]

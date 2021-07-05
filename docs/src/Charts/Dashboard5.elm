@@ -88,8 +88,9 @@ view model =
         ]
         Iris.virginica
 
-    , C.legendsAt .max .max -10 0
+    , C.legendsAt .max .max
           [ CA.column
+          , CA.moveLeft 10
           , CA.alignRight
           , CA.spacing 1
           , CA.background "white"

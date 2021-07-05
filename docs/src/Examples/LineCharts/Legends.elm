@@ -24,8 +24,9 @@ view model =
             |> C.named "Fish"
         ]
         data
-    , C.legendsAt .min .max 15 0
+    , C.legendsAt .min .max
         [ CA.column
+        , CA.moveRight 15
         , CA.spacing 5
         ]
         [ CA.width 20 ]
@@ -102,8 +103,9 @@ smallCode =
             |> C.named "Fish"
         ]
         data
-    , C.legendsAt .min .max 15 0
+    , C.legendsAt .min .max
         [ CA.column
+        , CA.moveRight 15
         , CA.spacing 5
         ]
         [ CA.width 20 ]
@@ -135,8 +137,9 @@ view model =
             |> C.named "Fish"
         ]
         data
-    , C.legendsAt .min .max 15 0
+    , C.legendsAt .min .max
         [ CA.column
+        , CA.moveRight 15
         , CA.spacing 5
         ]
         [ CA.width 20 ]

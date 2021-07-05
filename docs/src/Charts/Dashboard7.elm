@@ -110,8 +110,9 @@ view model =
 
         ]
 
-    , C.legendsAt .min .min 0 -25
+    , C.legendsAt .min .min
         [ CA.spacing 10
+        , CA.moveUp 25
         , CA.htmlAttrs [ HA.style "max-width" "350px", HA.style "flex-flow" "wrap" ]
         ]
         [ CA.fontSize 10
