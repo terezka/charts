@@ -14,8 +14,6 @@ view model =
   C.chart
     [ CA.height 300
     , CA.width 300
-    , CA.paddingTop 0
-    , CA.paddingRight 0
     , CA.range
         [ CA.lowest 5 CA.orLower
         , CA.highest 90 CA.orHigher
@@ -70,8 +68,6 @@ smallCode =
   C.chart
     [ CA.height 300
     , CA.width 300
-    , CA.paddingTop 0
-    , CA.paddingRight 0
     , CA.range
         [ CA.lowest 5 CA.orLower
         , CA.highest 90 CA.orHigher
@@ -107,8 +103,6 @@ view model =
   C.chart
     [ CA.height 300
     , CA.width 300
-    , CA.paddingTop 0
-    , CA.paddingRight 0
     , CA.range
         [ CA.lowest 5 CA.orLower
         , CA.highest 90 CA.orHigher

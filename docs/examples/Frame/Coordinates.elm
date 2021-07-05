@@ -16,8 +16,6 @@ view model =
   C.chart
     [ CA.height 300
     , CA.width 300
-    , CA.paddingTop 0
-    , CA.paddingRight 0
     ]
     [ C.grid []
     , C.xAxis []

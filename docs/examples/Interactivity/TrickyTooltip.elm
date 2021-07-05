@@ -34,7 +34,7 @@ view model =
   C.chart
     [ CA.height 300
     , CA.width 300
-    , CA.paddingLeft 10
+    , CA.padding { top = 0, bottom = 0, left = 10, right = 10 }
     , CE.bar
         |> CE.collect CE.bin
         |> CE.getNearest

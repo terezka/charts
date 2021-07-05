@@ -24,6 +24,16 @@ import Ui.CompactExample as CompactExample
 import Ui.Code as Code
 import Ui.Menu as Menu
 
+import Html as H
+import Html.Attributes as HA
+import Html.Events as HE
+import Svg as S
+import Svg.Attributes as SA
+
+import Chart as C
+import Chart.Attributes as CA
+import Chart.Svg as CS
+
 
 page : Shared.Model -> Request.With Params -> Page.With Model Msg
 page shared req =
@@ -114,6 +124,14 @@ update msg model =
 -- VIEW
 
 
+type Datum = Money MoneyDatum | People PeopleDatum
+
+type alias MoneyDatum = { year : Float, income : Float }
+
+type alias PeopleDatum = { year : Float, people : Float }
+
+
+
 view : Model -> View Msg
 view model =
     { title = "elm-charts"
@@ -158,6 +176,21 @@ view model =
                   , E.text " chart with confidence."
                   ]
               ]
+
+          , E.el
+              [ E.width (E.px 300)
+              , E.height (E.px 300)
+              ] <| E.html <|
+              C.chart []
+                    [ C.series .year
+                        [ C.scatter .income [ CA.opacity 0.6 ]
+                            |> C.variation (\index datum -> [ CA.size datum.people ])
+                        ]
+                        [ { year = 2000, income = 40000, people = 150 }
+                        , { year = 2010, income = 48000, people = 98 }
+                        , { year = 2020, income = 62000, people = 180 }
+                        ]
+                    ]
 
           , E.column
               [ E.width E.fill

@@ -15,10 +15,7 @@ view model =
   C.chart
     [ CA.height 300
     , CA.width 300
-    , CA.marginBottom 30
-    , CA.marginTop 20
-    , CA.marginLeft 30
-    , CA.marginRight 20
+    , CA.margin { top = 20, bottom = 30, left = 30, right = 20 }
     , CA.htmlAttrs
         [ HA.style "background" "#fcf9e9" ]
     ]
@@ -69,10 +66,7 @@ smallCode =
   C.chart
     [ CA.height 300
     , CA.width 300
-    , CA.marginBottom 30
-    , CA.marginTop 20
-    , CA.marginLeft 30
-    , CA.marginRight 20
+    , CA.margin { top = 20, bottom = 30, left = 30, right = 20 }
     , CA.htmlAttrs
         [ HA.style "background" "#fcf9e9" ]
     ]
@@ -105,10 +99,7 @@ view model =
   C.chart
     [ CA.height 300
     , CA.width 300
-    , CA.marginBottom 30
-    , CA.marginTop 20
-    , CA.marginLeft 30
-    , CA.marginRight 20
+    , CA.margin { top = 20, bottom = 30, left = 30, right = 20 }
     , CA.htmlAttrs
         [ HA.style "background" "#fcf9e9" ]
     ]

@@ -25,9 +25,42 @@ module Chart exposing
   )
 
 
-{-| Make a chart!
+{-| The configuration of this charting library mirrors the pattern of HTML elements
+and attributes. It looks something like this:
 
-@docs chart, Element
+    import Html exposing (Html)
+    import Chart as C
+    import Chart.Attributes as CA
+
+    view : Html msg
+    view =
+      C.chart
+        [ CA.width 300
+        , CA.height 300
+        ]
+        [ C.grid []
+        , C.xLabels []
+        , C.yLabels []
+        , C.bars []
+            [ C.bar .income [ CA.color "red" ]
+            , C.bar .spending [ CA.opacity 0.8 ]
+            ]
+            data
+        ]
+
+All the elements, like `chart`, `grid`, `xLabels`, `yLabels`, `bars` and `bar` in the example
+above, are defined in this module. All the attributes, like `width`, `height`, `color`, and `opacity`,
+are defined in `Chart.Attributes`. Attributes and other functions related to events are located in
+the `Chart.Events` module. Lastly, `Chart.Svg` holds charting primitives if case your have very special
+needs.
+
+NOTE: Some of the more advanced elements utilize helper functions in `Chart.Events`
+too. If that is the case, I will make a note in the comment of the element.
+
+@docs Element
+
+# The frame
+@docs chart
 
 # Data elements
 @docs bars, series
@@ -81,14 +114,8 @@ import Chart.Events as CE
 type alias Container data msg =
   { width : Float
   , height : Float
-  , marginTop : Float
-  , marginBottom : Float
-  , marginLeft : Float
-  , marginRight : Float
-  , paddingTop : Float
-  , paddingBottom : Float
-  , paddingLeft : Float
-  , paddingRight : Float
+  , margin : { top : Float, bottom : Float, left : Float, right : Float }
+  , padding : { top : Float, bottom : Float, left : Float, right : Float }
   , responsive : Bool
   , range : List (CA.Attribute C.Axis)
   , domain : List (CA.Attribute C.Axis)
@@ -98,21 +125,76 @@ type alias Container data msg =
   }
 
 
-{-| -}
+{-| This is the root element of your chart. All your chart elements must be contained in
+a `chart` element. The below example illustrates what configurations are available for
+the `chart` element.
+
+    import Html exposing (Html)
+    import Html.Attributes as HA
+    import Svg.Attributes as SA
+    import Chart as C
+    import Chart.Attributes as CA
+    import Chart.Events as CE
+
+    view : Html msg
+    view =
+      C.chart
+        [ CA.width 300    -- Sets width of chart
+        , CA.height 500   -- Sets height of chart
+        , CA.static       -- Don't scale with parent container
+
+        , CA.margin { top = 10, bottom = 20, left = 20, right = 20 }
+                          -- Add space around your chart.
+                          -- Useful if you have labels which extend
+                          -- outside the main chart area.
+
+        , CA.padding { top = 10, bottom = 10, left = 10, right = 10 }
+                          -- Expand your domain / range by a set
+                          -- amount of SVG units.
+                          -- Useful if you have e.g. scatter dots
+                          -- which extend beyond your main chart area,
+                          -- and you'd like them to be within.
+
+        -- Control the range and domain of your chart.
+        -- Your range and domain is by default set to the limits of
+        -- your data, but you can change them like this:
+        , CA.range
+            [ CA.lowest -5 CA.orLower
+                -- Makes sure that your x-axis begins at -5 or lower, no matter
+                -- what your data is like.
+            , CA.highest 10 CA.orHigher
+                -- Makes sure that your x-axis ends at 10 or higher, no matter
+                -- what your data is like.
+            ]
+        , CA.domain
+            [ CA.lowest 0 CA.exactly ]
+                -- Makes sure that your y-axis begins at exactly 0, no matter
+                -- what your data is like.
+
+        -- Add event triggers to your chart. Learn move about these in
+        -- the `Chart.Events` module.
+        , CE.onMouseMove OnHovering (CE.getNearest C.bar)
+        , CE.onMouseLeave (OnHovering [])
+
+        -- Add arbitrary HTML and SVG attributes to your chart.
+        , CA.htmlAttrs [ HA.style "background" "beige" ]
+        , CA.attrs [ SA.id "my-chart" ]
+        ]
+        [ C.grid []
+        , C.xLabels []
+        , C.yLabels []
+        , ..
+        ]
+
+-}
 chart : List (CA.Attribute (Container data msg)) -> List (Element data msg) -> H.Html msg
 chart edits unindexedElements =
   let config =
         Helpers.apply edits
-          { width = 500
-          , height = 200
-          , marginTop = 0
-          , marginBottom = 0
-          , marginLeft = 0
-          , marginRight = 0
-          , paddingTop = 10
-          , paddingBottom = 0
-          , paddingLeft = 0
-          , paddingRight = 10
+          { width = 300
+          , height = 300
+          , margin = { top = 0, bottom = 0, left = 0, right = 0 }
+          , padding = { top = 0, bottom = 0, left = 0, right = 0 }
           , responsive = True
           , range = []
           , domain = []
@@ -168,7 +250,9 @@ chart edits unindexedElements =
 -- ELEMENTS
 
 
-{-| -}
+{-| The representation of a chart element.
+
+-}
 type Element data msg
   = Indexed (Int -> ( Element data msg, Int ))
   | SeriesElement
@@ -252,17 +336,10 @@ definePlane config elements =
           [] -> CA.lowest 0 CA.orLower limits_.y
           some -> List.foldl (\f b -> f b) limits_.y some
 
-      margin =
-        { top = config.marginTop
-        , right = config.marginRight
-        , left = config.marginLeft
-        , bottom = config.marginBottom
-        }
-
       unpadded =
-        { width = max 1 (config.width - config.paddingLeft - config.paddingRight)
-        , height = max 1 (config.height - config.paddingBottom - config.paddingTop)
-        , margin = margin
+        { width = max 1 (config.width - config.padding.left - config.padding.right)
+        , height = max 1 (config.height - config.padding.bottom - config.padding.top)
+        , margin = config.margin
         , x = calcRange
         , y = calcDomain
         }
@@ -273,15 +350,15 @@ definePlane config elements =
       scalePadY =
         C.scaleCartesianY unpadded
 
-      xMin = calcRange.min - scalePadX config.paddingLeft
-      xMax = calcRange.max + scalePadX config.paddingRight
+      xMin = calcRange.min - scalePadX config.padding.left
+      xMax = calcRange.max + scalePadX config.padding.right
 
-      yMin = calcDomain.min - scalePadY config.paddingBottom
-      yMax = calcDomain.max + scalePadY config.paddingTop
+      yMin = calcDomain.min - scalePadY config.padding.bottom
+      yMax = calcDomain.max + scalePadY config.padding.top
   in
   { width = config.width
   , height = config.height
-  , margin = margin
+  , margin = config.margin
   , x =
       { calcRange
       | min = min xMin xMax
@@ -539,7 +616,7 @@ xTicks edits =
 
       toTicks p =
         List.foldl (\f x -> f x) p.x config.limits
-          |> generateValues config.amount config.generate
+          |> generateValues config.amount config.generate Nothing
           |> List.map .value
 
       addTickValues p ts =
@@ -578,7 +655,7 @@ yTicks edits =
 
       toTicks p =
         List.foldl (\f y -> f y) p.y config.limits
-          |> generateValues config.amount config.generate
+          |> generateValues config.amount config.generate Nothing
           |> List.map .value
 
       addTickValues p ts =
@@ -611,6 +688,7 @@ type alias Labels =
   , generate : IS.TickType
   , fontSize : Maybe Int
   , uppercase : Bool
+  , format : Maybe (Float -> String)
   , grid : Bool
   }
 
@@ -630,13 +708,14 @@ xLabels edits =
           , xOff = 0
           , yOff = 18
           , grid = True
+          , format = Nothing
           , uppercase = False
           , fontSize = Nothing
           }
 
       toTicks p config =
         List.foldl (\f x -> f x) p.x config.limits
-          |> generateValues config.amount config.generate
+          |> generateValues config.amount config.generate config.format
 
       toTickValues p config ts =
         if not config.grid then ts else
@@ -677,13 +756,14 @@ yLabels edits =
           , xOff = -10
           , yOff = 3
           , grid = True
+          , format = Nothing
           , uppercase = False
           , fontSize = Nothing
           }
 
       toTicks p config =
         List.foldl (\f y -> f y) p.y config.limits
-          |> generateValues config.amount config.generate
+          |> generateValues config.amount config.generate config.format
 
       toTickValues p config ts =
         if not config.grid then ts else
@@ -953,60 +1033,260 @@ grid edits =
 -- PROPERTIES
 
 
-{-| -}
+{-| A property of a bar, line, or scatter series.
+
+-}
 type alias Property data inter deco =
   P.Property data String inter deco
 
 
-{-| -}
-interpolated : (data -> Float) -> List (CA.Attribute CS.Interpolation) -> List (CA.Attribute CS.Dot) -> Property data CS.Interpolation CS.Dot
-interpolated y inter =
-  P.property (y >> Just) ([ CA.linear ] ++ inter)
+{-| Specify the configuration of a bar. The first argument will determine the height of
+your bar. The second is a list of styling attributes. The example below illustrates what
+styling options are available.
 
+    C.chart []
+      [ C.bars []
+          [ C.bar .income
+              [ CA.color "blue"      -- Change the color
+              , CA.border "darkblue" -- Change the border color
+              , CA.borderWidth 2     -- Change the border width
+              , CA.opacity 0.7       -- Change the border opacity
 
-{-| -}
-interpolatedMaybe : (data -> Maybe Float) -> List (CA.Attribute CS.Interpolation) -> List (CA.Attribute CS.Dot) -> Property data CS.Interpolation CS.Dot
-interpolatedMaybe y inter =
-  P.property y ([ CA.linear ] ++ inter)
+              -- A bar can either be solid (default), striped, dotted, or gradient.
+              , CA.striped
+                  [ CA.width 2      -- Width of each stripe
+                  , CA.spacing 3    -- Spacing bewteen each stripe
+                  , CA.color "blue" -- Color of stripe
+                  , CA.rotate 90    -- Angle of stripe
+                  ]
 
+              , CA.dotted []
+                  -- Same configurations as `striped`
 
-{-| -}
-scatter : (data -> Float) -> List (CA.Attribute CS.Dot) -> Property data inter CS.Dot
-scatter y =
-  P.property (y >> Just) []
+              , CA.gradient
+                  [ "blue", "darkblue" ] -- List of colors in gradient
 
+              , CA.roundTop 0.2    -- Round the top corners
+              , CA.roundBottom 0.2 -- Round the bottom corners
 
-{-| -}
-scatterMaybe : (data -> Maybe Float) -> List (CA.Attribute CS.Dot) -> Property data inter CS.Dot
-scatterMaybe y =
-  P.property y []
+              -- You can highlight a bar or a set of bars by adding a kind of "aura" to it.
+              , CA.highlight 0.5          -- Determine the opacity of the aura
+              , CA.highlightWidth 5       -- Determine the width of the aura
+              , CA.highlightColor "blue"  -- Determine the color of the aura
 
+              -- Add arbitrary SVG attributes to your bar
+              , CA.attrs [ SA.strokeOpacity "0.5" ]
+              ]
+          ]
+          [ { income = 10 }
+          , { income = 12 }
+          , { income = 18 }
+          ]
+      ]
 
-{-| -}
+-}
 bar : (data -> Float) -> List (CA.Attribute CS.Bar) -> Property data inter CS.Bar
 bar y =
   P.property (y >> Just) []
 
 
-{-| -}
+{-| Same as `bar`, but allows for missing data.
+
+    C.chart []
+      [ C.bars []
+          [ C.barMaybe .income [] ]
+          [ { income = Just 10 }
+          , { income = Nothing }
+          , { income = Just 18 }
+          ]
+      ]
+
+-}
 barMaybe : (data -> Maybe Float) -> List (CA.Attribute CS.Bar) -> Property data inter CS.Bar
 barMaybe y =
   P.property y []
 
 
-{-| -}
+{-| Specify the configuration of a set of dots. The first argument will determine the y value of
+your dots. The second is a list of styling attributes. The example below illustrates what styling
+options are available.
+
+    C.series .year
+      [ C.scatter .income
+          [ CA.size 10            -- Change size of dot
+          , CA.color "blue"       -- Change color
+          , CA.opacity 0.8        -- Change opacity
+          , CA.border "lightblue" -- Change border color
+          , CA.borderWidth 2      -- Change border width
+
+          -- You can highlight a dot or a set of dots by adding a kind of "aura" to it.
+          , CA.highlight 0.3          -- Determine the opacity of the aura
+          , CA.highlightWidth 6       -- Determine the width of the aura
+          , CA.highlightColor "blue"  -- Determine the color of the aura
+
+          -- A dot is by default a circle, but you can change it to any
+          -- of the shapes below.
+          , CA.triangle
+          , CA.square
+          , CA.diamond
+          , CA.plus
+          , CA.cross
+          ]
+      ]
+      [ { year = 2000, income = 40000 }
+      , { year = 2010, income = 57000 }
+      , { year = 2020, income = 62000 }
+      ]
+
+-}
+scatter : (data -> Float) -> List (CA.Attribute CS.Dot) -> Property data inter CS.Dot
+scatter y =
+  P.property (y >> Just) []
+
+
+{-| Same as `scatter`, but allows for missing data.
+
+    C.chart []
+      [ C.series .year
+          [ C.scatterMaybe .income [] ]
+          [ { year = 2000, income = Just 40000 }
+          , { year = 2010, income = Nothing }
+          , { year = 2020, income = Just 62000 }
+          ]
+      ]
+
+-}
+scatterMaybe : (data -> Maybe Float) -> List (CA.Attribute CS.Dot) -> Property data inter CS.Dot
+scatterMaybe y =
+  P.property y []
+
+
+{-| Specify the configuration of a interpolated series (a line). The first argument will determine
+the y value of your dots. The second is a list of attributes pertaining to your interpolation. The
+third argument is a list of attributes pertaining to the dots of your series.
+
+The example below illustrates what styling options are available.
+
+    C.series .age
+      [ C.interpolated .height
+          [ -- The following attributes allow alternatives to the default
+            -- linear interpolation.
+            CA.monotone  -- Use a monotone interpolation (looks smooth)
+          , CA.stepped   -- Use a stepped interpolation (looks like stairs)
+
+          , CA.color "blue"
+          , CA.width 2
+          , CA.dashed [ 4, 4 ]
+
+          -- The area beneath the curve is by default transparent, but you
+          -- can change the opacity of it, or make it striped, dotted, or gradient.
+          , CA.opacity 0.5
+
+          , CA.striped
+              [ CA.width 2      -- Width of each stripe
+              , CA.spacing 3    -- Spacing bewteen each stripe
+              , CA.color "blue" -- Color of stripe
+              , CA.rotate 90    -- Angle of stripe
+              ]
+
+          , CA.dotted [] -- Same configurations as `striped`
+
+          , CA.gradient [ "blue", "darkblue" ] -- List of colors in gradient
+
+          -- Add arbitrary SVG attributes to your line
+          , CA.attrs [ SA.id "my-chart" ]
+          ]
+          []
+      ]
+      [ { age = 0, height = 40 }
+      , { age = 5, height = 80 }
+      , { age = 10, height = 120 }
+      , { age = 15, height = 180 }
+      , { age = 20, height = 184 }
+      ]
+
+-}
+interpolated : (data -> Float) -> List (CA.Attribute CS.Interpolation) -> List (CA.Attribute CS.Dot) -> Property data CS.Interpolation CS.Dot
+interpolated y inter =
+  P.property (y >> Just) ([ CA.linear ] ++ inter)
+
+
+{-| Same as `interpolated`, but allows for missing data.
+
+    C.chart []
+      [ C.series .age
+          [ C.interpolatedMaybe .height [] ]
+          [ { age = 0, height = Just 40 }
+          , { age = 5, height = Nothing }
+          , { age = 10, height = Just 120 }
+          , { age = 15, height = Just 180 }
+          , { age = 20, height = Just 184 }
+          ]
+      ]
+
+-}
+interpolatedMaybe : (data -> Maybe Float) -> List (CA.Attribute CS.Interpolation) -> List (CA.Attribute CS.Dot) -> Property data CS.Interpolation CS.Dot
+interpolatedMaybe y inter =
+  P.property y ([ CA.linear ] ++ inter)
+
+
+{-| Name a bar, scatter, or interpolated series. This name will show up
+in the default tooltip, and you can use it to identify items from this series.
+
+    C.chart []
+      [ C.series .year
+          [ C.scatter .income []
+              |> C.named "Income"
+          ]
+          [ { year = 2000, income = 40000 }
+          , { year = 2010, income = 48000 }
+          , { year = 2020, income = 62000 }
+          ]
+      ]
+
+-}
 named : String -> Property data inter deco -> Property data inter deco
 named name =
   P.meta name
 
 
-{-| -}
+{-| Change the style of your bars or dots based on the index of its data point
+and the data point itself.
+
+    C.chart []
+      [ C.series .year
+          [ C.scatter .income [ CA.opacity 0.6 ]
+              |> C.variation (\index datum -> [ CA.size datum.people ])
+          ]
+          [ { year = 2000, income = 40000, people = 150 }
+          , { year = 2010, income = 48000, people = 98 }
+          , { year = 2020, income = 62000, people = 180 }
+          ]
+      ]
+
+-}
 variation : (Int -> data -> List (CA.Attribute deco)) -> Property data inter deco -> Property data inter deco
 variation func =
   P.variation <| \_ _ index _ datum -> func index datum
 
 
-{-| -}
+{-| Change the style of your bars or dots based on whether it is a member
+of the group of products which you list. A such group of products can be
+attrained through events like `Chart.Events.onMouseMove` or similar.
+
+    C.chart
+      [ CE.onMouseMove OnHover (CE.getNearest CE.dot) ]
+      [ C.series .year
+          [ C.scatter .income [ CA.opacity 0.6 ]
+              |> C.amongst model.hovering (\datum -> [ CA.highlight 0.5 ])
+          ]
+          [ { year = 2000, income = 40000, people = 150 }
+          , { year = 2010, income = 48000, people = 98 }
+          , { year = 2020, income = 62000, people = 180 }
+          ]
+      ]
+
+-}
 amongst : List (CE.Product config value data) -> (data -> List (CA.Attribute deco)) -> Property data inter deco -> Property data inter deco
 amongst inQuestion func =
   P.variation <| \p s i meta d ->
@@ -1020,27 +1300,28 @@ amongst inQuestion func =
     List.concatMap check inQuestion
 
 
-{-| -}
+{-| Stack a set of bar or line series.
+
+    C.chart []
+      [ C.bars []
+          [ C.stacked
+              [ C.bar .cats []
+              , C.bar .dogs []
+              ]
+          ]
+          [ { cats = 2, dogs = 4 }
+          , { cats = 3, dogs = 2 }
+          , { cats = 6, dogs = 1 }
+          ]
+      ]
+-}
 stacked : List (Property data inter deco) -> Property data inter deco
 stacked =
   P.stacked
 
 
 
--- BARS
-
-
-{-| -}
-type alias Bars data =
-  { spacing : Float
-  , margin : Float
-  , roundTop : Float
-  , roundBottom : Float
-  , grouped : Bool
-  , grid : Bool
-  , x1 : Maybe (data -> Float)
-  , x2 : Maybe (data -> Float)
-  }
+-- BARS EXTRAS
 
 
 {-| -}
@@ -1064,13 +1345,122 @@ dotLabels toPosition labelAttrs =
     [ label labelAttrs [ S.text (String.fromFloat (CE.getDependent item)) ] (toPosition p item) ]
 
 
+
+-- BARS
+
+
 {-| -}
+type alias Bars data =
+  { spacing : Float
+  , margin : Float
+  , roundTop : Float
+  , roundBottom : Float
+  , grouped : Bool
+  , grid : Bool
+  , x1 : Maybe (data -> Float)
+  , x2 : Maybe (data -> Float)
+  }
+
+
+{-| Add a bar series to your chart. Each `data` in your `List data` is a "bin". For
+each "bin", whatever number of bars your have specified in the second argument will
+show up, side-by-side.
+
+    C.bars []
+      [ C.bar .income []
+      , C.bar .spending []
+      ]
+      [ { income = 10, spending = 2 }
+      , { income = 12, spending = 6 }
+      , { income = 18, spending = 16 }
+      ]
+
+The example above will thus produce three bins, each containing two bars. You can make
+your bars show up overlapping instead of side-by-side by using the `CA.ungroup`
+attribute:
+
+    C.bars
+      [ CA.ungroup ]
+      [ C.bar .total []
+      , C.bar .gross []
+      , C.bar .net []
+      ]
+      [ { net = 10, gross = 20, total = 50 }
+      , { net = 13, gross = 28, total = 63 }
+      , { net = 16, gross = 21, total = 82 }
+      ]
+
+By default, the x value of each bin is set by a simple count. The first bin is set at
+x = 1, the second at x = 2, and so on. If you'd like to control what the x values of
+your bins are, e.g. you are making a histogram, you may use the `CA.x1` and `CA.x2`
+attributes, as illustrated below.
+
+    C.bars
+      [ CA.x1 .score
+      , CA.x2 (\datum -> datum.score + 20)
+      ]
+      [ C.bar .students [] ]
+      [ { score = 0, students = 1 }
+      , { score = 20, students = 10 }
+      , { score = 40, students = 30 }
+      , { score = 60, students = 20 }
+      , { score = 80, students = 1 }
+      ]
+
+In this case, you actually only need to specify either `x1` or `x2` because the library
+estimates the unknown x value based on the size of the previous or next bin. However, it comes in
+handy to specify both when you have bins of irregular sizes.
+
+The rest of the configuration options concern styling:
+
+    C.bars
+      [ CA.spacing 0.1      -- The spacing _between_ the bars in each bin relative to the full length (1).
+      , CA.margin 0.2       -- The spacing _around_ the bars in each bin relative to the full length (1).
+      , CA.roundTop 0.2     -- The rounding of your bars top corners. It gets weird after around 0.5.
+      , CA.roundBottom 0.2  -- The rounding of your bars top corners. It gets weird after around 0.5.
+      , CA.noGrid           -- Grid lines are by default added at the bin limits. This removes them.
+      ]
+      [ C.bar .income []
+      , C.bar .spending []
+      ]
+      [ { income = 10, spending = 2 }
+      , { income = 12, spending = 6 }
+      , { income = 18, spending = 16 }
+      ]
+-}
 bars : List (CA.Attribute (Bars data)) -> List (Property data () CS.Bar) -> List data -> Element data msg
 bars edits properties data =
   barsMap identity edits properties data
 
 
-{-| -}
+{-| This is just like `bars`, but it maps your `data`. This is useful if you have
+several kinds of data types present in your chart.
+
+    type Datum
+      = Money  { year : Float, income : Float }
+      | People { year : Float, people : Float }
+
+    view : Html msg
+    view =
+      C.chart []
+        [ C.barsMap Money
+            [ CA.x1 .year ]
+            [ C.bar .income [] ]
+            [ { year = 2000, income = 200 }
+            , { year = 2010, income = 300 }
+            , { year = 2020, income = 500 }
+            ]
+
+        , C.barsMap People
+            [ CA.x1 .year ]
+            [ C.bar .people [] ]
+            [ { year = 2000, people = 21 }
+            , { year = 2010, people = 65 }
+            , { year = 2020, people = 93 }
+            ]
+        ]
+
+-}
 barsMap : (data -> a) -> List (CA.Attribute (Bars data)) -> List (Property data () CS.Bar) -> List data -> Element a msg
 barsMap mapData edits properties data =
   Indexed <| \index ->
@@ -1112,13 +1502,57 @@ barsMap mapData edits properties data =
 -- SERIES
 
 
-{-| -}
+{-| Add a scatter or line series to your chart. Each `data` in your `List data` will result in one "dot".
+The first argument of `series` determines the x value of each dot. The y value and all styling configuration
+is determined by the list of `interpolated` or `scatter` properties defined in the second argument.
+
+    C.series .age
+      [ C.interpolated .height [] []
+      , C.interpolated .weight [] []
+      ]
+      [ { age = 0, height = 40, weight = 4 }
+      , { age = 5, height = 80, weight = 24 }
+      , { age = 10, height = 120, weight = 36 }
+      , { age = 15, height = 180, weight = 54 }
+      , { age = 20, height = 184, weight = 60 }
+      ]
+
+See `interpolated` and `scatter` for styling options.
+
+-}
 series : (data -> Float) -> List (Property data CS.Interpolation CS.Dot) -> List data -> Element data msg
 series toX properties data =
   seriesMap identity toX properties data
 
 
-{-| -}
+{-| This is just like `series`, but it maps your `data`. This is useful if you have
+several kinds of data types present in your chart.
+
+    type Datum
+      = Height { age : Float, height : Float }
+      | Weight { age : Float, weight : Float }
+
+    view : Html msg
+    view =
+      C.chart []
+        [ C.seriesMap Height .age
+            [ C.interpolated .height [] ]
+            [ { age = 0, height = 40 }
+            , { age = 5, height = 80 }
+            , { age = 10, height = 120 }
+            , { age = 15, height = 180 }
+            ]
+
+        , C.seriesMap Weight .age
+            [ C.interpolated .weight [] ]
+            [ { age = 0, weight = 4 }
+            , { age = 5, weight = 24 }
+            , { age = 10, weight = 36 }
+            , { age = 15, weight = 54 }
+            ]
+        ]
+
+-}
 seriesMap : (data -> a) -> (data -> Float) -> List (Property data CS.Interpolation CS.Dot) -> List data -> Element a msg
 seriesMap mapData toX properties data =
   Indexed <| \index ->
@@ -1346,11 +1780,35 @@ binned binWidth func data =
 -- HELPERS
 
 
-generateValues : Int -> IS.TickType -> C.Axis -> List IS.TickValue
-generateValues amount tick axis =
+
+type alias TickValue =
+  { value : Float
+  , label : String
+  }
+
+
+generateValues : Int -> IS.TickType -> Maybe (Float -> String) -> C.Axis -> List TickValue
+generateValues amount tick maybeFormat axis =
+  let toTickValues toValue toString =
+        List.map <| \i ->
+            { value = toValue i
+            , label =
+                case maybeFormat of
+                  Just format -> format (toValue i)
+                  Nothing -> toString i
+            }
+  in
   case tick of
-    IS.Floats -> IS.toTickValues identity String.fromFloat (CS.generate amount CS.floats axis)
-    IS.Ints -> IS.toTickValues toFloat String.fromInt (CS.generate amount CS.ints axis)
-    IS.Times zone -> IS.toTickValues (toFloat << Time.posixToMillis << .timestamp) (CS.formatTime zone) (CS.generate amount (CS.times zone) axis)
+    IS.Floats ->
+      toTickValues identity String.fromFloat
+        (CS.generate amount CS.floats axis)
+
+    IS.Ints ->
+      toTickValues toFloat String.fromInt
+        (CS.generate amount CS.ints axis)
+
+    IS.Times zone ->
+      toTickValues (toFloat << Time.posixToMillis << .timestamp) (CS.formatTime zone)
+        (CS.generate amount (CS.times zone) axis)
 
 

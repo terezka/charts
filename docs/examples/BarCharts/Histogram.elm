@@ -14,7 +14,6 @@ view model =
   C.chart
     [ CA.height 300
     , CA.width 300
-    , CA.paddingRight 0
     ]
     [ C.grid []
     , C.xLabels [ CA.times Time.utc ]

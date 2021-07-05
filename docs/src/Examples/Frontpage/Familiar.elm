@@ -14,7 +14,7 @@ view model =
     [ CA.height 300
     , CA.width 300
     , CA.static
-    , CA.paddingLeft 10
+    , CA.padding { top = 0, bottom = 0, left = 10, right = 10 }
     ]
     [ C.grid []
     , C.xLabels []
@@ -96,7 +96,7 @@ view model =
     [ CA.height 300
     , CA.width 300
     , CA.static
-    , CA.paddingLeft 10
+    , CA.padding { top = 0, bottom = 0, left = 10, right = 10 }
     ]
     [ C.grid []
     , C.xLabels []
@@ -126,7 +126,7 @@ view model =
     [ CA.height 300
     , CA.width 300
     , CA.static
-    , CA.paddingLeft 10
+    , CA.padding { top = 0, bottom = 0, left = 10, right = 10 }
     ]
     [ C.grid []
     , C.xLabels []

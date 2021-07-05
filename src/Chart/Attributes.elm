@@ -2,16 +2,14 @@ module Chart.Attributes exposing
   ( Attribute
 
   -- CONTAINER
-  , width, height, attrs, htmlAttrs, static, events
-  , marginTop, marginBottom, marginLeft, marginRight
-  , paddingTop, paddingBottom, paddingLeft, paddingRight
+  , width, height, attrs, htmlAttrs, static, events, margin, padding
 
   -- LIMITS
   , range, domain, limits
   , lowest, highest, orLower, orHigher, exactly, more, less, window, likeData, zero, middle, percent
 
   -- LABELS
-  , fontSize, uppercase
+  , fontSize, uppercase, format
   , alignLeft, alignRight, alignMiddle, content
 
   -- AXIS
@@ -24,16 +22,15 @@ module Chart.Attributes exposing
 
   -- DECORATION
   , border, borderWidth, color, opacity, highlight, highlightWidth, highlightColor, background, noArrow, rotate
-  , striped, dotted, gradient, colors
+  , striped, dotted, gradient
 
   -- BAR
-  , ungroup, roundTop, roundBottom, margin, spacing
-  --, barLabel, binLabel
+  , ungroup, roundTop, roundBottom, spacing
 
   -- LINES
   , area, size, dashed, break
   , linear, monotone, stepped
-  , circle, triangle, square, diamond, plus, cross, shape
+  , circle, triangle, square, diamond, plus, cross
 
   -- TOOLTIP
   , onTop, onBottom, onRight, onLeft, onLeftOrRight, onTopOrBottom
@@ -183,51 +180,9 @@ domain v config =
 
 
 {-| -}
-marginTop : Float -> Attribute { a | marginTop : Float }
-marginTop value config =
-  { config | marginTop = value }
-
-
-{-| -}
-marginBottom : Float -> Attribute { a | marginBottom : Float }
-marginBottom value config =
-  { config | marginBottom = value }
-
-
-{-| -}
-marginLeft : Float -> Attribute { a | marginLeft : Float }
-marginLeft value config =
-  { config | marginLeft = value }
-
-
-{-| -}
-marginRight : Float -> Attribute { a | marginRight : Float }
-marginRight value config =
-  { config | marginRight = value }
-
-
-{-| -}
-paddingTop : Float -> Attribute { a | paddingTop : Float }
-paddingTop value config =
-  { config | paddingTop = value }
-
-
-{-| -}
-paddingBottom : Float -> Attribute { a | paddingBottom : Float }
-paddingBottom value config =
-  { config | paddingBottom = value }
-
-
-{-| -}
-paddingLeft : Float -> Attribute { a | paddingLeft : Float }
-paddingLeft value config =
-  { config | paddingLeft = value }
-
-
-{-| -}
-paddingRight : Float -> Attribute { a | paddingRight : Float }
-paddingRight value config =
-  { config | paddingRight = value }
+padding : x -> Attribute { a | padding : x }
+padding value config =
+  { config | padding = value }
 
 
 {-| -}
@@ -369,6 +324,12 @@ uppercase config =
 
 
 {-| -}
+format : x -> Attribute { a | format : Maybe x }
+format v config =
+  { config | format = Just v }
+
+
+{-| -}
 color : String -> Attribute { a | color : String }
 color v config =
   if v == "" then config else { config | color = v }
@@ -447,7 +408,7 @@ rotate v config =
 
 
 {-| -}
-margin : Float -> Attribute { a | margin : Float }
+margin : x -> Attribute { a | margin : x }
 margin v config =
   { config | margin = v }
 
@@ -636,15 +597,9 @@ dotted attrs_ config =
 
 
 {-| -}
-gradient : List (Attribute CS.GradientConfig) -> Attribute { a | design : Maybe CS.Design, opacity : Float }
-gradient attrs_ config =
-  { config | design = Just (CS.Gradient attrs_), opacity = if config.opacity == 0 then 1 else config.opacity }
-
-
-{-| -}
-colors : x -> Attribute { a | colors : x }
-colors value config =
-  { config | colors = value }
+gradient : List String -> Attribute { a | design : Maybe CS.Design, opacity : Float }
+gradient colors config =
+  { config | design = Just (CS.Gradient colors), opacity = if config.opacity == 0 then 1 else config.opacity }
 
 
 {-| -}
@@ -688,12 +643,6 @@ plus config =
 cross : Attribute { a | shape : Maybe CS.Shape }
 cross config =
   { config | shape = Just CS.Cross }
-
-
-{-| -}
-shape : Maybe CS.Shape -> Attribute { a | shape : Maybe CS.Shape }
-shape v config =
-  { config | shape = v }
 
 
 {-| -}

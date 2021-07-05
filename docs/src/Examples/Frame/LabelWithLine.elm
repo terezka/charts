@@ -14,7 +14,7 @@ view model =
   C.chart
     [ CA.height 300
     , CA.width 300
-    , CA.paddingTop 25
+    , CA.padding { top = 25, bottom = 0, left = 10, right = 10 }
     , CA.range [ CA.lowest 0 CA.exactly, CA.highest 10 CA.exactly ]
     , CA.domain [ CA.lowest 0 CA.exactly, CA.highest 10 CA.exactly ]
     ]
@@ -87,7 +87,7 @@ smallCode =
   C.chart
     [ CA.height 300
     , CA.width 300
-    , CA.paddingTop 25
+    , CA.padding { top = 25, bottom = 0, left = 10, right = 10 }
     , CA.range [ CA.lowest 0 CA.exactly, CA.highest 10 CA.exactly ]
     , CA.domain [ CA.lowest 0 CA.exactly, CA.highest 10 CA.exactly ]
     ]
@@ -128,7 +128,7 @@ view model =
   C.chart
     [ CA.height 300
     , CA.width 300
-    , CA.paddingTop 25
+    , CA.padding { top = 25, bottom = 0, left = 10, right = 10 }
     , CA.range [ CA.lowest 0 CA.exactly, CA.highest 10 CA.exactly ]
     , CA.domain [ CA.lowest 0 CA.exactly, CA.highest 10 CA.exactly ]
     ]

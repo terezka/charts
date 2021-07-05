@@ -736,7 +736,7 @@ type alias Bar =
 type Design
   = Striped (List (Helpers.Attribute Pattern))
   | Dotted (List (Helpers.Attribute Pattern))
-  | Gradient (List (Helpers.Attribute GradientConfig))
+  | Gradient (List String)
 
 
 {-| -}
@@ -746,12 +746,6 @@ type alias Pattern =
   , spacing : Float
   , rotate : Float
   }
-
-
-{-| -}
-type alias GradientConfig =
-  { colors : List String }
-
 
 
 defaultBar : Bar
@@ -1705,12 +1699,11 @@ toPattern defaultColor design =
             )
 
           Gradient edits ->
-            let config =
-                  apply edits
-                    { colors = [ defaultColor, "white" ] }
+            let colors =
+                  if edits == [] then [ defaultColor, "white" ] else edits
 
-                theId = toPatternId config.colors
-                totalColors = List.length config.colors
+                theId = toPatternId colors
+                totalColors = List.length colors
                 toPercentage i = toFloat i * 100 / toFloat (totalColors - 1)
                 toStop i c =
                   S.stop
@@ -1722,7 +1715,7 @@ toPattern defaultColor design =
             ( S.defs []
                 [ S.linearGradient
                     [ SA.id theId, SA.x1 "0", SA.x2 "0", SA.y1 "0", SA.y2 "1" ]
-                    (List.indexedMap toStop config.colors)
+                    (List.indexedMap toStop colors)
                 ]
             , theId
             )
@@ -1847,17 +1840,6 @@ times zone =
 generate : Int -> Generator a -> Coord.Axis -> List a
 generate amount (Generator func) limits =
   func amount limits
-
-
-type alias TickValue =
-  { value : Float
-  , label : String
-  }
-
-
-toTickValues : (a -> Float) -> (a -> String) -> List a -> List TickValue
-toTickValues toValue toString =
-  List.map <| \i -> { value = toValue i, label = toString i }
 
 
 

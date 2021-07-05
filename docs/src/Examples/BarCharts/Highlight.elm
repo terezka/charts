@@ -48,7 +48,7 @@ view model =
         ]
         [ C.bar .z [ CA.striped [], CA.borderWidth 1 ]
             |> C.amongst model.hovering (\_ -> [ CA.highlight 0.25 ])
-        , C.bar .v [ CA.gradient [ CA.colors [ "#7c29ed", "#7c29ed1F" ] ] ]
+        , C.bar .v [ CA.gradient [ "#7c29ed", "#7c29ed1F" ] ]
             |> C.amongst model.hovering (\_ -> [ CA.highlight 0.25 ])
         ]
         data
@@ -108,7 +108,7 @@ smallCode =
         ]
         [ C.bar .z [ CA.striped [], CA.borderWidth 1 ]
             |> C.amongst model.hovering (\\_ -> [ CA.highlight 0.25 ])
-        , C.bar .v [ CA.gradient [ CA.colors [ "#7c29ed", "#7c29ed1F" ] ] ]
+        , C.bar .v [ CA.gradient [ "#7c29ed", "#7c29ed1F" ] ]
             |> C.amongst model.hovering (\\_ -> [ CA.highlight 0.25 ])
         ]
         data
@@ -166,7 +166,7 @@ view model =
         ]
         [ C.bar .z [ CA.striped [], CA.borderWidth 1 ]
             |> C.amongst model.hovering (\\_ -> [ CA.highlight 0.25 ])
-        , C.bar .v [ CA.gradient [ CA.colors [ "#7c29ed", "#7c29ed1F" ] ] ]
+        , C.bar .v [ CA.gradient [ "#7c29ed", "#7c29ed1F" ] ]
             |> C.amongst model.hovering (\\_ -> [ CA.highlight 0.25 ])
         ]
         data

@@ -54,9 +54,8 @@ view model =
     [ CA.height 135
     , CA.width 225
     , CA.static
-    , CA.paddingLeft 8
-    , CA.paddingRight 8
-    , CA.marginBottom 18
+    , CA.margin { top = 0, bottom = 18, left = 0, right = 0 }
+    , CA.padding { top = 10, bottom = 0, left = 8, right = 8 }
     , CE.onMouseMove OnHover (CE.getNearestX CE.dot)
     , CE.onMouseLeave (OnHover [])
     ]
@@ -67,7 +66,7 @@ view model =
 
     , C.series .x
         [ C.interpolatedMaybe .y
-            [ CA.linear, CA.color CA.blue, CA.width 1.5, CA.opacity 0.4, CA.gradient [ CA.colors [ CA.blue, "white" ] ] ]
+            [ CA.linear, CA.color CA.blue, CA.width 1.5, CA.opacity 0.4, CA.gradient [ CA.blue, "white" ] ]
             [ CA.diamond, CA.color "white", CA.borderWidth 1.5, CA.size 8 ]
             |> C.amongst model.hovering (\_ -> [ CA.size 14 ])
         ]

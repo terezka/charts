@@ -17,6 +17,7 @@ module Chart.Events exposing
   , getDefaultTooltip, getSize
 
   , getProducts, getCommonality, filterDatum
+  -- , isSame
   )
 
 

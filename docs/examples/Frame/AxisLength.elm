@@ -13,8 +13,6 @@ view model =
   C.chart
     [ CA.height 300
     , CA.width 300
-    , CA.paddingTop 0
-    , CA.paddingRight 0
     , CA.range
         [ CA.lowest 0 CA.orLower
         , CA.highest 100 CA.orHigher

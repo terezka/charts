@@ -93,10 +93,8 @@ view model =
   C.chart
     [ CA.height 600
     , CA.width 1000
-    , CA.marginLeft 0
-    , CA.marginRight 0
-    , CA.marginBottom 50
-    , CA.paddingTop 15
+    , CA.margin { top = 0, bottom = 50, left = 0, right = 0 }
+    , CA.padding { top = 15, bottom = 0, left = 15, right = 15 }
 
     , CA.range <|
         case model.window of
@@ -251,11 +249,7 @@ viewSalaryDiscrepancyMini model =
     [ CA.height 100
     , CA.width 167
     , CA.static
-    , CA.marginLeft 0
-    , CA.marginBottom 0
-    , CA.marginTop 0
-    , CA.marginRight 0
-    , CA.paddingTop 15
+    , CA.padding { top = 15, bottom = 0, left = 15, right = 15 }
     , CA.range [ CA.lowest 20000 CA.orHigher ]
     , CA.domain [ CA.lowest 76 CA.orHigher ]
     ]

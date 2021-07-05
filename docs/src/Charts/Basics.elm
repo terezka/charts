@@ -9,7 +9,6 @@ import Svg.Attributes as SA
 
 import Chart as C
 import Chart.Attributes as CA
-import Internal.Item as CI
 import Chart.Svg as CS
 
 import Element as E
@@ -59,7 +58,7 @@ view =
         [ C.chart
             [ CA.height 300
             , CA.width 300
-            , CA.marginBottom 20
+            , CA.margin { top = 0, bottom = 20, left = 0, right = 0 }
             ]
             [ C.grid []
             , C.xAxis []
@@ -81,8 +80,8 @@ scatter =
       C.chart
         [ CA.height 300
         , CA.width 300
-        , CA.paddingLeft 10
-        , CA.paddingBottom 5
+        , CA.margin { top = 0, bottom = 20, left = 0, right = 0 }
+        , CA.padding { top = 0, bottom = 5, left = 10, right = 10 }
         ]
         [ C.grid []
         , C.xLabels []
@@ -107,9 +106,8 @@ scatter =
         [ C.chart
             [ CA.height 300
             , CA.width 300
-            , CA.marginBottom 20
-            , CA.paddingLeft 10
-            , CA.paddingBottom 5
+            , CA.margin { top = 0, bottom = 20, left = 0, right = 0 }
+            , CA.padding { top = 0, bottom = 5, left = 10, right = 10 }
             ]
             [ C.grid []
             , C.xLabels []
@@ -137,8 +135,8 @@ bubbles =
       C.chart
         [ CA.height 300
         , CA.width 300
-        , CA.paddingLeft 10
-        , CA.paddingBottom 5
+        , CA.margin { top = 0, bottom = 20, left = 0, right = 0 }
+        , CA.padding { top = 30, bottom = 5, left = 40, right = 40 }
         ]
         [ C.grid []
         , C.xLabels []
@@ -165,11 +163,8 @@ bubbles =
         [ C.chart
             [ CA.height 300
             , CA.width 300
-            , CA.marginBottom 20
-            , CA.paddingLeft 40
-            , CA.paddingRight 40
-            , CA.paddingBottom 5
-            , CA.paddingTop 30
+            , CA.margin { top = 0, bottom = 20, left = 0, right = 0 }
+            , CA.padding { top = 30, bottom = 5, left = 40, right = 40 }
             ]
             [ C.grid []
             , C.xLabels []
@@ -199,8 +194,8 @@ lines =
       C.chart
         [ CA.height 300
         , CA.width 300
-        , CA.paddingLeft 10
-        , CA.paddingBottom 10
+        , CA.margin { top = 0, bottom = 20, left = 0, right = 0 }
+        , CA.padding { top = 10, bottom = 5, left = 10, right = 10 }
         ]
         [ C.grid []
         , C.xLabels []
@@ -223,9 +218,8 @@ lines =
         [ C.chart
             [ CA.height 300
             , CA.width 300
-            , CA.marginBottom 20
-            , CA.paddingLeft 10
-            , CA.paddingBottom 5
+            , CA.margin { top = 0, bottom = 20, left = 0, right = 0 }
+            , CA.padding { top = 10, bottom = 5, left = 10, right = 10 }
             ]
             [ C.grid []
             , C.xLabels []
@@ -251,6 +245,7 @@ areas =
       C.chart
         [ CA.height 300
         , CA.width 300
+        , CA.margin { top = 0, bottom = 20, left = 0, right = 0 }
         ]
         [ C.grid []
         , C.xLabels []
@@ -275,7 +270,7 @@ areas =
         [ C.chart
             [ CA.height 300
             , CA.width 300
-            , CA.marginBottom 20
+            , CA.margin { top = 0, bottom = 20, left = 0, right = 0 }
             ]
             [ C.grid []
             , C.xLabels []
@@ -303,6 +298,7 @@ bars =
       C.chart
         [ CA.height 300
         , CA.width 300
+        , CA.margin { top = 0, bottom = 20, left = 0, right = 0 }
         ]
         [ C.grid []
         , C.xLabels [ CA.ints ]
@@ -326,7 +322,7 @@ bars =
         [ C.chart
             [ CA.height 300
             , CA.width 300
-            , CA.marginBottom 20
+            , CA.margin { top = 0, bottom = 20, left = 0, right = 0 }
             ]
             [ C.grid []
             , C.xLabels [ CA.ints ]

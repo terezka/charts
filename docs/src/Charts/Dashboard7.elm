@@ -53,11 +53,8 @@ view model =
   C.chart
     [ CA.height 230
     , CA.width 350
-    , CA.marginRight 20
-    , CA.marginBottom 45
-    , CA.paddingRight 0
-    , CA.paddingTop 5
-    , CA.paddingBottom 5
+    , CA.margin { top = 0, bottom = 45, left = 0, right = 20 }
+    , CA.padding { top = 5, bottom = 5, left = 0, right = 0 }
     , CE.onMouseMove OnHover (CE.getNearest (CE.keep CE.realValues CE.dot))
     , CE.onMouseLeave (OnHover [])
     ]

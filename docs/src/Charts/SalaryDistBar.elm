@@ -143,11 +143,8 @@ viewChart model =
   C.chart
     [ CA.height 430
     , CA.width 1000
-    , CA.marginLeft 0
-    , CA.marginRight 0
-    , CA.marginTop 40
-    , CA.marginBottom 50
-    , CA.paddingTop 15
+    , CA.margin { top = 40, bottom = 50, left = 0, right = 0 }
+    , CA.padding { top = 15, bottom = 0, left = 0, right = 0 }
 
     , CE.realValues
         |> CE.keep CE.bar
@@ -184,9 +181,9 @@ viewChart model =
         , CA.roundTop 0.2
         , CA.roundBottom 0.2
         ]
-        [ C.bar (howMany "women") [ CA.color "#f56dbc", CA.gradient [ CA.colors [ "#de74d7EE", "#f56dbc80" ]] ]
+        [ C.bar (howMany "women") [ CA.color "#f56dbc", CA.gradient [ "#de74d7EE", "#f56dbc80" ] ]
             |> C.named "women"
-        , C.bar (howMany "men") [ CA.color "#58a9f6", CA.gradient [ CA.colors [ "#8a91f7EE", "#58a9f680" ]] ]
+        , C.bar (howMany "men") [ CA.color "#58a9f6", CA.gradient [ "#8a91f7EE", "#58a9f680" ] ]
             |> C.named "men"
         ]
         (C.binned model.binSize .salary (womensData ++ mensData))

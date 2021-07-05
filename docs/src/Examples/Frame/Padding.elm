@@ -14,10 +14,7 @@ view model =
   C.chart
     [ CA.height 300
     , CA.width 300
-    , CA.paddingBottom 20
-    , CA.paddingTop 20
-    , CA.paddingLeft 20
-    , CA.paddingRight 20
+    , CA.padding { top = 20, bottom = 20, left = 20, right = 20 }
     ]
     [ C.grid []
     , C.xAxis []
@@ -66,10 +63,7 @@ smallCode =
   C.chart
     [ CA.height 300
     , CA.width 300
-    , CA.paddingBottom 20
-    , CA.paddingTop 20
-    , CA.paddingLeft 20
-    , CA.paddingRight 20
+    , CA.padding { top = 20, bottom = 20, left = 20, right = 20 }
     ]
     [ C.grid []
     , C.xAxis []
@@ -99,10 +93,7 @@ view model =
   C.chart
     [ CA.height 300
     , CA.width 300
-    , CA.paddingBottom 20
-    , CA.paddingTop 20
-    , CA.paddingLeft 20
-    , CA.paddingRight 20
+    , CA.padding { top = 20, bottom = 20, left = 20, right = 20 }
     ]
     [ C.grid []
     , C.xAxis []

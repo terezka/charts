@@ -54,9 +54,6 @@ view model =
     [ CA.height 135
     , CA.width 225
     , CA.static
-    , CA.paddingRight 0
-    , CA.paddingBottom 0
-    , CA.paddingTop 0
     , CE.onMouseMove OnHover (CE.getNearest <| CE.keep CE.realValues CE.dot)
     , CE.onMouseLeave (OnHover [])
     ]
@@ -72,7 +69,6 @@ view model =
     , C.bars
         [ CA.x1 .x
         , CA.roundTop 0.2
-        , CA.ungroup
         , CA.margin 0.05
         ]
         [ C.bar .y [ CA.color CA.pink, CA.opacity 0.8 ]

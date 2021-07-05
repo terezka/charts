@@ -15,7 +15,7 @@ view model =
   C.chart
     [ CA.height 300
     , CA.width 300
-    , CA.marginTop 30
+    , CA.margin { top = 30, bottom = 0, left = 0, right = 0 }
     ]
     [ C.grid []
     , C.xAxis []
