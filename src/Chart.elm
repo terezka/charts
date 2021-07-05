@@ -9,19 +9,18 @@ module Chart exposing
   , xAxis, yAxis, xTicks, yTicks, xLabels, yLabels, grid
   , binLabels, barLabels, dotLabels
 
+  , generate, floats, ints, times
   , xLabel, yLabel, xTick, yTick
-  , label, labelAt, tooltip, line, rect
-  , legendsAt
+  , label, labelAt, legendsAt
+
+  , tooltip, line, rect
 
   , svgAt, htmlAt, svg, html, none
 
   , each, eachBin, eachStack, eachBar, eachDot, eachProduct, eachCustom
   , withPlane, withBins, withStacks, withBars, withDots, withProducts
 
-  , generate, floats, ints, times
-
   , binned
-
   )
 
 
@@ -512,7 +511,30 @@ type alias Axis =
   }
 
 
-{-| -}
+{-| Add an x-axis line to your chart. The example below illustrates
+the styling options:
+
+    C.chart []
+      [ C.xAxis
+          [ CA.color "red"  -- Change color of line
+          , CA.width 2      -- Change width of line
+          , CA.noArrow      -- Remove arrow from line
+          , CA.pinned .max  -- Change what y position the axis is set at
+                            -- .max is at the very top
+                            -- .min is at the very bottom
+                            -- CA.zero is the closest you can go to zero
+                            -- (always 3) is at y = 3.
+
+          , CA.limits
+              [ CA.lowest 2 CA.exactly
+              , CA.highest 8 CA.exactly
+              ]
+              -- Change from where to where you line goes.
+              -- The example will make a line where x1 = 2 to x2 = 8
+          ]
+      ]
+
+-}
 xAxis : List (CA.Attribute Axis) -> Element item msg
 xAxis edits =
   let config =
@@ -549,7 +571,9 @@ xAxis edits =
       ]
 
 
-{-| -}
+{-| Add an y-axis line to your chart. The styling options are the same
+as for `xAxis`.
+-}
 yAxis : List (CA.Attribute Axis) -> Element item msg
 yAxis edits =
   let config =
@@ -598,7 +622,36 @@ type alias Ticks =
   }
 
 
-{-| -}
+{-| Produce a set of ticks at "nice" numbers on the x-axis of your chart.
+The example below illustrates the configuration:
+
+    C.chart []
+      [ C.xTicks
+          [ CA.color "red" -- Change color
+          , CA.height 8    -- Change height
+          , CA.width 2     -- Change width
+          , CA.amount 15   -- Change amount of ticks
+          , CA.flip        -- Flip to opposite direction
+          , CA.noGrid      -- By default a grid line is added
+                           -- for each tick. This removes them.
+
+          , CA.ints            -- Add ticks at "nice" ints
+          , CA.times Time.utc  -- Add ticks at "nice" times
+
+          , CA.pinned .max  -- Change what y position the ticks are set at
+                            -- .max is at the very top
+                            -- .min is at the very bottom
+                            -- CA.zero is the closest you can go to zero
+                            -- (always 3) is at y = 3.
+          , CA.limits
+              [ CA.lowest 2 CA.exactly
+              , CA.highest 8 CA.exactly
+              ]
+              -- Change the upper and lower limit of your tick range.
+              -- The example will add ticks between x = 2 and 8.
+          ]
+      ]
+-}
 xTicks : List (CA.Attribute Ticks) -> Element item msg
 xTicks edits =
   let config =
@@ -637,7 +690,9 @@ xTicks edits =
     S.g [ SA.class "elm-charts__x-ticks" ] <| List.map toTick (toTicks p)
 
 
-{-| -}
+{-| Produce a set of ticks at "nice" numbers on the y-axis of your chart.
+The styling options are the same as for `xTicks`.
+-}
 yTicks : List (CA.Attribute Ticks) -> Element item msg
 yTicks edits =
   let config =
@@ -693,7 +748,51 @@ type alias Labels =
   }
 
 
-{-| -}
+{-| Produce a set of labels at "nice" numbers on the x-axis of your chart.
+The example below illustrates the configuration:
+
+    C.chart []
+      [ C.xTicks
+          [ CA.color "red"  -- Change color
+          , CA.fontSize 12  -- Change font size
+          , CA.uppercase    -- Make labels uppercase
+
+          , CA.alignRight   -- Anchor labels to the right
+          , CA.alignLeft    -- Anchor labels to the left
+
+          , CA.moveUp 5     -- Move 5 SVG units up
+          , CA.moveDown 5   -- Move 5 SVG units down
+          , CA.moveLeft 5   -- Move 5 SVG units left
+          , CA.moveRight 5  -- Move 5 SVG units right
+
+          , CA.amount 15   -- Change amount of ticks
+          , CA.flip        -- Flip to opposite direction
+          , CA.noGrid      -- By default a grid line is added
+                           -- for each label. This removes them.
+
+          , CA.ints            -- Add ticks at "nice" ints
+          , CA.times Time.utc  -- Add ticks at "nice" times
+
+          , CA.format (\num -> String.fromFloat num ++ "°")
+              -- Format the "nice" number
+
+          , CA.pinned .max  -- Change what y position the labels are set at
+                            -- .max is at the very top
+                            -- .min is at the very bottom
+                            -- CA.zero is the closest you can go to zero
+                            -- (always 3) is at y = 3.
+          , CA.limits
+              [ CA.lowest 2 CA.exactly
+              , CA.highest 8 CA.exactly
+              ]
+              -- Change the upper and lower limit of your labels range.
+              -- The example will add labels between x = 2 and 8.
+          ]
+      ]
+
+For more in depth and irregular customization, see `xLabel`.
+
+-}
 xLabels : List (CA.Attribute Labels) -> Element item msg
 xLabels edits =
   let toConfig p =
@@ -741,7 +840,9 @@ xLabels edits =
     S.g [ SA.class "elm-charts__x-labels" ] (List.map toLabel (toTicks p config))
 
 
-{-| -}
+{-| Produce a set of labels at "nice" numbers on the y-axis of your chart.
+The styling options are the same as for `xLabels`.
+-}
 yLabels : List (CA.Attribute Labels) -> Element item msg
 yLabels edits =
   let toConfig p =
@@ -810,7 +911,53 @@ type alias Label =
   }
 
 
-{-| -}
+{-| Produce a single x label. This is typically for cases where you need
+very custom labels and `xLabels` does not cut it. It is especially useful
+in combination with the `generate` helper. An example use case:
+
+    C.chart []
+      [ -- Create labels for 10 "nice" integers on the x-axis
+        -- and highlight the label at x = 0.
+        C.generate 10 C.ints .x [] <| \plane int ->
+          let color = if int == 0 then "red" else "gray" in
+          [ C.xLabel
+              [ CA.x (toFloat int), CA.color color ]
+              [ S.text (String.fromInt int) ]
+          ]
+      ]
+
+A full list of possible attributes:
+
+    C.chart []
+      [ C.xLabel
+          [ CA.x 5  -- Set x coordinate
+          , CA.y 8  -- Set y coordinate
+
+          , CA.moveUp 5     -- Move 5 SVG units up
+          , CA.moveDown 5   -- Move 5 SVG units down
+          , CA.moveLeft 5   -- Move 5 SVG units left
+          , CA.moveRight 5  -- Move 5 SVG units right
+
+          , CA.border "white"   -- Set stroke color
+          , CA.borderWidth 0.5  -- Set stroke width
+
+          , CA.fontSize 12      -- Set font size
+          , CA.color "red"      -- Set color
+
+          , CA.alignRight   -- Anchor labels to the right
+          , CA.alignLeft    -- Anchor labels to the left
+
+          , CA.rotate 90    -- Rotate label 90 degrees
+          , CA.uppercase    -- Make uppercase
+          , CA.flip         -- Flip to opposite direction
+
+          , CA.noGrid      -- By default a grid line is added
+                           -- for each label. This removes it.
+          ]
+          [ S.text "hello!" ]
+      ]
+
+-}
 xLabel : List (CA.Attribute Label) -> List (S.Svg msg) -> Element data msg
 xLabel edits inner =
   let toConfig p =
@@ -856,7 +1003,11 @@ xLabel edits inner =
       { x = config.x, y = config.y }
 
 
-{-| -}
+{-| Produce a single y label. This is typically for cases where you need
+very custom labels and `yLabels` does not cut it. See `xLabel` for
+usage and customization.
+
+-}
 yLabel : List (CA.Attribute Label) -> List (S.Svg msg) -> Element data msg
 yLabel edits inner =
   let toConfig p =
@@ -1321,24 +1472,60 @@ stacked =
 
 
 
--- BARS EXTRAS
+-- LABEL EXTRAS
 
 
-{-| -}
+{-| Add labels by every bin.
+
+    C.chart []
+      [ C.bars [] [ C.bar .income [] ]
+          [ { name = "Anna", income = 60 }
+          , { name = "Karenina", income = 70 }
+          , { name = "Jane", income = 80 }
+          ]
+
+      , C.binLabels .name CE.getBottom [ CA.moveDown 15 ]
+      ]
+-}
 binLabels : (data -> String) -> (CS.Plane -> CE.Group (CE.Bin data) CE.Bar (Maybe Float) data -> CS.Point) -> List (CA.Attribute CS.Label) -> Element data msg
 binLabels toLabel toPosition labelAttrs =
+  -- TODO make even nicer api
   eachCustom (CE.collect CE.bin CE.bar) <| \p item ->
     [ label labelAttrs [ S.text (toLabel (CE.getCommonality item).datum) ] (toPosition p item) ]
 
 
-{-| -}
+{-| Add labels by every bar.
+
+    C.chart []
+      [ C.bars []
+          [ C.bar .income [] ]
+          [ { name = "Anna", income = 60 }
+          , { name = "Karenina", income = 70 }
+          , { name = "Jane", income = 80 }
+          ]
+
+      , C.barLabels CE.getTop [ CA.moveUp 6 ]
+      ]
+-}
 barLabels : (CS.Plane -> CE.Product CE.Bar Float data -> CS.Point) -> List (CA.Attribute CS.Label) -> Element data msg
 barLabels toPosition labelAttrs =
   eachBar <| \p item ->
     [ label labelAttrs [ S.text (String.fromFloat (CE.getDependent item)) ] (toPosition p item) ]
 
 
-{-| -}
+{-| Add labels by every bar.
+
+    C.chart []
+      [ C.series .age
+          [ C.scatter .income [] ]
+          [ { age = 34, income = 60 }
+          , { age = 42, income = 70 }
+          , { age = 48, income = 80 }
+          ]
+
+      , C.dotLabels CE.getCenter [ CA.moveUp 6 ]
+      ]
+-}
 dotLabels : (CS.Plane -> CE.Product CE.Dot Float data -> CS.Point) -> List (CA.Attribute CS.Label) -> Element data msg
 dotLabels toPosition labelAttrs =
   eachDot <| \p item ->

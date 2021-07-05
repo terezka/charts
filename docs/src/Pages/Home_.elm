@@ -32,6 +32,7 @@ import Svg.Attributes as SA
 
 import Chart as C
 import Chart.Attributes as CA
+import Chart.Events as CE
 import Chart.Svg as CS
 
 
@@ -180,17 +181,18 @@ view model =
           , E.el
               [ E.width (E.px 300)
               , E.height (E.px 300)
+              , E.padding 40
               ] <| E.html <|
               C.chart []
-                    [ C.series .year
-                        [ C.scatter .income [ CA.opacity 0.6 ]
-                            |> C.variation (\index datum -> [ CA.size datum.people ])
-                        ]
-                        [ { year = 2000, income = 40000, people = 150 }
-                        , { year = 2010, income = 48000, people = 98 }
-                        , { year = 2020, income = 62000, people = 180 }
-                        ]
+                [ C.series .age
+                    [ C.scatter .income [] ]
+                    [ { age = 34, income = 60 }
+                    , { age = 42, income = 70 }
+                    , { age = 48, income = 80 }
                     ]
+
+                , C.dotLabels CE.getTop [ CA.moveUp 6 ]
+                ]
 
           , E.column
               [ E.width E.fill
