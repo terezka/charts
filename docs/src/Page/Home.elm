@@ -188,7 +188,7 @@ view model =
                   ]
                   [ E.text "Compose "
                   , E.el [ F.italic ] (E.text "your")
-                  , E.text " chart with confidence."
+                  , E.text " chart without the clutter."
                   ]
               ]
 

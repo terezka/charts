@@ -21098,7 +21098,7 @@ var $author$project$Chart$yLabels = function (edits) {
 		return A2(
 			$author$project$Internal$Helpers$apply,
 			edits,
-			{amount: 5, anchor: $elm$core$Maybe$Nothing, color: '#808BAB', flip: false, fontSize: $elm$core$Maybe$Nothing, format: $elm$core$Maybe$Nothing, generate: $author$project$Internal$Svg$Floats, grid: true, limits: _List_Nil, pinned: $author$project$Chart$Attributes$zero, rotate: 90, uppercase: false, xOff: -10, yOff: 3});
+			{amount: 5, anchor: $elm$core$Maybe$Nothing, color: '#808BAB', flip: false, fontSize: $elm$core$Maybe$Nothing, format: $elm$core$Maybe$Nothing, generate: $author$project$Internal$Svg$Floats, grid: true, limits: _List_Nil, pinned: $author$project$Chart$Attributes$zero, rotate: 0, uppercase: false, xOff: -10, yOff: 3});
 	};
 	return A3(
 		$author$project$Chart$LabelsElement,
@@ -38893,7 +38893,7 @@ var $author$project$Page$Home$view = function (model) {
 									_List_fromArray(
 										[$mdgriffith$elm_ui$Element$Font$italic]),
 									$mdgriffith$elm_ui$Element$text('your')),
-									$mdgriffith$elm_ui$Element$text(' chart with confidence.')
+									$mdgriffith$elm_ui$Element$text(' chart without the clutter.')
 								]))
 						])),
 					A2(
