@@ -38901,7 +38901,6 @@ var $author$project$Page$Home$view = function (model) {
 					_List_fromArray(
 						[
 							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-							A2($mdgriffith$elm_ui$Element$paddingXY, 0, 100),
 							$mdgriffith$elm_ui$Element$spacing(100)
 						]),
 					_List_fromArray(

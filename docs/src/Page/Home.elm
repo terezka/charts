@@ -194,7 +194,6 @@ view model =
 
           , E.column
               [ E.width E.fill
-              , E.paddingXY 0 100
               , E.spacing 100
               ]
               [ feature
