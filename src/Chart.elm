@@ -963,7 +963,7 @@ yLabels edits =
           , format = Nothing
           , uppercase = False
           , fontSize = Nothing
-          , rotate = 90
+          , rotate = 0
           }
 
       toTicks p config =
