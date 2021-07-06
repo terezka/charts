@@ -37870,8 +37870,6 @@ var $author$project$Page$Home$feature = function (config) {
 					]))
 			]));
 };
-var $author$project$Chart$Svg$getNearest = $author$project$Internal$Svg$getNearest;
-var $author$project$Chart$Events$getPosition = $author$project$Internal$Item$getPosition;
 var $author$project$Page$Home$section = F2(
 	function (portion, chart) {
 		return A2(
@@ -38793,16 +38791,6 @@ var $author$project$Charts$Dashboard4$view = function (model) {
 					}))
 			]));
 };
-var $author$project$Chart$withBars = function (func) {
-	return $author$project$Chart$SubElements(
-		F2(
-			function (p, is) {
-				return A2(
-					func,
-					p,
-					A2($author$project$Chart$Events$group, $author$project$Chart$Events$bar, is));
-			}));
-};
 var $author$project$Page$Home$view = function (model) {
 	return {
 		body: $author$project$Ui$Layout$view(
@@ -38909,79 +38897,6 @@ var $author$project$Page$Home$view = function (model) {
 								]))
 						])),
 					A2(
-					$mdgriffith$elm_ui$Element$el,
-					_List_fromArray(
-						[
-							$mdgriffith$elm_ui$Element$width(
-							$mdgriffith$elm_ui$Element$px(300)),
-							$mdgriffith$elm_ui$Element$height(
-							$mdgriffith$elm_ui$Element$px(300))
-						]),
-					$mdgriffith$elm_ui$Element$html(
-						A2(
-							$author$project$Chart$chart,
-							_List_Nil,
-							_List_fromArray(
-								[
-									$author$project$Chart$xLabels(_List_Nil),
-									$author$project$Chart$yLabels(_List_Nil),
-									A3(
-									$author$project$Chart$bars,
-									_List_Nil,
-									_List_fromArray(
-										[
-											A2(
-											$author$project$Chart$bar,
-											function ($) {
-												return $.income;
-											},
-											_List_Nil),
-											A2(
-											$author$project$Chart$bar,
-											function ($) {
-												return $.spending;
-											},
-											_List_Nil)
-										]),
-									_List_fromArray(
-										[
-											{country: 'Denmark', income: 40000, spending: 10000},
-											{country: 'Sweden', income: 56000, spending: 12000},
-											{country: 'Norway', income: 62000, spending: 18000}
-										])),
-									$author$project$Chart$withBars(
-									F2(
-										function (plane, bars) {
-											var closest = A4(
-												$author$project$Chart$Svg$getNearest,
-												$author$project$Chart$Events$getPosition(plane),
-												bars,
-												plane,
-												{x: 2, y: 0});
-											return _List_fromArray(
-												[
-													A2(
-													$author$project$Chart$each,
-													closest,
-													F2(
-														function (_v0, bar) {
-															return _List_fromArray(
-																[
-																	A3(
-																	$author$project$Chart$label,
-																	_List_Nil,
-																	_List_fromArray(
-																		[
-																			$elm$svg$Svg$text(
-																			$author$project$Chart$Events$getDatum(bar).country)
-																		]),
-																	A2($author$project$Chart$Events$getBottom, plane, bar))
-																]);
-														}))
-												]);
-										}))
-								])))),
-					A2(
 					$mdgriffith$elm_ui$Element$column,
 					_List_fromArray(
 						[
@@ -38996,7 +38911,7 @@ var $author$project$Page$Home$view = function (model) {
 								body: 'The API mirrors the element and attribute pattern which you already know and love.',
 								chart: A2(
 									$elm$html$Html$map,
-									function (_v1) {
+									function (_v0) {
 										return $author$project$Page$Home$None;
 									},
 									$author$project$Examples$Frontpage$Familiar$view(_Utils_Tuple0)),
@@ -39018,7 +38933,7 @@ var $author$project$Page$Home$view = function (model) {
 								body: 'Mix together chart types, edit the styling, and attach labels to anything.',
 								chart: A2(
 									$elm$html$Html$map,
-									function (_v2) {
+									function (_v1) {
 										return $author$project$Page$Home$None;
 									},
 									$author$project$Examples$Frontpage$Familiar$view(_Utils_Tuple0)),
@@ -39030,7 +38945,7 @@ var $author$project$Page$Home$view = function (model) {
 								body: 'You never need to know how SVG clip paths work or any SVG for that matter!',
 								chart: A2(
 									$elm$html$Html$map,
-									function (_v3) {
+									function (_v2) {
 										return $author$project$Page$Home$None;
 									},
 									$author$project$Examples$Frontpage$Familiar$view(_Utils_Tuple0)),
