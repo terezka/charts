@@ -33,17 +33,24 @@ module Chart.Events exposing
 
 # Filtering
 @docs keep
+## Filter products
 @docs Any, product
+## Filter bars
 @docs Bar, bar
+## Filter dots
 @docs Dot, dot
-@docs realValues
-@docs named
+## Other qualities
+@docs realValues, named
 
 # Grouping
 @docs collect
+## Group bins
 @docs Bin, bin
+## Group stack
 @docs Stack, stack
+## Group same x value
 @docs SameX, sameX
+## Group helpers
 @docs group, regroup
 
 # Information about item
@@ -392,7 +399,12 @@ type alias Any =
   I.Any
 
 
-{-| -}
+{-| All products.
+
+    CE.getNearest CE.product
+    -- gets nearest product (bar or dot)
+
+-}
 product : Grouping (Product Any value data) (Product Any value data)
 product =
   G.product
@@ -403,7 +415,12 @@ type alias Dot =
   CS.Dot
 
 
-{-| -}
+{-| All dots.
+
+    CE.getNearest CE.dot
+    -- gets nearest dot
+
+-}
 dot : Grouping (Product Any value data) (Product Dot value data)
 dot =
   G.dot
@@ -414,19 +431,36 @@ type alias Bar =
   CS.Bar
 
 
-{-| -}
+{-| All bars.
+
+    CE.getNearest CE.bar
+    -- gets nearest bar
+
+-}
 bar : Grouping (Product Any value data) (Product Bar value data)
 bar =
   G.bar
 
 
-{-| -}
+{-| All real values. If you have used `Chart.barMaybe` or the like,
+you may have representations of missing data in your chart. This can filter
+those out.
+
+    CE.getNearest CE.realValues
+    -- gets nearest "real" value
+
+-}
 realValues : Grouping (Product config (Maybe Float) data) (Product config Float data)
 realValues =
   G.realValues
 
 
-{-| -}
+{-| All values produced from a particular set of series.
+
+    CE.getNearest (CE.named [ "cats", "dogs" ])
+    -- gets nearest product from the cats or dogs series.
+
+-}
 named : List String -> Grouping (Product config value data) (Product config value data)
 named =
   G.named
