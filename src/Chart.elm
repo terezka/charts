@@ -11,11 +11,11 @@ module Chart exposing
 
   , xLabel, yLabel, xTick, yTick
   , generate, floats, ints, times
-  , label, labelAt
+  , label, labelAt, legendsAt
 
-  , tooltip, line, rect, legendsAt
+  , tooltip, line, rect, none
 
-  , svgAt, htmlAt, svg, html, none
+  , svg, svgAt, html, htmlAt
 
   , each, eachBin, eachStack, eachBar, eachDot, eachProduct, eachCustom
   , withPlane, withBins, withStacks, withBars, withDots, withProducts
@@ -71,9 +71,9 @@ too. If that is the case, I will make a note in the comment of the element.
 @docs xLabel, yLabel, xTick, yTick
 @docs generate, floats, ints, times
 
-@docs label, labelAt, tooltip, line, rect
+@docs label, labelAt, legendsAt
 
-@docs legendsAt
+@docs tooltip, line, rect
 
 # Arbitrary elements
 @docs svgAt, htmlAt, svg, html, none
@@ -485,7 +485,59 @@ type alias Tooltip =
   }
 
 
-{-| -}
+{-| Add a tooltip for a specific item.
+
+    C.chart
+      [ CE.onMouseMove OnHover (CE.getNearest CE.product) ]
+      [ C.series .year
+          [ C.scatter .income [] ]
+          [ { year = 2000, income = 40000 }
+          , { year = 2010, income = 56000 }
+          , { year = 2020, income = 62000 }
+          ]
+
+      , C.each model.hovering <| \plane product ->
+          [ C.tooltip product [] [] [] ]
+      ]
+
+Customizations:
+
+    C.tooltip item
+      [ -- Change direction
+        CA.onTop          -- Always place tooltip on top of the item
+      , CA.onBottom       -- Always place tooltip below of the item
+      , CA.onRight        -- Always place tooltip on the right of the item
+      , CA.onLeft         -- Always place tooltip on the left of the item
+      , CA.onLeftOrRight  -- Place tooltip on the left or right of the item,
+                          -- depending on which side has more space available
+      , CA.onTopOrBottom  -- Place tooltip on the top or bottom of the item,
+                          -- depending on which side has more space available
+
+        -- Change focal point (where on the item the tooltip is achored)
+      , CA.top
+      , CA.bottom
+      , CA.left
+      , CA.right
+      , CA.center
+      , CA.topLeft
+      , CA.topRight
+      , CA.topCenter
+      , CA.bottomLeft
+      , CA.bottomRight
+      , CA.bottomCenter
+      , CA.leftCenter
+      , CA.rightCenter
+
+      , CA.offset 20  -- Change offset between focal point and tooltip
+      , CA.noArrow    -- Remove little box arrow
+      , CA.border "blue"  -- Change border color
+      , CA.background     -- Change background color
+      ]
+      [] -- Add any HTML attributes
+      [] -- Add any HTML children (Will be filled with default tooltip if left empty)
+
+
+-}
 tooltip : Item.Item a -> List (CA.Attribute Tooltip) -> List (H.Attribute Never) -> List (H.Html Never) -> Element data msg
 tooltip i edits attrs_ content =
   html <| \p ->
@@ -1536,6 +1588,30 @@ stacked =
 
       , C.binLabels .name CE.getBottom [ CA.moveDown 15 ]
       ]
+
+Attributes you can use:
+
+    C.binLabels .name CE.getBottom
+      [ CA.moveUp 5     -- Move 5 SVG units up
+      , CA.moveDown 5   -- Move 5 SVG units down
+      , CA.moveLeft 5   -- Move 5 SVG units left
+      , CA.moveRight 5  -- Move 5 SVG units right
+
+      , CA.color "#333"
+      , CA.border "white"
+      , CA.borderWidth 1
+      , CA.fontSize 12
+
+      , CA.alignRight   -- Anchor labels to the right
+      , CA.alignLeft    -- Anchor labels to the left
+
+      , CA.rotate 90    -- Rotate label 90 degrees
+      , CA.uppercase    -- Make uppercase
+
+       -- Add arbitrary SVG attributes to your labels.
+      , CA.attrs [ SA.class "my-bin-labels" ]
+      ]
+
 -}
 binLabels : (data -> String) -> (CS.Plane -> CE.Group (CE.Bin data) CE.Bar (Maybe Float) data -> CS.Point) -> List (CA.Attribute CS.Label) -> Element data msg
 binLabels toLabel toPosition labelAttrs =
@@ -1556,6 +1632,29 @@ binLabels toLabel toPosition labelAttrs =
 
       , C.barLabels CE.getTop [ CA.moveUp 6 ]
       ]
+
+Attributes you can use:
+
+    C.barLabels CE.getTop
+      [ CA.moveUp 5     -- Move 5 SVG units up
+      , CA.moveDown 5   -- Move 5 SVG units down
+      , CA.moveLeft 5   -- Move 5 SVG units left
+      , CA.moveRight 5  -- Move 5 SVG units right
+
+      , CA.color "#333"
+      , CA.border "white"
+      , CA.borderWidth 1
+      , CA.fontSize 12
+
+      , CA.alignRight   -- Anchor labels to the right
+      , CA.alignLeft    -- Anchor labels to the left
+
+      , CA.rotate 90    -- Rotate label 90 degrees
+      , CA.uppercase    -- Make uppercase
+
+       -- Add arbitrary SVG attributes to your labels.
+      , CA.attrs [ SA.class "my-bar-labels" ]
+      ]
 -}
 barLabels : (CS.Plane -> CE.Product CE.Bar Float data -> CS.Point) -> List (CA.Attribute CS.Label) -> Element data msg
 barLabels toPosition labelAttrs =
@@ -1574,6 +1673,29 @@ barLabels toPosition labelAttrs =
           ]
 
       , C.dotLabels CE.getCenter [ CA.moveUp 6 ]
+      ]
+
+Attributes you can use:
+
+    C.dotLabels CE.getCenter
+      [ CA.moveUp 5     -- Move 5 SVG units up
+      , CA.moveDown 5   -- Move 5 SVG units down
+      , CA.moveLeft 5   -- Move 5 SVG units left
+      , CA.moveRight 5  -- Move 5 SVG units right
+
+      , CA.color "#333"
+      , CA.border "white"
+      , CA.borderWidth 1
+      , CA.fontSize 12
+
+      , CA.alignRight   -- Anchor labels to the right
+      , CA.alignLeft    -- Anchor labels to the left
+
+      , CA.rotate 90    -- Rotate label 90 degrees
+      , CA.uppercase    -- Make uppercase
+
+       -- Add arbitrary SVG attributes to your labels.
+      , CA.attrs [ SA.class "my-dot-labels" ]
       ]
 -}
 dotLabels : (CS.Plane -> CE.Product CE.Dot Float data -> CS.Point) -> List (CA.Attribute CS.Label) -> Element data msg
@@ -1827,6 +1949,7 @@ withPlane func =
 
 
 {-| Given all your bins, add a list of elements.
+Use helpers in `Chart.Events` to interact with bins.
 
 -}
 withBins : (C.Plane -> List (CE.Group (CE.Bin data) CE.Any (Maybe Float) data) -> List (Element data msg)) -> Element data msg
@@ -1835,6 +1958,7 @@ withBins func =
 
 
 {-| Given all your stacks, add a list of elements.
+Use helpers in `Chart.Events` to interact with stacks.
 
 -}
 withStacks : (C.Plane -> List (CE.Group (CE.Stack data) CE.Any (Maybe Float) data) -> List (Element data msg)) -> Element data msg
@@ -1843,6 +1967,7 @@ withStacks func =
 
 
 {-| Given all your bars, add a list of elements.
+Use helpers in `Chart.Events` to interact with bars.
 
 -}
 withBars : (C.Plane -> List (CE.Product CE.Bar (Maybe Float) data) -> List (Element data msg)) -> Element data msg
@@ -1851,6 +1976,7 @@ withBars func =
 
 
 {-| Given all your dots, add a list of elements.
+Use helpers in `Chart.Events` to interact with dots.
 
 -}
 withDots : (C.Plane -> List (CE.Product CE.Dot (Maybe Float) data) -> List (Element data msg)) -> Element data msg
@@ -1859,6 +1985,7 @@ withDots func =
 
 
 {-| Given all your products, add a list of elements.
+Use helpers in `Chart.Events` to interact with products.
 
 -}
 withProducts : (C.Plane -> List (CE.Product CE.Any (Maybe Float) data) -> List (Element data msg)) -> Element data msg
@@ -1868,6 +1995,19 @@ withProducts func =
 
 {-| Add elements for each item of whatever list in the first argument.
 
+    C.chart
+      [ CE.onMouseMove OnHover (CE.getNearest CE.product) ]
+      [ C.series .year
+          [ C.scatter .income [] ]
+          [ { year = 2000, income = 40000 }
+          , { year = 2010, income = 56000 }
+          , { year = 2020, income = 62000 }
+          ]
+
+      , C.each model.hovering <| \plane product ->
+          [ C.tooltip product [] [] [] ]
+      ]
+
 -}
 each : List a -> (C.Plane -> a -> List (Element data msg)) -> Element data msg
 each items func =
@@ -1875,6 +2015,21 @@ each items func =
 
 
 {-| Add elements for each bin.
+
+    C.chart []
+      [ C.bars []
+          [ C.bar .income []
+          , C.bar .spending []
+          ]
+          [ { country = "Denmark", income = 40000, spending = 10000 }
+          , { country = "Sweden", income = 56000, spending = 12000 }
+          , { country = "Norway", income = 62000, spending = 18000 }
+          ]
+
+      , C.eachBin <| \plane bin ->
+          let common = CE.getCommonality bin in
+          [ C.label [] [ S.text common.datum.country ] (CE.getBottom plane bin) ]
+      ]
 
 -}
 eachBin : (C.Plane -> CE.Group (CE.Bin data) CE.Any Float data -> List (Element data msg)) -> Element data msg
@@ -1884,6 +2039,23 @@ eachBin func =
 
 {-| Add elements for each stack.
 
+    C.chart []
+      [ C.bars []
+          [ C.stacked
+              [ C.bar .income []
+              , C.bar .savings []
+              ]
+          ]
+          [ { income = 40000, savings = 10000 }
+          , { income = 56000, savings = 12000 }
+          , { income = 62000, savings = 18000 }
+          ]
+
+      , C.eachStack <| \plane stack ->
+          let total = List.sum (List.map CE.getDependent (CE.getProducts stack)) in
+          [ C.label [] [ S.text (String.fromFloat total) ] (CE.getTop plane stack) ]
+      ]
+
 -}
 eachStack : (C.Plane -> CE.Group (CE.Stack data) CE.Any Float data -> List (Element data msg)) -> Element data msg
 eachStack func =
@@ -1891,6 +2063,21 @@ eachStack func =
 
 
 {-| Add elements for each bar.
+
+    C.chart []
+      [ C.bars []
+          [ C.bar .income []
+          , C.bar .spending []
+          ]
+          [ { income = 40000, spending = 10000 }
+          , { income = 56000, spending = 12000 }
+          , { income = 62000, spending = 18000 }
+          ]
+
+      , C.eachBar <| \plane bar ->
+          let yValue = CE.getDependent bar in
+          [ C.label [] [ S.text (String.fromFloat yValue) ] (CE.getTop plane bar) ]
+      ]
 
 -}
 eachBar : (C.Plane -> CE.Product CE.Bar Float data -> List (Element data msg)) -> Element data msg
@@ -1900,13 +2087,29 @@ eachBar func =
 
 {-| Add elements for each dot.
 
+    C.chart []
+      [ C.series []
+          [ C.scatter .income []
+          , C.scatter .spending []
+          ]
+          [ { income = 40000, spending = 10000 }
+          , { income = 56000, spending = 12000 }
+          , { income = 62000, spending = 18000 }
+          ]
+
+      , C.eachBar <| \plane bar ->
+          let yValue = CE.getDependent bar in
+          [ C.label [] [ S.text (String.fromFloat yValue) ] (CE.getTop plane bar) ]
+      ]
+
 -}
 eachDot : (C.Plane -> CE.Product CE.Dot Float data -> List (Element data msg)) -> Element data msg
 eachDot func =
   SubElements <| \p is -> List.concatMap (func p) (CE.group (CE.keep CE.realValues CE.dot) is)
 
 
-{-| Add elements for each product.
+{-| Add elements for each product. Works like `eachBar` and `eachDot`, but includes both
+bars and dots.
 
 -}
 eachProduct : (C.Plane -> CE.Product CE.Any Float data -> List (Element data msg)) -> Element data msg
@@ -1916,6 +2119,13 @@ eachProduct func =
 
 {-| Filter and group products in any way you'd like and add elements for each of them.
 
+    C.chart []
+      [ C.eachCustom (CE.named "cats") <| \plane product ->
+          [ C.label [] [ S.text "hello" ] (CE.getTop plane product) ]
+      ]
+
+The above example adds a label for each product of the series named "cats".
+
 -}
 eachCustom : CE.Grouping (CE.Product CE.Any (Maybe Float) data) a -> (C.Plane -> a -> List (Element data msg)) -> Element data msg
 eachCustom grouping func =
@@ -1924,7 +2134,36 @@ eachCustom grouping func =
     List.concatMap (func p) processed
 
 
-{-| -}
+{-| Add legends to your chart.
+
+    C.chart []
+      [ C.series .x
+          [ C.line .y [] []
+              |> C.named "cats"
+          , C.line .y [] []
+              |> C.named "dogs"
+          ]
+
+      , C.legendsAt .min .max
+          [ CA.column       -- Appear as column instead of row
+          , CA.alignRight   -- Anchor legends to the right
+          , CA.alignLeft    -- Anchor legends to the left
+
+          , CA.moveUp 5     -- Move 5px up
+          , CA.moveDown 5   -- Move 5px down
+          , CA.moveLeft 5   -- Move 5px left
+          , CA.moveRight 5  -- Move 5px right
+
+          , CA.spacing 20         -- Spacing between legends
+          , CA.background "beige" -- Color background
+          , CA.border "gray"      -- Add border
+          , CA.borderWidth 1      -- Set border width
+
+            -- Add arbitrary HTML attributes. Convinient for extra styling.
+          , CA.htmlAttrs [ HA.class "my-legend" ]
+          ]
+      ]
+-}
 legendsAt : (C.Axis -> Float) -> (C.Axis -> Float) -> List (CA.Attribute (CS.Legends msg)) -> List (CA.Attribute (CS.Legend msg)) -> Element data msg
 legendsAt toX toY attrs children =
   HtmlElement <| \p legends_ ->
@@ -1982,6 +2221,33 @@ times =
     C.chart []
       [ C.label [] [ S.text "Data from Fruits.com" ] { x = 5, y = 10 } ]
 
+The example above adds your label at coordinates x = y and y = 10.
+
+Other attributes you can use:
+
+  C.labelAt
+    [ CA.moveUp 5     -- Move 5 SVG units up
+    , CA.moveDown 5   -- Move 5 SVG units down
+    , CA.moveLeft 5   -- Move 5 SVG units left
+    , CA.moveRight 5  -- Move 5 SVG units right
+
+    , CA.color "#333"
+    , CA.border "white"
+    , CA.borderWidth 1
+    , CA.fontSize 12
+
+    , CA.alignRight   -- Anchor labels to the right
+    , CA.alignLeft    -- Anchor labels to the left
+
+    , CA.rotate 90    -- Rotate label 90 degrees
+    , CA.uppercase    -- Make uppercase
+
+     -- Add arbitrary SVG attributes to your labels.
+    , CA.attrs [ SA.class "my-label" ]
+    ]
+    [ S.text "Data from Fruits.com" ]
+    { x = 5, y = 10 }
+
 -}
 label : List (CA.Attribute CS.Label) -> List (S.Svg msg) -> C.Point -> Element data msg
 label attrs inner point =
@@ -1991,9 +2257,33 @@ label attrs inner point =
 {-| Add a label, such as a chart title or other note, at a position relative to your axes.
 
     C.chart []
-      [ C.label (CA.percent 20) (CA.percent 90) [] [ S.text "Data from Fruits.com" ] ]
+      [ C.labelAt (CA.percent 20) (CA.percent 90) [] [ S.text "Data from Fruits.com" ] ]
 
 The example above adds your label at 20% the length of your range and 90% of your domain.
+
+Other attributes you can use:
+
+  C.labelAt (CA.percent 20) (CA.percent 90)
+    [ CA.moveUp 5     -- Move 5 SVG units up
+    , CA.moveDown 5   -- Move 5 SVG units down
+    , CA.moveLeft 5   -- Move 5 SVG units left
+    , CA.moveRight 5  -- Move 5 SVG units right
+
+    , CA.color "#333"
+    , CA.border "white"
+    , CA.borderWidth 1
+    , CA.fontSize 12
+
+    , CA.alignRight   -- Anchor labels to the right
+    , CA.alignLeft    -- Anchor labels to the left
+
+    , CA.rotate 90    -- Rotate label 90 degrees
+    , CA.uppercase    -- Make uppercase
+
+     -- Add arbitrary SVG attributes to your labels.
+    , CA.attrs [ SA.class "my-label" ]
+    ]
+    [ S.text "Data from Fruits.com" ]
 
 -}
 labelAt : (C.Axis -> Float) -> (C.Axis -> Float) -> List (CA.Attribute CS.Label) -> List (S.Svg msg) -> Element data msg
@@ -2003,13 +2293,57 @@ labelAt toX toY attrs inner =
 
 {-| Add a line.
 
+    C.chart []
+      [ C.line
+          [ CA.x1 2 -- Set x1
+          , CA.x2 8 -- Set x2
+          , CA.y1 3 -- Set y1
+          , CA.y2 7 -- Set y2
+
+            -- Instead of specifying x2 and y2
+            -- you can use `xOff` and `yOff`
+            -- to specify the end coordinate in
+            -- terms of SVG units.
+            --
+            -- Useful if making little label pointers.
+          , CA.xOff 30
+          , CA.yOff 30
+
+          , CA.break            -- "break" line, so it it has a 90° angle
+          , CA.color "red"      -- Change color
+          , CA.width 2          -- Change width
+          , CA.opacity 0.8      -- Change opacity
+          , CA.dashed [ 5, 5 ]  -- Add dashing
+
+            -- Add arbitrary SVG attributes.
+          , CA.attrs [ SA.id "my-line" ]
+          ]
+      ]
+
 -}
 line : List (CA.Attribute CS.Line) -> Element data msg
 line attrs =
   SvgElement <| \p -> CS.line p attrs
 
 
-{-| Add a rect.
+{-| Add a rectangle.
+
+    C.chart []
+      [ C.rect
+          [ CA.x1 2 -- Set x1
+          , CA.x2 8 -- Set x2
+          , CA.y1 3 -- Set y1
+          , CA.y2 7 -- Set y2
+
+          , CA.color "#aaa"     -- Change fill color
+          , CA.opacity 0.8      -- Change fill opacity
+          , CA.border "#333"    -- Change border color
+          , CA.borderWidth 2    -- Change border width
+
+            -- Add arbitrary SVG attributes.
+          , CA.attrs [ SA.id "my-rect" ]
+          ]
+      ]
 
 -}
 rect : List (CA.Attribute CS.Rect) -> Element data msg
@@ -2017,7 +2351,7 @@ rect attrs =
   SvgElement <| \p -> CS.rect p attrs
 
 
-{-| Add arbitrary SVG.
+{-| Add arbitrary SVG. See `Chart.Svg` for handy SVG helpers.
 
 -}
 svg : (C.Plane -> S.Svg msg) -> Element data msg
@@ -2033,7 +2367,7 @@ html func =
   HtmlElement <| \p _ -> func p
 
 
-{-| Add arbitrary SVG at a specific location.
+{-| Add arbitrary SVG at a specific location. See `Chart.Svg` for handy SVG helpers.
 
 -}
 svgAt : (C.Axis -> Float) -> (C.Axis -> Float) -> Float -> Float -> List (S.Svg msg) -> Element data msg

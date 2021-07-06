@@ -58,6 +58,7 @@ type alias Model =
   , dashboard6 : Dashboard6.Model
   , dashboard7 : Dashboard7.Model
   , concise : Concise.Model
+  , hovering : List (CE.Product CE.Any (Maybe Float) { year : Float, income : Float})
   }
 
 
@@ -71,6 +72,7 @@ init =
   , dashboard6 = Dashboard6.init
   , dashboard7 = Dashboard7.init
   , concise = Concise.init
+  , hovering = []
   }
 
 
@@ -87,6 +89,7 @@ type Msg
   | Dashboard6Msg Dashboard6.Msg
   | Dashboard7Msg Dashboard7.Msg
   | ConciseMsg Concise.Msg
+  | OnHover (List (CE.Product CE.Any (Maybe Float) { year : Float, income : Float}))
   | None
 
 
@@ -116,6 +119,9 @@ update msg model =
 
     ConciseMsg subMsg ->
       { model | concise = Concise.update subMsg model.concise }
+
+    OnHover hovering ->
+      { model | hovering = hovering }
 
     None ->
       model
@@ -181,23 +187,22 @@ view model =
           , E.el
               [ E.width (E.px 300)
               , E.height (E.px 300)
-              , E.padding 40
               ] <| E.html <|
-              C.chart []
-                [ C.bars
-                    [ CA.x1 .bin
-                    , CA.x2 (.bin >> (+) 10)
-                    ]
-                    [ C.bar (.data >> List.length >> toFloat) [] ] <|
-                    C.binned 10 .score
-                      [ { name = "Anna", score = 43 }
-                      , { name = "Maya", score = 65 }
-                      , { name = "Joan", score = 69 }
-                      , { name = "Tina", score = 98 }
-                      ]
-                , C.binLabels (.bin >> String.fromFloat) CE.getBottom [ CA.moveDown 16 ]
-                , C.barLabels CE.getTop [ CA.moveUp 6 ]
-                ]
+             C.chart []
+              [ C.bars []
+                  [ C.bar .income []
+                  , C.bar .spending []
+                  ]
+                  [ { country = "Denmark", income = 40000, spending = 10000 }
+                  , { country = "Sweden", income = 56000, spending = 12000 }
+                  , { country = "Norway", income = 62000, spending = 18000 }
+                  ]
+
+              , C.eachBin <| \plane bin ->
+                  let common = CE.getCommonality bin in
+                  [ C.label [] [ S.text common.datum.country ] (CE.getBottom plane bin) ]
+              ]
+
 
           , E.column
               [ E.width E.fill

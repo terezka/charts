@@ -3,7 +3,7 @@ module Chart.Events exposing
   , onMouseMove, onMouseLeave, onMouseUp, onMouseDown, onClick, on
   , Decoder(..), Point, getCoords, getNearest, getNearestX, getWithin, getWithinX
   , map, map2, map3, map4
-  , Grouping, product, dot, bin, stack, sameX, bar, realValues, named
+  , Grouping, product, bar, dot, bin, stack, sameX, realValues, named
   , keep, collect
   , group, regroup
 
