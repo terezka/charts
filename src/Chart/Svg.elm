@@ -1,31 +1,35 @@
 module Chart.Svg exposing
   ( Line, line
-  , Tick, xTick, yTick
-  , Label, label
   , Arrow, arrow
+  , Rect, rect
+  , Tooltip, tooltip
+
+  , Label, label
+  , Tick, xTick, yTick
+  , Generator, generate, floats, ints, times, formatTime
+
   , Bar, bar
   , Interpolation, interpolation, area
   , Dot, dot
-  , Tooltip, tooltip
-  , Rect, rect
-  , position, positionHtml
-  , Generator, generate, floats, ints, times, formatTime
 
   , Legends, legendsAt
   , Legend, lineLegend, barLegend
 
-  , Plane, Position, Point
+  , position, positionHtml
+
+  , Plane, Axis, Margin, Position, Point
   , fromSvg, fromCartesian
   , lengthInSvgX, lengthInSvgY
   , lengthInCartesianX, lengthInCartesianY
-  , isWithinPlane
+
+  , getNearest, getNearestX, getWithin, getWithinX
   )
 
 {-| Render plain SVG chart elements!
 
 If the options in the `Chart` module does not fit your needs, perhaps
 you need to render some custom SVG. This is the low level SVG helpers I
-use in the library, and you can use them too however you'd like. You can
+use in the library, and you can use them however you'd like too. You can
 embed your own SVG into your chart by using the `Chart.svg` and `Chart.svgAt`
 functions.
 
@@ -40,12 +44,22 @@ functions.
             CS.label plane [] [ S.text "my custom label" ] { x = 5, y = 5 }
         ]
 
+Most of the configuration of these functions are directly parallel to those
+of `Chart`, except you need to pass a `Plane` type in the first argument.
+
+You can see what attributes are applicable given their configuration record.
 
 # Line
 @docs Line, line
 
 # Rectangels
 @docs Rect, rect
+
+# Arrows
+@docs Arrow, arrow
+
+# Labels
+@docs Label, label
 
 # Ticks
 @docs Tick, xTick, yTick
@@ -55,12 +69,6 @@ functions.
 
 ## Formatting
 @docs formatTime
-
-# Labels
-@docs Label, label
-
-# Arrows
-@docs Arrow, arrow
 
 # Series
 
@@ -90,6 +98,9 @@ functions.
 @docs lengthInCartesianX, lengthInCartesianY
 @docs isWithinPlane
 
+# Seaching
+@docs getNearest, getNearestX, getWithin, getWithinX
+
 -}
 
 import Html as H exposing (Html)
@@ -109,32 +120,6 @@ import DateFormat as F
 import Dict exposing (Dict)
 import Internal.Helpers as Helpers
 import Internal.Svg
-
-
-
--- CONTAINER
-
-
-{-| -}
-type alias Container msg =
-  { attrs : List (S.Attribute msg)
-  , htmlAttrs : List (H.Attribute msg)
-  , responsive : Bool
-  , events : List (Event msg)
-  }
-
-
-{-| -}
-type alias Event msg =
-  { name : String
-  , handler : Plane -> Point -> msg
-  }
-
-
-container : Plane -> List (CA.Attribute (Container msg)) -> List (Html msg) -> List (Svg msg) -> List (Html msg) -> Html msg
-container plane edits =
-  Internal.Svg.container plane (Helpers.apply edits Internal.Svg.defaultContainer)
-
 
 
 -- TICK
@@ -218,6 +203,7 @@ rect plane edits =
 -- LEGEND
 
 
+{-| -}
 type alias Legends msg =
   { alignment : Internal.Svg.Alignment
   , anchor : Maybe Internal.Svg.Anchor
@@ -231,12 +217,13 @@ type alias Legends msg =
   }
 
 
+{-| -}
 legendsAt : Plane -> Float -> Float -> List (CA.Attribute (Legends msg)) -> List (Html msg) -> Html msg
 legendsAt plane x y edits =
   Internal.Svg.legendsAt plane x y (Helpers.apply edits Internal.Svg.defaultLegends)
 
 
-
+{-| -}
 type alias Legend msg =
   { xOff : Float
   , yOff : Float
@@ -250,6 +237,7 @@ type alias Legend msg =
   }
 
 
+{-| -}
 barLegend : List (CA.Attribute (Legend msg)) -> List (CA.Attribute Bar) ->  Html msg
 barLegend edits barAttrs =
   Internal.Svg.barLegend
@@ -257,6 +245,7 @@ barLegend edits barAttrs =
     (Helpers.apply barAttrs Internal.Svg.defaultBar)
 
 
+{-| -}
 lineLegend : List (CA.Attribute (Legend msg)) -> List (CA.Attribute Interpolation) -> List (CA.Attribute Dot) -> Html msg
 lineLegend edits interAttrsOrg dotAttrsOrg =
   let interpolationConfigOrg = Helpers.apply interAttrsOrg Internal.Svg.defaultInterpolation
@@ -420,7 +409,9 @@ type alias Tooltip =
   }
 
 
-{-| -}
+{-| Like `Chart.tooltip`, except in the second argument you give position directly instead of item.
+
+-}
 tooltip : Plane -> Position -> List (CA.Attribute Tooltip) -> List (H.Attribute Never) -> List (H.Html Never) -> H.Html msg
 tooltip plane pos edits =
   Internal.Svg.tooltip plane pos (Helpers.apply edits Internal.Svg.defaultTooltip)
@@ -430,82 +421,98 @@ tooltip plane pos edits =
 -- POSITIONING
 
 
-{-| -}
+{-| Postion arbritary SVG.
+
+    S.g [ position plane x y xOff yOff ] [ ... ]
+
+-}
 position : Plane -> Float -> Float -> Float -> Float -> Float -> S.Attribute msg
 position =
   Internal.Svg.position
 
 
-{-| -}
+{-| Postion arbritary HTML.
+
+    positionHtml plane x y xOff yOff [] [ .. ]
+
+-}
 positionHtml : Plane -> Float -> Float -> Float -> Float -> List (H.Attribute msg) -> List (H.Html msg) -> H.Html msg
 positionHtml =
   Internal.Svg.positionHtml
 
 
 
--- EVENTS
+-- SEARCHERS
 
 
-{-| -}
+{-| Search a list for the nearest item. Example use:
+
+    C.withBars <| \plane bars ->
+      let closest = CS.getNearest (CE.getPosition plane) bars plane { x = 2, y = 4 } in
+      [ C.each closest <| \_ bar -> [ C.label [] [ S.text "nearest" ] (CE.getBottom plane bar) ]
+      ]
+
+-}
 getNearest : (a -> Position) -> List a -> Plane -> Point -> List a
 getNearest =
   Internal.Svg.getNearest
 
 
-{-| -}
+{-| Like `getNearest`, but include searched radius in first argument.
+
+-}
 getWithin : Float -> (a -> Position) -> List a -> Plane -> Point -> List a
 getWithin =
   Internal.Svg.getWithin
 
 
-{-| -}
+{-| Like `getNearest`, but only searches x coordinates.
+
+-}
 getNearestX : (a -> Position) -> List a -> Plane -> Point -> List a
 getNearestX =
   Internal.Svg.getNearestX
 
 
-{-| -}
+{-| Like `getWithin`, but only searches x coordinates.
+
+-}
 getWithinX : Float -> (a -> Position) -> List a -> Plane -> Point -> List a
 getWithinX =
   Internal.Svg.getWithinX
-
-
-{-| -}
-decoder : Plane -> (Plane -> Point -> msg) -> Json.Decoder msg
-decoder =
-  Internal.Svg.decoder
-
-
-{-| -}
-isWithinPlane : Plane -> Float -> Float -> Bool
-isWithinPlane =
-  Internal.Svg.isWithinPlane
 
 
 
 -- INTERVALS
 
 
+{-| -}
 type alias Generator a
   = Internal.Svg.Generator a
 
 
+{-| -}
 floats : Generator Float
 floats =
   Internal.Svg.floats
 
 
+{-| -}
 ints : Generator Int
 ints =
   Internal.Svg.ints
 
 
+{-| -}
 times : Time.Zone -> Generator I.Time
 times =
   Internal.Svg.times
 
 
-generate : Int -> Generator a -> Coord.Axis -> List a
+{-| Generate a "nice" set of type `a`.
+
+-}
+generate : Int -> Generator a -> Axis -> List a
 generate =
   Internal.Svg.generate
 
@@ -514,6 +521,7 @@ generate =
 -- FORMATTING
 
 
+{-| -}
 formatTime : Time.Zone -> I.Time -> String
 formatTime =
   Internal.Svg.formatTime
@@ -523,16 +531,52 @@ formatTime =
 -- SYSTEM
 
 
+{-| This is the key information about the coordinate system of your chart.
+Using this you'll be able to translate cartesian coordinates into SVG ones and back.
+
+-}
 type alias Plane =
-  Coord.Plane
+  { width : Float
+  , height : Float
+  , margin : Margin
+  , x : Axis
+  , y : Axis
+  }
 
 
+{-| -}
+type alias Margin =
+  { top : Float
+  , right : Float
+  , left : Float
+  , bottom : Float
+  }
+
+
+{-| Information about your range or domain.
+
+ - *dataMin* is the lowest value of your data
+ - *dataMax* is the highest value of your data
+ - *min* is the lowest value of your axis
+ - *max* is the highest value of your axis
+
+-}
+type alias Axis =
+  { dataMin : Float
+  , dataMax : Float
+  , min : Float
+  , max : Float
+  }
+
+
+{-| -}
 type alias Point =
   { x : Float
   , y : Float
   }
 
 
+{-| -}
 type alias Position =
   { x1 : Float
   , x2 : Float
@@ -541,31 +585,49 @@ type alias Position =
   }
 
 
+{-| Translate a SVG coordinate to cartesian.
+
+-}
 fromSvg : Plane -> Point -> Point
 fromSvg =
   Internal.Svg.fromSvg
 
 
+{-| Translate a cartesian coordinate to SVG.
+
+-}
 fromCartesian : Plane -> Point -> Point
 fromCartesian =
   Internal.Svg.fromCartesian
 
 
+{-| How long is a cartesian x length in SVG units?
+
+-}
 lengthInSvgX : Plane -> Float -> Float
 lengthInSvgX =
   Internal.Svg.lengthInSvgX
 
 
+{-| How long is a cartesian y length in SVG units?
+
+-}
 lengthInSvgY : Plane -> Float -> Float
 lengthInSvgY =
   Internal.Svg.lengthInSvgY
 
 
+{-| How long is a SVG x length in cartesian units?
+
+-}
 lengthInCartesianX : Plane -> Float -> Float
 lengthInCartesianX =
   Internal.Svg.lengthInCartesianX
 
 
+{-| How long is a SVG y length in cartesian units?
+
+-}
 lengthInCartesianY : Plane -> Float -> Float
 lengthInCartesianY =
   Internal.Svg.lengthInCartesianY

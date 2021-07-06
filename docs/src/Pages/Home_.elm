@@ -189,7 +189,9 @@ view model =
               , E.height (E.px 300)
               ] <| E.html <|
              C.chart []
-              [ C.bars []
+              [ C.xLabels []
+              , C.yLabels []
+              , C.bars []
                   [ C.bar .income []
                   , C.bar .spending []
                   ]
@@ -198,14 +200,21 @@ view model =
                   , { country = "Norway", income = 62000, spending = 18000 }
                   ]
 
-              , C.eachBin <| \plane bin ->
-                  let common = CE.getCommonality bin in
-                  [ C.label [] [ S.text common.datum.country ] (CE.getBottom plane bin) ]
+              , C.withBars <| \plane bars ->
+                  let closest : List (CE.Product CE.Bar (Maybe Float) { country : String, income : Float, spending : Float })
+                      closest =
+                        CS.getNearest (CE.getPosition plane) bars plane { x = 2, y = 0 }
+
+                  in
+                  [ C.each closest <| \_ bar ->
+                      [ C.label [] [ S.text (CE.getDatum bar).country ] (CE.getBottom plane bar) ]
+                  ]
               ]
 
 
           , E.column
               [ E.width E.fill
+              , E.paddingXY 0 100
               , E.spacing 100
               ]
               [ feature

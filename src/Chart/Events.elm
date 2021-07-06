@@ -90,10 +90,7 @@ type alias Point =
 {-| -}
 getCoords : Decoder data Point
 getCoords =
-  Decoder <| \_ plane searched ->
-    { x = C.toCartesianX plane searched.x
-    , y = C.toCartesianY plane searched.y
-    }
+  Decoder <| \_ plane searched -> searched
 
 
 {-| -}

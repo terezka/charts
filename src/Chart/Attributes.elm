@@ -54,6 +54,69 @@ module Chart.Attributes exposing
   )
 
 
+{-| This module contains attributes for editing elements in `Chart` and `Chart.Svg`. See
+`Chart` for usage examples.
+
+Often a single attribute can change several different configurations, so the categories
+below are only guiding.
+
+@docs Attribute
+
+## Container
+@docs width, height, attrs, htmlAttrs, static, events, margin, padding
+
+## Limits
+@docs range, domain, limits
+@docs lowest, highest, orLower, orHigher, exactly, more, less, window, likeData, zero, middle, percent
+
+## Labels
+@docs fontSize, uppercase, format
+@docs alignLeft, alignRight, alignMiddle, content
+
+## Axis
+@docs amount, flip, pinned
+@docs ints, times
+
+## Coordinates
+@docs x, y, x1, y1, x2, y2, xOff, yOff, length
+@docs moveLeft, moveRight, moveUp, moveDown
+
+## Decoration
+@docs border, borderWidth, color, opacity, highlight, highlightWidth, highlightColor, background, noArrow, rotate
+@docs striped, dotted, gradient
+
+## Bar
+@docs ungroup, roundTop, roundBottom, spacing
+
+## Lines
+@docs area, size, dashed, break
+@docs linear, monotone, stepped
+@docs circle, triangle, square, diamond, plus, cross
+
+## Tooltip
+@docs onTop, onBottom, onRight, onLeft, onLeftOrRight, onTopOrBottom
+@docs offset
+@docs focal
+@docs topLeft, topRight, topCenter
+@docs bottomLeft, bottomRight, bottomCenter
+@docs leftCenter, rightCenter
+@docs top, bottom, left, right, center
+
+## Legends
+@docs title, row, column
+
+## Grid
+@docs noGrid, dotGrid
+
+## Colors
+@docs pink, purple, blue, green, orange, turquoise, red
+@docs magenta, brown, mint, yellow, gray
+@docs darkYellow, darkBlue, darkGray
+
+
+-}
+
+
 import Time
 import Internal.Coordinates as C
 import Internal.Helpers as Helpers
@@ -65,73 +128,121 @@ type alias Attribute c =
   c -> c
 
 
-{-| -}
+{-| Change the lower bound of an axis.
+
+    CA.lowest -5 CA.orLower initial  -- { dataMin = 0, dataMax = 10, min = -5, max = 10 }
+    CA.lowest -5 CA.orHigher initial -- { dataMin = 0, dataMax = 10, min = 0, max = 10 }
+    CA.lowest 2 CA.exactly initial   -- { dataMin = 0, dataMax = 10, min = 2, max = 10 }
+    CA.lowest 2 CA.less initial   -- { dataMin = 0, dataMax = 10, min = -2, max = 10 }
+    CA.lowest 3 CA.more initial   -- { dataMin = 0, dataMax = 10, min = 3, max = 10 }
+
+where
+
+    initial : Axis
+    initial =
+      { dataMin = 0, dataMax = 10, min = 0, max = 10 }
+
+-}
 lowest : Float -> (Float -> Float -> Float -> Float) -> Attribute C.Axis
 lowest v edit b =
   { b | min = edit v b.min b.dataMin }
 
 
-{-| -}
+{-| Same as `lowest`, but changes upper bound.
+
+-}
 highest : Float -> (Float -> Float -> Float -> Float) -> Attribute C.Axis
 highest v edit b =
   { b | max = edit v b.max b.dataMax }
 
 
-{-| -}
+{-| Resets axis to fit data bounds.
+
+-}
 likeData : Attribute C.Axis
 likeData b =
   { b | min = b.dataMin, max = b.dataMax }
 
 
-{-| -}
+{-| Set an axis to an exact window.
+
+    CA.window 2 5 initial   -- { dataMin = 0, dataMax = 10, min = 2, max = 5 }
+
+where
+
+    initial : Axis
+    initial =
+      { dataMin = 0, dataMax = 10, min = 0, max = 10 }
+
+-}
 window : Float -> Float -> Attribute C.Axis
 window min_ max_ b =
   { b | min = min_, max = max_ }
 
 
-{-| -}
+{-| See `lowest` for usage examples.
+
+-}
 exactly : Float -> Float -> Float -> Float
 exactly exact _ _ =
   exact
 
 
-{-| -}
+{-| See `lowest` for usage examples.
+
+-}
 orLower : Float -> Float -> Float -> Float
 orLower least real _ =
   if real > least then least else real
 
 
-{-| -}
+{-| See `lowest` for usage examples.
+
+-}
 orHigher : Float -> Float -> Float -> Float
 orHigher most real _ =
   if real < most then most else real
 
 
-{-| -}
+{-| See `lowest` for usage examples.
+
+-}
 more : Float -> Float -> Float -> Float
 more v o _ =
   o + v
 
 
-{-| -}
+{-| See `lowest` for usage examples.
+
+-}
 less : Float -> Float -> Float -> Float
 less v o _ =
   o - v
 
 
-{-| -}
+{-| Given an axis, find the value within it closest to zero.
+
+    CA.zero { dataMin = 0, dataMax = 10, min = 2, max = 5 } -- 2
+    CA.zero { dataMin = 0, dataMax = 10, min = -5, max = 5 } -- 0
+    CA.zero { dataMin = 0, dataMax = 10, min = -5, max = -2 } -- -2
+
+-}
 zero : C.Axis -> Float
 zero b =
   clamp b.min b.max 0
 
 
-{-| -}
+{-| Get the middle value of your axis.
+
+-}
 middle : C.Axis -> Float
 middle b =
   b.min + (b.max - b.min) / 2
 
 
-{-| -}
+{-| Get the value at a certain percentage of the length of your axis.
+
+-}
 percent : Float -> C.Axis -> Float
 percent per b =
   b.min + (b.max - b.min) * (per / 100)

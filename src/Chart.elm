@@ -544,7 +544,7 @@ tooltip i edits attrs_ content =
     let pos = Item.getLimits i
         content_ = if content == [] then Item.toHtml i else content
     in
-    if CS.isWithinPlane p pos.x1 pos.y2 -- TODO
+    if IS.isWithinPlane p pos.x1 pos.y2 -- TODO
     then CS.tooltip p (Item.getPosition p i) edits attrs_ content_
     else H.text ""
 
@@ -2162,6 +2162,14 @@ eachCustom grouping func =
             -- Add arbitrary HTML attributes. Convinient for extra styling.
           , CA.htmlAttrs [ HA.class "my-legend" ]
           ]
+          [ CA.width 30    -- Change width of legend window
+          , CA.height 30   -- Change height of legend window
+          , CA.fontSize 12 -- Change font size
+          , CA.color "red" -- Change font color
+          , CA.spacing 12  -- Change spacing between window and title
+
+          , CA.htmlAttrs [ HA.class "my-legends" ] -- Add arbitrary HTML attributes.
+          ]
       ]
 -}
 legendsAt : (C.Axis -> Float) -> (C.Axis -> Float) -> List (CA.Attribute (CS.Legends msg)) -> List (CA.Attribute (CS.Legend msg)) -> Element data msg
@@ -2210,6 +2218,10 @@ ints =
 
 
 {-| Generate "nice" times.
+
+See the docs in [terezka/intervals](https://package.elm-lang.org/packages/terezka/intervals/2.0.0/Intervals#Time)
+for more info about the information in `I.Time`!
+
 -}
 times : Time.Zone -> CS.Generator I.Time
 times =

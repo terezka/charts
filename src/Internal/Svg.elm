@@ -1417,25 +1417,15 @@ positionHtml plane x y xOff yOff attrs content =
 
 {-| -}
 getNearest : (a -> Position) -> List a -> Plane -> Point -> List a
-getNearest toPosition items plane searchedSvg =
-  let searched =
-        { x = Coord.toCartesianX plane searchedSvg.x
-        , y = Coord.toCartesianY plane searchedSvg.y
-        }
-  in
+getNearest toPosition items plane searched =
   getNearestHelp toPosition items plane searched
 
 
 {-| -}
 getWithin : Float -> (a -> Position) -> List a -> Plane -> Point -> List a
-getWithin radius toPosition items plane searchedSvg =
+getWithin radius toPosition items plane searched =
     let toPoint i =
           closestPoint (toPosition i) searched
-
-        searched =
-          { x = Coord.toCartesianX plane searchedSvg.x
-          , y = Coord.toCartesianY plane searchedSvg.y
-          }
 
         keepIfEligible closest =
           withinRadius plane radius searched (toPoint closest)
@@ -1446,25 +1436,15 @@ getWithin radius toPosition items plane searchedSvg =
 
 {-| -}
 getNearestX : (a -> Position) -> List a -> Plane -> Point -> List a
-getNearestX toPosition items plane searchedSvg =
-    let searched =
-          { x = Coord.toCartesianX plane searchedSvg.x
-          , y = Coord.toCartesianY plane searchedSvg.y
-          }
-    in
+getNearestX toPosition items plane searched =
     getNearestXHelp toPosition items plane searched
 
 
 {-| -}
 getWithinX : Float -> (a -> Position) -> List a -> Plane -> Point -> List a
-getWithinX radius toPosition items plane searchedSvg =
+getWithinX radius toPosition items plane searched =
     let toPoint i =
           closestPoint (toPosition i) searched
-
-        searched =
-          { x = Coord.toCartesianX plane searchedSvg.x
-          , y = Coord.toCartesianY plane searchedSvg.y
-          }
 
         keepIfEligible =
             withinRadiusX plane radius searched << toPoint
@@ -1592,8 +1572,13 @@ decoder plane toMsg =
               , bottom = plane.margin.bottom * heightPercent
               }
           }
+
+        searched =
+          { x = Coord.toCartesianX plane (mouseX - box.left)
+          , y = Coord.toCartesianY plane (mouseY - box.top)
+          }
       in
-      toMsg newPlane { x = mouseX - box.left, y = mouseY - box.top }
+      toMsg newPlane searched
   in
   Json.map3 handle
     (Json.field "pageX" Json.float)
