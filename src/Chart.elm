@@ -104,6 +104,7 @@ import Internal.Legend as Legend
 import Internal.Group as Group
 import Internal.Helpers as Helpers
 import Internal.Svg as IS
+import Internal.Events as IE
 import Chart.Svg as CS
 import Chart.Attributes as CA
 import Chart.Events as CE
@@ -230,8 +231,8 @@ chart edits unindexedElements =
       ( beforeEls, chartEls, afterEls ) =
         viewElements config plane tickValues items legends_ elements
 
-      toEvent (CE.Event event_) =
-        let (CE.Decoder decoder) = event_.decoder in
+      toEvent (IE.Event event_) =
+        let (IE.Decoder decoder) = event_.decoder in
         IS.Event event_.name (decoder items)
   in
   IS.container plane
@@ -796,6 +797,7 @@ type alias Labels =
   , fontSize : Maybe Int
   , uppercase : Bool
   , format : Maybe (Float -> String)
+  , rotate : Float
   , grid : Bool
   }
 
@@ -804,10 +806,11 @@ type alias Labels =
 The example below illustrates the configuration:
 
     C.chart []
-      [ C.xTicks
+      [ C.xLabels
           [ CA.color "red"  -- Change color
           , CA.fontSize 12  -- Change font size
           , CA.uppercase    -- Make labels uppercase
+          , CA.rotate 90    -- Rotate labels
 
           , CA.alignRight   -- Anchor labels to the right
           , CA.alignLeft    -- Anchor labels to the left
@@ -861,6 +864,7 @@ xLabels edits =
           , grid = True
           , format = Nothing
           , uppercase = False
+          , rotate = 0
           , fontSize = Nothing
           }
 
@@ -883,6 +887,7 @@ xLabels edits =
             , anchor = config.anchor
             , fontSize = config.fontSize
             , uppercase = config.uppercase
+            , rotate = config.rotate
             }
             [ S.text item.label ]
             { x = item.value
@@ -894,7 +899,7 @@ xLabels edits =
 
 {-| Produce a set of labels at "nice" numbers on the y-axis of your chart.
 The styling options are the same as for `xLabels`.
--} -- TODO add rotate
+-}
 yLabels : List (CA.Attribute Labels) -> Element item msg
 yLabels edits =
   let toConfig p =
@@ -912,6 +917,7 @@ yLabels edits =
           , format = Nothing
           , uppercase = False
           , fontSize = Nothing
+          , rotate = 90
           }
 
       toTicks p config =
@@ -932,6 +938,7 @@ yLabels edits =
             , color = config.color
             , fontSize = config.fontSize
             , uppercase = config.uppercase
+            , rotate = config.rotate
             , anchor =
                 case config.anchor of
                   Nothing -> Just (if config.flip then IS.Start else IS.End)

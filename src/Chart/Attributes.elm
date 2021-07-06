@@ -719,7 +719,6 @@ dashed value config =
   { config | dashed = value }
 
 
-
 {-| -}
 circle : Attribute { a | shape : Maybe CS.Shape }
 circle config =
@@ -787,21 +786,25 @@ onLeft config =
   { config | direction = Just CS.Left }
 
 
+{-| -}
 onLeftOrRight : Attribute { a | direction : Maybe CS.Direction }
 onLeftOrRight config =
   { config | direction = Just CS.LeftOrRight }
 
 
+{-| -}
 onTopOrBottom : Attribute { a | direction : Maybe CS.Direction }
 onTopOrBottom config =
   { config | direction = Just CS.TopOrBottom }
 
 
+{-| -}
 row : Attribute { a | alignment : CS.Alignment }
 row config =
   { config | alignment = CS.Row }
 
 
+{-| -}
 column : Attribute { a | alignment : CS.Alignment }
 column config =
   { config | alignment = CS.Column }
@@ -829,6 +832,7 @@ blue =
   Helpers.blue
 
 
+{-| -}
 green : String
 green =
   Helpers.green
@@ -888,11 +892,13 @@ yellow =
   Helpers.yellow
 
 
+{-| -}
 gray : String
 gray =
   Helpers.gray
 
 
+{-| -}
 darkGray : String
 darkGray =
   Helpers.darkGray

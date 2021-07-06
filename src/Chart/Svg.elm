@@ -92,11 +92,10 @@ You can see what attributes are applicable given their configuration record.
 @docs position, positionHtml
 
 # Working with the coordinate system
-@docs Plane, Position, Point
+@docs Plane, Axis, Margin, Position, Point
 @docs fromSvg, fromCartesian
 @docs lengthInSvgX, lengthInSvgY
 @docs lengthInCartesianX, lengthInCartesianY
-@docs isWithinPlane
 
 # Seaching
 @docs getNearest, getNearestX, getWithin, getWithinX

@@ -150,6 +150,15 @@ getSize (Item item) =
 
 
 {-| -}
+isSame : Product config value data -> Product config value data -> Bool
+isSame a b =
+  getPropertyIndex a == getPropertyIndex b &&
+  getStackIndex a == getStackIndex b &&
+  getDataIndex a == getDataIndex b &&
+  getDatum a == getDatum b
+
+
+{-| -}
 map : (a -> b) -> Product config value a -> Product config value b
 map func (Item item) =
   Item

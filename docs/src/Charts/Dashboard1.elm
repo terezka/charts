@@ -82,7 +82,7 @@ view model =
             [ CA.monotone, CA.color "#7b4dff", CA.width 1.5, CA.opacity 0.2 ]
             [ CA.color "white", CA.borderWidth 1.5, CA.circle ]
             |> C.named "Traffic"
-            |> C.amongst (CE.filterDatum justDot model.hovering) (\_ -> [ CA.color "#7b4dff", CA.border "white" ])
+            |> C.amongst (CE.filterData justDot model.hovering) (\_ -> [ CA.color "#7b4dff", CA.border "white" ])
         ]
         lineData
 
