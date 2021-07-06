@@ -192,34 +192,6 @@ view model =
                   ]
               ]
 
-          , E.el
-              [ E.width (E.px 300)
-              , E.height (E.px 300)
-              ] <| E.html <|
-             C.chart []
-              [ C.xLabels []
-              , C.yLabels []
-              , C.bars []
-                  [ C.bar .income []
-                  , C.bar .spending []
-                  ]
-                  [ { country = "Denmark", income = 40000, spending = 10000 }
-                  , { country = "Sweden", income = 56000, spending = 12000 }
-                  , { country = "Norway", income = 62000, spending = 18000 }
-                  ]
-
-              , C.withBars <| \plane bars ->
-                  let closest : List (CE.Product CE.Bar (Maybe Float) { country : String, income : Float, spending : Float })
-                      closest =
-                        CS.getNearest (CE.getPosition plane) bars plane { x = 2, y = 0 }
-
-                  in
-                  [ C.each closest <| \_ bar ->
-                      [ C.label [] [ S.text (CE.getDatum bar).country ] (CE.getBottom plane bar) ]
-                  ]
-              ]
-
-
           , E.column
               [ E.width E.fill
               , E.paddingXY 0 100
