@@ -139,6 +139,7 @@ type alias Event data msg =
   IE.Event data msg
 
 
+{-| -}
 type alias Decoder data msg =
   IE.Decoder data msg
 

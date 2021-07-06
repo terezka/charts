@@ -62,24 +62,27 @@ too. If that is the case, I will make a note in the comment of the element.
 @docs chart
 
 # Data elements
-@docs bars, series
-@docs Property, bar, scatter, interpolated, stacked, named, variation, amongst
+@docs bars, series, seriesMap, barsMap
+@docs Property, bar, scatter, interpolated
+@docs barMaybe, scatterMaybe, interpolatedMaybe
+@docs stacked, named, variation, amongst
 
 # Navigation elements
 @docs xAxis, yAxis, xTicks, yTicks, xLabels, yLabels, grid
+
+@docs binLabels, barLabels, dotLabels
 
 @docs xLabel, yLabel, xTick, yTick
 @docs generate, floats, ints, times
 
 @docs label, labelAt, legendsAt
-
 @docs tooltip, line, rect
 
 # Arbitrary elements
 @docs svgAt, htmlAt, svg, html, none
 
 # Advanced elements
-@docs eachBin, eachStack, eachBar, eachDot, eachProduct, each
+@docs eachBin, eachStack, eachBar, eachDot, eachProduct, each, eachCustom
 @docs withBins, withStacks, withBars, withDots, withProducts, withPlane
 
 # Data helper
