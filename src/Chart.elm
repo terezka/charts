@@ -2481,9 +2481,10 @@ none =
 
 {-| Gather data points into bins. Arguments:
 
-  1. The desired bin width.
-  2. The function to access the binned quality on the data
-  3. The list of data.
+1. The desired bin width.
+2. The function to access the binned quality on the data
+3. The list of data.
+
 
     C.binned 10 .score
       [ Result "Anna" 43
