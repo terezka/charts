@@ -69,10 +69,9 @@ In the following examples, I will assume the imports:
     import Chart.Events as CE
 
 
-@docs Element
-
 # The frame
 @docs chart
+@docs Element
 
 # Chart elements
 
