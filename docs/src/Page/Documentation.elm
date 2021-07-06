@@ -96,7 +96,7 @@ view model =
         , Ui.Tabs.view
             { toUrl = Ui.Thumbnail.toUrlGroup << .title
             , toTitle = .title
-            , selected = ""
+            , selected = Ui.Thumbnail.toUrlGroup (Ui.Thumbnail.firstGroup.title)
             , all = Ui.Thumbnail.groups
             }
         , E.map OnExampleMsg

@@ -31,7 +31,7 @@ view config =
       , B.color (E.rgb255 220 220 220)
       , B.widthEach { top = 0, bottom = 1, left = 0, right = 0 }
       ]
-      (List.map (viewOne config) config.all)
+      (List.map (viewOne config) <| List.filter (\a -> config.toTitle a /= "Front page") config.all)
 
 
 viewOne : Config a -> a -> E.Element msg

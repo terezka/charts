@@ -14073,6 +14073,19 @@ var $author$project$Ui$Thumbnail$groups = A2(
 		return $.order;
 	},
 	$elm$core$Dict$values($author$project$Ui$Thumbnail$dictGroups));
+var $elm$core$List$head = function (list) {
+	if (list.b) {
+		var x = list.a;
+		var xs = list.b;
+		return $elm$core$Maybe$Just(x);
+	} else {
+		return $elm$core$Maybe$Nothing;
+	}
+};
+var $author$project$Ui$Thumbnail$firstGroup = A2(
+	$elm$core$Maybe$withDefault,
+	A3($author$project$Ui$Thumbnail$Group, '', 1, _List_Nil),
+	$elm$core$List$head($author$project$Ui$Thumbnail$groups));
 var $mdgriffith$elm_ui$Internal$Model$Empty = {$: 'Empty'};
 var $mdgriffith$elm_ui$Internal$Model$Text = function (a) {
 	return {$: 'Text', a: a};
@@ -14914,21 +14927,13 @@ var $author$project$Ui$Tabs$view = function (config) {
 			A2(
 				$elm$core$List$map,
 				$author$project$Ui$Tabs$viewOne(config),
-				config.all)));
+				A2(
+					$elm$core$List$filter,
+					function (a) {
+						return config.toTitle(a) !== 'Front page';
+					},
+					config.all))));
 };
-var $elm$core$List$head = function (list) {
-	if (list.b) {
-		var x = list.a;
-		var xs = list.b;
-		return $elm$core$Maybe$Just(x);
-	} else {
-		return $elm$core$Maybe$Nothing;
-	}
-};
-var $author$project$Ui$Thumbnail$firstGroup = A2(
-	$elm$core$Maybe$withDefault,
-	A3($author$project$Ui$Thumbnail$Group, '', 1, _List_Nil),
-	$elm$core$List$head($author$project$Ui$Thumbnail$groups));
 var $mdgriffith$elm_ui$Element$spacingXY = F2(
 	function (x, y) {
 		return A2(
@@ -31479,7 +31484,7 @@ var $author$project$Page$Documentation$view = function (model) {
 					$author$project$Ui$Tabs$view(
 					{
 						all: $author$project$Ui$Thumbnail$groups,
-						selected: '',
+						selected: $author$project$Ui$Thumbnail$toUrlGroup($author$project$Ui$Thumbnail$firstGroup.title),
 						toTitle: function ($) {
 							return $.title;
 						},
