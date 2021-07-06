@@ -74,7 +74,8 @@ In the following examples, I will assume the imports:
 # The frame
 @docs chart
 
-# Data elements
+# Chart elements
+
 ## Bar charts
 @docs bars, barsMap, bar, barMaybe
 
@@ -85,14 +86,33 @@ In the following examples, I will assume the imports:
 @docs Property, stacked, named, variation, amongst
 
 # Navigation elements
-@docs xAxis, yAxis, xTicks, yTicks, xLabels, yLabels, grid
 
-@docs binLabels, barLabels, dotLabels
+## Axis lines
+@docs xAxis, yAxis
 
+## Axis ticks
+@docs xTicks, yTicks
+
+## Axis labels
+@docs Labels, yLabels
+
+## Grid
+@docs grid
+
+## Custom Axis labels and ticks
 @docs xLabel, yLabel, xTick, yTick
 @docs generate, floats, ints, times
 
-@docs label, labelAt, legendsAt
+## Data labels
+@docs binLabels, barLabels, dotLabels
+
+## General labels
+@docs label, labelAt
+
+## Legends
+@docs legendsAt
+
+## Other navigation helpers
 @docs tooltip, line, rect
 
 # Arbitrary elements
