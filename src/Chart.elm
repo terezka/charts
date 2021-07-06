@@ -69,6 +69,11 @@ In the following examples, I will assume the imports:
     import Chart.Events as CE
 
 
+## Visual examples and documentation
+
+For additional examples and documnetation of features, please check out [elm-charts.org](https://www.elm-charts.org/documentation).
+
+
 # The frame
 @docs chart
 @docs Element
