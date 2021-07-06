@@ -23901,11 +23901,11 @@ var $author$project$Chart$labelAt = F4(
 					});
 			});
 	});
-var $author$project$Chart$Attributes$xOff = F2(
+var $author$project$Chart$Attributes$moveDown = F2(
 	function (v, config) {
 		return _Utils_update(
 			config,
-			{xOff: config.xOff + v});
+			{yOff: config.yOff + v});
 	});
 var $author$project$Examples$BarCharts$Title$view = function (model) {
 	return A2(
@@ -23930,8 +23930,8 @@ var $author$project$Examples$BarCharts$Title$view = function (model) {
 				},
 				_List_fromArray(
 					[
-						$author$project$Chart$Attributes$xOff(-15),
-						$author$project$Chart$Attributes$yOff(10),
+						$author$project$Chart$Attributes$moveLeft(8),
+						$author$project$Chart$Attributes$moveDown(5),
 						$author$project$Chart$Attributes$alignRight
 					]),
 				_List_fromArray(
@@ -23946,7 +23946,7 @@ var $author$project$Examples$BarCharts$Title$view = function (model) {
 				},
 				_List_fromArray(
 					[
-						$author$project$Chart$Attributes$yOff(30)
+						$author$project$Chart$Attributes$moveDown(18)
 					]),
 				_List_fromArray(
 					[
@@ -23960,7 +23960,7 @@ var $author$project$Examples$BarCharts$Title$view = function (model) {
 				$author$project$Chart$Attributes$middle,
 				_List_fromArray(
 					[
-						$author$project$Chart$Attributes$xOff(-23),
+						$author$project$Chart$Attributes$moveLeft(25),
 						$author$project$Chart$Attributes$rotate(90)
 					]),
 				_List_fromArray(
@@ -25651,6 +25651,12 @@ var $author$project$Chart$scatter = function (y) {
 		A2($elm$core$Basics$composeR, y, $elm$core$Maybe$Just),
 		_List_Nil);
 };
+var $author$project$Chart$Attributes$xOff = F2(
+	function (v, config) {
+		return _Utils_update(
+			config,
+			{xOff: config.xOff + v});
+	});
 var $author$project$Examples$Frame$LabelWithLine$view = function (model) {
 	return A2(
 		$author$project$Chart$chart,
@@ -26441,12 +26447,6 @@ var $author$project$Examples$Frame$Titles$data = _List_fromArray(
 		A2($author$project$Examples$Frame$Titles$Datum, 12.5, 5),
 		A2($author$project$Examples$Frame$Titles$Datum, 12.5, 2)
 	]);
-var $author$project$Chart$Attributes$moveDown = F2(
-	function (v, config) {
-		return _Utils_update(
-			config,
-			{yOff: config.yOff + v});
-	});
 var $author$project$Examples$Frame$Titles$view = function (model) {
 	return A2(
 		$author$project$Chart$chart,
@@ -31524,7 +31524,7 @@ var $author$project$Examples$BarCharts$Opacity$smallCode = '\n  C.chart\n    [ C
 var $author$project$Examples$BarCharts$Pattern$smallCode = '\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    ]\n    [ C.grid []\n    , C.xLabels []\n    , C.yLabels []\n    , C.bars []\n        [ C.bar .y [ CA.striped [ CA.spacing 6 ] ]\n        , C.bar .z [ CA.dotted [ CA.rotate 45 ] ]\n        ]\n        data\n    ]\n  ';
 var $author$project$Examples$BarCharts$Spacing$smallCode = '\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    ]\n    [ C.grid []\n    , C.xLabels []\n    , C.yLabels []\n    , C.bars\n        [ CA.spacing 0 ] -- Number is percentage of bin width\n        [ C.bar .y []\n        , C.bar .z []\n        ]\n        data\n    ]\n  ';
 var $author$project$Examples$BarCharts$Stacked$smallCode = '\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    ]\n    [ C.grid []\n    , C.xLabels []\n    , C.yLabels []\n    , C.bars []\n        [ C.stacked\n            [ C.bar .y []\n            , C.bar .v []\n            ]\n        ]\n        data\n    ]\n  ';
-var $author$project$Examples$BarCharts$Title$smallCode = '\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    ]\n    [ C.grid []\n    , C.xLabels []\n    , C.yLabels []\n    , C.labelAt .max .max [ CA.xOff -15, CA.yOff 10, CA.alignRight ] [ S.text "Quarterly revenue" ]\n    , C.labelAt CA.middle .min [ CA.yOff 30 ] [ S.text "Quarter" ]\n    , C.labelAt .min CA.middle [ CA.xOff -23, CA.rotate 90 ] [ S.text "Revenue" ]\n    , C.bars []\n        [ C.bar .z []\n        , C.bar .y []\n        ]\n        data\n    ]\n  ';
+var $author$project$Examples$BarCharts$Title$smallCode = '\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    ]\n    [ C.grid []\n    , C.xLabels []\n    , C.yLabels []\n\n    , C.labelAt .max .max\n        [ CA.moveLeft 8, CA.moveDown 5, CA.alignRight ]\n        [ S.text "Quarterly revenue" ]\n\n    , C.labelAt CA.middle .min\n        [ CA.moveDown 18 ]\n        [ S.text "Quarter" ]\n\n    , C.labelAt .min CA.middle\n        [ CA.moveLeft 25, CA.rotate 90 ]\n        [ S.text "Revenue" ]\n\n    , C.bars []\n        [ C.bar .z []\n        , C.bar .y []\n        ]\n        data\n    ]\n  ';
 var $author$project$Examples$BarCharts$Tooltip$smallCode = '\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    , CE.onMouseMove OnHover (CE.getNearest CE.bar)\n    , CE.onMouseLeave (OnHover [])\n    ]\n    [ C.grid []\n    , C.xLabels []\n    , C.yLabels []\n    , C.bars []\n        [ C.stacked\n            [ C.bar .z []\n            , C.bar .y []\n            ]\n        , C.bar .v [ CA.color CA.turquoise ]\n        ]\n        data\n    , C.each model.hovering <| \\p item ->\n        [ C.tooltip item [] [] [] ]\n    ]\n  ';
 var $author$project$Examples$BarCharts$TooltipBin$smallCode = '\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    , CE.onMouseMove OnHover (CE.getNearest CE.bin)\n    , CE.onMouseLeave (OnHover [])\n    ]\n    [ C.grid []\n    , C.xLabels []\n    , C.yLabels []\n    , C.bars []\n        [ C.bar .z []\n        , C.bar .y []\n        ]\n        data\n    , C.each model.hovering <| \\p item ->\n        [ C.tooltip item [] [] [] ]\n    ]\n  ';
 var $author$project$Examples$BarCharts$TooltipStack$smallCode = '\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    , CE.onMouseMove OnHover (CE.getNearest CE.stack)\n    , CE.onMouseLeave (OnHover [])\n    ]\n    [ C.grid []\n    , C.xLabels []\n    , C.yLabels []\n    , C.bars []\n        [ C.stacked\n            [ C.bar .z []\n            , C.bar .y []\n            ]\n        , C.bar .v [ CA.color CA.purple, CA.striped [] ]\n        ]\n        data\n    , C.each model.hovering <| \\p item ->\n        [ C.tooltip item [] [] [] ]\n    ]\n  ';
