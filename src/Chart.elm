@@ -93,7 +93,7 @@ In the following examples, I will assume the imports:
 @docs xTicks, yTicks
 
 ## Axis labels
-@docs Labels, yLabels
+@docs xLabels, yLabels
 
 ## Grid
 @docs grid
