@@ -5,6 +5,7 @@ import Browser exposing (Document)
 import Route exposing (Route)
 import Session exposing (Session)
 import Browser.Navigation as Navigation
+import Charts.Landing as Landing
 import Charts.Dashboard1 as Dashboard1
 import Charts.Dashboard2 as Dashboard2
 import Charts.Dashboard3 as Dashboard3
@@ -48,6 +49,7 @@ type alias Model =
   , dashboard5 : Dashboard5.Model
   , dashboard6 : Dashboard6.Model
   , dashboard7 : Dashboard7.Model
+  , landing : Landing.Model
   , concise : Concise.Model
   , hovering : List (CE.Product CE.Any (Maybe Float) { year : Float, income : Float})
   }
@@ -70,6 +72,7 @@ init key session params =
     , dashboard5 = Dashboard5.init
     , dashboard6 = Dashboard6.init
     , dashboard7 = Dashboard7.init
+    , landing = Landing.init
     , concise = Concise.init
     , hovering = []
     }
@@ -94,6 +97,7 @@ type Msg
   | Dashboard5Msg Dashboard5.Msg
   | Dashboard6Msg Dashboard6.Msg
   | Dashboard7Msg Dashboard7.Msg
+  | LandingMsg Landing.Msg
   | ConciseMsg Concise.Msg
   | OnHover (List (CE.Product CE.Any (Maybe Float) { year : Float, income : Float}))
   | None
@@ -127,6 +131,9 @@ update key msg model =
     ConciseMsg subMsg ->
       ( { model | concise = Concise.update subMsg model.concise }, Cmd.none )
 
+    LandingMsg subMsg ->
+      ( { model | landing = Landing.update subMsg model.landing }, Cmd.none )
+
     OnHover hovering ->
       ( { model | hovering = hovering }, Cmd.none )
 
@@ -153,72 +160,30 @@ view model =
     , body =
         Layout.view
           [ Menu.small
-          , E.row
-              [ E.width E.fill
-              , E.spacing 20
-              ]
-              [ section 1 (H.map Dashboard1Msg (Dashboard1.view model.dashboard1))
-              , E.column
-                  [ E.alignTop
-                  , E.width E.fill
-                  , E.spacing 20
-                  ]
-                  [ E.row
-                      [ E.alignTop
-                      , E.width E.fill
-                      , E.spacing 20
-                      ]
-                      [ section 1 (H.map Dashboard2Msg (Dashboard2.view model.dashboard2))
-                      , section 1 (H.map Dashboard3Msg (Dashboard3.view model.dashboard3))
-                      ]
-                  , section 1 (H.map Dashboard4Msg (Dashboard4.view model.dashboard4))
-                  ]
-              ]
 
-          , E.column
-              [ E.width E.fill
-              , E.paddingEach { top = 40, bottom = 100, left = 0, right = 0 }
-              , F.center
-              ]
-              [ E.el [ E.width E.fill, F.size 125 ] (E.text "elm-charts")
-              , E.paragraph
-                  [ F.size 24
-                  , F.color (E.rgb255 120 120 120)
-                  , E.paddingXY 10 5
-                  ]
-                  [ E.text "Compose "
-                  , E.el [ F.italic ] (E.text "your")
-                  , E.text " chart without the clutter."
-                  ]
-              ]
+          , E.el [] (E.html <| H.map LandingMsg (Landing.view model.landing))
 
           , E.column
               [ E.width E.fill
               , E.spacing 100
+              , E.paddingXY 0 100
               ]
               [ feature
-                  { title = "Familiar interface and vocabulary"
+                  { title = "Beginner friendly"
                   , body = "The API mirrors the element and attribute pattern which you already know and love."
                   , chart = H.map (\_ -> None) (Familiar.view ())
                   , code = Familiar.smallCode
                   }
 
               , feature
-                  { title = "Concise at any level"
+                  { title = "Advanced chart, elegant code"
                   , body = "No clutter even with tricky details!"
                   , chart = H.map ConciseMsg (Concise.view model.concise)
                   , code = Concise.smallCode
                   }
 
               , feature
-                  { title = "Compose any chart"
-                  , body = "Mix together chart types, edit the styling, and attach labels to anything."
-                  , chart = H.map (\_ -> None) (Familiar.view ())
-                  , code = Familiar.smallCode
-                  }
-
-              , feature
-                  { title = "Minimal context needed"
+                  { title = "Visual documentation"
                   , body = "You never need to know how SVG clip paths work or any SVG for that matter!"
                   , chart = H.map (\_ -> None) (Familiar.view ())
                   , code = Familiar.smallCode
@@ -228,6 +193,7 @@ view model =
     }
 
 
+feature : { title : String, body : String, chart : H.Html msg, code : String } -> E.Element msg
 feature config =
   E.column
     [ E.width E.fill
@@ -235,7 +201,7 @@ feature config =
     ]
     [ E.el
         [ E.width E.fill
-        , F.size 24
+        , F.size 40
         ]
         (E.text config.title)
     , E.paragraph

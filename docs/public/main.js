@@ -5548,10 +5548,11 @@ var $author$project$Charts$Dashboard4$init = {hovering: _List_Nil};
 var $author$project$Charts$Dashboard5$init = {hovering: _List_Nil};
 var $author$project$Charts$Dashboard6$init = {hovering: _List_Nil};
 var $author$project$Charts$Dashboard7$init = {hovering: _List_Nil};
+var $author$project$Charts$Landing$init = {hovering: _List_Nil};
 var $author$project$Page$Home$init = F3(
 	function (key, session, params) {
 		return _Utils_Tuple2(
-			{concise: $author$project$Examples$Frontpage$Concise$init, dashboard1: $author$project$Charts$Dashboard1$init, dashboard2: $author$project$Charts$Dashboard2$init, dashboard3: $author$project$Charts$Dashboard3$init, dashboard4: $author$project$Charts$Dashboard4$init, dashboard5: $author$project$Charts$Dashboard5$init, dashboard6: $author$project$Charts$Dashboard6$init, dashboard7: $author$project$Charts$Dashboard7$init, hovering: _List_Nil},
+			{concise: $author$project$Examples$Frontpage$Concise$init, dashboard1: $author$project$Charts$Dashboard1$init, dashboard2: $author$project$Charts$Dashboard2$init, dashboard3: $author$project$Charts$Dashboard3$init, dashboard4: $author$project$Charts$Dashboard4$init, dashboard5: $author$project$Charts$Dashboard5$init, dashboard6: $author$project$Charts$Dashboard6$init, dashboard7: $author$project$Charts$Dashboard7$init, hovering: _List_Nil, landing: $author$project$Charts$Landing$init},
 			$elm$core$Platform$Cmd$none);
 	});
 var $author$project$Page$QuickStart$init = F3(
@@ -7935,6 +7936,13 @@ var $author$project$Charts$Dashboard7$update = F2(
 			model,
 			{hovering: hovering});
 	});
+var $author$project$Charts$Landing$update = F2(
+	function (msg, model) {
+		var hovering = msg.a;
+		return _Utils_update(
+			model,
+			{hovering: hovering});
+	});
 var $author$project$Page$Home$update = F3(
 	function (key, msg, model) {
 		switch (msg.$) {
@@ -8008,6 +8016,15 @@ var $author$project$Page$Home$update = F3(
 						model,
 						{
 							concise: A2($author$project$Examples$Frontpage$Concise$update, subMsg, model.concise)
+						}),
+					$elm$core$Platform$Cmd$none);
+			case 'LandingMsg':
+				var subMsg = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							landing: A2($author$project$Charts$Landing$update, subMsg, model.landing)
 						}),
 					$elm$core$Platform$Cmd$none);
 			case 'OnHover':
@@ -14218,10 +14235,6 @@ var $mdgriffith$elm_ui$Element$Font$size = function (i) {
 		$mdgriffith$elm_ui$Internal$Flag$fontSize,
 		$mdgriffith$elm_ui$Internal$Model$FontSize(i));
 };
-var $author$project$Ui$Menu$Link = F2(
-	function (url, title) {
-		return {title: title, url: url};
-	});
 var $mdgriffith$elm_ui$Internal$Model$AlignX = function (a) {
 	return {$: 'AlignX', a: a};
 };
@@ -14298,6 +14311,31 @@ var $mdgriffith$elm_ui$Element$link = F2(
 				_List_fromArray(
 					[label])));
 	});
+var $author$project$Ui$Menu$Link = F2(
+	function (url, title) {
+		return {title: title, url: url};
+	});
+var $mdgriffith$elm_ui$Element$text = function (content) {
+	return $mdgriffith$elm_ui$Internal$Model$Text(content);
+};
+var $author$project$Ui$Menu$viewLink = function (link) {
+	return A2(
+		$mdgriffith$elm_ui$Element$link,
+		_List_Nil,
+		{
+			label: $mdgriffith$elm_ui$Element$text(link.title),
+			url: link.url
+		});
+};
+var $author$project$Ui$Menu$links = A2(
+	$elm$core$List$map,
+	$author$project$Ui$Menu$viewLink,
+	_List_fromArray(
+		[
+			A2($author$project$Ui$Menu$Link, '/quick-start', 'Getting started'),
+			A2($author$project$Ui$Menu$Link, '/documentation', 'Documentation'),
+			A2($author$project$Ui$Menu$Link, '/administration', 'Administration')
+		]));
 var $mdgriffith$elm_ui$Internal$Model$paddingName = F4(
 	function (top, right, bottom, left) {
 		return 'pad-' + ($elm$core$String$fromInt(top) + ('-' + ($elm$core$String$fromInt(right) + ('-' + ($elm$core$String$fromInt(bottom) + ('-' + $elm$core$String$fromInt(left)))))));
@@ -14352,18 +14390,6 @@ var $mdgriffith$elm_ui$Element$row = F2(
 						attrs))),
 			$mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
 	});
-var $mdgriffith$elm_ui$Element$text = function (content) {
-	return $mdgriffith$elm_ui$Internal$Model$Text(content);
-};
-var $author$project$Ui$Menu$viewLink = function (link) {
-	return A2(
-		$mdgriffith$elm_ui$Element$link,
-		_List_Nil,
-		{
-			label: $mdgriffith$elm_ui$Element$text(link.title),
-			url: link.url
-		});
-};
 var $author$project$Ui$Menu$small = A2(
 	$mdgriffith$elm_ui$Element$row,
 	_List_fromArray(
@@ -14411,16 +14437,7 @@ var $author$project$Ui$Menu$small = A2(
 					$mdgriffith$elm_ui$Element$alignRight,
 					$mdgriffith$elm_ui$Element$Font$size(13)
 				]),
-			A2(
-				$elm$core$List$map,
-				$author$project$Ui$Menu$viewLink,
-				_List_fromArray(
-					[
-						A2($author$project$Ui$Menu$Link, '/quick-start', 'Quick start'),
-						A2($author$project$Ui$Menu$Link, '/documentation', 'Documentation'),
-						A2($author$project$Ui$Menu$Link, '/gallery', 'Gallery'),
-						A2($author$project$Ui$Menu$Link, '/administration', 'Administration')
-					])))
+			$author$project$Ui$Menu$links)
 		]));
 var $mdgriffith$elm_ui$Internal$Model$CenterX = {$: 'CenterX'};
 var $mdgriffith$elm_ui$Element$centerX = $mdgriffith$elm_ui$Internal$Model$AlignX($mdgriffith$elm_ui$Internal$Model$CenterX);
@@ -26731,22 +26748,16 @@ var $author$project$Examples$Frontpage$Concise$view = function (model) {
 					}))
 			]));
 };
-var $author$project$Examples$Frontpage$Familiar$Datum = F7(
-	function (x, y, z, v, w, p, q) {
-		return {p: p, q: q, v: v, w: w, x: x, y: y, z: z};
+var $author$project$Examples$Frontpage$Familiar$Datum = F2(
+	function (x, y) {
+		return {x: x, y: y};
 	});
 var $author$project$Examples$Frontpage$Familiar$data = _List_fromArray(
 	[
-		A7($author$project$Examples$Frontpage$Familiar$Datum, 0.1, 2.0, 4.0, 4.6, 6.9, 7.3, 8.0),
-		A7($author$project$Examples$Frontpage$Familiar$Datum, 0.2, 3.0, 4.2, 5.2, 6.2, 7.0, 8.7),
-		A7($author$project$Examples$Frontpage$Familiar$Datum, 0.8, 4.0, 4.6, 5.5, 5.2, 7.2, 8.1),
-		A7($author$project$Examples$Frontpage$Familiar$Datum, 1.0, 2.0, 4.2, 5.3, 5.7, 6.2, 7.8),
-		A7($author$project$Examples$Frontpage$Familiar$Datum, 1.2, 5.0, 3.5, 4.9, 5.9, 6.7, 8.2),
-		A7($author$project$Examples$Frontpage$Familiar$Datum, 2.0, 2.0, 3.2, 4.8, 5.4, 7.2, 8.3),
-		A7($author$project$Examples$Frontpage$Familiar$Datum, 2.3, 1.0, 4.3, 5.3, 5.1, 7.8, 7.1),
-		A7($author$project$Examples$Frontpage$Familiar$Datum, 2.8, 3.0, 2.9, 5.4, 3.9, 7.6, 8.5),
-		A7($author$project$Examples$Frontpage$Familiar$Datum, 3.0, 2.0, 3.6, 5.8, 4.6, 6.5, 6.9),
-		A7($author$project$Examples$Frontpage$Familiar$Datum, 4.0, 1.0, 4.2, 4.5, 5.3, 6.3, 7.0)
+		A2($author$project$Examples$Frontpage$Familiar$Datum, 1, 1),
+		A2($author$project$Examples$Frontpage$Familiar$Datum, 2, 3),
+		A2($author$project$Examples$Frontpage$Familiar$Datum, 3, 2),
+		A2($author$project$Examples$Frontpage$Familiar$Datum, 4.2, 6.2)
 	]);
 var $author$project$Examples$Frontpage$Familiar$view = function (model) {
 	return A2(
@@ -26755,9 +26766,7 @@ var $author$project$Examples$Frontpage$Familiar$view = function (model) {
 			[
 				$author$project$Chart$Attributes$height(300),
 				$author$project$Chart$Attributes$width(300),
-				$author$project$Chart$Attributes$static,
-				$author$project$Chart$Attributes$padding(
-				{bottom: 0, left: 10, right: 10, top: 0})
+				$author$project$Chart$Attributes$static
 			]),
 		_List_fromArray(
 			[
@@ -26773,17 +26782,12 @@ var $author$project$Examples$Frontpage$Familiar$view = function (model) {
 				},
 				_List_fromArray(
 					[
-						A2(
-						$author$project$Chart$scatter,
+						A3(
+						$author$project$Chart$interpolated,
 						function ($) {
 							return $.y;
 						},
-						_List_Nil),
-						A2(
-						$author$project$Chart$scatter,
-						function ($) {
-							return $.z;
-						},
+						_List_Nil,
 						_List_Nil)
 					]),
 				$author$project$Examples$Frontpage$Familiar$data)
@@ -31554,7 +31558,7 @@ var $author$project$Examples$Frame$Rect$smallCode = '\n  C.chart\n    [ CA.heigh
 var $author$project$Examples$Frame$Times$smallCode = '\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    , CA.padding { top = 10, bottom = 0, left = 0, right = 25 }\n    , CA.range\n        [ CA.lowest 1591974241000 CA.exactly\n        , CA.highest 1623510241000 CA.exactly\n        ]\n    ]\n    [ C.grid []\n    , C.xAxis []\n    , C.xTicks [ CA.times Time.utc ]\n    , C.xLabels [ CA.times Time.utc ]\n    ]\n  ';
 var $author$project$Examples$Frame$Titles$smallCode = '\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    , CA.padding { top = 25, bottom = 0, left = 0, right = 10 }\n    , CA.range [ CA.lowest 0 CA.exactly ]\n    ]\n    [ C.grid []\n    , C.xAxis []\n    , C.xTicks [ CA.ints ]\n    , C.xLabels [ CA.ints ]\n    , C.yAxis []\n    , C.yTicks [ CA.ints ]\n    , C.yLabels [ CA.ints ]\n    , C.series .age\n        [ C.scatter .toys [ CA.opacity 0, CA.borderWidth 1 ]\n        ]\n        data\n\n    , C.labelAt .min CA.middle [ CA.moveLeft 35, CA.rotate 90 ]\n        [ S.text "Fruits" ]\n    , C.labelAt CA.middle .min [ CA.moveDown 30 ]\n        [ S.text "Age" ]\n    , C.labelAt CA.middle .max [ CA.fontSize 14 ]\n        [ S.text "How many fruits do children eat? (2021)" ]\n    , C.labelAt CA.middle .max [ CA.moveDown 15 ]\n        [ S.text "Data from fruits.com" ]\n    ]\n  ';
 var $author$project$Examples$Frontpage$Concise$smallCode = '\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    , CA.static\n    , CE.onMouseMove OnHover (CE.getNearest CE.stack)\n    , CE.onMouseLeave (OnHover [])\n    ]\n    [ C.grid []\n    , C.yLabels []\n\n    , C.bars [ CA.roundTop 0.5 ]\n        [ C.stacked\n            [ C.bar .p [ CA.opacity 0.8 ]\n            , C.bar .w [ CA.opacity 0.8 ]\n            ]\n        , C.bar .q [ CA.opacity 0.8, CA.dotted [ CA.spacing 2.2 ] ]\n        ]\n        data\n\n    , C.binLabels .country CE.getBottom [ CA.moveDown 15 ]\n    , C.barLabels CE.getTop [ CA.moveDown 15, CA.color "white" ]\n    , C.each model.hovering <| \\p stack -> [ C.tooltip stack [] [] [] ]\n    ]\n  ';
-var $author$project$Examples$Frontpage$Familiar$smallCode = '\nimport Chart as C\nimport Chart.Attributes as CA\n\n\nview : Model -> Html Msg\nview model =\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    , CA.static\n    , CA.padding { top = 0, bottom = 0, left = 10, right = 10 }\n    ]\n    [ C.grid []\n    , C.xLabels []\n    , C.yLabels []\n    , C.xAxis []\n    , C.yAxis []\n    , C.series .x\n        [ C.scatter .y []\n        , C.scatter .z []\n        ]\n        data\n    ]\n  ';
+var $author$project$Examples$Frontpage$Familiar$smallCode = '\nimport Chart as C\nimport Chart.Attributes as CA\n\n\nview : Model -> Html Msg\nview model =\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    , CA.static\n    ]\n    [ C.grid []\n    , C.xLabels []\n    , C.yLabels []\n    , C.xAxis []\n    , C.yAxis []\n    , C.series .x [ C.interpolated .y [] [] ] data\n    ]\n  ';
 var $author$project$Examples$Interactivity$Background$smallCode = '\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    , CE.onMouseMove OnHover (CE.getNearest CE.bar)\n    , CE.onMouseLeave (OnHover [])\n    ]\n    [ C.grid []\n    , C.xLabels []\n    , C.yLabels []\n    , C.bars []\n        [ C.bar .y [ CA.opacity 0.3, CA.borderWidth 1, CA.border CA.pink ]\n        , C.bar .z [ CA.opacity 0.3, CA.borderWidth 1, CA.striped [], CA.border CA.purple ]\n        ]\n        data\n    , C.each model.hovering <| \\p item ->\n        [ C.tooltip item [ CA.background "#fcf9e9" ] [] [] ]\n    ]\n  ';
 var $author$project$Examples$Interactivity$BasicArea$smallCode = '\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    , CE.onMouseMove OnHover (CE.getNearest CE.stack)\n    , CE.onMouseLeave (OnHover [])\n    ]\n    [ C.grid []\n    , C.xLabels []\n    , C.yLabels []\n    , C.series .x\n        [ C.stacked\n          [ C.interpolated .y\n              [ CA.monotone, CA.opacity 0.2 ]\n              [ CA.circle, CA.color "white", CA.border CA.pink, CA.borderWidth 1 ]\n          , C.interpolated .z\n              [ CA.monotone, CA.opacity 0, CA.color CA.pink ]\n              [ CA.circle, CA.color "white", CA.border CA.pink, CA.borderWidth 1 ]\n          ]\n        ]\n        data\n    , C.each model.hovering <| \\p item ->\n        [ C.tooltip item [] [] [] ]\n    ]\n  ';
 var $author$project$Examples$Interactivity$BasicBar$smallCode = '\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    , CE.onMouseMove OnHover (CE.getNearest CE.bar)\n    , CE.onMouseLeave (OnHover [])\n    ]\n    [ C.grid []\n    , C.xLabels []\n    , C.yLabels []\n    , C.bars []\n        [ C.stacked\n            [ C.bar .z []\n            , C.bar .y []\n            ]\n        , C.bar .v [ CA.color CA.turquoise, CA.dotted [] ]\n        ]\n        data\n    , C.each model.hovering <| \\p item ->\n        [ C.tooltip item [] [] [] ]\n    ]\n  ';
@@ -37800,21 +37804,10 @@ var $author$project$Page$Gallery$view = function (model) {
 var $author$project$Page$Home$ConciseMsg = function (a) {
 	return {$: 'ConciseMsg', a: a};
 };
-var $author$project$Page$Home$Dashboard1Msg = function (a) {
-	return {$: 'Dashboard1Msg', a: a};
-};
-var $author$project$Page$Home$Dashboard2Msg = function (a) {
-	return {$: 'Dashboard2Msg', a: a};
-};
-var $author$project$Page$Home$Dashboard3Msg = function (a) {
-	return {$: 'Dashboard3Msg', a: a};
-};
-var $author$project$Page$Home$Dashboard4Msg = function (a) {
-	return {$: 'Dashboard4Msg', a: a};
+var $author$project$Page$Home$LandingMsg = function (a) {
+	return {$: 'LandingMsg', a: a};
 };
 var $author$project$Page$Home$None = {$: 'None'};
-var $mdgriffith$elm_ui$Internal$Flag$fontAlignment = $mdgriffith$elm_ui$Internal$Flag$flag(12);
-var $mdgriffith$elm_ui$Element$Font$center = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$fontAlignment, $mdgriffith$elm_ui$Internal$Style$classes.textCenter);
 var $author$project$Page$Home$feature = function (config) {
 	return A2(
 		$mdgriffith$elm_ui$Element$column,
@@ -37830,7 +37823,7 @@ var $author$project$Page$Home$feature = function (config) {
 				_List_fromArray(
 					[
 						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-						$mdgriffith$elm_ui$Element$Font$size(24)
+						$mdgriffith$elm_ui$Element$Font$size(40)
 					]),
 				$mdgriffith$elm_ui$Element$text(config.title)),
 				A2(
@@ -37875,47 +37868,32 @@ var $author$project$Page$Home$feature = function (config) {
 					]))
 			]));
 };
-var $author$project$Page$Home$section = F2(
-	function (portion, chart) {
-		return A2(
-			$mdgriffith$elm_ui$Element$column,
-			_List_fromArray(
-				[
-					$mdgriffith$elm_ui$Element$alignTop,
-					$mdgriffith$elm_ui$Element$width(
-					$mdgriffith$elm_ui$Element$fillPortion(portion))
-				]),
-			_List_fromArray(
-				[
-					$mdgriffith$elm_ui$Element$html(chart)
-				]));
-	});
-var $author$project$Charts$Dashboard1$Bar = function (a) {
+var $author$project$Charts$Landing$Bar = function (a) {
 	return {$: 'Bar', a: a};
 };
-var $author$project$Charts$Dashboard1$Dot = function (a) {
+var $author$project$Charts$Landing$Dot = function (a) {
 	return {$: 'Dot', a: a};
 };
-var $author$project$Charts$Dashboard1$OnHover = function (a) {
+var $author$project$Charts$Landing$OnHover = function (a) {
 	return {$: 'OnHover', a: a};
 };
-var $author$project$Charts$Dashboard1$BarDatum = F3(
+var $author$project$Charts$Landing$BarDatum = F3(
 	function (x, y, z) {
 		return {x: x, y: y, z: z};
 	});
-var $author$project$Charts$Dashboard1$barData = _List_fromArray(
+var $author$project$Charts$Landing$barData = _List_fromArray(
 	[
-		A3($author$project$Charts$Dashboard1$BarDatum, 1612440000000, 100000, 20000),
-		A3($author$project$Charts$Dashboard1$BarDatum, 1612440300000, 125000, 12000),
-		A3($author$project$Charts$Dashboard1$BarDatum, 1612440600000, 150000, 23000),
-		A3($author$project$Charts$Dashboard1$BarDatum, 1612440900000, 85000, 8000),
-		A3($author$project$Charts$Dashboard1$BarDatum, 1612441200000, 54000, 12000),
-		A3($author$project$Charts$Dashboard1$BarDatum, 1612441500000, 30000, 0),
-		A3($author$project$Charts$Dashboard1$BarDatum, 1612441800000, 76000, 23000),
-		A3($author$project$Charts$Dashboard1$BarDatum, 1612442100000, 87000, 18000),
-		A3($author$project$Charts$Dashboard1$BarDatum, 1612442400000, 90000, 6000),
-		A3($author$project$Charts$Dashboard1$BarDatum, 1612442700000, 102000, 30000),
-		A3($author$project$Charts$Dashboard1$BarDatum, 1612443000000, 122000, 34000)
+		A3($author$project$Charts$Landing$BarDatum, 1612440000000, 100000, 20000),
+		A3($author$project$Charts$Landing$BarDatum, 1612440300000, 125000, 12000),
+		A3($author$project$Charts$Landing$BarDatum, 1612440600000, 150000, 23000),
+		A3($author$project$Charts$Landing$BarDatum, 1612440900000, 85000, 8000),
+		A3($author$project$Charts$Landing$BarDatum, 1612441200000, 54000, 12000),
+		A3($author$project$Charts$Landing$BarDatum, 1612441500000, 30000, 0),
+		A3($author$project$Charts$Landing$BarDatum, 1612441800000, 76000, 23000),
+		A3($author$project$Charts$Landing$BarDatum, 1612442100000, 87000, 18000),
+		A3($author$project$Charts$Landing$BarDatum, 1612442400000, 90000, 6000),
+		A3($author$project$Charts$Landing$BarDatum, 1612442700000, 102000, 30000),
+		A3($author$project$Charts$Landing$BarDatum, 1612443000000, 122000, 34000)
 	]);
 var $author$project$Internal$Item$filterMap = function (func) {
 	return $elm$core$List$filterMap(
@@ -37966,7 +37944,7 @@ var $author$project$Chart$Attributes$format = F2(
 				format: $elm$core$Maybe$Just(v)
 			});
 	});
-var $author$project$Charts$Dashboard1$justDot = function (datum) {
+var $author$project$Charts$Landing$justDot = function (datum) {
 	if (datum.$ === 'Bar') {
 		return $elm$core$Maybe$Nothing;
 	} else {
@@ -37974,51 +37952,44 @@ var $author$project$Charts$Dashboard1$justDot = function (datum) {
 		return $elm$core$Maybe$Just(dot);
 	}
 };
-var $author$project$Charts$Dashboard1$DotDatum = F2(
+var $author$project$Charts$Landing$DotDatum = F2(
 	function (x, y) {
 		return {x: x, y: y};
 	});
-var $author$project$Charts$Dashboard1$lineData = _List_fromArray(
+var $author$project$Charts$Landing$lineData = _List_fromArray(
 	[
-		A2($author$project$Charts$Dashboard1$DotDatum, 1612440000000, 140000),
-		A2($author$project$Charts$Dashboard1$DotDatum, 1612440300000, 135000),
-		A2($author$project$Charts$Dashboard1$DotDatum, 1612440600000, 160000),
-		A2($author$project$Charts$Dashboard1$DotDatum, 1612440900000, 95000),
-		A2($author$project$Charts$Dashboard1$DotDatum, 1612441200000, 74000),
-		A2($author$project$Charts$Dashboard1$DotDatum, 1612441500000, 32000),
-		A2($author$project$Charts$Dashboard1$DotDatum, 1612441800000, 86000),
-		A2($author$project$Charts$Dashboard1$DotDatum, 1612442100000, 83000),
-		A2($author$project$Charts$Dashboard1$DotDatum, 1612442400000, 60000),
-		A2($author$project$Charts$Dashboard1$DotDatum, 1612442700000, 92000),
-		A2($author$project$Charts$Dashboard1$DotDatum, 1612443000000, 72000),
-		A2($author$project$Charts$Dashboard1$DotDatum, 1612443300000, 52000),
-		A2($author$project$Charts$Dashboard1$DotDatum, 1612443600000, 62000)
+		A2($author$project$Charts$Landing$DotDatum, 1612440000000, 140000),
+		A2($author$project$Charts$Landing$DotDatum, 1612440300000, 135000),
+		A2($author$project$Charts$Landing$DotDatum, 1612440600000, 160000),
+		A2($author$project$Charts$Landing$DotDatum, 1612440900000, 95000),
+		A2($author$project$Charts$Landing$DotDatum, 1612441200000, 74000),
+		A2($author$project$Charts$Landing$DotDatum, 1612441500000, 32000),
+		A2($author$project$Charts$Landing$DotDatum, 1612441800000, 86000),
+		A2($author$project$Charts$Landing$DotDatum, 1612442100000, 83000),
+		A2($author$project$Charts$Landing$DotDatum, 1612442400000, 60000),
+		A2($author$project$Charts$Landing$DotDatum, 1612442700000, 92000),
+		A2($author$project$Charts$Landing$DotDatum, 1612443000000, 72000),
+		A2($author$project$Charts$Landing$DotDatum, 1612443300000, 52000),
+		A2($author$project$Charts$Landing$DotDatum, 1612443600000, 62000)
 	]);
-var $author$project$Chart$Attributes$onTop = function (config) {
-	return _Utils_update(
-		config,
-		{
-			direction: $elm$core$Maybe$Just($author$project$Internal$Svg$Top)
-		});
-};
-var $author$project$Charts$Dashboard1$view = function (model) {
+var $author$project$Charts$Landing$view = function (model) {
 	return A2(
 		$author$project$Chart$chart,
 		_List_fromArray(
 			[
-				$author$project$Chart$Attributes$height(300),
-				$author$project$Chart$Attributes$width(490),
+				$author$project$Chart$Attributes$height(450),
+				$author$project$Chart$Attributes$width(1000),
 				$author$project$Chart$Attributes$static,
 				$author$project$Chart$Attributes$margin(
-				{bottom: 18, left: 10, right: 10, top: 0}),
+				{bottom: 18, left: 0, right: 0, top: 0}),
 				$author$project$Chart$Attributes$padding(
 				{bottom: 0, left: 0, right: 35, top: 10}),
 				A2(
 				$author$project$Chart$Events$onMouseMove,
-				$author$project$Charts$Dashboard1$OnHover,
+				$author$project$Charts$Landing$OnHover,
 				$author$project$Chart$Events$getNearest($author$project$Chart$Events$dot)),
 				$author$project$Chart$Events$onMouseLeave(
-				$author$project$Charts$Dashboard1$OnHover(_List_Nil))
+				$author$project$Charts$Landing$OnHover(_List_Nil))
 			]),
 		_List_fromArray(
 			[
@@ -38027,7 +37998,8 @@ var $author$project$Charts$Dashboard1$view = function (model) {
 					[
 						$author$project$Chart$Attributes$dashed(
 						_List_fromArray(
-							[3, 2]))
+							[5, 5])),
+						$author$project$Chart$Attributes$width(1.5)
 					])),
 				$author$project$Chart$xLabels(
 				_List_fromArray(
@@ -38044,7 +38016,7 @@ var $author$project$Charts$Dashboard1$view = function (model) {
 							return $.max;
 						}),
 						$author$project$Chart$Attributes$moveUp(7),
-						$author$project$Chart$Attributes$moveRight(10),
+						$author$project$Chart$Attributes$moveRight(6),
 						$author$project$Chart$Attributes$fontSize(10),
 						$author$project$Chart$Attributes$format(
 						function (i) {
@@ -38053,7 +38025,7 @@ var $author$project$Charts$Dashboard1$view = function (model) {
 					])),
 				A4(
 				$author$project$Chart$barsMap,
-				$author$project$Charts$Dashboard1$Bar,
+				$author$project$Charts$Landing$Bar,
 				_List_fromArray(
 					[
 						$author$project$Chart$Attributes$x1(
@@ -38077,24 +38049,12 @@ var $author$project$Charts$Dashboard1$view = function (model) {
 								$author$project$Chart$Attributes$gradient(
 								_List_fromArray(
 									['#7b4dff6F', '#7b4dff1F']))
-							])),
-						A2(
-						$author$project$Chart$bar,
-						function ($) {
-							return $.z;
-						},
-						_List_fromArray(
-							[
-								$author$project$Chart$Attributes$color('#bfc2c9'),
-								$author$project$Chart$Attributes$gradient(
-								_List_fromArray(
-									['#bfc2c9', '#bfc2c96F']))
 							]))
 					]),
-				$author$project$Charts$Dashboard1$barData),
+				$author$project$Charts$Landing$barData),
 				A4(
 				$author$project$Chart$seriesMap,
-				$author$project$Charts$Dashboard1$Dot,
+				$author$project$Charts$Landing$Dot,
 				function ($) {
 					return $.x;
 				},
@@ -38102,12 +38062,15 @@ var $author$project$Charts$Dashboard1$view = function (model) {
 					[
 						A3(
 						$author$project$Chart$amongst,
-						A2($author$project$Chart$Events$filterData, $author$project$Charts$Dashboard1$justDot, model.hovering),
+						A2($author$project$Chart$Events$filterData, $author$project$Charts$Landing$justDot, model.hovering),
 						function (_v0) {
 							return _List_fromArray(
 								[
-									$author$project$Chart$Attributes$color('#7b4dff'),
-									$author$project$Chart$Attributes$border('white')
+									$author$project$Chart$Attributes$size(12),
+									$author$project$Chart$Attributes$circle,
+									$author$project$Chart$Attributes$color('white'),
+									$author$project$Chart$Attributes$border('#7b4dff'),
+									$author$project$Chart$Attributes$borderWidth(1.5)
 								]);
 						},
 						A2(
@@ -38123,677 +38086,35 @@ var $author$project$Charts$Dashboard1$view = function (model) {
 										$author$project$Chart$Attributes$monotone,
 										$author$project$Chart$Attributes$color('#7b4dff'),
 										$author$project$Chart$Attributes$width(1.5),
-										$author$project$Chart$Attributes$opacity(0.2)
-									]),
-								_List_fromArray(
-									[
-										$author$project$Chart$Attributes$color('white'),
-										$author$project$Chart$Attributes$borderWidth(1.5),
-										$author$project$Chart$Attributes$circle
-									]))))
-					]),
-				$author$project$Charts$Dashboard1$lineData),
-				A2(
-				$author$project$Chart$each,
-				model.hovering,
-				F2(
-					function (p, dot) {
-						return _List_fromArray(
-							[
-								A4(
-								$author$project$Chart$tooltip,
-								dot,
-								_List_fromArray(
-									[
-										$author$project$Chart$Attributes$onTop,
-										$author$project$Chart$Attributes$offset(3)
-									]),
-								_List_Nil,
-								_List_Nil)
-							]);
-					}))
-			]));
-};
-var $author$project$Charts$Dashboard2$OnHover = function (a) {
-	return {$: 'OnHover', a: a};
-};
-var $author$project$Charts$Dashboard2$Datum = F2(
-	function (x, y) {
-		return {x: x, y: y};
-	});
-var $author$project$Charts$Dashboard2$barData = _List_fromArray(
-	[
-		A2($author$project$Charts$Dashboard2$Datum, 1612440000000, 56),
-		A2($author$project$Charts$Dashboard2$Datum, 1612440300000, 32),
-		A2($author$project$Charts$Dashboard2$Datum, 1612440600000, 0),
-		A2($author$project$Charts$Dashboard2$Datum, 1612440900000, 7),
-		A2($author$project$Charts$Dashboard2$Datum, 1612441200000, 48),
-		A2($author$project$Charts$Dashboard2$Datum, 1612441500000, 24),
-		A2($author$project$Charts$Dashboard2$Datum, 1612441800000, 0),
-		A2($author$project$Charts$Dashboard2$Datum, 1612442100000, 88)
-	]);
-var $author$project$Charts$Dashboard2$lineData = _List_fromArray(
-	[
-		A2($author$project$Charts$Dashboard2$Datum, 1612440000000, 90),
-		A2($author$project$Charts$Dashboard2$Datum, 1612440300000, 80),
-		A2($author$project$Charts$Dashboard2$Datum, 1612440600000, 97),
-		A2($author$project$Charts$Dashboard2$Datum, 1612440900000, 65),
-		A2($author$project$Charts$Dashboard2$Datum, 1612441200000, 72),
-		A2($author$project$Charts$Dashboard2$Datum, 1612441500000, 56),
-		A2($author$project$Charts$Dashboard2$Datum, 1612441800000, 82),
-		A2($author$project$Charts$Dashboard2$Datum, 1612442100000, 94),
-		A2($author$project$Charts$Dashboard2$Datum, 1612442400000, 76)
-	]);
-var $author$project$Charts$Dashboard2$view = function (model) {
-	return A2(
-		$author$project$Chart$chart,
-		_List_fromArray(
-			[
-				$author$project$Chart$Attributes$height(135),
-				$author$project$Chart$Attributes$width(225),
-				$author$project$Chart$Attributes$static,
-				A2(
-				$author$project$Chart$Events$onMouseMove,
-				$author$project$Charts$Dashboard2$OnHover,
-				$author$project$Chart$Events$getNearest(
-					A2($author$project$Chart$Events$keep, $author$project$Chart$Events$realValues, $author$project$Chart$Events$dot))),
-				$author$project$Chart$Events$onMouseLeave(
-				$author$project$Charts$Dashboard2$OnHover(_List_Nil))
-			]),
-		_List_fromArray(
-			[
-				A3(
-				$author$project$Chart$series,
-				function ($) {
-					return $.x;
-				},
-				_List_fromArray(
-					[
-						A3(
-						$author$project$Chart$amongst,
-						model.hovering,
-						function (_v0) {
-							return _List_fromArray(
-								[
-									$author$project$Chart$Attributes$circle,
-									$author$project$Chart$Attributes$color($author$project$Chart$Attributes$pink),
-									$author$project$Chart$Attributes$size(15)
-								]);
-						},
-						A2(
-							$author$project$Chart$named,
-							'Combinations',
-							A3(
-								$author$project$Chart$interpolated,
-								function ($) {
-									return $.y;
-								},
-								_List_fromArray(
-									[
-										$author$project$Chart$Attributes$monotone,
-										$author$project$Chart$Attributes$color('#555'),
-										$author$project$Chart$Attributes$dashed(
-										_List_fromArray(
-											[5, 5])),
-										$author$project$Chart$Attributes$width(3),
 										$author$project$Chart$Attributes$opacity(0.1)
 									]),
 								_List_Nil)))
 					]),
-				$author$project$Charts$Dashboard2$lineData),
-				A3(
-				$author$project$Chart$bars,
-				_List_fromArray(
-					[
-						$author$project$Chart$Attributes$x1(
-						function ($) {
-							return $.x;
-						}),
-						$author$project$Chart$Attributes$roundTop(0.2),
-						$author$project$Chart$Attributes$margin(0.05)
-					]),
-				_List_fromArray(
-					[
-						A2(
-						$author$project$Chart$bar,
-						function ($) {
-							return $.y;
-						},
-						_List_fromArray(
-							[
-								$author$project$Chart$Attributes$color($author$project$Chart$Attributes$pink),
-								$author$project$Chart$Attributes$opacity(0.8)
-							]))
-					]),
-				$author$project$Charts$Dashboard2$barData),
-				$author$project$Chart$eachBar(
-				F2(
-					function (p, bar) {
-						var value = $author$project$Chart$Events$getDependent(bar);
-						var color = (value < 10) ? '#6f6f6f' : 'white';
-						var bottom = A2($author$project$Chart$Events$getBottom, p, bar);
-						return (!value) ? _List_Nil : _List_fromArray(
-							[
-								A3(
-								$author$project$Chart$label,
-								_List_fromArray(
-									[
-										$author$project$Chart$Attributes$color(color),
-										$author$project$Chart$Attributes$moveUp(6),
-										$author$project$Chart$Attributes$fontSize(14)
-									]),
-								_List_fromArray(
-									[
-										$elm$svg$Svg$text(
-										$elm$core$String$fromFloat(value))
-									]),
-								bottom)
-							]);
-					})),
-				A2(
-				$author$project$Chart$each,
-				model.hovering,
-				F2(
-					function (p, dot) {
-						return _List_fromArray(
-							[
-								A3(
-								$author$project$Chart$label,
-								_List_fromArray(
-									[
-										$author$project$Chart$Attributes$fontSize(14),
-										$author$project$Chart$Attributes$moveUp(10)
-									]),
-								_List_fromArray(
-									[
-										$elm$svg$Svg$text(
-										$elm$core$String$fromFloat(
-											$author$project$Chart$Events$getDependent(dot)))
-									]),
-								A2($author$project$Chart$Events$getTop, p, dot))
-							]);
-					}))
-			]));
-};
-var $author$project$Charts$Dashboard3$OnHover = function (a) {
-	return {$: 'OnHover', a: a};
-};
-var $author$project$Internal$Svg$getNearestXHelp = F4(
-	function (toPosition, items, plane, searched) {
-		var toPoint = function (i) {
-			return A2(
-				$author$project$Internal$Svg$closestPoint,
-				toPosition(i),
-				searched);
-		};
-		var distanceX_ = A2($author$project$Internal$Svg$distanceX, plane, searched);
-		var getClosest = F2(
-			function (item, allClosest) {
-				var _v0 = $elm$core$List$head(allClosest);
-				if (_v0.$ === 'Just') {
-					var closest = _v0.a;
-					return _Utils_eq(
-						toPoint(closest).x,
-						toPoint(item).x) ? A2($elm$core$List$cons, item, allClosest) : ((_Utils_cmp(
-						distanceX_(
-							toPoint(closest)),
-						distanceX_(
-							toPoint(item))) > 0) ? _List_fromArray(
-						[item]) : allClosest);
-				} else {
-					return _List_fromArray(
-						[item]);
-				}
-			});
-		return A2(
-			$author$project$Internal$Svg$keepOne,
-			toPosition,
-			A3($elm$core$List$foldl, getClosest, _List_Nil, items));
-	});
-var $author$project$Internal$Svg$getNearestX = F4(
-	function (toPosition, items, plane, searched) {
-		return A4($author$project$Internal$Svg$getNearestXHelp, toPosition, items, plane, searched);
-	});
-var $author$project$Internal$Events$getNearestX = function (grouping) {
-	var toPos = grouping.a;
-	return $author$project$Internal$Events$Decoder(
-		F2(
-			function (items, plane) {
-				var groups = A2($author$project$Internal$Group$group, grouping, items);
-				return A3(
-					$author$project$Internal$Svg$getNearestX,
-					toPos(plane),
-					groups,
-					plane);
-			}));
-};
-var $author$project$Chart$Events$getNearestX = $author$project$Internal$Events$getNearestX;
-var $author$project$Chart$interpolatedMaybe = F2(
-	function (y, inter) {
-		return A2(
-			$author$project$Internal$Property$property,
-			y,
-			_Utils_ap(
-				_List_fromArray(
-					[$author$project$Chart$Attributes$linear]),
-				inter));
-	});
-var $author$project$Charts$Dashboard3$Datum = F2(
-	function (x, y) {
-		return {x: x, y: y};
-	});
-var $author$project$Charts$Dashboard3$lineData = _List_fromArray(
-	[
-		A2(
-		$author$project$Charts$Dashboard3$Datum,
-		1612137600000,
-		$elm$core$Maybe$Just(80)),
-		A2(
-		$author$project$Charts$Dashboard3$Datum,
-		1614556800000,
-		$elm$core$Maybe$Just(97)),
-		A2(
-		$author$project$Charts$Dashboard3$Datum,
-		1617235200000,
-		$elm$core$Maybe$Just(65)),
-		A2($author$project$Charts$Dashboard3$Datum, 1617235200001, $elm$core$Maybe$Nothing),
-		A2(
-		$author$project$Charts$Dashboard3$Datum,
-		1619827200000,
-		$elm$core$Maybe$Just(72)),
-		A2(
-		$author$project$Charts$Dashboard3$Datum,
-		1622505600000,
-		$elm$core$Maybe$Just(56)),
-		A2(
-		$author$project$Charts$Dashboard3$Datum,
-		1625097600000,
-		$elm$core$Maybe$Just(82)),
-		A2(
-		$author$project$Charts$Dashboard3$Datum,
-		1627776000000,
-		$elm$core$Maybe$Just(94)),
-		A2(
-		$author$project$Charts$Dashboard3$Datum,
-		1630454400000,
-		$elm$core$Maybe$Just(76)),
-		A2(
-		$author$project$Charts$Dashboard3$Datum,
-		1633046400000,
-		$elm$core$Maybe$Just(83))
-	]);
-var $author$project$Chart$Attributes$uppercase = function (config) {
-	return _Utils_update(
-		config,
-		{uppercase: true});
-};
-var $author$project$Charts$Dashboard3$view = function (model) {
-	return A2(
-		$author$project$Chart$chart,
-		_List_fromArray(
-			[
-				$author$project$Chart$Attributes$height(135),
-				$author$project$Chart$Attributes$width(225),
-				$author$project$Chart$Attributes$static,
-				$author$project$Chart$Attributes$margin(
-				{bottom: 18, left: 0, right: 0, top: 0}),
-				$author$project$Chart$Attributes$padding(
-				{bottom: 0, left: 8, right: 8, top: 10}),
-				A2(
-				$author$project$Chart$Events$onMouseMove,
-				$author$project$Charts$Dashboard3$OnHover,
-				$author$project$Chart$Events$getNearestX($author$project$Chart$Events$dot)),
-				$author$project$Chart$Events$onMouseLeave(
-				$author$project$Charts$Dashboard3$OnHover(_List_Nil))
-			]),
-		_List_fromArray(
-			[
-				$author$project$Chart$xLabels(
-				_List_fromArray(
-					[
-						$author$project$Chart$Attributes$times($elm$time$Time$utc),
-						$author$project$Chart$Attributes$uppercase,
-						$author$project$Chart$Attributes$fontSize(9),
-						$author$project$Chart$Attributes$amount(10)
-					])),
-				A2(
-				$author$project$Chart$each,
-				model.hovering,
-				F2(
-					function (p, dot) {
-						return _List_fromArray(
-							[
-								$author$project$Chart$line(
-								_List_fromArray(
-									[
-										$author$project$Chart$Attributes$x1(
-										$author$project$Chart$Events$getIndependent(dot)),
-										$author$project$Chart$Attributes$width(2),
-										$author$project$Chart$Attributes$dashed(
-										_List_fromArray(
-											[5, 5]))
-									]))
-							]);
-					})),
-				A3(
-				$author$project$Chart$series,
-				function ($) {
-					return $.x;
-				},
-				_List_fromArray(
-					[
-						A3(
-						$author$project$Chart$amongst,
-						model.hovering,
-						function (_v0) {
-							return _List_fromArray(
-								[
-									$author$project$Chart$Attributes$size(14)
-								]);
-						},
-						A3(
-							$author$project$Chart$interpolatedMaybe,
-							function ($) {
-								return $.y;
-							},
-							_List_fromArray(
-								[
-									$author$project$Chart$Attributes$linear,
-									$author$project$Chart$Attributes$color($author$project$Chart$Attributes$blue),
-									$author$project$Chart$Attributes$width(1.5),
-									$author$project$Chart$Attributes$opacity(0.4),
-									$author$project$Chart$Attributes$gradient(
-									_List_fromArray(
-										[$author$project$Chart$Attributes$blue, 'white']))
-								]),
-							_List_fromArray(
-								[
-									$author$project$Chart$Attributes$diamond,
-									$author$project$Chart$Attributes$color('white'),
-									$author$project$Chart$Attributes$borderWidth(1.5),
-									$author$project$Chart$Attributes$size(8)
-								])))
-					]),
-				$author$project$Charts$Dashboard3$lineData)
-			]));
-};
-var $author$project$Charts$Dashboard4$OnHover = function (a) {
-	return {$: 'OnHover', a: a};
-};
-var $author$project$Chart$barMaybe = function (y) {
-	return A2($author$project$Internal$Property$property, y, _List_Nil);
-};
-var $author$project$Charts$Dashboard4$Datum = F2(
-	function (score, name) {
-		return {name: name, score: score};
-	});
-var $author$project$Charts$Dashboard4$data = _List_fromArray(
-	[
-		A2(
-		$author$project$Charts$Dashboard4$Datum,
-		$elm$core$Maybe$Just(23),
-		'Alexander'),
-		A2(
-		$author$project$Charts$Dashboard4$Datum,
-		$elm$core$Maybe$Just(48),
-		'Anne'),
-		A2(
-		$author$project$Charts$Dashboard4$Datum,
-		$elm$core$Maybe$Just(98),
-		'Alice'),
-		A2(
-		$author$project$Charts$Dashboard4$Datum,
-		$elm$core$Maybe$Just(85),
-		'Brian'),
-		A2(
-		$author$project$Charts$Dashboard4$Datum,
-		$elm$core$Maybe$Just(32),
-		'Bobby'),
-		A2($author$project$Charts$Dashboard4$Datum, $elm$core$Maybe$Nothing, 'Byron'),
-		A2(
-		$author$project$Charts$Dashboard4$Datum,
-		$elm$core$Maybe$Just(72),
-		'Cirkeline'),
-		A2(
-		$author$project$Charts$Dashboard4$Datum,
-		$elm$core$Maybe$Just(56),
-		'Diana'),
-		A2(
-		$author$project$Charts$Dashboard4$Datum,
-		$elm$core$Maybe$Just(64),
-		'Felicia'),
-		A2(
-		$author$project$Charts$Dashboard4$Datum,
-		$elm$core$Maybe$Just(45),
-		'Felipa'),
-		A2(
-		$author$project$Charts$Dashboard4$Datum,
-		$elm$core$Maybe$Just(28),
-		'Georgina'),
-		A2(
-		$author$project$Charts$Dashboard4$Datum,
-		$elm$core$Maybe$Just(45),
-		'Helena'),
-		A2(
-		$author$project$Charts$Dashboard4$Datum,
-		$elm$core$Maybe$Just(56),
-		'Irina'),
-		A2(
-		$author$project$Charts$Dashboard4$Datum,
-		$elm$core$Maybe$Just(52),
-		'Iris'),
-		A2(
-		$author$project$Charts$Dashboard4$Datum,
-		$elm$core$Maybe$Just(68),
-		'Jack'),
-		A2(
-		$author$project$Charts$Dashboard4$Datum,
-		$elm$core$Maybe$Just(72),
-		'Kristine'),
-		A2(
-		$author$project$Charts$Dashboard4$Datum,
-		$elm$core$Maybe$Just(87),
-		'Linea'),
-		A2(
-		$author$project$Charts$Dashboard4$Datum,
-		$elm$core$Maybe$Just(92),
-		'Mina'),
-		A2(
-		$author$project$Charts$Dashboard4$Datum,
-		$elm$core$Maybe$Just(100),
-		'Prudence'),
-		A2(
-		$author$project$Charts$Dashboard4$Datum,
-		$elm$core$Maybe$Just(65),
-		'Pauline'),
-		A2(
-		$author$project$Charts$Dashboard4$Datum,
-		$elm$core$Maybe$Just(59),
-		'Preston'),
-		A2(
-		$author$project$Charts$Dashboard4$Datum,
-		$elm$core$Maybe$Just(47),
-		'Regina'),
-		A2(
-		$author$project$Charts$Dashboard4$Datum,
-		$elm$core$Maybe$Just(86),
-		'Ruzena'),
-		A2(
-		$author$project$Charts$Dashboard4$Datum,
-		$elm$core$Maybe$Just(37),
-		'Regitze'),
-		A2(
-		$author$project$Charts$Dashboard4$Datum,
-		$elm$core$Maybe$Just(59),
-		'Selena'),
-		A2(
-		$author$project$Charts$Dashboard4$Datum,
-		$elm$core$Maybe$Just(62),
-		'Sylvia'),
-		A2(
-		$author$project$Charts$Dashboard4$Datum,
-		$elm$core$Maybe$Just(76),
-		'Tristen'),
-		A2(
-		$author$project$Charts$Dashboard4$Datum,
-		$elm$core$Maybe$Just(79),
-		'Ursula'),
-		A2(
-		$author$project$Charts$Dashboard4$Datum,
-		$elm$core$Maybe$Just(65),
-		'Virginia'),
-		A2(
-		$author$project$Charts$Dashboard4$Datum,
-		$elm$core$Maybe$Just(35),
-		'Winston')
-	]);
-var $author$project$Charts$Dashboard4$colors = $elm$core$Dict$fromList(
-	A2(
-		$elm$core$List$indexedMap,
-		$elm$core$Tuple$pair,
-		$elm$core$List$reverse(
-			_List_fromArray(
-				['#00E58A', '#00E1CC', '#00AFDD', '#006BD9', '#0029D5', '#1600D2', '#5300CE', '#8F00CA', '#C600C5', '#C20086']))));
-var $author$project$Charts$Dashboard4$toColor = function (score) {
-	var key = $elm$core$Basics$floor(
-		A2($elm$core$Maybe$withDefault, 0, score) / 10);
-	return A2(
-		$elm$core$Maybe$withDefault,
-		'#00E58A',
-		A2($elm$core$Dict$get, key, $author$project$Charts$Dashboard4$colors));
-};
-var $author$project$Charts$Dashboard4$view = function (model) {
-	return A2(
-		$author$project$Chart$chart,
-		_List_fromArray(
-			[
-				$author$project$Chart$Attributes$height(140),
-				$author$project$Chart$Attributes$width(490),
-				$author$project$Chart$Attributes$margin(
-				{bottom: 0, left: 0, right: 15, top: 0}),
-				A2(
-				$author$project$Chart$Events$onMouseMove,
-				$author$project$Charts$Dashboard4$OnHover,
-				$author$project$Chart$Events$getNearestX($author$project$Chart$Events$bar)),
-				$author$project$Chart$Events$onMouseLeave(
-				$author$project$Charts$Dashboard4$OnHover(_List_Nil))
-			]),
-		_List_fromArray(
-			[
-				$author$project$Chart$grid(_List_Nil),
-				$author$project$Chart$yLabels(
-				_List_fromArray(
-					[
-						$author$project$Chart$Attributes$pinned(
-						function ($) {
-							return $.max;
-						}),
-						$author$project$Chart$Attributes$amount(1),
-						$author$project$Chart$Attributes$flip,
-						$author$project$Chart$Attributes$fontSize(10)
-					])),
-				$author$project$Chart$line(
-				_List_fromArray(
-					[
-						$author$project$Chart$Attributes$y1(50),
-						$author$project$Chart$Attributes$dashed(
-						_List_fromArray(
-							[5, 5]))
-					])),
-				A3(
-				$author$project$Chart$bars,
-				_List_fromArray(
-					[
-						$author$project$Chart$Attributes$roundTop(1),
-						$author$project$Chart$Attributes$roundBottom(1),
-						$author$project$Chart$Attributes$margin(0.2),
-						$author$project$Chart$Attributes$noGrid
-					]),
-				_List_fromArray(
-					[
-						A3(
-						$author$project$Chart$amongst,
-						model.hovering,
-						function (_v0) {
-							return _List_fromArray(
-								[
-									$author$project$Chart$Attributes$highlight(0.2),
-									$author$project$Chart$Attributes$highlightWidth(5)
-								]);
-						},
-						A2(
-							$author$project$Chart$variation,
-							F2(
-								function (i, d) {
-									return _List_fromArray(
-										[
-											$author$project$Chart$Attributes$color(
-											$author$project$Charts$Dashboard4$toColor(d.score))
-										]);
-								}),
-							A2(
-								$author$project$Chart$barMaybe,
-								function ($) {
-									return $.score;
-								},
-								_List_fromArray(
-									[
-										$author$project$Chart$Attributes$opacity(0.5)
-									]))))
-					]),
-				$author$project$Charts$Dashboard4$data),
+				$author$project$Charts$Landing$lineData),
 				A4(
 				$author$project$Chart$labelAt,
-				function ($) {
-					return $.max;
-				},
 				$author$project$Chart$Attributes$middle,
+				$author$project$Chart$Attributes$percent(60),
 				_List_fromArray(
 					[
-						$author$project$Chart$Attributes$rotate(90),
-						$author$project$Chart$Attributes$moveRight(18)
+						$author$project$Chart$Attributes$fontSize(50),
+						$author$project$Chart$Attributes$moveUp(10),
+						$author$project$Chart$Attributes$color('rgb(90, 90, 90)')
 					]),
 				_List_fromArray(
 					[
-						$elm$svg$Svg$text('score')
-					])),
-				A2(
-				$author$project$Chart$each,
-				model.hovering,
-				F2(
-					function (p, bar) {
-						var datum = $author$project$Chart$Events$getDatum(bar);
-						var scoreText = function () {
-							var _v1 = datum.score;
-							if (_v1.$ === 'Just') {
-								var score = _v1.a;
-								return $elm$core$String$fromFloat(score) + '/100';
-							} else {
-								return 'Absent';
-							}
-						}();
-						return _List_fromArray(
+						A2(
+						$elm$svg$Svg$tspan,
+						_List_fromArray(
 							[
-								A4(
-								$author$project$Chart$tooltip,
-								bar,
-								_List_fromArray(
-									[$author$project$Chart$Attributes$onTop]),
-								_List_fromArray(
-									[
-										A2(
-										$elm$html$Html$Attributes$style,
-										'color',
-										$author$project$Chart$Events$getColor(bar))
-									]),
-								_List_fromArray(
-									[
-										$elm$html$Html$text(datum.name),
-										$elm$html$Html$text(': '),
-										$elm$html$Html$text(scoreText)
-									]))
-							]);
-					}))
+								$elm$svg$Svg$Attributes$style('font-style: italic;')
+							]),
+						_List_fromArray(
+							[
+								$elm$svg$Svg$text('Your')
+							])),
+						$elm$svg$Svg$text(' chart, simply.')
+					]))
 			]));
 };
 var $author$project$Page$Home$view = function (model) {
@@ -38803,110 +38124,20 @@ var $author$project$Page$Home$view = function (model) {
 				[
 					$author$project$Ui$Menu$small,
 					A2(
-					$mdgriffith$elm_ui$Element$row,
-					_List_fromArray(
-						[
-							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-							$mdgriffith$elm_ui$Element$spacing(20)
-						]),
-					_List_fromArray(
-						[
-							A2(
-							$author$project$Page$Home$section,
-							1,
-							A2(
-								$elm$html$Html$map,
-								$author$project$Page$Home$Dashboard1Msg,
-								$author$project$Charts$Dashboard1$view(model.dashboard1))),
-							A2(
-							$mdgriffith$elm_ui$Element$column,
-							_List_fromArray(
-								[
-									$mdgriffith$elm_ui$Element$alignTop,
-									$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-									$mdgriffith$elm_ui$Element$spacing(20)
-								]),
-							_List_fromArray(
-								[
-									A2(
-									$mdgriffith$elm_ui$Element$row,
-									_List_fromArray(
-										[
-											$mdgriffith$elm_ui$Element$alignTop,
-											$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-											$mdgriffith$elm_ui$Element$spacing(20)
-										]),
-									_List_fromArray(
-										[
-											A2(
-											$author$project$Page$Home$section,
-											1,
-											A2(
-												$elm$html$Html$map,
-												$author$project$Page$Home$Dashboard2Msg,
-												$author$project$Charts$Dashboard2$view(model.dashboard2))),
-											A2(
-											$author$project$Page$Home$section,
-											1,
-											A2(
-												$elm$html$Html$map,
-												$author$project$Page$Home$Dashboard3Msg,
-												$author$project$Charts$Dashboard3$view(model.dashboard3)))
-										])),
-									A2(
-									$author$project$Page$Home$section,
-									1,
-									A2(
-										$elm$html$Html$map,
-										$author$project$Page$Home$Dashboard4Msg,
-										$author$project$Charts$Dashboard4$view(model.dashboard4)))
-								]))
-						])),
+					$mdgriffith$elm_ui$Element$el,
+					_List_Nil,
+					$mdgriffith$elm_ui$Element$html(
+						A2(
+							$elm$html$Html$map,
+							$author$project$Page$Home$LandingMsg,
+							$author$project$Charts$Landing$view(model.landing)))),
 					A2(
 					$mdgriffith$elm_ui$Element$column,
 					_List_fromArray(
 						[
 							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-							$mdgriffith$elm_ui$Element$paddingEach(
-							{bottom: 100, left: 0, right: 0, top: 40}),
-							$mdgriffith$elm_ui$Element$Font$center
-						]),
-					_List_fromArray(
-						[
-							A2(
-							$mdgriffith$elm_ui$Element$el,
-							_List_fromArray(
-								[
-									$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-									$mdgriffith$elm_ui$Element$Font$size(125)
-								]),
-							$mdgriffith$elm_ui$Element$text('elm-charts')),
-							A2(
-							$mdgriffith$elm_ui$Element$paragraph,
-							_List_fromArray(
-								[
-									$mdgriffith$elm_ui$Element$Font$size(24),
-									$mdgriffith$elm_ui$Element$Font$color(
-									A3($mdgriffith$elm_ui$Element$rgb255, 120, 120, 120)),
-									A2($mdgriffith$elm_ui$Element$paddingXY, 10, 5)
-								]),
-							_List_fromArray(
-								[
-									$mdgriffith$elm_ui$Element$text('Compose '),
-									A2(
-									$mdgriffith$elm_ui$Element$el,
-									_List_fromArray(
-										[$mdgriffith$elm_ui$Element$Font$italic]),
-									$mdgriffith$elm_ui$Element$text('your')),
-									$mdgriffith$elm_ui$Element$text(' chart without the clutter.')
-								]))
-						])),
-					A2(
-					$mdgriffith$elm_ui$Element$column,
-					_List_fromArray(
-						[
-							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-							$mdgriffith$elm_ui$Element$spacing(100)
+							$mdgriffith$elm_ui$Element$spacing(100),
+							A2($mdgriffith$elm_ui$Element$paddingXY, 0, 100)
 						]),
 					_List_fromArray(
 						[
@@ -38920,7 +38151,7 @@ var $author$project$Page$Home$view = function (model) {
 									},
 									$author$project$Examples$Frontpage$Familiar$view(_Utils_Tuple0)),
 								code: $author$project$Examples$Frontpage$Familiar$smallCode,
-								title: 'Familiar interface and vocabulary'
+								title: 'Beginner friendly'
 							}),
 							$author$project$Page$Home$feature(
 							{
@@ -38930,11 +38161,11 @@ var $author$project$Page$Home$view = function (model) {
 									$author$project$Page$Home$ConciseMsg,
 									$author$project$Examples$Frontpage$Concise$view(model.concise)),
 								code: $author$project$Examples$Frontpage$Concise$smallCode,
-								title: 'Concise at any level'
+								title: 'Advanced chart, elegant code'
 							}),
 							$author$project$Page$Home$feature(
 							{
-								body: 'Mix together chart types, edit the styling, and attach labels to anything.',
+								body: 'You never need to know how SVG clip paths work or any SVG for that matter!',
 								chart: A2(
 									$elm$html$Html$map,
 									function (_v1) {
@@ -38942,19 +38173,7 @@ var $author$project$Page$Home$view = function (model) {
 									},
 									$author$project$Examples$Frontpage$Familiar$view(_Utils_Tuple0)),
 								code: $author$project$Examples$Frontpage$Familiar$smallCode,
-								title: 'Compose any chart'
-							}),
-							$author$project$Page$Home$feature(
-							{
-								body: 'You never need to know how SVG clip paths work or any SVG for that matter!',
-								chart: A2(
-									$elm$html$Html$map,
-									function (_v2) {
-										return $author$project$Page$Home$None;
-									},
-									$author$project$Examples$Frontpage$Familiar$view(_Utils_Tuple0)),
-								code: $author$project$Examples$Frontpage$Familiar$smallCode,
-								title: 'Minimal context needed'
+								title: 'Visual documentation'
 							})
 						]))
 				])),

@@ -1,4 +1,4 @@
-module Ui.Menu exposing (Group, Link, small, expanded)
+module Ui.Menu exposing (Group, Link, small, links)
 
 
 import Html as H
@@ -18,61 +18,6 @@ type alias Link =
   { url : String
   , title : String
   }
-
-
-expanded : E.Element msg
-expanded =
-  E.column
-      [ E.width E.fill
-      , E.spacing 20
-      ]
-      [ E.column
-        [ E.alignTop
-        , E.spacing 5
-        ]
-        [ E.row
-            [ F.size 40 ]
-            [ E.text "elm-charts" ]
-        ]
-      , E.row
-          [ E.spacing 100
-          , E.width E.fill
-          ]
-          [ description
-          , E.row
-              [ E.spaceEvenly
-              , E.width E.fill
-              , E.alignRight
-              ] <| List.map viewGroup
-              [ { title = Link "/documentation" "Documentation"
-                , links =
-                    [ Link "/quick-start" "Quick start"
-                    , Link "/documentation/scatter-charts" "Scatter charts"
-                    , Link "/documentation/line-charts" "Line charts"
-                    , Link "/documentation/bar-charts" "Bar charts"
-                    , Link "/documentation/navigation" "Navigation"
-                    , Link "/documentation/interactivity" "Interactivity"
-                    ]
-                }
-              , { title = Link "/gallery" "Gallery"
-                , links =
-                    [ Link "/gallery#salary-distribution" "Salary distribution in Denmark"
-                    , Link "/gallery#perceptions-of-probability" "Perceptions of Probability"
-                    , Link "/gallery#community-examples" "Community examples"
-                    ]
-                }
-              , { title = Link "/administration" "Administration"
-                , links =
-                    [ Link "/roadmap" "Roadmap"
-                    , Link "/donating" "Donating"
-                    , Link "/consulting" "Consulting"
-                    , Link "https://github.com/terezka/charts" "Github"
-                    , Link "https://twitter.com/tereza_sokol" "Twitter"
-                    ]
-                }
-              ]
-          ]
-      ]
 
 
 description : E.Element msg
@@ -108,14 +53,19 @@ small =
         [ E.spacing 40
         , E.alignRight
         , F.size 13
-        ] <| List.map viewLink
-        [ Link "/quick-start" "Quick start"
-        , Link "/documentation" "Documentation"
-        , Link "/gallery" "Gallery"
-        , Link "/administration" "Administration"
         ]
+        links
     ]
 
+
+links : List (E.Element msg)
+links =
+  List.map viewLink
+    [ Link "/quick-start" "Getting started"
+    , Link "/documentation" "Documentation"
+    --, Link "/gallery" "Gallery"
+    , Link "/administration" "Administration"
+    ]
 
 
 viewGroup : Group -> E.Element msg
