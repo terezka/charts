@@ -56,16 +56,33 @@ needs.
 NOTE: Some of the more advanced elements utilize helper functions in `Chart.Events`
 too. If that is the case, I will make a note in the comment of the element.
 
+In the following examples, I will assume the imports:
+
+    import Html as H
+    import Html.Attributes as HA
+    import Html.Events as HE
+    import Svg as S
+    import Svg.Attributes as SA
+    import Svg.Events as SE
+    import Chart as C
+    import Chart.Attributes as CA
+    import Chart.Events as CE
+
+
 @docs Element
 
 # The frame
 @docs chart
 
 # Data elements
-@docs bars, series, seriesMap, barsMap
-@docs Property, bar, scatter, interpolated
-@docs barMaybe, scatterMaybe, interpolatedMaybe
-@docs stacked, named, variation, amongst
+## Bar charts
+@docs bars, barsMap, bar, barMaybe
+
+## Scatter and line charts
+@docs series, seriesMap, scatter, scatterMaybe, interpolated, interpolatedMaybe
+
+## Stacking, naming, and variation
+@docs Property, stacked, named, variation, amongst
 
 # Navigation elements
 @docs xAxis, yAxis, xTicks, yTicks, xLabels, yLabels, grid
