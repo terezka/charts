@@ -1,6 +1,11 @@
-module Pages.QuickStart exposing (view)
+module Page.QuickStart exposing (Model, Params, Msg, init, subscriptions, exit, update, view)
 
-import View exposing (View)
+
+import Browser exposing (Document)
+import Route exposing (Route)
+import Session exposing (Session)
+import Browser.Navigation as Navigation
+import Html
 import Charts.Basics exposing (Example)
 import Html as H
 import Element as E
@@ -13,8 +18,64 @@ import Ui.Code as Code
 import Ui.Menu as Menu
 
 
-view : View msg
-view =
+
+-- MODEL
+
+
+type alias Model =
+  ()
+
+
+type alias Params =
+  ()
+
+
+
+-- INIT
+
+
+init : Navigation.Key -> Session -> Params -> ( Model, Cmd Msg )
+init key session params =
+  ( ()
+  , Cmd.none
+  )
+
+
+exit : Model -> Session -> Session
+exit model session =
+  session
+
+
+
+-- UPDATE
+
+
+type Msg
+  = NoOp
+
+
+update : Navigation.Key -> Msg -> Model -> ( Model, Cmd Msg )
+update key msg model =
+  case msg of
+    NoOp ->
+      ( model, Cmd.none )
+
+
+
+-- SUBSCRIPTIONS
+
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+  Sub.none
+
+
+
+-- VIEW
+
+
+view : Model -> Document Msg
+view model =
   { title = "elm-charts | Quick start"
   , body =
       Layout.view
@@ -48,4 +109,3 @@ view =
                 ]
         ]
   }
-

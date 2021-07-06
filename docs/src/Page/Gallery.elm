@@ -1,10 +1,11 @@
-module Pages.Real exposing (Model, Msg, page)
+module Page.Gallery exposing (Model, Params, Msg, init, subscriptions, exit, update, view)
 
-import Gen.Params.Real exposing (Params)
-import Page
-import Request
-import Shared
-import View exposing (View)
+
+import Browser exposing (Document)
+import Route exposing (Route)
+import Session exposing (Session)
+import Browser.Navigation as Navigation
+import Html
 import Charts.SalaryDist as SalaryDist
 import Charts.SalaryDistBar as SalaryDistBar
 import Charts.Basics exposing (Example)
@@ -19,30 +20,37 @@ import Ui.Code as Code
 import Ui.Menu as Menu
 
 
-page : Shared.Model -> Request.With Params -> Page.With Model Msg
-page shared req =
-    Page.sandbox
-        { init = init
-        , update = update
-        , view = view
-        }
+
+
+-- MODEL
+
+
+type alias Model =
+  { salaryDist : SalaryDist.Model
+  , salaryDistBar : SalaryDistBar.Model
+  }
+
+
+type alias Params =
+  ()
 
 
 
 -- INIT
 
 
-type alias Model =
-    { salaryDist : SalaryDist.Model
-    , salaryDistBar : SalaryDistBar.Model
-    }
-
-
-init : Model
-init =
-    { salaryDist = SalaryDist.init
+init : Navigation.Key -> Session -> Params -> ( Model, Cmd Msg )
+init key session params =
+  ( { salaryDist = SalaryDist.init
     , salaryDistBar = SalaryDistBar.init
     }
+  , Cmd.none
+  )
+
+
+exit : Model -> Session -> Session
+exit model session =
+  session
 
 
 
@@ -50,27 +58,38 @@ init =
 
 
 type Msg
-    = SalaryDistMsg SalaryDist.Msg
-    | SalaryDistBarMsg SalaryDistBar.Msg
+  = SalaryDistMsg SalaryDist.Msg
+  | SalaryDistBarMsg SalaryDistBar.Msg
 
 
-update : Msg -> Model -> Model
-update msg model =
-    case msg of
-      SalaryDistMsg subMsg ->
-          { model | salaryDist = SalaryDist.update subMsg model.salaryDist }
 
-      SalaryDistBarMsg subMsg ->
-          { model | salaryDistBar = SalaryDistBar.update subMsg model.salaryDistBar }
+update : Navigation.Key -> Msg -> Model -> ( Model, Cmd Msg )
+update key msg model =
+  case msg of
+    SalaryDistMsg subMsg ->
+      ( { model | salaryDist = SalaryDist.update subMsg model.salaryDist }, Cmd.none )
+
+    SalaryDistBarMsg subMsg ->
+      ( { model | salaryDistBar = SalaryDistBar.update subMsg model.salaryDistBar }, Cmd.none )
+
+
+
+
+-- SUBSCRIPTIONS
+
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+  Sub.none
 
 
 
 -- VIEW
 
 
-view : Model -> View Msg
+view : Model -> Document Msg
 view model =
-    { title = "elm-charts"
+  { title = "elm-charts"
     , body =
         Layout.view
           [ Menu.small

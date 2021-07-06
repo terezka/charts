@@ -1,10 +1,10 @@
-module Pages.Home_ exposing (Model, Msg, page)
+module Page.Home exposing (Model, Params, Msg, init, subscriptions, exit, update, view)
 
-import Gen.Params.Home_ exposing (Params)
-import Page
-import Request
-import Shared
-import View exposing (View)
+
+import Browser exposing (Document)
+import Route exposing (Route)
+import Session exposing (Session)
+import Browser.Navigation as Navigation
 import Charts.Dashboard1 as Dashboard1
 import Charts.Dashboard2 as Dashboard2
 import Charts.Dashboard3 as Dashboard3
@@ -36,17 +36,8 @@ import Chart.Events as CE
 import Chart.Svg as CS
 
 
-page : Shared.Model -> Request.With Params -> Page.With Model Msg
-page shared req =
-  Page.sandbox
-    { init = init
-    , update = update
-    , view = view
-    }
 
-
-
--- INIT
+-- MODEL
 
 
 type alias Model =
@@ -62,18 +53,33 @@ type alias Model =
   }
 
 
-init : Model
-init =
-  { dashboard1 = Dashboard1.init
-  , dashboard2 = Dashboard2.init
-  , dashboard3 = Dashboard3.init
-  , dashboard4 = Dashboard4.init
-  , dashboard5 = Dashboard5.init
-  , dashboard6 = Dashboard6.init
-  , dashboard7 = Dashboard7.init
-  , concise = Concise.init
-  , hovering = []
-  }
+type alias Params =
+  ()
+
+
+
+-- INIT
+
+
+init : Navigation.Key -> Session -> Params -> ( Model, Cmd Msg )
+init key session params =
+  ( { dashboard1 = Dashboard1.init
+    , dashboard2 = Dashboard2.init
+    , dashboard3 = Dashboard3.init
+    , dashboard4 = Dashboard4.init
+    , dashboard5 = Dashboard5.init
+    , dashboard6 = Dashboard6.init
+    , dashboard7 = Dashboard7.init
+    , concise = Concise.init
+    , hovering = []
+    }
+  , Cmd.none
+  )
+
+
+exit : Model -> Session -> Session
+exit model session =
+  session
 
 
 
@@ -93,53 +99,55 @@ type Msg
   | None
 
 
-update : Msg -> Model -> Model
-update msg model =
+
+update : Navigation.Key -> Msg -> Model -> ( Model, Cmd Msg )
+update key msg model =
   case msg of
     Dashboard1Msg subMsg ->
-      { model | dashboard1 = Dashboard1.update subMsg model.dashboard1 }
+      ( { model | dashboard1 = Dashboard1.update subMsg model.dashboard1 }, Cmd.none )
 
     Dashboard2Msg subMsg ->
-      { model | dashboard2 = Dashboard2.update subMsg model.dashboard2 }
+      ( { model | dashboard2 = Dashboard2.update subMsg model.dashboard2 }, Cmd.none )
 
     Dashboard3Msg subMsg ->
-      { model | dashboard3 = Dashboard3.update subMsg model.dashboard3 }
+      ( { model | dashboard3 = Dashboard3.update subMsg model.dashboard3 }, Cmd.none )
 
     Dashboard4Msg subMsg ->
-      { model | dashboard4 = Dashboard4.update subMsg model.dashboard4 }
+      ( { model | dashboard4 = Dashboard4.update subMsg model.dashboard4 }, Cmd.none )
 
     Dashboard5Msg subMsg ->
-      { model | dashboard5 = Dashboard5.update subMsg model.dashboard5 }
+      ( { model | dashboard5 = Dashboard5.update subMsg model.dashboard5 }, Cmd.none )
 
     Dashboard6Msg subMsg ->
-      { model | dashboard6 = Dashboard6.update subMsg model.dashboard6 }
+      ( { model | dashboard6 = Dashboard6.update subMsg model.dashboard6 }, Cmd.none )
 
     Dashboard7Msg subMsg ->
-      { model | dashboard7 = Dashboard7.update subMsg model.dashboard7 }
+      ( { model | dashboard7 = Dashboard7.update subMsg model.dashboard7 }, Cmd.none )
 
     ConciseMsg subMsg ->
-      { model | concise = Concise.update subMsg model.concise }
+      ( { model | concise = Concise.update subMsg model.concise }, Cmd.none )
 
     OnHover hovering ->
-      { model | hovering = hovering }
+      ( { model | hovering = hovering }, Cmd.none )
 
     None ->
-      model
+      ( model, Cmd.none)
+
+
+
+-- SUBSCRIPTIONS
+
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+  Sub.none
 
 
 
 -- VIEW
 
 
-type Datum = Money MoneyDatum | People PeopleDatum
-
-type alias MoneyDatum = { year : Float, income : Float }
-
-type alias PeopleDatum = { year : Float, people : Float }
-
-
-
-view : Model -> View Msg
+view : Model -> Document Msg
 view model =
     { title = "elm-charts"
     , body =

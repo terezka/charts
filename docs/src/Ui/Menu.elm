@@ -54,11 +54,11 @@ expanded =
                     , Link "/documentation/interactivity" "Interactivity"
                     ]
                 }
-              , { title = Link "/real" "Gallery"
+              , { title = Link "/gallery" "Gallery"
                 , links =
-                    [ Link "/real#salary-distribution" "Salary distribution in Denmark"
-                    , Link "/real#perceptions-of-probability" "Perceptions of Probability"
-                    , Link "/real#community-examples" "Community examples"
+                    [ Link "/gallery#salary-distribution" "Salary distribution in Denmark"
+                    , Link "/gallery#perceptions-of-probability" "Perceptions of Probability"
+                    , Link "/gallery#community-examples" "Community examples"
                     ]
                 }
               , { title = Link "/administration" "Administration"
@@ -111,7 +111,7 @@ small =
         ] <| List.map viewLink
         [ Link "/quick-start" "Quick start"
         , Link "/documentation" "Documentation"
-        , Link "/real" "Gallery"
+        , Link "/gallery" "Gallery"
         , Link "/administration" "Administration"
         ]
     ]

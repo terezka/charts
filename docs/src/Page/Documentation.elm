@@ -1,10 +1,11 @@
-module Pages.Documentation exposing (Model, Msg, page)
+module Page.Documentation exposing (Model, Params, Msg, init, subscriptions, exit, update, view)
 
-import Gen.Params.Documentation exposing (Params)
-import Page
-import Request
-import Shared
-import View exposing (View)
+
+import Browser exposing (Document)
+import Route exposing (Route)
+import Session exposing (Session)
+import Browser.Navigation as Navigation
+import Html
 import Ui.Layout as Layout
 import Ui.Menu as Menu
 import Ui.Code as Code
@@ -20,17 +21,8 @@ import Ui.Thumbnail
 import Ui.Tabs
 
 
-page : Shared.Model -> Request.With Params -> Page.With Model Msg
-page shared req =
-  Page.sandbox
-    { init = init
-    , update = update
-    , view = view
-    }
 
-
-
--- INIT
+-- MODEL
 
 
 type alias Model =
@@ -38,10 +30,24 @@ type alias Model =
   }
 
 
-init : Model
-init =
-  { examples = Examples.init
-  }
+type alias Params =
+  ()
+
+
+
+-- INIT
+
+
+init : Navigation.Key -> Session -> Params -> ( Model, Cmd Msg )
+init key session params =
+  ( { examples = Examples.init }
+  , Cmd.none
+  )
+
+
+exit : Model -> Session -> Session
+exit model session =
+  session
 
 
 
@@ -53,18 +59,23 @@ type Msg
 
 
 
-update : Msg -> Model -> Model
-update msg model =
+update : Navigation.Key -> Msg -> Model -> ( Model, Cmd Msg )
+update key msg model =
     case msg of
       OnExampleMsg sub ->
-        { model | examples = Examples.update sub model.examples }
+        ( { model | examples = Examples.update sub model.examples }, Cmd.none )
 
+
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+  Sub.none
 
 
 -- VIEW
 
 
-view : Model -> View Msg
+view : Model -> Document Msg
 view model =
   { title = "elm-charts | Documentation"
   , body =
