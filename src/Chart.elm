@@ -119,8 +119,15 @@ In the following examples, I will assume the imports:
 @docs svgAt, htmlAt, svg, html, none
 
 # Advanced elements
+
+## For each item, do..
 @docs eachBin, eachStack, eachBar, eachDot, eachProduct, each, eachCustom
-@docs withBins, withStacks, withBars, withDots, withProducts, withPlane
+
+## With all item, do..
+@docs withBins, withStacks, withBars, withDots, withProducts
+
+## Using the plane, do..
+@docs withPlane
 
 # Data helper
 @docs binned
@@ -2078,6 +2085,8 @@ each items func =
           [ C.label [] [ S.text common.datum.country ] (CE.getBottom plane bin) ]
       ]
 
+Use the functions in `Chart.Events` to access information about your bins.
+
 -}
 eachBin : (C.Plane -> CE.Group (CE.Bin data) CE.Any Float data -> List (Element data msg)) -> Element data msg
 eachBin func =
@@ -2103,6 +2112,8 @@ eachBin func =
           [ C.label [] [ S.text (String.fromFloat total) ] (CE.getTop plane stack) ]
       ]
 
+Use the functions in `Chart.Events` to access information about your stacks.
+
 -}
 eachStack : (C.Plane -> CE.Group (CE.Stack data) CE.Any Float data -> List (Element data msg)) -> Element data msg
 eachStack func =
@@ -2125,6 +2136,8 @@ eachStack func =
           let yValue = CE.getDependent bar in
           [ C.label [] [ S.text (String.fromFloat yValue) ] (CE.getTop plane bar) ]
       ]
+
+Use the functions in `Chart.Events` to access information about your bars.
 
 -}
 eachBar : (C.Plane -> CE.Product CE.Bar Float data -> List (Element data msg)) -> Element data msg
@@ -2149,6 +2162,8 @@ eachBar func =
           [ C.label [] [ S.text (String.fromFloat yValue) ] (CE.getTop plane bar) ]
       ]
 
+Use the functions in `Chart.Events` to access information about your dots.
+
 -}
 eachDot : (C.Plane -> CE.Product CE.Dot Float data -> List (Element data msg)) -> Element data msg
 eachDot func =
@@ -2157,6 +2172,8 @@ eachDot func =
 
 {-| Add elements for each product. Works like `eachBar` and `eachDot`, but includes both
 bars and dots.
+
+Use the functions in `Chart.Events` to access information about your products.
 
 -}
 eachProduct : (C.Plane -> CE.Product CE.Any Float data -> List (Element data msg)) -> Element data msg
@@ -2172,6 +2189,8 @@ eachProduct func =
       ]
 
 The above example adds a label for each product of the series named "cats".
+
+Use the functions in `Chart.Events` to access information about your items.
 
 -}
 eachCustom : CE.Grouping (CE.Product CE.Any (Maybe Float) data) a -> (C.Plane -> a -> List (Element data msg)) -> Element data msg
@@ -2267,7 +2286,7 @@ ints =
 {-| Generate "nice" times.
 
 See the docs in [terezka/intervals](https://package.elm-lang.org/packages/terezka/intervals/2.0.0/Intervals#Time)
-for more info about the information in `I.Time`!
+for more info about the properties of `Time`!
 
 -}
 times : Time.Zone -> CS.Generator I.Time
@@ -2284,28 +2303,28 @@ The example above adds your label at coordinates x = y and y = 10.
 
 Other attributes you can use:
 
-  C.labelAt
-    [ CA.moveUp 5     -- Move 5 SVG units up
-    , CA.moveDown 5   -- Move 5 SVG units down
-    , CA.moveLeft 5   -- Move 5 SVG units left
-    , CA.moveRight 5  -- Move 5 SVG units right
+    C.labelAt
+      [ CA.moveUp 5     -- Move 5 SVG units up
+      , CA.moveDown 5   -- Move 5 SVG units down
+      , CA.moveLeft 5   -- Move 5 SVG units left
+      , CA.moveRight 5  -- Move 5 SVG units right
 
-    , CA.color "#333"
-    , CA.border "white"
-    , CA.borderWidth 1
-    , CA.fontSize 12
+      , CA.color "#333"
+      , CA.border "white"
+      , CA.borderWidth 1
+      , CA.fontSize 12
 
-    , CA.alignRight   -- Anchor labels to the right
-    , CA.alignLeft    -- Anchor labels to the left
+      , CA.alignRight   -- Anchor labels to the right
+      , CA.alignLeft    -- Anchor labels to the left
 
-    , CA.rotate 90    -- Rotate label 90 degrees
-    , CA.uppercase    -- Make uppercase
+      , CA.rotate 90    -- Rotate label 90 degrees
+      , CA.uppercase    -- Make uppercase
 
-     -- Add arbitrary SVG attributes to your labels.
-    , CA.attrs [ SA.class "my-label" ]
-    ]
-    [ S.text "Data from Fruits.com" ]
-    { x = 5, y = 10 }
+       -- Add arbitrary SVG attributes to your labels.
+      , CA.attrs [ SA.class "my-label" ]
+      ]
+      [ S.text "Data from Fruits.com" ]
+      { x = 5, y = 10 }
 
 -}
 label : List (CA.Attribute CS.Label) -> List (S.Svg msg) -> C.Point -> Element data msg
@@ -2322,27 +2341,27 @@ The example above adds your label at 20% the length of your range and 90% of you
 
 Other attributes you can use:
 
-  C.labelAt (CA.percent 20) (CA.percent 90)
-    [ CA.moveUp 5     -- Move 5 SVG units up
-    , CA.moveDown 5   -- Move 5 SVG units down
-    , CA.moveLeft 5   -- Move 5 SVG units left
-    , CA.moveRight 5  -- Move 5 SVG units right
+    C.labelAt (CA.percent 20) (CA.percent 90)
+      [ CA.moveUp 5     -- Move 5 SVG units up
+      , CA.moveDown 5   -- Move 5 SVG units down
+      , CA.moveLeft 5   -- Move 5 SVG units left
+      , CA.moveRight 5  -- Move 5 SVG units right
 
-    , CA.color "#333"
-    , CA.border "white"
-    , CA.borderWidth 1
-    , CA.fontSize 12
+      , CA.color "#333"
+      , CA.border "white"
+      , CA.borderWidth 1
+      , CA.fontSize 12
 
-    , CA.alignRight   -- Anchor labels to the right
-    , CA.alignLeft    -- Anchor labels to the left
+      , CA.alignRight   -- Anchor labels to the right
+      , CA.alignLeft    -- Anchor labels to the left
 
-    , CA.rotate 90    -- Rotate label 90 degrees
-    , CA.uppercase    -- Make uppercase
+      , CA.rotate 90    -- Rotate label 90 degrees
+      , CA.uppercase    -- Make uppercase
 
-     -- Add arbitrary SVG attributes to your labels.
-    , CA.attrs [ SA.class "my-label" ]
-    ]
-    [ S.text "Data from Fruits.com" ]
+       -- Add arbitrary SVG attributes to your labels.
+      , CA.attrs [ SA.class "my-label" ]
+      ]
+      [ S.text "Data from Fruits.com" ]
 
 -}
 labelAt : (C.Axis -> Float) -> (C.Axis -> Float) -> List (CA.Attribute CS.Label) -> List (S.Svg msg) -> Element data msg
@@ -2427,6 +2446,12 @@ html func =
 
 
 {-| Add arbitrary SVG at a specific location. See `Chart.Svg` for handy SVG helpers.
+
+    C.chart []
+      [ C.svgAt .min .max 10 20 [ .. ]
+          -- Add .. at x = the minumum value of your range (x-axis) + 12 SVG units
+          -- and y = the maximum value of your domain (y-axis) + 20 SVG units
+      ]
 
 -}
 svgAt : (C.Axis -> Float) -> (C.Axis -> Float) -> Float -> Float -> List (S.Svg msg) -> Element data msg
