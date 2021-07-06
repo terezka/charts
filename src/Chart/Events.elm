@@ -434,7 +434,9 @@ named =
 
 {-| -}
 type alias SameX =
-  G.SameX
+  { x1 : Float
+  , x2 : Float
+  }
 
 
 {-| -}
@@ -445,7 +447,11 @@ sameX =
 
 {-| -}
 type alias Stack datum =
-  G.Stack datum
+  { datum : datum
+  , start : Float
+  , end : Float
+  , index : Int
+  }
 
 
 {-| -}
@@ -456,7 +462,10 @@ stack =
 
 {-| -}
 type alias Bin data =
-  G.Bin data
+  { datum : data
+  , start : Float
+  , end : Float
+  }
 
 
 {-| -}
