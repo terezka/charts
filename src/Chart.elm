@@ -50,7 +50,7 @@ and attributes. It looks something like this:
 All the elements, like `chart`, `grid`, `xLabels`, `yLabels`, `bars` and `bar` in the example
 above, are defined in this module. All the attributes, like `width`, `height`, `color`, and `opacity`,
 are defined in `Chart.Attributes`. Attributes and other functions related to events are located in
-the `Chart.Events` module. Lastly, `Chart.Svg` holds charting primitives if case your have very special
+the `Chart.Events` module. Lastly, `Chart.Svg` holds charting primitives in case you have very special
 needs.
 
 NOTE: Some of the more advanced elements utilize helper functions in `Chart.Events`
