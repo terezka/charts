@@ -5,24 +5,35 @@ import Html exposing (Html)
 {-| @SMALL -}
 import Chart as C
 import Chart.Attributes as CA
+import Time
 
 
-view : Model -> Html Msg
-view model =
+chart : Html Msg
+chart =
   C.chart
     [ CA.height 300
-    , CA.width 300
+    , CA.width 500
     , CA.static
     ]
     [ C.grid []
-    , C.xLabels []
-    , C.yLabels []
+    , C.xLabels [ CA.times Time.utc, CA.amount 12 ]
+    , C.yLabels [ CA.amount 6 ]
     , C.xAxis []
     , C.yAxis []
-    , C.series .x [ C.interpolated .y [ CA.width 2 ] [] ] data
+    , C.series .x
+        [ C.interpolated .y
+            [ CA.width 2 ] []
+        , C.interpolated .z
+            [ CA.width 2, CA.dashed [ 5, 5 ] ] []
+        ]
+        data
     ]
 {-| @SMALL END -}
 {-| @LARGE END -}
+
+view : Model -> Html Msg
+view model =
+  chart
 
 
 meta =
@@ -55,14 +66,24 @@ update msg model =
 type alias Datum =
   { x : Float
   , y : Float
+  , z : Float
   }
 
 
 data : List Datum
 data =
-  [ Datum 1 1
-  , Datum 2 3
-  , Datum 3 2
-  , Datum 4.2 6.2
+  let toDatum e t y =
+        Datum t y (y + e)
+  in
+  [ toDatum 5 1622505600000 3.2
+  , toDatum 6 1625097600000 5.6
+  , toDatum 5 1627776000000 4.2
+  , toDatum 7 1630454400000 7.6
+  , toDatum 6 1633046400000 3.2
+  , toDatum 8 1635724800000 12.8
+  , toDatum 7 1638316800000 6.3
+  , toDatum 9 1640995200000 16.3
+  , toDatum 12 1643673600000 7.8
+  , toDatum 13 1646092800000 28.5
   ]
 

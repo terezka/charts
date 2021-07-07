@@ -5541,18 +5541,11 @@ var $author$project$Page$Gallery$init = F3(
 			{salaryDist: $author$project$Charts$SalaryDist$init, salaryDistBar: $author$project$Charts$SalaryDistBar$init},
 			$elm$core$Platform$Cmd$none);
 	});
-var $author$project$Charts$Dashboard1$init = {hovering: _List_Nil};
-var $author$project$Charts$Dashboard2$init = {hovering: _List_Nil};
-var $author$project$Charts$Dashboard3$init = {hovering: _List_Nil};
-var $author$project$Charts$Dashboard4$init = {hovering: _List_Nil};
-var $author$project$Charts$Dashboard5$init = {hovering: _List_Nil};
-var $author$project$Charts$Dashboard6$init = {hovering: _List_Nil};
-var $author$project$Charts$Dashboard7$init = {hovering: _List_Nil};
 var $author$project$Charts$Landing$init = {hovering: _List_Nil, hoveringBars: _List_Nil};
 var $author$project$Page$Home$init = F3(
 	function (key, session, params) {
 		return _Utils_Tuple2(
-			{concise: $author$project$Examples$Frontpage$Concise$init, dashboard1: $author$project$Charts$Dashboard1$init, dashboard2: $author$project$Charts$Dashboard2$init, dashboard3: $author$project$Charts$Dashboard3$init, dashboard4: $author$project$Charts$Dashboard4$init, dashboard5: $author$project$Charts$Dashboard5$init, dashboard6: $author$project$Charts$Dashboard6$init, dashboard7: $author$project$Charts$Dashboard7$init, hovering: _List_Nil, landing: $author$project$Charts$Landing$init},
+			{concise: $author$project$Examples$Frontpage$Concise$init, conciseToggle: true, hovering: _List_Nil, landing: $author$project$Charts$Landing$init},
 			$elm$core$Platform$Cmd$none);
 	});
 var $author$project$Page$QuickStart$init = F3(
@@ -7887,55 +7880,7 @@ var $author$project$Page$Gallery$update = F3(
 				$elm$core$Platform$Cmd$none);
 		}
 	});
-var $author$project$Charts$Dashboard1$update = F2(
-	function (msg, model) {
-		var hovering = msg.a;
-		return _Utils_update(
-			model,
-			{hovering: hovering});
-	});
-var $author$project$Charts$Dashboard2$update = F2(
-	function (msg, model) {
-		var hovering = msg.a;
-		return _Utils_update(
-			model,
-			{hovering: hovering});
-	});
-var $author$project$Charts$Dashboard3$update = F2(
-	function (msg, model) {
-		var hovering = msg.a;
-		return _Utils_update(
-			model,
-			{hovering: hovering});
-	});
-var $author$project$Charts$Dashboard4$update = F2(
-	function (msg, model) {
-		var hovering = msg.a;
-		return _Utils_update(
-			model,
-			{hovering: hovering});
-	});
-var $author$project$Charts$Dashboard5$update = F2(
-	function (msg, model) {
-		var hovering = msg.a;
-		return _Utils_update(
-			model,
-			{hovering: hovering});
-	});
-var $author$project$Charts$Dashboard6$update = F2(
-	function (msg, model) {
-		var hovering = msg.a;
-		return _Utils_update(
-			model,
-			{hovering: hovering});
-	});
-var $author$project$Charts$Dashboard7$update = F2(
-	function (msg, model) {
-		var hovering = msg.a;
-		return _Utils_update(
-			model,
-			{hovering: hovering});
-	});
+var $elm$core$Basics$not = _Basics_not;
 var $author$project$Charts$Landing$update = F2(
 	function (msg, model) {
 		var hovering = msg.a;
@@ -7947,69 +7892,6 @@ var $author$project$Charts$Landing$update = F2(
 var $author$project$Page$Home$update = F3(
 	function (key, msg, model) {
 		switch (msg.$) {
-			case 'Dashboard1Msg':
-				var subMsg = msg.a;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							dashboard1: A2($author$project$Charts$Dashboard1$update, subMsg, model.dashboard1)
-						}),
-					$elm$core$Platform$Cmd$none);
-			case 'Dashboard2Msg':
-				var subMsg = msg.a;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							dashboard2: A2($author$project$Charts$Dashboard2$update, subMsg, model.dashboard2)
-						}),
-					$elm$core$Platform$Cmd$none);
-			case 'Dashboard3Msg':
-				var subMsg = msg.a;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							dashboard3: A2($author$project$Charts$Dashboard3$update, subMsg, model.dashboard3)
-						}),
-					$elm$core$Platform$Cmd$none);
-			case 'Dashboard4Msg':
-				var subMsg = msg.a;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							dashboard4: A2($author$project$Charts$Dashboard4$update, subMsg, model.dashboard4)
-						}),
-					$elm$core$Platform$Cmd$none);
-			case 'Dashboard5Msg':
-				var subMsg = msg.a;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							dashboard5: A2($author$project$Charts$Dashboard5$update, subMsg, model.dashboard5)
-						}),
-					$elm$core$Platform$Cmd$none);
-			case 'Dashboard6Msg':
-				var subMsg = msg.a;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							dashboard6: A2($author$project$Charts$Dashboard6$update, subMsg, model.dashboard6)
-						}),
-					$elm$core$Platform$Cmd$none);
-			case 'Dashboard7Msg':
-				var subMsg = msg.a;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							dashboard7: A2($author$project$Charts$Dashboard7$update, subMsg, model.dashboard7)
-						}),
-					$elm$core$Platform$Cmd$none);
 			case 'ConciseMsg':
 				var subMsg = msg.a;
 				return _Utils_Tuple2(
@@ -8018,6 +7900,12 @@ var $author$project$Page$Home$update = F3(
 						{
 							concise: A2($author$project$Examples$Frontpage$Concise$update, subMsg, model.concise)
 						}),
+					$elm$core$Platform$Cmd$none);
+			case 'ConciseToggle':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{conciseToggle: !model.conciseToggle}),
 					$elm$core$Platform$Cmd$none);
 			case 'LandingMsg':
 				var subMsg = msg.a;
@@ -11840,7 +11728,6 @@ var $elm$virtual_dom$VirtualDom$keyedNode = function (tag) {
 	return _VirtualDom_keyedNode(
 		_VirtualDom_noScript(tag));
 };
-var $elm$core$Basics$not = _Basics_not;
 var $elm$html$Html$p = _VirtualDom_node('p');
 var $elm$core$Bitwise$and = _Bitwise_and;
 var $mdgriffith$elm_ui$Internal$Flag$present = F2(
@@ -26660,7 +26547,7 @@ var $author$project$Examples$Frontpage$Concise$view = function (model) {
 		_List_fromArray(
 			[
 				$author$project$Chart$Attributes$height(300),
-				$author$project$Chart$Attributes$width(300),
+				$author$project$Chart$Attributes$width(500),
 				$author$project$Chart$Attributes$static,
 				A2(
 				$author$project$Chart$Events$onMouseMove,
@@ -26749,53 +26636,88 @@ var $author$project$Examples$Frontpage$Concise$view = function (model) {
 					}))
 			]));
 };
-var $author$project$Examples$Frontpage$Familiar$Datum = F2(
-	function (x, y) {
-		return {x: x, y: y};
+var $author$project$Examples$Frontpage$Familiar$Datum = F3(
+	function (x, y, z) {
+		return {x: x, y: y, z: z};
 	});
-var $author$project$Examples$Frontpage$Familiar$data = _List_fromArray(
-	[
-		A2($author$project$Examples$Frontpage$Familiar$Datum, 1, 1),
-		A2($author$project$Examples$Frontpage$Familiar$Datum, 2, 3),
-		A2($author$project$Examples$Frontpage$Familiar$Datum, 3, 2),
-		A2($author$project$Examples$Frontpage$Familiar$Datum, 4.2, 6.2)
-	]);
+var $author$project$Examples$Frontpage$Familiar$data = function () {
+	var toDatum = F3(
+		function (e, t, y) {
+			return A3($author$project$Examples$Frontpage$Familiar$Datum, t, y, y + e);
+		});
+	return _List_fromArray(
+		[
+			A3(toDatum, 5, 1622505600000, 3.2),
+			A3(toDatum, 6, 1625097600000, 5.6),
+			A3(toDatum, 5, 1627776000000, 4.2),
+			A3(toDatum, 7, 1630454400000, 7.6),
+			A3(toDatum, 6, 1633046400000, 3.2),
+			A3(toDatum, 8, 1635724800000, 12.8),
+			A3(toDatum, 7, 1638316800000, 6.3),
+			A3(toDatum, 9, 1640995200000, 16.3),
+			A3(toDatum, 12, 1643673600000, 7.8),
+			A3(toDatum, 13, 1646092800000, 28.5)
+		]);
+}();
+var $author$project$Examples$Frontpage$Familiar$chart = A2(
+	$author$project$Chart$chart,
+	_List_fromArray(
+		[
+			$author$project$Chart$Attributes$height(300),
+			$author$project$Chart$Attributes$width(500),
+			$author$project$Chart$Attributes$static
+		]),
+	_List_fromArray(
+		[
+			$author$project$Chart$grid(_List_Nil),
+			$author$project$Chart$xLabels(
+			_List_fromArray(
+				[
+					$author$project$Chart$Attributes$times($elm$time$Time$utc),
+					$author$project$Chart$Attributes$amount(12)
+				])),
+			$author$project$Chart$yLabels(
+			_List_fromArray(
+				[
+					$author$project$Chart$Attributes$amount(6)
+				])),
+			$author$project$Chart$xAxis(_List_Nil),
+			$author$project$Chart$yAxis(_List_Nil),
+			A3(
+			$author$project$Chart$series,
+			function ($) {
+				return $.x;
+			},
+			_List_fromArray(
+				[
+					A3(
+					$author$project$Chart$interpolated,
+					function ($) {
+						return $.y;
+					},
+					_List_fromArray(
+						[
+							$author$project$Chart$Attributes$width(2)
+						]),
+					_List_Nil),
+					A3(
+					$author$project$Chart$interpolated,
+					function ($) {
+						return $.z;
+					},
+					_List_fromArray(
+						[
+							$author$project$Chart$Attributes$width(2),
+							$author$project$Chart$Attributes$dashed(
+							_List_fromArray(
+								[5, 5]))
+						]),
+					_List_Nil)
+				]),
+			$author$project$Examples$Frontpage$Familiar$data)
+		]));
 var $author$project$Examples$Frontpage$Familiar$view = function (model) {
-	return A2(
-		$author$project$Chart$chart,
-		_List_fromArray(
-			[
-				$author$project$Chart$Attributes$height(300),
-				$author$project$Chart$Attributes$width(300),
-				$author$project$Chart$Attributes$static
-			]),
-		_List_fromArray(
-			[
-				$author$project$Chart$grid(_List_Nil),
-				$author$project$Chart$xLabels(_List_Nil),
-				$author$project$Chart$yLabels(_List_Nil),
-				$author$project$Chart$xAxis(_List_Nil),
-				$author$project$Chart$yAxis(_List_Nil),
-				A3(
-				$author$project$Chart$series,
-				function ($) {
-					return $.x;
-				},
-				_List_fromArray(
-					[
-						A3(
-						$author$project$Chart$interpolated,
-						function ($) {
-							return $.y;
-						},
-						_List_fromArray(
-							[
-								$author$project$Chart$Attributes$width(2)
-							]),
-						_List_Nil)
-					]),
-				$author$project$Examples$Frontpage$Familiar$data)
-			]));
+	return $author$project$Examples$Frontpage$Familiar$chart;
 };
 var $author$project$Examples$Interactivity$Background$OnHover = function (a) {
 	return {$: 'OnHover', a: a};
@@ -31561,8 +31483,8 @@ var $author$project$Examples$Frame$Position$smallCode = '\n  C.chart\n    [ CA.h
 var $author$project$Examples$Frame$Rect$smallCode = '\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    ]\n    [ C.grid []\n    , C.xAxis []\n    , C.xTicks []\n    , C.xLabels []\n    , C.yAxis []\n    , C.yTicks []\n    , C.yLabels []\n    , C.withPlane <| \\p ->\n        [ C.rect\n            [ CA.x1 3\n            , CA.y1 3\n            , CA.x2 7\n            , CA.y2 9\n            , CA.color "rgb(210, 210, 210)"\n            , CA.opacity 0.3\n            ]\n        ]\n    ]\n  ';
 var $author$project$Examples$Frame$Times$smallCode = '\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    , CA.padding { top = 10, bottom = 0, left = 0, right = 25 }\n    , CA.range\n        [ CA.lowest 1591974241000 CA.exactly\n        , CA.highest 1623510241000 CA.exactly\n        ]\n    ]\n    [ C.grid []\n    , C.xAxis []\n    , C.xTicks [ CA.times Time.utc ]\n    , C.xLabels [ CA.times Time.utc ]\n    ]\n  ';
 var $author$project$Examples$Frame$Titles$smallCode = '\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    , CA.padding { top = 25, bottom = 0, left = 0, right = 10 }\n    , CA.range [ CA.lowest 0 CA.exactly ]\n    ]\n    [ C.grid []\n    , C.xAxis []\n    , C.xTicks [ CA.ints ]\n    , C.xLabels [ CA.ints ]\n    , C.yAxis []\n    , C.yTicks [ CA.ints ]\n    , C.yLabels [ CA.ints ]\n    , C.series .age\n        [ C.scatter .toys [ CA.opacity 0, CA.borderWidth 1 ]\n        ]\n        data\n\n    , C.labelAt .min CA.middle [ CA.moveLeft 35, CA.rotate 90 ]\n        [ S.text "Fruits" ]\n    , C.labelAt CA.middle .min [ CA.moveDown 30 ]\n        [ S.text "Age" ]\n    , C.labelAt CA.middle .max [ CA.fontSize 14 ]\n        [ S.text "How many fruits do children eat? (2021)" ]\n    , C.labelAt CA.middle .max [ CA.moveDown 15 ]\n        [ S.text "Data from fruits.com" ]\n    ]\n  ';
-var $author$project$Examples$Frontpage$Concise$smallCode = '\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    , CA.static\n    , CE.onMouseMove OnHover (CE.getNearest CE.stack)\n    , CE.onMouseLeave (OnHover [])\n    ]\n    [ C.grid []\n    , C.yLabels []\n\n    , C.bars [ CA.roundTop 0.5 ]\n        [ C.stacked\n            [ C.bar .p [ CA.opacity 0.8 ]\n            , C.bar .w [ CA.opacity 0.8 ]\n            ]\n        , C.bar .q [ CA.opacity 0.8, CA.dotted [ CA.spacing 2.2 ] ]\n        ]\n        data\n\n    , C.binLabels .country CE.getBottom [ CA.moveDown 15 ]\n    , C.barLabels CE.getTop [ CA.moveDown 15, CA.color "white" ]\n    , C.each model.hovering <| \\p stack -> [ C.tooltip stack [] [] [] ]\n    ]\n  ';
-var $author$project$Examples$Frontpage$Familiar$smallCode = '\nimport Chart as C\nimport Chart.Attributes as CA\n\n\nview : Model -> Html Msg\nview model =\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    , CA.static\n    ]\n    [ C.grid []\n    , C.xLabels []\n    , C.yLabels []\n    , C.xAxis []\n    , C.yAxis []\n    , C.series .x [ C.interpolated .y [ CA.width 2 ] [] ] data\n    ]\n  ';
+var $author$project$Examples$Frontpage$Concise$smallCode = '\n  C.chart\n    [ CA.height 300\n    , CA.width 500\n    , CA.static\n    , CE.onMouseMove OnHover (CE.getNearest CE.stack)\n    , CE.onMouseLeave (OnHover [])\n    ]\n    [ C.grid []\n    , C.yLabels []\n\n    , C.bars [ CA.roundTop 0.5 ]\n        [ C.stacked\n            [ C.bar .p [ CA.opacity 0.8 ]\n            , C.bar .w [ CA.opacity 0.8 ]\n            ]\n        , C.bar .q [ CA.opacity 0.8, CA.dotted [ CA.spacing 2.2 ] ]\n        ]\n        data\n\n    , C.binLabels .country CE.getBottom [ CA.moveDown 15 ]\n    , C.barLabels CE.getTop [ CA.moveDown 15, CA.color "white" ]\n    , C.each model.hovering <| \\p stack -> [ C.tooltip stack [] [] [] ]\n    ]\n  ';
+var $author$project$Examples$Frontpage$Familiar$smallCode = '\nimport Chart as C\nimport Chart.Attributes as CA\nimport Time\n\n\nchart : Html Msg\nchart =\n  C.chart\n    [ CA.height 300\n    , CA.width 500\n    , CA.static\n    ]\n    [ C.grid []\n    , C.xLabels [ CA.times Time.utc, CA.amount 12 ]\n    , C.yLabels [ CA.amount 6 ]\n    , C.xAxis []\n    , C.yAxis []\n    , C.series .x\n        [ C.interpolated .y\n            [ CA.width 2 ] []\n        , C.interpolated .z\n            [ CA.width 2, CA.dashed [ 5, 5 ] ] []\n        ]\n        data\n    ]\n  ';
 var $author$project$Examples$Interactivity$Background$smallCode = '\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    , CE.onMouseMove OnHover (CE.getNearest CE.bar)\n    , CE.onMouseLeave (OnHover [])\n    ]\n    [ C.grid []\n    , C.xLabels []\n    , C.yLabels []\n    , C.bars []\n        [ C.bar .y [ CA.opacity 0.3, CA.borderWidth 1, CA.border CA.pink ]\n        , C.bar .z [ CA.opacity 0.3, CA.borderWidth 1, CA.striped [], CA.border CA.purple ]\n        ]\n        data\n    , C.each model.hovering <| \\p item ->\n        [ C.tooltip item [ CA.background "#fcf9e9" ] [] [] ]\n    ]\n  ';
 var $author$project$Examples$Interactivity$BasicArea$smallCode = '\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    , CE.onMouseMove OnHover (CE.getNearest CE.stack)\n    , CE.onMouseLeave (OnHover [])\n    ]\n    [ C.grid []\n    , C.xLabels []\n    , C.yLabels []\n    , C.series .x\n        [ C.stacked\n          [ C.interpolated .y\n              [ CA.monotone, CA.opacity 0.2 ]\n              [ CA.circle, CA.color "white", CA.border CA.pink, CA.borderWidth 1 ]\n          , C.interpolated .z\n              [ CA.monotone, CA.opacity 0, CA.color CA.pink ]\n              [ CA.circle, CA.color "white", CA.border CA.pink, CA.borderWidth 1 ]\n          ]\n        ]\n        data\n    , C.each model.hovering <| \\p item ->\n        [ C.tooltip item [] [] [] ]\n    ]\n  ';
 var $author$project$Examples$Interactivity$BasicBar$smallCode = '\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    , CE.onMouseMove OnHover (CE.getNearest CE.bar)\n    , CE.onMouseLeave (OnHover [])\n    ]\n    [ C.grid []\n    , C.xLabels []\n    , C.yLabels []\n    , C.bars []\n        [ C.stacked\n            [ C.bar .z []\n            , C.bar .y []\n            ]\n        , C.bar .v [ CA.color CA.turquoise, CA.dotted [] ]\n        ]\n        data\n    , C.each model.hovering <| \\p item ->\n        [ C.tooltip item [] [] [] ]\n    ]\n  ';
@@ -37808,57 +37730,70 @@ var $author$project$Page$Gallery$view = function (model) {
 var $author$project$Page$Home$ConciseMsg = function (a) {
 	return {$: 'ConciseMsg', a: a};
 };
+var $author$project$Page$Home$ConciseToggle = {$: 'ConciseToggle'};
 var $author$project$Page$Home$LandingMsg = function (a) {
 	return {$: 'LandingMsg', a: a};
 };
 var $author$project$Page$Home$None = {$: 'None'};
+var $mdgriffith$elm_ui$Element$Events$onClick = A2($elm$core$Basics$composeL, $mdgriffith$elm_ui$Internal$Model$Attr, $elm$html$Html$Events$onClick);
 var $author$project$Page$Home$feature = function (config) {
 	return A2(
-		$mdgriffith$elm_ui$Element$column,
+		$mdgriffith$elm_ui$Element$row,
 		_List_fromArray(
 			[
 				$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-				$mdgriffith$elm_ui$Element$spacing(10)
+				$mdgriffith$elm_ui$Element$height(
+				A2($mdgriffith$elm_ui$Element$minimum, 400, $mdgriffith$elm_ui$Element$fill)),
+				$mdgriffith$elm_ui$Element$spacing(100)
 			]),
-		_List_fromArray(
-			[
-				A2(
-				$mdgriffith$elm_ui$Element$el,
-				_List_fromArray(
-					[
-						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-						$mdgriffith$elm_ui$Element$Font$size(40)
-					]),
-				$mdgriffith$elm_ui$Element$text(config.title)),
-				A2(
-				$mdgriffith$elm_ui$Element$paragraph,
-				_List_fromArray(
-					[
-						$mdgriffith$elm_ui$Element$Font$size(14),
-						$mdgriffith$elm_ui$Element$Font$color(
-						A3($mdgriffith$elm_ui$Element$rgb255, 120, 120, 120)),
-						A2($mdgriffith$elm_ui$Element$paddingXY, 0, 10)
-					]),
-				_List_fromArray(
-					[
-						$mdgriffith$elm_ui$Element$text(config.body)
-					])),
-				A2(
-				$mdgriffith$elm_ui$Element$row,
-				_List_fromArray(
-					[
-						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-						$mdgriffith$elm_ui$Element$spacing(40),
-						A2($mdgriffith$elm_ui$Element$paddingXY, 0, 15)
-					]),
-				_List_fromArray(
-					[
-						A2(
-						$mdgriffith$elm_ui$Element$el,
-						_List_fromArray(
-							[$mdgriffith$elm_ui$Element$alignTop]),
-						$mdgriffith$elm_ui$Element$html(config.chart)),
-						A2(
+		(config.flipped ? $elm$core$List$reverse : $elm$core$Basics$identity)(
+			_List_fromArray(
+				[
+					A2(
+					$mdgriffith$elm_ui$Element$column,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+							$mdgriffith$elm_ui$Element$alignTop,
+							$mdgriffith$elm_ui$Element$alignLeft,
+							$mdgriffith$elm_ui$Element$spacing(10),
+							$mdgriffith$elm_ui$Element$width(
+							$mdgriffith$elm_ui$Element$fillPortion(3))
+						]),
+					_List_fromArray(
+						[
+							A2(
+							$mdgriffith$elm_ui$Element$el,
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+									$mdgriffith$elm_ui$Element$Font$size(40)
+								]),
+							$mdgriffith$elm_ui$Element$text(config.title)),
+							A2(
+							$mdgriffith$elm_ui$Element$paragraph,
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$Font$size(16),
+									$mdgriffith$elm_ui$Element$Font$color(
+									A3($mdgriffith$elm_ui$Element$rgb255, 120, 120, 120)),
+									A2($mdgriffith$elm_ui$Element$paddingXY, 0, 10)
+								]),
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$text(config.body)
+								]))
+						])),
+					A2(
+					$mdgriffith$elm_ui$Element$el,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$width(
+							$mdgriffith$elm_ui$Element$fillPortion(5)),
+							$mdgriffith$elm_ui$Element$alignTop,
+							$mdgriffith$elm_ui$Element$Events$onClick(config.onToggle)
+						]),
+					config.toggled ? A2(
 						$mdgriffith$elm_ui$Element$el,
 						_List_fromArray(
 							[
@@ -37868,9 +37803,12 @@ var $author$project$Page$Home$feature = function (config) {
 								A3($mdgriffith$elm_ui$Element$rgb255, 250, 250, 250))
 							]),
 						$author$project$Ui$Code$view(
-							{edits: _List_Nil, template: config.code}))
-					]))
-			]));
+							{edits: _List_Nil, template: config.code})) : A2(
+						$mdgriffith$elm_ui$Element$el,
+						_List_fromArray(
+							[$mdgriffith$elm_ui$Element$centerX]),
+						$mdgriffith$elm_ui$Element$html(config.chart)))
+				])));
 };
 var $author$project$Charts$Landing$Bar = function (a) {
 	return {$: 'Bar', a: a};
@@ -38439,13 +38377,13 @@ var $author$project$Page$Home$view = function (model) {
 						[
 							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
 							$mdgriffith$elm_ui$Element$spacing(100),
-							A2($mdgriffith$elm_ui$Element$paddingXY, 0, 100)
+							A2($mdgriffith$elm_ui$Element$paddingXY, 0, 120)
 						]),
 					_List_fromArray(
 						[
 							$author$project$Page$Home$feature(
 							{
-								body: 'The API mirrors the element and attribute pattern which you already know and love.',
+								body: 'Simple charts should be simple to make. The interface mirrors the element\nand attribute pattern which you already know and love. Get started making your chart in\nminutes!',
 								chart: A2(
 									$elm$html$Html$map,
 									function (_v0) {
@@ -38453,7 +38391,10 @@ var $author$project$Page$Home$view = function (model) {
 									},
 									$author$project$Examples$Frontpage$Familiar$view(_Utils_Tuple0)),
 								code: $author$project$Examples$Frontpage$Familiar$smallCode,
-								title: 'Beginner friendly'
+								flipped: false,
+								onToggle: $author$project$Page$Home$ConciseToggle,
+								title: 'Beginner friendly',
+								toggled: model.conciseToggle
 							}),
 							$author$project$Page$Home$feature(
 							{
@@ -38463,7 +38404,10 @@ var $author$project$Page$Home$view = function (model) {
 									$author$project$Page$Home$ConciseMsg,
 									$author$project$Examples$Frontpage$Concise$view(model.concise)),
 								code: $author$project$Examples$Frontpage$Concise$smallCode,
-								title: 'Advanced chart, elegant code'
+								flipped: true,
+								onToggle: $author$project$Page$Home$None,
+								title: 'Flexible',
+								toggled: false
 							})
 						]))
 				])),

@@ -33,7 +33,7 @@ view model =
 {-| @SMALL -}
   C.chart
     [ CA.height 300
-    , CA.width 300
+    , CA.width 500
     , CA.static
     , CE.onMouseMove OnHover (CE.getNearest CE.stack)
     , CE.onMouseLeave (OnHover [])

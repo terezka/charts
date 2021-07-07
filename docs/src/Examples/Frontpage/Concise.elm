@@ -34,7 +34,7 @@ view : Model -> H.Html Msg
 view model =
   C.chart
     [ CA.height 300
-    , CA.width 300
+    , CA.width 500
     , CA.static
     , CE.onMouseMove OnHover (CE.getNearest CE.stack)
     , CE.onMouseLeave (OnHover [])
@@ -94,7 +94,7 @@ smallCode =
   """
   C.chart
     [ CA.height 300
-    , CA.width 300
+    , CA.width 500
     , CA.static
     , CE.onMouseMove OnHover (CE.getNearest CE.stack)
     , CE.onMouseLeave (OnHover [])
@@ -152,7 +152,7 @@ view : Model -> H.Html Msg
 view model =
   C.chart
     [ CA.height 300
-    , CA.width 300
+    , CA.width 500
     , CA.static
     , CE.onMouseMove OnHover (CE.getNearest CE.stack)
     , CE.onMouseLeave (OnHover [])
