@@ -21764,7 +21764,7 @@ var $author$project$Examples$BarCharts$Gradient$view = function (model) {
 							[
 								$author$project$Chart$Attributes$gradient(
 								_List_fromArray(
-									[$author$project$Chart$Attributes$purple, $author$project$Chart$Attributes$pink, 'white']))
+									[$author$project$Chart$Attributes$purple, $author$project$Chart$Attributes$pink]))
 							]))
 					]),
 				$author$project$Examples$BarCharts$Gradient$data)
@@ -31544,7 +31544,7 @@ var $author$project$Examples$BarCharts$Borders$smallCode = '\n  C.chart\n    [ C
 var $author$project$Examples$BarCharts$Color$smallCode = '\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    ]\n    [ C.grid []\n    , C.xLabels []\n    , C.yLabels []\n    , C.bars\n        []\n        [ C.bar .y [ CA.color CA.blue ]\n        , C.bar .z [ CA.color CA.green ]\n        ]\n        data\n    ]\n  ';
 var $author$project$Examples$BarCharts$Corners$smallCode = '\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    ]\n    [ C.grid []\n    , C.xLabels []\n    , C.yLabels []\n    , C.bars\n        [ CA.roundTop 0.5 ]\n        [ C.bar .y []\n        , C.bar .z [ CA.roundBottom 0.5 ]\n        ]\n        data\n    ]\n  ';
 var $author$project$Examples$BarCharts$DataDependent$smallCode = '\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    ]\n    [ C.grid []\n    , C.xLabels []\n    , C.yLabels []\n    , C.bars\n        []\n        [ C.bar .y []\n            |> C.variation (\\_ d -> if d.x == 3 then [ CA.striped [] ] else [])\n        , C.bar .z []\n        ]\n        data\n    ]\n  ';
-var $author$project$Examples$BarCharts$Gradient$smallCode = '\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    ]\n    [ C.grid []\n    , C.xLabels []\n    , C.yLabels []\n    , C.bars\n        []\n        [ C.bar .y [ CA.gradient [ CA.purple, CA.pink, "white" ] ]\n        ]\n        data\n    ]\n  ';
+var $author$project$Examples$BarCharts$Gradient$smallCode = '\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    ]\n    [ C.grid []\n    , C.xLabels []\n    , C.yLabels []\n    , C.bars\n        []\n        [ C.bar .y [ CA.gradient [ CA.purple, CA.pink ] ]\n        ]\n        data\n    ]\n  ';
 var $author$project$Examples$BarCharts$Highlight$smallCode = '\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    , CE.onMouseMove OnHover (CE.getNearest CE.bar)\n    , CE.onMouseLeave (OnHover [])\n    , CA.padding { top = 10, bottom = 0, left = 0, right = 0 }\n    ]\n    [ C.grid []\n    , C.xLabels []\n    , C.yLabels []\n    , C.bars\n        [ CA.roundTop 0.2\n        , CA.margin 0.2\n        , CA.spacing 0.15\n        ]\n        [ C.bar .z [ CA.striped [], CA.borderWidth 1 ]\n            |> C.amongst model.hovering (\\_ -> [ CA.highlight 0.25 ])\n        , C.bar .v []\n            |> C.amongst model.hovering (\\_ -> [ CA.highlight 0.25 ])\n        ]\n        data\n    , C.each model.hovering <| \\p item ->\n        [ C.tooltip item [] [] [] ]\n    ]\n  ';
 var $author$project$Examples$BarCharts$Histogram$smallCode = '\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    ]\n    [ C.grid []\n    , C.xLabels [ CA.times Time.utc ]\n    , C.yLabels []\n    , C.bars\n        [ CA.x1 .start\n        , CA.x2 .end\n        , CA.margin 0.02\n        ]\n        [ C.bar .y [] ]\n        data\n    ]\n  ';
 var $author$project$Examples$BarCharts$Legends$smallCode = '\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    ]\n    [ C.grid []\n    , C.xLabels []\n    , C.yLabels []\n    , C.bars [ CA.roundTop 0.3 ]\n        [ C.bar .z []\n            |> C.named "Cats"\n        , C.bar .y [ CA.striped [] ]\n            |> C.named "Fish"\n        ]\n        data\n    , C.legendsAt .max .max\n        [ CA.column\n        , CA.moveLeft 15\n        , CA.alignRight\n        , CA.spacing 5\n        ]\n        []\n    ]\n  ';
@@ -38587,8 +38587,6 @@ var $author$project$Charts$Basics$areas = {
 	code: '\n      C.chart\n        [ CA.height 300\n        , CA.width 300\n        , CA.margin { top = 0, bottom = 20, left = 0, right = 0 }\n        ]\n        [ C.grid []\n        , C.xLabels []\n        , C.yLabels []\n        , C.series .x\n            [ C.stacked\n                [ C.interpolated .y [ CA.opacity 0.2 ] []\n                , C.interpolated .z [ CA.opacity 1, CA.dotted [] ] []\n                ]\n            ]\n            [ { x = 1, y = 1, z = 3 }\n            , { x = 5, y = 2, z = 1 }\n            , { x = 10, y = 2, z = 4 }\n            ]\n        ]\n      ',
 	title: 'Area chart example'
 };
-var $author$project$Charts$Basics$pink = '#f56dbc';
-var $author$project$Charts$Basics$purple = '#7c29ed';
 var $author$project$Charts$Basics$bars = {
 	chart: function (_v0) {
 		return A2(
@@ -38634,7 +38632,6 @@ var $author$project$Charts$Basics$bars = {
 									},
 									_List_fromArray(
 										[
-											$author$project$Chart$Attributes$color($author$project$Charts$Basics$purple),
 											$author$project$Chart$Attributes$striped(_List_Nil)
 										])),
 									A2(
@@ -38642,10 +38639,7 @@ var $author$project$Charts$Basics$bars = {
 									function ($) {
 										return $.y;
 									},
-									_List_fromArray(
-										[
-											$author$project$Chart$Attributes$color($author$project$Charts$Basics$pink)
-										]))
+									_List_Nil)
 								]),
 							_List_fromArray(
 								[

@@ -19,7 +19,7 @@ view model =
     , C.yLabels []
     , C.bars
         []
-        [ C.bar .y [ CA.gradient [ CA.purple, CA.pink, "white" ] ]
+        [ C.bar .y [ CA.gradient [ CA.purple, CA.pink ] ]
         ]
         data
     ]

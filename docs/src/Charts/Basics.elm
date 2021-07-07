@@ -329,8 +329,8 @@ bars =
             , C.yLabels []
             , C.bars
                 [ CA.x1 .x ]
-                [ C.bar .z [ CA.color purple, CA.striped [] ]
-                , C.bar .y [ CA.color pink ]
+                [ C.bar .z [ CA.striped [] ]
+                , C.bar .y []
                 ]
                 [ { x = 1, y = 3, z = 1 }
                 , { x = 2, y = 2, z = 3 }
