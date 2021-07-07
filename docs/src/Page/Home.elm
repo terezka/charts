@@ -168,7 +168,8 @@ view model =
               , E.spacing 100
               , E.paddingXY 0 100
               ]
-              [ feature
+              [ E.el [ E.centerX, F.size 50 ] (E.text "Not done- please don't tweet yet! ❤️")
+              , feature
                   { title = "Beginner friendly"
                   , body = "The API mirrors the element and attribute pattern which you already know and love."
                   , chart = H.map (\_ -> None) (Familiar.view ())
@@ -182,12 +183,12 @@ view model =
                   , code = Concise.smallCode
                   }
 
-              , feature
-                  { title = "Visual documentation"
-                  , body = "You never need to know how SVG clip paths work or any SVG for that matter!"
-                  , chart = H.map (\_ -> None) (Familiar.view ())
-                  , code = Familiar.smallCode
-                  }
+              --, feature
+              --    { title = "Visual documentation"
+              --    , body = "You never need to know how SVG clip paths work or any SVG for that matter!"
+              --    , chart = H.map (\_ -> None) (Familiar.view ())
+              --    , code = Familiar.smallCode
+              --    }
               ]
           ]
     }

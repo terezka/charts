@@ -38141,6 +38141,14 @@ var $author$project$Page$Home$view = function (model) {
 						]),
 					_List_fromArray(
 						[
+							A2(
+							$mdgriffith$elm_ui$Element$el,
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$centerX,
+									$mdgriffith$elm_ui$Element$Font$size(50)
+								]),
+							$mdgriffith$elm_ui$Element$text('Not done- please don\'t tweet yet! ❤️')),
 							$author$project$Page$Home$feature(
 							{
 								body: 'The API mirrors the element and attribute pattern which you already know and love.',
@@ -38162,18 +38170,6 @@ var $author$project$Page$Home$view = function (model) {
 									$author$project$Examples$Frontpage$Concise$view(model.concise)),
 								code: $author$project$Examples$Frontpage$Concise$smallCode,
 								title: 'Advanced chart, elegant code'
-							}),
-							$author$project$Page$Home$feature(
-							{
-								body: 'You never need to know how SVG clip paths work or any SVG for that matter!',
-								chart: A2(
-									$elm$html$Html$map,
-									function (_v1) {
-										return $author$project$Page$Home$None;
-									},
-									$author$project$Examples$Frontpage$Familiar$view(_Utils_Tuple0)),
-								code: $author$project$Examples$Frontpage$Familiar$smallCode,
-								title: 'Visual documentation'
 							})
 						]))
 				])),
