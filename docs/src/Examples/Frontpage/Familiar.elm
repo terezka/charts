@@ -20,7 +20,7 @@ view model =
     , C.yLabels []
     , C.xAxis []
     , C.yAxis []
-    , C.series .x [ C.interpolated .y [] [] ] data
+    , C.series .x [ C.interpolated .y [ CA.width 2 ] [] ] data
     ]
 
 
@@ -86,7 +86,7 @@ view model =
     , C.yLabels []
     , C.xAxis []
     , C.yAxis []
-    , C.series .x [ C.interpolated .y [] [] ] data
+    , C.series .x [ C.interpolated .y [ CA.width 2 ] [] ] data
     ]
   """
 
@@ -111,6 +111,6 @@ view model =
     , C.yLabels []
     , C.xAxis []
     , C.yAxis []
-    , C.series .x [ C.interpolated .y [] [] ] data
+    , C.series .x [ C.interpolated .y [ CA.width 2 ] [] ] data
     ]
   """

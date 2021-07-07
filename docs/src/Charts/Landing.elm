@@ -23,29 +23,34 @@ import Element.Font as F
 import Element.Border as B
 import Element.Background as BG
 
-import Chart.Events
+import Time
+import DateFormat as F
 
 
 type alias Model =
   { hovering : List (CE.Product CE.Dot (Maybe Float) Datum)
+  , hoveringBars : List (CE.Group (CE.Bin Datum) CE.Bar (Maybe Float) Datum)
   }
 
 
 init : Model
 init =
   { hovering = []
+  , hoveringBars = []
   }
 
 
 type Msg
-  = OnHover (List (CE.Product CE.Dot (Maybe Float) Datum))
+  = OnHover
+      (List (CE.Product CE.Dot (Maybe Float) Datum))
+      (List (CE.Group (CE.Bin Datum) CE.Bar (Maybe Float) Datum))
 
 
 update : Msg -> Model -> Model
 update msg model =
   case msg of
-    OnHover hovering ->
-      { model | hovering = hovering }
+    OnHover hovering hoveringBars ->
+      { model | hovering = hovering, hoveringBars = hoveringBars }
 
 
 view : Model -> H.Html Msg
@@ -56,8 +61,11 @@ view model =
     , CA.static
     , CA.margin { top = 0, bottom = 18, left = 0, right = 0 }
     , CA.padding { top = 10, bottom = 0, left = 0, right = 35 }
-    , CE.onMouseMove OnHover (CE.getNearest CE.dot)
-    , CE.onMouseLeave (OnHover [])
+    , CE.on "mousemove" <|
+        CE.map2 OnHover
+          (CE.getNearestX CE.dot)
+          (CE.getWithinX 10 <| CE.collect CE.bin CE.bar)
+    , CE.onMouseLeave (OnHover [] [])
     ]
     [ C.grid [ CA.dashed [ 5, 5 ], CA.width 1.5 ]
     , C.xLabels [ CA.times Time.utc, CA.amount 20, CA.fontSize 10 ]
@@ -72,8 +80,10 @@ view model =
         , CA.roundTop 0.2
         , CA.ungroup
         ]
-        [ C.bar .y [ CA.color "#7b4dff", CA.gradient [ "#7b4dff6F", "#7b4dff1F" ] ]
-        --, C.bar .z [ CA.color "#bfc2c9", CA.gradient [ "#bfc2c9", "#bfc2c96F" ] ]
+        [ C.barMaybe .y [ CA.color "#7b4dff", CA.gradient [ "#7b4dff6F", "#7b4dff1F" ] ]
+            |> C.named "Requests"
+        , C.barMaybe .z [ CA.color "#666", CA.gradient [ "#bfc2c9", "#bfc2c96F" ] ]
+            |> C.named "Sales"
         ]
         barData
 
@@ -81,21 +91,65 @@ view model =
         [ C.interpolated .y
             [ CA.monotone, CA.color "#7b4dff", CA.width 1.5, CA.opacity 0.1 ]
             []
-            |> C.named "Traffic"
+            |> C.named "Customers"
             |> C.amongst (CE.filterData justDot model.hovering) (\_ ->
                 [ CA.size 12, CA.circle, CA.color "white", CA.border "#7b4dff", CA.borderWidth 1.5 ]
               )
         ]
         lineData
 
+    , C.each model.hoveringBars <| \p stack ->
+        let eachBar bar =
+              case CE.getDependent bar of
+                Just value ->
+                  C.label
+                    [ CA.moveDown 25
+                    , CA.fontSize 14
+                    , CA.color "rgba(255, 255, 255, 0.4)"
+                    ]
+                    [ S.text (String.fromInt (round (value / 1000)) ++ "k") ]
+                    (CE.getTop p bar)
+
+                Nothing ->
+                  C.label
+                    [ CA.moveUp 15
+                    , CA.fontSize 14
+                    , CA.color "rgb(120, 120, 120)"
+                    ]
+                    [ S.text "No data" ]
+                    (CE.getTop p bar)
+        in
+        List.map eachBar (CE.getProducts stack)
+
     , C.labelAt (CA.middle) (CA.percent 60)
         [ CA.fontSize 50, CA.moveUp 10, CA.color "rgb(90, 90, 90)" ]
-        [ S.tspan [ SA.style "font-style: italic;" ] [ S.text "Your" ]
-        , S.text " chart, simply."
+        [ S.text "Your chart, simply."
         ]
 
-    --, C.each model.hovering <| \p dot ->
-    --    [ C.tooltip dot [ CA.onTop, CA.offset 3 ] [] [] ]
+    , C.labelAt (CA.middle) (CA.percent 60)
+        [ CA.fontSize 24, CA.moveUp 65, CA.color "rgb(120, 120, 120)" ]
+        [ S.text "This site is not done- please don't tweet yet!"
+        ]
+
+    , C.each model.hovering <| \p dot ->
+        let xValue = Time.millisToPosix (round (CE.getIndependent dot))
+            rows = CE.getDefaultTooltip dot ++ List.concatMap CE.getDefaultTooltip (List.concatMap CE.getProducts model.hoveringBars)
+            header =
+              H.div
+                [ HA.style "padding" "5px 0 5px 0"
+                , HA.style "color" "rgb(120, 120, 120)"
+                ]
+                [ H.text (formatFullTime Time.utc xValue) ]
+
+            withPadding i = H.div [ HA.style "padding" "2px 0" ] [ i ]
+            body = H.div [ HA.style "padding-bottom" "5px" ] (List.map withPadding rows)
+        in
+        [ C.tooltip dot
+            [ CA.onLeftOrRight, CA.offset 12, CA.center ]
+            [ HA.style "font-size" "14px"
+            ]
+            [ header, body ]
+        ]
     ]
 
 
@@ -113,24 +167,24 @@ justDot datum =
 
 type alias BarDatum =
   { x : Float
-  , y : Float
-  , z : Float
+  , y : Maybe Float
+  , z : Maybe Float
   }
 
 
 barData : List BarDatum
 barData =
-  [ BarDatum 1612440000000 100000 20000
-  , BarDatum 1612440300000 125000 12000
-  , BarDatum 1612440600000 150000 23000
-  , BarDatum 1612440900000 85000 8000
-  , BarDatum 1612441200000 54000 12000
-  , BarDatum 1612441500000 30000 0
-  , BarDatum 1612441800000 76000 23000
-  , BarDatum 1612442100000 87000 18000
-  , BarDatum 1612442400000 90000 6000
-  , BarDatum 1612442700000 102000 30000
-  , BarDatum 1612443000000 122000 34000
+  [ BarDatum 1612440000000 (Just 100342) (Just 20000)
+  , BarDatum 1612440300000 (Just 124731) (Just 13800)
+  , BarDatum 1612440600000 (Just 151421) (Just 23000)
+  , BarDatum 1612440900000 (Just 92132) (Just 14000)
+  , BarDatum 1612441200000 (Just 53970) (Just 13400)
+  , BarDatum 1612441500000 (Just 30122) (Just 0)
+  , BarDatum 1612441800000 (Just 66130) (Just 23000)
+  , BarDatum 1612442100000 (Just 87002) (Just 18000)
+  , BarDatum 1612442400000 Nothing Nothing
+  , BarDatum 1612442700000 (Just 102032) (Just 30000)
+  , BarDatum 1612443000000 (Just 122101) (Just 34000)
   ]
 
 
@@ -142,18 +196,32 @@ type alias DotDatum =
 
 lineData : List DotDatum
 lineData =
-  [ DotDatum 1612440000000 140000
-  , DotDatum 1612440300000 135000
-  , DotDatum 1612440600000 160000
-  , DotDatum 1612440900000 95000
-  , DotDatum 1612441200000 74000
-  , DotDatum 1612441500000 32000
-  , DotDatum 1612441800000 86000
-  , DotDatum 1612442100000 83000
-  , DotDatum 1612442400000 60000
-  , DotDatum 1612442700000 92000
-  , DotDatum 1612443000000 72000
-  , DotDatum 1612443300000 52000
-  , DotDatum 1612443600000 62000
+  [ DotDatum 1612440000000 140023
+  , DotDatum 1612440300000 135210
+  , DotDatum 1612440600000 160132
+  , DotDatum 1612440900000 95231
+  , DotDatum 1612441200000 74032
+  , DotDatum 1612441500000 32187
+  , DotDatum 1612441800000 86065
+  , DotDatum 1612442100000 83754
+  , DotDatum 1612442400000 60597
+  , DotDatum 1612442700000 92657
+  , DotDatum 1612443000000 72065
+  , DotDatum 1612443300000 52402
+  , DotDatum 1612443600000 62207
   ]
 
+
+formatFullTime : Time.Zone -> Time.Posix -> String
+formatFullTime =
+    F.format
+        [ F.monthNameFull
+        , F.text " "
+        , F.dayOfMonthSuffix
+        , F.text " "
+        , F.yearNumber
+        , F.text " "
+        , F.hourMilitaryFixed
+        , F.text ":"
+        , F.minuteFixed
+        ]

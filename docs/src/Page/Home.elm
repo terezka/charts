@@ -168,8 +168,7 @@ view model =
               , E.spacing 100
               , E.paddingXY 0 100
               ]
-              [ E.el [ E.centerX, F.size 50 ] (E.text "Not done- please don't tweet yet! ❤️")
-              , feature
+              [ feature
                   { title = "Beginner friendly"
                   , body = "The API mirrors the element and attribute pattern which you already know and love."
                   , chart = H.map (\_ -> None) (Familiar.view ())
