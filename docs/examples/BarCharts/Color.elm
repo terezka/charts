@@ -20,7 +20,7 @@ view model =
     , C.bars
         []
         [ C.bar .y [ CA.color CA.blue ]
-        , C.bar .z [ CA.color CA.turquoise ]
+        , C.bar .z [ CA.color CA.green ]
         ]
         data
     ]

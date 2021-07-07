@@ -38,6 +38,10 @@ import Chart.Events as CE
 import Chart.Svg as CS
 
 
+-- TODO
+-- fix static / responsive
+-- fix bar highlight
+
 
 -- MODEL
 
@@ -46,6 +50,7 @@ type alias Model =
   { landing : Landing.Model
   , concise : Concise.Model
   , conciseToggle : Bool
+  , familiarToggle : Bool
   , hovering : List (CE.Product CE.Any (Maybe Float) { year : Float, income : Float})
   }
 
@@ -62,7 +67,8 @@ init : Navigation.Key -> Session -> Params -> ( Model, Cmd Msg )
 init key session params =
   ( { landing = Landing.init
     , concise = Concise.init
-    , conciseToggle = True
+    , conciseToggle = False
+    , familiarToggle = True
     , hovering = []
     }
   , Cmd.none
@@ -81,7 +87,8 @@ exit model session =
 type Msg
   = LandingMsg Landing.Msg
   | ConciseMsg Concise.Msg
-  | ConciseToggle
+  | FamiliarToggle
+  | ConsiceToggle
   | OnHover (List (CE.Product CE.Any (Maybe Float) { year : Float, income : Float}))
   | None
 
@@ -93,7 +100,10 @@ update key msg model =
     ConciseMsg subMsg ->
       ( { model | concise = Concise.update subMsg model.concise }, Cmd.none )
 
-    ConciseToggle ->
+    FamiliarToggle ->
+      ( { model | familiarToggle = not model.familiarToggle }, Cmd.none )
+
+    ConsiceToggle ->
       ( { model | conciseToggle = not model.conciseToggle }, Cmd.none )
 
     LandingMsg subMsg ->
@@ -130,27 +140,27 @@ view model =
 
           , E.column
               [ E.width E.fill
-              , E.spacing 100
+              , E.spacing 120
               , E.paddingXY 0 120
               ]
               [ feature
-                  { title = "Beginner friendly"
+                  { title = "Intuitive"
                   , body =
                       """Simple charts should be simple to make. The interface mirrors the element
-and attribute pattern which you already know and love. Get started making your chart in
+and attribute pattern which you already know and love. Get started composing your chart in
 minutes!"""
-                  , onToggle = ConciseToggle
-                  , toggled = model.conciseToggle
+                  , onToggle = FamiliarToggle
+                  , toggled = model.familiarToggle
                   , chart = H.map (\_ -> None) (Familiar.view ())
                   , code = Familiar.smallCode
                   , flipped = False
                   }
 
               , feature
-                  { title = "Flexible"
+                  { title = "Flexible, yet concise"
                   , body = "No clutter even with tricky details!"
-                  , onToggle = None
-                  , toggled = False
+                  , onToggle = ConsiceToggle
+                  , toggled = model.conciseToggle
                   , chart = H.map ConciseMsg (Concise.view model.concise)
                   , code = Concise.smallCode
                   , flipped = True
@@ -180,8 +190,8 @@ feature :
 feature config =
   E.row
     [ E.width E.fill
-    , E.height (E.minimum 400 E.fill)
-    , E.spacing 100
+    , E.height (E.minimum 350 E.fill)
+    , E.spacing 70
     ] <| (if config.flipped then List.reverse else identity)
     [ E.column
         [ E.width E.fill

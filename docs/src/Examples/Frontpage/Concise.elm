@@ -42,18 +42,32 @@ view model =
     [ C.grid []
     , C.yLabels []
 
-    , C.bars [ CA.roundTop 0.5 ]
+    , C.bars
+        [ CA.roundTop 0.2
+        , CA.margin 0.2
+        , CA.noGrid
+        ]
         [ C.stacked
-            [ C.bar .p [ CA.opacity 0.8 ]
-            , C.bar .w [ CA.opacity 0.8 ]
+            [ C.bar .p
+                [ CA.gradient [ "#da6197", "#f37c56" ] ]
+            , C.bar .w
+                [ CA.gradient [ "#aa39ea", "#d159b0" ] ]
             ]
-        , C.bar .q [ CA.opacity 0.8, CA.dotted [ CA.spacing 2.2 ] ]
+        , C.bar .q
+            [ CA.color "#666bfe"
+            , CA.striped [ CA.width 7 ]
+            ]
         ]
         data
 
     , C.binLabels .country CE.getBottom [ CA.moveDown 15 ]
-    , C.barLabels CE.getTop [ CA.moveDown 15, CA.color "white" ]
-    , C.each model.hovering <| \p stack -> [ C.tooltip stack [] [] [] ]
+    , C.barLabels CE.getTop
+        [ CA.moveDown 18
+        , CA.color "white"
+        , CA.fontSize 14
+        ]
+    , C.each model.hovering <| \p stack ->
+        [ C.tooltip stack [ CA.onTop ] [] [] ]
     ]
 
 
@@ -102,18 +116,32 @@ smallCode =
     [ C.grid []
     , C.yLabels []
 
-    , C.bars [ CA.roundTop 0.5 ]
+    , C.bars
+        [ CA.roundTop 0.2
+        , CA.margin 0.2
+        , CA.noGrid
+        ]
         [ C.stacked
-            [ C.bar .p [ CA.opacity 0.8 ]
-            , C.bar .w [ CA.opacity 0.8 ]
+            [ C.bar .p
+                [ CA.gradient [ "#da6197", "#f37c56" ] ]
+            , C.bar .w
+                [ CA.gradient [ "#aa39ea", "#d159b0" ] ]
             ]
-        , C.bar .q [ CA.opacity 0.8, CA.dotted [ CA.spacing 2.2 ] ]
+        , C.bar .q
+            [ CA.color "#666bfe"
+            , CA.striped [ CA.width 7 ]
+            ]
         ]
         data
 
     , C.binLabels .country CE.getBottom [ CA.moveDown 15 ]
-    , C.barLabels CE.getTop [ CA.moveDown 15, CA.color "white" ]
-    , C.each model.hovering <| \\p stack -> [ C.tooltip stack [] [] [] ]
+    , C.barLabels CE.getTop
+        [ CA.moveDown 18
+        , CA.color "white"
+        , CA.fontSize 14
+        ]
+    , C.each model.hovering <| \\p stack ->
+        [ C.tooltip stack [ CA.onTop ] [] [] ]
     ]
   """
 
@@ -160,17 +188,31 @@ view model =
     [ C.grid []
     , C.yLabels []
 
-    , C.bars [ CA.roundTop 0.5 ]
+    , C.bars
+        [ CA.roundTop 0.2
+        , CA.margin 0.2
+        , CA.noGrid
+        ]
         [ C.stacked
-            [ C.bar .p [ CA.opacity 0.8 ]
-            , C.bar .w [ CA.opacity 0.8 ]
+            [ C.bar .p
+                [ CA.gradient [ "#da6197", "#f37c56" ] ]
+            , C.bar .w
+                [ CA.gradient [ "#aa39ea", "#d159b0" ] ]
             ]
-        , C.bar .q [ CA.opacity 0.8, CA.dotted [ CA.spacing 2.2 ] ]
+        , C.bar .q
+            [ CA.color "#666bfe"
+            , CA.striped [ CA.width 7 ]
+            ]
         ]
         data
 
     , C.binLabels .country CE.getBottom [ CA.moveDown 15 ]
-    , C.barLabels CE.getTop [ CA.moveDown 15, CA.color "white" ]
-    , C.each model.hovering <| \\p stack -> [ C.tooltip stack [] [] [] ]
+    , C.barLabels CE.getTop
+        [ CA.moveDown 18
+        , CA.color "white"
+        , CA.fontSize 14
+        ]
+    , C.each model.hovering <| \\p stack ->
+        [ C.tooltip stack [ CA.onTop ] [] [] ]
     ]
   """

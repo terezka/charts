@@ -46,7 +46,7 @@ view model =
             [ C.bar .z []
             , C.bar .y []
             ]
-        , C.bar .v [ CA.color CA.turquoise ]
+        , C.bar .v []
         ]
         data
     , C.each model.hovering <| \p item ->
@@ -103,7 +103,7 @@ smallCode =
             [ C.bar .z []
             , C.bar .y []
             ]
-        , C.bar .v [ CA.color CA.turquoise ]
+        , C.bar .v []
         ]
         data
     , C.each model.hovering <| \\p item ->
@@ -158,7 +158,7 @@ view model =
             [ C.bar .z []
             , C.bar .y []
             ]
-        , C.bar .v [ CA.color CA.turquoise ]
+        , C.bar .v []
         ]
         data
     , C.each model.hovering <| \\p item ->

@@ -120,7 +120,13 @@ toBarSeries elIndex barsAttrs properties data =
             defaultAttrs = [ CA.roundTop roundTop, CA.roundBottom roundBottom, CA.color defaultColor, CA.border defaultColor ]
             attrs = defaultAttrs ++ section.attrs ++ section.extra barIndex sectionIndex dataIndex section.meta bin.datum
             productOrg = toBarConfig attrs
-            product = if productOrg.border == defaultColor then { productOrg | border = productOrg.color } else productOrg
+            product =
+              productOrg
+                |> (\p ->
+                     case p.design of
+                      Just (S.Gradient (color :: _)) -> if p.color == defaultColor then { p | color = color } else p
+                      _ -> p)
+                |> (\p -> if p.border == defaultColor then { p | border = p.color } else p)
         in
         I.Item
           { config =

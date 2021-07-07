@@ -44,7 +44,7 @@ gatherWith testFn list =
 
 toDefaultColor : Int -> String
 toDefaultColor =
-  toDefault pink [ pink, purple, blue, orange, red, mint, turquoise, green, darkYellow, darkBlue, magenta, brown, yellow ]
+  toDefault pink [ purple, pink, blue, green, red, yellow, orange ]
 
 
 toDefault : a -> List a -> Int -> a
@@ -64,78 +64,91 @@ toDefault default items index =
 {-| -}
 pink : String
 pink =
-  "#f56dbc"
+  "#ea60df"
 
 
 {-| -}
 purple : String
 purple =
-  "#7c29ed"
+  "#7b4dff"
 
 
 {-| -}
 blue : String
 blue =
-  "#259fe7"
+  "#12A5ED"
 
 
+{-| -}
+moss : String
+moss =
+  "#92b42c"
+
+
+{-| -}
 green : String
 green =
-  "#109618"
+  "#71c614"
 
 
 {-| -}
 orange : String
 orange =
-  "#e47d32"
+  "#FF8400"
 
 
 {-| -}
 turquoise : String
 turquoise =
-  "#4eaea7"
+  "#22d2ba"
 
 
 {-| -}
 red : String
 red =
-  "#d32f2f"
+  "#F5325B"
 
 
 {-| -}
 darkYellow : String
 darkYellow =
-  "#aaaa11"
+  "#eabd39"
 
 
 {-| -}
 darkBlue : String
 darkBlue =
-  "#135ca5"
+  "#7345f6"
+
+
+{-| -}
+coral : String
+coral =
+  "#ea7369"
 
 
 {-| -}
 magenta : String
 magenta =
-  "#de23a5"
+  "#db4cb2"
 
 
 {-| -}
 brown : String
 brown =
-  "#7e413b"
+  "#820401"
 
 
 {-| -}
 mint : String
 mint =
-  "#70d8cb"
+  "#6df0d2"
 
 
 {-| -}
 yellow : String
 yellow =
-  "#e1e10e"
+  "#FFCA00"
 
 
 gray : String

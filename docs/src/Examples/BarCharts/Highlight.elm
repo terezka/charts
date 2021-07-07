@@ -42,13 +42,13 @@ view model =
     , C.xLabels []
     , C.yLabels []
     , C.bars
-        [ CA.roundTop 1
+        [ CA.roundTop 0.2
         , CA.margin 0.2
         , CA.spacing 0.15
         ]
         [ C.bar .z [ CA.striped [], CA.borderWidth 1 ]
             |> C.amongst model.hovering (\_ -> [ CA.highlight 0.25 ])
-        , C.bar .v [ CA.gradient [ "#7c29ed", "#7c29ed1F" ] ]
+        , C.bar .v []
             |> C.amongst model.hovering (\_ -> [ CA.highlight 0.25 ])
         ]
         data
@@ -102,13 +102,13 @@ smallCode =
     , C.xLabels []
     , C.yLabels []
     , C.bars
-        [ CA.roundTop 1
+        [ CA.roundTop 0.2
         , CA.margin 0.2
         , CA.spacing 0.15
         ]
         [ C.bar .z [ CA.striped [], CA.borderWidth 1 ]
             |> C.amongst model.hovering (\\_ -> [ CA.highlight 0.25 ])
-        , C.bar .v [ CA.gradient [ "#7c29ed", "#7c29ed1F" ] ]
+        , C.bar .v []
             |> C.amongst model.hovering (\\_ -> [ CA.highlight 0.25 ])
         ]
         data
@@ -160,13 +160,13 @@ view model =
     , C.xLabels []
     , C.yLabels []
     , C.bars
-        [ CA.roundTop 1
+        [ CA.roundTop 0.2
         , CA.margin 0.2
         , CA.spacing 0.15
         ]
         [ C.bar .z [ CA.striped [], CA.borderWidth 1 ]
             |> C.amongst model.hovering (\\_ -> [ CA.highlight 0.25 ])
-        , C.bar .v [ CA.gradient [ "#7c29ed", "#7c29ed1F" ] ]
+        , C.bar .v []
             |> C.amongst model.hovering (\\_ -> [ CA.highlight 0.25 ])
         ]
         data
