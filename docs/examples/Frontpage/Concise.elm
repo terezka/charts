@@ -44,31 +44,42 @@ view model =
     , C.bars
         [ CA.roundTop 0.2
         , CA.margin 0.2
+        , CA.spacing 0.1
         , CA.noGrid
         ]
         [ C.stacked
             [ C.bar .p
-                [ CA.gradient [ "#da6197", "#f37c56" ] ]
+                [ CA.gradient [ purple, pink ] ]
             , C.bar .w
-                [ CA.gradient [ "#aa39ea", "#d159b0" ] ]
+                [ CA.gradient [ blue, green ] ]
             ]
         , C.bar .q
-            [ CA.color "#666bfe"
+            [ CA.color darkBlue
             , CA.striped [ CA.width 7 ]
             ]
         ]
         data
 
-    , C.binLabels .country CE.getBottom [ CA.moveDown 15 ]
-    , C.barLabels CE.getTop
-        [ CA.moveDown 18
-        , CA.color "white"
-        , CA.fontSize 14
-        ]
-    , C.each model.hovering <| \p stack ->
-        [ C.tooltip stack [ CA.onTop ] [] [] ]
+    , C.binLabels .country [ CA.moveDown 18 ]
+    , C.barLabels [ CA.moveDown 18, CA.color weakWhite ]
+
+    , let
+        toBrightLabel =
+          C.barLabel [ CA.moveDown 18, CA.color white ]
+      in
+      C.each model.hovering <| \p stack ->
+        List.map toBrightLabel (CE.getProducts stack)
     ]
 {-| @SMALL END -}
+
+purple = "#7b4dffB8"
+pink = "#e958c1B8"
+blue = "#2F80EDB8"
+green = "#13E2DAB8"
+darkBlue = "#666bfeF0"
+weakWhite = "rgba(255, 255, 255, 0.7)"
+white = "white"
+
 {-| @LARGE END -}
 
 

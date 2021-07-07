@@ -7,7 +7,7 @@ module Chart.Events exposing
   , keep, collect
   , group, regroup
 
-  , Product, Any, Bar, Dot
+  , Item, Product, Any, Bar, Dot
   , Group, Bin, Stack, SameX
   , getDependent, getIndependent, getDatum, getColor, getName
   , getTop, getTopLeft, getTopRight
@@ -324,9 +324,17 @@ type alias Group inter config value data =
 {-| Get the products of a group.
 
 -}
-getProducts : Group inter config value data -> List (Product Any value data)
+getProducts : Group inter config value data -> List (Product config value data)
 getProducts =
   G.getProducts
+
+
+{-| Get the generalized products of a group.
+
+-}
+getGenerals : Group a config value datum -> List (I.Product Any value datum)
+getGenerals =
+  G.getGenerals
 
 
 {-| Get the commonality of a group.

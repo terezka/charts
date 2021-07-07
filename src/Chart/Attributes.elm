@@ -9,7 +9,7 @@ module Chart.Attributes exposing
   , lowest, highest, orLower, orHigher, exactly, more, less, window, likeData, zero, middle, percent
 
   -- LABELS
-  , fontSize, uppercase, format
+  , fontSize, uppercase, format, position
   , alignLeft, alignRight, alignMiddle, content
 
   -- AXIS
@@ -438,6 +438,12 @@ uppercase config =
 format : x -> Attribute { a | format : Maybe x }
 format v config =
   { config | format = Just v }
+
+
+{-| -}
+position : x -> Attribute { a | position : x }
+position v config =
+  { config | position = v }
 
 
 {-| -}

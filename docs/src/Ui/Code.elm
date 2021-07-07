@@ -48,9 +48,9 @@ fixIndent code =
         let trimmed = String.trimLeft x
             indent = String.length x - String.length trimmed
         in
-        ( indent, x ))
+        ( if String.length trimmed == 0 then Nothing else Just indent, x ))
     |> (\xs ->
-        let smallest = Maybe.withDefault 0 <| List.minimum (List.map Tuple.first xs) in
+        let smallest = Maybe.withDefault 0 <| List.minimum (List.filterMap Tuple.first xs) in
         List.map (\( _, x ) -> String.dropLeft smallest x) xs
           |> String.join "\n"
       )

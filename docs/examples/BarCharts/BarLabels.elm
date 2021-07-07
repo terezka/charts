@@ -24,12 +24,7 @@ view model =
         ]
         data
 
-    , C.eachBar <| \p bar ->
-        [ C.label
-            [ CA.yOff 15, CA.color "white" ]
-            [ S.text (String.fromFloat (CE.getDependent bar)) ]
-            (CE.getTop p bar)
-        ]
+    , C.barLabels [ CA.moveDown 15, CA.color "white" ]
     ]
 {-| @SMALL END -}
 {-| @LARGE END -}

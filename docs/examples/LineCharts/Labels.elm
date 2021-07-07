@@ -24,7 +24,7 @@ view model =
         ]
         data
 
-    , C.dotLabels CE.getCenter [ CA.moveDown 4, CA.color "white" ]
+    , C.dotLabels [ CA.moveDown 4, CA.color "white" ]
     ]
 {-| @SMALL END -}
 {-| @LARGE END -}

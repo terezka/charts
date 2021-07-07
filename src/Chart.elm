@@ -7,7 +7,7 @@ module Chart exposing
   , stacked, named, variation, amongst
 
   , xAxis, yAxis, xTicks, yTicks, xLabels, yLabels, grid
-  , binLabels, barLabels, dotLabels
+  , binLabels, barLabels, barLabel, dotLabels
 
   , xLabel, yLabel, xTick, yTick
   , generate, floats, ints, times
@@ -1635,6 +1635,55 @@ stacked =
 -- LABEL EXTRAS
 
 
+{-| -}
+type alias ItemLabel a =
+  { xOff : Float
+  , yOff : Float
+  , border : String
+  , borderWidth : Float
+  , fontSize : Maybe Int
+  , color : String
+  , anchor : Maybe IS.Anchor
+  , rotate : Float
+  , uppercase : Bool
+  , attrs : List (S.Attribute Never)
+  , position : CS.Plane -> a -> CS.Point
+  , format : Maybe (a -> String)
+  }
+
+
+defaultLabel : ItemLabel (CE.Item a)
+defaultLabel =
+  { xOff = IS.defaultLabel.xOff
+  , yOff = IS.defaultLabel.yOff
+  , border = IS.defaultLabel.border
+  , borderWidth = IS.defaultLabel.borderWidth
+  , fontSize = IS.defaultLabel.fontSize
+  , color = IS.defaultLabel.color
+  , anchor = IS.defaultLabel.anchor
+  , rotate = IS.defaultLabel.rotate
+  , uppercase = IS.defaultLabel.uppercase
+  , attrs = IS.defaultLabel.attrs
+  , position = CE.getBottom
+  , format = Nothing
+  }
+
+
+toLabelFromItemLabel : ItemLabel (CE.Item a) -> CS.Label
+toLabelFromItemLabel config =
+  { xOff = config.xOff
+  , yOff = config.yOff
+  , color = config.color
+  , border = config.border
+  , borderWidth = config.borderWidth
+  , anchor = config.anchor
+  , fontSize = config.fontSize
+  , uppercase = config.uppercase
+  , rotate = config.rotate
+  , attrs = config.attrs
+  }
+
+
 {-| Add labels by every bin.
 
     C.chart []
@@ -1671,11 +1720,20 @@ Attributes you can use:
       ]
 
 -}
-binLabels : (data -> String) -> (CS.Plane -> CE.Group (CE.Bin data) CE.Bar (Maybe Float) data -> CS.Point) -> List (CA.Attribute CS.Label) -> Element data msg
-binLabels toLabel toPosition labelAttrs =
-  -- TODO make even nicer api
+binLabels : (data -> String) -> List (CA.Attribute (ItemLabel (CE.Group (CE.Bin data) CE.Bar (Maybe Float) data))) -> Element data msg
+binLabels toLabel edits =
   eachCustom (CE.collect CE.bin CE.bar) <| \p item ->
-    [ label labelAttrs [ S.text (toLabel (CE.getCommonality item).datum) ] (toPosition p item) ]
+    let config =
+          Helpers.apply edits defaultLabel
+
+        text =
+          case config.format of
+            Just formatting -> formatting item
+            Nothing -> toLabel (CE.getCommonality item).datum
+    in
+    [ svg <| \_ ->
+        IS.label p (toLabelFromItemLabel config) [ S.text text ] (config.position p item)
+    ]
 
 
 {-| Add labels by every bar.
@@ -1714,10 +1772,38 @@ Attributes you can use:
       , CA.attrs [ SA.class "my-bar-labels" ]
       ]
 -}
-barLabels : (CS.Plane -> CE.Product CE.Bar Float data -> CS.Point) -> List (CA.Attribute CS.Label) -> Element data msg
-barLabels toPosition labelAttrs =
+barLabels : List (CA.Attribute (ItemLabel (CE.Product CE.Bar Float data))) -> Element data msg
+barLabels edits =
   eachBar <| \p item ->
-    [ label labelAttrs [ S.text (String.fromFloat (CE.getDependent item)) ] (toPosition p item) ]
+    let config =
+          Helpers.apply edits { defaultLabel | position = CE.getTop }
+
+        text =
+          case config.format of
+            Just formatting -> formatting item
+            Nothing -> String.fromFloat (CE.getDependent item)
+    in
+    [ svg <| \_ ->
+        IS.label p (toLabelFromItemLabel config) [ S.text text ] (config.position p item)
+    ]
+
+
+{-| -}
+barLabel : List (CA.Attribute (ItemLabel (CE.Product config value data))) -> CE.Product config value data -> Element data msg
+barLabel edits item =
+  withPlane <| \p ->
+    let config =
+          Helpers.apply edits { defaultLabel | position = CE.getTop }
+
+        text =
+          case config.format of
+            Just formatting -> formatting item
+            Nothing -> String.fromFloat (Item.getDependentSafe item)
+    in
+    [ svg <| \_ ->
+        IS.label p (toLabelFromItemLabel config) [ S.text text ] (config.position p item)
+    ]
+
 
 
 {-| Add labels by every bar.
@@ -1756,10 +1842,20 @@ Attributes you can use:
       , CA.attrs [ SA.class "my-dot-labels" ]
       ]
 -}
-dotLabels : (CS.Plane -> CE.Product CE.Dot Float data -> CS.Point) -> List (CA.Attribute CS.Label) -> Element data msg
-dotLabels toPosition labelAttrs =
+dotLabels : List (CA.Attribute (ItemLabel (CE.Product CE.Dot Float data))) -> Element data msg
+dotLabels edits =
   eachDot <| \p item ->
-    [ label labelAttrs [ S.text (String.fromFloat (CE.getDependent item)) ] (toPosition p item) ]
+    let config =
+          Helpers.apply edits { defaultLabel | position = CE.getCenter  }
+
+        text =
+          case config.format of
+            Just formatting -> formatting item
+            Nothing -> String.fromFloat (Item.getDependent item)
+    in
+    [ svg <| \_ ->
+        IS.label p (toLabelFromItemLabel config) [ S.text text ] (config.position p item)
+    ]
 
 
 
@@ -1888,7 +1984,7 @@ barsMap mapData edits properties data =
           Produce.toBarSeries index edits properties data
 
         generalized =
-          List.concatMap Group.getProducts items
+          List.concatMap Group.getGenerals items
             |> List.map (Item.map mapData)
 
         bins =
@@ -1977,7 +2073,7 @@ seriesMap mapData toX properties data =
           Produce.toDotSeries index toX properties data
 
         generalized =
-          List.concatMap Group.getProducts items
+          List.concatMap Group.getGenerals items
             |> List.map (Item.map mapData)
 
         legends_ =

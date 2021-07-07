@@ -80,7 +80,7 @@ view model =
         , CA.roundTop 0.2
         , CA.ungroup
         ]
-        [ C.barMaybe .y [ CA.color "#7b4dff", CA.gradient [ "#7b4dff6F", "#7b4dff1F" ] ]
+        [ C.barMaybe .y [ CA.color "#7b4dffAF", CA.gradient [ "#7b4dff6F", "#7b4dff1F" ] ]
             |> C.named "Requests"
         , C.barMaybe .z [ CA.color "#666", CA.gradient [ "#bfc2c9", "#bfc2c96F" ] ]
             |> C.named "Sales"
@@ -123,7 +123,9 @@ view model =
 
     , C.labelAt (CA.middle) (CA.percent 60)
         [ CA.fontSize 50, CA.moveUp 10, CA.color "rgb(90, 90, 90)" ]
-        [ S.text "Your chart, simply."
+        [
+          --S.tspan [ SA.style "font-style: italic;" ] [ S.text "Your" ]
+          S.text "Your chart, without the clutter."
         ]
 
     , C.labelAt (CA.middle) (CA.percent 60)

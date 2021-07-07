@@ -153,6 +153,7 @@ minutes!"""
                   , chart = H.map (\_ -> None) (Familiar.view ())
                   , code = Familiar.smallCode
                   , flipped = False
+                  , height = 350
                   }
 
               , feature
@@ -163,6 +164,7 @@ minutes!"""
                   , chart = H.map ConciseMsg (Concise.view model.concise)
                   , code = Concise.smallCode
                   , flipped = True
+                  , height = 350
                   }
 
               --, feature
@@ -179,6 +181,7 @@ minutes!"""
 feature :
   { title : String
   , body : String
+  , height : Int
   , onToggle : msg
   , toggled : Bool
   , chart : H.Html msg
@@ -189,7 +192,7 @@ feature :
 feature config =
   E.row
     [ E.width E.fill
-    , E.height (E.minimum 350 E.fill)
+    , E.height (E.minimum config.height E.fill)
     , E.spacing 50
     ] <| (if config.flipped then List.reverse else identity)
     [ E.column

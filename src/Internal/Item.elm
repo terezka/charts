@@ -126,6 +126,12 @@ getDependent (Item item) =
 
 
 {-| -}
+getDependentSafe : Product config value data -> Float
+getDependentSafe (Item item) =
+  Maybe.withDefault 0 item.config.values.y
+
+
+{-| -}
 getPropertyIndex : Product config value data -> Int
 getPropertyIndex (Item item) =
   item.config.tooltipInfo.property
