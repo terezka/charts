@@ -169,8 +169,12 @@ type alias Line =
   , x2 : Maybe Float
   , y1 : Maybe Float
   , y2 : Maybe Float
+  , x2Svg : Maybe Float
+  , y2Svg : Maybe Float
   , xOff : Float
   , yOff : Float
+  , tickLength : Float
+  , tickDirection : Float
   , color : String
   , width : Float
   , dashed : List Float
@@ -186,6 +190,10 @@ defaultLine =
   , x2 = Nothing
   , y1 = Nothing
   , y2 = Nothing
+  , x2Svg = Nothing
+  , y2Svg = Nothing
+  , tickLength = 0
+  , tickDirection = -90
   , xOff = 0
   , yOff = 0
   , color = "rgb(210, 210, 210)"
@@ -200,8 +208,8 @@ defaultLine =
 {-| -}
 line : Plane -> Line -> Svg msg
 line plane config =
-  let ( ( x1_, x2_ ), ( y1_, y2_ ) ) =
-        case ( ( config.x1, config.x2 ), ( config.y1, config.y2 ), ( round config.xOff, round config.yOff ) ) of
+  let ( ( x1, x2 ), ( y1, y2 ) ) =
+        case ( ( config.x1, config.x2 ), ( config.y1, config.y2 ), ( config.x2Svg, config.y2Svg ) ) of
           -- ONLY X
           ( ( Just a, Just b ), ( Nothing, Nothing ), _ ) ->
             ( ( a, b ), ( plane.y.min, plane.y.min ) )
@@ -236,29 +244,29 @@ line plane config =
             ( ( a, b ), ( c, c ) )
 
           -- ONE FULL POINT
-          ( ( Just a, Nothing ), ( Nothing, Just b ), ( 0, 0 ) ) ->
+          ( ( Just a, Nothing ), ( Nothing, Just b ), ( Nothing, Nothing ) ) ->
             ( ( a, plane.x.max ), ( b, b ) )
 
-          ( ( Just a, Nothing ), ( Nothing, Just b ), ( xOff, yOff ) ) ->
-            ( ( a, a + Coord.scaleCartesianX plane config.xOff ), ( b, b + Coord.scaleCartesianY plane config.yOff ) )
+          ( ( Just a, Nothing ), ( Nothing, Just b ), ( Just x2Svg, Just y2Svg ) ) ->
+            ( ( a, a + Coord.scaleCartesianX plane x2Svg ), ( b, b + Coord.scaleCartesianY plane y2Svg ) )
 
-          ( ( Just a, Nothing ), ( Just b, Nothing ), ( 0, 0 ) ) ->
+          ( ( Just a, Nothing ), ( Just b, Nothing ), ( Nothing, Nothing ) ) ->
             ( ( a, plane.x.max ), ( b, b ) )
 
-          ( ( Just a, Nothing ), ( Just b, Nothing ), ( xOff, yOff ) ) ->
-            ( ( a, a + Coord.scaleCartesianX plane config.xOff ), ( b, b + Coord.scaleCartesianY plane config.yOff ) )
+          ( ( Just a, Nothing ), ( Just b, Nothing ), ( Just x2Svg, Just y2Svg ) ) ->
+            ( ( a, a + Coord.scaleCartesianX plane x2Svg ), ( b, b + Coord.scaleCartesianY plane y2Svg ) )
 
-          ( ( Nothing, Just a ), ( Nothing, Just b ), ( 0, 0 ) ) ->
+          ( ( Nothing, Just a ), ( Nothing, Just b ), ( Nothing, Nothing ) ) ->
             ( ( a, plane.x.max ), ( b, b ) )
 
-          ( ( Nothing, Just a ), ( Nothing, Just b ), ( xOff, yOff ) ) ->
-            ( ( a, a + Coord.scaleCartesianX plane config.xOff ), ( b, b + Coord.scaleCartesianY plane config.yOff ) )
+          ( ( Nothing, Just a ), ( Nothing, Just b ), ( Just x2Svg, Just y2Svg ) ) ->
+            ( ( a, a + Coord.scaleCartesianX plane x2Svg ), ( b, b + Coord.scaleCartesianY plane y2Svg ) )
 
-          ( ( Nothing, Just a ), ( Just b, Nothing ), ( 0, 0 ) ) ->
+          ( ( Nothing, Just a ), ( Just b, Nothing ), ( Nothing, Nothing ) ) ->
             ( ( a, plane.x.max ), ( b, b ) )
 
-          ( ( Nothing, Just a ), ( Just b, Nothing ), ( xOff, yOff ) ) ->
-            ( ( a, a + Coord.scaleCartesianX plane config.xOff ), ( b, b + Coord.scaleCartesianY plane config.yOff ) )
+          ( ( Nothing, Just a ), ( Just b, Nothing ), ( Just x2Svg, Just y2Svg ) ) ->
+            ( ( a, a + Coord.scaleCartesianX plane x2Svg ), ( b, b + Coord.scaleCartesianY plane y2Svg ) )
 
           -- NEITHER
           ( ( Nothing, Nothing ), ( Nothing, Nothing ), _ ) ->
@@ -273,13 +281,32 @@ line plane config =
               )
             )
 
+      angle =
+        degrees config.tickDirection
+
+      ( tickOffsetX, tickOffsetY ) =
+        if config.tickLength > 0 then
+        ( lengthInCartesianX plane (cos angle * config.tickLength)
+        , lengthInCartesianY plane (sin angle * config.tickLength)
+        ) else ( 0, 0 )
+
+      x1_ = x1 + lengthInCartesianX plane config.xOff
+      x2_ = x2 + lengthInCartesianX plane config.xOff
+      y1_ = y1 - lengthInCartesianY plane config.yOff
+      y2_ = y2 - lengthInCartesianY plane config.yOff
+
       cmds =
-        [ C.Move x1_ y1_
-        , C.Line x1_ y1_
-        ] ++
-        if config.break
+        (if config.tickLength > 0
+          then [ C.Move (x1_ + tickOffsetX) (y1_ + tickOffsetY), C.Line x1_ y1_ ]
+          else [ C.Move x1_ y1_ ])
+        ++
+        (if config.break
         then [ C.Line x1_ y2_, C.Line x2_ y2_ ]
-        else [ C.Line x2_ y2_ ]
+        else [ C.Line x2_ y2_ ])
+        ++
+        (if config.tickLength > 0
+        then [ C.Line (x2_ + tickOffsetX) (y2_ + tickOffsetY) ]
+        else [])
   in
   withAttrs config.attrs S.path
     [ SA.class "elm-charts__line"

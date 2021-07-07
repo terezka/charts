@@ -6,6 +6,7 @@ module Examples.Frontpage.Concise exposing (..)
 import Html as H
 import Svg as S
 import Chart as C
+import Chart.Svg as CS
 import Chart.Attributes as CA
 import Chart.Events as CE
 
@@ -40,29 +41,39 @@ view model =
     , CE.onMouseLeave (OnHover [])
     ]
     [ C.grid []
-    , C.yLabels []
+    , C.yLabels [ CA.format (\y -> String.fromFloat y ++ "M")]
 
     , C.bars
         [ CA.roundTop 0.2
         , CA.margin 0.2
-        , CA.spacing 0.1
+        , CA.spacing 0.05
         , CA.noGrid
         ]
         [ C.stacked
-            [ C.bar .p
-                [ CA.gradient [ purple, pink ] ]
-            , C.bar .w
-                [ CA.gradient [ blue, green ] ]
+            [ C.bar .cats
+                [ CA.gradient [ "#54c8ddD0", "#54c8dd90" ] ]
+                |> C.named "Cats"
+            , C.bar .dogs
+                [ CA.gradient [ "#0f9ff0D0", "#0f9ff090" ] ]
+                |> C.named "Dogs"
             ]
-        , C.bar .q
-            [ CA.color darkBlue
-            , CA.striped [ CA.width 7 ]
-            ]
+        , C.bar .people
+            [ CA.gradient [ "#653bf4D0", "#653bf490" ] ]
+                |> C.named "People"
         ]
         data
 
+    , C.labelAt (CA.percent 30) .max
+        [ CA.moveDown 3, CA.fontSize 15 ]
+        [ S.text "Populations in Scandinavia" ]
+
+    , C.labelAt (CA.percent 30) .max
+        [ CA.moveDown 20, CA.fontSize 12 ]
+        [ S.text "Note: Based on made up data." ]
+
     , C.binLabels .country [ CA.moveDown 18 ]
     , C.barLabels [ CA.moveDown 18, CA.color weakWhite ]
+    , C.legendsAt .max .max [ CA.alignRight, CA.column, CA.spacing 7 ] []
 
     , let
         toBrightLabel =
@@ -70,6 +81,27 @@ view model =
       in
       C.each model.hovering <| \p stack ->
         List.map toBrightLabel (CE.getProducts stack)
+
+    , C.eachBin <| \p bin ->
+        let common = CE.getCommonality bin
+            yPos = (CE.getTop p bin).y
+            xMid = (CE.getCenter p bin).x
+        in
+        if common.datum.country == "Finland" then
+          [ C.line
+              [ CA.x1 common.start
+              , CA.x2 common.end
+              , CA.y1 yPos
+              , CA.moveUp 15
+              , CA.tickLength 5
+              ]
+          , C.label
+              [ CA.moveUp 22, CA.fontSize 10 ]
+              [ S.text "Most pets per person"]
+              { x = xMid, y = yPos }
+          ]
+        else
+          []
     ]
 
 purple = "#7b4dffB8"
@@ -92,24 +124,19 @@ meta =
 
 
 type alias Datum =
-  { x : Float
-  , x1 : Float
-  , y : Float
-  , z : Float
-  , v : Float
-  , w : Float
-  , p : Float
-  , q : Float
+  { cats : Float
+  , dogs : Float
+  , people : Float
   , country : String
   }
 
 
 data : List Datum
 data =
-  [ Datum 0.0 0.0 1.2 4.0 4.6 6.9 7.3 8.0 "Norway"
-  , Datum 2.0 0.4 2.2 4.2 5.3 5.7 6.2 7.8 "Denmark"
-  , Datum 3.0 0.6 1.0 3.2 4.8 5.4 7.2 8.3 "Sweden"
-  , Datum 4.0 0.2 1.2 3.0 4.1 5.5 7.9 8.1 "Finland"
+  [ Datum 2.4 1.2 5.3 "Norway"
+  , Datum 2.2 2.4 5.8 "Denmark"
+  , Datum 3.6 2.2 10.2 "Sweden"
+  , Datum 3.4 1.2 5.5 "Finland"
   ]
 
 
@@ -125,29 +152,39 @@ smallCode =
     , CE.onMouseLeave (OnHover [])
     ]
     [ C.grid []
-    , C.yLabels []
+    , C.yLabels [ CA.format (\\y -> String.fromFloat y ++ "M")]
 
     , C.bars
         [ CA.roundTop 0.2
         , CA.margin 0.2
-        , CA.spacing 0.1
+        , CA.spacing 0.05
         , CA.noGrid
         ]
         [ C.stacked
-            [ C.bar .p
-                [ CA.gradient [ purple, pink ] ]
-            , C.bar .w
-                [ CA.gradient [ blue, green ] ]
+            [ C.bar .cats
+                [ CA.gradient [ "#54c8ddD0", "#54c8dd90" ] ]
+                |> C.named "Cats"
+            , C.bar .dogs
+                [ CA.gradient [ "#0f9ff0D0", "#0f9ff090" ] ]
+                |> C.named "Dogs"
             ]
-        , C.bar .q
-            [ CA.color darkBlue
-            , CA.striped [ CA.width 7 ]
-            ]
+        , C.bar .people
+            [ CA.gradient [ "#653bf4D0", "#653bf490" ] ]
+                |> C.named "People"
         ]
         data
 
+    , C.labelAt (CA.percent 30) .max
+        [ CA.moveDown 3, CA.fontSize 15 ]
+        [ S.text "Populations in Scandinavia" ]
+
+    , C.labelAt (CA.percent 30) .max
+        [ CA.moveDown 20, CA.fontSize 12 ]
+        [ S.text "Note: Based on made up data." ]
+
     , C.binLabels .country [ CA.moveDown 18 ]
     , C.barLabels [ CA.moveDown 18, CA.color weakWhite ]
+    , C.legendsAt .max .max [ CA.alignRight, CA.column, CA.spacing 7 ] []
 
     , let
         toBrightLabel =
@@ -155,6 +192,27 @@ smallCode =
       in
       C.each model.hovering <| \\p stack ->
         List.map toBrightLabel (CE.getProducts stack)
+
+    , C.eachBin <| \\p bin ->
+        let common = CE.getCommonality bin
+            yPos = (CE.getTop p bin).y
+            xMid = (CE.getCenter p bin).x
+        in
+        if common.datum.country == "Finland" then
+          [ C.line
+              [ CA.x1 common.start
+              , CA.x2 common.end
+              , CA.y1 yPos
+              , CA.moveUp 15
+              , CA.tickLength 5
+              ]
+          , C.label
+              [ CA.moveUp 22, CA.fontSize 10 ]
+              [ S.text "Most pets per person"]
+              { x = xMid, y = yPos }
+          ]
+        else
+          []
     ]
   """
 
@@ -165,6 +223,7 @@ largeCode =
 import Html as H
 import Svg as S
 import Chart as C
+import Chart.Svg as CS
 import Chart.Attributes as CA
 import Chart.Events as CE
 
@@ -199,29 +258,39 @@ view model =
     , CE.onMouseLeave (OnHover [])
     ]
     [ C.grid []
-    , C.yLabels []
+    , C.yLabels [ CA.format (\\y -> String.fromFloat y ++ "M")]
 
     , C.bars
         [ CA.roundTop 0.2
         , CA.margin 0.2
-        , CA.spacing 0.1
+        , CA.spacing 0.05
         , CA.noGrid
         ]
         [ C.stacked
-            [ C.bar .p
-                [ CA.gradient [ purple, pink ] ]
-            , C.bar .w
-                [ CA.gradient [ blue, green ] ]
+            [ C.bar .cats
+                [ CA.gradient [ "#54c8ddD0", "#54c8dd90" ] ]
+                |> C.named "Cats"
+            , C.bar .dogs
+                [ CA.gradient [ "#0f9ff0D0", "#0f9ff090" ] ]
+                |> C.named "Dogs"
             ]
-        , C.bar .q
-            [ CA.color darkBlue
-            , CA.striped [ CA.width 7 ]
-            ]
+        , C.bar .people
+            [ CA.gradient [ "#653bf4D0", "#653bf490" ] ]
+                |> C.named "People"
         ]
         data
 
+    , C.labelAt (CA.percent 30) .max
+        [ CA.moveDown 3, CA.fontSize 15 ]
+        [ S.text "Populations in Scandinavia" ]
+
+    , C.labelAt (CA.percent 30) .max
+        [ CA.moveDown 20, CA.fontSize 12 ]
+        [ S.text "Note: Based on made up data." ]
+
     , C.binLabels .country [ CA.moveDown 18 ]
     , C.barLabels [ CA.moveDown 18, CA.color weakWhite ]
+    , C.legendsAt .max .max [ CA.alignRight, CA.column, CA.spacing 7 ] []
 
     , let
         toBrightLabel =
@@ -229,6 +298,27 @@ view model =
       in
       C.each model.hovering <| \\p stack ->
         List.map toBrightLabel (CE.getProducts stack)
+
+    , C.eachBin <| \\p bin ->
+        let common = CE.getCommonality bin
+            yPos = (CE.getTop p bin).y
+            xMid = (CE.getCenter p bin).x
+        in
+        if common.datum.country == "Finland" then
+          [ C.line
+              [ CA.x1 common.start
+              , CA.x2 common.end
+              , CA.y1 yPos
+              , CA.moveUp 15
+              , CA.tickLength 5
+              ]
+          , C.label
+              [ CA.moveUp 22, CA.fontSize 10 ]
+              [ S.text "Most pets per person"]
+              { x = xMid, y = yPos }
+          ]
+        else
+          []
     ]
 
 purple = "#7b4dffB8"

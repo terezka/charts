@@ -121,14 +121,19 @@ view model =
         in
         List.map eachBar (CE.getProducts stack)
 
-    , C.labelAt (CA.middle) (CA.percent 60)
+    , C.labelAt (CA.middle) (CA.percent 72)
         [ CA.fontSize 50, CA.moveUp 10, CA.color "rgb(90, 90, 90)" ]
-        [
-          --S.tspan [ SA.style "font-style: italic;" ] [ S.text "Your" ]
-          S.text "Your chart, without the clutter."
+        [ S.text "Compose "
+        , S.tspan [ SA.style "font-style: italic;" ] [ S.text "your" ]
+        , S.text " chart"
         ]
 
-    , C.labelAt (CA.middle) (CA.percent 60)
+    , C.labelAt (CA.middle) (CA.percent 72)
+        [ CA.fontSize 50, CA.moveDown 50, CA.color "rgb(90, 90, 90)" ]
+        [ S.text "with confidence."
+        ]
+
+    , C.labelAt (CA.middle) (CA.percent 72)
         [ CA.fontSize 24, CA.moveUp 65, CA.color "rgb(120, 120, 120)" ]
         [ S.text "This site is not done- please don't tweet yet!"
         ]

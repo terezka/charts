@@ -17,7 +17,7 @@ module Chart.Attributes exposing
   , ints, times
 
   -- COORDINATES
-  , x, y, x1, y1, x2, y2, xOff, yOff, length
+  , x, y, x1, x2Svg, y1, x2, y2, y2Svg, length
   , moveLeft, moveRight, moveUp, moveDown
 
   -- DECORATION
@@ -28,7 +28,7 @@ module Chart.Attributes exposing
   , ungroup, roundTop, roundBottom, spacing
 
   -- LINES
-  , area, size, dashed, break
+  , area, size, dashed, break, tickLength, tickDirection
   , linear, monotone, stepped
   , circle, triangle, square, diamond, plus, cross
 
@@ -339,6 +339,12 @@ x2 v config =
 
 
 {-| -}
+x2Svg : x -> Attribute { a | x2Svg : Maybe x }
+x2Svg v config =
+  { config | x2Svg = Just v }
+
+
+{-| -}
 y : Float -> Attribute { a | y : Float }
 y v config =
   { config | y = v }
@@ -357,9 +363,27 @@ y2 v config =
 
 
 {-| -}
+y2Svg : x -> Attribute { a | y2Svg : Maybe x }
+y2Svg v config =
+  { config | y2Svg = Just v }
+
+
+{-| -}
 break : Attribute { a | break : Bool }
 break config =
   { config | break = True }
+
+
+{-| -}
+tickLength : Float -> Attribute { a | tickLength : Float }
+tickLength v config =
+  { config | tickLength = v }
+
+
+{-| -}
+tickDirection : Float -> Attribute { a | tickDirection : Float }
+tickDirection v config =
+  { config | tickDirection = v }
 
 
 {-| -}

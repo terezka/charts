@@ -22,10 +22,8 @@ chart =
     , C.xAxis []
     , C.yAxis []
     , C.series .x
-        [ C.interpolated .y
-            [ CA.width 2 ] []
-        , C.interpolated .z
-            [ CA.width 2, CA.dashed [ 5, 5 ] ] []
+        [ C.interpolated .y [ CA.width 2 ] []
+        , C.interpolated .z [ CA.width 2 ] []
         ]
         data
     ]
@@ -109,10 +107,8 @@ chart =
     , C.xAxis []
     , C.yAxis []
     , C.series .x
-        [ C.interpolated .y
-            [ CA.width 2 ] []
-        , C.interpolated .z
-            [ CA.width 2, CA.dashed [ 5, 5 ] ] []
+        [ C.interpolated .y [ CA.width 2 ] []
+        , C.interpolated .z [ CA.width 2 ] []
         ]
         data
     ]
@@ -141,10 +137,8 @@ chart =
     , C.xAxis []
     , C.yAxis []
     , C.series .x
-        [ C.interpolated .y
-            [ CA.width 2 ] []
-        , C.interpolated .z
-            [ CA.width 2, CA.dashed [ 5, 5 ] ] []
+        [ C.interpolated .y [ CA.width 2 ] []
+        , C.interpolated .z [ CA.width 2 ] []
         ]
         data
     ]

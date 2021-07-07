@@ -158,7 +158,7 @@ minutes!"""
 
               , feature
                   { title = "Flexible, yet concise"
-                  , body = "No clutter even with tricky details!"
+                  , body = "No clutter, even with tricky requirements. Great support for interactivity, advanced labeling, guidence lines, and irregular details."
                   , onToggle = ConsiceToggle
                   , toggled = model.conciseToggle
                   , chart = H.map ConciseMsg (Concise.view model.concise)
