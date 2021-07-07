@@ -16176,20 +16176,20 @@ var $author$project$Internal$Svg$bar = F3(
 		};
 		var highlightPos = {x1: pos.x1 - highlightWidthCarX, x2: pos.x2 + highlightWidthCarX, y1: pos.y1 - highlightWidthCarY, y2: pos.y2 + highlightWidthCarY};
 		var w = $elm$core$Basics$abs(pos.x2 - pos.x1);
-		var roudningBottom = (A2($author$project$Internal$Coordinates$scaleSVGX, plane, w) * 0.5) * A3($elm$core$Basics$clamp, 0, 1, config.roundBottom);
-		var radiusBottomX = A2($author$project$Internal$Coordinates$scaleCartesianX, plane, roudningBottom);
-		var radiusBottomY = A2($author$project$Internal$Coordinates$scaleCartesianY, plane, roudningBottom);
+		var roundingBottom = (A2($author$project$Internal$Coordinates$scaleSVGX, plane, w) * 0.5) * A3($elm$core$Basics$clamp, 0, 1, config.roundBottom);
+		var radiusBottomX = A2($author$project$Internal$Coordinates$scaleCartesianX, plane, roundingBottom);
+		var radiusBottomY = A2($author$project$Internal$Coordinates$scaleCartesianY, plane, roundingBottom);
 		var roundingTop = (A2($author$project$Internal$Coordinates$scaleSVGX, plane, w) * 0.5) * A3($elm$core$Basics$clamp, 0, 1, config.roundTop);
 		var radiusTopX = A2($author$project$Internal$Coordinates$scaleCartesianX, plane, roundingTop);
 		var radiusTopY = A2($author$project$Internal$Coordinates$scaleCartesianY, plane, roundingTop);
 		var _v0 = function () {
 			if (_Utils_eq(pos.y1, pos.y2)) {
-				return _Utils_Tuple2(_List_Nil, _List_Nil);
+				return _Utils_Tuple3(_List_Nil, _List_Nil, highlightPos);
 			} else {
 				var _v1 = _Utils_Tuple2(config.roundTop > 0, config.roundBottom > 0);
 				if (!_v1.a) {
 					if (!_v1.b) {
-						return _Utils_Tuple2(
+						return _Utils_Tuple3(
 							_List_fromArray(
 								[
 									A2($author$project$Internal$Commands$Move, pos.x1, pos.y1),
@@ -16208,39 +16208,41 @@ var $author$project$Internal$Svg$bar = F3(
 									A2($author$project$Internal$Commands$Line, pos.x2, pos.y2),
 									A2($author$project$Internal$Commands$Line, pos.x1, pos.y2),
 									A2($author$project$Internal$Commands$Line, pos.x1, pos.y1)
-								]));
+								]),
+							{x1: pos.x1 - highlightWidthCarX, x2: pos.x2 + highlightWidthCarX, y1: pos.y1, y2: pos.y2 + highlightWidthCarY});
 					} else {
-						return _Utils_Tuple2(
+						return _Utils_Tuple3(
 							_List_fromArray(
 								[
 									A2($author$project$Internal$Commands$Move, pos.x1 + radiusBottomX, pos.y1),
-									A7($author$project$Internal$Commands$Arc, roudningBottom, roudningBottom, -45, false, true, pos.x1, pos.y1 + radiusBottomY),
+									A7($author$project$Internal$Commands$Arc, roundingBottom, roundingBottom, -45, false, true, pos.x1, pos.y1 + radiusBottomY),
 									A2($author$project$Internal$Commands$Line, pos.x1, pos.y2),
 									A2($author$project$Internal$Commands$Line, pos.x2, pos.y2),
 									A2($author$project$Internal$Commands$Line, pos.x2, pos.y1 + radiusBottomY),
-									A7($author$project$Internal$Commands$Arc, roudningBottom, roudningBottom, -45, false, true, pos.x2 - radiusBottomX, pos.y1),
+									A7($author$project$Internal$Commands$Arc, roundingBottom, roundingBottom, -45, false, true, pos.x2 - radiusBottomX, pos.y1),
 									A2($author$project$Internal$Commands$Line, pos.x1 + radiusBottomX, pos.y1)
 								]),
 							_List_fromArray(
 								[
 									A2($author$project$Internal$Commands$Move, highlightPos.x1 + radiusBottomX, highlightPos.y1),
-									A7($author$project$Internal$Commands$Arc, roudningBottom, roudningBottom, -45, false, true, highlightPos.x1, highlightPos.y1 + radiusBottomY),
-									A2($author$project$Internal$Commands$Line, highlightPos.x1, pos.y2),
-									A2($author$project$Internal$Commands$Line, highlightPos.x2, pos.y2),
+									A7($author$project$Internal$Commands$Arc, roundingBottom, roundingBottom, -45, false, true, highlightPos.x1, highlightPos.y1 + radiusBottomY),
+									A2($author$project$Internal$Commands$Line, highlightPos.x1, highlightPos.y2),
+									A2($author$project$Internal$Commands$Line, highlightPos.x2, highlightPos.y2),
 									A2($author$project$Internal$Commands$Line, highlightPos.x2, highlightPos.y1 + radiusBottomY),
-									A7($author$project$Internal$Commands$Arc, roudningBottom, roudningBottom, -45, false, true, highlightPos.x2 - radiusBottomX, highlightPos.y1),
+									A7($author$project$Internal$Commands$Arc, roundingBottom, roundingBottom, -45, false, true, highlightPos.x2 - radiusBottomX, highlightPos.y1),
 									A2($author$project$Internal$Commands$Line, highlightPos.x1 + radiusBottomX, highlightPos.y1),
 									A2($author$project$Internal$Commands$Line, pos.x2 - radiusBottomX, pos.y1),
-									A7($author$project$Internal$Commands$Arc, roudningBottom, roudningBottom, -45, false, false, pos.x2, pos.y1 + radiusBottomY),
+									A7($author$project$Internal$Commands$Arc, roundingBottom, roundingBottom, -45, false, false, pos.x2, pos.y1 + radiusBottomY),
 									A2($author$project$Internal$Commands$Line, pos.x2, pos.y2),
 									A2($author$project$Internal$Commands$Line, pos.x1, pos.y2),
 									A2($author$project$Internal$Commands$Line, pos.x1, pos.y1 + radiusBottomY),
-									A7($author$project$Internal$Commands$Arc, roudningBottom, roudningBottom, -45, false, false, pos.x1 + radiusBottomX, pos.y1)
-								]));
+									A2($author$project$Internal$Commands$Line, pos.x2, pos.y1)
+								]),
+							{x1: pos.x1 - highlightWidthCarX, x2: pos.x2 + highlightWidthCarX, y1: pos.y1 - highlightWidthCarY, y2: pos.y2 + highlightWidthCarY});
 					}
 				} else {
 					if (!_v1.b) {
-						return _Utils_Tuple2(
+						return _Utils_Tuple3(
 							_List_fromArray(
 								[
 									A2($author$project$Internal$Commands$Move, pos.x1, pos.y1),
@@ -16265,47 +16267,50 @@ var $author$project$Internal$Svg$bar = F3(
 									A2($author$project$Internal$Commands$Line, pos.x1 + radiusTopX, pos.y2),
 									A7($author$project$Internal$Commands$Arc, roundingTop, roundingTop, -45, false, false, pos.x1, pos.y2 - radiusTopY),
 									A2($author$project$Internal$Commands$Line, pos.x1, pos.y1)
-								]));
+								]),
+							{x1: pos.x1 - highlightWidthCarX, x2: pos.x2 + highlightWidthCarX, y1: pos.y1, y2: pos.y2 + highlightWidthCarY});
 					} else {
-						return _Utils_Tuple2(
+						return _Utils_Tuple3(
 							_List_fromArray(
 								[
 									A2($author$project$Internal$Commands$Move, pos.x1 + radiusBottomX, pos.y1),
-									A7($author$project$Internal$Commands$Arc, roudningBottom, roudningBottom, -45, false, true, pos.x1, pos.y1 + radiusBottomY),
+									A7($author$project$Internal$Commands$Arc, roundingBottom, roundingBottom, -45, false, true, pos.x1, pos.y1 + radiusBottomY),
 									A2($author$project$Internal$Commands$Line, pos.x1, pos.y2 - radiusTopY),
 									A7($author$project$Internal$Commands$Arc, roundingTop, roundingTop, -45, false, true, pos.x1 + radiusTopX, pos.y2),
 									A2($author$project$Internal$Commands$Line, pos.x2 - radiusTopX, pos.y2),
 									A7($author$project$Internal$Commands$Arc, roundingTop, roundingTop, -45, false, true, pos.x2, pos.y2 - radiusTopY),
 									A2($author$project$Internal$Commands$Line, pos.x2, pos.y1 + radiusBottomY),
-									A7($author$project$Internal$Commands$Arc, roudningBottom, roudningBottom, -45, false, true, pos.x2 - radiusBottomX, pos.y1),
+									A7($author$project$Internal$Commands$Arc, roundingBottom, roundingBottom, -45, false, true, pos.x2 - radiusBottomX, pos.y1),
 									A2($author$project$Internal$Commands$Line, pos.x1 + radiusBottomX, pos.y1)
 								]),
 							_List_fromArray(
 								[
 									A2($author$project$Internal$Commands$Move, highlightPos.x1 + radiusBottomX, highlightPos.y1),
-									A7($author$project$Internal$Commands$Arc, roudningBottom, roudningBottom, -45, false, true, highlightPos.x1, highlightPos.y1 + radiusBottomY),
+									A7($author$project$Internal$Commands$Arc, roundingBottom, roundingBottom, -45, false, true, highlightPos.x1, highlightPos.y1 + radiusBottomY),
 									A2($author$project$Internal$Commands$Line, highlightPos.x1, highlightPos.y2 - radiusTopY),
 									A7($author$project$Internal$Commands$Arc, roundingTop, roundingTop, -45, false, true, highlightPos.x1 + radiusTopX, highlightPos.y2),
 									A2($author$project$Internal$Commands$Line, highlightPos.x2 - radiusTopX, highlightPos.y2),
 									A7($author$project$Internal$Commands$Arc, roundingTop, roundingTop, -45, false, true, highlightPos.x2, highlightPos.y2 - radiusTopY),
 									A2($author$project$Internal$Commands$Line, highlightPos.x2, highlightPos.y1 + radiusBottomY),
-									A7($author$project$Internal$Commands$Arc, roudningBottom, roudningBottom, -45, false, true, highlightPos.x2 - radiusBottomX, highlightPos.y1),
+									A7($author$project$Internal$Commands$Arc, roundingBottom, roundingBottom, -45, false, true, highlightPos.x2 - radiusBottomX, highlightPos.y1),
 									A2($author$project$Internal$Commands$Line, highlightPos.x1 + radiusBottomX, highlightPos.y1),
 									A2($author$project$Internal$Commands$Line, pos.x2 - radiusBottomX, pos.y1),
-									A7($author$project$Internal$Commands$Arc, roudningBottom, roudningBottom, -45, false, false, pos.x2, pos.y1 + radiusBottomY),
+									A7($author$project$Internal$Commands$Arc, roundingBottom, roundingBottom, -45, false, false, pos.x2, pos.y1 + radiusBottomY),
 									A2($author$project$Internal$Commands$Line, pos.x2, pos.y2 - radiusTopY),
 									A7($author$project$Internal$Commands$Arc, roundingTop, roundingTop, -45, false, false, pos.x2 - radiusTopX, pos.y2),
 									A2($author$project$Internal$Commands$Line, pos.x1 + radiusTopX, pos.y2),
 									A7($author$project$Internal$Commands$Arc, roundingTop, roundingTop, -45, false, false, pos.x1, pos.y2 - radiusTopY),
 									A2($author$project$Internal$Commands$Line, pos.x1, pos.y1 + radiusBottomY),
-									A7($author$project$Internal$Commands$Arc, roudningBottom, roudningBottom, -45, false, false, pos.x1 + radiusBottomX, pos.y1)
-								]));
+									A2($author$project$Internal$Commands$Line, pos.x2, pos.y1)
+								]),
+							{x1: pos.x1 - highlightWidthCarX, x2: pos.x2 + highlightWidthCarX, y1: pos.y1 - highlightWidthCarY, y2: pos.y2 + highlightWidthCarY});
 					}
 				}
 			}
 		}();
 		var commands = _v0.a;
 		var highlightCommands = _v0.b;
+		var highlightCut = _v0.c;
 		var viewAuraBar = function (fill) {
 			return (!config.highlight) ? A7(viewBar, fill, config.opacity, config.border, config.borderWidth, 1, commands, pos) : A2(
 				$elm$svg$Svg$g,
@@ -16315,17 +16320,7 @@ var $author$project$Internal$Svg$bar = F3(
 					]),
 				_List_fromArray(
 					[
-						A7(
-						viewBar,
-						highlightColor,
-						config.highlight,
-						'transparent',
-						0,
-						0,
-						highlightCommands,
-						_Utils_update(
-							highlightPos,
-							{y2: pos.y2 + (highlightWidthCarY * 2)})),
+						A7(viewBar, highlightColor, config.highlight, 'transparent', 0, 0, highlightCommands, highlightCut),
 						A7(viewBar, fill, config.opacity, config.border, config.borderWidth, 1, commands, pos)
 					]));
 		};
@@ -21975,6 +21970,12 @@ var $author$project$Chart$Events$onMouseMove = F2(
 			'mousemove',
 			A2($author$project$Chart$Events$map, onMsg, decoder));
 	});
+var $author$project$Chart$Attributes$padding = F2(
+	function (value, config) {
+		return _Utils_update(
+			config,
+			{padding: value});
+	});
 var $author$project$Chart$Attributes$spacing = F2(
 	function (v, config) {
 		return _Utils_update(
@@ -22223,7 +22224,9 @@ var $author$project$Examples$BarCharts$Highlight$view = function (model) {
 				$author$project$Examples$BarCharts$Highlight$OnHover,
 				$author$project$Chart$Events$getNearest($author$project$Chart$Events$bar)),
 				$author$project$Chart$Events$onMouseLeave(
-				$author$project$Examples$BarCharts$Highlight$OnHover(_List_Nil))
+				$author$project$Examples$BarCharts$Highlight$OnHover(_List_Nil)),
+				$author$project$Chart$Attributes$padding(
+				{bottom: 0, left: 0, right: 0, top: 10})
 			]),
 		_List_fromArray(
 			[
@@ -25549,12 +25552,6 @@ var $author$project$Chart$Attributes$moveRight = F2(
 		return _Utils_update(
 			config,
 			{xOff: config.xOff + v});
-	});
-var $author$project$Chart$Attributes$padding = F2(
-	function (value, config) {
-		return _Utils_update(
-			config,
-			{padding: value});
 	});
 var $author$project$Chart$scatter = function (y) {
 	return A2(
@@ -31469,7 +31466,7 @@ var $author$project$Examples$BarCharts$Color$smallCode = '\n  C.chart\n    [ CA.
 var $author$project$Examples$BarCharts$Corners$smallCode = '\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    ]\n    [ C.grid []\n    , C.xLabels []\n    , C.yLabels []\n    , C.bars\n        [ CA.roundTop 0.5 ]\n        [ C.bar .y []\n        , C.bar .z [ CA.roundBottom 0.5 ]\n        ]\n        data\n    ]\n  ';
 var $author$project$Examples$BarCharts$DataDependent$smallCode = '\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    ]\n    [ C.grid []\n    , C.xLabels []\n    , C.yLabels []\n    , C.bars\n        []\n        [ C.bar .y []\n            |> C.variation (\\_ d -> if d.x == 3 then [ CA.striped [] ] else [])\n        , C.bar .z []\n        ]\n        data\n    ]\n  ';
 var $author$project$Examples$BarCharts$Gradient$smallCode = '\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    ]\n    [ C.grid []\n    , C.xLabels []\n    , C.yLabels []\n    , C.bars\n        []\n        [ C.bar .y [ CA.gradient [ CA.purple, CA.pink, "white" ] ]\n        ]\n        data\n    ]\n  ';
-var $author$project$Examples$BarCharts$Highlight$smallCode = '\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    , CE.onMouseMove OnHover (CE.getNearest CE.bar)\n    , CE.onMouseLeave (OnHover [])\n    ]\n    [ C.grid []\n    , C.xLabels []\n    , C.yLabels []\n    , C.bars\n        [ CA.roundTop 0.2\n        , CA.margin 0.2\n        , CA.spacing 0.15\n        ]\n        [ C.bar .z [ CA.striped [], CA.borderWidth 1 ]\n            |> C.amongst model.hovering (\\_ -> [ CA.highlight 0.25 ])\n        , C.bar .v []\n            |> C.amongst model.hovering (\\_ -> [ CA.highlight 0.25 ])\n        ]\n        data\n    , C.each model.hovering <| \\p item ->\n        [ C.tooltip item [] [] [] ]\n    ]\n  ';
+var $author$project$Examples$BarCharts$Highlight$smallCode = '\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    , CE.onMouseMove OnHover (CE.getNearest CE.bar)\n    , CE.onMouseLeave (OnHover [])\n    , CA.padding { top = 10, bottom = 0, left = 0, right = 0 }\n    ]\n    [ C.grid []\n    , C.xLabels []\n    , C.yLabels []\n    , C.bars\n        [ CA.roundTop 0.2\n        , CA.margin 0.2\n        , CA.spacing 0.15\n        ]\n        [ C.bar .z [ CA.striped [], CA.borderWidth 1 ]\n            |> C.amongst model.hovering (\\_ -> [ CA.highlight 0.25 ])\n        , C.bar .v []\n            |> C.amongst model.hovering (\\_ -> [ CA.highlight 0.25 ])\n        ]\n        data\n    , C.each model.hovering <| \\p item ->\n        [ C.tooltip item [] [] [] ]\n    ]\n  ';
 var $author$project$Examples$BarCharts$Histogram$smallCode = '\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    ]\n    [ C.grid []\n    , C.xLabels [ CA.times Time.utc ]\n    , C.yLabels []\n    , C.bars\n        [ CA.x1 .start\n        , CA.x2 .end\n        , CA.margin 0.02\n        ]\n        [ C.bar .y [] ]\n        data\n    ]\n  ';
 var $author$project$Examples$BarCharts$Legends$smallCode = '\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    ]\n    [ C.grid []\n    , C.xLabels []\n    , C.yLabels []\n    , C.bars [ CA.roundTop 0.3 ]\n        [ C.bar .z []\n            |> C.named "Cats"\n        , C.bar .y [ CA.striped [] ]\n            |> C.named "Fish"\n        ]\n        data\n    , C.legendsAt .max .max\n        [ CA.column\n        , CA.moveLeft 15\n        , CA.alignRight\n        , CA.spacing 5\n        ]\n        []\n    ]\n  ';
 var $author$project$Examples$BarCharts$Margin$smallCode = '\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    ]\n    [ C.grid []\n    , C.xLabels []\n    , C.yLabels []\n    , C.bars\n        [ CA.margin 0.4 ] -- Number is percentage of bin width\n        [ C.bar .y []\n        , C.bar .z []\n        ]\n        data\n    ]\n  ';
@@ -37768,7 +37765,7 @@ var $author$project$Page$Home$feature = function (config) {
 				$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
 				$mdgriffith$elm_ui$Element$height(
 				A2($mdgriffith$elm_ui$Element$minimum, 350, $mdgriffith$elm_ui$Element$fill)),
-				$mdgriffith$elm_ui$Element$spacing(70)
+				$mdgriffith$elm_ui$Element$spacing(50)
 			]),
 		(config.flipped ? $elm$core$List$reverse : $elm$core$Basics$identity)(
 			_List_fromArray(
@@ -37782,7 +37779,7 @@ var $author$project$Page$Home$feature = function (config) {
 							$mdgriffith$elm_ui$Element$alignLeft,
 							$mdgriffith$elm_ui$Element$spacing(10),
 							$mdgriffith$elm_ui$Element$width(
-							$mdgriffith$elm_ui$Element$fillPortion(3))
+							$mdgriffith$elm_ui$Element$fillPortion(5))
 						]),
 					_List_fromArray(
 						[
@@ -37813,7 +37810,7 @@ var $author$project$Page$Home$feature = function (config) {
 					_List_fromArray(
 						[
 							$mdgriffith$elm_ui$Element$width(
-							$mdgriffith$elm_ui$Element$fillPortion(5)),
+							$mdgriffith$elm_ui$Element$fillPortion(7)),
 							$mdgriffith$elm_ui$Element$alignTop,
 							$mdgriffith$elm_ui$Element$Events$onClick(config.onToggle)
 						]),
@@ -38400,7 +38397,7 @@ var $author$project$Page$Home$view = function (model) {
 					_List_fromArray(
 						[
 							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-							$mdgriffith$elm_ui$Element$spacing(120),
+							$mdgriffith$elm_ui$Element$spacing(140),
 							A2($mdgriffith$elm_ui$Element$paddingXY, 0, 120)
 						]),
 					_List_fromArray(

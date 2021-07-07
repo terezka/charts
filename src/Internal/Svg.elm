@@ -795,15 +795,15 @@ bar plane config point =
 
       w = abs (pos.x2 - pos.x1)
       roundingTop = Coord.scaleSVGX plane w * 0.5 * (clamp 0 1 config.roundTop)
-      roudningBottom = Coord.scaleSVGX plane w * 0.5 * (clamp 0 1 config.roundBottom)
+      roundingBottom = Coord.scaleSVGX plane w * 0.5 * (clamp 0 1 config.roundBottom)
       radiusTopX = Coord.scaleCartesianX plane roundingTop
       radiusTopY = Coord.scaleCartesianY plane roundingTop
-      radiusBottomX = Coord.scaleCartesianX plane roudningBottom
-      radiusBottomY = Coord.scaleCartesianY plane roudningBottom
+      radiusBottomX = Coord.scaleCartesianX plane roundingBottom
+      radiusBottomY = Coord.scaleCartesianY plane roundingBottom
 
-      ( commands, highlightCommands ) =
+      ( commands, highlightCommands, highlightCut ) =
         if pos.y1 == pos.y2 then
-          ( [], [] )
+          ( [], [], highlightPos )
         else
           case ( config.roundTop > 0, config.roundBottom > 0 ) of
             ( False, False ) ->
@@ -823,6 +823,11 @@ bar plane config point =
                 , C.Line pos.x1 pos.y2
                 , C.Line pos.x1 pos.y1
                 ]
+              , { x1 = pos.x1 - highlightWidthCarX
+                , x2 = pos.x2 + highlightWidthCarX
+                , y1 = pos.y1
+                , y2 = pos.y2 + highlightWidthCarY
+                }
               )
 
             ( True, False ) ->
@@ -848,64 +853,79 @@ bar plane config point =
                 , C.Arc roundingTop roundingTop -45 False False pos.x1 (pos.y2 - radiusTopY)
                 , C.Line pos.x1 pos.y1
                 ]
+              , { x1 = pos.x1 - highlightWidthCarX
+                , x2 = pos.x2 + highlightWidthCarX
+                , y1 = pos.y1
+                , y2 = pos.y2 + highlightWidthCarY
+                }
               )
 
             ( False, True ) ->
               ( [ C.Move (pos.x1 + radiusBottomX) pos.y1
-                , C.Arc roudningBottom roudningBottom -45 False True pos.x1 (pos.y1 + radiusBottomY)
+                , C.Arc roundingBottom roundingBottom -45 False True pos.x1 (pos.y1 + radiusBottomY)
                 , C.Line pos.x1 pos.y2
                 , C.Line pos.x2 pos.y2
                 , C.Line pos.x2 (pos.y1 + radiusBottomY)
-                , C.Arc roudningBottom roudningBottom -45 False True (pos.x2 - radiusBottomX) pos.y1
+                , C.Arc roundingBottom roundingBottom -45 False True (pos.x2 - radiusBottomX) pos.y1
                 , C.Line (pos.x1 + radiusBottomX) pos.y1
                 ]
               , [ C.Move (highlightPos.x1 + radiusBottomX) highlightPos.y1
-                , C.Arc roudningBottom roudningBottom -45 False True highlightPos.x1 (highlightPos.y1 + radiusBottomY)
-                , C.Line highlightPos.x1 pos.y2
-                , C.Line highlightPos.x2 pos.y2
+                , C.Arc roundingBottom roundingBottom -45 False True highlightPos.x1 (highlightPos.y1 + radiusBottomY)
+                , C.Line highlightPos.x1 highlightPos.y2
+                , C.Line highlightPos.x2 highlightPos.y2
                 , C.Line highlightPos.x2 (highlightPos.y1 + radiusBottomY)
-                , C.Arc roudningBottom roudningBottom -45 False True (highlightPos.x2 - radiusBottomX) highlightPos.y1
+                , C.Arc roundingBottom roundingBottom -45 False True (highlightPos.x2 - radiusBottomX) highlightPos.y1
                 , C.Line (highlightPos.x1 + radiusBottomX) highlightPos.y1
                 -- ^ outer
                 , C.Line (pos.x2 - radiusBottomX) pos.y1
-                , C.Arc roudningBottom roudningBottom -45 False False pos.x2 (pos.y1 + radiusBottomY)
+                , C.Arc roundingBottom roundingBottom -45 False False pos.x2 (pos.y1 + radiusBottomY)
                 , C.Line pos.x2 pos.y2
                 , C.Line pos.x1 pos.y2
                 , C.Line pos.x1 (pos.y1 + radiusBottomY)
-                , C.Arc roudningBottom roudningBottom -45 False False (pos.x1 + radiusBottomX) pos.y1
+                , C.Line pos.x2 pos.y1
                 ]
+              , { x1 = pos.x1 - highlightWidthCarX
+                , x2 = pos.x2 + highlightWidthCarX
+                , y1 = pos.y1 - highlightWidthCarY
+                , y2 = pos.y2 + highlightWidthCarY
+                }
               )
 
             ( True, True ) ->
               ( [ C.Move (pos.x1 + radiusBottomX) pos.y1
-                , C.Arc roudningBottom roudningBottom -45 False True pos.x1 (pos.y1 + radiusBottomY)
+                , C.Arc roundingBottom roundingBottom -45 False True pos.x1 (pos.y1 + radiusBottomY)
                 , C.Line pos.x1 (pos.y2 - radiusTopY)
                 , C.Arc roundingTop roundingTop -45 False True (pos.x1 + radiusTopX) pos.y2
                 , C.Line (pos.x2 - radiusTopX) pos.y2
                 , C.Arc roundingTop roundingTop -45 False True pos.x2 (pos.y2 - radiusTopY)
                 , C.Line pos.x2 (pos.y1 + radiusBottomY)
-                , C.Arc roudningBottom roudningBottom -45 False True (pos.x2 - radiusBottomX) pos.y1
+                , C.Arc roundingBottom roundingBottom -45 False True (pos.x2 - radiusBottomX) pos.y1
                 , C.Line (pos.x1 + radiusBottomX) pos.y1
                 ]
               , [ C.Move (highlightPos.x1 + radiusBottomX) highlightPos.y1
-                , C.Arc roudningBottom roudningBottom -45 False True highlightPos.x1 (highlightPos.y1 + radiusBottomY)
+                , C.Arc roundingBottom roundingBottom -45 False True highlightPos.x1 (highlightPos.y1 + radiusBottomY)
                 , C.Line highlightPos.x1 (highlightPos.y2 - radiusTopY)
                 , C.Arc roundingTop roundingTop -45 False True (highlightPos.x1 + radiusTopX) highlightPos.y2
                 , C.Line (highlightPos.x2 - radiusTopX) highlightPos.y2
                 , C.Arc roundingTop roundingTop -45 False True highlightPos.x2 (highlightPos.y2 - radiusTopY)
                 , C.Line highlightPos.x2 (highlightPos.y1 + radiusBottomY)
-                , C.Arc roudningBottom roudningBottom -45 False True (highlightPos.x2 - radiusBottomX) highlightPos.y1
+                , C.Arc roundingBottom roundingBottom -45 False True (highlightPos.x2 - radiusBottomX) highlightPos.y1
                 , C.Line (highlightPos.x1 + radiusBottomX) highlightPos.y1
                 -- ^ outer
                 , C.Line (pos.x2 - radiusBottomX) pos.y1
-                , C.Arc roudningBottom roudningBottom -45 False False pos.x2 (pos.y1 + radiusBottomY)
+                , C.Arc roundingBottom roundingBottom -45 False False pos.x2 (pos.y1 + radiusBottomY)
                 , C.Line pos.x2 (pos.y2 - radiusTopY)
                 , C.Arc roundingTop roundingTop -45 False False (pos.x2 - radiusTopX) pos.y2
                 , C.Line (pos.x1 + radiusTopX) pos.y2
                 , C.Arc roundingTop roundingTop -45 False False pos.x1 (pos.y2 - radiusTopY)
                 , C.Line pos.x1 (pos.y1 + radiusBottomY)
-                , C.Arc roudningBottom roudningBottom -45 False False (pos.x1 + radiusBottomX) pos.y1
+                , C.Line pos.x2 pos.y1
                 ]
+              , { x1 = pos.x1 - highlightWidthCarX
+                , x2 = pos.x2 + highlightWidthCarX
+                , y1 = pos.y1 - highlightWidthCarY
+                , y2 = pos.y2 + highlightWidthCarY
+                }
               )
 
       viewAuraBar fill =
@@ -914,7 +934,7 @@ bar plane config point =
         else
           S.g
             [ SA.class "elm-charts__bar-with-highlight" ]
-            [ viewBar highlightColor config.highlight "transparent" 0 0 highlightCommands { highlightPos | y2 = pos.y2 + highlightWidthCarY * 2 }
+            [ viewBar highlightColor config.highlight "transparent" 0 0 highlightCommands highlightCut
             , viewBar fill config.opacity config.border config.borderWidth 1 commands pos
             ]
 

@@ -40,7 +40,6 @@ import Chart.Svg as CS
 
 -- TODO
 -- fix static / responsive
--- fix bar highlight
 
 
 -- MODEL
@@ -140,7 +139,7 @@ view model =
 
           , E.column
               [ E.width E.fill
-              , E.spacing 120
+              , E.spacing 140
               , E.paddingXY 0 120
               ]
               [ feature
@@ -191,14 +190,14 @@ feature config =
   E.row
     [ E.width E.fill
     , E.height (E.minimum 350 E.fill)
-    , E.spacing 70
+    , E.spacing 50
     ] <| (if config.flipped then List.reverse else identity)
     [ E.column
         [ E.width E.fill
         , E.alignTop
         , E.alignLeft
         , E.spacing 10
-        , E.width (E.fillPortion 3)
+        , E.width (E.fillPortion 5)
         ]
         [ E.el
             [ E.width E.fill
@@ -213,7 +212,7 @@ feature config =
             [ E.text config.body ]
         ]
     , E.el
-        [ E.width (E.fillPortion 5)
+        [ E.width (E.fillPortion 7)
         , E.alignTop
         , EE.onClick config.onToggle
         ] <|

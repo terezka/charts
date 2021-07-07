@@ -37,6 +37,7 @@ view model =
     , CA.width 300
     , CE.onMouseMove OnHover (CE.getNearest CE.bar)
     , CE.onMouseLeave (OnHover [])
+    , CA.padding { top = 10, bottom = 0, left = 0, right = 0 }
     ]
     [ C.grid []
     , C.xLabels []
@@ -97,6 +98,7 @@ smallCode =
     , CA.width 300
     , CE.onMouseMove OnHover (CE.getNearest CE.bar)
     , CE.onMouseLeave (OnHover [])
+    , CA.padding { top = 10, bottom = 0, left = 0, right = 0 }
     ]
     [ C.grid []
     , C.xLabels []
@@ -155,6 +157,7 @@ view model =
     , CA.width 300
     , CE.onMouseMove OnHover (CE.getNearest CE.bar)
     , CE.onMouseLeave (OnHover [])
+    , CA.padding { top = 10, bottom = 0, left = 0, right = 0 }
     ]
     [ C.grid []
     , C.xLabels []
