@@ -35,7 +35,7 @@ view model =
         [ CA.break
         , CA.x1 5, CA.y1 6
         , CA.x2Svg 10, CA.y2Svg 13
-        , CA.color CA.pink
+        , CA.color CA.purple
         ]
     ]
 
@@ -108,7 +108,7 @@ smallCode =
         [ CA.break
         , CA.x1 5, CA.y1 6
         , CA.x2Svg 10, CA.y2Svg 13
-        , CA.color CA.pink
+        , CA.color CA.purple
         ]
     ]
   """
@@ -149,7 +149,7 @@ view model =
         [ CA.break
         , CA.x1 5, CA.y1 6
         , CA.x2Svg 10, CA.y2Svg 13
-        , CA.color CA.pink
+        , CA.color CA.purple
         ]
     ]
 

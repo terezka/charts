@@ -45,7 +45,7 @@ view model =
             [ C.bar .z []
             , C.bar .y []
             ]
-        , C.bar .v [ CA.color CA.turquoise, CA.dotted [] ]
+        , C.bar .v [ CA.dotted [] ]
         ]
         data
     , C.each model.hovering <| \p item ->

@@ -506,7 +506,7 @@ legendsAt plane x y config children =
           Just Start -> [ HA.style "transform" "translate(-0%, 0%)" ]
           Just Middle -> [ HA.style "transform" "translate(-50%, 0%)" ]
   in
-  positionHtml plane x y config.xOff config.yOff
+  positionHtml plane x y config.xOff -config.yOff
     (anchorAttrs ++ alignmentAttrs ++ otherAttrs ++ config.htmlAttrs)
     (H.node "style" [] [ H.text paddingStyle ] :: children)
 

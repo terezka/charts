@@ -50,14 +50,14 @@ view model =
         ]
         [ C.stacked
             [ C.bar .cats
-                [ CA.gradient [ "#54c8ddD0", "#54c8dd90" ] ]
+                [ CA.gradient [ mint1, mint2 ] ]
                 |> C.named "Cats"
             , C.bar .dogs
-                [ CA.gradient [ "#0f9ff0D0", "#0f9ff090" ] ]
+                [ CA.gradient [ blue1, blue2 ] ]
                 |> C.named "Dogs"
             ]
         , C.bar .people
-            [ CA.gradient [ "#653bf4D0", "#653bf490" ] ]
+            [ CA.gradient [ purple1, purple2 ] ]
                 |> C.named "People"
         ]
         data
@@ -104,11 +104,12 @@ view model =
     ]
 {-| @SMALL END -}
 
-purple = "#7b4dffB8"
-pink = "#e958c1B8"
-blue = "#2F80EDB8"
-green = "#13E2DAB8"
-darkBlue = "#666bfeF0"
+mint1 = "#54c8ddD0"
+mint2 = "#54c8dd90"
+blue1 = "#0f9ff0D0"
+blue2 = "#0f9ff090"
+purple1 = "#653bf4D0"
+purple2 = "#653bf490"
 weakWhite = "rgba(255, 255, 255, 0.7)"
 white = "white"
 
