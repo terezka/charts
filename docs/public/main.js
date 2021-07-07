@@ -37892,27 +37892,27 @@ var $author$project$Charts$Landing$barData = _List_fromArray(
 		$author$project$Charts$Landing$BarDatum,
 		1612440000000,
 		$elm$core$Maybe$Just(100342),
-		$elm$core$Maybe$Just(20000)),
+		$elm$core$Maybe$Just(20231)),
 		A3(
 		$author$project$Charts$Landing$BarDatum,
 		1612440300000,
 		$elm$core$Maybe$Just(124731),
-		$elm$core$Maybe$Just(13800)),
+		$elm$core$Maybe$Just(13802)),
 		A3(
 		$author$project$Charts$Landing$BarDatum,
 		1612440600000,
 		$elm$core$Maybe$Just(151421),
-		$elm$core$Maybe$Just(23000)),
+		$elm$core$Maybe$Just(23038)),
 		A3(
 		$author$project$Charts$Landing$BarDatum,
 		1612440900000,
 		$elm$core$Maybe$Just(92132),
-		$elm$core$Maybe$Just(14000)),
+		$elm$core$Maybe$Just(14047)),
 		A3(
 		$author$project$Charts$Landing$BarDatum,
 		1612441200000,
 		$elm$core$Maybe$Just(53970),
-		$elm$core$Maybe$Just(13400)),
+		$elm$core$Maybe$Just(13406)),
 		A3(
 		$author$project$Charts$Landing$BarDatum,
 		1612441500000,
@@ -37922,23 +37922,23 @@ var $author$project$Charts$Landing$barData = _List_fromArray(
 		$author$project$Charts$Landing$BarDatum,
 		1612441800000,
 		$elm$core$Maybe$Just(66130),
-		$elm$core$Maybe$Just(23000)),
+		$elm$core$Maybe$Just(23094)),
 		A3(
 		$author$project$Charts$Landing$BarDatum,
 		1612442100000,
 		$elm$core$Maybe$Just(87002),
-		$elm$core$Maybe$Just(18000)),
+		$elm$core$Maybe$Just(18120)),
 		A3($author$project$Charts$Landing$BarDatum, 1612442400000, $elm$core$Maybe$Nothing, $elm$core$Maybe$Nothing),
 		A3(
 		$author$project$Charts$Landing$BarDatum,
 		1612442700000,
 		$elm$core$Maybe$Just(102032),
-		$elm$core$Maybe$Just(30000)),
+		$elm$core$Maybe$Just(30379)),
 		A3(
 		$author$project$Charts$Landing$BarDatum,
 		1612443000000,
 		$elm$core$Maybe$Just(122101),
-		$elm$core$Maybe$Just(34000))
+		$elm$core$Maybe$Just(34092))
 	]);
 var $author$project$Chart$barMaybe = function (y) {
 	return A2($author$project$Internal$Property$property, y, _List_Nil);
@@ -38057,23 +38057,12 @@ var $author$project$Internal$Svg$getNearestX = F4(
 	function (toPosition, items, plane, searched) {
 		return A4($author$project$Internal$Svg$getNearestXHelp, toPosition, items, plane, searched);
 	});
-var $elm$core$Debug$log = _Debug_log;
 var $author$project$Internal$Events$getNearestX = function (grouping) {
 	var toPos = grouping.a;
 	return $author$project$Internal$Events$Decoder(
 		F2(
 			function (items, plane) {
 				var groups = A2($author$project$Internal$Group$group, grouping, items);
-				var _v0 = A2(
-					$elm$core$Debug$log,
-					'here',
-					A2(
-						$elm$core$List$map,
-						function (_v1) {
-							var item = _v1.a;
-							return _Utils_Tuple2(item.config.values.x1, item.config.values.x2);
-						},
-						items));
 				return A3(
 					$author$project$Internal$Svg$getNearestX,
 					toPos(plane),
@@ -38170,7 +38159,7 @@ var $author$project$Charts$Landing$view = function (model) {
 					$author$project$Chart$Events$getNearestX($author$project$Chart$Events$dot),
 					A2(
 						$author$project$Chart$Events$getWithinX,
-						10,
+						8,
 						A2($author$project$Chart$Events$collect, $author$project$Chart$Events$bin, $author$project$Chart$Events$bar)))),
 				$author$project$Chart$Events$onMouseLeave(
 				A2($author$project$Charts$Landing$OnHover, _List_Nil, _List_Nil))

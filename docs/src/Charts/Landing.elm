@@ -64,7 +64,7 @@ view model =
     , CE.on "mousemove" <|
         CE.map2 OnHover
           (CE.getNearestX CE.dot)
-          (CE.getWithinX 10 <| CE.collect CE.bin CE.bar)
+          (CE.getWithinX 8 <| CE.collect CE.bin CE.bar)
     , CE.onMouseLeave (OnHover [] [])
     ]
     [ C.grid [ CA.dashed [ 5, 5 ], CA.width 1.5 ]
@@ -174,17 +174,17 @@ type alias BarDatum =
 
 barData : List BarDatum
 barData =
-  [ BarDatum 1612440000000 (Just 100342) (Just 20000)
-  , BarDatum 1612440300000 (Just 124731) (Just 13800)
-  , BarDatum 1612440600000 (Just 151421) (Just 23000)
-  , BarDatum 1612440900000 (Just 92132) (Just 14000)
-  , BarDatum 1612441200000 (Just 53970) (Just 13400)
+  [ BarDatum 1612440000000 (Just 100342) (Just 20231)
+  , BarDatum 1612440300000 (Just 124731) (Just 13802)
+  , BarDatum 1612440600000 (Just 151421) (Just 23038)
+  , BarDatum 1612440900000 (Just 92132) (Just 14047)
+  , BarDatum 1612441200000 (Just 53970) (Just 13406)
   , BarDatum 1612441500000 (Just 30122) (Just 0)
-  , BarDatum 1612441800000 (Just 66130) (Just 23000)
-  , BarDatum 1612442100000 (Just 87002) (Just 18000)
+  , BarDatum 1612441800000 (Just 66130) (Just 23094)
+  , BarDatum 1612442100000 (Just 87002) (Just 18120)
   , BarDatum 1612442400000 Nothing Nothing
-  , BarDatum 1612442700000 (Just 102032) (Just 30000)
-  , BarDatum 1612443000000 (Just 122101) (Just 34000)
+  , BarDatum 1612442700000 (Just 102032) (Just 30379)
+  , BarDatum 1612443000000 (Just 122101) (Just 34092)
   ]
 
 
