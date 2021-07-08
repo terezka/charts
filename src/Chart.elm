@@ -63,7 +63,7 @@ too. If that is the case, I will make a note in the comment of the element.
 
 In the following examples, I will assume the imports:
 
-    import Html as H
+    import Html as H exposing (Html)
     import Html.Attributes as HA
     import Html.Events as HE
     import Svg as S
@@ -179,13 +179,6 @@ type alias Container data msg =
 {-| This is the root element of your chart. All your chart elements must be contained in
 a `chart` element. The below example illustrates what configurations are available for
 the `chart` element.
-
-    import Html exposing (Html)
-    import Html.Attributes as HA
-    import Svg.Attributes as SA
-    import Chart as C
-    import Chart.Attributes as CA
-    import Chart.Events as CE
 
     view : Html msg
     view =
