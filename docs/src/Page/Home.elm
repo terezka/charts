@@ -19,6 +19,7 @@ import Html as H
 import Element as E
 import Element.Events as EE
 import Element.Font as F
+import Element.Input as I
 import Element.Border as B
 import Element.Background as BG
 import Ui.Layout as Layout
@@ -44,7 +45,6 @@ import Chart.Svg as CS
 type alias Model =
   { landing : Landing.Model
   , concise : Concise.Model
-  , conciseToggle : Bool
   , familiarToggle : Bool
   , hovering : List (CE.Product CE.Any (Maybe Float) { year : Float, income : Float})
   }
@@ -62,7 +62,6 @@ init : Navigation.Key -> Session -> Params -> ( Model, Cmd Msg )
 init key session params =
   ( { landing = Landing.init
     , concise = Concise.init
-    , conciseToggle = False
     , familiarToggle = True
     , hovering = []
     }
@@ -83,7 +82,6 @@ type Msg
   = LandingMsg Landing.Msg
   | ConciseMsg Concise.Msg
   | FamiliarToggle
-  | ConsiceToggle
   | OnHover (List (CE.Product CE.Any (Maybe Float) { year : Float, income : Float}))
   | None
 
@@ -97,9 +95,6 @@ update key msg model =
 
     FamiliarToggle ->
       ( { model | familiarToggle = not model.familiarToggle }, Cmd.none )
-
-    ConsiceToggle ->
-      ( { model | conciseToggle = not model.conciseToggle }, Cmd.none )
 
     LandingMsg subMsg ->
       ( { model | landing = Landing.update subMsg model.landing }, Cmd.none )
@@ -144,8 +139,7 @@ view model =
                       """Simple charts should be simple to make. The interface mirrors the element
 and attribute pattern which you already know and love. Get started composing your chart in
 minutes!"""
-                  , onToggle = FamiliarToggle
-                  , toggled = model.familiarToggle
+                  , togglable = Just ( FamiliarToggle, model.familiarToggle )
                   , chart = H.map (\_ -> None) (Familiar.view ())
                   , code = Familiar.smallCode
                   , flipped = False
@@ -155,8 +149,7 @@ minutes!"""
               , feature
                   { title = "Flexible, yet concise"
                   , body = "No clutter, even with tricky requirements. Great support for interactivity, advanced labeling, guidence lines, and irregular details."
-                  , onToggle = ConsiceToggle
-                  , toggled = model.conciseToggle
+                  , togglable = Nothing
                   , chart = H.map ConciseMsg (Concise.view model.concise)
                   , code = Concise.smallCode
                   , flipped = True
@@ -178,8 +171,7 @@ feature :
   { title : String
   , body : String
   , height : Int
-  , onToggle : msg
-  , toggled : Bool
+  , togglable : Maybe ( msg, Bool )
   , chart : H.Html msg
   , code : String
   , flipped : Bool
@@ -210,21 +202,47 @@ feature config =
             ]
             [ E.text config.body ]
         ]
-    , E.el
-        [ E.width (E.fillPortion 7)
-        , E.alignTop
-        , EE.onClick config.onToggle
-        ] <|
-        if config.toggled then
-          E.el
-            [ E.width E.fill
-            , E.height E.fill
-            , BG.color (E.rgb255 250 250 250)
-            ]
-            (Code.view { template = config.code, edits = [] })
-        else
+    , case config.togglable of
+        Nothing ->
           E.el [ E.centerX ] (E.html config.chart)
 
+        Just ( onToggle, isToggled ) ->
+          E.el
+            [ E.width (E.fillPortion 7)
+            , E.alignTop
+            ] <|
+            if isToggled then
+              E.column
+                []
+                [ E.el
+                    [ E.width E.fill
+                    , E.height E.fill
+                    , BG.color (E.rgb255 250 250 250)
+                    ]
+                    (Code.view { template = config.code, edits = [] })
+                , I.button
+                    [ E.paddingXY 15 15
+                    , F.size 14
+                    , E.htmlAttribute (HA.style "position" "absolute")
+                    , E.htmlAttribute (HA.style "right" "0")
+                    ]
+                    { onPress = Just onToggle
+                    , label = E.text "Show chart"
+                    }
+                ]
+            else
+              E.column [ E.centerX ]
+                [ E.el [] (E.html config.chart)
+                , I.button
+                    [ E.paddingXY 15 15
+                    , F.size 14
+                    , E.htmlAttribute (HA.style "position" "absolute")
+                    , E.htmlAttribute (HA.style "right" "0")
+                    ]
+                    { onPress = Just onToggle
+                    , label = E.text "Show code"
+                    }
+                ]
     ]
 
 
