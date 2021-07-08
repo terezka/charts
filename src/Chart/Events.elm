@@ -29,7 +29,7 @@ module Chart.Events exposing
 @docs map, map2, map3, map4
 
 # Chart items
-@docs Product, Group, Grouping
+@docs Item, Product, Group, Grouping
 
 # Filtering
 @docs keep

@@ -70,7 +70,7 @@ below are only guiding.
 @docs lowest, highest, orLower, orHigher, exactly, more, less, window, likeData, zero, middle, percent
 
 ## Labels
-@docs fontSize, uppercase, format
+@docs fontSize, uppercase, format, position
 @docs alignLeft, alignRight, alignMiddle, content
 
 ## Axis
@@ -78,7 +78,7 @@ below are only guiding.
 @docs ints, times
 
 ## Coordinates
-@docs x, y, x1, y1, x2, y2, xOff, yOff, length
+@docs x, y, x1, y1, x2, y2, x2Svg, y2Svg, length
 @docs moveLeft, moveRight, moveUp, moveDown
 
 ## Decoration
@@ -89,7 +89,7 @@ below are only guiding.
 @docs ungroup, roundTop, roundBottom, spacing
 
 ## Lines
-@docs area, size, dashed, break
+@docs area, size, dashed, break, tickLength, tickDirection
 @docs linear, monotone, stepped
 @docs circle, triangle, square, diamond, plus, cross
 

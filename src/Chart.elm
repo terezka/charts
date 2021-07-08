@@ -24,7 +24,7 @@ module Chart exposing
   )
 
 
-{-|
+{-| Alpha version!
 
 **Documentation of type signatures are great, but for a visual catalog of
 examples, please check out [elm-charts.org](https://www.elm-charts.org/documentation).**
@@ -108,7 +108,7 @@ In the following examples, I will assume the imports:
 @docs generate, floats, ints, times
 
 ## Data labels
-@docs binLabels, barLabels, dotLabels
+@docs binLabels, barLabels, dotLabels, productLabel
 
 ## General labels
 @docs label, labelAt
