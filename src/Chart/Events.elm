@@ -20,7 +20,7 @@ module Chart.Events exposing
   )
 
 
-{-| Add events and interact with chart "items".
+{-| Add events and interact with [chart items](https://package.elm-lang.org/packages/terezka/charts/latest/Chart-Events#Item).
 
 # Event handlers
 @docs Attribute, Event
@@ -519,7 +519,7 @@ product =
   G.product
 
 
-{-| The coniguration of a dot.
+{-| The configuration of a dot.
 
 -}
 type alias Dot =
@@ -537,7 +537,7 @@ dot =
   G.dot
 
 
-{-| The coniguration of a bar.
+{-| The configuration of a bar.
 
 -}
 type alias Bar =
