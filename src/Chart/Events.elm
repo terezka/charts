@@ -1,5 +1,5 @@
 module Chart.Events exposing
-  ( Event
+  ( Attribute, Event
   , onMouseMove, onMouseLeave, onMouseUp, onMouseDown, onClick, on
   , Decoder, Point, getCoords, getNearest, getNearestX, getWithin, getWithinX
   , map, map2, map3, map4
@@ -23,13 +23,18 @@ module Chart.Events exposing
 {-| Add events and interact with chart "items".
 
 # Event handlers
-@docs Event
+@docs Attribute, Event
 @docs onMouseMove, onMouseLeave, onMouseUp, onMouseDown, onClick, on
+
+## Decoders
 @docs Decoder, Point, getCoords, getNearest, getNearestX, getWithin, getWithinX
 @docs map, map2, map3, map4
 
 # Chart items
-@docs Item, Product, Group, Grouping
+@docs Item, Product, Group
+
+## Working with chart items
+@docs Grouping
 
 # Filtering
 @docs keep
@@ -42,7 +47,7 @@ module Chart.Events exposing
 ## Other qualities
 @docs realValues, named
 
-# Grouping
+# Collecting
 @docs collect
 ## Group bins
 @docs Bin, bin
@@ -84,6 +89,12 @@ import Internal.Events as IE
 -- EVENTS
 
 
+{-| An attribute for adding events.
+-}
+type alias Attribute x data msg =
+  { x | events : List (Event data msg) } -> { x | events : List (Event data msg) }
+
+
 {-| Add an click event handler.
 
     C.chart
@@ -91,31 +102,41 @@ import Internal.Events as IE
       [ .. ]
 
 -}
-onClick : (a -> msg) -> Decoder data a -> Attribute { x | events : List (Event data msg) }
+onClick : (a -> msg) -> Decoder data a -> Attribute x data msg
 onClick onMsg decoder =
   on "click" (map onMsg decoder)
 
 
-{-| Add an mouse move event handler. -}
-onMouseMove : (a -> msg) -> Decoder data a -> Attribute { x | events : List (Event data msg) }
+{-| Add an mouse move event handler.
+
+    C.chart
+      [ CE.onMouseMove (CE.getNearest CE.bar) ]
+      [ .. ]
+
+See example at [elm-charts.org](https://www.elm-charts.org/documentation/interactivity/basic-bar-tooltip).
+-}
+onMouseMove : (a -> msg) -> Decoder data a -> Attribute x data msg
 onMouseMove onMsg decoder =
   on "mousemove" (map onMsg decoder)
 
 
-{-| Add an mouse up event handler. -}
-onMouseUp : (a -> msg) -> Decoder data a -> Attribute { x | events : List (Event data msg) }
+{-| Add an mouse up event handler. See example at [elm-charts.org](https://www.elm-charts.org/documentation/interactivity/zoom).
+-}
+onMouseUp : (a -> msg) -> Decoder data a -> Attribute x data msg
 onMouseUp onMsg decoder =
   on "mouseup" (map onMsg decoder)
 
 
-{-| Add an mouse down event handler. -}
-onMouseDown : (a -> msg) -> Decoder data a -> Attribute { x | events : List (Event data msg) }
+{-| Add an mouse down event handler. See example at [elm-charts.org](https://www.elm-charts.org/documentation/interactivity/zoom).
+-}
+onMouseDown : (a -> msg) -> Decoder data a -> Attribute x data msg
 onMouseDown onMsg decoder =
   on "mousedown" (map onMsg decoder)
 
 
-{-| Add an mouse leave event handler. -}
-onMouseLeave : msg -> Attribute { x | events : List (Event data msg) }
+{-| Add an mouse leave event handler. See example at [elm-charts.org](https://www.elm-charts.org/documentation/interactivity/basic-bar-tooltip).
+-}
+onMouseLeave : msg -> Attribute x data msg
 onMouseLeave onMsg =
   on "mouseleave" (map (always onMsg) getCoords)
 
@@ -131,8 +152,10 @@ onMouseLeave onMsg =
       ]
       [ .. ]
 
+See example at [elm-charts.org](https://www.elm-charts.org/documentation/interactivity/multiple-tooltips).
+
 -}
-on : String -> Decoder data msg -> Attribute { x | events : List (Event data msg) }
+on : String -> Decoder data msg -> Attribute x data msg
 on =
   IE.on
 
@@ -168,6 +191,43 @@ getCoords =
 
 {-| Decode to get the nearest item to the event.
 
+    type alias Model =
+      { hovering : List (CE.Product CE.Bar (Maybe Float) Datum) }
+
+    init : Model
+    init =
+      { hovering = [] }
+
+    type Msg
+      = OnHover (List (CE.Product CE.Bar (Maybe Float) Datum))
+
+    update : Msg -> Model -> Model
+    update msg model =
+      case msg of
+        OnHover hovering ->
+          { model | hovering = hovering }
+
+    view : Model -> H.Html Msg
+    view model =
+      C.chart
+        [ CA.height 300
+        , CA.width 300
+        , CE.onMouseMove OnHover (CE.getNearest CE.bar)
+        , CE.onMouseLeave (OnHover [])
+        ]
+        [ C.xLabels []
+        , C.yLabels []
+        , C.bars []
+            [ C.bar .z []
+            , C.bar .y []
+            ]
+            data
+
+        , C.each model.hovering <| \p bar ->
+            [ C.tooltip bar [] [] [] ]
+        ]
+
+See example at [elm-charts.org](https://www.elm-charts.org/documentation/interactivity/basic-bar-tooltip).
 -}
 getNearest : Grouping (Product Any (Maybe Float) data) (Item result) -> Decoder data (List (Item result))
 getNearest =
@@ -224,7 +284,7 @@ map4 =
 -- PRODUCT
 
 
-{-| A product is an item produced by a bar or dot series.
+{-| A product is an item produced by a bar series, or a dot series (line or scatter).
 
     CE.Product CE.Any value data -- A product of either a bar or dot series
     CE.Product CE.Dot value data -- A product of a dot series
@@ -357,14 +417,51 @@ filterData =
 -- GROUPING
 
 
-{-| The representation of a method of grouping.
+{-| Say we have an event handler like so:
+
+    CE.onMouseMove (CE.getNearest CE.bar)
+
+The function `getNearest` takes a `Grouping` as the first argument. A
+`Grouping` is essentially a method for filtering or collecting items.
+
+For example, the grouping `bar` takes a list of `Product Any value data`
+and filters it, such that there are only bar products left, that is a
+list of `Product Bar value data`.
+
+On the other hand, the grouping `bin` takes a list of `Product config value data`
+and bundles all the products made from the same `data` point together. This results
+in a list of `Group (Bin data) config value data`.
+
+
+If you'd like to combine the two and collect all bins of bars, you can do it like so.
+
+    CE.collect CE.bin CE.bar
+
+This will result in a list of `Group (Bin data) Bar value data`.
+
+Check out the many examples on [elm-charts.org](https://www.elm-charts.org/documentation/interactivity).
+
 
 -}
 type alias Grouping a b =
   G.Grouping a b
 
 
-{-| Apply a grouping method to a list of items.
+{-| Low level api for applying a `Grouping`.
+
+    C.withProducts <| \p products ->
+        let grouping : Grouping (Product Any (Maybe Float) Datum) (Group (Bin Datum) Bar Float Datum)
+            grouping =
+              CE.bar
+                |> CE.keep CE.realValues
+                |> CE.collect CE.bin
+
+            toBinLabel : Group (Bin Datum) Bar Float Datum -> Element msg Datum
+            toBinLabel bin =
+              let datum = (CE.getCommonality bin).datum in
+              C.label [] [ S.text datum.country ] (CE.getTop p bin)
+        in
+        List.map toBinLabel (CE.group grouping products).
 
 -}
 group : Grouping a b -> List a -> List b
@@ -372,7 +469,9 @@ group =
   G.group
 
 
-{-| Given a group, apply a new grouping method to the products of the group.
+{-| Low level helper to applying a new grouping to a group. Same as saying:
+
+    CE.group (CE.getProducts myGroup)
 
 -}
 regroup : Grouping (Product a v data) b -> Group i a v data -> List b
@@ -382,8 +481,8 @@ regroup =
 
 {-| Filter a set of products.
 
-    CE.getNearest (CE.keep CE.realValues CE.bar)
-    -- get nearest bar which is not a representation of missing data
+    CE.keep CE.realValues CE.bar
+    -- Keeps all bars which are not a representation of missing data.
 
 -}
 keep : Grouping (Product b v data) (Product c x data) -> Grouping a (Product b v data) -> Grouping a (Product c x data)
@@ -393,8 +492,8 @@ keep =
 
 {-| Collect groups from a set of products.
 
-    CE.getNearest (CE.collect CE.bins CE.bar)
-    -- collect all bars into bins and get the nearest one.
+    CE.collect CE.bin CE.bar
+    -- collect all bars into bins.
 
 -}
 collect : Grouping b c -> Grouping a b -> Grouping a c
@@ -402,7 +501,9 @@ collect =
   G.collect
 
 
-{-| -}
+{-| The configuration of either a dot or a bar.
+
+-}
 type alias Any =
   I.Any
 
@@ -418,7 +519,9 @@ product =
   G.product
 
 
-{-| -}
+{-| The coniguration of a dot.
+
+-}
 type alias Dot =
   CS.Dot
 
@@ -434,7 +537,9 @@ dot =
   G.dot
 
 
-{-| -}
+{-| The coniguration of a bar.
+
+-}
 type alias Bar =
   CS.Bar
 
@@ -455,7 +560,7 @@ you may have representations of missing data in your chart. This can filter
 those out.
 
     CE.getNearest CE.realValues
-    -- gets nearest "real" value
+    -- gets nearest product which is not a representation of missing data.
 
 -}
 realValues : Grouping (Product config (Maybe Float) data) (Product config Float data)
@@ -481,7 +586,12 @@ type alias SameX =
   }
 
 
-{-| -}
+{-| All values with the same x values.
+
+    CE.getNearest CE.sameX
+    -- gets nearest set of products from any series, sharing the same x values.
+
+-}
 sameX : Grouping (Product config value data) (Group SameX config value data)
 sameX =
   G.sameX
@@ -496,7 +606,12 @@ type alias Stack datum =
   }
 
 
-{-| -}
+{-| Collect values of the same stack into groups. A stack is produced using `C.stacked`.
+
+    CE.getNearest CE.stack
+    -- gets nearest stack.
+
+-}
 stack : Grouping (Product config value data) (Group (Stack data) config value data)
 stack =
   G.stack
@@ -510,94 +625,150 @@ type alias Bin data =
   }
 
 
-{-| -}
+{-| Collect values of the same bin into groups. Two products are in the same bin if
+they are produced from the same `data` from your `List data` in your bar or dot series.
+
+    CE.getNearest CE.bin
+    -- gets nearest bin.
+
+-}
 bin : Grouping (Product config value data) (Group (Bin data) config value data)
 bin =
   G.bin
 
 
-{-| -}
+{-| Make your own grouping.
+
+    sameColor : Grouping (Product config value data) (Group String config value data)
+    sameColor =
+      CE.custom CE.getPosition <| \products ->
+        List.Extra.gatherEqualsBy CE.getColor products
+          |> \( color, productsOfColor ) -> CE.customGroup color productsOfColor
+
+
+-}
 custom : (Plane -> b -> Position) -> (List a -> List b) -> Grouping a b
 custom =
   G.Grouping
 
 
 
+{-| Make a group. Useful in combination with `custom`.
+
+-}
+customGroup : inter -> List (Product config value datum) -> Group inter config value datum
+customGroup =
+  G.toGroup
+
+
+
 -- ITEM
 
 
-{-| -}
+{-| An item is anything on the chart which is produced from data elements,
+that is bar, line, and scatter charts.
+
+It may be a single one of such items (a `Product`), or a group of such items (a `Group`).
+
+-}
 type alias Item a =
   I.Item a
 
 
-{-| -}
+{-| Get center of item.
+
+-}
 getCenter : Plane -> Item a -> Point
 getCenter p =
   I.getPosition p >> C.center
 
 
-{-| -}
+{-| Get the center left of item.
+
+-}
 getLeft : Plane -> Item a -> Point
 getLeft p =
   I.getPosition p >> C.left
 
 
-{-| -}
+{-| Get the center right of item.
+
+-}
 getRight : Plane -> Item a -> Point
 getRight p =
   I.getPosition p >> C.right
 
 
-{-| -}
+{-| Get the center top of item.
+
+-}
 getTop : Plane -> Item a -> Point
 getTop p =
   I.getPosition p >> C.top
 
 
-{-| -}
+{-| Get the top left of item.
+
+-}
 getTopLeft : Plane -> Item a -> Point
 getTopLeft p =
   I.getPosition p >> C.topLeft
 
 
-{-| -}
+{-| Get the top right of item.
+
+-}
 getTopRight : Plane -> Item a -> Point
 getTopRight p =
   I.getPosition p >> C.topRight
 
 
-{-| -}
+{-| Get the center bottom of item.
+
+-}
 getBottom : Plane -> Item a -> Point
 getBottom p =
   I.getPosition p >> C.bottom
 
 
-{-| -}
+{-| Get the bottom left of item.
+
+-}
 getBottomLeft : Plane -> Item a -> Point
 getBottomLeft p =
   I.getPosition p >> C.bottomLeft
 
 
-{-| -}
+{-| Get the bottom right of item.
+
+-}
 getBottomRight : Plane -> Item a -> Point
 getBottomRight p =
   I.getPosition p >> C.bottomRight
 
 
-{-| -}
+{-| Get full position of item.
+
+-}
 getPosition : Plane -> Item a -> Position
 getPosition =
   I.getPosition
 
 
-{-| -}
+{-| In a few cases, an item's "position" and "limits" aren't the same.
+
+In the case of bins, the "position" is the area which the bins bars take up, not
+inclusing any margin which may be around them. Its "limits" include the margin.
+
+-}
 getLimits : Item a -> Position
 getLimits =
   I.getLimits
 
 
-{-| -}
+{-| Render the default tooltip of an item.
+
+-}
 getDefaultTooltip : Item a -> List (Html Never)
 getDefaultTooltip =
   I.toHtml
