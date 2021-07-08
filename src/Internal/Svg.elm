@@ -58,6 +58,7 @@ container plane config below chartEls above =
       htmlAttrsSize =
         if config.responsive then
           [ HA.style "width" "100%"
+          , HA.style "height" "100%"
           ]
         else
           [ HA.style "width" (String.fromFloat plane.width ++ "px")
@@ -1621,9 +1622,10 @@ decoder plane toMsg =
           }
 
         searched =
-          { x = Coord.toCartesianX plane (mouseX - box.left)
-          , y = Coord.toCartesianY plane (mouseY - box.top)
-          }
+          fromSvg newPlane
+            { x = mouseX - box.left
+            , y = mouseY - box.top
+            }
       in
       toMsg newPlane searched
   in

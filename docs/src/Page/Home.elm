@@ -38,9 +38,6 @@ import Chart.Events as CE
 import Chart.Svg as CS
 
 
--- TODO
--- fix static / responsive
-
 
 -- MODEL
 
