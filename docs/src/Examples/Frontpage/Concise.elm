@@ -77,7 +77,7 @@ view model =
 
     , let
         toBrightLabel =
-          C.barLabel [ CA.moveDown 18, CA.color white ]
+          C.productLabel [ CA.moveDown 18, CA.color white ]
       in
       C.each model.hovering <| \p stack ->
         List.map toBrightLabel (CE.getProducts stack)
@@ -108,8 +108,8 @@ mint1 = "#54c8ddD0"
 mint2 = "#54c8dd90"
 blue1 = "#0f9ff0D0"
 blue2 = "#0f9ff090"
-purple1 = "#653bf4D0"
-purple2 = "#653bf490"
+purple1 = "#653bf4B0"
+purple2 = "#653bf470"
 weakWhite = "rgba(255, 255, 255, 0.7)"
 white = "white"
 
@@ -189,7 +189,7 @@ smallCode =
 
     , let
         toBrightLabel =
-          C.barLabel [ CA.moveDown 18, CA.color white ]
+          C.productLabel [ CA.moveDown 18, CA.color white ]
       in
       C.each model.hovering <| \\p stack ->
         List.map toBrightLabel (CE.getProducts stack)
@@ -295,7 +295,7 @@ view model =
 
     , let
         toBrightLabel =
-          C.barLabel [ CA.moveDown 18, CA.color white ]
+          C.productLabel [ CA.moveDown 18, CA.color white ]
       in
       C.each model.hovering <| \\p stack ->
         List.map toBrightLabel (CE.getProducts stack)
@@ -326,8 +326,8 @@ mint1 = "#54c8ddD0"
 mint2 = "#54c8dd90"
 blue1 = "#0f9ff0D0"
 blue2 = "#0f9ff090"
-purple1 = "#653bf4D0"
-purple2 = "#653bf490"
+purple1 = "#653bf4B0"
+purple2 = "#653bf470"
 weakWhite = "rgba(255, 255, 255, 0.7)"
 white = "white"
 

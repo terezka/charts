@@ -49,6 +49,7 @@ defaultContainer =
 container : Plane -> Container msg -> List (Html msg) -> List (Svg msg) -> List (Html msg) -> Html msg
 container plane config below chartEls above =
   -- TODO seperate plane from container size
+  -- TODO preserveAspectRatio?
   let htmlAttrsDef =
         [ HA.class "elm-charts__container-inner"
         , HA.style "display" "flex"

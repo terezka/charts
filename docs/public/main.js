@@ -26597,47 +26597,6 @@ var $author$project$Examples$Frame$Titles$view = function (model) {
 var $author$project$Examples$Frontpage$Concise$OnHover = function (a) {
 	return {$: 'OnHover', a: a};
 };
-var $author$project$Internal$Item$getDependentSafe = function (_v0) {
-	var item = _v0.a;
-	return A2($elm$core$Maybe$withDefault, 0, item.config.values.y);
-};
-var $author$project$Chart$barLabel = F2(
-	function (edits, item) {
-		return $author$project$Chart$withPlane(
-			function (p) {
-				var config = A2(
-					$author$project$Internal$Helpers$apply,
-					edits,
-					_Utils_update(
-						$author$project$Chart$defaultLabel,
-						{position: $author$project$Chart$Events$getTop}));
-				var text = function () {
-					var _v1 = config.format;
-					if (_v1.$ === 'Just') {
-						var formatting = _v1.a;
-						return formatting(item);
-					} else {
-						return $elm$core$String$fromFloat(
-							$author$project$Internal$Item$getDependentSafe(item));
-					}
-				}();
-				return _List_fromArray(
-					[
-						$author$project$Chart$svg(
-						function (_v0) {
-							return A4(
-								$author$project$Internal$Svg$label,
-								p,
-								$author$project$Chart$toLabelFromItemLabel(config),
-								_List_fromArray(
-									[
-										$elm$svg$Svg$text(text)
-									]),
-								A2(config.position, p, item));
-						})
-					]);
-			});
-	});
 var $author$project$Chart$eachCustom = F2(
 	function (grouping, func) {
 		return $author$project$Chart$SubElements(
@@ -26722,8 +26681,49 @@ var $author$project$Internal$Group$getProducts = function (_v0) {
 var $author$project$Chart$Events$getProducts = $author$project$Internal$Group$getProducts;
 var $author$project$Examples$Frontpage$Concise$mint1 = '#54c8ddD0';
 var $author$project$Examples$Frontpage$Concise$mint2 = '#54c8dd90';
-var $author$project$Examples$Frontpage$Concise$purple1 = '#653bf4D0';
-var $author$project$Examples$Frontpage$Concise$purple2 = '#653bf490';
+var $author$project$Internal$Item$getDependentSafe = function (_v0) {
+	var item = _v0.a;
+	return A2($elm$core$Maybe$withDefault, 0, item.config.values.y);
+};
+var $author$project$Chart$productLabel = F2(
+	function (edits, item) {
+		return $author$project$Chart$withPlane(
+			function (p) {
+				var config = A2(
+					$author$project$Internal$Helpers$apply,
+					edits,
+					_Utils_update(
+						$author$project$Chart$defaultLabel,
+						{position: $author$project$Chart$Events$getTop}));
+				var text = function () {
+					var _v1 = config.format;
+					if (_v1.$ === 'Just') {
+						var formatting = _v1.a;
+						return formatting(item);
+					} else {
+						return $elm$core$String$fromFloat(
+							$author$project$Internal$Item$getDependentSafe(item));
+					}
+				}();
+				return _List_fromArray(
+					[
+						$author$project$Chart$svg(
+						function (_v0) {
+							return A4(
+								$author$project$Internal$Svg$label,
+								p,
+								$author$project$Chart$toLabelFromItemLabel(config),
+								_List_fromArray(
+									[
+										$elm$svg$Svg$text(text)
+									]),
+								A2(config.position, p, item));
+						})
+					]);
+			});
+	});
+var $author$project$Examples$Frontpage$Concise$purple1 = '#653bf4B0';
+var $author$project$Examples$Frontpage$Concise$purple2 = '#653bf470';
 var $author$project$Chart$Attributes$static = function (config) {
 	return _Utils_update(
 		config,
@@ -26883,7 +26883,7 @@ var $author$project$Examples$Frontpage$Concise$view = function (model) {
 					]),
 				_List_Nil),
 				function () {
-				var toBrightLabel = $author$project$Chart$barLabel(
+				var toBrightLabel = $author$project$Chart$productLabel(
 					_List_fromArray(
 						[
 							$author$project$Chart$Attributes$moveDown(18),
@@ -27171,7 +27171,6 @@ var $author$project$Examples$Interactivity$BasicArea$view = function (model) {
 									[
 										$author$project$Chart$Attributes$circle,
 										$author$project$Chart$Attributes$color('white'),
-										$author$project$Chart$Attributes$border($author$project$Chart$Attributes$pink),
 										$author$project$Chart$Attributes$borderWidth(1)
 									])),
 								A3(
@@ -27183,13 +27182,12 @@ var $author$project$Examples$Interactivity$BasicArea$view = function (model) {
 									[
 										$author$project$Chart$Attributes$monotone,
 										$author$project$Chart$Attributes$opacity(0),
-										$author$project$Chart$Attributes$color($author$project$Chart$Attributes$pink)
+										$author$project$Chart$Attributes$color($author$project$Chart$Attributes$purple)
 									]),
 								_List_fromArray(
 									[
 										$author$project$Chart$Attributes$circle,
 										$author$project$Chart$Attributes$color('white'),
-										$author$project$Chart$Attributes$border($author$project$Chart$Attributes$pink),
 										$author$project$Chart$Attributes$borderWidth(1)
 									]))
 							]))
@@ -31864,10 +31862,10 @@ var $author$project$Examples$Frame$Position$smallCode = '\n  C.chart\n    [ CA.h
 var $author$project$Examples$Frame$Rect$smallCode = '\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    ]\n    [ C.grid []\n    , C.xAxis []\n    , C.xTicks []\n    , C.xLabels []\n    , C.yAxis []\n    , C.yTicks []\n    , C.yLabels []\n    , C.withPlane <| \\p ->\n        [ C.rect\n            [ CA.x1 3\n            , CA.y1 3\n            , CA.x2 7\n            , CA.y2 9\n            , CA.color "rgb(210, 210, 210)"\n            , CA.opacity 0.3\n            ]\n        ]\n    ]\n  ';
 var $author$project$Examples$Frame$Times$smallCode = '\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    , CA.padding { top = 10, bottom = 0, left = 0, right = 25 }\n    , CA.range\n        [ CA.lowest 1591974241000 CA.exactly\n        , CA.highest 1623510241000 CA.exactly\n        ]\n    ]\n    [ C.grid []\n    , C.xAxis []\n    , C.xTicks [ CA.times Time.utc ]\n    , C.xLabels [ CA.times Time.utc ]\n    ]\n  ';
 var $author$project$Examples$Frame$Titles$smallCode = '\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    , CA.padding { top = 25, bottom = 0, left = 0, right = 10 }\n    , CA.range [ CA.lowest 0 CA.exactly ]\n    ]\n    [ C.grid []\n    , C.xAxis []\n    , C.xTicks [ CA.ints ]\n    , C.xLabels [ CA.ints ]\n    , C.yAxis []\n    , C.yTicks [ CA.ints ]\n    , C.yLabels [ CA.ints ]\n    , C.series .age\n        [ C.scatter .toys [ CA.opacity 0, CA.borderWidth 1 ]\n        ]\n        data\n\n    , C.labelAt .min CA.middle [ CA.moveLeft 35, CA.rotate 90 ]\n        [ S.text "Fruits" ]\n    , C.labelAt CA.middle .min [ CA.moveDown 30 ]\n        [ S.text "Age" ]\n    , C.labelAt CA.middle .max [ CA.fontSize 14 ]\n        [ S.text "How many fruits do children eat? (2021)" ]\n    , C.labelAt CA.middle .max [ CA.moveDown 15 ]\n        [ S.text "Data from fruits.com" ]\n    ]\n  ';
-var $author$project$Examples$Frontpage$Concise$smallCode = '\n  C.chart\n    [ CA.height 300\n    , CA.width 500\n    , CA.static\n    , CE.onMouseMove OnHover (CE.getNearest CE.stack)\n    , CE.onMouseLeave (OnHover [])\n    ]\n    [ C.grid []\n    , C.yLabels [ CA.format (\\y -> String.fromFloat y ++ "M")]\n\n    , C.bars\n        [ CA.roundTop 0.2\n        , CA.margin 0.2\n        , CA.spacing 0.05\n        , CA.noGrid\n        ]\n        [ C.stacked\n            [ C.bar .cats\n                [ CA.gradient [ mint1, mint2 ] ]\n                |> C.named "Cats"\n            , C.bar .dogs\n                [ CA.gradient [ blue1, blue2 ] ]\n                |> C.named "Dogs"\n            ]\n        , C.bar .people\n            [ CA.gradient [ purple1, purple2 ] ]\n                |> C.named "People"\n        ]\n        data\n\n    , C.labelAt (CA.percent 30) .max\n        [ CA.moveDown 3, CA.fontSize 15 ]\n        [ S.text "Populations in Scandinavia" ]\n\n    , C.labelAt (CA.percent 30) .max\n        [ CA.moveDown 20, CA.fontSize 12 ]\n        [ S.text "Note: Based on made up data." ]\n\n    , C.binLabels .country [ CA.moveDown 18 ]\n    , C.barLabels [ CA.moveDown 18, CA.color weakWhite ]\n    , C.legendsAt .max .max [ CA.alignRight, CA.column, CA.spacing 7 ] []\n\n    , let\n        toBrightLabel =\n          C.barLabel [ CA.moveDown 18, CA.color white ]\n      in\n      C.each model.hovering <| \\p stack ->\n        List.map toBrightLabel (CE.getProducts stack)\n\n    , C.eachBin <| \\p bin ->\n        let common = CE.getCommonality bin\n            yPos = (CE.getTop p bin).y\n            xMid = (CE.getCenter p bin).x\n        in\n        if common.datum.country == "Finland" then\n          [ C.line\n              [ CA.x1 common.start\n              , CA.x2 common.end\n              , CA.y1 yPos\n              , CA.moveUp 15\n              , CA.tickLength 5\n              ]\n          , C.label\n              [ CA.moveUp 22, CA.fontSize 10 ]\n              [ S.text "Most pets per person"]\n              { x = xMid, y = yPos }\n          ]\n        else\n          []\n    ]\n  ';
+var $author$project$Examples$Frontpage$Concise$smallCode = '\n  C.chart\n    [ CA.height 300\n    , CA.width 500\n    , CA.static\n    , CE.onMouseMove OnHover (CE.getNearest CE.stack)\n    , CE.onMouseLeave (OnHover [])\n    ]\n    [ C.grid []\n    , C.yLabels [ CA.format (\\y -> String.fromFloat y ++ "M")]\n\n    , C.bars\n        [ CA.roundTop 0.2\n        , CA.margin 0.2\n        , CA.spacing 0.05\n        , CA.noGrid\n        ]\n        [ C.stacked\n            [ C.bar .cats\n                [ CA.gradient [ mint1, mint2 ] ]\n                |> C.named "Cats"\n            , C.bar .dogs\n                [ CA.gradient [ blue1, blue2 ] ]\n                |> C.named "Dogs"\n            ]\n        , C.bar .people\n            [ CA.gradient [ purple1, purple2 ] ]\n                |> C.named "People"\n        ]\n        data\n\n    , C.labelAt (CA.percent 30) .max\n        [ CA.moveDown 3, CA.fontSize 15 ]\n        [ S.text "Populations in Scandinavia" ]\n\n    , C.labelAt (CA.percent 30) .max\n        [ CA.moveDown 20, CA.fontSize 12 ]\n        [ S.text "Note: Based on made up data." ]\n\n    , C.binLabels .country [ CA.moveDown 18 ]\n    , C.barLabels [ CA.moveDown 18, CA.color weakWhite ]\n    , C.legendsAt .max .max [ CA.alignRight, CA.column, CA.spacing 7 ] []\n\n    , let\n        toBrightLabel =\n          C.productLabel [ CA.moveDown 18, CA.color white ]\n      in\n      C.each model.hovering <| \\p stack ->\n        List.map toBrightLabel (CE.getProducts stack)\n\n    , C.eachBin <| \\p bin ->\n        let common = CE.getCommonality bin\n            yPos = (CE.getTop p bin).y\n            xMid = (CE.getCenter p bin).x\n        in\n        if common.datum.country == "Finland" then\n          [ C.line\n              [ CA.x1 common.start\n              , CA.x2 common.end\n              , CA.y1 yPos\n              , CA.moveUp 15\n              , CA.tickLength 5\n              ]\n          , C.label\n              [ CA.moveUp 22, CA.fontSize 10 ]\n              [ S.text "Most pets per person"]\n              { x = xMid, y = yPos }\n          ]\n        else\n          []\n    ]\n  ';
 var $author$project$Examples$Frontpage$Familiar$smallCode = '\nimport Chart as C\nimport Chart.Attributes as CA\nimport Time\n\n\nchart : Html Msg\nchart =\n  C.chart\n    [ CA.height 300\n    , CA.width 500\n    , CA.static\n    ]\n    [ C.grid []\n    , C.xLabels [ CA.times Time.utc, CA.amount 12 ]\n    , C.yLabels [ CA.amount 6 ]\n    , C.xAxis []\n    , C.yAxis []\n    , C.series .x\n        [ C.interpolated .y [ CA.width 2 ] []\n        , C.interpolated .z [ CA.width 2 ] []\n        ]\n        data\n    ]\n  ';
 var $author$project$Examples$Interactivity$Background$smallCode = '\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    , CE.onMouseMove OnHover (CE.getNearest CE.bar)\n    , CE.onMouseLeave (OnHover [])\n    ]\n    [ C.grid []\n    , C.xLabels []\n    , C.yLabels []\n    , C.bars []\n        [ C.bar .y [ CA.opacity 0.3, CA.borderWidth 1 ]\n        , C.bar .z [ CA.opacity 0.3, CA.borderWidth 1, CA.striped [] ]\n        ]\n        data\n    , C.each model.hovering <| \\p item ->\n        [ C.tooltip item [ CA.background "#fcf9e9" ] [] [] ]\n    ]\n  ';
-var $author$project$Examples$Interactivity$BasicArea$smallCode = '\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    , CE.onMouseMove OnHover (CE.getNearest CE.stack)\n    , CE.onMouseLeave (OnHover [])\n    ]\n    [ C.grid []\n    , C.xLabels []\n    , C.yLabels []\n    , C.series .x\n        [ C.stacked\n          [ C.interpolated .y\n              [ CA.monotone, CA.opacity 0.2 ]\n              [ CA.circle, CA.color "white", CA.border CA.pink, CA.borderWidth 1 ]\n          , C.interpolated .z\n              [ CA.monotone, CA.opacity 0, CA.color CA.pink ]\n              [ CA.circle, CA.color "white", CA.border CA.pink, CA.borderWidth 1 ]\n          ]\n        ]\n        data\n    , C.each model.hovering <| \\p item ->\n        [ C.tooltip item [] [] [] ]\n    ]\n  ';
+var $author$project$Examples$Interactivity$BasicArea$smallCode = '\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    , CE.onMouseMove OnHover (CE.getNearest CE.stack)\n    , CE.onMouseLeave (OnHover [])\n    ]\n    [ C.grid []\n    , C.xLabels []\n    , C.yLabels []\n    , C.series .x\n        [ C.stacked\n          [ C.interpolated .y\n              [ CA.monotone, CA.opacity 0.2 ]\n              [ CA.circle, CA.color "white", CA.borderWidth 1 ]\n          , C.interpolated .z\n              [ CA.monotone, CA.opacity 0, CA.color CA.purple ]\n              [ CA.circle, CA.color "white", CA.borderWidth 1 ]\n          ]\n        ]\n        data\n    , C.each model.hovering <| \\p item ->\n        [ C.tooltip item [] [] [] ]\n    ]\n  ';
 var $author$project$Examples$Interactivity$BasicBar$smallCode = '\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    , CE.onMouseMove OnHover (CE.getNearest CE.bar)\n    , CE.onMouseLeave (OnHover [])\n    ]\n    [ C.grid []\n    , C.xLabels []\n    , C.yLabels []\n    , C.bars []\n        [ C.stacked\n            [ C.bar .z []\n            , C.bar .y []\n            ]\n        , C.bar .v [ CA.dotted [] ]\n        ]\n        data\n    , C.each model.hovering <| \\p item ->\n        [ C.tooltip item [] [] [] ]\n    ]\n  ';
 var $author$project$Examples$Interactivity$BasicBin$smallCode = '\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    , CE.onMouseMove OnHover (CE.getNearest CE.bin)\n    , CE.onMouseLeave (OnHover [])\n    ]\n    [ C.grid []\n    , C.xLabels []\n    , C.yLabels []\n    , C.bars []\n        [ C.bar .z []\n        , C.bar .y []\n        ]\n        data\n    , C.each model.hovering <| \\p item ->\n        [ C.tooltip item [] [] [] ]\n    ]\n  ';
 var $author$project$Examples$Interactivity$BasicLine$smallCode = '\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    , CE.onMouseMove OnHover (CE.getNearest CE.dot)\n    , CE.onMouseLeave (OnHover [])\n    ]\n    [ C.grid []\n    , C.xLabels []\n    , C.yLabels []\n    , C.series .x\n        [ C.interpolated .y [  ] [ CA.circle, CA.size 3 ]\n        , C.interpolated .z [  ] [ CA.circle, CA.size 3 ]\n        ]\n        data\n    , C.each model.hovering <| \\p item ->\n        [ C.tooltip item [] [] [] ]\n    ]\n  ';

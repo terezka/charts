@@ -7,7 +7,7 @@ module Chart exposing
   , stacked, named, variation, amongst
 
   , xAxis, yAxis, xTicks, yTicks, xLabels, yLabels, grid
-  , binLabels, barLabels, barLabel, dotLabels
+  , binLabels, barLabels, dotLabels, productLabel
 
   , xLabel, yLabel, xTick, yTick
   , generate, floats, ints, times
@@ -1693,12 +1693,12 @@ toLabelFromItemLabel config =
           , { name = "Jane", income = 80 }
           ]
 
-      , C.binLabels .name CE.getBottom [ CA.moveDown 15 ]
+      , C.binLabels .name [ CA.moveDown 15 ]
       ]
 
 Attributes you can use:
 
-    C.binLabels .name CE.getBottom
+    C.binLabels .name
       [ CA.moveUp 5     -- Move 5 SVG units up
       , CA.moveDown 5   -- Move 5 SVG units down
       , CA.moveLeft 5   -- Move 5 SVG units left
@@ -1717,6 +1717,13 @@ Attributes you can use:
 
        -- Add arbitrary SVG attributes to your labels.
       , CA.attrs [ SA.class "my-bin-labels" ]
+
+       -- Edit the position of the label
+      , CA.position CE.getTop
+
+       -- Given the entire bin item (not just the data)
+       -- produce a string.
+      , CA.format (\bin -> String.fromFloat (CE.getCommonality bin).start)
       ]
 
 -}
@@ -1746,12 +1753,12 @@ binLabels toLabel edits =
           , { name = "Jane", income = 80 }
           ]
 
-      , C.barLabels CE.getTop [ CA.moveUp 6 ]
+      , C.barLabels [ CA.moveUp 6 ]
       ]
 
 Attributes you can use:
 
-    C.barLabels CE.getTop
+    C.barLabels
       [ CA.moveUp 5     -- Move 5 SVG units up
       , CA.moveDown 5   -- Move 5 SVG units down
       , CA.moveLeft 5   -- Move 5 SVG units left
@@ -1770,6 +1777,12 @@ Attributes you can use:
 
        -- Add arbitrary SVG attributes to your labels.
       , CA.attrs [ SA.class "my-bar-labels" ]
+
+       -- Edit the position of the label
+      , CA.position CE.getTop
+
+       -- Change the text of the label
+      , CA.format (\bar -> String.fromFloat (CE.getDependent bar))
       ]
 -}
 barLabels : List (CA.Attribute (ItemLabel (CE.Product CE.Bar Float data))) -> Element data msg
@@ -1788,9 +1801,54 @@ barLabels edits =
     ]
 
 
-{-| -}
-barLabel : List (CA.Attribute (ItemLabel (CE.Product config value data))) -> CE.Product config value data -> Element data msg
-barLabel edits item =
+{-| Helper to add a label by a particular product.
+
+    C.chart
+      [ CE.onMouseMove OnHover (CE.getNearest CE.bar) ]
+      [ C.bars []
+          [ C.bar .income [] ]
+          [ { name = "Anna", income = 60 }
+          , { name = "Karenina", income = 70 }
+          , { name = "Jane", income = 80 }
+          ]
+
+      , C.each model.hovering <| \_ bar ->
+          [ C.productLabel [ CA.moveUp 6 ] bar ]
+      ]
+
+Attributes you can use:
+
+    C.productLabel
+      [ CA.moveUp 5     -- Move 5 SVG units up
+      , CA.moveDown 5   -- Move 5 SVG units down
+      , CA.moveLeft 5   -- Move 5 SVG units left
+      , CA.moveRight 5  -- Move 5 SVG units right
+
+      , CA.color "#333"
+      , CA.border "white"
+      , CA.borderWidth 1
+      , CA.fontSize 12
+
+      , CA.alignRight   -- Anchor labels to the right
+      , CA.alignLeft    -- Anchor labels to the left
+
+      , CA.rotate 90    -- Rotate label 90 degrees
+      , CA.uppercase    -- Make uppercase
+
+       -- Add arbitrary SVG attributes to your labels.
+      , CA.attrs [ SA.class "my-bar-labels" ]
+
+       -- Edit the position of the label
+      , CA.position CE.getTop
+
+       -- Change the text of the label
+      , CA.format (\bar -> String.fromFloat (CE.getDependent bar))
+      ]
+      product
+
+-}
+productLabel : List (CA.Attribute (ItemLabel (CE.Product config value data))) -> CE.Product config value data -> Element data msg
+productLabel edits item =
   withPlane <| \p ->
     let config =
           Helpers.apply edits { defaultLabel | position = CE.getTop }
@@ -1821,7 +1879,7 @@ barLabel edits item =
 
 Attributes you can use:
 
-    C.dotLabels CE.getCenter
+    C.dotLabels
       [ CA.moveUp 5     -- Move 5 SVG units up
       , CA.moveDown 5   -- Move 5 SVG units down
       , CA.moveLeft 5   -- Move 5 SVG units left
@@ -1840,6 +1898,12 @@ Attributes you can use:
 
        -- Add arbitrary SVG attributes to your labels.
       , CA.attrs [ SA.class "my-dot-labels" ]
+
+       -- Edit the position of the label
+      , CA.position CE.getTop
+
+       -- Change the text of the label
+      , CA.format (\dot -> String.fromFloat (CE.getDependent dot))
       ]
 -}
 dotLabels : List (CA.Attribute (ItemLabel (CE.Product CE.Dot Float data))) -> Element data msg
@@ -2479,15 +2543,20 @@ labelAt toX toY attrs inner =
           , CA.y2 7 -- Set y2
 
             -- Instead of specifying x2 and y2
-            -- you can use `xOff` and `yOff`
+            -- you can use `x2Svg` and `y2Svg`
             -- to specify the end coordinate in
             -- terms of SVG units.
             --
             -- Useful if making little label pointers.
-          , CA.xOff 30
-          , CA.yOff 30
+            -- This makes a from ( x1, y1 ) to the point
+            -- ( x1 + 15 SVG units, y1 + 30 SVG units )
+          , CA.x2Svg 15
+          , CA.y2Svg 30
 
           , CA.break            -- "break" line, so it it has a 90° angle
+          , CA.tickLength       -- Add "ticks" at the ends of the line
+          , CA.tickDirection    -- The angle of the ticks
+
           , CA.color "red"      -- Change color
           , CA.width 2          -- Change width
           , CA.opacity 0.8      -- Change opacity
