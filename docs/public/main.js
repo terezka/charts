@@ -14360,7 +14360,7 @@ var $author$project$Page$Administration$view = function (model) {
 						[
 							$mdgriffith$elm_ui$Element$text('This library is developed and managed by '),
 							A2($author$project$Ui$Layout$link, 'https://twitter.com/tereza_sokol', 'Tereza Sokol'),
-							$mdgriffith$elm_ui$Element$text(' by the support of freelance contracts with various companies. If you\'d '),
+							$mdgriffith$elm_ui$Element$text('. If you\'d '),
 							A2(
 							$mdgriffith$elm_ui$Element$el,
 							_List_fromArray(
@@ -14416,7 +14416,7 @@ var $author$project$Page$Administration$view = function (model) {
 						]),
 					_List_fromArray(
 						[
-							$mdgriffith$elm_ui$Element$text('Here are some upcoming features and improvements in approximate order. '),
+							$mdgriffith$elm_ui$Element$text('Here are some upcoming features and improvements in approximate order of priority. '),
 							$mdgriffith$elm_ui$Element$text('If you have more suggestions or have wishes regarding the priority, then '),
 							$mdgriffith$elm_ui$Element$text('you\'re welcome to '),
 							A2($author$project$Ui$Layout$link, 'https://github.com/terezka/charts/issues', 'open an issue'),
@@ -14450,12 +14450,12 @@ var $author$project$Page$Administration$view = function (model) {
 									]),
 								_List_fromArray(
 									[
+										item('Heat maps charts'),
+										item('Horizontal bar charts'),
 										item('Logarithmic scales'),
 										item('Multiple scales'),
-										item('Horizontal bar charts'),
 										item('Relative stacked bars'),
 										item('Further improvements of automatic \"nice\" ticks'),
-										item('Heat maps charts'),
 										item('Pie charts'),
 										item('Confidence intervals'),
 										item('More interpolation options')
@@ -39775,7 +39775,7 @@ var $author$project$Page$Home$view = function (model) {
 								body: _List_fromArray(
 									[
 										$mdgriffith$elm_ui$Element$text('Charts are visual and so should the documentation! '),
-										$mdgriffith$elm_ui$Element$text('There is nearly 100 examples on this site to help you '),
+										$mdgriffith$elm_ui$Element$text('There is more than 100 examples on this site to help you '),
 										$mdgriffith$elm_ui$Element$text('compose your exact chart. '),
 										A2(
 										$mdgriffith$elm_ui$Element$link,

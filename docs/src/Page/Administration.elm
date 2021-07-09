@@ -84,7 +84,7 @@ view model =
               ]
               [ E.text "This library is developed and managed by "
               , Layout.link "https://twitter.com/tereza_sokol" "Tereza Sokol"
-              , E.text " by the support of freelance contracts with various companies. If you'd "
+              , E.text ". If you'd "
               , E.el [ F.bold ] (E.text "like to support  the maintanence and furter development")
               , E.text " through a commission of work or donation, you are welcome to contact me "
               , E.text "at "
