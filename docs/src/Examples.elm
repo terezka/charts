@@ -1,4 +1,4 @@
-module Examples exposing (Id, Model, init, Msg, update, view, name, all, first, smallCode, largeCode, meta)
+module Examples exposing (Id(..), Model, init, Msg, update, view, name, all, first, smallCode, largeCode, meta)
 
 
 -- THIS IS A GENERATED MODULE!

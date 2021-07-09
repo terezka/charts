@@ -30,7 +30,7 @@ copyright =
   E.el
     [ F.size 12
     , F.color (E.rgb255 180 180 180)
-    , E.paddingEach { top = 30, bottom = 0, left = 0, right = 0 }
+    , E.paddingEach { top = 30, bottom = 20, left = 0, right = 0 }
     , E.alignRight
     ]
     (E.text "Designed and developed by Tereza Sokol © 2021")

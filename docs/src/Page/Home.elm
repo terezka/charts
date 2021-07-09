@@ -15,6 +15,7 @@ import Charts.Dashboard6 as Dashboard6
 import Charts.Dashboard7 as Dashboard7
 import Examples.Frontpage.Familiar as Familiar
 import Examples.Frontpage.Concise as Concise
+import Examples
 import Html as H
 import Element as E
 import Element.Events as EE
@@ -136,11 +137,12 @@ view model =
               [ feature
                   { title = "Intuitive"
                   , body =
-                      """Simple charts should be simple to make. The interface mirrors the element
-and attribute pattern which you already know and love. Get started composing your chart in
-minutes!"""
+                      [ E.text "Simple charts should be simple to make. The interface "
+                      , E.text "mirrors the element and attribute pattern which you already"
+                      , E.text "know and love. Get started composing your chart in minutes!"
+                      ]
                   , togglable = Just ( FamiliarToggle, model.familiarToggle )
-                  , chart = H.map (\_ -> None) (Familiar.view ())
+                  , chart = E.html <| H.map (\_ -> None) (Familiar.view ())
                   , code = Familiar.smallCode
                   , flipped = False
                   , height = 350
@@ -148,20 +150,54 @@ minutes!"""
 
               , feature
                   { title = "Flexible, yet concise"
-                  , body = "No clutter, even with tricky requirements. Great support for interactivity, advanced labeling, guidence lines, and irregular details."
+                  , body =
+                      [ E.text "No clutter, even with tricky requirements. Great support for"
+                      , E.text "interactivity, advanced labeling, guidence lines, and "
+                      , E.text "irregular details."
+                      ]
                   , togglable = Nothing
-                  , chart = H.map ConciseMsg (Concise.view model.concise)
+                  , chart = E.html <| H.map ConciseMsg (Concise.view model.concise)
                   , code = Concise.smallCode
                   , flipped = True
                   , height = 350
                   }
 
-              --, feature
-              --    { title = "Visual documentation"
-              --    , body = "You never need to know how SVG clip paths work or any SVG for that matter!"
-              --    , chart = H.map (\_ -> None) (Familiar.view ())
-              --    , code = Familiar.smallCode
-              --    }
+              , feature
+                  { title = "Visual catalog"
+                  , body =
+                      [ E.text "Charts are visual and so should the documentation! "
+                      , E.text "There is nearly 100 examples on this site to help you"
+                      , E.text "compose your exact chart. "
+                      , E.link [ F.underline ] { url = "/documentation", label = E.text "Explore catalog" }
+                      , E.text "."
+                      ]
+                  , togglable = Nothing
+                  , flipped = False
+                  , height = 350
+                  , chart =
+                      [ Examples.BarCharts__Histogram
+                      , Examples.BarCharts__TooltipStack
+                      , Examples.Interactivity__Zoom
+                      , Examples.Frame__Titles
+                      , Examples.LineCharts__Stepped
+                      , Examples.ScatterCharts__Labels
+                      , Examples.ScatterCharts__DataDependent
+                      , Examples.LineCharts__TooltipStack
+                      , Examples.LineCharts__Labels
+                      , Examples.BarCharts__BarLabels
+                      , Examples.BarCharts__Margin
+                      , Examples.ScatterCharts__Shapes
+                      ]
+                        |> List.map (Examples.view Examples.init)
+                        |> List.map (E.html >> E.el [ E.width (E.minimum 90 E.fill) ])
+                        |> E.wrappedRow
+                            [ E.width (E.px 550)
+                            , E.spacing 30
+                            , E.alignTop
+                            ]
+                        |> E.map (\_ -> None)
+                  , code = ""
+                  }
               ]
           ]
     }
@@ -169,10 +205,10 @@ minutes!"""
 
 feature :
   { title : String
-  , body : String
+  , body : List (E.Element msg)
   , height : Int
   , togglable : Maybe ( msg, Bool )
-  , chart : H.Html msg
+  , chart : E.Element msg
   , code : String
   , flipped : Bool
   }
@@ -200,11 +236,11 @@ feature config =
             , F.color (E.rgb255 120 120 120)
             , E.paddingXY 0 10
             ]
-            [ E.text config.body ]
+            config.body
         ]
     , case config.togglable of
         Nothing ->
-          E.el [ E.centerX ] (E.html config.chart)
+          E.el [ E.centerX, E.alignTop ] config.chart
 
         Just ( onToggle, isToggled ) ->
           E.el
@@ -232,7 +268,7 @@ feature config =
                 ]
             else
               E.column [ E.centerX ]
-                [ E.el [] (E.html config.chart)
+                [ E.el [ E.alignTop ] config.chart
                 , I.button
                     [ E.paddingXY 15 15
                     , F.size 14

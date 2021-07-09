@@ -14395,7 +14395,7 @@ var $author$project$Ui$Layout$copyright = A2(
 			$mdgriffith$elm_ui$Element$Font$color(
 			A3($mdgriffith$elm_ui$Element$rgb255, 180, 180, 180)),
 			$mdgriffith$elm_ui$Element$paddingEach(
-			{bottom: 0, left: 0, right: 0, top: 30}),
+			{bottom: 20, left: 0, right: 0, top: 30}),
 			$mdgriffith$elm_ui$Element$alignRight
 		]),
 	$mdgriffith$elm_ui$Element$text('Designed and developed by Tereza Sokol © 2021'));
@@ -30364,22 +30364,20 @@ var $author$project$Examples$ScatterCharts$Colors$view = function (model) {
 				},
 				_List_fromArray(
 					[
-						A3(
-						$author$project$Chart$interpolated,
+						A2(
+						$author$project$Chart$scatter,
 						function ($) {
 							return $.y;
 						},
-						_List_Nil,
 						_List_fromArray(
 							[
 								$author$project$Chart$Attributes$color($author$project$Chart$Attributes$red)
 							])),
-						A3(
-						$author$project$Chart$interpolated,
+						A2(
+						$author$project$Chart$scatter,
 						function ($) {
 							return $.z;
 						},
-						_List_Nil,
 						_List_fromArray(
 							[
 								$author$project$Chart$Attributes$color($author$project$Chart$Attributes$orange)
@@ -32040,7 +32038,7 @@ var $author$project$Examples$LineCharts$TooltipStack$largeCode = '\nimport Html 
 var $author$project$Examples$LineCharts$Width$largeCode = '\nimport Html as H\nimport Chart as C\nimport Chart.Attributes as CA\n\n\nview : Model -> H.Html Msg\nview model =\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n\n    ]\n    [ C.grid []\n    , C.xLabels []\n    , C.yLabels []\n    , C.series .x\n        [ C.interpolated .y [ CA.width 4 ] []\n        , C.interpolated .z [ CA.width 3 ] []\n        ]\n        data\n    ]\n  ';
 var $author$project$Examples$ScatterCharts$Basic$largeCode = '\nimport Html as H\nimport Chart as C\nimport Chart.Attributes as CA\n\n\nview : Model -> H.Html Msg\nview model =\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    , CA.padding { top = 0, bottom = 0, left = 15, right = 15 }\n    ]\n    [ C.grid []\n    , C.xLabels []\n    , C.yLabels []\n    , C.series .x\n        [ C.scatter .y []\n        , C.scatter .z []\n        ]\n        data\n    ]\n  ';
 var $author$project$Examples$ScatterCharts$Borders$largeCode = '\nimport Html as H\nimport Chart as C\nimport Chart.Attributes as CA\n\n\nview : Model -> H.Html Msg\nview model =\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    , CA.padding { top = 0, bottom = 0, left = 10, right = 10 }\n    ]\n    [ C.grid []\n    , C.xLabels []\n    , C.yLabels []\n    , C.series .x\n        [ C.scatter .y\n            [ CA.borderWidth 3\n            , CA.border CA.purple\n            , CA.size 18\n            , CA.opacity 0\n            ]\n        ]\n        data\n    ]\n  ';
-var $author$project$Examples$ScatterCharts$Colors$largeCode = '\nimport Html as H\nimport Chart as C\nimport Chart.Attributes as CA\n\n\nview : Model -> H.Html Msg\nview model =\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    , CA.padding { top = 0, bottom = 0, left = 10, right = 10 }\n    ]\n    [ C.grid []\n    , C.xLabels []\n    , C.yLabels []\n    , C.series .x\n        [ C.interpolated .y [] [ CA.color CA.red ]\n        , C.interpolated .z [] [ CA.color CA.orange ]\n        ]\n        data\n    ]\n  ';
+var $author$project$Examples$ScatterCharts$Colors$largeCode = '\nimport Html as H\nimport Chart as C\nimport Chart.Attributes as CA\n\n\nview : Model -> H.Html Msg\nview model =\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    , CA.padding { top = 0, bottom = 0, left = 10, right = 10 }\n    ]\n    [ C.grid []\n    , C.xLabels []\n    , C.yLabels []\n    , C.series .x\n        [ C.scatter .y [ CA.color CA.red ]\n        , C.scatter .z [ CA.color CA.orange ]\n        ]\n        data\n    ]\n  ';
 var $author$project$Examples$ScatterCharts$DataDependent$largeCode = '\nimport Html as H\nimport Chart as C\nimport Chart.Attributes as CA\n\n\nview : Model -> H.Html Msg\nview model =\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    , CA.padding { top = 0, bottom = 0, left = 10, right = 10 }\n    ]\n    [ C.grid []\n    , C.xLabels []\n    , C.yLabels []\n    , C.series .x\n        [ C.scatter .z [ CA.opacity 0.5, CA.borderWidth 1 ]\n            |> C.variation (\\i d -> [ CA.size (d.x * 20 + 2) ])\n        , C.scatter .y []\n            |> C.variation (\\i d -> [ CA.highlight (if d.x == 3 then 0.5 else 0) ])\n        ]\n        data\n    ]\n  ';
 var $author$project$Examples$ScatterCharts$Highlight$largeCode = '\nimport Html as H\nimport Chart as C\nimport Chart.Attributes as CA\n\n\nview : Model -> H.Html Msg\nview model =\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    , CA.padding { top = 0, bottom = 0, left = 15, right = 15 }\n    ]\n    [ C.grid []\n    , C.xLabels []\n    , C.yLabels []\n    , C.series .x\n        [ C.scatter .y []\n        , C.scatter .z [ CA.highlight 0.4 ]\n        ]\n        data\n    ]\n  ';
 var $author$project$Examples$ScatterCharts$Labels$largeCode = '\nimport Html as H\nimport Svg as S\nimport Chart as C\nimport Chart.Attributes as CA\nimport Chart.Events as CE\n\n\nview : Model -> H.Html Msg\nview model =\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    , CA.padding { top = 0, bottom = 0, left = 30, right = 10 }\n    ]\n    [ C.grid []\n    , C.xLabels []\n    , C.yLabels []\n    , C.series .x\n        [ C.scatter .y [ CA.opacity 0.2, CA.borderWidth 1 ]\n            |> C.variation (\\i d -> [ CA.size (d.w * 30) ])\n        ]\n        data\n\n    , C.eachDot <| \\p dot ->\n        [ C.label\n            [ CA.moveDown 4, CA.color (CE.getColor dot) ]\n            [ S.text (String.fromFloat (CE.getDatum dot).w) ]\n            (CE.getCenter p dot)\n        ]\n    ]\n  ';
@@ -32320,7 +32318,7 @@ var $author$project$Examples$LineCharts$TooltipStack$smallCode = '\n  C.chart\n 
 var $author$project$Examples$LineCharts$Width$smallCode = '\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n\n    ]\n    [ C.grid []\n    , C.xLabels []\n    , C.yLabels []\n    , C.series .x\n        [ C.interpolated .y [ CA.width 4 ] []\n        , C.interpolated .z [ CA.width 3 ] []\n        ]\n        data\n    ]\n  ';
 var $author$project$Examples$ScatterCharts$Basic$smallCode = '\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    , CA.padding { top = 0, bottom = 0, left = 15, right = 15 }\n    ]\n    [ C.grid []\n    , C.xLabels []\n    , C.yLabels []\n    , C.series .x\n        [ C.scatter .y []\n        , C.scatter .z []\n        ]\n        data\n    ]\n  ';
 var $author$project$Examples$ScatterCharts$Borders$smallCode = '\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    , CA.padding { top = 0, bottom = 0, left = 10, right = 10 }\n    ]\n    [ C.grid []\n    , C.xLabels []\n    , C.yLabels []\n    , C.series .x\n        [ C.scatter .y\n            [ CA.borderWidth 3\n            , CA.border CA.purple\n            , CA.size 18\n            , CA.opacity 0\n            ]\n        ]\n        data\n    ]\n  ';
-var $author$project$Examples$ScatterCharts$Colors$smallCode = '\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    , CA.padding { top = 0, bottom = 0, left = 10, right = 10 }\n    ]\n    [ C.grid []\n    , C.xLabels []\n    , C.yLabels []\n    , C.series .x\n        [ C.interpolated .y [] [ CA.color CA.red ]\n        , C.interpolated .z [] [ CA.color CA.orange ]\n        ]\n        data\n    ]\n  ';
+var $author$project$Examples$ScatterCharts$Colors$smallCode = '\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    , CA.padding { top = 0, bottom = 0, left = 10, right = 10 }\n    ]\n    [ C.grid []\n    , C.xLabels []\n    , C.yLabels []\n    , C.series .x\n        [ C.scatter .y [ CA.color CA.red ]\n        , C.scatter .z [ CA.color CA.orange ]\n        ]\n        data\n    ]\n  ';
 var $author$project$Examples$ScatterCharts$DataDependent$smallCode = '\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    , CA.padding { top = 0, bottom = 0, left = 10, right = 10 }\n    ]\n    [ C.grid []\n    , C.xLabels []\n    , C.yLabels []\n    , C.series .x\n        [ C.scatter .z [ CA.opacity 0.5, CA.borderWidth 1 ]\n            |> C.variation (\\i d -> [ CA.size (d.x * 20 + 2) ])\n        , C.scatter .y []\n            |> C.variation (\\i d -> [ CA.highlight (if d.x == 3 then 0.5 else 0) ])\n        ]\n        data\n    ]\n  ';
 var $author$project$Examples$ScatterCharts$Highlight$smallCode = '\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    , CA.padding { top = 0, bottom = 0, left = 15, right = 15 }\n    ]\n    [ C.grid []\n    , C.xLabels []\n    , C.yLabels []\n    , C.series .x\n        [ C.scatter .y []\n        , C.scatter .z [ CA.highlight 0.4 ]\n        ]\n        data\n    ]\n  ';
 var $author$project$Examples$ScatterCharts$Labels$smallCode = '\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    , CA.padding { top = 0, bottom = 0, left = 30, right = 10 }\n    ]\n    [ C.grid []\n    , C.xLabels []\n    , C.yLabels []\n    , C.series .x\n        [ C.scatter .y [ CA.opacity 0.2, CA.borderWidth 1 ]\n            |> C.variation (\\i d -> [ CA.size (d.w * 30) ])\n        ]\n        data\n\n    , C.eachDot <| \\p dot ->\n        [ C.label\n            [ CA.moveDown 4, CA.color (CE.getColor dot) ]\n            [ S.text (String.fromFloat (CE.getDatum dot).w) ]\n            (CE.getCenter p dot)\n        ]\n    ]\n  ';
@@ -38583,10 +38581,7 @@ var $author$project$Page$Home$feature = function (config) {
 									A3($mdgriffith$elm_ui$Element$rgb255, 120, 120, 120)),
 									A2($mdgriffith$elm_ui$Element$paddingXY, 0, 10)
 								]),
-							_List_fromArray(
-								[
-									$mdgriffith$elm_ui$Element$text(config.body)
-								]))
+							config.body)
 						])),
 					function () {
 					var _v0 = config.togglable;
@@ -38594,8 +38589,8 @@ var $author$project$Page$Home$feature = function (config) {
 						return A2(
 							$mdgriffith$elm_ui$Element$el,
 							_List_fromArray(
-								[$mdgriffith$elm_ui$Element$centerX]),
-							$mdgriffith$elm_ui$Element$html(config.chart));
+								[$mdgriffith$elm_ui$Element$centerX, $mdgriffith$elm_ui$Element$alignTop]),
+							config.chart);
 					} else {
 						var _v1 = _v0.a;
 						var onToggle = _v1.a;
@@ -38647,8 +38642,9 @@ var $author$project$Page$Home$feature = function (config) {
 									[
 										A2(
 										$mdgriffith$elm_ui$Element$el,
-										_List_Nil,
-										$mdgriffith$elm_ui$Element$html(config.chart)),
+										_List_fromArray(
+											[$mdgriffith$elm_ui$Element$alignTop]),
+										config.chart),
 										A2(
 										$mdgriffith$elm_ui$Element$Input$button,
 										_List_fromArray(
@@ -39219,13 +39215,19 @@ var $author$project$Page$Home$view = function (model) {
 						[
 							$author$project$Page$Home$feature(
 							{
-								body: 'Simple charts should be simple to make. The interface mirrors the element\nand attribute pattern which you already know and love. Get started composing your chart in\nminutes!',
-								chart: A2(
-									$elm$html$Html$map,
-									function (_v0) {
-										return $author$project$Page$Home$None;
-									},
-									$author$project$Examples$Frontpage$Familiar$view(_Utils_Tuple0)),
+								body: _List_fromArray(
+									[
+										$mdgriffith$elm_ui$Element$text('Simple charts should be simple to make. The interface '),
+										$mdgriffith$elm_ui$Element$text('mirrors the element and attribute pattern which you already'),
+										$mdgriffith$elm_ui$Element$text('know and love. Get started composing your chart in minutes!')
+									]),
+								chart: $mdgriffith$elm_ui$Element$html(
+									A2(
+										$elm$html$Html$map,
+										function (_v0) {
+											return $author$project$Page$Home$None;
+										},
+										$author$project$Examples$Frontpage$Familiar$view(_Utils_Tuple0))),
 								code: $author$project$Examples$Frontpage$Familiar$smallCode,
 								flipped: false,
 								height: 350,
@@ -39235,15 +39237,74 @@ var $author$project$Page$Home$view = function (model) {
 							}),
 							$author$project$Page$Home$feature(
 							{
-								body: 'No clutter, even with tricky requirements. Great support for interactivity, advanced labeling, guidence lines, and irregular details.',
-								chart: A2(
-									$elm$html$Html$map,
-									$author$project$Page$Home$ConciseMsg,
-									$author$project$Examples$Frontpage$Concise$view(model.concise)),
+								body: _List_fromArray(
+									[
+										$mdgriffith$elm_ui$Element$text('No clutter, even with tricky requirements. Great support for'),
+										$mdgriffith$elm_ui$Element$text('interactivity, advanced labeling, guidence lines, and '),
+										$mdgriffith$elm_ui$Element$text('irregular details.')
+									]),
+								chart: $mdgriffith$elm_ui$Element$html(
+									A2(
+										$elm$html$Html$map,
+										$author$project$Page$Home$ConciseMsg,
+										$author$project$Examples$Frontpage$Concise$view(model.concise))),
 								code: $author$project$Examples$Frontpage$Concise$smallCode,
 								flipped: true,
 								height: 350,
 								title: 'Flexible, yet concise',
+								togglable: $elm$core$Maybe$Nothing
+							}),
+							$author$project$Page$Home$feature(
+							{
+								body: _List_fromArray(
+									[
+										$mdgriffith$elm_ui$Element$text('Charts are visual and so should the documentation! '),
+										$mdgriffith$elm_ui$Element$text('There is nearly 100 examples on this site to help you'),
+										$mdgriffith$elm_ui$Element$text('compose your exact chart. '),
+										A2(
+										$mdgriffith$elm_ui$Element$link,
+										_List_fromArray(
+											[$mdgriffith$elm_ui$Element$Font$underline]),
+										{
+											label: $mdgriffith$elm_ui$Element$text('Explore catalog'),
+											url: '/documentation'
+										}),
+										$mdgriffith$elm_ui$Element$text('.')
+									]),
+								chart: A2(
+									$mdgriffith$elm_ui$Element$map,
+									function (_v1) {
+										return $author$project$Page$Home$None;
+									},
+									A2(
+										$mdgriffith$elm_ui$Element$wrappedRow,
+										_List_fromArray(
+											[
+												$mdgriffith$elm_ui$Element$width(
+												$mdgriffith$elm_ui$Element$px(550)),
+												$mdgriffith$elm_ui$Element$spacing(30),
+												$mdgriffith$elm_ui$Element$alignTop
+											]),
+										A2(
+											$elm$core$List$map,
+											A2(
+												$elm$core$Basics$composeR,
+												$mdgriffith$elm_ui$Element$html,
+												$mdgriffith$elm_ui$Element$el(
+													_List_fromArray(
+														[
+															$mdgriffith$elm_ui$Element$width(
+															A2($mdgriffith$elm_ui$Element$minimum, 90, $mdgriffith$elm_ui$Element$fill))
+														]))),
+											A2(
+												$elm$core$List$map,
+												$author$project$Examples$view($author$project$Examples$init),
+												_List_fromArray(
+													[$author$project$Examples$BarCharts__Histogram, $author$project$Examples$BarCharts__TooltipStack, $author$project$Examples$Interactivity__Zoom, $author$project$Examples$Frame__Titles, $author$project$Examples$LineCharts__Stepped, $author$project$Examples$ScatterCharts__Labels, $author$project$Examples$ScatterCharts__DataDependent, $author$project$Examples$LineCharts__TooltipStack, $author$project$Examples$LineCharts__Labels, $author$project$Examples$BarCharts__BarLabels, $author$project$Examples$BarCharts__Margin, $author$project$Examples$ScatterCharts__Shapes]))))),
+								code: '',
+								flipped: false,
+								height: 350,
+								title: 'Visual catalog',
 								togglable: $elm$core$Maybe$Nothing
 							})
 						]))
