@@ -139,7 +139,9 @@ view model =
                   , body =
                       [ E.text "Simple charts should be simple to make. The interface "
                       , E.text "mirrors the element and attribute pattern which you already"
-                      , E.text "know and love. Get started composing your chart in minutes!"
+                      , E.text "know and love. "
+                      , Layout.link "/quick-start" "Get started"
+                      , E.text " composing your chart in minutes!"
                       ]
                   , togglable = Just ( FamiliarToggle, model.familiarToggle )
                   , chart = E.html <| H.map (\_ -> None) (Familiar.view ())
@@ -151,7 +153,7 @@ view model =
               , feature
                   { title = "Flexible, yet concise"
                   , body =
-                      [ E.text "No clutter, even with tricky requirements. Great support for"
+                      [ E.text "No clutter, even with tricky requirements. Great support for "
                       , E.text "interactivity, advanced labeling, guidence lines, and "
                       , E.text "irregular details."
                       ]
@@ -165,7 +167,7 @@ view model =
               , feature
                   { title = "Plenty of examples"
                   , body =
-                      [ E.text "Charts are visual and so should the documentation! "
+                      [ E.text "Charts are visual and so should the documentation be! "
                       , E.text "There is more than 100 examples on this site to help you "
                       , E.text "compose your exact chart. "
                       , E.link [ F.underline ] { url = "/documentation", label = E.text "Explore catalog" }

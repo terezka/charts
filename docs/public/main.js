@@ -39735,7 +39735,9 @@ var $author$project$Page$Home$view = function (model) {
 									[
 										$mdgriffith$elm_ui$Element$text('Simple charts should be simple to make. The interface '),
 										$mdgriffith$elm_ui$Element$text('mirrors the element and attribute pattern which you already'),
-										$mdgriffith$elm_ui$Element$text('know and love. Get started composing your chart in minutes!')
+										$mdgriffith$elm_ui$Element$text('know and love. '),
+										A2($author$project$Ui$Layout$link, '/quick-start', 'Get started'),
+										$mdgriffith$elm_ui$Element$text(' composing your chart in minutes!')
 									]),
 								chart: $mdgriffith$elm_ui$Element$html(
 									A2(
@@ -39755,7 +39757,7 @@ var $author$project$Page$Home$view = function (model) {
 							{
 								body: _List_fromArray(
 									[
-										$mdgriffith$elm_ui$Element$text('No clutter, even with tricky requirements. Great support for'),
+										$mdgriffith$elm_ui$Element$text('No clutter, even with tricky requirements. Great support for '),
 										$mdgriffith$elm_ui$Element$text('interactivity, advanced labeling, guidence lines, and '),
 										$mdgriffith$elm_ui$Element$text('irregular details.')
 									]),
@@ -39774,7 +39776,7 @@ var $author$project$Page$Home$view = function (model) {
 							{
 								body: _List_fromArray(
 									[
-										$mdgriffith$elm_ui$Element$text('Charts are visual and so should the documentation! '),
+										$mdgriffith$elm_ui$Element$text('Charts are visual and so should the documentation be! '),
 										$mdgriffith$elm_ui$Element$text('There is more than 100 examples on this site to help you '),
 										$mdgriffith$elm_ui$Element$text('compose your exact chart. '),
 										A2(
