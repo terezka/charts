@@ -56,7 +56,7 @@ update msg model =
 view : Model -> H.Html Msg
 view model =
   C.chart
-    [ CA.height 450
+    [ CA.height 300
     , CA.width 1000
     , CA.static
     , CA.margin { top = 0, bottom = 18, left = 0, right = 0 }
@@ -103,8 +103,8 @@ view model =
               case CE.getDependent bar of
                 Just value ->
                   C.label
-                    [ CA.moveDown 25
-                    , CA.fontSize 14
+                    [ CA.moveDown 16
+                    , CA.fontSize 12
                     , CA.color "rgba(255, 255, 255, 0.4)"
                     ]
                     [ S.text (String.fromInt (round (value / 1000)) ++ "k") ]
@@ -113,30 +113,13 @@ view model =
                 Nothing ->
                   C.label
                     [ CA.moveUp 15
-                    , CA.fontSize 14
+                    , CA.fontSize 12
                     , CA.color "rgb(120, 120, 120)"
                     ]
                     [ S.text "No data" ]
                     (CE.getTop p bar)
         in
         List.map eachBar (CE.getProducts stack)
-
-    , C.labelAt (CA.middle) (CA.percent 72)
-        [ CA.fontSize 50, CA.moveUp 10, CA.color "rgb(90, 90, 90)" ]
-        [ S.text "Compose "
-        , S.tspan [ SA.style "font-style: italic;" ] [ S.text "your" ]
-        , S.text " chart"
-        ]
-
-    , C.labelAt (CA.middle) (CA.percent 72)
-        [ CA.fontSize 50, CA.moveDown 50, CA.color "rgb(90, 90, 90)" ]
-        [ S.text "with confidence."
-        ]
-
-    , C.labelAt (CA.middle) (CA.percent 72)
-        [ CA.fontSize 24, CA.moveUp 65, CA.color "rgb(120, 120, 120)" ]
-        [ S.text "This site is not done- please don't tweet yet!"
-        ]
 
     , C.each model.hovering <| \p dot ->
         let xValue = Time.millisToPosix (round (CE.getIndependent dot))
@@ -156,6 +139,11 @@ view model =
             [ HA.style "font-size" "14px"
             ]
             [ header, body ]
+        ]
+
+    , C.labelAt (CA.middle) (CA.percent 57)
+        [ CA.fontSize 100, CA.color "rgb(90, 90, 90)" ]
+        [ S.text "elm-charts"
         ]
     ]
 
