@@ -82,8 +82,9 @@ view model =
               , F.size 14
               , E.width (E.px 700)
               ]
-              [ E.text "This library is developed and managed by Tereza Sokol by the "
-              , E.text "support of freelance contracts with various companies. If you'd "
+              [ E.text "This library is developed and managed by "
+              , Layout.link "https://twitter.com/tereza_sokol" "Tereza Sokol"
+              , E.text " by the support of freelance contracts with various companies. If you'd "
               , E.el [ F.bold ] (E.text "like to support  the maintanence and furter development")
               , E.text " through a commission of work or donation, you are welcome to contact me "
               , E.text "at "
@@ -91,19 +92,26 @@ view model =
               , E.text "."
               ]
 
-          , E.row
-              [ F.size 14
-              , E.paddingXY 0 10
-              , E.spacing 20
+          , E.el
+              [ F.size 22
+              , E.paddingEach { top = 30, bottom = 5, left = 0, right = 0 }
               ]
-              [ Layout.link "https://github.com/terezka" "GitHub"
-              , Layout.link "https://twitter.com/tereza_sokol" "Twitter"
-              , Layout.link "https://github.com/terezka/charts/issues" "Report an issue"
+              (E.text "Contracting")
+
+          , E.paragraph
+              [ E.paddingXY 0 10
+              , F.size 14
+              , E.width (E.px 700)
+              ]
+              [ E.text "If you or your company would like me to build you a chart with elm-charts, I'm happy to do so! "
+              , E.text "Feel free to contact me at "
+              , Layout.link "mailto:terezasokol@gmail.com" "terezasokol@gmail.com"
+              , E.text " and we can figure out the details."
               ]
 
           , E.el
               [ F.size 22
-              , E.paddingEach { top = 45, bottom = 5, left = 0, right = 0 }
+              , E.paddingEach { top = 30, bottom = 5, left = 0, right = 0 }
               ]
               (E.text "Roadmap")
 
@@ -135,6 +143,17 @@ view model =
                 , item "Confidence intervals"
                 , item "More interpolation options"
                 ]
+
+          , E.row
+              [ F.size 14
+              , E.paddingXY 0 30
+              , E.spacing 20
+              ]
+              [ E.text "Quick links:"
+              , Layout.link "https://github.com/terezka" "GitHub"
+              , Layout.link "https://twitter.com/tereza_sokol" "Twitter"
+              , Layout.link "https://github.com/terezka/charts/issues" "Report an issue"
+              ]
           ]
     }
 

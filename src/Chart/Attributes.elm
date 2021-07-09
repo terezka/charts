@@ -50,7 +50,7 @@ module Chart.Attributes exposing
   -- COLORS
   , pink, purple, blue, green, orange, turquoise, red
   , magenta, brown, mint, yellow, gray
-  , darkYellow, darkBlue, darkGray
+  , darkYellow, darkBlue, darkGray, labelGray
   )
 
 
@@ -932,3 +932,9 @@ gray =
 darkGray : String
 darkGray =
   Helpers.darkGray
+
+
+{-| -}
+labelGray : String
+labelGray =
+  Helpers.labelGray

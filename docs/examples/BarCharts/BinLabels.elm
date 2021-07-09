@@ -18,11 +18,7 @@ view model =
     [ C.grid []
 
     , C.yLabels []
-    , C.eachBin <| \p bin ->
-        let common = CE.getCommonality bin
-            middle = common.start + (common.end - common.start) / 2
-        in
-        [ C.xLabel [ CA.x middle, CA.y 0 ] [ S.text common.datum.label ] ]
+    , C.binLabels .label [ CA.moveDown 20 ]
 
     , C.bars []
         [ C.bar .q []
@@ -38,7 +34,7 @@ meta =
   { category = "Bar charts"
   , categoryOrder = 1
   , name = "Labels for bins"
-  , description = "Add custom bin labels."
+  , description = "Add bin labels."
   , order = 15
   }
 

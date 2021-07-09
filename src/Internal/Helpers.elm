@@ -160,3 +160,7 @@ darkGray : String
 darkGray =
   "rgb(200 200 200)"
 
+
+labelGray : String
+labelGray =
+  "#808BAB"
