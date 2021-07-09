@@ -39784,7 +39784,7 @@ var $author$project$Page$Home$view = function (model) {
 										_List_fromArray(
 											[$mdgriffith$elm_ui$Element$Font$underline]),
 										{
-											label: $mdgriffith$elm_ui$Element$text('Explore catalog'),
+											label: $mdgriffith$elm_ui$Element$text('Explore the catalog'),
 											url: '/documentation'
 										}),
 										$mdgriffith$elm_ui$Element$text('.')
