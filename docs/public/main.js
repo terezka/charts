@@ -39180,6 +39180,20 @@ var $author$project$Charts$Landing$view = function (model) {
 				$author$project$Chart$Attributes$percent(57),
 				_List_fromArray(
 					[
+						$author$project$Chart$Attributes$fontSize(20),
+						$author$project$Chart$Attributes$moveUp(90),
+						$author$project$Chart$Attributes$color('rgb(120, 120, 120)')
+					]),
+				_List_fromArray(
+					[
+						$elm$svg$Svg$text('Not finished yet- please do not tweet!')
+					])),
+				A4(
+				$author$project$Chart$labelAt,
+				$author$project$Chart$Attributes$middle,
+				$author$project$Chart$Attributes$percent(57),
+				_List_fromArray(
+					[
 						$author$project$Chart$Attributes$fontSize(100),
 						$author$project$Chart$Attributes$color('rgb(90, 90, 90)')
 					]),
@@ -39259,7 +39273,7 @@ var $author$project$Page$Home$view = function (model) {
 								body: _List_fromArray(
 									[
 										$mdgriffith$elm_ui$Element$text('Charts are visual and so should the documentation! '),
-										$mdgriffith$elm_ui$Element$text('There is nearly 100 examples on this site to help you'),
+										$mdgriffith$elm_ui$Element$text('There is nearly 100 examples on this site to help you '),
 										$mdgriffith$elm_ui$Element$text('compose your exact chart. '),
 										A2(
 										$mdgriffith$elm_ui$Element$link,

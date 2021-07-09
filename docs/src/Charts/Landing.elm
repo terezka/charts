@@ -142,6 +142,11 @@ view model =
         ]
 
     , C.labelAt (CA.middle) (CA.percent 57)
+        [ CA.fontSize 20, CA.moveUp 90, CA.color "rgb(120, 120, 120)" ]
+        [ S.text "Not finished yet- please do not tweet!"
+        ]
+
+    , C.labelAt (CA.middle) (CA.percent 57)
         [ CA.fontSize 100, CA.color "rgb(90, 90, 90)" ]
         [ S.text "elm-charts"
         ]
