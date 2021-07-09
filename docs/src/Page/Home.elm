@@ -166,7 +166,7 @@ view model =
                   { title = "Visual catalog"
                   , body =
                       [ E.text "Charts are visual and so should the documentation! "
-                      , E.text "There is nearly 100 examples on this site to help you"
+                      , E.text "There is nearly 100 examples on this site to help you "
                       , E.text "compose your exact chart. "
                       , E.link [ F.underline ] { url = "/documentation", label = E.text "Explore catalog" }
                       , E.text "."
