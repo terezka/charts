@@ -86,7 +86,7 @@ view model =
               , Layout.link "https://twitter.com/tereza_sokol" "Tereza Sokol"
               , E.text ". If you'd "
               , E.el [ F.bold ] (E.text "like to support  the maintanence and furter development")
-              , E.text " through a commission of work or donation, you are welcome to contact me "
+              , E.text " through a commission of work, you are welcome to contact me "
               , E.text "at "
               , Layout.link "mailto:terezasokol@gmail.com" "terezasokol@gmail.com"
               , E.text "."
