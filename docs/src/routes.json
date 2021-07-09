@@ -1,5 +1,6 @@
 { "/": { "module": "Page.Home", "name": "top" }
 , "/quick-start": { "module": "Page.QuickStart", "name": "quickStart" }
+, "/administration": { "module": "Page.Administration", "name": "administration" }
 , "/documentation": { "module": "Page.Documentation", "name": "documentation" }
 , "/documentation/section:string": { "module": "Page.Section", "name": "section" }
 , "/documentation/section:string/example:string": { "module": "Page.Example", "name": "example" }

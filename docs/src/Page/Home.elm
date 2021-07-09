@@ -159,11 +159,11 @@ view model =
                   , chart = E.html <| H.map ConciseMsg (Concise.view model.concise)
                   , code = Concise.smallCode
                   , flipped = True
-                  , height = 350
+                  , height = 300
                   }
 
               , feature
-                  { title = "Visual catalog"
+                  { title = "Plenty of examples"
                   , body =
                       [ E.text "Charts are visual and so should the documentation! "
                       , E.text "There is nearly 100 examples on this site to help you "
@@ -243,42 +243,29 @@ feature config =
           E.el [ E.centerX, E.alignTop ] config.chart
 
         Just ( onToggle, isToggled ) ->
-          E.el
+          E.column
             [ E.width (E.fillPortion 7)
             , E.alignTop
-            ] <|
-            if isToggled then
-              E.column
-                []
-                [ E.el
-                    [ E.width E.fill
-                    , E.height E.fill
-                    , BG.color (E.rgb255 250 250 250)
-                    ]
-                    (Code.view { template = config.code, edits = [] })
-                , I.button
-                    [ E.paddingXY 15 15
-                    , F.size 14
-                    , E.htmlAttribute (HA.style "position" "absolute")
-                    , E.htmlAttribute (HA.style "right" "0")
-                    ]
-                    { onPress = Just onToggle
-                    , label = E.text "Show chart"
-                    }
+            ]
+            [ if isToggled then
+                E.el
+                  [ E.width E.fill
+                  , E.height E.fill
+                  , BG.color (E.rgb255 250 250 250)
+                  ]
+                  (Code.view { template = config.code, edits = [] })
+              else
+                E.el [ E.centerX, E.alignTop ] config.chart
+            , I.button
+                [ E.paddingXY 15 15
+                , F.size 14
+                , E.htmlAttribute (HA.style "position" "absolute")
+                , E.htmlAttribute (HA.style "right" "0")
                 ]
-            else
-              E.column [ E.centerX ]
-                [ E.el [ E.alignTop ] config.chart
-                , I.button
-                    [ E.paddingXY 15 15
-                    , F.size 14
-                    , E.htmlAttribute (HA.style "position" "absolute")
-                    , E.htmlAttribute (HA.style "right" "0")
-                    ]
-                    { onPress = Just onToggle
-                    , label = E.text "Show code"
-                    }
-                ]
+                { onPress = Just onToggle
+                , label = E.text (if isToggled then "Show chart" else "Show code")
+                }
+            ]
     ]
 
 

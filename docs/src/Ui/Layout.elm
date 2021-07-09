@@ -1,4 +1,4 @@
-module Ui.Layout exposing (view)
+module Ui.Layout exposing (view, link)
 
 
 import Html as H
@@ -34,3 +34,12 @@ copyright =
     , E.alignRight
     ]
     (E.text "Designed and developed by Tereza Sokol © 2021")
+
+
+link : String -> String -> E.Element msg
+link url label =
+  E.link
+    [ F.underline ]
+    { url = url
+    , label = E.text label
+    }

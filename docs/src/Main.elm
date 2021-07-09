@@ -4,6 +4,7 @@ import Browser
 import Browser.Navigation as Navigation
 import Html
 import Page.Home
+import Page.Administration
 import Page.Documentation
 import Page.Section
 import Page.Example
@@ -36,6 +37,7 @@ type Page
     = Redirect
     | NotFound
     | Page_Home Page.Home.Model
+    | Page_Administration Page.Administration.Model
     | Page_Documentation Page.Documentation.Model
     | Page_Section Page.Section.Model
     | Page_Example Page.Example.Model
@@ -70,6 +72,9 @@ view model =
         Page_Home subModel ->
             viewPage Page_Home_Msg (Page.Home.view subModel)
 
+        Page_Administration subModel ->
+            viewPage Page_Administration_Msg (Page.Administration.view subModel)
+
         Page_Documentation subModel ->
             viewPage Page_Documentation_Msg (Page.Documentation.view subModel)
 
@@ -90,6 +95,7 @@ type Msg
     = ChangedUrl Url
     | ClickedLink Browser.UrlRequest
     | Page_Home_Msg Page.Home.Msg
+    | Page_Administration_Msg Page.Administration.Msg
     | Page_Documentation_Msg Page.Documentation.Msg
     | Page_Section_Msg Page.Section.Msg
     | Page_Example_Msg Page.Example.Msg
@@ -118,6 +124,10 @@ update msg model =
         ( Page_Home_Msg subMsg, Page_Home subModel ) ->
             Page.Home.update model.navigation subMsg subModel
                 |> updateWith Page_Home Page_Home_Msg model
+
+        ( Page_Administration_Msg subMsg, Page_Administration subModel ) ->
+            Page.Administration.update model.navigation subMsg subModel
+                |> updateWith Page_Administration Page_Administration_Msg model
 
         ( Page_Documentation_Msg subMsg, Page_Documentation subModel ) ->
             Page.Documentation.update model.navigation subMsg subModel
@@ -156,6 +166,9 @@ subscriptions model =
         Page_Home subModel ->
             Sub.map Page_Home_Msg (Page.Home.subscriptions subModel)
 
+        Page_Administration subModel ->
+            Sub.map Page_Administration_Msg (Page.Administration.subscriptions subModel)
+
         Page_Documentation subModel ->
             Sub.map Page_Documentation_Msg (Page.Documentation.subscriptions subModel)
 
@@ -188,6 +201,10 @@ changeRouteTo maybeRoute old =
         Just (Route.Top ) ->
             Page.Home.init model.navigation session ()
                 |> updateWith Page_Home Page_Home_Msg model
+
+        Just (Route.Administration ) ->
+            Page.Administration.init model.navigation session ()
+                |> updateWith Page_Administration Page_Administration_Msg model
 
         Just (Route.Documentation ) ->
             Page.Documentation.init model.navigation session ()
@@ -228,6 +245,9 @@ exit model =
 
         Page_Home subModel ->
             Page.Home.exit subModel model.session
+
+        Page_Administration subModel ->
+            Page.Administration.exit subModel model.session
 
         Page_Documentation subModel ->
             Page.Documentation.exit subModel model.session

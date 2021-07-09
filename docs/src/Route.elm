@@ -1,4 +1,4 @@
-module Route exposing (Route(..), top, documentation, section, example, gallery, quickStart, fromUrl, replaceUrl, toString)
+module Route exposing (Route(..), top, administration, documentation, section, example, gallery, quickStart, fromUrl, replaceUrl, toString)
 
 import Browser.Navigation as Navigation
 import Url exposing (Url)
@@ -10,6 +10,11 @@ import Url.Builder as Builder
 top : String
 top =
   toString <| Top 
+
+
+administration : String
+administration =
+  toString <| Administration 
 
 
 documentation : String
@@ -39,6 +44,7 @@ quickStart =
 
 type Route
     = Top 
+    | Administration 
     | Documentation 
     | Documentation_String_ String
     | Documentation_String__String_ String String
@@ -61,6 +67,9 @@ toString route =
     case route of
         Top  ->
             Builder.absolute [] (List.filterMap identity [])
+
+        Administration  ->
+            Builder.absolute ["administration"] (List.filterMap identity [])
 
         Documentation  ->
             Builder.absolute ["documentation"] (List.filterMap identity [])
@@ -85,6 +94,7 @@ parser : Parser (Route -> a) a
 parser =
     oneOf
         [ Parser.map Top Parser.top
+        , Parser.map Administration (s "administration")
         , Parser.map Documentation (s "documentation")
         , Parser.map Documentation_String_ (s "documentation" </> string)
         , Parser.map Documentation_String__String_ (s "documentation" </> string </> string)
