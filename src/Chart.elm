@@ -55,7 +55,7 @@ and attributes. It looks something like this:
 All the elements, like `chart`, `grid`, `xLabels`, `yLabels`, `bars` and `bar` in the example
 above, are defined in this module. All the attributes, like `width`, `height`, `color`, and `opacity`,
 are defined in `Chart.Attributes`. Attributes and other functions related to events are located in
-the `Chart.Events` module. Lastly, `Chart.Svg` holds charting primitives if case your have very special
+the `Chart.Events` module. Lastly, `Chart.Svg` holds charting primitives in case you have very special
 needs.
 
 NOTE: Some of the more advanced elements utilize helper functions in `Chart.Events`
@@ -215,7 +215,7 @@ the `chart` element.
                 -- Makes sure that your y-axis begins at exactly 0, no matter
                 -- what your data is like.
 
-        -- Add event triggers to your chart. Learn move about these in
+        -- Add event triggers to your chart. Learn more about these in
         -- the `Chart.Events` module.
         , CE.onMouseMove OnHovering (CE.getNearest C.bar)
         , CE.onMouseLeave (OnHovering [])
@@ -1986,8 +1986,8 @@ The rest of the configuration options concern styling:
     C.bars
       [ CA.spacing 0.1      -- The spacing _between_ the bars in each bin relative to the full length (1).
       , CA.margin 0.2       -- The spacing _around_ the bars in each bin relative to the full length (1).
-      , CA.roundTop 0.2     -- The rounding of your bars top corners. It gets weird after around 0.5.
-      , CA.roundBottom 0.2  -- The rounding of your bars top corners. It gets weird after around 0.5.
+      , CA.roundTop 0.2     -- The rounding of your bars' top corners. It gets weird after around 0.5.
+      , CA.roundBottom 0.2  -- The rounding of your bars' bottom corners. It gets weird after around 0.5.
       , CA.noGrid           -- Grid lines are by default added at the bin limits. This removes them.
       ]
       [ C.bar .income []
