@@ -9,7 +9,7 @@ module Chart.Attributes exposing
   , lowest, highest, orLower, orHigher, exactly, more, less, window, likeData, zero, middle, percent
 
   -- LABELS
-  , fontSize, uppercase, format
+  , fontSize, uppercase, format, position
   , alignLeft, alignRight, alignMiddle, content
 
   -- AXIS
@@ -17,7 +17,7 @@ module Chart.Attributes exposing
   , ints, times
 
   -- COORDINATES
-  , x, y, x1, y1, x2, y2, xOff, yOff, length
+  , x, y, x1, x2Svg, y1, x2, y2, y2Svg, length
   , moveLeft, moveRight, moveUp, moveDown
 
   -- DECORATION
@@ -28,7 +28,7 @@ module Chart.Attributes exposing
   , ungroup, roundTop, roundBottom, spacing
 
   -- LINES
-  , area, size, dashed, break
+  , area, size, dashed, break, tickLength, tickDirection
   , linear, monotone, stepped
   , circle, triangle, square, diamond, plus, cross
 
@@ -70,7 +70,7 @@ below are only guiding.
 @docs lowest, highest, orLower, orHigher, exactly, more, less, window, likeData, zero, middle, percent
 
 ## Labels
-@docs fontSize, uppercase, format
+@docs fontSize, uppercase, format, position
 @docs alignLeft, alignRight, alignMiddle, content
 
 ## Axis
@@ -78,7 +78,7 @@ below are only guiding.
 @docs ints, times
 
 ## Coordinates
-@docs x, y, x1, y1, x2, y2, xOff, yOff, length
+@docs x, y, x1, y1, x2, y2, x2Svg, y2Svg, length
 @docs moveLeft, moveRight, moveUp, moveDown
 
 ## Decoration
@@ -89,7 +89,7 @@ below are only guiding.
 @docs ungroup, roundTop, roundBottom, spacing
 
 ## Lines
-@docs area, size, dashed, break
+@docs area, size, dashed, break, tickLength, tickDirection
 @docs linear, monotone, stepped
 @docs circle, triangle, square, diamond, plus, cross
 
@@ -339,6 +339,12 @@ x2 v config =
 
 
 {-| -}
+x2Svg : x -> Attribute { a | x2Svg : Maybe x }
+x2Svg v config =
+  { config | x2Svg = Just v }
+
+
+{-| -}
 y : Float -> Attribute { a | y : Float }
 y v config =
   { config | y = v }
@@ -357,9 +363,27 @@ y2 v config =
 
 
 {-| -}
+y2Svg : x -> Attribute { a | y2Svg : Maybe x }
+y2Svg v config =
+  { config | y2Svg = Just v }
+
+
+{-| -}
 break : Attribute { a | break : Bool }
 break config =
   { config | break = True }
+
+
+{-| -}
+tickLength : Float -> Attribute { a | tickLength : Float }
+tickLength v config =
+  { config | tickLength = v }
+
+
+{-| -}
+tickDirection : Float -> Attribute { a | tickDirection : Float }
+tickDirection v config =
+  { config | tickDirection = v }
 
 
 {-| -}
@@ -438,6 +462,12 @@ uppercase config =
 format : x -> Attribute { a | format : Maybe x }
 format v config =
   { config | format = Just v }
+
+
+{-| -}
+position : x -> Attribute { a | position : x }
+position v config =
+  { config | position = v }
 
 
 {-| -}

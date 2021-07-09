@@ -18,8 +18,8 @@ view model =
     , C.yLabels []
     , C.series .x
         [ C.stacked
-          [ C.interpolated .y [  ] []
-          , C.interpolated .z [  ] []
+          [ C.interpolated .y [] []
+          , C.interpolated .z [] []
           ]
         ]
         data

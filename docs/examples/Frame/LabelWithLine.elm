@@ -33,8 +33,8 @@ view model =
     , C.line
         [ CA.break
         , CA.x1 5, CA.y1 6
-        , CA.xOff 10, CA.yOff 13
-        , CA.color CA.pink
+        , CA.x2Svg 10, CA.y2Svg 13
+        , CA.color CA.purple
         ]
     ]
 {-| @SMALL END -}

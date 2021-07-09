@@ -18,8 +18,8 @@ view model =
     , C.xLabels []
     , C.yLabels []
     , C.series .x
-        [ C.interpolated .y [] [ CA.color CA.red ]
-        , C.interpolated .z [] [ CA.color CA.orange ]
+        [ C.scatter .y [ CA.color CA.red ]
+        , C.scatter .z [ CA.color CA.orange ]
         ]
         data
     ]

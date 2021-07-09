@@ -46,7 +46,7 @@ view model =
         [ CA.x1 .x1
         , CA.x2 .x2
         ]
-        [ C.bar .z [ CA.opacity 0.3, CA.borderWidth 1, CA.border CA.pink ]
+        [ C.bar .z [ CA.opacity 0.3, CA.borderWidth 1 ]
         ]
         data
 
@@ -111,7 +111,7 @@ smallCode =
         [ CA.x1 .x1
         , CA.x2 .x2
         ]
-        [ C.bar .z [ CA.opacity 0.3, CA.borderWidth 1, CA.border CA.pink ]
+        [ C.bar .z [ CA.opacity 0.3, CA.borderWidth 1 ]
         ]
         data
 
@@ -173,7 +173,7 @@ view model =
         [ CA.x1 .x1
         , CA.x2 .x2
         ]
-        [ C.bar .z [ CA.opacity 0.3, CA.borderWidth 1, CA.border CA.pink ]
+        [ C.bar .z [ CA.opacity 0.3, CA.borderWidth 1 ]
         ]
         data
 

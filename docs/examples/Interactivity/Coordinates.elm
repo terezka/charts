@@ -1,24 +1,25 @@
-module Examples.Interactivity.BasicBar exposing (..)
+module Examples.Interactivity.Coordinates exposing (..)
 
 {-| @LARGE -}
 import Html as H
 import Svg as S
 import Chart as C
+import Chart.Svg as CS
 import Chart.Attributes as CA
 import Chart.Events as CE
 
 
 type alias Model =
-  { hovering : List (CE.Product CE.Bar (Maybe Float) Datum) }
+  { hovering : Maybe CE.Point }
 
 
 init : Model
 init =
-  { hovering = [] }
+  { hovering = Nothing }
 
 
 type Msg
-  = OnHover (List (CE.Product CE.Bar (Maybe Float) Datum))
+  = OnHover (Maybe CE.Point)
 
 
 update : Msg -> Model -> Model
@@ -34,22 +35,31 @@ view model =
   C.chart
     [ CA.height 300
     , CA.width 300
-    , CE.onMouseMove OnHover (CE.getNearest CE.bar)
-    , CE.onMouseLeave (OnHover [])
+    , CE.onMouseMove (OnHover << Just) CE.getCoords
+    , CE.onMouseLeave (OnHover Nothing)
+    , CA.domain [ CA.lowest 0 CA.exactly, CA.highest 10 CA.exactly ]
+    , CA.range [ CA.lowest 0 CA.exactly, CA.highest 10 CA.exactly ]
     ]
     [ C.grid []
     , C.xLabels []
     , C.yLabels []
-    , C.bars []
-        [ C.stacked
-            [ C.bar .z []
-            , C.bar .y []
+
+    , case model.hovering of
+        Just coords ->
+          C.series .x [ C.scatter .y [ CA.cross ] ] [ coords ]
+
+        Nothing ->
+          C.none
+
+    , case model.hovering of
+        Just coords ->
+          C.labelAt CA.middle .max []
+            [ S.text ("x: " ++ String.fromFloat coords.x)
+            , S.text (" y: " ++ String.fromFloat coords.y)
             ]
-        , C.bar .v [ CA.dotted [] ]
-        ]
-        data
-    , C.each model.hovering <| \p item ->
-        [ C.tooltip item [] [] [] ]
+
+        Nothing ->
+          C.none
     ]
 {-| @SMALL END -}
 {-| @LARGE END -}
@@ -58,9 +68,9 @@ view model =
 meta =
   { category = "Interactivity"
   , categoryOrder = 5
-  , name = "Basic bar tooltip"
-  , description = "Add a tooltip for nearest bar."
-  , order = 1
+  , name = "Basic coordinates"
+  , description = "Get the hovered coordinates."
+  , order = -1
   }
 
 

@@ -49,6 +49,7 @@ defaultContainer =
 container : Plane -> Container msg -> List (Html msg) -> List (Svg msg) -> List (Html msg) -> Html msg
 container plane config below chartEls above =
   -- TODO seperate plane from container size
+  -- TODO preserveAspectRatio?
   let htmlAttrsDef =
         [ HA.class "elm-charts__container-inner"
         , HA.style "display" "flex"
@@ -58,6 +59,7 @@ container plane config below chartEls above =
       htmlAttrsSize =
         if config.responsive then
           [ HA.style "width" "100%"
+          , HA.style "height" "100%"
           ]
         else
           [ HA.style "width" (String.fromFloat plane.width ++ "px")
@@ -169,8 +171,12 @@ type alias Line =
   , x2 : Maybe Float
   , y1 : Maybe Float
   , y2 : Maybe Float
+  , x2Svg : Maybe Float
+  , y2Svg : Maybe Float
   , xOff : Float
   , yOff : Float
+  , tickLength : Float
+  , tickDirection : Float
   , color : String
   , width : Float
   , dashed : List Float
@@ -186,6 +192,10 @@ defaultLine =
   , x2 = Nothing
   , y1 = Nothing
   , y2 = Nothing
+  , x2Svg = Nothing
+  , y2Svg = Nothing
+  , tickLength = 0
+  , tickDirection = -90
   , xOff = 0
   , yOff = 0
   , color = "rgb(210, 210, 210)"
@@ -200,8 +210,8 @@ defaultLine =
 {-| -}
 line : Plane -> Line -> Svg msg
 line plane config =
-  let ( ( x1_, x2_ ), ( y1_, y2_ ) ) =
-        case ( ( config.x1, config.x2 ), ( config.y1, config.y2 ), ( round config.xOff, round config.yOff ) ) of
+  let ( ( x1, x2 ), ( y1, y2 ) ) =
+        case ( ( config.x1, config.x2 ), ( config.y1, config.y2 ), ( config.x2Svg, config.y2Svg ) ) of
           -- ONLY X
           ( ( Just a, Just b ), ( Nothing, Nothing ), _ ) ->
             ( ( a, b ), ( plane.y.min, plane.y.min ) )
@@ -236,29 +246,29 @@ line plane config =
             ( ( a, b ), ( c, c ) )
 
           -- ONE FULL POINT
-          ( ( Just a, Nothing ), ( Nothing, Just b ), ( 0, 0 ) ) ->
+          ( ( Just a, Nothing ), ( Nothing, Just b ), ( Nothing, Nothing ) ) ->
             ( ( a, plane.x.max ), ( b, b ) )
 
-          ( ( Just a, Nothing ), ( Nothing, Just b ), ( xOff, yOff ) ) ->
-            ( ( a, a + Coord.scaleCartesianX plane config.xOff ), ( b, b + Coord.scaleCartesianY plane config.yOff ) )
+          ( ( Just a, Nothing ), ( Nothing, Just b ), ( Just x2Svg, Just y2Svg ) ) ->
+            ( ( a, a + Coord.scaleCartesianX plane x2Svg ), ( b, b + Coord.scaleCartesianY plane y2Svg ) )
 
-          ( ( Just a, Nothing ), ( Just b, Nothing ), ( 0, 0 ) ) ->
+          ( ( Just a, Nothing ), ( Just b, Nothing ), ( Nothing, Nothing ) ) ->
             ( ( a, plane.x.max ), ( b, b ) )
 
-          ( ( Just a, Nothing ), ( Just b, Nothing ), ( xOff, yOff ) ) ->
-            ( ( a, a + Coord.scaleCartesianX plane config.xOff ), ( b, b + Coord.scaleCartesianY plane config.yOff ) )
+          ( ( Just a, Nothing ), ( Just b, Nothing ), ( Just x2Svg, Just y2Svg ) ) ->
+            ( ( a, a + Coord.scaleCartesianX plane x2Svg ), ( b, b + Coord.scaleCartesianY plane y2Svg ) )
 
-          ( ( Nothing, Just a ), ( Nothing, Just b ), ( 0, 0 ) ) ->
+          ( ( Nothing, Just a ), ( Nothing, Just b ), ( Nothing, Nothing ) ) ->
             ( ( a, plane.x.max ), ( b, b ) )
 
-          ( ( Nothing, Just a ), ( Nothing, Just b ), ( xOff, yOff ) ) ->
-            ( ( a, a + Coord.scaleCartesianX plane config.xOff ), ( b, b + Coord.scaleCartesianY plane config.yOff ) )
+          ( ( Nothing, Just a ), ( Nothing, Just b ), ( Just x2Svg, Just y2Svg ) ) ->
+            ( ( a, a + Coord.scaleCartesianX plane x2Svg ), ( b, b + Coord.scaleCartesianY plane y2Svg ) )
 
-          ( ( Nothing, Just a ), ( Just b, Nothing ), ( 0, 0 ) ) ->
+          ( ( Nothing, Just a ), ( Just b, Nothing ), ( Nothing, Nothing ) ) ->
             ( ( a, plane.x.max ), ( b, b ) )
 
-          ( ( Nothing, Just a ), ( Just b, Nothing ), ( xOff, yOff ) ) ->
-            ( ( a, a + Coord.scaleCartesianX plane config.xOff ), ( b, b + Coord.scaleCartesianY plane config.yOff ) )
+          ( ( Nothing, Just a ), ( Just b, Nothing ), ( Just x2Svg, Just y2Svg ) ) ->
+            ( ( a, a + Coord.scaleCartesianX plane x2Svg ), ( b, b + Coord.scaleCartesianY plane y2Svg ) )
 
           -- NEITHER
           ( ( Nothing, Nothing ), ( Nothing, Nothing ), _ ) ->
@@ -273,13 +283,32 @@ line plane config =
               )
             )
 
+      angle =
+        degrees config.tickDirection
+
+      ( tickOffsetX, tickOffsetY ) =
+        if config.tickLength > 0 then
+        ( lengthInCartesianX plane (cos angle * config.tickLength)
+        , lengthInCartesianY plane (sin angle * config.tickLength)
+        ) else ( 0, 0 )
+
+      x1_ = x1 + lengthInCartesianX plane config.xOff
+      x2_ = x2 + lengthInCartesianX plane config.xOff
+      y1_ = y1 - lengthInCartesianY plane config.yOff
+      y2_ = y2 - lengthInCartesianY plane config.yOff
+
       cmds =
-        [ C.Move x1_ y1_
-        , C.Line x1_ y1_
-        ] ++
-        if config.break
+        (if config.tickLength > 0
+          then [ C.Move (x1_ + tickOffsetX) (y1_ + tickOffsetY), C.Line x1_ y1_ ]
+          else [ C.Move x1_ y1_ ])
+        ++
+        (if config.break
         then [ C.Line x1_ y2_, C.Line x2_ y2_ ]
-        else [ C.Line x2_ y2_ ]
+        else [ C.Line x2_ y2_ ])
+        ++
+        (if config.tickLength > 0
+        then [ C.Line (x2_ + tickOffsetX) (y2_ + tickOffsetY) ]
+        else [])
   in
   withAttrs config.attrs S.path
     [ SA.class "elm-charts__line"
@@ -479,7 +508,7 @@ legendsAt plane x y config children =
           Just Start -> [ HA.style "transform" "translate(-0%, 0%)" ]
           Just Middle -> [ HA.style "transform" "translate(-50%, 0%)" ]
   in
-  positionHtml plane x y config.xOff config.yOff
+  positionHtml plane x y config.xOff -config.yOff
     (anchorAttrs ++ alignmentAttrs ++ otherAttrs ++ config.htmlAttrs)
     (H.node "style" [] [ H.text paddingStyle ] :: children)
 
@@ -627,7 +656,7 @@ defaultLabel =
   { xOff = 0
   , yOff = 0
   , border = "white"
-  , borderWidth = 0.1
+  , borderWidth = 0
   , fontSize = Nothing
   , color = "#808BAB"
   , anchor = Nothing
@@ -795,15 +824,15 @@ bar plane config point =
 
       w = abs (pos.x2 - pos.x1)
       roundingTop = Coord.scaleSVGX plane w * 0.5 * (clamp 0 1 config.roundTop)
-      roudningBottom = Coord.scaleSVGX plane w * 0.5 * (clamp 0 1 config.roundBottom)
+      roundingBottom = Coord.scaleSVGX plane w * 0.5 * (clamp 0 1 config.roundBottom)
       radiusTopX = Coord.scaleCartesianX plane roundingTop
       radiusTopY = Coord.scaleCartesianY plane roundingTop
-      radiusBottomX = Coord.scaleCartesianX plane roudningBottom
-      radiusBottomY = Coord.scaleCartesianY plane roudningBottom
+      radiusBottomX = Coord.scaleCartesianX plane roundingBottom
+      radiusBottomY = Coord.scaleCartesianY plane roundingBottom
 
-      ( commands, highlightCommands ) =
+      ( commands, highlightCommands, highlightCut ) =
         if pos.y1 == pos.y2 then
-          ( [], [] )
+          ( [], [], highlightPos )
         else
           case ( config.roundTop > 0, config.roundBottom > 0 ) of
             ( False, False ) ->
@@ -823,6 +852,11 @@ bar plane config point =
                 , C.Line pos.x1 pos.y2
                 , C.Line pos.x1 pos.y1
                 ]
+              , { x1 = pos.x1 - highlightWidthCarX
+                , x2 = pos.x2 + highlightWidthCarX
+                , y1 = pos.y1
+                , y2 = pos.y2 + highlightWidthCarY
+                }
               )
 
             ( True, False ) ->
@@ -848,64 +882,79 @@ bar plane config point =
                 , C.Arc roundingTop roundingTop -45 False False pos.x1 (pos.y2 - radiusTopY)
                 , C.Line pos.x1 pos.y1
                 ]
+              , { x1 = pos.x1 - highlightWidthCarX
+                , x2 = pos.x2 + highlightWidthCarX
+                , y1 = pos.y1
+                , y2 = pos.y2 + highlightWidthCarY
+                }
               )
 
             ( False, True ) ->
               ( [ C.Move (pos.x1 + radiusBottomX) pos.y1
-                , C.Arc roudningBottom roudningBottom -45 False True pos.x1 (pos.y1 + radiusBottomY)
+                , C.Arc roundingBottom roundingBottom -45 False True pos.x1 (pos.y1 + radiusBottomY)
                 , C.Line pos.x1 pos.y2
                 , C.Line pos.x2 pos.y2
                 , C.Line pos.x2 (pos.y1 + radiusBottomY)
-                , C.Arc roudningBottom roudningBottom -45 False True (pos.x2 - radiusBottomX) pos.y1
+                , C.Arc roundingBottom roundingBottom -45 False True (pos.x2 - radiusBottomX) pos.y1
                 , C.Line (pos.x1 + radiusBottomX) pos.y1
                 ]
               , [ C.Move (highlightPos.x1 + radiusBottomX) highlightPos.y1
-                , C.Arc roudningBottom roudningBottom -45 False True highlightPos.x1 (highlightPos.y1 + radiusBottomY)
-                , C.Line highlightPos.x1 pos.y2
-                , C.Line highlightPos.x2 pos.y2
+                , C.Arc roundingBottom roundingBottom -45 False True highlightPos.x1 (highlightPos.y1 + radiusBottomY)
+                , C.Line highlightPos.x1 highlightPos.y2
+                , C.Line highlightPos.x2 highlightPos.y2
                 , C.Line highlightPos.x2 (highlightPos.y1 + radiusBottomY)
-                , C.Arc roudningBottom roudningBottom -45 False True (highlightPos.x2 - radiusBottomX) highlightPos.y1
+                , C.Arc roundingBottom roundingBottom -45 False True (highlightPos.x2 - radiusBottomX) highlightPos.y1
                 , C.Line (highlightPos.x1 + radiusBottomX) highlightPos.y1
                 -- ^ outer
                 , C.Line (pos.x2 - radiusBottomX) pos.y1
-                , C.Arc roudningBottom roudningBottom -45 False False pos.x2 (pos.y1 + radiusBottomY)
+                , C.Arc roundingBottom roundingBottom -45 False False pos.x2 (pos.y1 + radiusBottomY)
                 , C.Line pos.x2 pos.y2
                 , C.Line pos.x1 pos.y2
                 , C.Line pos.x1 (pos.y1 + radiusBottomY)
-                , C.Arc roudningBottom roudningBottom -45 False False (pos.x1 + radiusBottomX) pos.y1
+                , C.Line pos.x2 pos.y1
                 ]
+              , { x1 = pos.x1 - highlightWidthCarX
+                , x2 = pos.x2 + highlightWidthCarX
+                , y1 = pos.y1 - highlightWidthCarY
+                , y2 = pos.y2 + highlightWidthCarY
+                }
               )
 
             ( True, True ) ->
               ( [ C.Move (pos.x1 + radiusBottomX) pos.y1
-                , C.Arc roudningBottom roudningBottom -45 False True pos.x1 (pos.y1 + radiusBottomY)
+                , C.Arc roundingBottom roundingBottom -45 False True pos.x1 (pos.y1 + radiusBottomY)
                 , C.Line pos.x1 (pos.y2 - radiusTopY)
                 , C.Arc roundingTop roundingTop -45 False True (pos.x1 + radiusTopX) pos.y2
                 , C.Line (pos.x2 - radiusTopX) pos.y2
                 , C.Arc roundingTop roundingTop -45 False True pos.x2 (pos.y2 - radiusTopY)
                 , C.Line pos.x2 (pos.y1 + radiusBottomY)
-                , C.Arc roudningBottom roudningBottom -45 False True (pos.x2 - radiusBottomX) pos.y1
+                , C.Arc roundingBottom roundingBottom -45 False True (pos.x2 - radiusBottomX) pos.y1
                 , C.Line (pos.x1 + radiusBottomX) pos.y1
                 ]
               , [ C.Move (highlightPos.x1 + radiusBottomX) highlightPos.y1
-                , C.Arc roudningBottom roudningBottom -45 False True highlightPos.x1 (highlightPos.y1 + radiusBottomY)
+                , C.Arc roundingBottom roundingBottom -45 False True highlightPos.x1 (highlightPos.y1 + radiusBottomY)
                 , C.Line highlightPos.x1 (highlightPos.y2 - radiusTopY)
                 , C.Arc roundingTop roundingTop -45 False True (highlightPos.x1 + radiusTopX) highlightPos.y2
                 , C.Line (highlightPos.x2 - radiusTopX) highlightPos.y2
                 , C.Arc roundingTop roundingTop -45 False True highlightPos.x2 (highlightPos.y2 - radiusTopY)
                 , C.Line highlightPos.x2 (highlightPos.y1 + radiusBottomY)
-                , C.Arc roudningBottom roudningBottom -45 False True (highlightPos.x2 - radiusBottomX) highlightPos.y1
+                , C.Arc roundingBottom roundingBottom -45 False True (highlightPos.x2 - radiusBottomX) highlightPos.y1
                 , C.Line (highlightPos.x1 + radiusBottomX) highlightPos.y1
                 -- ^ outer
                 , C.Line (pos.x2 - radiusBottomX) pos.y1
-                , C.Arc roudningBottom roudningBottom -45 False False pos.x2 (pos.y1 + radiusBottomY)
+                , C.Arc roundingBottom roundingBottom -45 False False pos.x2 (pos.y1 + radiusBottomY)
                 , C.Line pos.x2 (pos.y2 - radiusTopY)
                 , C.Arc roundingTop roundingTop -45 False False (pos.x2 - radiusTopX) pos.y2
                 , C.Line (pos.x1 + radiusTopX) pos.y2
                 , C.Arc roundingTop roundingTop -45 False False pos.x1 (pos.y2 - radiusTopY)
                 , C.Line pos.x1 (pos.y1 + radiusBottomY)
-                , C.Arc roudningBottom roudningBottom -45 False False (pos.x1 + radiusBottomX) pos.y1
+                , C.Line pos.x2 pos.y1
                 ]
+              , { x1 = pos.x1 - highlightWidthCarX
+                , x2 = pos.x2 + highlightWidthCarX
+                , y1 = pos.y1 - highlightWidthCarY
+                , y2 = pos.y2 + highlightWidthCarY
+                }
               )
 
       viewAuraBar fill =
@@ -914,7 +963,7 @@ bar plane config point =
         else
           S.g
             [ SA.class "elm-charts__bar-with-highlight" ]
-            [ viewBar highlightColor config.highlight "transparent" 0 0 highlightCommands { highlightPos | y2 = pos.y2 + highlightWidthCarY * 2 }
+            [ viewBar highlightColor config.highlight "transparent" 0 0 highlightCommands highlightCut
             , viewBar fill config.opacity config.border config.borderWidth 1 commands pos
             ]
 
@@ -1574,9 +1623,10 @@ decoder plane toMsg =
           }
 
         searched =
-          { x = Coord.toCartesianX plane (mouseX - box.left)
-          , y = Coord.toCartesianY plane (mouseY - box.top)
-          }
+          fromSvg newPlane
+            { x = mouseX - box.left
+            , y = mouseY - box.top
+            }
       in
       toMsg newPlane searched
   in

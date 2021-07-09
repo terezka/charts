@@ -27,6 +27,7 @@ import Ui.Tabs
 
 type alias Model =
   { examples : Examples.Model
+  , showFullCode : Bool
   , selectedTab : String
   , selectedThumb : String
   }
@@ -45,6 +46,7 @@ type alias Params =
 init : Navigation.Key -> Session -> Params -> ( Model, Cmd Msg )
 init key session params =
   ( { examples = Examples.init
+    , showFullCode = False
     , selectedTab = params.section
     , selectedThumb = params.example
     }
@@ -63,6 +65,7 @@ exit model session =
 
 type Msg
   = OnExampleMsg Examples.Msg
+  | OnToggleCode
 
 
 update : Navigation.Key -> Msg -> Model -> ( Model, Cmd Msg )
@@ -70,6 +73,11 @@ update key msg model =
   case msg of
     OnExampleMsg sub ->
       ( { model | examples = Examples.update sub model.examples }
+      , Cmd.none
+      )
+
+    OnToggleCode ->
+      ( { model | showFullCode = not model.showFullCode }
       , Cmd.none
       )
 
@@ -166,13 +174,27 @@ viewContent model =
         , E.column
             [ E.width (E.fillPortion 8)
             , E.height E.fill
+            , E.spacing 20
             ]
-            [ E.column
+            [ I.button
+                [ E.alignRight
+                ]
+                { onPress = Just OnToggleCode
+                , label = E.text <| if model.showFullCode then "Show essence" else "Show full code"
+                }
+            , E.column
                 [ E.width E.fill
                 , E.height E.fill
                 , BG.color (E.rgb255 250 250 250)
                 ]
-                [ Code.view { template = Examples.smallCode currentId, edits = [] } ]
+                [ Code.view
+                    { template =
+                        if model.showFullCode
+                        then Examples.largeCode currentId
+                        else Examples.smallCode currentId
+                    , edits = []
+                    }
+                ]
             ]
           ]
     ]

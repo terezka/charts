@@ -21,8 +21,14 @@ type alias Group inter config value datum =
 
 
 {-| -}
-getProducts : Group a config value datum -> List (I.Product I.Any value datum)
+getProducts : Group a config value datum -> List (I.Product config value datum)
 getProducts (I.Item group_) =
+  group_.config.items
+
+
+{-| -}
+getGenerals : Group a config value datum -> List (I.Product I.Any value datum)
+getGenerals (I.Item group_) =
   let generalize (I.Item item) =
         I.generalize item.config.toAny (I.Item item)
   in

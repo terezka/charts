@@ -162,7 +162,7 @@ viewChart model =
             viewLabels value =
               [ C.xLabel
                   [ CA.fontSize 8
-                  , CA.x value, CA.y 0, CA.yOff -5
+                  , CA.x value, CA.y 0, CA.moveUp 5
                   ]
                   [ S.text (String.fromFloat (value / 1000) ++ "k") ]
               , C.xTick

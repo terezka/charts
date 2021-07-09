@@ -10,7 +10,7 @@ import Chart.Events as CE
 
 type alias Model =
   { hoveringDots : List (CE.Product CE.Dot (Maybe Float) Datum)
-  , hoveringBars : List (CE.Product CE.Bar (Maybe Float) Datum)
+  , hoveringBars : List (CE.Product CE.Bar Float Datum)
   }
 
 
@@ -24,14 +24,17 @@ init =
 type Msg
   = OnHover
       (List (CE.Product CE.Dot (Maybe Float) Datum))
-      (List (CE.Product CE.Bar (Maybe Float) Datum))
+      (List (CE.Product CE.Bar Float Datum))
 
 
 update : Msg -> Model -> Model
 update msg model =
   case msg of
     OnHover hoveringDots hoveringBars ->
-      { model | hoveringDots = hoveringDots, hoveringBars = hoveringBars }
+      { model
+      | hoveringDots = hoveringDots
+      , hoveringBars = hoveringBars
+      }
 
 
 view : Model -> H.Html Msg
@@ -40,12 +43,12 @@ view model =
   C.chart
     [ CA.height 300
     , CA.width 300
-
     , CE.on "mousemove" <|
         CE.map2 OnHover
           (CE.getNearest CE.dot)
-          (CE.getNearest CE.bar)
-    , CE.onMouseLeave (OnHover [] [])
+          (CE.getNearest (CE.keep CE.realValues CE.bar))
+    , CE.onMouseLeave
+        (OnHover [] [])
     ]
     [ C.grid []
     , C.xLabels []
@@ -59,7 +62,10 @@ view model =
         ]
         data
 
-    , C.bars [ CA.x1 .x1, CA.x2 .x2 ]
+    , C.bars
+        [ CA.x1 .x1
+        , CA.x2 .x2
+        ]
         [ C.bar .z [ CA.color CA.purple, CA.striped [] ] ]
         data
 
@@ -67,19 +73,13 @@ view model =
         [ C.tooltip item [] [] [] ]
 
     , C.each model.hoveringBars <| \p item ->
-        let top = CE.getTop p item
-            value =
-              CE.getDependent item
-                |> Maybe.map String.fromFloat
-                |> Maybe.withDefault "N/A"
-        in
         [ C.label
             [ CA.color CA.purple
             , CA.moveUp 8
             , CA.fontSize 14
             ]
-            [ S.text value ]
-            top
+            [ S.text (String.fromFloat (CE.getDependent item)) ]
+            (CE.getTop p item)
         ]
     ]
 {-| @SMALL END -}

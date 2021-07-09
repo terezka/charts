@@ -160,8 +160,12 @@ type alias Line =
   , x2 : Maybe Float
   , y1 : Maybe Float
   , y2 : Maybe Float
+  , x2Svg : Maybe Float
+  , y2Svg : Maybe Float
   , xOff : Float
   , yOff : Float
+  , tickLength : Float
+  , tickDirection : Float
   , color : String
   , width : Float
   , dashed : List Float

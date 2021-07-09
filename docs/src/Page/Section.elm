@@ -101,7 +101,13 @@ view model =
             , F.size 14
             , E.width (E.px 700)
             ]
-            [ E.text "This is an attempt at documentation through example. For documentation of exact API, see official Elm documentation."
+            [ E.text "This is an attempt at documentation through example. For documentation of exact API, see "
+            , E.link
+                [ F.underline ]
+                { url = "https://package.elm-lang.org/packages/terezka/charts/latest"
+                , label = E.text "official Elm documentation"
+                }
+            , E.text "."
             ]
         , Ui.Tabs.view
             { toUrl = Ui.Thumbnail.toUrlGroup << .title

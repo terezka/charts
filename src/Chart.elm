@@ -7,7 +7,7 @@ module Chart exposing
   , stacked, named, variation, amongst
 
   , xAxis, yAxis, xTicks, yTicks, xLabels, yLabels, grid
-  , binLabels, barLabels, dotLabels
+  , binLabels, barLabels, dotLabels, productLabel
 
   , xLabel, yLabel, xTick, yTick
   , generate, floats, ints, times
@@ -24,7 +24,12 @@ module Chart exposing
   )
 
 
-{-| The configuration of this charting library mirrors the pattern of HTML elements
+{-| Alpha version!
+
+**Documentation of type signatures are great, but for a visual catalog of
+examples, please check out [elm-charts.org](https://www.elm-charts.org/documentation).**
+
+The configuration of this charting library mirrors the pattern of HTML elements
 and attributes. It looks something like this:
 
     import Html exposing (Html)
@@ -58,7 +63,7 @@ too. If that is the case, I will make a note in the comment of the element.
 
 In the following examples, I will assume the imports:
 
-    import Html as H
+    import Html as H exposing (Html)
     import Html.Attributes as HA
     import Html.Events as HE
     import Svg as S
@@ -67,11 +72,6 @@ In the following examples, I will assume the imports:
     import Chart as C
     import Chart.Attributes as CA
     import Chart.Events as CE
-
-
-## Visual examples and documentation
-
-For additional examples and documentation of features, please check out [elm-charts.org](https://www.elm-charts.org/documentation).
 
 
 # The frame
@@ -108,7 +108,7 @@ For additional examples and documentation of features, please check out [elm-cha
 @docs generate, floats, ints, times
 
 ## Data labels
-@docs binLabels, barLabels, dotLabels
+@docs binLabels, barLabels, dotLabels, productLabel
 
 ## General labels
 @docs label, labelAt
@@ -157,7 +157,7 @@ import Internal.Helpers as Helpers
 import Internal.Svg as IS
 import Internal.Events as IE
 import Chart.Svg as CS
-import Chart.Attributes as CA
+import Chart.Attributes as CA exposing (Attribute)
 import Chart.Events as CE
 
 
@@ -168,8 +168,8 @@ type alias Container data msg =
   , margin : { top : Float, bottom : Float, left : Float, right : Float }
   , padding : { top : Float, bottom : Float, left : Float, right : Float }
   , responsive : Bool
-  , range : List (CA.Attribute C.Axis)
-  , domain : List (CA.Attribute C.Axis)
+  , range : List (Attribute C.Axis)
+  , domain : List (Attribute C.Axis)
   , events : List (CE.Event data msg)
   , htmlAttrs : List (H.Attribute msg)
   , attrs : List (S.Attribute msg)
@@ -179,13 +179,6 @@ type alias Container data msg =
 {-| This is the root element of your chart. All your chart elements must be contained in
 a `chart` element. The below example illustrates what configurations are available for
 the `chart` element.
-
-    import Html exposing (Html)
-    import Html.Attributes as HA
-    import Svg.Attributes as SA
-    import Chart as C
-    import Chart.Attributes as CA
-    import Chart.Events as CE
 
     view : Html msg
     view =
@@ -238,7 +231,7 @@ the `chart` element.
         ]
 
 -}
-chart : List (CA.Attribute (Container data msg)) -> List (Element data msg) -> H.Html msg
+chart : List (Attribute (Container data msg)) -> List (Element data msg) -> H.Html msg
 chart edits unindexedElements =
   let config =
         Helpers.apply edits
@@ -590,7 +583,7 @@ Customizations:
 
 
 -}
-tooltip : Item.Item a -> List (CA.Attribute Tooltip) -> List (H.Attribute Never) -> List (H.Html Never) -> Element data msg
+tooltip : Item.Item a -> List (Attribute Tooltip) -> List (H.Attribute Never) -> List (H.Html Never) -> Element data msg
 tooltip i edits attrs_ content =
   html <| \p ->
     let pos = Item.getLimits i
@@ -607,7 +600,7 @@ tooltip i edits attrs_ content =
 
 {-| -}
 type alias Axis =
-  { limits : List (CA.Attribute C.Axis)
+  { limits : List (Attribute C.Axis)
   , pinned : C.Axis -> Float
   , arrow : Bool
   , color : String
@@ -639,7 +632,7 @@ the styling options:
       ]
 
 -}
-xAxis : List (CA.Attribute Axis) -> Element item msg
+xAxis : List (Attribute Axis) -> Element item msg
 xAxis edits =
   let config =
         Helpers.apply edits
@@ -678,7 +671,7 @@ xAxis edits =
 {-| Add an y-axis line to your chart. The styling options are the same
 as for `xAxis`.
 -}
-yAxis : List (CA.Attribute Axis) -> Element item msg
+yAxis : List (Attribute Axis) -> Element item msg
 yAxis edits =
   let config =
         Helpers.apply edits
@@ -718,7 +711,7 @@ type alias Ticks =
   , height : Float
   , width : Float
   , pinned : C.Axis -> Float
-  , limits : List (CA.Attribute C.Axis)
+  , limits : List (Attribute C.Axis)
   , amount : Int
   , flip : Bool
   , grid : Bool
@@ -756,7 +749,7 @@ The example below illustrates the configuration:
           ]
       ]
 -}
-xTicks : List (CA.Attribute Ticks) -> Element item msg
+xTicks : List (Attribute Ticks) -> Element item msg
 xTicks edits =
   let config =
         Helpers.apply edits
@@ -797,7 +790,7 @@ xTicks edits =
 {-| Produce a set of ticks at "nice" numbers on the y-axis of your chart.
 The styling options are the same as for `xTicks`.
 -}
-yTicks : List (CA.Attribute Ticks) -> Element item msg
+yTicks : List (Attribute Ticks) -> Element item msg
 yTicks edits =
   let config =
         Helpers.apply edits
@@ -838,7 +831,7 @@ yTicks edits =
 type alias Labels =
   { color : String
   , pinned : C.Axis -> Float
-  , limits : List (CA.Attribute C.Axis)
+  , limits : List (Attribute C.Axis)
   , xOff : Float
   , yOff : Float
   , flip : Bool
@@ -899,7 +892,7 @@ The example below illustrates the configuration:
 For more in depth and irregular customization, see `xLabel`.
 
 -}
-xLabels : List (CA.Attribute Labels) -> Element item msg
+xLabels : List (Attribute Labels) -> Element item msg
 xLabels edits =
   let toConfig p =
         Helpers.apply edits
@@ -951,7 +944,7 @@ xLabels edits =
 {-| Produce a set of labels at "nice" numbers on the y-axis of your chart.
 The styling options are the same as for `xLabels`.
 -}
-yLabels : List (CA.Attribute Labels) -> Element item msg
+yLabels : List (Attribute Labels) -> Element item msg
 yLabels edits =
   let toConfig p =
         Helpers.apply edits
@@ -1068,7 +1061,7 @@ A full list of possible attributes:
       ]
 
 -}
-xLabel : List (CA.Attribute Label) -> List (S.Svg msg) -> Element data msg
+xLabel : List (Attribute Label) -> List (S.Svg msg) -> Element data msg
 xLabel edits inner =
   let toConfig p =
         Helpers.apply edits
@@ -1118,7 +1111,7 @@ very custom labels and `yLabels` does not cut it. See `xLabel` for
 usage and customization.
 
 -}
-yLabel : List (CA.Attribute Label) -> List (S.Svg msg) -> Element data msg
+yLabel : List (Attribute Label) -> List (S.Svg msg) -> Element data msg
 yLabel edits inner =
   let toConfig p =
         Helpers.apply edits
@@ -1208,7 +1201,7 @@ A full list of possible attributes:
       ]
 
 -}
-xTick : List (CA.Attribute Tick) -> Element data msg
+xTick : List (Attribute Tick) -> Element data msg
 xTick edits =
   let toConfig p =
         Helpers.apply edits
@@ -1239,7 +1232,7 @@ very custom ticks and `yTicks` does not cut it. See `xTick` for
 usage and customization.
 
 -}
-yTick : List (CA.Attribute Tick) -> Float -> Element data msg
+yTick : List (Attribute Tick) -> Float -> Element data msg
 yTick edits val =
   let toConfig p =
         Helpers.apply edits
@@ -1293,7 +1286,7 @@ Customizations:
       , CA.dotGrid          -- Use dot grid instead of line grid
       ]
 -}
-grid : List (CA.Attribute Grid) -> Element item msg
+grid : List (Attribute Grid) -> Element item msg
 grid edits =
   let config =
         Helpers.apply edits
@@ -1396,7 +1389,7 @@ styling options are available.
       ]
 
 -}
-bar : (data -> Float) -> List (CA.Attribute CS.Bar) -> Property data inter CS.Bar
+bar : (data -> Float) -> List (Attribute CS.Bar) -> Property data inter CS.Bar
 bar y =
   P.property (y >> Just) []
 
@@ -1413,7 +1406,7 @@ bar y =
       ]
 
 -}
-barMaybe : (data -> Maybe Float) -> List (CA.Attribute CS.Bar) -> Property data inter CS.Bar
+barMaybe : (data -> Maybe Float) -> List (Attribute CS.Bar) -> Property data inter CS.Bar
 barMaybe y =
   P.property y []
 
@@ -1450,7 +1443,7 @@ options are available.
       ]
 
 -}
-scatter : (data -> Float) -> List (CA.Attribute CS.Dot) -> Property data inter CS.Dot
+scatter : (data -> Float) -> List (Attribute CS.Dot) -> Property data inter CS.Dot
 scatter y =
   P.property (y >> Just) []
 
@@ -1467,7 +1460,7 @@ scatter y =
       ]
 
 -}
-scatterMaybe : (data -> Maybe Float) -> List (CA.Attribute CS.Dot) -> Property data inter CS.Dot
+scatterMaybe : (data -> Maybe Float) -> List (Attribute CS.Dot) -> Property data inter CS.Dot
 scatterMaybe y =
   P.property y []
 
@@ -1517,7 +1510,7 @@ The example below illustrates what styling options are available.
       ]
 
 -}
-interpolated : (data -> Float) -> List (CA.Attribute CS.Interpolation) -> List (CA.Attribute CS.Dot) -> Property data CS.Interpolation CS.Dot
+interpolated : (data -> Float) -> List (Attribute CS.Interpolation) -> List (Attribute CS.Dot) -> Property data CS.Interpolation CS.Dot
 interpolated y inter =
   P.property (y >> Just) ([ CA.linear ] ++ inter)
 
@@ -1536,7 +1529,7 @@ interpolated y inter =
       ]
 
 -}
-interpolatedMaybe : (data -> Maybe Float) -> List (CA.Attribute CS.Interpolation) -> List (CA.Attribute CS.Dot) -> Property data CS.Interpolation CS.Dot
+interpolatedMaybe : (data -> Maybe Float) -> List (Attribute CS.Interpolation) -> List (Attribute CS.Dot) -> Property data CS.Interpolation CS.Dot
 interpolatedMaybe y inter =
   P.property y ([ CA.linear ] ++ inter)
 
@@ -1576,7 +1569,7 @@ and the data point itself.
       ]
 
 -}
-variation : (Int -> data -> List (CA.Attribute deco)) -> Property data inter deco -> Property data inter deco
+variation : (Int -> data -> List (Attribute deco)) -> Property data inter deco -> Property data inter deco
 variation func =
   P.variation <| \_ _ index _ datum -> func index datum
 
@@ -1598,7 +1591,7 @@ attrained through events like `Chart.Events.onMouseMove` or similar.
       ]
 
 -}
-amongst : List (CE.Product config value data) -> (data -> List (CA.Attribute deco)) -> Property data inter deco -> Property data inter deco
+amongst : List (CE.Product config value data) -> (data -> List (Attribute deco)) -> Property data inter deco -> Property data inter deco
 amongst inQuestion func =
   P.variation <| \p s i meta d ->
     let check product =
@@ -1635,6 +1628,55 @@ stacked =
 -- LABEL EXTRAS
 
 
+{-| -}
+type alias ItemLabel a =
+  { xOff : Float
+  , yOff : Float
+  , border : String
+  , borderWidth : Float
+  , fontSize : Maybe Int
+  , color : String
+  , anchor : Maybe IS.Anchor
+  , rotate : Float
+  , uppercase : Bool
+  , attrs : List (S.Attribute Never)
+  , position : CS.Plane -> a -> CS.Point
+  , format : Maybe (a -> String)
+  }
+
+
+defaultLabel : ItemLabel (CE.Item a)
+defaultLabel =
+  { xOff = IS.defaultLabel.xOff
+  , yOff = IS.defaultLabel.yOff
+  , border = IS.defaultLabel.border
+  , borderWidth = IS.defaultLabel.borderWidth
+  , fontSize = IS.defaultLabel.fontSize
+  , color = IS.defaultLabel.color
+  , anchor = IS.defaultLabel.anchor
+  , rotate = IS.defaultLabel.rotate
+  , uppercase = IS.defaultLabel.uppercase
+  , attrs = IS.defaultLabel.attrs
+  , position = CE.getBottom
+  , format = Nothing
+  }
+
+
+toLabelFromItemLabel : ItemLabel (CE.Item a) -> CS.Label
+toLabelFromItemLabel config =
+  { xOff = config.xOff
+  , yOff = config.yOff
+  , color = config.color
+  , border = config.border
+  , borderWidth = config.borderWidth
+  , anchor = config.anchor
+  , fontSize = config.fontSize
+  , uppercase = config.uppercase
+  , rotate = config.rotate
+  , attrs = config.attrs
+  }
+
+
 {-| Add labels by every bin.
 
     C.chart []
@@ -1644,12 +1686,12 @@ stacked =
           , { name = "Jane", income = 80 }
           ]
 
-      , C.binLabels .name CE.getBottom [ CA.moveDown 15 ]
+      , C.binLabels .name [ CA.moveDown 15 ]
       ]
 
 Attributes you can use:
 
-    C.binLabels .name CE.getBottom
+    C.binLabels .name
       [ CA.moveUp 5     -- Move 5 SVG units up
       , CA.moveDown 5   -- Move 5 SVG units down
       , CA.moveLeft 5   -- Move 5 SVG units left
@@ -1668,14 +1710,30 @@ Attributes you can use:
 
        -- Add arbitrary SVG attributes to your labels.
       , CA.attrs [ SA.class "my-bin-labels" ]
+
+       -- Edit the position of the label
+      , CA.position CE.getTop
+
+       -- Given the entire bin item (not just the data)
+       -- produce a string.
+      , CA.format (\bin -> String.fromFloat (CE.getCommonality bin).start)
       ]
 
 -}
-binLabels : (data -> String) -> (CS.Plane -> CE.Group (CE.Bin data) CE.Bar (Maybe Float) data -> CS.Point) -> List (CA.Attribute CS.Label) -> Element data msg
-binLabels toLabel toPosition labelAttrs =
-  -- TODO make even nicer api
+binLabels : (data -> String) -> List (Attribute (ItemLabel (CE.Group (CE.Bin data) CE.Bar (Maybe Float) data))) -> Element data msg
+binLabels toLabel edits =
   eachCustom (CE.collect CE.bin CE.bar) <| \p item ->
-    [ label labelAttrs [ S.text (toLabel (CE.getCommonality item).datum) ] (toPosition p item) ]
+    let config =
+          Helpers.apply edits defaultLabel
+
+        text =
+          case config.format of
+            Just formatting -> formatting item
+            Nothing -> toLabel (CE.getCommonality item).datum
+    in
+    [ svg <| \_ ->
+        IS.label p (toLabelFromItemLabel config) [ S.text text ] (config.position p item)
+    ]
 
 
 {-| Add labels by every bar.
@@ -1688,12 +1746,12 @@ binLabels toLabel toPosition labelAttrs =
           , { name = "Jane", income = 80 }
           ]
 
-      , C.barLabels CE.getTop [ CA.moveUp 6 ]
+      , C.barLabels [ CA.moveUp 6 ]
       ]
 
 Attributes you can use:
 
-    C.barLabels CE.getTop
+    C.barLabels
       [ CA.moveUp 5     -- Move 5 SVG units up
       , CA.moveDown 5   -- Move 5 SVG units down
       , CA.moveLeft 5   -- Move 5 SVG units left
@@ -1712,12 +1770,91 @@ Attributes you can use:
 
        -- Add arbitrary SVG attributes to your labels.
       , CA.attrs [ SA.class "my-bar-labels" ]
+
+       -- Edit the position of the label
+      , CA.position CE.getTop
+
+       -- Change the text of the label
+      , CA.format (\bar -> String.fromFloat (CE.getDependent bar))
       ]
 -}
-barLabels : (CS.Plane -> CE.Product CE.Bar Float data -> CS.Point) -> List (CA.Attribute CS.Label) -> Element data msg
-barLabels toPosition labelAttrs =
+barLabels : List (Attribute (ItemLabel (CE.Product CE.Bar Float data))) -> Element data msg
+barLabels edits =
   eachBar <| \p item ->
-    [ label labelAttrs [ S.text (String.fromFloat (CE.getDependent item)) ] (toPosition p item) ]
+    let config =
+          Helpers.apply edits { defaultLabel | position = CE.getTop }
+
+        text =
+          case config.format of
+            Just formatting -> formatting item
+            Nothing -> String.fromFloat (CE.getDependent item)
+    in
+    [ svg <| \_ ->
+        IS.label p (toLabelFromItemLabel config) [ S.text text ] (config.position p item)
+    ]
+
+
+{-| Helper to add a label by a particular product.
+
+    C.chart
+      [ CE.onMouseMove OnHover (CE.getNearest CE.bar) ]
+      [ C.bars []
+          [ C.bar .income [] ]
+          [ { name = "Anna", income = 60 }
+          , { name = "Karenina", income = 70 }
+          , { name = "Jane", income = 80 }
+          ]
+
+      , C.each model.hovering <| \_ bar ->
+          [ C.productLabel [ CA.moveUp 6 ] bar ]
+      ]
+
+Attributes you can use:
+
+    C.productLabel
+      [ CA.moveUp 5     -- Move 5 SVG units up
+      , CA.moveDown 5   -- Move 5 SVG units down
+      , CA.moveLeft 5   -- Move 5 SVG units left
+      , CA.moveRight 5  -- Move 5 SVG units right
+
+      , CA.color "#333"
+      , CA.border "white"
+      , CA.borderWidth 1
+      , CA.fontSize 12
+
+      , CA.alignRight   -- Anchor labels to the right
+      , CA.alignLeft    -- Anchor labels to the left
+
+      , CA.rotate 90    -- Rotate label 90 degrees
+      , CA.uppercase    -- Make uppercase
+
+       -- Add arbitrary SVG attributes to your labels.
+      , CA.attrs [ SA.class "my-bar-labels" ]
+
+       -- Edit the position of the label
+      , CA.position CE.getTop
+
+       -- Change the text of the label
+      , CA.format (\bar -> String.fromFloat (CE.getDependent bar))
+      ]
+      product
+
+-}
+productLabel : List (Attribute (ItemLabel (CE.Product config value data))) -> CE.Product config value data -> Element data msg
+productLabel edits item =
+  withPlane <| \p ->
+    let config =
+          Helpers.apply edits { defaultLabel | position = CE.getTop }
+
+        text =
+          case config.format of
+            Just formatting -> formatting item
+            Nothing -> String.fromFloat (Item.getDependentSafe item)
+    in
+    [ svg <| \_ ->
+        IS.label p (toLabelFromItemLabel config) [ S.text text ] (config.position p item)
+    ]
+
 
 
 {-| Add labels by every bar.
@@ -1735,7 +1872,7 @@ barLabels toPosition labelAttrs =
 
 Attributes you can use:
 
-    C.dotLabels CE.getCenter
+    C.dotLabels
       [ CA.moveUp 5     -- Move 5 SVG units up
       , CA.moveDown 5   -- Move 5 SVG units down
       , CA.moveLeft 5   -- Move 5 SVG units left
@@ -1754,12 +1891,28 @@ Attributes you can use:
 
        -- Add arbitrary SVG attributes to your labels.
       , CA.attrs [ SA.class "my-dot-labels" ]
+
+       -- Edit the position of the label
+      , CA.position CE.getTop
+
+       -- Change the text of the label
+      , CA.format (\dot -> String.fromFloat (CE.getDependent dot))
       ]
 -}
-dotLabels : (CS.Plane -> CE.Product CE.Dot Float data -> CS.Point) -> List (CA.Attribute CS.Label) -> Element data msg
-dotLabels toPosition labelAttrs =
+dotLabels : List (Attribute (ItemLabel (CE.Product CE.Dot Float data))) -> Element data msg
+dotLabels edits =
   eachDot <| \p item ->
-    [ label labelAttrs [ S.text (String.fromFloat (CE.getDependent item)) ] (toPosition p item) ]
+    let config =
+          Helpers.apply edits { defaultLabel | position = CE.getCenter  }
+
+        text =
+          case config.format of
+            Just formatting -> formatting item
+            Nothing -> String.fromFloat (Item.getDependent item)
+    in
+    [ svg <| \_ ->
+        IS.label p (toLabelFromItemLabel config) [ S.text text ] (config.position p item)
+    ]
 
 
 
@@ -1845,7 +1998,7 @@ The rest of the configuration options concern styling:
       , { income = 18, spending = 16 }
       ]
 -}
-bars : List (CA.Attribute (Bars data)) -> List (Property data () CS.Bar) -> List data -> Element data msg
+bars : List (Attribute (Bars data)) -> List (Property data () CS.Bar) -> List data -> Element data msg
 bars edits properties data =
   barsMap identity edits properties data
 
@@ -1878,7 +2031,7 @@ several kinds of data types present in your chart.
         ]
 
 -}
-barsMap : (data -> a) -> List (CA.Attribute (Bars data)) -> List (Property data () CS.Bar) -> List data -> Element a msg
+barsMap : (data -> a) -> List (Attribute (Bars data)) -> List (Property data () CS.Bar) -> List data -> Element a msg
 barsMap mapData edits properties data =
   Indexed <| \index ->
     let barsConfig =
@@ -1888,7 +2041,7 @@ barsMap mapData edits properties data =
           Produce.toBarSeries index edits properties data
 
         generalized =
-          List.concatMap Group.getProducts items
+          List.concatMap Group.getGenerals items
             |> List.map (Item.map mapData)
 
         bins =
@@ -1977,7 +2130,7 @@ seriesMap mapData toX properties data =
           Produce.toDotSeries index toX properties data
 
         generalized =
-          List.concatMap Group.getProducts items
+          List.concatMap Group.getGenerals items
             |> List.map (Item.map mapData)
 
         legends_ =
@@ -2242,7 +2395,7 @@ eachCustom grouping func =
           ]
       ]
 -}
-legendsAt : (C.Axis -> Float) -> (C.Axis -> Float) -> List (CA.Attribute (CS.Legends msg)) -> List (CA.Attribute (CS.Legend msg)) -> Element data msg
+legendsAt : (C.Axis -> Float) -> (C.Axis -> Float) -> List (Attribute (CS.Legends msg)) -> List (Attribute (CS.Legend msg)) -> Element data msg
 legendsAt toX toY attrs children =
   HtmlElement <| \p legends_ ->
     let viewLegend legend =
@@ -2266,7 +2419,7 @@ The example above generates 10 ints on the x axis between x = -5 and x = 15. For
 ints, it adds a tick and a label.
 
 -}
-generate : Int -> CS.Generator a -> (C.Plane -> C.Axis) -> List (CA.Attribute C.Axis) -> (C.Plane -> a -> List (Element data msg)) -> Element data msg
+generate : Int -> CS.Generator a -> (C.Plane -> C.Axis) -> List (Attribute C.Axis) -> (C.Plane -> a -> List (Element data msg)) -> Element data msg
 generate num gen limit attrs func =
   SubElements <| \p _ ->
     let items = CS.generate num gen (List.foldl (\f x -> f x) (limit p) attrs) in
@@ -2331,7 +2484,7 @@ Other attributes you can use:
       { x = 5, y = 10 }
 
 -}
-label : List (CA.Attribute CS.Label) -> List (S.Svg msg) -> C.Point -> Element data msg
+label : List (Attribute CS.Label) -> List (S.Svg msg) -> C.Point -> Element data msg
 label attrs inner point =
   SvgElement <| \p -> CS.label p attrs inner point
 
@@ -2368,7 +2521,7 @@ Other attributes you can use:
       [ S.text "Data from Fruits.com" ]
 
 -}
-labelAt : (C.Axis -> Float) -> (C.Axis -> Float) -> List (CA.Attribute CS.Label) -> List (S.Svg msg) -> Element data msg
+labelAt : (C.Axis -> Float) -> (C.Axis -> Float) -> List (Attribute CS.Label) -> List (S.Svg msg) -> Element data msg
 labelAt toX toY attrs inner =
   SvgElement <| \p -> CS.label p attrs inner { x = toX p.x, y = toY p.y }
 
@@ -2383,15 +2536,20 @@ labelAt toX toY attrs inner =
           , CA.y2 7 -- Set y2
 
             -- Instead of specifying x2 and y2
-            -- you can use `xOff` and `yOff`
+            -- you can use `x2Svg` and `y2Svg`
             -- to specify the end coordinate in
             -- terms of SVG units.
             --
             -- Useful if making little label pointers.
-          , CA.xOff 30
-          , CA.yOff 30
+            -- This makes a from ( x1, y1 ) to the point
+            -- ( x1 + 15 SVG units, y1 + 30 SVG units )
+          , CA.x2Svg 15
+          , CA.y2Svg 30
 
           , CA.break            -- "break" line, so it it has a 90° angle
+          , CA.tickLength       -- Add "ticks" at the ends of the line
+          , CA.tickDirection    -- The angle of the ticks
+
           , CA.color "red"      -- Change color
           , CA.width 2          -- Change width
           , CA.opacity 0.8      -- Change opacity
@@ -2403,7 +2561,7 @@ labelAt toX toY attrs inner =
       ]
 
 -}
-line : List (CA.Attribute CS.Line) -> Element data msg
+line : List (Attribute CS.Line) -> Element data msg
 line attrs =
   SvgElement <| \p -> CS.line p attrs
 
@@ -2428,7 +2586,7 @@ line attrs =
       ]
 
 -}
-rect : List (CA.Attribute CS.Rect) -> Element data msg
+rect : List (Attribute CS.Rect) -> Element data msg
 rect attrs =
   SvgElement <| \p -> CS.rect p attrs
 
