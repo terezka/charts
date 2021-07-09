@@ -120,7 +120,7 @@ view model =
               , F.size 14
               , E.width (E.px 700)
               ]
-              [ E.text "Here are some upcoming features and improvements in approximate order. "
+              [ E.text "Here are some upcoming features and improvements in approximate order of priority. "
               , E.text "If you have more suggestions or have wishes regarding the priority, then "
               , E.text "you're welcome to "
               , Layout.link "https://github.com/terezka/charts/issues" "open an issue"
@@ -133,12 +133,12 @@ view model =
               in
               H.ul
                 [ HA.style "padding-left" "25px" ]
-                [ item "Logarithmic scales"
-                , item "Multiple scales"
+                [ item "Heat maps charts"
                 , item "Horizontal bar charts"
+                , item "Logarithmic scales"
+                , item "Multiple scales"
                 , item "Relative stacked bars"
                 , item "Further improvements of automatic \"nice\" ticks"
-                , item "Heat maps charts"
                 , item "Pie charts"
                 , item "Confidence intervals"
                 , item "More interpolation options"
