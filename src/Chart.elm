@@ -26,8 +26,8 @@ module Chart exposing
 
 {-| Alpha version!
 
-**Documentation of type signatures are great, but for a visual catalog of
-examples, please check out [elm-charts.org](https://www.elm-charts.org/documentation).**
+**See also the visual catalog of
+examples at [elm-charts.org](https://www.elm-charts.org/documentation).**
 
 The configuration of this charting library mirrors the pattern of HTML elements
 and attributes. It looks something like this:
