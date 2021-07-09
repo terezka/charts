@@ -170,7 +170,7 @@ view model =
                       [ E.text "Charts are visual and so should the documentation be! "
                       , E.text "There is more than 100 examples on this site to help you "
                       , E.text "compose your exact chart. "
-                      , E.link [ F.underline ] { url = "/documentation", label = E.text "Explore catalog" }
+                      , E.link [ F.underline ] { url = "/documentation", label = E.text "Explore the catalog" }
                       , E.text "."
                       ]
                   , togglable = Nothing
