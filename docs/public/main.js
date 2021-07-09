@@ -36754,7 +36754,7 @@ var $author$project$Charts$SalaryDist$view = function (model) {
 								_List_fromArray(
 									[
 										$author$project$Chart$Attributes$alignLeft,
-										$author$project$Chart$Attributes$moveDown(20),
+										$author$project$Chart$Attributes$moveUp(20),
 										$author$project$Chart$Attributes$moveRight(3),
 										$author$project$Chart$Attributes$x(t),
 										(t === 20000) ? $author$project$Chart$Attributes$noGrid : $elm$core$Basics$identity
@@ -36820,7 +36820,7 @@ var $author$project$Charts$SalaryDist$view = function (model) {
 							_List_fromArray(
 								[
 									$author$project$Chart$Attributes$fontSize(11),
-									$author$project$Chart$Attributes$moveUp(12)
+									$author$project$Chart$Attributes$moveDown(12)
 								]),
 							_List_fromArray(
 								[
@@ -36835,7 +36835,7 @@ var $author$project$Charts$SalaryDist$view = function (model) {
 							_List_fromArray(
 								[
 									$author$project$Chart$Attributes$fontSize(12),
-									$author$project$Chart$Attributes$moveUp(25)
+									$author$project$Chart$Attributes$moveDown(25)
 								]),
 							_List_fromArray(
 								[

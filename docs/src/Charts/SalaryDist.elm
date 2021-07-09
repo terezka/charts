@@ -120,7 +120,7 @@ view model =
 
     , C.generate 10 CS.ints .x [] <| \p t ->
         [ C.xLabel
-            [ CA.alignLeft, CA.moveDown 20, CA.moveRight 3, CA.x (toFloat t)
+            [ CA.alignLeft, CA.moveUp 20, CA.moveRight 3, CA.x (toFloat t)
             , if t == 20000 then CA.noGrid else identity
             ]
             [ S.text (String.fromInt t) ]
@@ -139,8 +139,8 @@ view model =
 
     , C.withPlane <| \p ->
         [ C.label [ CA.fontSize 14, CA.moveDown -3 ] [ S.text ("Salary distribution in Denmark " ++ String.fromFloat model.year) ] { x = CA.middle p.x, y = p.y.max }
-        , C.label [ CA.fontSize 11, CA.moveUp 12 ] [ S.text "Data from Danmarks Statestik" ] { x = CA.middle p.x, y = p.y.max }
-        , C.label [ CA.fontSize 12, CA.moveUp 25 ] [ S.text "Average salary in DKK" ] { x = CA.middle p.x, y = p.y.min }
+        , C.label [ CA.fontSize 11, CA.moveDown 12 ] [ S.text "Data from Danmarks Statestik" ] { x = CA.middle p.x, y = p.y.max }
+        , C.label [ CA.fontSize 12, CA.moveDown 25 ] [ S.text "Average salary in DKK" ] { x = CA.middle p.x, y = p.y.min }
         , C.label [ CA.fontSize 12, CA.moveLeft 15, CA.rotate 90 ] [ S.text "Womens percentage of mens salary" ] { x = p.x.min, y = CA.middle p.y }
         , C.line [ CA.dashed [ 4, 2 ], CA.opacity 0.7, CA.color "#f56dbc", CA.x1 Salary.avgSalaryWomen ]
         , C.line [ CA.dashed [ 4, 2 ], CA.opacity 0.7, CA.color "#58a9f6", CA.x1 Salary.avgSalaryMen ]
