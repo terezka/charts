@@ -24,7 +24,7 @@ view model =
         , CA.x2 .end
         , CA.margin 0
         ]
-        [ C.bar .y [ CA.borderWidth 1, CA.opacity 0.5 ] ]
+        [ C.bar .y [ CA.borderWidth 0.3, CA.opacity 0.5 ] ]
         data
     ]
 
@@ -89,7 +89,7 @@ smallCode =
         , CA.x2 .end
         , CA.margin 0
         ]
-        [ C.bar .y [ CA.borderWidth 1, CA.opacity 0.5 ] ]
+        [ C.bar .y [ CA.borderWidth 0.3, CA.opacity 0.5 ] ]
         data
     ]
   """
@@ -119,7 +119,7 @@ view model =
         , CA.x2 .end
         , CA.margin 0
         ]
-        [ C.bar .y [ CA.borderWidth 1, CA.opacity 0.5 ] ]
+        [ C.bar .y [ CA.borderWidth 0.3, CA.opacity 0.5 ] ]
         data
     ]
 
