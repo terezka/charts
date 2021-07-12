@@ -45,7 +45,7 @@ view model =
     , C.yLabels []
     , C.bars
         [ CA.roundTop 0.2
-        , CA.margin 0.2
+        , CA.margin 0.1
         , CA.spacing 0.15
         ]
         [ C.bar .z [ CA.striped [], CA.borderWidth 1 ]
@@ -86,7 +86,6 @@ data =
   [ Datum 0.0 0.0 1.2 4.0 4.6 6.9 7.3 8.0
   , Datum 2.0 0.4 2.2 4.2 5.3 5.7 6.2 7.8
   , Datum 3.0 0.6 1.0 3.2 4.8 5.4 7.2 8.3
-  , Datum 4.0 0.2 1.2 3.0 4.1 5.5 7.9 8.1
   ]
 
 
@@ -106,7 +105,7 @@ smallCode =
     , C.yLabels []
     , C.bars
         [ CA.roundTop 0.2
-        , CA.margin 0.2
+        , CA.margin 0.1
         , CA.spacing 0.15
         ]
         [ C.bar .z [ CA.striped [], CA.borderWidth 1 ]
@@ -166,7 +165,7 @@ view model =
     , C.yLabels []
     , C.bars
         [ CA.roundTop 0.2
-        , CA.margin 0.2
+        , CA.margin 0.1
         , CA.spacing 0.15
         ]
         [ C.bar .z [ CA.striped [], CA.borderWidth 1 ]
