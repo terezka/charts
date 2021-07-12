@@ -1507,14 +1507,15 @@ getNearestHelp toPosition items plane searched =
   let toPoint i =
         closestPoint (toPosition i) searched
 
-      distance_ =
-          distance plane searched
+      distanceSquared_ =
+          distanceSquared plane searched
 
       getClosest item allClosest =
         case List.head allClosest of
           Just closest ->
             if toPoint closest == toPoint item then item :: allClosest
-            else if distance_ (toPoint closest) > distance_ (toPoint item) then [ item ]
+            else if distanceSquared_ (toPoint closest)
+                    > distanceSquared_ (toPoint item) then [ item ]
             else allClosest
 
           Nothing ->
@@ -1556,9 +1557,14 @@ distanceY plane searched point =
     abs <| Coord.toSVGY plane point.y - Coord.toSVGY plane searched.y
 
 
-distance : Plane -> Point -> Point -> Float
-distance plane searched point =
-    sqrt <| distanceX plane searched point ^ 2 + distanceY plane searched point ^ 2
+distanceSquared : Plane -> Point -> Point -> Float
+distanceSquared plane searched point =
+    -- True distance calculation requries the relatively expensive
+    -- squareroot operation, but when we only need a metric to
+    -- compare distances with eachother the squared distance will suffice.
+    -- Possible future gotcha: Don't use this function when adding the
+    -- resulting distances together since a^2 + b^2 != (a + b)^2.
+    distanceX plane searched point ^ 2 + distanceY plane searched point ^ 2
 
 
 closestPoint : Position -> Point -> Point
@@ -1570,7 +1576,7 @@ closestPoint pos searched =
 
 withinRadius : Plane -> Float -> Point -> Point -> Bool
 withinRadius plane radius searched point =
-    distance plane searched point <= radius
+    distanceSquared plane searched point <= radius ^ 2
 
 
 withinRadiusX : Plane -> Float -> Point -> Point -> Bool
