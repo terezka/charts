@@ -47,7 +47,15 @@ view model =
 
     , case model.hovering of
         Just coords ->
-          C.series .x [ C.scatter .y [ CA.cross ] ] [ coords ]
+          C.series .x
+            [ C.scatter .y
+                [ CA.cross
+                , CA.borderWidth 2
+                , CA.border "white"
+                , CA.size 12
+                ]
+            ]
+            [ coords ]
 
         Nothing ->
           C.none
