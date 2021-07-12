@@ -12,7 +12,7 @@ module Chart.Item exposing
   , Many, Stack, Bin
   , getMembers, getShared, getDatas, getFirstData
 
-  , Remodel, apply, continue
+  , Remodel, apply, andThen
   , any, dots, bars, real
   , bins, stacks, sameX, named
   --, customs
@@ -251,9 +251,9 @@ apply =
 
 
 {-| -}
-continue : Remodel b c -> Remodel a b -> Remodel a c
-continue =
-  M.continue
+andThen : Remodel b c -> Remodel a b -> Remodel a c
+andThen =
+  M.andThen
 
 
 {-| -}

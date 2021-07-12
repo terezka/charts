@@ -65,7 +65,7 @@ view model =
     , CE.on "mousemove" <|
         CE.map2 OnHover
           (CE.getNearestX CI.dots)
-          (CE.getWithinX 8 <| CI.continue CI.bins CI.bars)
+          (CE.getWithinX 8 <| CI.andThen CI.bins CI.bars)
     , CE.onMouseLeave (OnHover [] [])
     ]
     [ C.grid [ CA.dashed [ 5, 5 ], CA.width 1.5 ]

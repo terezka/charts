@@ -148,8 +148,8 @@ viewChart model =
     , CA.padding { top = 15, bottom = 0, left = 0, right = 0 }
 
     , CI.real
-        |> CI.continue CI.bars
-        |> CI.continue CI.bins
+        |> CI.andThen CI.bars
+        |> CI.andThen CI.bins
         |> CE.getNearest
         |> CE.onMouseMove OnHover
     ]

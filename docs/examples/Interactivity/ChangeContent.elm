@@ -36,7 +36,7 @@ view model =
   C.chart
     [ CA.height 300
     , CA.width 300
-    , CE.onMouseMove OnHover (CE.getNearest <| CI.continue CI.real CI.dots)
+    , CE.onMouseMove OnHover (CE.getNearest <| CI.andThen CI.real CI.dots)
     , CE.onMouseLeave (OnHover [])
     ]
     [ C.grid []

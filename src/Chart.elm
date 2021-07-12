@@ -1723,7 +1723,7 @@ Attributes you can use:
 -}
 binLabels : (data -> String) -> List (Attribute (ItemLabel (CI.Bin (CI.Bar data)))) -> Element data msg
 binLabels toLabel edits =
-  eachCustom (CI.continue CI.bins CI.bars) <| \p item ->
+  eachCustom (CI.andThen CI.bins CI.bars) <| \p item ->
     let config =
           Helpers.apply edits defaultLabel
 
@@ -2248,7 +2248,7 @@ Use the functions in `Chart.Events` to access information about your bins.
 -}
 eachBin : (C.Plane -> CI.Bin (CI.Any data) -> List (Element data msg)) -> Element data msg
 eachBin func =
-  SubElements <| \p is -> List.concatMap (func p) (CI.apply (CI.continue CI.bins <| CI.continue CI.real CI.any) is)
+  SubElements <| \p is -> List.concatMap (func p) (CI.apply (CI.andThen CI.bins <| CI.andThen CI.real CI.any) is)
 
 
 {-| Add elements for each stack.
@@ -2275,7 +2275,7 @@ Use the functions in `Chart.Events` to access information about your stacks.
 -}
 eachStack : (C.Plane -> CI.Stack (CI.Any data) -> List (Element data msg)) -> Element data msg
 eachStack func =
-  SubElements <| \p is -> List.concatMap (func p) (CI.apply (CI.continue CI.stacks <| CI.continue CI.real CI.any) is)
+  SubElements <| \p is -> List.concatMap (func p) (CI.apply (CI.andThen CI.stacks <| CI.andThen CI.real CI.any) is)
 
 
 {-| Add elements for each bar.
@@ -2300,7 +2300,7 @@ Use the functions in `Chart.Events` to access information about your bars.
 -}
 eachBar : (C.Plane -> CI.Bar data -> List (Element data msg)) -> Element data msg
 eachBar func =
-  SubElements <| \p is -> List.concatMap (func p) (CI.apply (CI.continue CI.real CI.bars) is)
+  SubElements <| \p is -> List.concatMap (func p) (CI.apply (CI.andThen CI.real CI.bars) is)
 
 
 {-| Add elements for each dot.
@@ -2325,7 +2325,7 @@ Use the functions in `Chart.Events` to access information about your dots.
 -}
 eachDot : (C.Plane -> CI.Dot data -> List (Element data msg)) -> Element data msg
 eachDot func =
-  SubElements <| \p is -> List.concatMap (func p) (CI.apply (CI.continue CI.real CI.dots) is)
+  SubElements <| \p is -> List.concatMap (func p) (CI.apply (CI.andThen CI.real CI.dots) is)
 
 
 {-| Add elements for each product. Works like `eachBar` and `eachDot`, but includes both
@@ -2336,7 +2336,7 @@ Use the functions in `Chart.Events` to access information about your products.
 -}
 eachProduct : (C.Plane -> CI.Any data -> List (Element data msg)) -> Element data msg
 eachProduct func =
-  SubElements <| \p is -> List.concatMap (func p) (CI.apply (CI.continue CI.real CI.any) is)
+  SubElements <| \p is -> List.concatMap (func p) (CI.apply (CI.andThen CI.real CI.any) is)
 
 
 {-| Filter and group products in any way you'd like and add elements for each of them.

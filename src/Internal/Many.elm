@@ -74,8 +74,8 @@ apply (Remodel _ func) items =
   func items
 
 
-continue : Remodel x y -> Remodel a x -> Remodel a y
-continue (Remodel toPos2 func2) (Remodel toPos1 func1) =
+andThen : Remodel x y -> Remodel a x -> Remodel a y
+andThen (Remodel toPos2 func2) (Remodel toPos1 func1) =
   Remodel toPos2 <| \items -> func2 (func1 items)
 
 
