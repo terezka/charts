@@ -171,6 +171,7 @@ type alias Line =
   , dashed : List Float
   , opacity : Float
   , break : Bool
+  , flip : Bool
   , attrs : List (S.Attribute Never)
   }
 

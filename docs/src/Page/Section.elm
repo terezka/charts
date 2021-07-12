@@ -19,6 +19,7 @@ import Element.Background as BG
 import Examples
 import Ui.Thumbnail
 import Ui.Tabs
+import Charts.Terminology
 
 
 
@@ -115,6 +116,23 @@ view model =
             , selected = "/documentation/" ++ model.selectedTab
             , all = Ui.Thumbnail.groups
             }
+
+        , case model.selectedTab of
+            "bar-charts" ->
+              E.column
+                [ E.width E.fill
+                , E.height E.fill
+                , E.spacing 25
+                , E.paddingXY 0 20
+                ]
+                [ E.el [ F.size 20 ] (E.text "Terminology")
+                , E.el [ E.width E.fill, E.height E.fill ] (E.html Charts.Terminology.view)
+                , E.el [ F.size 20 ] (E.text "Examples")
+                ]
+
+            _ ->
+              E.none
+
         , E.map OnExampleMsg
             (Ui.Thumbnail.viewSelected model.examples <| "/documentation/" ++ model.selectedTab)
         ]

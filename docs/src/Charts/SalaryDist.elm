@@ -151,7 +151,7 @@ view model =
 
     , salarySeries model 0.7 5 200
 
-    , C.eachProduct <| \p product ->
+    , C.eachItem <| \p product ->
         let datum = CI.getData product
             color = CI.getColor product
             top = CI.getTop p product

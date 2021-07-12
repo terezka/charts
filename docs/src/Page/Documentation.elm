@@ -19,6 +19,7 @@ import Element.Background as BG
 import Examples
 import Ui.Thumbnail
 import Ui.Tabs
+import Page.Section
 
 
 
@@ -26,8 +27,7 @@ import Ui.Tabs
 
 
 type alias Model =
-  { examples : Examples.Model
-  }
+  Page.Section.Model
 
 
 type alias Params =
@@ -40,9 +40,7 @@ type alias Params =
 
 init : Navigation.Key -> Session -> Params -> ( Model, Cmd Msg )
 init key session params =
-  ( { examples = Examples.init }
-  , Cmd.none
-  )
+  Page.Section.init key session { section = Ui.Thumbnail.urlify Ui.Thumbnail.firstGroup.title }
 
 
 exit : Model -> Session -> Session
@@ -54,58 +52,26 @@ exit model session =
 -- UPDATE
 
 
-type Msg
-  = OnExampleMsg Examples.Msg
+type alias Msg
+  = Page.Section.Msg
 
 
 
 update : Navigation.Key -> Msg -> Model -> ( Model, Cmd Msg )
-update key msg model =
-    case msg of
-      OnExampleMsg sub ->
-        ( { model | examples = Examples.update sub model.examples }, Cmd.none )
+update =
+  Page.Section.update
 
 
 
 subscriptions : Model -> Sub Msg
-subscriptions model =
-  Sub.none
+subscriptions =
+  Page.Section.subscriptions
+
 
 
 -- VIEW
 
 
 view : Model -> Document Msg
-view model =
-  { title = "elm-charts | Documentation"
-  , body =
-      Layout.view <|
-        [ Menu.small
-        , E.el
-            [ F.size 32
-            , E.paddingXY 0 10
-            ]
-            (E.text "Documentation")
-        , E.paragraph
-            [ E.paddingXY 0 10
-            , F.size 14
-            , E.width (E.px 700)
-            ]
-            [ E.text "This is an attempt at documentation through example. For documentation of exact API, see "
-            , E.link
-                [ F.underline ]
-                { url = "https://package.elm-lang.org/packages/terezka/charts/latest"
-                , label = E.text "official Elm documentation"
-                }
-            , E.text "."
-            ]
-        , Ui.Tabs.view
-            { toUrl = Ui.Thumbnail.toUrlGroup << .title
-            , toTitle = .title
-            , selected = Ui.Thumbnail.toUrlGroup (Ui.Thumbnail.firstGroup.title)
-            , all = Ui.Thumbnail.groups
-            }
-        , E.map OnExampleMsg
-            (Ui.Thumbnail.viewSelected model.examples "")
-        ]
-  }
+view =
+  Page.Section.view

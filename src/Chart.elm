@@ -17,8 +17,8 @@ module Chart exposing
 
   , svg, svgAt, html, htmlAt
 
-  , each, eachBin, eachStack, eachBar, eachDot, eachProduct, eachCustom
-  , withPlane, withBins, withStacks, withBars, withDots, withProducts
+  , each, eachBin, eachStack, eachBar, eachDot, eachItem, eachCustom
+  , withPlane, withBins, withStacks, withBars, withDots, withItems
 
   , binned
   )
@@ -125,10 +125,10 @@ In the following examples, I will assume the imports:
 # Advanced elements
 
 ## For each item, do..
-@docs eachBin, eachStack, eachBar, eachDot, eachProduct, each, eachCustom
+@docs eachBin, eachStack, eachBar, eachDot, eachItem, each, eachCustom
 
 ## With all item, do..
-@docs withBins, withStacks, withBars, withDots, withProducts
+@docs withBins, withStacks, withBars, withDots, withItems
 
 ## Using the plane, do..
 @docs withPlane
@@ -2200,8 +2200,8 @@ withDots func =
 Use helpers in `Chart.Events` to interact with products.
 
 -}
-withProducts : (C.Plane -> List (CI.One data CI.Any) -> List (Element data msg)) -> Element data msg
-withProducts func =
+withItems : (C.Plane -> List (CI.One data CI.Any) -> List (Element data msg)) -> Element data msg
+withItems func =
   SubElements <| \p is -> func p is
 
 
@@ -2334,8 +2334,8 @@ bars and dots.
 Use the functions in `Chart.Events` to access information about your products.
 
 -}
-eachProduct : (C.Plane -> CI.One data CI.Any -> List (Element data msg)) -> Element data msg
-eachProduct func =
+eachItem : (C.Plane -> CI.One data CI.Any -> List (Element data msg)) -> Element data msg
+eachItem func =
   SubElements <| \p is -> List.concatMap (func p) (CI.apply (CI.andThen CI.real CI.any) is)
 
 

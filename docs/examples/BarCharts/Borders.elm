@@ -20,8 +20,8 @@ view model =
     , C.bars
         []
         [ C.stacked
-            [ C.bar .z [ CA.borderWidth 2 ]
-            , C.bar .y [ CA.borderWidth 2 ]
+            [ C.bar .z [ CA.borderWidth 2, CA.opacity 0.4 ]
+            , C.bar .y [ CA.borderWidth 2, CA.opacity 0.4 ]
             ]
         ]
         data
