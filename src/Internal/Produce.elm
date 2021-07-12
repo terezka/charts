@@ -11,7 +11,7 @@ import Chart.Attributes as CA
 import Chart.Events as CE
 import Internal.Svg as S
 import Internal.Helpers as Helpers
-import Internal.Group as G
+import Internal.Many as M
 import Internal.Item as I
 
 
@@ -41,7 +41,7 @@ defaultBars =
   }
 
 
-toBarSeries : Int -> List (CA.Attribute (Bars data)) -> List (P.Property data String () S.Bar) -> List data -> List (G.Group () S.Bar (Maybe Float) data)
+toBarSeries : Int -> List (CA.Attribute (Bars data)) -> List (P.Property data String () S.Bar) -> List data -> List (M.Many () (I.One data S.Bar))
 toBarSeries elIndex barsAttrs properties data =
   let barsConfig =
         Helpers.apply barsAttrs defaultBars
@@ -76,18 +76,25 @@ toBarSeries elIndex barsAttrs properties data =
             { datum = curr, start = toStart curr, end = toEnd curr }
 
 
+      toSeriesItem : List { datum : data, start : Float, end : Float } -> List (P.Config data String () S.Bar) -> Int -> Int -> P.Config data String () S.Bar -> Int -> Maybe (M.Many () (I.One data S.Bar))
       toSeriesItem bins sections barIndex sectionIndex section colorIndex =
-        I.Item
-          { config =
-              { config = ()
-              , items = List.indexedMap (toBarItem sections barIndex sectionIndex section colorIndex) bins
-              }
-          , toLimits = \c -> Coord.foldPosition I.getLimits c.items
-          , toPosition = \plane c -> Coord.foldPosition (I.getPosition plane) c.items
-          , toSvg = \plane config _ -> S.g [ SA.class "elm-charts__bar-series" ] (List.map (I.toSvg plane) config.items)
-          , toHtml = \c -> [ H.table [ HA.style "margin" "0" ] (List.concatMap I.toHtml c.items) ]
-          }
+        case List.indexedMap (toBarItem sections barIndex sectionIndex section colorIndex) bins of
+          [] ->
+            Nothing
 
+          first :: rest ->
+            Just <| I.Rendered
+              { config =
+                  { config = ()
+                  , items = ( first, rest )
+                  }
+              , toLimits = \c -> Coord.foldPosition I.getLimits ((\(x, xs) -> x :: xs) c.items)
+              , toPosition = \plane c -> Coord.foldPosition (I.getPosition plane) ((\(x, xs) -> x :: xs) c.items)
+              , toSvg = \plane c _ -> S.g [ SA.class "elm-charts__bar-series" ] (List.map (I.toSvg plane) ((\(x, xs) -> x :: xs) c.items))
+              , toHtml = \c -> [ H.table [ HA.style "margin" "0" ] (List.concatMap I.toHtml ((\(x, xs) -> x :: xs) c.items)) ]
+              }
+
+      toBarItem : List (P.Config data String () S.Bar) -> Int -> Int -> P.Config data String () S.Bar -> Int -> Int -> { datum : data, start : Float, end : Float } -> I.One data S.Bar
       toBarItem sections barIndex sectionIndex section colorIndex dataIndex bin =
         let numOfBars = if barsConfig.grouped then toFloat (List.length properties) else 1
             numOfSections = toFloat (List.length sections)
@@ -128,15 +135,18 @@ toBarSeries elIndex barsAttrs properties data =
                       _ -> p)
                 |> (\p -> if p.border == defaultColor then { p | border = p.color } else p)
         in
-        I.Item
+        I.Rendered
           { config =
               { product = product
               , values =
                   { datum = bin.datum
                   , x1 = start
                   , x2 = end
-                  , yOrg = value
-                  , y = value
+                  , y = Maybe.withDefault 0 value
+                  , isReal =
+                      case value of
+                        Just _ -> True
+                        Nothing -> False
                   }
               , tooltipInfo =
                   { property = barIndex
@@ -161,6 +171,7 @@ toBarSeries elIndex barsAttrs properties data =
       |> List.indexedMap (\barIndex props -> List.indexedMap (toSeriesItem bins props barIndex) (List.reverse props))
       |> List.concat
       |> List.indexedMap (\propIndex f -> f (elIndex + propIndex))
+      |> List.filterMap identity
 
 
 
@@ -168,7 +179,7 @@ toBarSeries elIndex barsAttrs properties data =
 
 
 {-| -}
-toDotSeries : Int -> (data -> Float) -> List (Property data String S.Interpolation S.Dot) -> List data -> List (G.Group S.Interpolation S.Dot (Maybe Float) data)
+toDotSeries : Int -> (data -> Float) -> List (Property data String S.Interpolation S.Dot) -> List data -> List (M.Many S.Interpolation (I.One data S.Dot))
 toDotSeries elIndex toX properties data =
   let toInterConfig attrs =
         Helpers.apply attrs S.defaultInterpolation
@@ -182,25 +193,30 @@ toDotSeries elIndex toX properties data =
             interAttr = [ CA.color (Helpers.toDefaultColor colorIndex), CA.opacity defaultOpacity ] ++ prop.inter
             interConfig = toInterConfig interAttr
         in
-        I.Item
-          { config =
-              { items = dotItems
-              , config = interConfig
+        case dotItems of
+          [] ->
+            Nothing
+
+          first :: rest ->
+            Just <| I.Rendered
+              { config =
+                  { items = ( first, rest )
+                  , config = interConfig
+                  }
+              , toSvg = \plane _ _ ->
+                  let toBottom datum_ =
+                        Maybe.map2 (\real visual -> visual - real) (prop.value datum_) (prop.visual datum_)
+                  in
+                  S.g
+                    [ SA.class "elm-charts__series" ]
+                    [ S.area plane toX (Just toBottom) prop.visual interConfig data
+                    , S.interpolation plane toX prop.visual interConfig data
+                    , S.g [ SA.class "elm-charts__dots" ] (List.map (I.toSvg plane) dotItems)
+                    ]
+              , toLimits = \c -> Coord.foldPosition I.getLimits ((\(x, xs) -> x :: xs) c.items)
+              , toPosition = \plane c -> Coord.foldPosition (I.getPosition plane) ((\(x, xs) -> x :: xs) c.items)
+              , toHtml = \c -> [ H.table [ HA.style "margin" "0" ] (List.concatMap I.toHtml ((\(x, xs) -> x :: xs) c.items)) ]
               }
-          , toSvg = \plane _ _ ->
-              let toBottom datum_ =
-                    Maybe.map2 (\real visual -> visual - real) (prop.value datum_) (prop.visual datum_)
-              in
-              S.g
-                [ SA.class "elm-charts__series" ]
-                [ S.area plane toX (Just toBottom) prop.visual interConfig data
-                , S.interpolation plane toX prop.visual interConfig data
-                , S.g [ SA.class "elm-charts__dots" ] (List.map (I.toSvg plane) dotItems)
-                ]
-          , toLimits = \c -> Coord.foldPosition I.getLimits c.items
-          , toPosition = \plane c -> Coord.foldPosition (I.getPosition plane) c.items
-          , toHtml = \c -> [ H.table [ HA.style "margin" "0" ] (List.concatMap I.toHtml c.items) ]
-          }
 
       toDotItem lineIndex sublineIndex colorIndex prop interConfig dataIndex datum_ =
         let defaultAttrs = [ CA.color interConfig.color, CA.border interConfig.color, if interConfig.method == Nothing then CA.circle else identity ]
@@ -209,7 +225,7 @@ toDotSeries elIndex toX properties data =
             x_ = toX datum_
             y_ = Maybe.withDefault 0 (prop.visual datum_)
         in
-        I.Item
+        I.Rendered
           { toSvg = \plane _ _ ->
               case prop.value datum_ of
                 Nothing -> S.text ""
@@ -232,8 +248,11 @@ toDotSeries elIndex toX properties data =
                   { datum = datum_
                   , x1 = x_
                   , x2 = x_
-                  , yOrg = prop.value datum_
-                  , y = prop.value datum_
+                  , y = y_
+                  , isReal =
+                      case prop.value datum_ of
+                        Just _ -> True
+                        Nothing -> False
                   }
               , tooltipInfo =
                   { property = lineIndex
@@ -256,6 +275,7 @@ toDotSeries elIndex toX properties data =
     |> List.indexedMap (\lineIndex ps -> List.indexedMap (toSeriesItem lineIndex ps) ps)
     |> List.concat
     |> List.indexedMap (\propIndex f -> f (elIndex + propIndex))
+    |> List.filterMap identity
 
 
 

@@ -9,6 +9,7 @@ import Chart as C
 import Chart.Svg as CS
 import Chart.Attributes as CA
 import Chart.Events as CE
+import Chart.Item as CI
 
 
 type alias Model =
@@ -140,6 +141,7 @@ import Chart as C
 import Chart.Svg as CS
 import Chart.Attributes as CA
 import Chart.Events as CE
+import Chart.Item as CI
 
 
 type alias Model =

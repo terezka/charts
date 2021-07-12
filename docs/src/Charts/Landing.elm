@@ -16,6 +16,7 @@ import Time
 import Chart as C
 import Chart.Attributes as CA
 import Chart.Events as CE
+import Chart.Item as CI
 import Chart.Svg as CS
 
 import Element as E
@@ -28,8 +29,8 @@ import DateFormat as F
 
 
 type alias Model =
-  { hovering : List (CE.Product CE.Dot (Maybe Float) Datum)
-  , hoveringBars : List (CE.Group (CE.Bin Datum) CE.Bar (Maybe Float) Datum)
+  { hovering : List (CI.Dot Datum)
+  , hoveringBars : List (CI.Bin (CI.Bar Datum))
   }
 
 
@@ -42,8 +43,8 @@ init =
 
 type Msg
   = OnHover
-      (List (CE.Product CE.Dot (Maybe Float) Datum))
-      (List (CE.Group (CE.Bin Datum) CE.Bar (Maybe Float) Datum))
+      (List (CI.Dot Datum))
+      (List (CI.Bin (CI.Bar Datum)))
 
 
 update : Msg -> Model -> Model
@@ -63,8 +64,8 @@ view model =
     , CA.padding { top = 10, bottom = 0, left = 0, right = 35 }
     , CE.on "mousemove" <|
         CE.map2 OnHover
-          (CE.getNearestX CE.dot)
-          (CE.getWithinX 8 <| CE.collect CE.bin CE.bar)
+          (CE.getNearestX CI.dots)
+          (CE.getWithinX 8 <| CI.continue CI.bins CI.bars)
     , CE.onMouseLeave (OnHover [] [])
     ]
     [ C.grid [ CA.dashed [ 5, 5 ], CA.width 1.5 ]
@@ -92,7 +93,7 @@ view model =
             [ CA.monotone, CA.color "#7b4dff", CA.width 1.5, CA.opacity 0.1 ]
             []
             |> C.named "Customers"
-            |> C.amongst (CE.filterData justDot model.hovering) (\_ ->
+            |> C.amongst (CI.filter justDot model.hovering) (\_ ->
                 [ CA.size 12, CA.circle, CA.color "white", CA.border "#7b4dff", CA.borderWidth 1.5 ]
               )
         ]
@@ -100,30 +101,29 @@ view model =
 
     , C.each model.hoveringBars <| \p stack ->
         let eachBar bar =
-              case CE.getDependent bar of
-                Just value ->
-                  C.label
-                    [ CA.moveDown 16
-                    , CA.fontSize 12
-                    , CA.color "rgba(255, 255, 255, 0.4)"
-                    ]
-                    [ S.text (String.fromInt (round (value / 1000)) ++ "k") ]
-                    (CE.getTop p bar)
+              if CI.isReal bar then
+                C.label
+                  [ CA.moveDown 16
+                  , CA.fontSize 12
+                  , CA.color "rgba(255, 255, 255, 0.4)"
+                  ]
+                  [ S.text (String.fromInt (round (CI.getDependent bar / 1000)) ++ "k") ]
+                  (CI.getTop p bar)
 
-                Nothing ->
-                  C.label
-                    [ CA.moveUp 15
-                    , CA.fontSize 12
-                    , CA.color "rgb(120, 120, 120)"
-                    ]
-                    [ S.text "No data" ]
-                    (CE.getTop p bar)
+              else
+                C.label
+                  [ CA.moveUp 15
+                  , CA.fontSize 12
+                  , CA.color "rgb(120, 120, 120)"
+                  ]
+                  [ S.text "No data" ]
+                  (CI.getTop p bar)
         in
-        List.map eachBar (CE.getProducts stack)
+        List.map eachBar (CI.getMembers stack)
 
     , C.each model.hovering <| \p dot ->
-        let xValue = Time.millisToPosix (round (CE.getIndependent dot))
-            rows = CE.getDefaultTooltip dot ++ List.concatMap CE.getDefaultTooltip (List.concatMap CE.getProducts model.hoveringBars)
+        let xValue = Time.millisToPosix (round (CI.getIndependent dot))
+            rows = CI.getTooltip dot ++ List.concatMap CI.getTooltip (List.concatMap CI.getMembers model.hoveringBars)
             header =
               H.div
                 [ HA.style "padding" "5px 0 5px 0"

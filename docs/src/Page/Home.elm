@@ -37,6 +37,7 @@ import Svg.Attributes as SA
 import Chart as C
 import Chart.Attributes as CA
 import Chart.Events as CE
+import Chart.Item as CI
 import Chart.Svg as CS
 
 
@@ -47,7 +48,7 @@ type alias Model =
   { landing : Landing.Model
   , concise : Concise.Model
   , familiarToggle : Bool
-  , hovering : List (CE.Product CE.Any (Maybe Float) { year : Float, income : Float})
+  , hovering : List (CI.Any { year : Float, income : Float})
   }
 
 
@@ -83,7 +84,7 @@ type Msg
   = LandingMsg Landing.Msg
   | ConciseMsg Concise.Msg
   | FamiliarToggle
-  | OnHover (List (CE.Product CE.Any (Maybe Float) { year : Float, income : Float}))
+  | OnHover (List (CI.Any { year : Float, income : Float}))
   | None
 
 

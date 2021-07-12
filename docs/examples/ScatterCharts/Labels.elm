@@ -6,6 +6,7 @@ import Svg as S
 import Chart as C
 import Chart.Attributes as CA
 import Chart.Events as CE
+import Chart.Item as CI
 
 
 view : Model -> H.Html Msg
@@ -27,9 +28,9 @@ view model =
 
     , C.eachDot <| \p dot ->
         [ C.label
-            [ CA.moveDown 4, CA.color (CE.getColor dot) ]
-            [ S.text (String.fromFloat (CE.getDatum dot).w) ]
-            (CE.getCenter p dot)
+            [ CA.moveDown 4, CA.color (CI.getColor dot) ]
+            [ S.text (String.fromFloat (CI.getData dot).w) ]
+            (CI.getCenter p dot)
         ]
     ]
 {-| @SMALL END -}

@@ -16,6 +16,7 @@ import Time
 import Chart as C
 import Chart.Attributes as CA
 import Chart.Events as CE
+import Chart.Item as CI
 import Chart.Svg as CS
 
 import Element as E
@@ -27,7 +28,7 @@ import Chart.Events
 
 
 type alias Model =
-  { hovering : List (CE.Product CE.Dot Float Datum)
+  { hovering : List (CI.Dot Datum)
   }
 
 
@@ -38,7 +39,7 @@ init =
 
 
 type Msg
-  = OnHover (List (CE.Product CE.Dot Float Datum))
+  = OnHover (List (CI.Dot Datum))
 
 
 update : Msg -> Model -> Model
@@ -54,7 +55,7 @@ view model =
     [ CA.height 135
     , CA.width 225
     , CA.static
-    , CE.onMouseMove OnHover (CE.getNearest <| CE.keep CE.realValues CE.dot)
+    , CE.onMouseMove OnHover (CE.getNearest CI.dots)
     , CE.onMouseLeave (OnHover [])
     ]
     [ C.series .x
@@ -76,15 +77,15 @@ view model =
         barData
 
     , C.eachBar <| \p bar ->
-        let bottom = CE.getBottom p bar
-            value = CE.getDependent bar
+        let bottom = CI.getBottom p bar
+            value = CI.getDependent bar
             color = if value < 10 then "#6f6f6f" else "white"
         in
         if value == 0 then [] else
         [ C.label [ CA.color color, CA.moveUp 6, CA.fontSize 14 ] [ S.text (String.fromFloat value) ] bottom ]
 
     , C.each model.hovering <| \p dot ->
-        [ C.label [ CA.fontSize 14, CA.moveUp 10 ] [ S.text (String.fromFloat <| CE.getDependent dot) ] (CE.getTop p dot) ]
+        [ C.label [ CA.fontSize 14, CA.moveUp 10 ] [ S.text (String.fromFloat <| CI.getDependent dot) ] (CI.getTop p dot) ]
     ]
 
 

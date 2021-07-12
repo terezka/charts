@@ -6,10 +6,11 @@ import Svg as S
 import Chart as C
 import Chart.Attributes as CA
 import Chart.Events as CE
+import Chart.Item as CI
 
 
 type alias Model =
-  { hovering : List (CE.Group (CE.Stack Datum) CE.Dot (Maybe Float) Datum) }
+  { hovering : List (CI.Stack (CI.Dot Datum)) }
 
 
 init : Model
@@ -18,7 +19,7 @@ init =
 
 
 type Msg
-  = OnHover (List (CE.Group (CE.Stack Datum) CE.Dot (Maybe Float) Datum))
+  = OnHover (List (CI.Stack (CI.Dot Datum)))
 
 
 update : Msg -> Model -> Model
@@ -35,8 +36,8 @@ view model =
     [ CA.height 300
     , CA.width 300
     , CA.padding { top = 0, bottom = 0, left = 10, right = 10 }
-    , CE.dot
-        |> CE.collect CE.stack
+    , CI.dots
+        |> CI.continue CI.stacks
         |> CE.getNearest
         |> CE.onMouseMove OnHover
     , CE.onMouseLeave (OnHover [])

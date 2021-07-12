@@ -9,10 +9,11 @@ import Svg as S
 import Chart as C
 import Chart.Attributes as CA
 import Chart.Events as CE
+import Chart.Item as CI
 
 
 type alias Model =
-  { hovering : List (CE.Product CE.Dot Float Datum) }
+  { hovering : List (CI.Dot Datum) }
 
 
 init : Model
@@ -21,7 +22,7 @@ init =
 
 
 type Msg
-  = OnHover (List (CE.Product CE.Dot Float Datum))
+  = OnHover (List (CI.Dot Datum))
 
 
 update : Msg -> Model -> Model
@@ -36,7 +37,7 @@ view model =
   C.chart
     [ CA.height 300
     , CA.width 300
-    , CE.onMouseMove OnHover (CE.getNearest <| CE.collect CE.realValues CE.dot)
+    , CE.onMouseMove OnHover (CE.getNearest <| CI.continue CI.real CI.dots)
     , CE.onMouseLeave (OnHover [])
     ]
     [ C.grid []
@@ -50,9 +51,9 @@ view model =
         ]
         data
     , C.each model.hovering <| \p dot ->
-        let color = CE.getColor dot
-            x = CE.getIndependent dot
-            y = CE.getDependent dot
+        let color = CI.getColor dot
+            x = CI.getIndependent dot
+            y = CI.getDependent dot
         in
         [ C.tooltip dot []
             [ HA.style "color" color ]
@@ -104,7 +105,7 @@ smallCode =
   C.chart
     [ CA.height 300
     , CA.width 300
-    , CE.onMouseMove OnHover (CE.getNearest <| CE.collect CE.realValues CE.dot)
+    , CE.onMouseMove OnHover (CE.getNearest <| CI.continue CI.real CI.dots)
     , CE.onMouseLeave (OnHover [])
     ]
     [ C.grid []
@@ -118,9 +119,9 @@ smallCode =
         ]
         data
     , C.each model.hovering <| \\p dot ->
-        let color = CE.getColor dot
-            x = CE.getIndependent dot
-            y = CE.getDependent dot
+        let color = CI.getColor dot
+            x = CI.getIndependent dot
+            y = CI.getDependent dot
         in
         [ C.tooltip dot []
             [ HA.style "color" color ]
@@ -143,10 +144,11 @@ import Svg as S
 import Chart as C
 import Chart.Attributes as CA
 import Chart.Events as CE
+import Chart.Item as CI
 
 
 type alias Model =
-  { hovering : List (CE.Product CE.Dot Float Datum) }
+  { hovering : List (CI.Dot Datum) }
 
 
 init : Model
@@ -155,7 +157,7 @@ init =
 
 
 type Msg
-  = OnHover (List (CE.Product CE.Dot Float Datum))
+  = OnHover (List (CI.Dot Datum))
 
 
 update : Msg -> Model -> Model
@@ -170,7 +172,7 @@ view model =
   C.chart
     [ CA.height 300
     , CA.width 300
-    , CE.onMouseMove OnHover (CE.getNearest <| CE.collect CE.realValues CE.dot)
+    , CE.onMouseMove OnHover (CE.getNearest <| CI.continue CI.real CI.dots)
     , CE.onMouseLeave (OnHover [])
     ]
     [ C.grid []
@@ -184,9 +186,9 @@ view model =
         ]
         data
     , C.each model.hovering <| \\p dot ->
-        let color = CE.getColor dot
-            x = CE.getIndependent dot
-            y = CE.getDependent dot
+        let color = CI.getColor dot
+            x = CI.getIndependent dot
+            y = CI.getDependent dot
         in
         [ C.tooltip dot []
             [ HA.style "color" color ]

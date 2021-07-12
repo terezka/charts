@@ -6,6 +6,7 @@ import Svg as S
 import Chart as C
 import Chart.Attributes as CA
 import Chart.Events as CE
+import Chart.Item as CI
 
 
 view : Model -> H.Html Msg
@@ -19,12 +20,13 @@ view model =
     , C.yLabels []
 
     , C.eachBin <| \p bin ->
-        let common = CE.getCommonality bin
-            isSpecial = common.datum.y + common.datum.z > 6
+        let shared = CI.getShared bin
+            datum = CI.getFirstData bin
+            isSpecial = datum.y + datum.z > 6
 
             labelBasic =
-              String.fromFloat common.start ++ " - " ++
-              String.fromFloat common.end
+              String.fromFloat shared.x1 ++ " - " ++
+              String.fromFloat shared.x2
 
             label =
               if isSpecial
@@ -39,7 +41,7 @@ view model =
         [ C.label
             [ CA.color color, CA.moveDown 18 ]
             [ S.text label ]
-            (CE.getBottom p bin)
+            (CI.getBottom p bin)
         ]
 
     , C.bars

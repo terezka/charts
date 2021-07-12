@@ -16,6 +16,7 @@ import Time
 import Chart as C
 import Chart.Attributes as CA
 import Chart.Events as CE
+import Chart.Item as CI
 import Chart.Svg as CS
 
 import Element as E
@@ -27,7 +28,7 @@ import Chart.Events
 
 
 type alias Model =
-  { hovering : List (CE.Product CE.Dot (Maybe Float) Datum)
+  { hovering : List (CI.Dot Datum)
   }
 
 
@@ -38,7 +39,7 @@ init =
 
 
 type Msg
-  = OnHover (List (CE.Product CE.Dot (Maybe Float) Datum))
+  = OnHover (List (CI.Dot Datum))
 
 
 update : Msg -> Model -> Model
@@ -56,13 +57,13 @@ view model =
     , CA.static
     , CA.margin { top = 0, bottom = 18, left = 0, right = 0 }
     , CA.padding { top = 10, bottom = 0, left = 8, right = 8 }
-    , CE.onMouseMove OnHover (CE.getNearestX CE.dot)
+    , CE.onMouseMove OnHover (CE.getNearestX CI.dots)
     , CE.onMouseLeave (OnHover [])
     ]
     [ C.xLabels [ CA.times Time.utc, CA.uppercase, CA.fontSize 9, CA.amount 10 ]
 
     , C.each model.hovering <| \p dot ->
-        [ C.line [ CA.x1 (CE.getIndependent dot), CA.width 2, CA.dashed [ 5, 5 ] ] ]
+        [ C.line [ CA.x1 (CI.getIndependent dot), CA.width 2, CA.dashed [ 5, 5 ] ] ]
 
     , C.series .x
         [ C.interpolatedMaybe .y

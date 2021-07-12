@@ -152,13 +152,14 @@ import Dict exposing (Dict)
 import Internal.Item as Item
 import Internal.Produce as Produce
 import Internal.Legend as Legend
-import Internal.Group as Group
+import Internal.Many as Many
 import Internal.Helpers as Helpers
 import Internal.Svg as IS
 import Internal.Events as IE
 import Chart.Svg as CS
 import Chart.Attributes as CA exposing (Attribute)
 import Chart.Events as CE
+import Chart.Item as CI
 
 
 {-| -}
@@ -301,12 +302,12 @@ type Element data msg
   = Indexed (Int -> ( Element data msg, Int ))
   | SeriesElement
       (List C.Position)
-      (List (Item.Product CE.Any (Maybe Float) data))
+      (List (CI.Any data))
       (List Legend.Legend)
       (C.Plane -> S.Svg msg)
   | BarsElement
       (List C.Position)
-      (List (Item.Product CE.Any (Maybe Float) data))
+      (List (CI.Any data))
       (List Legend.Legend)
       (C.Plane -> TickValues -> TickValues)
       (C.Plane -> S.Svg msg)
@@ -331,7 +332,7 @@ type Element data msg
   | GridElement
       (C.Plane -> TickValues -> S.Svg msg)
   | SubElements
-      (C.Plane -> List (Item.Product CE.Any (Maybe Float) data) -> List (Element data msg))
+      (C.Plane -> List (CI.Any data) -> List (Element data msg))
   | ListOfElements
       (List (Element data msg))
   | SvgElement
@@ -416,7 +417,7 @@ definePlane config elements =
   }
 
 
-getItems : C.Plane -> List (Element data msg) -> List (Item.Product CE.Any (Maybe Float) data)
+getItems : C.Plane -> List (Element data msg) -> List (CI.Any data)
 getItems plane elements =
   let toItems el acc =
         case el of
@@ -468,7 +469,7 @@ type alias TickValues =
   }
 
 
-getTickValues : C.Plane -> List (Item.Product CE.Any (Maybe Float) data) -> List (Element data msg) -> TickValues
+getTickValues : C.Plane -> List (CI.Any data) -> List (Element data msg) -> TickValues
 getTickValues plane items elements =
   let toValues el acc =
         case el of
@@ -489,7 +490,7 @@ getTickValues plane items elements =
   List.foldl toValues (TickValues [] [] [] []) elements
 
 
-viewElements : Container data msg -> C.Plane -> TickValues -> List (Item.Product CE.Any (Maybe Float) data) -> List Legend.Legend -> List (Element data msg) -> ( List (H.Html msg), List (S.Svg msg), List (H.Html msg) )
+viewElements : Container data msg -> C.Plane -> TickValues -> List (CI.Any data) -> List Legend.Legend -> List (Element data msg) -> ( List (H.Html msg), List (S.Svg msg), List (H.Html msg) )
 viewElements config plane tickValues allItems allLegends elements =
   let viewOne el ( before, chart_, after ) =
         case el of
@@ -533,7 +534,7 @@ type alias Tooltip =
 {-| Add a tooltip for a specific item.
 
     C.chart
-      [ CE.onMouseMove OnHover (CE.getNearest CE.product) ]
+      [ CE.onMouseMove OnHover (CE.getNearest CI.any) ]
       [ C.series .year
           [ C.scatter .income [] ]
           [ { year = 2000, income = 40000 }
@@ -583,7 +584,7 @@ Customizations:
 
 
 -}
-tooltip : Item.Item a -> List (Attribute Tooltip) -> List (H.Attribute Never) -> List (H.Html Never) -> Element data msg
+tooltip : Item.Rendered a -> List (Attribute Tooltip) -> List (H.Attribute Never) -> List (H.Html Never) -> Element data msg
 tooltip i edits attrs_ content =
   html <| \p ->
     let pos = Item.getLimits i
@@ -1579,7 +1580,7 @@ of the group of products which you list. A such group of products can be
 attrained through events like `Chart.Events.onMouseMove` or similar.
 
     C.chart
-      [ CE.onMouseMove OnHover (CE.getNearest CE.dot) ]
+      [ CE.onMouseMove OnHover (CE.getNearest CI.dots) ]
       [ C.series .year
           [ C.scatter .income [ CA.opacity 0.6 ]
               |> C.amongst model.hovering (\datum -> [ CA.highlight 0.5 ])
@@ -1591,7 +1592,7 @@ attrained through events like `Chart.Events.onMouseMove` or similar.
       ]
 
 -}
-amongst : List (CE.Product config value data) -> (data -> List (Attribute deco)) -> Property data inter deco -> Property data inter deco
+amongst : List (CI.One data x) -> (data -> List (Attribute deco)) -> Property data inter deco -> Property data inter deco
 amongst inQuestion func =
   P.variation <| \p s i meta d ->
     let check product =
@@ -1645,7 +1646,7 @@ type alias ItemLabel a =
   }
 
 
-defaultLabel : ItemLabel (CE.Item a)
+defaultLabel : ItemLabel (CI.Rendered a)
 defaultLabel =
   { xOff = IS.defaultLabel.xOff
   , yOff = IS.defaultLabel.yOff
@@ -1657,12 +1658,12 @@ defaultLabel =
   , rotate = IS.defaultLabel.rotate
   , uppercase = IS.defaultLabel.uppercase
   , attrs = IS.defaultLabel.attrs
-  , position = CE.getBottom
+  , position = CI.getBottom
   , format = Nothing
   }
 
 
-toLabelFromItemLabel : ItemLabel (CE.Item a) -> CS.Label
+toLabelFromItemLabel : ItemLabel (CI.Rendered a) -> CS.Label
 toLabelFromItemLabel config =
   { xOff = config.xOff
   , yOff = config.yOff
@@ -1712,24 +1713,24 @@ Attributes you can use:
       , CA.attrs [ SA.class "my-bin-labels" ]
 
        -- Edit the position of the label
-      , CA.position CE.getTop
+      , CA.position CI.getTop
 
        -- Given the entire bin item (not just the data)
        -- produce a string.
-      , CA.format (\bin -> String.fromFloat (CE.getCommonality bin).start)
+      , CA.format (\bin -> String.fromFloat (CI.getShared bin).start)
       ]
 
 -}
-binLabels : (data -> String) -> List (Attribute (ItemLabel (CE.Group (CE.Bin data) CE.Bar (Maybe Float) data))) -> Element data msg
+binLabels : (data -> String) -> List (Attribute (ItemLabel (CI.Bin (CI.Bar data)))) -> Element data msg
 binLabels toLabel edits =
-  eachCustom (CE.collect CE.bin CE.bar) <| \p item ->
+  eachCustom (CI.continue CI.bins CI.bars) <| \p item ->
     let config =
           Helpers.apply edits defaultLabel
 
         text =
           case config.format of
             Just formatting -> formatting item
-            Nothing -> toLabel (CE.getCommonality item).datum
+            Nothing -> toLabel (CI.getFirstData item)
     in
     [ svg <| \_ ->
         IS.label p (toLabelFromItemLabel config) [ S.text text ] (config.position p item)
@@ -1772,22 +1773,22 @@ Attributes you can use:
       , CA.attrs [ SA.class "my-bar-labels" ]
 
        -- Edit the position of the label
-      , CA.position CE.getTop
+      , CA.position CI.getTop
 
        -- Change the text of the label
-      , CA.format (\bar -> String.fromFloat (CE.getDependent bar))
+      , CA.format (\bar -> String.fromFloat (CI.getDependent bar))
       ]
 -}
-barLabels : List (Attribute (ItemLabel (CE.Product CE.Bar Float data))) -> Element data msg
+barLabels : List (Attribute (ItemLabel (CI.Bar data))) -> Element data msg
 barLabels edits =
   eachBar <| \p item ->
     let config =
-          Helpers.apply edits { defaultLabel | position = CE.getTop }
+          Helpers.apply edits { defaultLabel | position = CI.getTop }
 
         text =
           case config.format of
             Just formatting -> formatting item
-            Nothing -> String.fromFloat (CE.getDependent item)
+            Nothing -> String.fromFloat (CI.getDependent item)
     in
     [ svg <| \_ ->
         IS.label p (toLabelFromItemLabel config) [ S.text text ] (config.position p item)
@@ -1797,7 +1798,7 @@ barLabels edits =
 {-| Helper to add a label by a particular product.
 
     C.chart
-      [ CE.onMouseMove OnHover (CE.getNearest CE.bar) ]
+      [ CE.onMouseMove OnHover (CE.getNearest CI.bars) ]
       [ C.bars []
           [ C.bar .income [] ]
           [ { name = "Anna", income = 60 }
@@ -1832,24 +1833,24 @@ Attributes you can use:
       , CA.attrs [ SA.class "my-bar-labels" ]
 
        -- Edit the position of the label
-      , CA.position CE.getTop
+      , CA.position CI.getTop
 
        -- Change the text of the label
-      , CA.format (\bar -> String.fromFloat (CE.getDependent bar))
+      , CA.format (\bar -> String.fromFloat (CI.getDependent bar))
       ]
       product
 
 -}
-productLabel : List (Attribute (ItemLabel (CE.Product config value data))) -> CE.Product config value data -> Element data msg
+productLabel : List (Attribute (ItemLabel (CI.One data x))) -> CI.One data x -> Element data msg
 productLabel edits item =
   withPlane <| \p ->
     let config =
-          Helpers.apply edits { defaultLabel | position = CE.getTop }
+          Helpers.apply edits { defaultLabel | position = CI.getTop }
 
         text =
           case config.format of
             Just formatting -> formatting item
-            Nothing -> String.fromFloat (Item.getDependentSafe item)
+            Nothing -> String.fromFloat (CI.getDependent item)
     in
     [ svg <| \_ ->
         IS.label p (toLabelFromItemLabel config) [ S.text text ] (config.position p item)
@@ -1867,7 +1868,7 @@ productLabel edits item =
           , { age = 48, income = 80 }
           ]
 
-      , C.dotLabels CE.getCenter [ CA.moveUp 6 ]
+      , C.dotLabels CI.getCenter [ CA.moveUp 6 ]
       ]
 
 Attributes you can use:
@@ -1893,22 +1894,22 @@ Attributes you can use:
       , CA.attrs [ SA.class "my-dot-labels" ]
 
        -- Edit the position of the label
-      , CA.position CE.getTop
+      , CA.position CI.getTop
 
        -- Change the text of the label
-      , CA.format (\dot -> String.fromFloat (CE.getDependent dot))
+      , CA.format (\dot -> String.fromFloat (CI.getDependent dot))
       ]
 -}
-dotLabels : List (Attribute (ItemLabel (CE.Product CE.Dot Float data))) -> Element data msg
+dotLabels : List (Attribute (ItemLabel (CI.Dot data))) -> Element data msg
 dotLabels edits =
   eachDot <| \p item ->
     let config =
-          Helpers.apply edits { defaultLabel | position = CE.getCenter  }
+          Helpers.apply edits { defaultLabel | position = CI.getCenter  }
 
         text =
           case config.format of
             Just formatting -> formatting item
-            Nothing -> String.fromFloat (Item.getDependent item)
+            Nothing -> String.fromFloat (CI.getDependent item)
     in
     [ svg <| \_ ->
         IS.label p (toLabelFromItemLabel config) [ S.text text ] (config.position p item)
@@ -2041,11 +2042,11 @@ barsMap mapData edits properties data =
           Produce.toBarSeries index edits properties data
 
         generalized =
-          List.concatMap Group.getGenerals items
+          List.concatMap Many.getGenerals items
             |> List.map (Item.map mapData)
 
         bins =
-          CE.group CE.bin generalized
+          CI.apply CI.bins generalized
 
         legends_ =
           Legend.toBarLegends index edits properties
@@ -2053,7 +2054,7 @@ barsMap mapData edits properties data =
         toTicks plane acc =
           { acc | xs = acc.xs ++
               if barsConfig.grid then
-                List.concatMap (CE.getLimits >> \pos -> [ pos.x1, pos.x2 ]) bins
+                List.concatMap (CI.getLimits >> \pos -> [ pos.x1, pos.x2 ]) bins
               else
                 []
           }
@@ -2130,7 +2131,7 @@ seriesMap mapData toX properties data =
           Produce.toDotSeries index toX properties data
 
         generalized =
-          List.concatMap Group.getGenerals items
+          List.concatMap Many.getGenerals items
             |> List.map (Item.map mapData)
 
         legends_ =
@@ -2163,43 +2164,43 @@ withPlane func =
 Use helpers in `Chart.Events` to interact with bins.
 
 -}
-withBins : (C.Plane -> List (CE.Group (CE.Bin data) CE.Any (Maybe Float) data) -> List (Element data msg)) -> Element data msg
+withBins : (C.Plane -> List (CI.Bin (CI.Any data)) -> List (Element data msg)) -> Element data msg
 withBins func =
-  SubElements <| \p is -> func p (CE.group CE.bin is)
+  SubElements <| \p is -> func p (CI.apply CI.bins is)
 
 
 {-| Given all your stacks, add a list of elements.
 Use helpers in `Chart.Events` to interact with stacks.
 
 -}
-withStacks : (C.Plane -> List (CE.Group (CE.Stack data) CE.Any (Maybe Float) data) -> List (Element data msg)) -> Element data msg
+withStacks : (C.Plane -> List (CI.Stack (CI.Any data)) -> List (Element data msg)) -> Element data msg
 withStacks func =
-  SubElements <| \p is -> func p (CE.group CE.stack is)
+  SubElements <| \p is -> func p (CI.apply CI.stacks is)
 
 
 {-| Given all your bars, add a list of elements.
 Use helpers in `Chart.Events` to interact with bars.
 
 -}
-withBars : (C.Plane -> List (CE.Product CE.Bar (Maybe Float) data) -> List (Element data msg)) -> Element data msg
+withBars : (C.Plane -> List (CI.Bar data) -> List (Element data msg)) -> Element data msg
 withBars func =
-  SubElements <| \p is -> func p (CE.group CE.bar is)
+  SubElements <| \p is -> func p (CI.apply CI.bars is)
 
 
 {-| Given all your dots, add a list of elements.
 Use helpers in `Chart.Events` to interact with dots.
 
 -}
-withDots : (C.Plane -> List (CE.Product CE.Dot (Maybe Float) data) -> List (Element data msg)) -> Element data msg
+withDots : (C.Plane -> List (CI.Dot data) -> List (Element data msg)) -> Element data msg
 withDots func =
-  SubElements <| \p is -> func p (CE.group CE.dot is)
+  SubElements <| \p is -> func p (CI.apply CI.dots is)
 
 
 {-| Given all your products, add a list of elements.
 Use helpers in `Chart.Events` to interact with products.
 
 -}
-withProducts : (C.Plane -> List (CE.Product CE.Any (Maybe Float) data) -> List (Element data msg)) -> Element data msg
+withProducts : (C.Plane -> List (CI.Any data) -> List (Element data msg)) -> Element data msg
 withProducts func =
   SubElements <| \p is -> func p is
 
@@ -2207,7 +2208,7 @@ withProducts func =
 {-| Add elements for each item of whatever list in the first argument.
 
     C.chart
-      [ CE.onMouseMove OnHover (CE.getNearest CE.product) ]
+      [ CE.onMouseMove OnHover (CE.getNearest CI.any) ]
       [ C.series .year
           [ C.scatter .income [] ]
           [ { year = 2000, income = 40000 }
@@ -2238,16 +2239,16 @@ each items func =
           ]
 
       , C.eachBin <| \plane bin ->
-          let common = CE.getCommonality bin in
-          [ C.label [] [ S.text common.datum.country ] (CE.getBottom plane bin) ]
+          let common = CI.getShared bin in
+          [ C.label [] [ S.text common.datum.country ] (CI.getBottom plane bin) ]
       ]
 
 Use the functions in `Chart.Events` to access information about your bins.
 
 -}
-eachBin : (C.Plane -> CE.Group (CE.Bin data) CE.Any Float data -> List (Element data msg)) -> Element data msg
+eachBin : (C.Plane -> CI.Bin (CI.Any data) -> List (Element data msg)) -> Element data msg
 eachBin func =
-  SubElements <| \p is -> List.concatMap (func p) (CE.group (CE.collect CE.bin <| CE.keep CE.realValues CE.product) is)
+  SubElements <| \p is -> List.concatMap (func p) (CI.apply (CI.continue CI.bins <| CI.continue CI.real CI.any) is)
 
 
 {-| Add elements for each stack.
@@ -2265,16 +2266,16 @@ eachBin func =
           ]
 
       , C.eachStack <| \plane stack ->
-          let total = List.sum (List.map CE.getDependent (CE.getProducts stack)) in
-          [ C.label [] [ S.text (String.fromFloat total) ] (CE.getTop plane stack) ]
+          let total = List.sum (List.map CI.getDependent (CI.getMembers stack)) in
+          [ C.label [] [ S.text (String.fromFloat total) ] (CI.getTop plane stack) ]
       ]
 
 Use the functions in `Chart.Events` to access information about your stacks.
 
 -}
-eachStack : (C.Plane -> CE.Group (CE.Stack data) CE.Any Float data -> List (Element data msg)) -> Element data msg
+eachStack : (C.Plane -> CI.Stack (CI.Any data) -> List (Element data msg)) -> Element data msg
 eachStack func =
-  SubElements <| \p is -> List.concatMap (func p) (CE.group (CE.collect CE.stack <| CE.keep CE.realValues CE.product) is)
+  SubElements <| \p is -> List.concatMap (func p) (CI.apply (CI.continue CI.stacks <| CI.continue CI.real CI.any) is)
 
 
 {-| Add elements for each bar.
@@ -2290,16 +2291,16 @@ eachStack func =
           ]
 
       , C.eachBar <| \plane bar ->
-          let yValue = CE.getDependent bar in
-          [ C.label [] [ S.text (String.fromFloat yValue) ] (CE.getTop plane bar) ]
+          let yValue = CI.getDependent bar in
+          [ C.label [] [ S.text (String.fromFloat yValue) ] (CI.getTop plane bar) ]
       ]
 
 Use the functions in `Chart.Events` to access information about your bars.
 
 -}
-eachBar : (C.Plane -> CE.Product CE.Bar Float data -> List (Element data msg)) -> Element data msg
+eachBar : (C.Plane -> CI.Bar data -> List (Element data msg)) -> Element data msg
 eachBar func =
-  SubElements <| \p is -> List.concatMap (func p) (CE.group (CE.keep CE.realValues CE.bar) is)
+  SubElements <| \p is -> List.concatMap (func p) (CI.apply (CI.continue CI.real CI.bars) is)
 
 
 {-| Add elements for each dot.
@@ -2315,16 +2316,16 @@ eachBar func =
           ]
 
       , C.eachBar <| \plane bar ->
-          let yValue = CE.getDependent bar in
-          [ C.label [] [ S.text (String.fromFloat yValue) ] (CE.getTop plane bar) ]
+          let yValue = CI.getDependent bar in
+          [ C.label [] [ S.text (String.fromFloat yValue) ] (CI.getTop plane bar) ]
       ]
 
 Use the functions in `Chart.Events` to access information about your dots.
 
 -}
-eachDot : (C.Plane -> CE.Product CE.Dot Float data -> List (Element data msg)) -> Element data msg
+eachDot : (C.Plane -> CI.Dot data -> List (Element data msg)) -> Element data msg
 eachDot func =
-  SubElements <| \p is -> List.concatMap (func p) (CE.group (CE.keep CE.realValues CE.dot) is)
+  SubElements <| \p is -> List.concatMap (func p) (CI.apply (CI.continue CI.real CI.dots) is)
 
 
 {-| Add elements for each product. Works like `eachBar` and `eachDot`, but includes both
@@ -2333,16 +2334,16 @@ bars and dots.
 Use the functions in `Chart.Events` to access information about your products.
 
 -}
-eachProduct : (C.Plane -> CE.Product CE.Any Float data -> List (Element data msg)) -> Element data msg
+eachProduct : (C.Plane -> CI.Any data -> List (Element data msg)) -> Element data msg
 eachProduct func =
-  SubElements <| \p is -> List.concatMap (func p) (CE.group (CE.keep CE.realValues CE.product) is)
+  SubElements <| \p is -> List.concatMap (func p) (CI.apply (CI.continue CI.real CI.any) is)
 
 
 {-| Filter and group products in any way you'd like and add elements for each of them.
 
     C.chart []
-      [ C.eachCustom (CE.named "cats") <| \plane product ->
-          [ C.label [] [ S.text "hello" ] (CE.getTop plane product) ]
+      [ C.eachCustom (CI.named "cats") <| \plane product ->
+          [ C.label [] [ S.text "hello" ] (CI.getTop plane product) ]
       ]
 
 The above example adds a label for each product of the series named "cats".
@@ -2350,10 +2351,10 @@ The above example adds a label for each product of the series named "cats".
 Use the functions in `Chart.Events` to access information about your items.
 
 -}
-eachCustom : CE.Grouping (CE.Product CE.Any (Maybe Float) data) a -> (C.Plane -> a -> List (Element data msg)) -> Element data msg
+eachCustom : CI.Remodel (CI.Any data) a -> (C.Plane -> a -> List (Element data msg)) -> Element data msg
 eachCustom grouping func =
   SubElements <| \p items ->
-    let processed = CE.group grouping items in
+    let processed = CI.apply grouping items in
     List.concatMap (func p) processed
 
 

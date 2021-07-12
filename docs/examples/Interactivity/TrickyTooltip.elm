@@ -6,10 +6,11 @@ import Svg as S
 import Chart as C
 import Chart.Attributes as CA
 import Chart.Events as CE
+import Chart.Item as CI
 
 
 type alias Model =
-  { hovering : List (CE.Group (CE.Bin Datum) CE.Bar (Maybe Float) Datum) }
+  { hovering : List (CI.Bin (CI.Bar Datum)) }
 
 
 init : Model
@@ -18,7 +19,7 @@ init =
 
 
 type Msg
-  = OnHover (List (CE.Group (CE.Bin Datum) CE.Bar (Maybe Float) Datum))
+  = OnHover (List (CI.Bin (CI.Bar Datum)))
 
 
 update : Msg -> Model -> Model
@@ -35,8 +36,8 @@ view model =
     [ CA.height 300
     , CA.width 300
     , CA.padding { top = 0, bottom = 0, left = 10, right = 10 }
-    , CE.bar
-        |> CE.collect CE.bin
+    , CI.bars
+        |> CI.continue CI.bins
         |> CE.getNearest
         |> CE.onMouseMove OnHover
     , CE.onMouseLeave (OnHover [])
@@ -54,7 +55,7 @@ view model =
         ]
         data
     , C.each model.hovering <| \p bin ->
-        let stacks = CE.regroup CE.stack bin
+        let stacks = CI.apply CI.stacks (CI.getMembers bin)
             toTooltip stack = C.tooltip stack [ CA.onLeftOrRight ] [] []
         in
         List.map toTooltip stacks

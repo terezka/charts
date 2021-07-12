@@ -16,6 +16,7 @@ import Time
 import Chart as C
 import Chart.Attributes as CA
 import Chart.Events as CE
+import Chart.Item as CI
 import Chart.Svg as CS
 
 import Element as E
@@ -27,7 +28,7 @@ import Chart.Events
 
 
 type alias Model =
-  { hovering : List (CE.Product CE.Dot Float Datum)
+  { hovering : List (CI.Dot Datum)
   }
 
 
@@ -38,7 +39,7 @@ init =
 
 
 type Msg
-  = OnHover (List (CE.Product CE.Dot Float Datum))
+  = OnHover (List (CI.Dot Datum))
 
 
 update : Msg -> Model -> Model
@@ -55,7 +56,7 @@ view model =
     , CA.width 350
     , CA.margin { top = 0, bottom = 45, left = 0, right = 20 }
     , CA.padding { top = 5, bottom = 5, left = 0, right = 0 }
-    , CE.onMouseMove OnHover (CE.getNearest (CE.keep CE.realValues CE.dot))
+    , CE.onMouseMove OnHover (CE.getNearest (CI.continue CI.real CI.dots))
     , CE.onMouseLeave (OnHover [])
     ]
     [ C.grid []
@@ -70,10 +71,10 @@ view model =
     , C.labelAt .max .max [ CA.moveRight 7 ] [ S.text "Population" ]
 
     , C.each model.hovering <| \p dot ->
-        [ C.line [ CA.x1 (CE.getIndependent dot), CA.dashed [ 3, 3 ], CA.width 1.5 ] ]
+        [ C.line [ CA.x1 (CI.getIndependent dot), CA.dashed [ 3, 3 ], CA.width 1.5 ] ]
 
     , let isMemberOfBin datum =
-            List.member datum (List.map CE.getDatum model.hovering)
+            List.member datum (List.map CI.getData model.hovering)
       in
       C.series .year
         [ C.interpolated .manhattan [ CA.linear, CA.width 2, CA.color orange ] []
@@ -103,9 +104,9 @@ view model =
         [ C.tooltip dot [ CA.onTop, CA.offset 8 ] []
             [ H.span
                 [ HA.style "color" "#777" ]
-                [ H.text <| String.fromFloat (CE.getIndependent dot) ]
+                [ H.text <| String.fromFloat (CI.getIndependent dot) ]
             , H.text ": "
-            , H.text <| String.fromFloat (CE.getDependent dot) ++ "k"
+            , H.text <| String.fromFloat (CI.getDependent dot) ++ "k"
             ]
 
         ]

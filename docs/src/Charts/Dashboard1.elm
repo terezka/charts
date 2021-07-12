@@ -16,6 +16,7 @@ import Time
 import Chart as C
 import Chart.Attributes as CA
 import Chart.Events as CE
+import Chart.Item as CI
 import Chart.Svg as CS
 
 import Element as E
@@ -27,7 +28,7 @@ import Chart.Events
 
 
 type alias Model =
-  { hovering : List (CE.Product CE.Dot (Maybe Float) Datum)
+  { hovering : List (CI.Dot Datum)
   }
 
 
@@ -38,7 +39,7 @@ init =
 
 
 type Msg
-  = OnHover (List (CE.Product CE.Dot (Maybe Float) Datum))
+  = OnHover (List (CI.Dot Datum))
 
 
 update : Msg -> Model -> Model
@@ -56,7 +57,7 @@ view model =
     , CA.static
     , CA.margin { top = 0, bottom = 18, left = 10, right = 10 }
     , CA.padding { top = 10, bottom = 0, left = 0, right = 35 }
-    , CE.onMouseMove OnHover (CE.getNearest CE.dot)
+    , CE.onMouseMove OnHover (CE.getNearest CI.dots)
     , CE.onMouseLeave (OnHover [])
     ]
     [ C.grid [ CA.dashed [ 3, 2 ]]
@@ -82,7 +83,7 @@ view model =
             [ CA.monotone, CA.color "#7b4dff", CA.width 1.5, CA.opacity 0.2 ]
             [ CA.color "white", CA.borderWidth 1.5, CA.circle ]
             |> C.named "Traffic"
-            |> C.amongst (CE.filterData justDot model.hovering) (\_ -> [ CA.color "#7b4dff", CA.border "white" ])
+            |> C.amongst (CI.filter justDot model.hovering) (\_ -> [ CA.color "#7b4dff", CA.border "white" ])
         ]
         lineData
 

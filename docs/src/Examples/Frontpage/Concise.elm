@@ -9,10 +9,12 @@ import Chart as C
 import Chart.Svg as CS
 import Chart.Attributes as CA
 import Chart.Events as CE
+import Chart.Item as CI
+import Chart.Item as CI
 
 
 type alias Model =
-  { hovering : List (CE.Group (CE.Stack Datum) CE.Any (Maybe Float) Datum) }
+  { hovering : List (CI.Stack (CI.Any Datum)) }
 
 
 init : Model
@@ -21,7 +23,7 @@ init =
 
 
 type Msg
-  = OnHover (List (CE.Group (CE.Stack Datum) CE.Any (Maybe Float) Datum))
+  = OnHover (List (CI.Stack (CI.Any Datum)))
 
 
 update : Msg -> Model -> Model
@@ -37,7 +39,7 @@ view model =
     [ CA.height 300
     , CA.width 500
     , CA.static
-    , CE.onMouseMove OnHover (CE.getNearest CE.stack)
+    , CE.onMouseMove OnHover (CE.getNearest CI.stacks)
     , CE.onMouseLeave (OnHover [])
     ]
     [ C.grid []
@@ -80,17 +82,18 @@ view model =
           C.productLabel [ CA.moveDown 18, CA.color white ]
       in
       C.each model.hovering <| \p stack ->
-        List.map toBrightLabel (CE.getProducts stack)
+        List.map toBrightLabel (CI.getMembers stack)
 
     , C.eachBin <| \p bin ->
-        let common = CE.getCommonality bin
-            yPos = (CE.getTop p bin).y
-            xMid = (CE.getCenter p bin).x
+        let shared = CI.getShared bin
+            datum = CI.getFirstData bin
+            yPos = (CI.getTop p bin).y
+            xMid = (CI.getCenter p bin).x
         in
-        if common.datum.country == "Finland" then
+        if datum.country == "Finland" then
           [ C.line
-              [ CA.x1 common.start
-              , CA.x2 common.end
+              [ CA.x1 shared.x1
+              , CA.x2 shared.x2
               , CA.y1 yPos
               , CA.moveUp 15
               , CA.tickLength 5
@@ -149,7 +152,7 @@ smallCode =
     [ CA.height 300
     , CA.width 500
     , CA.static
-    , CE.onMouseMove OnHover (CE.getNearest CE.stack)
+    , CE.onMouseMove OnHover (CE.getNearest CI.stacks)
     , CE.onMouseLeave (OnHover [])
     ]
     [ C.grid []
@@ -192,17 +195,18 @@ smallCode =
           C.productLabel [ CA.moveDown 18, CA.color white ]
       in
       C.each model.hovering <| \\p stack ->
-        List.map toBrightLabel (CE.getProducts stack)
+        List.map toBrightLabel (CI.getMembers stack)
 
     , C.eachBin <| \\p bin ->
-        let common = CE.getCommonality bin
-            yPos = (CE.getTop p bin).y
-            xMid = (CE.getCenter p bin).x
+        let shared = CI.getShared bin
+            datum = CI.getFirstData bin
+            yPos = (CI.getTop p bin).y
+            xMid = (CI.getCenter p bin).x
         in
-        if common.datum.country == "Finland" then
+        if datum.country == "Finland" then
           [ C.line
-              [ CA.x1 common.start
-              , CA.x2 common.end
+              [ CA.x1 shared.x1
+              , CA.x2 shared.x2
               , CA.y1 yPos
               , CA.moveUp 15
               , CA.tickLength 5
@@ -227,10 +231,12 @@ import Chart as C
 import Chart.Svg as CS
 import Chart.Attributes as CA
 import Chart.Events as CE
+import Chart.Item as CI
+import Chart.Item as CI
 
 
 type alias Model =
-  { hovering : List (CE.Group (CE.Stack Datum) CE.Any (Maybe Float) Datum) }
+  { hovering : List (CI.Stack (CI.Any Datum)) }
 
 
 init : Model
@@ -239,7 +245,7 @@ init =
 
 
 type Msg
-  = OnHover (List (CE.Group (CE.Stack Datum) CE.Any (Maybe Float) Datum))
+  = OnHover (List (CI.Stack (CI.Any Datum)))
 
 
 update : Msg -> Model -> Model
@@ -255,7 +261,7 @@ view model =
     [ CA.height 300
     , CA.width 500
     , CA.static
-    , CE.onMouseMove OnHover (CE.getNearest CE.stack)
+    , CE.onMouseMove OnHover (CE.getNearest CI.stacks)
     , CE.onMouseLeave (OnHover [])
     ]
     [ C.grid []
@@ -298,17 +304,18 @@ view model =
           C.productLabel [ CA.moveDown 18, CA.color white ]
       in
       C.each model.hovering <| \\p stack ->
-        List.map toBrightLabel (CE.getProducts stack)
+        List.map toBrightLabel (CI.getMembers stack)
 
     , C.eachBin <| \\p bin ->
-        let common = CE.getCommonality bin
-            yPos = (CE.getTop p bin).y
-            xMid = (CE.getCenter p bin).x
+        let shared = CI.getShared bin
+            datum = CI.getFirstData bin
+            yPos = (CI.getTop p bin).y
+            xMid = (CI.getCenter p bin).x
         in
-        if common.datum.country == "Finland" then
+        if datum.country == "Finland" then
           [ C.line
-              [ CA.x1 common.start
-              , CA.x2 common.end
+              [ CA.x1 shared.x1
+              , CA.x2 shared.x2
               , CA.y1 yPos
               , CA.moveUp 15
               , CA.tickLength 5

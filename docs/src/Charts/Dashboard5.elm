@@ -16,6 +16,7 @@ import Time
 import Chart as C
 import Chart.Attributes as CA
 import Chart.Events as CE
+import Chart.Item as CI
 import Chart.Svg as CS
 
 import Element as E
@@ -27,7 +28,7 @@ import Chart.Events
 
 
 type alias Model =
-  { hovering : List (CE.Product CE.Dot (Maybe Float) Iris.Datum)
+  { hovering : List (CI.Dot Iris.Datum)
   }
 
 
@@ -38,7 +39,7 @@ init =
 
 
 type Msg
-  = OnHover (List (CE.Product CE.Dot (Maybe Float) Iris.Datum))
+  = OnHover (List (CI.Dot Iris.Datum))
 
 
 update : Msg -> Model -> Model
@@ -56,7 +57,7 @@ view model =
     , CA.margin { top = 5, bottom = 10, left = 10, right = 0 }
     , CA.padding { top = 15, bottom = 10, left = 15, right = 15 }
     , CA.domain [ CA.likeData ]
-    , CE.onMouseMove OnHover (CE.getNearest CE.dot)
+    , CE.onMouseMove OnHover (CE.getNearest CI.dots)
     , CE.onMouseLeave (OnHover [])
     ]
     [ C.grid [ CA.dashed [ 5, 5 ] ]
@@ -105,12 +106,12 @@ view model =
     --    [ S.text "The Iris flower: Sepal length vs. sepal width" ]
 
     , C.each model.hovering <| \p dot ->
-        let datum = CE.getDatum dot in
+        let datum = CI.getData dot in
         [ C.tooltip dot
             [ CA.offset 1 ]
             []
             [ H.div
-                [ HA.style "color" (CE.getColor dot)
+                [ HA.style "color" (CI.getColor dot)
                 , HA.style "text-align" "center"
                 , HA.style "padding-bottom" "4px"
                 , HA.style "border-bottom" "1px solid lightgray"

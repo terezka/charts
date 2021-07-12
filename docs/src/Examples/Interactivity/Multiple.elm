@@ -8,10 +8,11 @@ import Svg as S
 import Chart as C
 import Chart.Attributes as CA
 import Chart.Events as CE
+import Chart.Item as CI
 
 
 type alias Model =
-  { hovering : List (CE.Product CE.Any (Maybe Float) Datum) }
+  { hovering : List (CI.Any Datum) }
 
 
 init : Model
@@ -20,7 +21,7 @@ init =
 
 
 type Msg
-  = OnHover (List (CE.Product CE.Any (Maybe Float) Datum))
+  = OnHover (List (CI.Any Datum))
 
 
 update : Msg -> Model -> Model
@@ -35,7 +36,7 @@ view model =
   C.chart
     [ CA.height 300
     , CA.width 300
-    , CE.onMouseMove OnHover (CE.getNearest CE.product)
+    , CE.onMouseMove OnHover (CE.getNearest CI.any)
     , CE.onMouseLeave (OnHover [])
     ]
     [ C.grid []
@@ -51,8 +52,8 @@ view model =
         data
 
     , C.series .x
-        [ C.interpolated .p [  ] []
-        , C.interpolated .q [  ] []
+        [ C.interpolated .p [] []
+        , C.interpolated .q [] []
         ]
         data
 
@@ -100,7 +101,7 @@ smallCode =
   C.chart
     [ CA.height 300
     , CA.width 300
-    , CE.onMouseMove OnHover (CE.getNearest CE.product)
+    , CE.onMouseMove OnHover (CE.getNearest CI.any)
     , CE.onMouseLeave (OnHover [])
     ]
     [ C.grid []
@@ -116,8 +117,8 @@ smallCode =
         data
 
     , C.series .x
-        [ C.interpolated .p [  ] []
-        , C.interpolated .q [  ] []
+        [ C.interpolated .p [] []
+        , C.interpolated .q [] []
         ]
         data
 
@@ -135,10 +136,11 @@ import Svg as S
 import Chart as C
 import Chart.Attributes as CA
 import Chart.Events as CE
+import Chart.Item as CI
 
 
 type alias Model =
-  { hovering : List (CE.Product CE.Any (Maybe Float) Datum) }
+  { hovering : List (CI.Any Datum) }
 
 
 init : Model
@@ -147,7 +149,7 @@ init =
 
 
 type Msg
-  = OnHover (List (CE.Product CE.Any (Maybe Float) Datum))
+  = OnHover (List (CI.Any Datum))
 
 
 update : Msg -> Model -> Model
@@ -162,7 +164,7 @@ view model =
   C.chart
     [ CA.height 300
     , CA.width 300
-    , CE.onMouseMove OnHover (CE.getNearest CE.product)
+    , CE.onMouseMove OnHover (CE.getNearest CI.any)
     , CE.onMouseLeave (OnHover [])
     ]
     [ C.grid []
@@ -178,8 +180,8 @@ view model =
         data
 
     , C.series .x
-        [ C.interpolated .p [  ] []
-        , C.interpolated .q [  ] []
+        [ C.interpolated .p [] []
+        , C.interpolated .q [] []
         ]
         data
 
