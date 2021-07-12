@@ -79,7 +79,7 @@ view model =
             , CA.moveUp 8
             , CA.fontSize 14
             ]
-            [ S.text (String.fromFloat (CI.getDependent item)) ]
+            [ S.text (String.fromFloat (CI.getY item)) ]
             (CI.getTop p item)
         ]
     ]

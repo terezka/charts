@@ -14,7 +14,7 @@ import Chart.Item as CI
 
 
 type alias Model =
-  { hovering : List (CI.Stack Datum CI.Any) }
+  { hovering : List (CI.Many Datum CI.Any) }
 
 
 init : Model
@@ -23,7 +23,7 @@ init =
 
 
 type Msg
-  = OnHover (List (CI.Stack Datum CI.Any))
+  = OnHover (List (CI.Many Datum CI.Any))
 
 
 update : Msg -> Model -> Model
@@ -85,15 +85,15 @@ view model =
         List.map toBrightLabel (CI.getMembers stack)
 
     , C.eachBin <| \p bin ->
-        let shared = CI.getShared bin
-            datum = CI.getFirstData bin
+        let bar = CI.getMember bin
+            datum = CI.getOneData bin
             yPos = (CI.getTop p bin).y
             xMid = (CI.getCenter p bin).x
         in
         if datum.country == "Finland" then
           [ C.line
-              [ CA.x1 shared.x1
-              , CA.x2 shared.x2
+              [ CA.x1 (CI.getX1 bar)
+              , CA.x2 (CI.getX2 bar)
               , CA.y1 yPos
               , CA.moveUp 15
               , CA.tickLength 5
@@ -198,15 +198,15 @@ smallCode =
         List.map toBrightLabel (CI.getMembers stack)
 
     , C.eachBin <| \\p bin ->
-        let shared = CI.getShared bin
-            datum = CI.getFirstData bin
+        let bar = CI.getMember bin
+            datum = CI.getOneData bin
             yPos = (CI.getTop p bin).y
             xMid = (CI.getCenter p bin).x
         in
         if datum.country == "Finland" then
           [ C.line
-              [ CA.x1 shared.x1
-              , CA.x2 shared.x2
+              [ CA.x1 (CI.getX1 bar)
+              , CA.x2 (CI.getX2 bar)
               , CA.y1 yPos
               , CA.moveUp 15
               , CA.tickLength 5
@@ -236,7 +236,7 @@ import Chart.Item as CI
 
 
 type alias Model =
-  { hovering : List (CI.Stack Datum CI.Any) }
+  { hovering : List (CI.Many Datum CI.Any) }
 
 
 init : Model
@@ -245,7 +245,7 @@ init =
 
 
 type Msg
-  = OnHover (List (CI.Stack Datum CI.Any))
+  = OnHover (List (CI.Many Datum CI.Any))
 
 
 update : Msg -> Model -> Model
@@ -307,15 +307,15 @@ view model =
         List.map toBrightLabel (CI.getMembers stack)
 
     , C.eachBin <| \\p bin ->
-        let shared = CI.getShared bin
-            datum = CI.getFirstData bin
+        let bar = CI.getMember bin
+            datum = CI.getOneData bin
             yPos = (CI.getTop p bin).y
             xMid = (CI.getCenter p bin).x
         in
         if datum.country == "Finland" then
           [ C.line
-              [ CA.x1 shared.x1
-              , CA.x2 shared.x2
+              [ CA.x1 (CI.getX1 bar)
+              , CA.x2 (CI.getX2 bar)
               , CA.y1 yPos
               , CA.moveUp 15
               , CA.tickLength 5

@@ -29,7 +29,7 @@ import Chart.Events
 
 
 type alias Model =
-  { hovering : List (CI.Bin Binned CI.Bar)
+  { hovering : List (CI.Many Binned CI.Bar)
   , binSize : Float
   , year : Float
   }
@@ -58,7 +58,7 @@ init =
 
 
 type Msg
-  = OnHover (List (CI.Bin Binned CI.Bar))
+  = OnHover (List (CI.Many Binned CI.Bar))
   | OnYear Float
   | OnBinSize Float
 
@@ -191,7 +191,7 @@ viewChart model =
 
     , C.withPlane <| \p ->
         let hoveredBars = List.concatMap CI.getMembers model.hovering
-            highestValue = Maybe.withDefault 0 <| List.maximum (List.map CI.getDependent hoveredBars)
+            highestValue = Maybe.withDefault 0 <| List.maximum (List.map CI.getY hoveredBars)
             amountOfBars = List.length hoveredBars
             viewLabel index bar =
               let offset = CS.lengthInCartesianY p <| 10 + toFloat (amountOfBars - index - 1) * 20 in
@@ -210,7 +210,7 @@ viewChart model =
                   , CA.fontSize 10
                   , CA.color (CI.getColor bar)
                   ]
-                  [ S.text (String.fromFloat <| CI.getDependent bar) ]
+                  [ S.text (String.fromFloat <| CI.getY bar) ]
                   { x = (CI.getTop p bar).x, y = highestValue + offset }
               ]
 

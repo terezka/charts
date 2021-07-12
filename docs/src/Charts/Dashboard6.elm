@@ -104,7 +104,7 @@ view model =
             List.map toCountryLabel (CI.getMembers first)
 
     , C.eachBin <| \p bin ->
-        let datum = CI.getFirstData bin in
+        let datum = CI.getOneData bin in
         [ C.label [ CA.moveDown 20, CA.fontSize 16 ] [ S.text (String.fromFloat datum.year) ] (CI.getBottom p bin) ]
     ]
 

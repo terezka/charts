@@ -71,7 +71,7 @@ view model =
     , C.labelAt .max .max [ CA.moveRight 7 ] [ S.text "Population" ]
 
     , C.each model.hovering <| \p dot ->
-        [ C.line [ CA.x1 (CI.getIndependent dot), CA.dashed [ 3, 3 ], CA.width 1.5 ] ]
+        [ C.line [ CA.x1 (CI.getX dot), CA.dashed [ 3, 3 ], CA.width 1.5 ] ]
 
     , let isMemberOfBin datum =
             List.member datum (List.map CI.getData model.hovering)
@@ -104,9 +104,9 @@ view model =
         [ C.tooltip dot [ CA.onTop, CA.offset 8 ] []
             [ H.span
                 [ HA.style "color" "#777" ]
-                [ H.text <| String.fromFloat (CI.getIndependent dot) ]
+                [ H.text <| String.fromFloat (CI.getX dot) ]
             , H.text ": "
-            , H.text <| String.fromFloat (CI.getDependent dot) ++ "k"
+            , H.text <| String.fromFloat (CI.getY dot) ++ "k"
             ]
 
         ]

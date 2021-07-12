@@ -30,7 +30,7 @@ import DateFormat as F
 
 type alias Model =
   { hovering : List (CI.One Datum CI.Dot)
-  , hoveringBars : List (CI.Bin Datum CI.Bar)
+  , hoveringBars : List (CI.Many Datum CI.Bar)
   }
 
 
@@ -44,7 +44,7 @@ init =
 type Msg
   = OnHover
       (List (CI.One Datum CI.Dot))
-      (List (CI.Bin Datum CI.Bar))
+      (List (CI.Many Datum CI.Bar))
 
 
 update : Msg -> Model -> Model
@@ -107,7 +107,7 @@ view model =
                   , CA.fontSize 12
                   , CA.color "rgba(255, 255, 255, 0.4)"
                   ]
-                  [ S.text (String.fromInt (round (CI.getDependent bar / 1000)) ++ "k") ]
+                  [ S.text (String.fromInt (round (CI.getY bar / 1000)) ++ "k") ]
                   (CI.getTop p bar)
 
               else
@@ -122,7 +122,7 @@ view model =
         List.map eachBar (CI.getMembers stack)
 
     , C.each model.hovering <| \p dot ->
-        let xValue = Time.millisToPosix (round (CI.getIndependent dot))
+        let xValue = Time.millisToPosix (round (CI.getX dot))
             rows = CI.getTooltip dot ++ List.concatMap CI.getTooltip (List.concatMap CI.getMembers model.hoveringBars)
             header =
               H.div

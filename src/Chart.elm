@@ -1730,7 +1730,7 @@ binLabels toLabel edits =
         text =
           case config.format of
             Just formatting -> formatting item
-            Nothing -> toLabel (CI.getFirstData item)
+            Nothing -> toLabel (CI.getOneData item)
     in
     [ svg <| \_ ->
         IS.label p (toLabelFromItemLabel config) [ S.text text ] (config.position p item)
@@ -1776,7 +1776,7 @@ Attributes you can use:
       , CA.position CI.getTop
 
        -- Change the text of the label
-      , CA.format (\bar -> String.fromFloat (CI.getDependent bar))
+      , CA.format (\bar -> String.fromFloat (CI.getY bar))
       ]
 -}
 barLabels : List (Attribute (ItemLabel (CI.One data CI.Bar))) -> Element data msg
@@ -1788,7 +1788,7 @@ barLabels edits =
         text =
           case config.format of
             Just formatting -> formatting item
-            Nothing -> String.fromFloat (CI.getDependent item)
+            Nothing -> String.fromFloat (CI.getY item)
     in
     [ svg <| \_ ->
         IS.label p (toLabelFromItemLabel config) [ S.text text ] (config.position p item)
@@ -1836,7 +1836,7 @@ Attributes you can use:
       , CA.position CI.getTop
 
        -- Change the text of the label
-      , CA.format (\bar -> String.fromFloat (CI.getDependent bar))
+      , CA.format (\bar -> String.fromFloat (CI.getY bar))
       ]
       product
 
@@ -1850,7 +1850,7 @@ productLabel edits item =
         text =
           case config.format of
             Just formatting -> formatting item
-            Nothing -> String.fromFloat (CI.getDependent item)
+            Nothing -> String.fromFloat (CI.getY item)
     in
     [ svg <| \_ ->
         IS.label p (toLabelFromItemLabel config) [ S.text text ] (config.position p item)
@@ -1897,7 +1897,7 @@ Attributes you can use:
       , CA.position CI.getTop
 
        -- Change the text of the label
-      , CA.format (\dot -> String.fromFloat (CI.getDependent dot))
+      , CA.format (\dot -> String.fromFloat (CI.getY dot))
       ]
 -}
 dotLabels : List (Attribute (ItemLabel (CI.One data CI.Dot))) -> Element data msg
@@ -1909,7 +1909,7 @@ dotLabels edits =
         text =
           case config.format of
             Just formatting -> formatting item
-            Nothing -> String.fromFloat (CI.getDependent item)
+            Nothing -> String.fromFloat (CI.getY item)
     in
     [ svg <| \_ ->
         IS.label p (toLabelFromItemLabel config) [ S.text text ] (config.position p item)
@@ -2266,7 +2266,7 @@ eachBin func =
           ]
 
       , C.eachStack <| \plane stack ->
-          let total = List.sum (List.map CI.getDependent (CI.getMembers stack)) in
+          let total = List.sum (List.map CI.getY (CI.getMembers stack)) in
           [ C.label [] [ S.text (String.fromFloat total) ] (CI.getTop plane stack) ]
       ]
 
@@ -2291,7 +2291,7 @@ eachStack func =
           ]
 
       , C.eachBar <| \plane bar ->
-          let yValue = CI.getDependent bar in
+          let yValue = CI.getY bar in
           [ C.label [] [ S.text (String.fromFloat yValue) ] (CI.getTop plane bar) ]
       ]
 
@@ -2316,7 +2316,7 @@ eachBar func =
           ]
 
       , C.eachBar <| \plane bar ->
-          let yValue = CI.getDependent bar in
+          let yValue = CI.getY bar in
           [ C.label [] [ S.text (String.fromFloat yValue) ] (CI.getTop plane bar) ]
       ]
 

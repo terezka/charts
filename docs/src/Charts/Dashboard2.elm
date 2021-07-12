@@ -78,14 +78,14 @@ view model =
 
     , C.eachBar <| \p bar ->
         let bottom = CI.getBottom p bar
-            value = CI.getDependent bar
+            value = CI.getY bar
             color = if value < 10 then "#6f6f6f" else "white"
         in
         if value == 0 then [] else
         [ C.label [ CA.color color, CA.moveUp 6, CA.fontSize 14 ] [ S.text (String.fromFloat value) ] bottom ]
 
     , C.each model.hovering <| \p dot ->
-        [ C.label [ CA.fontSize 14, CA.moveUp 10 ] [ S.text (String.fromFloat <| CI.getDependent dot) ] (CI.getTop p dot) ]
+        [ C.label [ CA.fontSize 14, CA.moveUp 10 ] [ S.text (String.fromFloat <| CI.getY dot) ] (CI.getTop p dot) ]
     ]
 
 

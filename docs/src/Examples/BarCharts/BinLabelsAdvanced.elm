@@ -21,13 +21,13 @@ view model =
     , C.yLabels []
 
     , C.eachBin <| \p bin ->
-        let shared = CI.getShared bin
-            datum = CI.getFirstData bin
+        let bar = CI.getMember bin
+            datum = CI.getOneData bin
             isSpecial = datum.y + datum.z > 6
 
             labelBasic =
-              String.fromFloat shared.x1 ++ " - " ++
-              String.fromFloat shared.x2
+              String.fromFloat (CI.getX1 bar) ++ " - " ++
+              String.fromFloat (CI.getX2 bar)
 
             label =
               if isSpecial
@@ -112,13 +112,13 @@ smallCode =
     , C.yLabels []
 
     , C.eachBin <| \\p bin ->
-        let shared = CI.getShared bin
-            datum = CI.getFirstData bin
+        let bar = CI.getMember bin
+            datum = CI.getOneData bin
             isSpecial = datum.y + datum.z > 6
 
             labelBasic =
-              String.fromFloat shared.x1 ++ " - " ++
-              String.fromFloat shared.x2
+              String.fromFloat (CI.getX1 bar) ++ " - " ++
+              String.fromFloat (CI.getX2 bar)
 
             label =
               if isSpecial
@@ -167,13 +167,13 @@ view model =
     , C.yLabels []
 
     , C.eachBin <| \\p bin ->
-        let shared = CI.getShared bin
-            datum = CI.getFirstData bin
+        let bar = CI.getMember bin
+            datum = CI.getOneData bin
             isSpecial = datum.y + datum.z > 6
 
             labelBasic =
-              String.fromFloat shared.x1 ++ " - " ++
-              String.fromFloat shared.x2
+              String.fromFloat (CI.getX1 bar) ++ " - " ++
+              String.fromFloat (CI.getX2 bar)
 
             label =
               if isSpecial

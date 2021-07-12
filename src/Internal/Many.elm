@@ -163,7 +163,7 @@ bins =
           , dataIndex = config.tooltipInfo.data
           }
       , equality = \a b -> a.x1 == b.x1 && a.x2 == b.x2 && a.seriesIndex == b.seriesIndex && a.dataIndex == b.dataIndex
-      , edits = editLimits (\c pos -> { pos | x1 = c.config.x1, x2 = c.config.x2 })
+      , edits = editLimits (\item pos -> { pos | x1 = I.getX1 item, x2 = I.getX2 item })
       }
 
 
@@ -186,9 +186,9 @@ groupingHelp { shared, equality, edits } items =
   List.map toNewGroup (Helpers.gatherWith toEquality items)
 
 
-editLimits : ({ items : ( x, List x ) } -> Position -> Position) -> Many x -> Many x
+editLimits : (x -> Position -> Position) -> Many x -> Many x
 editLimits edit (I.Rendered group_) =
-  I.Rendered { group_ | toLimits = \c -> group_.toLimits c |> edit c }
+  I.Rendered { group_ | toLimits = \c -> c.items |> \(x, xs) -> group_.toLimits c |> edit x }
 
 
 toGroup : I.Rendered x -> List (I.Rendered x) -> Many (I.Rendered x)

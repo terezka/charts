@@ -51,8 +51,8 @@ view model =
         data
     , C.each model.hovering <| \p dot ->
         let color = CI.getColor dot
-            x = CI.getIndependent dot
-            y = CI.getDependent dot
+            x = CI.getX dot
+            y = CI.getY dot
         in
         [ C.tooltip dot []
             [ HA.style "color" color ]

@@ -63,7 +63,7 @@ view model =
     [ C.xLabels [ CA.times Time.utc, CA.uppercase, CA.fontSize 9, CA.amount 10 ]
 
     , C.each model.hovering <| \p dot ->
-        [ C.line [ CA.x1 (CI.getIndependent dot), CA.width 2, CA.dashed [ 5, 5 ] ] ]
+        [ C.line [ CA.x1 (CI.getX dot), CA.width 2, CA.dashed [ 5, 5 ] ] ]
 
     , C.series .x
         [ C.interpolatedMaybe .y

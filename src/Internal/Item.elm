@@ -113,14 +113,26 @@ getDatum (Rendered item) =
 
 
 {-| -}
-getIndependent : One data x -> Float
-getIndependent (Rendered item) =
+getX : One data x -> Float
+getX (Rendered item) =
   item.config.values.x1
 
 
 {-| -}
-getDependent : One data x -> Float
-getDependent (Rendered item) =
+getX1 : One data x -> Float
+getX1 (Rendered item) =
+  item.config.values.x1
+
+
+{-| -}
+getX2 : One data x -> Float
+getX2 (Rendered item) =
+  item.config.values.x2
+
+
+{-| -}
+getY : One data x -> Float
+getY (Rendered item) =
   item.config.values.y
 
 

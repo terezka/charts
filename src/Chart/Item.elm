@@ -5,12 +5,11 @@ module Chart.Item exposing
   , getPosition, getLimits, getTooltip
 
   , One, Any, Bar, Dot
-  , getData, getDependent, getIndependent
+  , getData, getX, getX1, getX2, getY
   , getName, getColor, getSize
   , isReal, isSame, filter
 
-  , Many, Stack, Bin
-  , getMembers, getShared, getDatas, getFirstData
+  , Many, getMembers, getMember, getDatas, getOneData
 
   , Remodel, apply, andThen
   , any, dots, bars, real
@@ -139,15 +138,27 @@ getData =
 
 
 {-| -}
-getDependent : One data x -> Float
-getDependent =
-  I.getDependent
+getX : One data x -> Float
+getX =
+  I.getX
 
 
 {-| -}
-getIndependent : One data x -> Float
-getIndependent =
-  I.getIndependent
+getX1 : One data x -> Float
+getX1 =
+  I.getX1
+
+
+{-| -}
+getX2 : One data x -> Float
+getX2 =
+  I.getX2
+
+
+{-| -}
+getY : One data x -> Float
+getY =
+  I.getY
 
 
 {-| -}
@@ -196,13 +207,13 @@ type alias Many data x =
 
 
 {-| -}
-getMembers : Many data x -> List x
+getMembers : Many data x -> List (One data x)
 getMembers =
   M.getMembers
 
 
 {-| -}
-getMember : Many data x -> x
+getMember : Many data x -> One data x
 getMember =
   M.getMember
 
@@ -265,19 +276,19 @@ real =
 
 
 {-| -}
-bins : Remodel (One data x) (Bin data x)
+bins : Remodel (One data x) (Many data x)
 bins =
   M.bins
 
 
 {-| -}
-stacks : Remodel (One data x) (Stack data x)
+stacks : Remodel (One data x) (Many data x)
 stacks =
   M.stacks
 
 
 {-| -}
-sameX : Remodel (One data x) (SameX data x)
+sameX : Remodel (One data x) (Many data x)
 sameX =
   M.sameX
 
