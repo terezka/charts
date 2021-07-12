@@ -32813,7 +32813,7 @@ var $author$project$Page$Section$view = function (model) {
 									$mdgriffith$elm_ui$Element$el,
 									_List_fromArray(
 										[
-											$mdgriffith$elm_ui$Element$Font$size(20)
+											$mdgriffith$elm_ui$Element$Font$size(24)
 										]),
 									$mdgriffith$elm_ui$Element$text('Terminology')),
 									A2(
@@ -32828,7 +32828,7 @@ var $author$project$Page$Section$view = function (model) {
 									$mdgriffith$elm_ui$Element$el,
 									_List_fromArray(
 										[
-											$mdgriffith$elm_ui$Element$Font$size(20)
+											$mdgriffith$elm_ui$Element$Font$size(24)
 										]),
 									$mdgriffith$elm_ui$Element$text('Examples'))
 								]));
