@@ -45,9 +45,11 @@ view model =
           [ C.interpolated .y
               [ CA.monotone, CA.opacity 0.2 ]
               [ CA.circle, CA.color "white", CA.borderWidth 1 ]
+              |> C.named "line1"
           , C.interpolated .z
               [ CA.monotone, CA.opacity 0, CA.color CA.purple ]
               [ CA.circle, CA.color "white", CA.borderWidth 1 ]
+              |> C.named "line2"
           ]
         ]
         data

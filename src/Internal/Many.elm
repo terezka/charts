@@ -138,12 +138,11 @@ stacks =
   Remodel I.getPosition <|
     groupingHelp
       { shared = \config ->
-          { x1 = config.values.x1
-          , x2 = config.values.x2
-          , seriesIndex = config.tooltipInfo.index
-          , stackIndex = config.tooltipInfo.stack
-          }
-      , equality = \a b -> a.x1 == b.x1 && a.x2 == b.x2 && a.seriesIndex == b.seriesIndex && a.stackIndex == b.stackIndex
+            { x1 = config.values.x1
+            , x2 = config.values.x2
+            , property = config.tooltipInfo.property
+            }
+      , equality = \a b -> a.x1 == b.x1 && a.x2 == b.x2 && a.property == b.property
       , edits = identity
       }
 
@@ -159,10 +158,10 @@ bins =
       { shared = \config ->
           { x1 = config.values.x1
           , x2 = config.values.x2
-          , seriesIndex = config.tooltipInfo.index
+          , elIndex = config.tooltipInfo.elIndex
           , dataIndex = config.tooltipInfo.data
           }
-      , equality = \a b -> a.x1 == b.x1 && a.x2 == b.x2 && a.seriesIndex == b.seriesIndex && a.dataIndex == b.dataIndex
+      , equality = \a b -> a.x1 == b.x1 && a.x2 == b.x2 && a.elIndex == b.elIndex && a.dataIndex == b.dataIndex
       , edits = editLimits (\item pos -> { pos | x1 = I.getX1 item, x2 = I.getX2 item })
       }
 

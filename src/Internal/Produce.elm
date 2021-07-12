@@ -150,6 +150,7 @@ toBarSeries elIndex barsAttrs properties data =
                   , stack = sectionIndex
                   , data = dataIndex
                   , index = colorIndex
+                  , elIndex = elIndex
                   , name = section.meta
                   , color = product.color
                   , border = product.border
@@ -165,7 +166,7 @@ toBarSeries elIndex barsAttrs properties data =
   in
   Helpers.withSurround data toBin |> \bins ->
     List.map P.toConfigs properties
-      |> List.indexedMap (\barIndex props -> List.indexedMap (toSeriesItem bins props barIndex) (List.reverse props))
+      |> List.indexedMap (\barIndex stacks -> List.indexedMap (toSeriesItem bins stacks barIndex) (List.reverse stacks))
       |> List.concat
       |> List.indexedMap (\propIndex f -> f (elIndex + propIndex))
       |> List.filterMap identity
@@ -184,9 +185,9 @@ toDotSeries elIndex toX properties data =
       toDotConfig attrs =
         Helpers.apply attrs S.defaultDot
 
-      toSeriesItem lineIndex props sublineIndex prop colorIndex =
-        let dotItems = List.indexedMap (toDotItem lineIndex sublineIndex colorIndex prop interConfig) data
-            defaultOpacity = if List.length props > 1 then 0.4 else 0
+      toSeriesItem lineIndex stacks stackIndex prop colorIndex =
+        let dotItems = List.indexedMap (toDotItem lineIndex stackIndex colorIndex prop interConfig) data
+            defaultOpacity = if List.length stacks > 1 then 0.4 else 0
             interAttr = [ CA.color (Helpers.toDefaultColor colorIndex), CA.opacity defaultOpacity ] ++ prop.inter
             interConfig = toInterConfig interAttr
         in
@@ -212,9 +213,9 @@ toDotSeries elIndex toX properties data =
               , toHtml = \c -> [ H.table [ HA.style "margin" "0" ] (List.concatMap I.toHtml ((\(x, xs) -> x :: xs) c.items)) ]
               }
 
-      toDotItem lineIndex sublineIndex colorIndex prop interConfig dataIndex datum_ =
+      toDotItem lineIndex stackIndex colorIndex prop interConfig dataIndex datum_ =
         let defaultAttrs = [ CA.color interConfig.color, CA.border interConfig.color, if interConfig.method == Nothing then CA.circle else identity ]
-            dotAttrs = defaultAttrs ++ prop.attrs ++ prop.extra lineIndex sublineIndex dataIndex prop.meta datum_
+            dotAttrs = defaultAttrs ++ prop.attrs ++ prop.extra lineIndex stackIndex dataIndex prop.meta datum_
             config = toDotConfig dotAttrs
             x_ = toX datum_
             y_ = Maybe.withDefault 0 (prop.visual datum_)
@@ -250,9 +251,10 @@ toDotSeries elIndex toX properties data =
                   }
               , tooltipInfo =
                   { property = lineIndex
-                  , stack = sublineIndex
+                  , stack = stackIndex
                   , data = dataIndex
                   , index = colorIndex
+                  , elIndex = elIndex
                   , name = prop.meta
                   , color =
                       case config.color of
@@ -266,7 +268,7 @@ toDotSeries elIndex toX properties data =
           }
   in
   List.map P.toConfigs properties
-    |> List.indexedMap (\lineIndex ps -> List.indexedMap (toSeriesItem lineIndex ps) ps)
+    |> List.indexedMap (\lineIndex stacks -> List.indexedMap (toSeriesItem lineIndex stacks) stacks)
     |> List.concat
     |> List.indexedMap (\propIndex f -> f (elIndex + propIndex))
     |> List.filterMap identity

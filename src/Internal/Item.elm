@@ -43,6 +43,7 @@ type alias TooltipInfo =
   , stack : Int
   , data : Int
   , index : Int
+  , elIndex : Int
   , name : Maybe String
   , color : String
   , border : String
