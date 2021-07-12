@@ -175,7 +175,7 @@ getCoords =
 
 See example at [elm-charts.org](https://www.elm-charts.org/documentation/interactivity/basic-bar-tooltip).
 -}
-getNearest : I.Remodel (I.Any data) (I.Rendered result) -> Decoder data (List (I.Rendered result))
+getNearest : I.Remodel (I.One data I.Any) (I.Rendered result) -> Decoder data (List (I.Rendered result))
 getNearest =
   IE.getNearest
 
@@ -183,21 +183,21 @@ getNearest =
 {-| Decode to get the nearest item within certain radius to the event.
 
 -}
-getWithin : Float -> I.Remodel (I.Any data) (I.Rendered result) -> Decoder data (List (I.Rendered result))
+getWithin : Float -> I.Remodel (I.One data I.Any) (I.Rendered result) -> Decoder data (List (I.Rendered result))
 getWithin =
   IE.getWithin
 
 
 {-| Like `getNearest`, but only takes x coordiante into account
 -}
-getNearestX : I.Remodel (I.Any data) (I.Rendered result) -> Decoder data (List (I.Rendered result))
+getNearestX : I.Remodel (I.One data I.Any) (I.Rendered result) -> Decoder data (List (I.Rendered result))
 getNearestX =
   IE.getNearestX
 
 
 {-| Like `getWithin`, but only takes x coordiante into account
 -}
-getWithinX : Float -> I.Remodel (I.Any data) (I.Rendered result) -> Decoder data (List (I.Rendered result))
+getWithinX : Float -> I.Remodel (I.One data I.Any) (I.Rendered result) -> Decoder data (List (I.Rendered result))
 getWithinX =
   IE.getWithinX
 

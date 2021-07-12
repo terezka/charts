@@ -28,7 +28,7 @@ import Chart.Events
 
 type alias Model =
   { selection : Maybe { a : CS.Point, b : CS.Point }
-  , hovering : List (CI.Dot Salary.Datum)
+  , hovering : List (CI.One Salary.Datum CI.Dot)
   , window : Maybe CS.Position
   , year : Float
   }
@@ -44,7 +44,7 @@ init =
 
 
 type Msg
-  = OnHover (List (CI.Dot Salary.Datum)) CS.Point
+  = OnHover (List (CI.One Salary.Datum CI.Dot)) CS.Point
   | OnMouseDown CS.Point
   | OnMouseUp CS.Point
   | OnReset
@@ -290,7 +290,7 @@ salarySeries model border highlightSize size =
       (List.filter (.year >> (==) model.year) Salary.data)
 
 
-tooltipContent : CI.Dot Salary.Datum -> H.Html msg
+tooltipContent : CI.One Salary.Datum CI.Dot -> H.Html msg
 tooltipContent hovered =
   let datum = CI.getData hovered
       precentOfWomen = round (Salary.womenPerc datum)

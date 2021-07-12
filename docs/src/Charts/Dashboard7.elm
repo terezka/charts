@@ -28,7 +28,7 @@ import Chart.Events
 
 
 type alias Model =
-  { hovering : List (CI.Dot Datum)
+  { hovering : List (CI.One Datum CI.Dot)
   }
 
 
@@ -39,7 +39,7 @@ init =
 
 
 type Msg
-  = OnHover (List (CI.Dot Datum))
+  = OnHover (List (CI.One Datum CI.Dot))
 
 
 update : Msg -> Model -> Model

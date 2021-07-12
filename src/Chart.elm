@@ -302,12 +302,12 @@ type Element data msg
   = Indexed (Int -> ( Element data msg, Int ))
   | SeriesElement
       (List C.Position)
-      (List (CI.Any data))
+      (List (CI.One data CI.Any))
       (List Legend.Legend)
       (C.Plane -> S.Svg msg)
   | BarsElement
       (List C.Position)
-      (List (CI.Any data))
+      (List (CI.One data CI.Any))
       (List Legend.Legend)
       (C.Plane -> TickValues -> TickValues)
       (C.Plane -> S.Svg msg)
@@ -332,7 +332,7 @@ type Element data msg
   | GridElement
       (C.Plane -> TickValues -> S.Svg msg)
   | SubElements
-      (C.Plane -> List (CI.Any data) -> List (Element data msg))
+      (C.Plane -> List (CI.One data CI.Any) -> List (Element data msg))
   | ListOfElements
       (List (Element data msg))
   | SvgElement
@@ -417,7 +417,7 @@ definePlane config elements =
   }
 
 
-getItems : C.Plane -> List (Element data msg) -> List (CI.Any data)
+getItems : C.Plane -> List (Element data msg) -> List (CI.One data CI.Any)
 getItems plane elements =
   let toItems el acc =
         case el of
@@ -469,7 +469,7 @@ type alias TickValues =
   }
 
 
-getTickValues : C.Plane -> List (CI.Any data) -> List (Element data msg) -> TickValues
+getTickValues : C.Plane -> List (CI.One data CI.Any) -> List (Element data msg) -> TickValues
 getTickValues plane items elements =
   let toValues el acc =
         case el of
@@ -490,7 +490,7 @@ getTickValues plane items elements =
   List.foldl toValues (TickValues [] [] [] []) elements
 
 
-viewElements : Container data msg -> C.Plane -> TickValues -> List (CI.Any data) -> List Legend.Legend -> List (Element data msg) -> ( List (H.Html msg), List (S.Svg msg), List (H.Html msg) )
+viewElements : Container data msg -> C.Plane -> TickValues -> List (CI.One data CI.Any) -> List Legend.Legend -> List (Element data msg) -> ( List (H.Html msg), List (S.Svg msg), List (H.Html msg) )
 viewElements config plane tickValues allItems allLegends elements =
   let viewOne el ( before, chart_, after ) =
         case el of
@@ -1721,7 +1721,7 @@ Attributes you can use:
       ]
 
 -}
-binLabels : (data -> String) -> List (Attribute (ItemLabel (CI.Bin (CI.Bar data)))) -> Element data msg
+binLabels : (data -> String) -> List (Attribute (ItemLabel (CI.Many data CI.Bar))) -> Element data msg
 binLabels toLabel edits =
   eachCustom (CI.andThen CI.bins CI.bars) <| \p item ->
     let config =
@@ -1779,7 +1779,7 @@ Attributes you can use:
       , CA.format (\bar -> String.fromFloat (CI.getDependent bar))
       ]
 -}
-barLabels : List (Attribute (ItemLabel (CI.Bar data))) -> Element data msg
+barLabels : List (Attribute (ItemLabel (CI.One data CI.Bar))) -> Element data msg
 barLabels edits =
   eachBar <| \p item ->
     let config =
@@ -1900,7 +1900,7 @@ Attributes you can use:
       , CA.format (\dot -> String.fromFloat (CI.getDependent dot))
       ]
 -}
-dotLabels : List (Attribute (ItemLabel (CI.Dot data))) -> Element data msg
+dotLabels : List (Attribute (ItemLabel (CI.One data CI.Dot))) -> Element data msg
 dotLabels edits =
   eachDot <| \p item ->
     let config =
@@ -2164,7 +2164,7 @@ withPlane func =
 Use helpers in `Chart.Events` to interact with bins.
 
 -}
-withBins : (C.Plane -> List (CI.Bin (CI.Any data)) -> List (Element data msg)) -> Element data msg
+withBins : (C.Plane -> List (CI.Many data CI.Any) -> List (Element data msg)) -> Element data msg
 withBins func =
   SubElements <| \p is -> func p (CI.apply CI.bins is)
 
@@ -2173,7 +2173,7 @@ withBins func =
 Use helpers in `Chart.Events` to interact with stacks.
 
 -}
-withStacks : (C.Plane -> List (CI.Stack (CI.Any data)) -> List (Element data msg)) -> Element data msg
+withStacks : (C.Plane -> List (CI.Many data CI.Any) -> List (Element data msg)) -> Element data msg
 withStacks func =
   SubElements <| \p is -> func p (CI.apply CI.stacks is)
 
@@ -2182,7 +2182,7 @@ withStacks func =
 Use helpers in `Chart.Events` to interact with bars.
 
 -}
-withBars : (C.Plane -> List (CI.Bar data) -> List (Element data msg)) -> Element data msg
+withBars : (C.Plane -> List (CI.One data CI.Bar) -> List (Element data msg)) -> Element data msg
 withBars func =
   SubElements <| \p is -> func p (CI.apply CI.bars is)
 
@@ -2191,7 +2191,7 @@ withBars func =
 Use helpers in `Chart.Events` to interact with dots.
 
 -}
-withDots : (C.Plane -> List (CI.Dot data) -> List (Element data msg)) -> Element data msg
+withDots : (C.Plane -> List (CI.One data CI.Dot) -> List (Element data msg)) -> Element data msg
 withDots func =
   SubElements <| \p is -> func p (CI.apply CI.dots is)
 
@@ -2200,7 +2200,7 @@ withDots func =
 Use helpers in `Chart.Events` to interact with products.
 
 -}
-withProducts : (C.Plane -> List (CI.Any data) -> List (Element data msg)) -> Element data msg
+withProducts : (C.Plane -> List (CI.One data CI.Any) -> List (Element data msg)) -> Element data msg
 withProducts func =
   SubElements <| \p is -> func p is
 
@@ -2246,7 +2246,7 @@ each items func =
 Use the functions in `Chart.Events` to access information about your bins.
 
 -}
-eachBin : (C.Plane -> CI.Bin (CI.Any data) -> List (Element data msg)) -> Element data msg
+eachBin : (C.Plane -> CI.Many data CI.Any -> List (Element data msg)) -> Element data msg
 eachBin func =
   SubElements <| \p is -> List.concatMap (func p) (CI.apply (CI.andThen CI.bins <| CI.andThen CI.real CI.any) is)
 
@@ -2273,7 +2273,7 @@ eachBin func =
 Use the functions in `Chart.Events` to access information about your stacks.
 
 -}
-eachStack : (C.Plane -> CI.Stack (CI.Any data) -> List (Element data msg)) -> Element data msg
+eachStack : (C.Plane -> CI.Many data CI.Any -> List (Element data msg)) -> Element data msg
 eachStack func =
   SubElements <| \p is -> List.concatMap (func p) (CI.apply (CI.andThen CI.stacks <| CI.andThen CI.real CI.any) is)
 
@@ -2298,7 +2298,7 @@ eachStack func =
 Use the functions in `Chart.Events` to access information about your bars.
 
 -}
-eachBar : (C.Plane -> CI.Bar data -> List (Element data msg)) -> Element data msg
+eachBar : (C.Plane -> CI.One data CI.Bar -> List (Element data msg)) -> Element data msg
 eachBar func =
   SubElements <| \p is -> List.concatMap (func p) (CI.apply (CI.andThen CI.real CI.bars) is)
 
@@ -2323,7 +2323,7 @@ eachBar func =
 Use the functions in `Chart.Events` to access information about your dots.
 
 -}
-eachDot : (C.Plane -> CI.Dot data -> List (Element data msg)) -> Element data msg
+eachDot : (C.Plane -> CI.One data CI.Dot -> List (Element data msg)) -> Element data msg
 eachDot func =
   SubElements <| \p is -> List.concatMap (func p) (CI.apply (CI.andThen CI.real CI.dots) is)
 
@@ -2334,7 +2334,7 @@ bars and dots.
 Use the functions in `Chart.Events` to access information about your products.
 
 -}
-eachProduct : (C.Plane -> CI.Any data -> List (Element data msg)) -> Element data msg
+eachProduct : (C.Plane -> CI.One data CI.Any -> List (Element data msg)) -> Element data msg
 eachProduct func =
   SubElements <| \p is -> List.concatMap (func p) (CI.apply (CI.andThen CI.real CI.any) is)
 
@@ -2351,7 +2351,7 @@ The above example adds a label for each product of the series named "cats".
 Use the functions in `Chart.Events` to access information about your items.
 
 -}
-eachCustom : CI.Remodel (CI.Any data) a -> (C.Plane -> a -> List (Element data msg)) -> Element data msg
+eachCustom : CI.Remodel (CI.One data CI.Any) a -> (C.Plane -> a -> List (Element data msg)) -> Element data msg
 eachCustom grouping func =
   SubElements <| \p items ->
     let processed = CI.apply grouping items in

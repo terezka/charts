@@ -29,7 +29,7 @@ import Chart.Events
 
 
 type alias Model =
-  { hovering : List (CI.Bin (CI.Bar Binned))
+  { hovering : List (CI.Bin Binned CI.Bar)
   , binSize : Float
   , year : Float
   }
@@ -58,7 +58,7 @@ init =
 
 
 type Msg
-  = OnHover (List (CI.Bin (CI.Bar Binned)))
+  = OnHover (List (CI.Bin Binned CI.Bar))
   | OnYear Float
   | OnBinSize Float
 

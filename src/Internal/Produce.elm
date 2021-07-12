@@ -41,7 +41,7 @@ defaultBars =
   }
 
 
-toBarSeries : Int -> List (CA.Attribute (Bars data)) -> List (P.Property data String () S.Bar) -> List data -> List (M.Many () (I.One data S.Bar))
+toBarSeries : Int -> List (CA.Attribute (Bars data)) -> List (P.Property data String () S.Bar) -> List data -> List (M.Many (I.One data S.Bar))
 toBarSeries elIndex barsAttrs properties data =
   let barsConfig =
         Helpers.apply barsAttrs defaultBars
@@ -76,7 +76,7 @@ toBarSeries elIndex barsAttrs properties data =
             { datum = curr, start = toStart curr, end = toEnd curr }
 
 
-      toSeriesItem : List { datum : data, start : Float, end : Float } -> List (P.Config data String () S.Bar) -> Int -> Int -> P.Config data String () S.Bar -> Int -> Maybe (M.Many () (I.One data S.Bar))
+      toSeriesItem : List { datum : data, start : Float, end : Float } -> List (P.Config data String () S.Bar) -> Int -> Int -> P.Config data String () S.Bar -> Int -> Maybe (M.Many (I.One data S.Bar))
       toSeriesItem bins sections barIndex sectionIndex section colorIndex =
         case List.indexedMap (toBarItem sections barIndex sectionIndex section colorIndex) bins of
           [] ->
@@ -84,10 +84,7 @@ toBarSeries elIndex barsAttrs properties data =
 
           first :: rest ->
             Just <| I.Rendered
-              { config =
-                  { config = ()
-                  , items = ( first, rest )
-                  }
+              { config = { items = ( first, rest ) }
               , toLimits = \c -> Coord.foldPosition I.getLimits ((\(x, xs) -> x :: xs) c.items)
               , toPosition = \plane c -> Coord.foldPosition (I.getPosition plane) ((\(x, xs) -> x :: xs) c.items)
               , toSvg = \plane c _ -> S.g [ SA.class "elm-charts__bar-series" ] (List.map (I.toSvg plane) ((\(x, xs) -> x :: xs) c.items))
@@ -179,7 +176,7 @@ toBarSeries elIndex barsAttrs properties data =
 
 
 {-| -}
-toDotSeries : Int -> (data -> Float) -> List (Property data String S.Interpolation S.Dot) -> List data -> List (M.Many S.Interpolation (I.One data S.Dot))
+toDotSeries : Int -> (data -> Float) -> List (Property data String S.Interpolation S.Dot) -> List data -> List (M.Many (I.One data S.Dot))
 toDotSeries elIndex toX properties data =
   let toInterConfig attrs =
         Helpers.apply attrs S.defaultInterpolation
@@ -199,10 +196,7 @@ toDotSeries elIndex toX properties data =
 
           first :: rest ->
             Just <| I.Rendered
-              { config =
-                  { items = ( first, rest )
-                  , config = interConfig
-                  }
+              { config = { items = ( first, rest ) }
               , toSvg = \plane _ _ ->
                   let toBottom datum_ =
                         Maybe.map2 (\real visual -> visual - real) (prop.value datum_) (prop.visual datum_)

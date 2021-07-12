@@ -13,21 +13,24 @@ import Internal.Helpers as Helpers
 
 
 {-| -}
-type alias Many shared x =
-  I.Rendered
-    { config : shared
-    , items : ( x, List x )
-    }
+type alias Many x =
+  I.Rendered { items : ( x, List x ) }
 
 
 {-| -}
-getMembers : Many shared x -> List x
+getMembers : Many x -> List x
 getMembers (I.Rendered group_) =
   group_.config.items |> \(x, xs) -> x :: xs
 
 
 {-| -}
-getGenerals : Many shared (I.One data x) -> List (I.One data I.Any)
+getMember : Many x -> x
+getMember (I.Rendered group_) =
+  group_.config.items |> \(x, xs) -> x
+
+
+{-| -}
+getGenerals : Many (I.One data x) -> List (I.One data I.Any)
 getGenerals group_ =
   let generalize (I.Rendered item) =
         I.generalize item.config.toAny (I.Rendered item)
@@ -36,27 +39,21 @@ getGenerals group_ =
 
 
 {-| -}
-getCommonality : Many shared x -> shared
-getCommonality (I.Rendered item) =
-  item.config.config
-
-
-{-| -}
-getDatas : Many shared (I.One data x) -> List data
+getDatas : Many (I.One data x) -> List data
 getDatas (I.Rendered group_) =
   group_.config.items |> \(x, xs) -> I.getDatum x :: List.map I.getDatum xs
 
 
 {-| -}
-getData : Many shared (I.One data x) -> data
+getData : Many (I.One data x) -> data
 getData (I.Rendered group_) =
   group_.config.items |> \(x, xs) -> I.getDatum x
 
 
-mapData : (a -> b) -> Many shared (I.One a x) -> Many shared (I.One b x)
+mapData : (a -> b) -> Many (I.One a x) -> Many (I.One b x)
 mapData func (I.Rendered group_) =
   let ( x, xs ) = group_.config.items in
-  toGroup group_.config.config (I.map func x) (List.map (I.map func) xs)
+  toGroup (I.map func x) (List.map (I.map func) xs)
 
 
 
@@ -118,14 +115,7 @@ named names =
 -- SAME X
 
 
-{-| -}
-type alias SameX =
-  { x1 : Float
-  , x2 : Float
-  }
-
-
-sameX : Remodel (I.One data x) (Many SameX (I.One data x))
+sameX : Remodel (I.One data x) (Many (I.One data x))
 sameX =
   let fullVertialPosition plane item =
         I.getPosition plane item
@@ -143,16 +133,7 @@ sameX =
 -- SAME STACK
 
 
-{-| -}
-type alias Stack =
-  { x1 : Float
-  , x2 : Float
-  , seriesIndex : Int
-  , stackIndex : Int
-  }
-
-
-stacks : Remodel (I.One data x) (Many Stack (I.One data x))
+stacks : Remodel (I.One data x) (Many (I.One data x))
 stacks =
   Remodel I.getPosition <|
     groupingHelp
@@ -171,16 +152,7 @@ stacks =
 -- SAME BIN
 
 
-{-| -}
-type alias Bin =
-  { x1 : Float
-  , x2 : Float
-  , seriesIndex : Int
-  , dataIndex : Int
-  }
-
-
-bins : Remodel (I.One data x) (Many Bin (I.One data x))
+bins : Remodel (I.One data x) (Many (I.One data x))
 bins =
   Remodel I.getPosition <|
     groupingHelp
@@ -199,23 +171,31 @@ bins =
 -- HELPERS
 
 
+groupingHelp :
+  { shared : x -> a
+  , equality : a -> a -> Bool
+  , edits : Many (I.Rendered x) -> Many (I.Rendered x)
+  }
+  -> List (I.Rendered x)
+  -> List (Many (I.Rendered x))
 groupingHelp { shared, equality, edits } items =
-  let toInter (I.Rendered item) = shared item.config
-      toEquality aO bO = equality (toInter aO) (toInter bO)
-      toNewGroup ( i, is ) = toGroup (toInter i) i is |> edits
+  let toShared (I.Rendered item) = shared item.config
+      toEquality aO bO = equality (toShared aO) (toShared bO)
+      toNewGroup ( i, is ) = toGroup i is |> edits
   in
   List.map toNewGroup (Helpers.gatherWith toEquality items)
 
 
+editLimits : ({ items : ( x, List x ) } -> Position -> Position) -> Many x -> Many x
 editLimits edit (I.Rendered group_) =
   I.Rendered { group_ | toLimits = \c -> group_.toLimits c |> edit c }
 
 
-toGroup : shared -> I.One data x -> List (I.One data x) -> Many shared (I.One data x)
-toGroup shared first rest =
+toGroup : I.Rendered x -> List (I.Rendered x) -> Many (I.Rendered x)
+toGroup first rest =
   let concatTuple ( x, xs ) = x :: xs in
   I.Rendered
-    { config = { config = shared, items = ( first, rest ) }
+    { config = { items = ( first, rest ) }
     , toLimits = \c -> Coord.foldPosition I.getLimits (concatTuple c.items)
     , toPosition = \p c -> Coord.foldPosition (I.getPosition p) (concatTuple c.items)
     , toSvg = \p c _ -> S.g [ SA.class "elm-charts__group" ] (List.map (I.toSvg p) (concatTuple c.items))

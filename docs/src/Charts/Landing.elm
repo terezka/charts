@@ -29,8 +29,8 @@ import DateFormat as F
 
 
 type alias Model =
-  { hovering : List (CI.Dot Datum)
-  , hoveringBars : List (CI.Bin (CI.Bar Datum))
+  { hovering : List (CI.One Datum CI.Dot)
+  , hoveringBars : List (CI.Bin Datum CI.Bar)
   }
 
 
@@ -43,8 +43,8 @@ init =
 
 type Msg
   = OnHover
-      (List (CI.Dot Datum))
-      (List (CI.Bin (CI.Bar Datum)))
+      (List (CI.One Datum CI.Dot))
+      (List (CI.Bin Datum CI.Bar))
 
 
 update : Msg -> Model -> Model

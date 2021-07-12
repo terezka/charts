@@ -12,7 +12,7 @@ import Chart.Item as CI
 
 
 type alias Model =
-  { hovering : List (CI.Bin (CI.Bar Datum)) }
+  { hovering : List (CI.Bin Datum CI.Bar) }
 
 
 init : Model
@@ -21,7 +21,7 @@ init =
 
 
 type Msg
-  = OnHover (List (CI.Bin (CI.Bar Datum)))
+  = OnHover (List (CI.Bin Datum CI.Bar))
 
 
 update : Msg -> Model -> Model
@@ -141,7 +141,7 @@ import Chart.Item as CI
 
 
 type alias Model =
-  { hovering : List (CI.Bin (CI.Bar Datum)) }
+  { hovering : List (CI.Bin Datum CI.Bar) }
 
 
 init : Model
@@ -150,7 +150,7 @@ init =
 
 
 type Msg
-  = OnHover (List (CI.Bin (CI.Bar Datum)))
+  = OnHover (List (CI.Bin Datum CI.Bar))
 
 
 update : Msg -> Model -> Model

@@ -118,18 +118,18 @@ type alias One data x =
 
 
 {-| -}
-type alias Any data =
-  One data I.Any
+type alias Any =
+  I.Any
 
 
 {-| -}
-type alias Bar data =
-  One data CS.Bar
+type alias Bar =
+  CS.Bar
 
 
 {-| -}
-type alias Dot data =
-  One data CS.Dot
+type alias Dot =
+  CS.Dot
 
 
 {-| -}
@@ -163,7 +163,7 @@ getColor =
 
 
 {-| -}
-getSize : Dot data -> Float
+getSize : One data Dot -> Float
 getSize =
   I.getSize
 
@@ -191,47 +191,31 @@ filter =
 
 
 {-| -}
-type alias Many shared x =
-  M.Many shared x
+type alias Many data x =
+  M.Many (One data x)
 
 
 {-| -}
-type alias Stack x =
-  Many { x1 : Float, x2 : Float, seriesIndex : Int, stackIndex : Int } x
-
-
-{-| -}
-type alias Bin x =
-  Many { x1 : Float, x2 : Float, seriesIndex : Int, dataIndex : Int } x
-
-
-{-| -}
-type alias SameX x =
-  Many { x1 : Float, x2 : Float } x
-
-
-
-{-| -}
-getMembers : Many shared x -> List x
+getMembers : Many data x -> List x
 getMembers =
   M.getMembers
 
 
 {-| -}
-getShared : Many shared x -> shared
-getShared =
-  M.getCommonality
+getMember : Many data x -> x
+getMember =
+  M.getMember
 
 
 {-| -}
-getDatas : Many shared (One data x) -> List data
+getDatas : Many data x -> List data
 getDatas =
   M.getDatas
 
 
 {-| -}
-getFirstData : Many shared (One data x) -> data
-getFirstData =
+getOneData : Many data x -> data
+getOneData =
   M.getData
 
 
@@ -257,19 +241,19 @@ andThen =
 
 
 {-| -}
-any : Remodel (Any data) (Any data)
+any : Remodel (One data Any) (One data Any)
 any =
   M.any
 
 
 {-| -}
-dots : Remodel (Any data) (Dot data)
+dots : Remodel (One data Any) (One data Dot)
 dots =
   M.dots
 
 
 {-| -}
-bars : Remodel (Any data) (Bar data)
+bars : Remodel (One data Any) (One data Bar)
 bars =
   M.bars
 
@@ -281,19 +265,19 @@ real =
 
 
 {-| -}
-bins : Remodel (One data x) (Bin (One data x))
+bins : Remodel (One data x) (Bin data x)
 bins =
   M.bins
 
 
 {-| -}
-stacks : Remodel (One data x) (Stack (One data x))
+stacks : Remodel (One data x) (Stack data x)
 stacks =
   M.stacks
 
 
 {-| -}
-sameX : Remodel (One data x) (SameX (One data x))
+sameX : Remodel (One data x) (SameX data x)
 sameX =
   M.sameX
 

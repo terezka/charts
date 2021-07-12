@@ -48,7 +48,7 @@ type alias Model =
   { landing : Landing.Model
   , concise : Concise.Model
   , familiarToggle : Bool
-  , hovering : List (CI.Any { year : Float, income : Float})
+  , hovering : List (CI.One { year : Float, income : Float} CI.Any)
   }
 
 
@@ -84,7 +84,7 @@ type Msg
   = LandingMsg Landing.Msg
   | ConciseMsg Concise.Msg
   | FamiliarToggle
-  | OnHover (List (CI.Any { year : Float, income : Float}))
+  | OnHover (List (CI.One { year : Float, income : Float} CI.Any))
   | None
 
 
