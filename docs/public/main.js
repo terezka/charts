@@ -21463,6 +21463,7 @@ var $author$project$Charts$Terminology$view = A2(
 			$author$project$Chart$line(
 			_List_fromArray(
 				[
+					$author$project$Chart$Attributes$color('#888'),
 					$author$project$Chart$Attributes$tickLength(7),
 					$author$project$Chart$Attributes$x1(3.5),
 					$author$project$Chart$Attributes$x2(4.5),
@@ -21483,6 +21484,7 @@ var $author$project$Charts$Terminology$view = A2(
 			$author$project$Chart$line(
 			_List_fromArray(
 				[
+					$author$project$Chart$Attributes$color('#888'),
 					$author$project$Chart$Attributes$tickLength(7),
 					$author$project$Chart$Attributes$x1(3.5),
 					$author$project$Chart$Attributes$x2(3.7),
@@ -21503,6 +21505,7 @@ var $author$project$Charts$Terminology$view = A2(
 			$author$project$Chart$line(
 			_List_fromArray(
 				[
+					$author$project$Chart$Attributes$color('#888'),
 					$author$project$Chart$Attributes$tickLength(7),
 					$author$project$Chart$Attributes$x1(3.925),
 					$author$project$Chart$Attributes$x2(4.075),
@@ -21523,6 +21526,7 @@ var $author$project$Charts$Terminology$view = A2(
 			$author$project$Chart$line(
 			_List_fromArray(
 				[
+					$author$project$Chart$Attributes$color('#888'),
 					$author$project$Chart$Attributes$tickLength(7),
 					$author$project$Chart$Attributes$tickDirection(360),
 					$author$project$Chart$Attributes$x1(0.5),
@@ -21545,6 +21549,7 @@ var $author$project$Charts$Terminology$view = A2(
 			$author$project$Chart$line(
 			_List_fromArray(
 				[
+					$author$project$Chart$Attributes$color('#888'),
 					$author$project$Chart$Attributes$tickLength(7),
 					$author$project$Chart$Attributes$tickDirection(360),
 					$author$project$Chart$Attributes$x1(1.5),
@@ -21561,12 +21566,13 @@ var $author$project$Charts$Terminology$view = A2(
 				]),
 			_List_fromArray(
 				[
-					$elm$svg$Svg$text('bar')
+					$elm$svg$Svg$text('bar no. 1 in stack')
 				]),
 			{x: 1.5, y: 1}),
 			$author$project$Chart$line(
 			_List_fromArray(
 				[
+					$author$project$Chart$Attributes$color('#888'),
 					$author$project$Chart$Attributes$tickLength(7),
 					$author$project$Chart$Attributes$tickDirection(360),
 					$author$project$Chart$Attributes$x1(1.5),
@@ -21583,12 +21589,13 @@ var $author$project$Charts$Terminology$view = A2(
 				]),
 			_List_fromArray(
 				[
-					$elm$svg$Svg$text('bar')
+					$elm$svg$Svg$text('bar no. 2 in stack')
 				]),
 			{x: 1.5, y: 3}),
 			$author$project$Chart$line(
 			_List_fromArray(
 				[
+					$author$project$Chart$Attributes$color('#888'),
 					$author$project$Chart$Attributes$tickLength(7),
 					$author$project$Chart$Attributes$tickDirection(360),
 					$author$project$Chart$Attributes$x1(2),
@@ -21610,6 +21617,7 @@ var $author$project$Charts$Terminology$view = A2(
 			$author$project$Chart$line(
 			_List_fromArray(
 				[
+					$author$project$Chart$Attributes$color('#888'),
 					$author$project$Chart$Attributes$x1(4),
 					$author$project$Chart$Attributes$y1(0),
 					$author$project$Chart$Attributes$x2Svg(-20),
