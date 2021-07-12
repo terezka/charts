@@ -42,9 +42,9 @@ getCommonality (I.Rendered item) =
 
 
 {-| -}
-getDatas : Many shared (I.One data x) -> ( data, List data )
+getDatas : Many shared (I.One data x) -> List data
 getDatas (I.Rendered group_) =
-  group_.config.items |> \(x, xs) -> ( I.getDatum x, List.map I.getDatum xs )
+  group_.config.items |> \(x, xs) -> I.getDatum x :: List.map I.getDatum xs
 
 
 {-| -}

@@ -224,7 +224,7 @@ getShared =
 
 
 {-| -}
-getDatas : Many shared (One data x) -> ( data, List data )
+getDatas : Many shared (One data x) -> List data
 getDatas =
   M.getDatas
 
