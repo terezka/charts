@@ -138,9 +138,9 @@ view model =
               [ feature
                   { title = "Intuitive"
                   , body =
-                      [ E.text "Charts shouldn't be hard to make. The interface "
-                      , E.text "mirrors the element and attribute pattern which you already"
-                      , E.text "know and love. "
+                      [ E.text "Charts shouldn't be hard to make, and with elm-charts they aren't. "
+                      , E.text "The interface mirrors the element and attribute pattern which "
+                      , E.text "you already know and love. "
                       , Layout.link "/quick-start" "Get started"
                       , E.text " composing your chart in minutes!"
                       ]

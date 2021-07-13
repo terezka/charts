@@ -40526,9 +40526,9 @@ var $author$project$Page$Home$view = function (model) {
 							{
 								body: _List_fromArray(
 									[
-										$mdgriffith$elm_ui$Element$text('Charts shouldn\'t be hard to make. The interface '),
-										$mdgriffith$elm_ui$Element$text('mirrors the element and attribute pattern which you already'),
-										$mdgriffith$elm_ui$Element$text('know and love. '),
+										$mdgriffith$elm_ui$Element$text('Charts shouldn\'t be hard to make, and with elm-charts they aren\'t. '),
+										$mdgriffith$elm_ui$Element$text('The interface mirrors the element and attribute pattern which '),
+										$mdgriffith$elm_ui$Element$text('you already know and love. '),
 										A2($author$project$Ui$Layout$link, '/quick-start', 'Get started'),
 										$mdgriffith$elm_ui$Element$text(' composing your chart in minutes!')
 									]),
