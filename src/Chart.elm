@@ -1933,7 +1933,7 @@ type alias Bars data =
 
 {-| Add a bar series to your chart.
 
-![bar chart terminology](https://github.com/terezka/charts/blob/master/docs/images/bar-chart-terminology.png)
+![bar chart terminology](https://github.com/terezka/charts/blob/master/docs/images/bar-chart-terminology.png?raw=true)
 
 Each `data` in your `List data` is a "bin". For
 each "bin", whatever number of bars your have specified in the second argument will
