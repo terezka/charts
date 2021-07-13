@@ -111,7 +111,7 @@ below are only guiding.
 ## Colors
 @docs pink, purple, blue, green, orange, turquoise, red
 @docs magenta, brown, mint, yellow, gray
-@docs darkYellow, darkBlue, darkGray
+@docs darkYellow, darkBlue, darkGray, labelGray
 
 
 -}
