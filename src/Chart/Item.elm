@@ -12,8 +12,8 @@ module Chart.Item exposing
   , Many, getMembers, getMember, getDatas, getOneData
 
   , Remodel, apply, andThen
-  , any, dots, bars, real
-  , bins, stacks, sameX, named
+  , any, dots, bars, real, named
+  , bins, stacks, sameX
   --, customs
   )
 
@@ -55,8 +55,8 @@ Or when using functions like `C.eachBar` or `C.eachBin`:
 
 # Filtering and collecting
 @docs Remodel, apply, andThen
-@docs any, dots, bars, real
-@docs bins, stacks, sameX, named
+@docs any, dots, bars, real, named
+@docs bins, stacks, sameX
 
 # General
 @docs Item
