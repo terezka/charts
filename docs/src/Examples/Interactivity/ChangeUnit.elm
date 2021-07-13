@@ -13,7 +13,7 @@ import Chart.Item as CI
 
 
 type alias Model =
-  { hovering : List (CI.One Datum CI.Bar) }
+  { hovering : List (CI.Many Datum CI.Any) }
 
 
 init : Model
@@ -22,7 +22,7 @@ init =
 
 
 type Msg
-  = OnHover (List (CI.One Datum CI.Bar))
+  = OnHover (List (CI.Many Datum CI.Any))
 
 
 update : Msg -> Model -> Model
@@ -37,17 +37,19 @@ view model =
   C.chart
     [ CA.height 300
     , CA.width 300
-    , CE.onMouseMove OnHover (CE.getNearest CI.bars)
+    , CE.onMouseMove OnHover (CE.getNearest CI.stacks)
     , CE.onMouseLeave (OnHover [])
     ]
     [ C.grid []
     , C.xLabels []
     , C.yLabels []
     , C.bars []
-        [ C.bar .y [ CA.opacity 0.5, CA.borderWidth 1 ]
-            |> C.format (\v -> String.fromFloat v ++ " m/s")
-        , C.bar .z [ CA.opacity 0.5, CA.borderWidth 1 ]
-            |> C.format (\v -> String.fromFloat v ++ " m/s")
+        [ C.stacked
+            [ C.bar .y [ CA.opacity 0.5, CA.borderWidth 1 ]
+                |> C.format (\v -> String.fromFloat v ++ " m/s")
+            , C.bar .z [ CA.opacity 0.5, CA.borderWidth 1 ]
+                |> C.format (\v -> String.fromFloat v ++ " m/s")
+            ]
         ]
         data
     , C.each model.hovering <| \p dot ->
@@ -94,17 +96,19 @@ smallCode =
   C.chart
     [ CA.height 300
     , CA.width 300
-    , CE.onMouseMove OnHover (CE.getNearest CI.bars)
+    , CE.onMouseMove OnHover (CE.getNearest CI.stacks)
     , CE.onMouseLeave (OnHover [])
     ]
     [ C.grid []
     , C.xLabels []
     , C.yLabels []
     , C.bars []
-        [ C.bar .y [ CA.opacity 0.5, CA.borderWidth 1 ]
-            |> C.format (\\v -> String.fromFloat v ++ " m/s")
-        , C.bar .z [ CA.opacity 0.5, CA.borderWidth 1 ]
-            |> C.format (\\v -> String.fromFloat v ++ " m/s")
+        [ C.stacked
+            [ C.bar .y [ CA.opacity 0.5, CA.borderWidth 1 ]
+                |> C.format (\\v -> String.fromFloat v ++ " m/s")
+            , C.bar .z [ CA.opacity 0.5, CA.borderWidth 1 ]
+                |> C.format (\\v -> String.fromFloat v ++ " m/s")
+            ]
         ]
         data
     , C.each model.hovering <| \\p dot ->
@@ -126,7 +130,7 @@ import Chart.Item as CI
 
 
 type alias Model =
-  { hovering : List (CI.One Datum CI.Bar) }
+  { hovering : List (CI.Many Datum CI.Any) }
 
 
 init : Model
@@ -135,7 +139,7 @@ init =
 
 
 type Msg
-  = OnHover (List (CI.One Datum CI.Bar))
+  = OnHover (List (CI.Many Datum CI.Any))
 
 
 update : Msg -> Model -> Model
@@ -150,17 +154,19 @@ view model =
   C.chart
     [ CA.height 300
     , CA.width 300
-    , CE.onMouseMove OnHover (CE.getNearest CI.bars)
+    , CE.onMouseMove OnHover (CE.getNearest CI.stacks)
     , CE.onMouseLeave (OnHover [])
     ]
     [ C.grid []
     , C.xLabels []
     , C.yLabels []
     , C.bars []
-        [ C.bar .y [ CA.opacity 0.5, CA.borderWidth 1 ]
-            |> C.format (\\v -> String.fromFloat v ++ " m/s")
-        , C.bar .z [ CA.opacity 0.5, CA.borderWidth 1 ]
-            |> C.format (\\v -> String.fromFloat v ++ " m/s")
+        [ C.stacked
+            [ C.bar .y [ CA.opacity 0.5, CA.borderWidth 1 ]
+                |> C.format (\\v -> String.fromFloat v ++ " m/s")
+            , C.bar .z [ CA.opacity 0.5, CA.borderWidth 1 ]
+                |> C.format (\\v -> String.fromFloat v ++ " m/s")
+            ]
         ]
         data
     , C.each model.hovering <| \\p dot ->
