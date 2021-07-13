@@ -4,7 +4,7 @@ module Chart exposing
   , Element, bars, series, seriesMap, barsMap
   , Property, bar, scatter, interpolated
   , barMaybe, scatterMaybe, interpolatedMaybe
-  , stacked, named, format, formatMaybe, variation, amongst
+  , stacked, variation, amongst, named, format, formatMaybe
 
   , xAxis, yAxis, xTicks, yTicks, xLabels, yLabels, grid
   , binLabels, barLabels, dotLabels, productLabel
@@ -85,7 +85,7 @@ In the following examples, I will assume the imports:
 @docs series, seriesMap, scatter, scatterMaybe, interpolated, interpolatedMaybe
 
 ## Stacking, naming, and variation
-@docs Property, stacked, named, variation, amongst
+@docs Property, stacked, variation, amongst, named, format, formatMaybe
 
 # Navigation elements
 
@@ -1553,7 +1553,10 @@ named name =
   P.meta name
 
 
-{-| -}
+{-| Easily format the value which shows up by default in your tooltip if you add one. You
+can also access it using `Chart.Item.getTooltipValue`.
+
+-}
 format : (Float -> String) -> Property data inter deco -> Property data inter deco
 format func =
   P.format <| \v ->
@@ -1562,7 +1565,9 @@ format func =
       Nothing -> "N/A"
 
 
-{-| -}
+{-| Like `format`, except it allows you customize the formatting of missing values too!
+
+-}
 formatMaybe : (Maybe Float -> String) -> Property data inter deco -> Property data inter deco
 formatMaybe =
   P.format
