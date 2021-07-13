@@ -55,7 +55,9 @@ Or when using functions like `C.eachBar` or `C.eachBin`:
 
 # Filtering and collecting
 @docs Remodel, apply, andThen
+## Filters
 @docs any, dots, bars, real, named
+## Collecters
 @docs bins, stacks, sameX
 
 # General
