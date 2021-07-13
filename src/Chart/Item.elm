@@ -64,7 +64,7 @@ Or when using functions like `C.eachBar` or `C.eachBin`:
 @docs Item
 @docs getCenter, getTop, getBottom, getLeft, getRight
 @docs getTopLeft, getTopRight, getBottomLeft, getBottomRight
-@docs getPosition, getLimits, getTooltip, getTooltipValue
+@docs getPosition, getLimits, getTooltip
 
 
 -}
