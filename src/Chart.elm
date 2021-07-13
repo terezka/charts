@@ -1931,7 +1931,7 @@ type alias Bars data =
   }
 
 
-{-| Add a bar series to your chart.
+{-| Add a bar series to your chart. Here's some handy terminology:
 
 ![bar chart terminology](https://github.com/terezka/charts/blob/master/docs/images/bar-chart-terminology.png?raw=true)
 
