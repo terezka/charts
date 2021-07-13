@@ -6,7 +6,7 @@ module Chart.Events exposing
   )
 
 
-{-| Add events and interact with [chart items](https://package.elm-lang.org/packages/terezka/charts/latest/Chart-Events#Item).
+{-| Add events.
 
 # Event handlers
 @docs Attribute, Event
@@ -56,7 +56,7 @@ onClick onMsg decoder =
 {-| Add an mouse move event handler.
 
     C.chart
-      [ CE.onMouseMove (CE.getNearest CE.bar) ]
+      [ CE.onMouseMove (CE.getNearest CI.bars) ]
       [ .. ]
 
 See example at [elm-charts.org](https://www.elm-charts.org/documentation/interactivity/basic-bar-tooltip).
@@ -92,8 +92,8 @@ onMouseLeave onMsg =
     C.chart
       [ CE.on "mousemove" <|
           CE.map2 OnMouseMove
-            (CE.getNearest CE.bar)
-            (CE.getNearest CE.dot)
+            (CE.getNearest CI.bars)
+            (CE.getNearest CI.dots)
 
       ]
       [ .. ]
@@ -135,17 +135,23 @@ getCoords =
   IE.getCoords
 
 
-{-| Decode to get the nearest item to the event.
+{-| Decode to get the nearest item to the event. Use the `Remodel` functions in `Chart.Item`
+to filter down what items or groups of items you will be searching for.
+
+    import Chart as C
+    import Chart.Attributes as CA
+    import Chart.Events as CE
+    import Chart.Item as CI
 
     type alias Model =
-      { hovering : List (CE.Product CE.Bar (Maybe Float) Datum) }
+      { hovering : List (CI.One Datum CI.Bar) }
 
     init : Model
     init =
       { hovering = [] }
 
     type Msg
-      = OnHover (List (CE.Product CE.Bar (Maybe Float) Datum))
+      = OnHover (List (CI.One Datum CI.Bar))
 
     update : Msg -> Model -> Model
     update msg model =
@@ -158,7 +164,7 @@ getCoords =
       C.chart
         [ CA.height 300
         , CA.width 300
-        , CE.onMouseMove OnHover (CE.getNearest CE.bar)
+        , CE.onMouseMove OnHover (CE.getNearest CI.bars)
         , CE.onMouseLeave (OnHover [])
         ]
         [ C.xLabels []
@@ -175,29 +181,32 @@ getCoords =
 
 See example at [elm-charts.org](https://www.elm-charts.org/documentation/interactivity/basic-bar-tooltip).
 -}
-getNearest : I.Remodel (I.One data I.Any) (I.Rendered result) -> Decoder data (List (I.Rendered result))
+getNearest : I.Remodel (I.One data I.Any) (I.Item result) -> Decoder data (List (I.Item result))
 getNearest =
   IE.getNearest
 
 
-{-| Decode to get the nearest item within certain radius to the event.
+{-| Decode to get the nearest item within certain radius to the event. Use the `Remodel` functions in `Chart.Item`
+to filter down what items or groups of items you will be searching for.
 
 -}
-getWithin : Float -> I.Remodel (I.One data I.Any) (I.Rendered result) -> Decoder data (List (I.Rendered result))
+getWithin : Float -> I.Remodel (I.One data I.Any) (I.Item result) -> Decoder data (List (I.Item result))
 getWithin =
   IE.getWithin
 
 
-{-| Like `getNearest`, but only takes x coordiante into account
+{-| Like `getNearest`, but only takes x coordiante into account. Use the `Remodel` functions in `Chart.Item`
+to filter down what items or groups of items you will be searching for.
 -}
-getNearestX : I.Remodel (I.One data I.Any) (I.Rendered result) -> Decoder data (List (I.Rendered result))
+getNearestX : I.Remodel (I.One data I.Any) (I.Item result) -> Decoder data (List (I.Item result))
 getNearestX =
   IE.getNearestX
 
 
-{-| Like `getWithin`, but only takes x coordiante into account
+{-| Like `getWithin`, but only takes x coordiante into account. Use the `Remodel` functions in `Chart.Item`
+to filter down what items or groups of items you will be searching for.
 -}
-getWithinX : Float -> I.Remodel (I.One data I.Any) (I.Rendered result) -> Decoder data (List (I.Rendered result))
+getWithinX : Float -> I.Remodel (I.One data I.Any) (I.Item result) -> Decoder data (List (I.Item result))
 getWithinX =
   IE.getWithinX
 

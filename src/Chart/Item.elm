@@ -1,5 +1,5 @@
 module Chart.Item exposing
-  ( Rendered
+  ( Item
   , getCenter, getTop, getBottom, getLeft, getRight
   , getTopLeft, getTopRight, getBottomLeft, getBottomRight
   , getPosition, getLimits, getTooltip
@@ -59,7 +59,7 @@ Or when using functions like `C.eachBar` or `C.eachBin`:
 @docs bins, stacks, sameX, named
 
 # General
-@docs Rendered
+@docs Item
 @docs getCenter, getTop, getBottom, getLeft, getRight
 @docs getTopLeft, getTopRight, getBottomLeft, getBottomRight
 @docs getPosition, getLimits, getTooltip
@@ -75,73 +75,76 @@ import Internal.Many as M
 import Internal.Svg as CS
 
 
-{-| -}
-type alias Rendered x =
+{-| An "item" on the chart. A `One Data Bar` and `Many Data Bar` are both
+instances on this type, so you can use all the fuctions below on those too.
+
+-}
+type alias Item x =
   I.Rendered x
 
 
-{-| -}
-getTooltip : Rendered x -> List (Html Never)
+{-| Get the default tooltip. -}
+getTooltip : Item x -> List (Html Never)
 getTooltip =
   I.toHtml
 
 
 {-| -}
-getCenter : Plane -> Rendered x -> Point
+getCenter : Plane -> Item x -> Point
 getCenter p =
   I.getPosition p >> C.center
 
 
 {-| -}
-getLeft : Plane -> Rendered x -> Point
+getLeft : Plane -> Item x -> Point
 getLeft p =
   I.getPosition p >> C.left
 
 
 {-| -}
-getRight : Plane -> Rendered x -> Point
+getRight : Plane -> Item x -> Point
 getRight p =
   I.getPosition p >> C.right
 
 
 {-| -}
-getTop : Plane -> Rendered x -> Point
+getTop : Plane -> Item x -> Point
 getTop p =
   I.getPosition p >> C.top
 
 
 {-| -}
-getTopLeft : Plane -> Rendered x -> Point
+getTopLeft : Plane -> Item x -> Point
 getTopLeft p =
   I.getPosition p >> C.topLeft
 
 
 {-| -}
-getTopRight : Plane -> Rendered x -> Point
+getTopRight : Plane -> Item x -> Point
 getTopRight p =
   I.getPosition p >> C.topRight
 
 
 {-| -}
-getBottom : Plane -> Rendered x -> Point
+getBottom : Plane -> Item x -> Point
 getBottom p =
   I.getPosition p >> C.bottom
 
 
 {-| -}
-getBottomLeft : Plane -> Rendered x -> Point
+getBottomLeft : Plane -> Item x -> Point
 getBottomLeft p =
   I.getPosition p >> C.bottomLeft
 
 
 {-| -}
-getBottomRight : Plane -> Rendered x -> Point
+getBottomRight : Plane -> Item x -> Point
 getBottomRight p =
   I.getPosition p >> C.bottomRight
 
 
 {-| -}
-getPosition : Plane -> Rendered x -> Position
+getPosition : Plane -> Item x -> Position
 getPosition =
   I.getPosition
 
@@ -152,7 +155,7 @@ In the case of a bin, the "position" is the area which the bins bars take up, no
 inclusing any margin which may be around them. Its "limits" include the margin.
 
 -}
-getLimits : Rendered x -> Position
+getLimits : Item x -> Position
 getLimits =
   I.getLimits
 

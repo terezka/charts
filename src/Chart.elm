@@ -55,11 +55,8 @@ and attributes. It looks something like this:
 All the elements, like `chart`, `grid`, `xLabels`, `yLabels`, `bars` and `bar` in the example
 above, are defined in this module. All the attributes, like `width`, `height`, `color`, and `opacity`,
 are defined in `Chart.Attributes`. Attributes and other functions related to events are located in
-the `Chart.Events` module. Lastly, `Chart.Svg` holds charting primitives in case you have very special
-needs.
-
-NOTE: Some of the more advanced elements utilize helper functions in `Chart.Events`
-too. If that is the case, I will make a note in the comment of the element.
+the `Chart.Events` module. Functions for working with rendered chart items are located in `Chart.Item`.
+Lastly, `Chart.Svg` holds charting primitives in case you have very special needs.
 
 In the following examples, I will assume the imports:
 
@@ -72,6 +69,7 @@ In the following examples, I will assume the imports:
     import Chart as C
     import Chart.Attributes as CA
     import Chart.Events as CE
+    import Chart.Item as CI
 
 
 # The frame
@@ -218,7 +216,7 @@ the `chart` element.
 
         -- Add event triggers to your chart. Learn more about these in
         -- the `Chart.Events` module.
-        , CE.onMouseMove OnHovering (CE.getNearest C.bar)
+        , CE.onMouseMove OnHovering (CE.getNearest CI.bars)
         , CE.onMouseLeave (OnHovering [])
 
         -- Add arbitrary HTML and SVG attributes to your chart.
@@ -584,7 +582,7 @@ Customizations:
 
 
 -}
-tooltip : Item.Rendered a -> List (Attribute Tooltip) -> List (H.Attribute Never) -> List (H.Html Never) -> Element data msg
+tooltip : CI.Item a -> List (Attribute Tooltip) -> List (H.Attribute Never) -> List (H.Html Never) -> Element data msg
 tooltip i edits attrs_ content =
   html <| \p ->
     let pos = Item.getLimits i
@@ -1646,7 +1644,7 @@ type alias ItemLabel a =
   }
 
 
-defaultLabel : ItemLabel (CI.Rendered a)
+defaultLabel : ItemLabel (CI.Item a)
 defaultLabel =
   { xOff = IS.defaultLabel.xOff
   , yOff = IS.defaultLabel.yOff
@@ -1663,7 +1661,7 @@ defaultLabel =
   }
 
 
-toLabelFromItemLabel : ItemLabel (CI.Rendered a) -> CS.Label
+toLabelFromItemLabel : ItemLabel (CI.Item a) -> CS.Label
 toLabelFromItemLabel config =
   { xOff = config.xOff
   , yOff = config.yOff
@@ -1933,7 +1931,11 @@ type alias Bars data =
   }
 
 
-{-| Add a bar series to your chart. Each `data` in your `List data` is a "bin". For
+{-| Add a bar series to your chart.
+
+![bar chart terminology](https://github.com/terezka/charts/blob/master/docs/images/barchart-terminology.svg)
+
+Each `data` in your `List data` is a "bin". For
 each "bin", whatever number of bars your have specified in the second argument will
 show up, side-by-side.
 
@@ -2161,7 +2163,7 @@ withPlane func =
 
 
 {-| Given all your bins, add a list of elements.
-Use helpers in `Chart.Events` to interact with bins.
+Use helpers in `Chart.Item` to interact with bins.
 
 -}
 withBins : (C.Plane -> List (CI.Many data CI.Any) -> List (Element data msg)) -> Element data msg
@@ -2170,7 +2172,7 @@ withBins func =
 
 
 {-| Given all your stacks, add a list of elements.
-Use helpers in `Chart.Events` to interact with stacks.
+Use helpers in `Chart.Item` to interact with stacks.
 
 -}
 withStacks : (C.Plane -> List (CI.Many data CI.Any) -> List (Element data msg)) -> Element data msg
@@ -2179,7 +2181,7 @@ withStacks func =
 
 
 {-| Given all your bars, add a list of elements.
-Use helpers in `Chart.Events` to interact with bars.
+Use helpers in `Chart.Item` to interact with bars.
 
 -}
 withBars : (C.Plane -> List (CI.One data CI.Bar) -> List (Element data msg)) -> Element data msg
@@ -2188,7 +2190,7 @@ withBars func =
 
 
 {-| Given all your dots, add a list of elements.
-Use helpers in `Chart.Events` to interact with dots.
+Use helpers in `Chart.Item` to interact with dots.
 
 -}
 withDots : (C.Plane -> List (CI.One data CI.Dot) -> List (Element data msg)) -> Element data msg
@@ -2197,7 +2199,7 @@ withDots func =
 
 
 {-| Given all your products, add a list of elements.
-Use helpers in `Chart.Events` to interact with products.
+Use helpers in `Chart.Item` to interact with products.
 
 -}
 withItems : (C.Plane -> List (CI.One data CI.Any) -> List (Element data msg)) -> Element data msg
@@ -2243,7 +2245,7 @@ each items func =
           [ C.label [] [ S.text common.datum.country ] (CI.getBottom plane bin) ]
       ]
 
-Use the functions in `Chart.Events` to access information about your bins.
+Use the functions in `Chart.Item` to access information about your bins.
 
 -}
 eachBin : (C.Plane -> CI.Many data CI.Any -> List (Element data msg)) -> Element data msg
@@ -2270,7 +2272,7 @@ eachBin func =
           [ C.label [] [ S.text (String.fromFloat total) ] (CI.getTop plane stack) ]
       ]
 
-Use the functions in `Chart.Events` to access information about your stacks.
+Use the functions in `Chart.Item` to access information about your stacks.
 
 -}
 eachStack : (C.Plane -> CI.Many data CI.Any -> List (Element data msg)) -> Element data msg
@@ -2295,7 +2297,7 @@ eachStack func =
           [ C.label [] [ S.text (String.fromFloat yValue) ] (CI.getTop plane bar) ]
       ]
 
-Use the functions in `Chart.Events` to access information about your bars.
+Use the functions in `Chart.Item` to access information about your bars.
 
 -}
 eachBar : (C.Plane -> CI.One data CI.Bar -> List (Element data msg)) -> Element data msg
@@ -2320,7 +2322,7 @@ eachBar func =
           [ C.label [] [ S.text (String.fromFloat yValue) ] (CI.getTop plane bar) ]
       ]
 
-Use the functions in `Chart.Events` to access information about your dots.
+Use the functions in `Chart.Item` to access information about your dots.
 
 -}
 eachDot : (C.Plane -> CI.One data CI.Dot -> List (Element data msg)) -> Element data msg
@@ -2328,10 +2330,10 @@ eachDot func =
   SubElements <| \p is -> List.concatMap (func p) (CI.apply (CI.andThen CI.real CI.dots) is)
 
 
-{-| Add elements for each product. Works like `eachBar` and `eachDot`, but includes both
+{-| Add elements for each dot or bar. Works like `eachBar` and `eachDot`, but includes both
 bars and dots.
 
-Use the functions in `Chart.Events` to access information about your products.
+Use the functions in `Chart.Item` to access information about your items.
 
 -}
 eachItem : (C.Plane -> CI.One data CI.Any -> List (Element data msg)) -> Element data msg
@@ -2348,7 +2350,7 @@ eachItem func =
 
 The above example adds a label for each product of the series named "cats".
 
-Use the functions in `Chart.Events` to access information about your items.
+Use the functions in `Chart.Item` to access information about your items.
 
 -}
 eachCustom : CI.Remodel (CI.One data CI.Any) a -> (C.Plane -> a -> List (Element data msg)) -> Element data msg
@@ -2548,6 +2550,7 @@ labelAt toX toY attrs inner =
           , CA.y2Svg 30
 
           , CA.break            -- "break" line, so it it has a 90° angle
+          , CA.flip             -- flip break to opposite direction
           , CA.tickLength       -- Add "ticks" at the ends of the line
           , CA.tickDirection    -- The angle of the ticks
 
