@@ -30,10 +30,10 @@ view =
         , CA.spacing 0.15
         ]
         [ C.stacked
-            [ C.bar .a []
-            , C.bar .b []
+            [ C.bar .a [ CA.opacity 0.8, CA.borderWidth 1 ]
+            , C.bar .b [ CA.opacity 0.8, CA.borderWidth 1 ]
             ]
-        , C.bar .c []
+        , C.bar .c [ CA.opacity 0.8, CA.borderWidth 1 ]
         ]
         data
 

@@ -21522,6 +21522,12 @@ var $author$project$Chart$binLabels = F2(
 						]);
 				}));
 	});
+var $author$project$Chart$Attributes$borderWidth = F2(
+	function (v, config) {
+		return _Utils_update(
+			config,
+			{borderWidth: v});
+	});
 var $author$project$Chart$Attributes$break = function (config) {
 	return _Utils_update(
 		config,
@@ -23328,6 +23334,12 @@ var $author$project$Chart$Attributes$noArrow = function (config) {
 		config,
 		{arrow: false});
 };
+var $author$project$Chart$Attributes$opacity = F2(
+	function (v, config) {
+		return _Utils_update(
+			config,
+			{opacity: v});
+	});
 var $author$project$Chart$Attributes$padding = F2(
 	function (value, config) {
 		return _Utils_update(
@@ -26127,20 +26139,32 @@ var $author$project$Charts$Terminology$view = A2(
 							function ($) {
 								return $.a;
 							},
-							_List_Nil),
+							_List_fromArray(
+								[
+									$author$project$Chart$Attributes$opacity(0.8),
+									$author$project$Chart$Attributes$borderWidth(1)
+								])),
 							A2(
 							$author$project$Chart$bar,
 							function ($) {
 								return $.b;
 							},
-							_List_Nil)
+							_List_fromArray(
+								[
+									$author$project$Chart$Attributes$opacity(0.8),
+									$author$project$Chart$Attributes$borderWidth(1)
+								]))
 						])),
 					A2(
 					$author$project$Chart$bar,
 					function ($) {
 						return $.c;
 					},
-					_List_Nil)
+					_List_fromArray(
+						[
+							$author$project$Chart$Attributes$opacity(0.8),
+							$author$project$Chart$Attributes$borderWidth(1)
+						]))
 				]),
 			$author$project$Charts$Terminology$data),
 			$author$project$Chart$line(
@@ -27268,12 +27292,6 @@ var $author$project$Examples$BarCharts$BinLabelsAdvanced$view = function (model)
 				$author$project$Examples$BarCharts$BinLabelsAdvanced$data)
 			]));
 };
-var $author$project$Chart$Attributes$borderWidth = F2(
-	function (v, config) {
-		return _Utils_update(
-			config,
-			{borderWidth: v});
-	});
 var $author$project$Examples$BarCharts$Borders$Datum = F8(
 	function (x, x1, y, z, v, w, p, q) {
 		return {p: p, q: q, v: v, w: w, x: x, x1: x1, y: y, z: z};
@@ -27285,12 +27303,6 @@ var $author$project$Examples$BarCharts$Borders$data = _List_fromArray(
 		A8($author$project$Examples$BarCharts$Borders$Datum, 3.0, 0.6, 1.0, 3.2, 4.8, 5.4, 7.2, 8.3),
 		A8($author$project$Examples$BarCharts$Borders$Datum, 4.0, 0.2, 1.2, 3.0, 4.1, 5.5, 7.9, 8.1)
 	]);
-var $author$project$Chart$Attributes$opacity = F2(
-	function (v, config) {
-		return _Utils_update(
-			config,
-			{opacity: v});
-	});
 var $author$project$Examples$BarCharts$Borders$view = function (model) {
 	return A2(
 		$author$project$Chart$chart,
