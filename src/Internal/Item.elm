@@ -35,6 +35,7 @@ type alias One data x =
 type Any
   = Dot S.Dot
   | Bar S.Bar
+  | Custom
 
 
 {-| -}
@@ -145,6 +146,12 @@ isReal (Rendered item) =
 
 
 {-| -}
+getElIndex : One data x -> Int
+getElIndex (Rendered item) =
+  item.config.tooltipInfo.elIndex
+
+
+{-| -}
 getPropertyIndex : One data x -> Int
 getPropertyIndex (Rendered item) =
   item.config.tooltipInfo.property
@@ -169,6 +176,12 @@ getTooltipValue (Rendered item) =
 
 
 {-| -}
+getGeneral : One data x -> One data Any
+getGeneral (Rendered item) =
+  generalize item.config.toAny (Rendered item)
+
+
+{-| -}
 getSize : One data S.Dot -> Float
 getSize (Rendered item) =
   item.config.product.size
@@ -180,7 +193,7 @@ isSame a b =
   getPropertyIndex a == getPropertyIndex b &&
   getStackIndex a == getStackIndex b &&
   getDataIndex a == getDataIndex b &&
-  getDatum a == getDatum b
+  getElIndex a == getElIndex b
 
 
 {-| -}
@@ -275,7 +288,7 @@ isBar (Rendered item) =
         }
         |> Just
 
-    Dot _ ->
+    _ ->
       Nothing
 
 
@@ -300,5 +313,5 @@ isDot (Rendered item) =
         }
         |> Just
 
-    Bar _ ->
+    _ ->
       Nothing

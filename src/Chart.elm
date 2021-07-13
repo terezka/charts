@@ -2,6 +2,7 @@ module Chart exposing
   ( chart
 
   , Element, bars, series, seriesMap, barsMap
+  , list, custom
   , Property, bar, scatter, interpolated
   , barMaybe, scatterMaybe, interpolatedMaybe
   , stacked, variation, amongst, named, format, formatMaybe
@@ -253,6 +254,9 @@ chart edits unindexedElements =
                   let ( newEl, newIndex ) = toElAndIndex index in
                   ( acc ++ [ newEl ], newIndex )
 
+                ListOfElements els ->
+                  List.foldl toIndexedEl ( acc, index ) els
+
                 _ ->
                   ( acc ++ [ el ], index )
         in
@@ -309,6 +313,9 @@ type Element data msg
       (List Legend.Legend)
       (C.Plane -> TickValues -> TickValues)
       (C.Plane -> S.Svg msg)
+  | CustomElement
+      (CI.One data CI.Any)
+      (C.Plane -> S.Svg msg)
   | AxisElement
       (C.Plane -> TickValues -> TickValues)
       (C.Plane -> S.Svg msg)
@@ -346,6 +353,7 @@ definePlane config elements =
           Indexed _ -> acc
           SeriesElement lims _ _ _ -> acc ++ lims
           BarsElement lims _ _ _ _ -> acc ++ lims
+          CustomElement _ _ -> acc
           AxisElement _ _ -> acc
           TicksElement _ _ -> acc
           TickElement _ _ _ -> acc
@@ -422,6 +430,7 @@ getItems plane elements =
           Indexed _ -> acc
           SeriesElement _ items _ _ -> acc ++ items
           BarsElement _ items _ _ _ -> acc ++ items
+          CustomElement item _ -> acc ++ [ item ]
           AxisElement func _ -> acc
           TicksElement _ _ -> acc
           TickElement _ _ _ -> acc
@@ -443,6 +452,7 @@ getLegends elements =
           Indexed _ -> acc
           SeriesElement _ _ legends_ _ -> acc ++ legends_
           BarsElement _ _ legends_ _ _ -> acc ++ legends_
+          CustomElement _ _ -> acc
           AxisElement _ _ -> acc
           TicksElement _ _ -> acc
           TickElement _ _ _ -> acc
@@ -474,6 +484,7 @@ getTickValues plane items elements =
           Indexed _ -> acc
           SeriesElement _ _ _ _     -> acc
           BarsElement _ _ _ func _  -> func plane acc
+          CustomElement _ func      -> acc
           AxisElement func _        -> func plane acc
           TicksElement func _       -> func plane acc
           TickElement toC func _    -> func plane (toC plane) acc
@@ -495,6 +506,7 @@ viewElements config plane tickValues allItems allLegends elements =
           Indexed _                 -> ( before,chart_, after )
           SeriesElement _ _ _ view  -> ( before, view plane :: chart_, after )
           BarsElement _ _ _ _ view  -> ( before, view plane :: chart_, after )
+          CustomElement _ view      -> ( before, view plane :: chart_, after )
           AxisElement _ view        -> ( before, view plane :: chart_, after )
           TicksElement _ view       -> ( before, view plane :: chart_, after )
           TickElement toC _ view    -> ( before, view plane (toC plane) :: chart_, after )
@@ -2166,6 +2178,61 @@ seriesMap mapData toX properties data =
         S.g [ SA.class "elm-charts__dot-series" ] (List.map (Item.toSvg p) items)
           |> S.map never
     , index + List.length (List.concatMap P.toConfigs properties)
+    )
+
+
+
+{-| -}
+list : List (Element data msg) -> Element data msg
+list =
+  ListOfElements
+
+
+{-| -}
+custom :
+  { name : String
+  , color : String
+  , position : CS.Position
+  , format : data -> String
+  , data : data
+  , render : CS.Plane -> S.Svg Never
+  } -> Element data msg
+custom config =
+  Indexed <| \elIndex ->
+    let item =
+          Item.Rendered
+            { config =
+                { product = ()
+                , values =
+                    { datum = config.data
+                    , x1 = config.position.x1
+                    , x2 = config.position.x2
+                    , y = config.position.y2
+                    , isReal = True
+                    }
+                , tooltipInfo =
+                    { property = 0
+                    , stack = 0
+                    , data = 0
+                    , index = 0
+                    , elIndex = elIndex
+                    , name = Just config.name
+                    , color = config.color
+                    , border = config.color
+                    , borderWidth = 0
+                    , formatted = config.format config.data
+                    }
+                , toAny = always Item.Custom
+                }
+            , toLimits = \_ -> config.position
+            , toPosition = \_ _ -> config.position
+            , toSvg = \plane _ position -> config.render plane
+            , toHtml = \c -> [ Produce.tooltipRow c.tooltipInfo.color (Maybe.withDefault "Custom" c.tooltipInfo.name) (c.tooltipInfo.formatted) ]
+            }
+    in
+    ( CustomElement (Item.getGeneral item) <| \p ->
+        S.map never (Item.toSvg p item)
+    , elIndex + 1
     )
 
 
