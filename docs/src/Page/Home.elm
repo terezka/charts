@@ -138,7 +138,7 @@ view model =
               [ feature
                   { title = "Intuitive"
                   , body =
-                      [ E.text "Simple charts should be simple to make. The interface "
+                      [ E.text "Charts shouldn't be hard to make. The interface "
                       , E.text "mirrors the element and attribute pattern which you already"
                       , E.text "know and love. "
                       , Layout.link "/quick-start" "Get started"
