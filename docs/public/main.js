@@ -26111,9 +26111,9 @@ var $author$project$Charts$Terminology$view = A2(
 			$author$project$Chart$Attributes$height(350),
 			$author$project$Chart$Attributes$width(1000),
 			$author$project$Chart$Attributes$margin(
-			{bottom: 10, left: 10, right: 10, top: 10}),
+			{bottom: 15, left: 25, right: 0, top: 0}),
 			$author$project$Chart$Attributes$padding(
-			{bottom: 30, left: 10, right: 20, top: 40})
+			{bottom: 30, left: 0, right: 0, top: 40})
 		]),
 	_List_fromArray(
 		[
@@ -26338,7 +26338,7 @@ var $author$project$Charts$Terminology$view = A2(
 			$author$project$Chart$label,
 			_List_fromArray(
 				[
-					$author$project$Chart$Attributes$moveDown(40),
+					$author$project$Chart$Attributes$moveDown(37),
 					$author$project$Chart$Attributes$moveLeft(25)
 				]),
 			_List_fromArray(

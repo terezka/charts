@@ -18,8 +18,8 @@ view =
   C.chart
     [ CA.height 350
     , CA.width 1000
-    , CA.margin { top = 10, bottom = 10, left = 10, right = 10 }
-    , CA.padding { top = 40, bottom = 30, left = 10, right = 20 }
+    , CA.margin { top = 0, bottom = 15, left = 25, right = 0 }
+    , CA.padding { top = 40, bottom = 30, left = 0, right = 0 }
     ]
     [ C.grid []
     , C.yLabels []
@@ -57,7 +57,7 @@ view =
     , C.label [ CA.rotate 90 ] [ S.text "bar" ] { x = 2, y = 0.5 }
 
     , C.line [ CA.color "#888", CA.x1 4, CA.y1 0, CA.x2Svg -10, CA.y2Svg -10, CA.break, CA.flip, CA.moveDown 15, CA.moveLeft 10 ]
-    , C.label [ CA.moveDown 40, CA.moveLeft 25 ] [ S.text "bin label" ] { x = 4, y = 0 }
+    , C.label [ CA.moveDown 37, CA.moveLeft 25 ] [ S.text "bin label" ] { x = 4, y = 0 }
     , C.binLabels .label [ CA.moveDown 20 ]
 
     , C.eachBar <| \p bar ->
