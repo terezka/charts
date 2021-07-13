@@ -4,7 +4,7 @@ module Chart exposing
   , Element, bars, series, seriesMap, barsMap
   , Property, bar, scatter, interpolated
   , barMaybe, scatterMaybe, interpolatedMaybe
-  , stacked, named, variation, amongst
+  , stacked, named, format, formatMaybe, variation, amongst
 
   , xAxis, yAxis, xTicks, yTicks, xLabels, yLabels, grid
   , binLabels, barLabels, dotLabels, productLabel
@@ -1553,6 +1553,21 @@ named name =
   P.meta name
 
 
+{-| -}
+format : (Float -> String) -> Property data inter deco -> Property data inter deco
+format func =
+  P.format <| \v ->
+    case v of
+      Just v_ -> func v_
+      Nothing -> "N/A"
+
+
+{-| -}
+formatMaybe : (Maybe Float -> String) -> Property data inter deco -> Property data inter deco
+formatMaybe =
+  P.format
+
+
 {-| Change the style of your bars or dots based on the index of its data point
 and the data point itself.
 
@@ -2703,7 +2718,7 @@ generateValues amount tick maybeFormat axis =
             { value = toValue i
             , label =
                 case maybeFormat of
-                  Just format -> format (toValue i)
+                  Just formatter -> formatter (toValue i)
                   Nothing -> toString i
             }
   in

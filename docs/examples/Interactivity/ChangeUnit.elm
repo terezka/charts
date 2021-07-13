@@ -1,4 +1,4 @@
-module Examples.Interactivity.ChangeContent exposing (..)
+module Examples.Interactivity.ChangeUnit exposing (..)
 
 {-| @LARGE -}
 import Html as H
@@ -11,7 +11,7 @@ import Chart.Item as CI
 
 
 type alias Model =
-  { hovering : List (CI.One Datum CI.Dot) }
+  { hovering : List (CI.One Datum CI.Bar) }
 
 
 init : Model
@@ -20,7 +20,7 @@ init =
 
 
 type Msg
-  = OnHover (List (CI.One Datum CI.Dot))
+  = OnHover (List (CI.One Datum CI.Bar))
 
 
 update : Msg -> Model -> Model
@@ -36,32 +36,21 @@ view model =
   C.chart
     [ CA.height 300
     , CA.width 300
-    , CE.onMouseMove OnHover (CE.getNearest CI.dots)
+    , CE.onMouseMove OnHover (CE.getNearest CI.bars)
     , CE.onMouseLeave (OnHover [])
     ]
     [ C.grid []
     , C.xLabels []
     , C.yLabels []
-    , C.series .x
-        [ C.scatter .z [ CA.opacity 0.5, CA.borderWidth 1 ]
-        , C.scatter .y [ CA.opacity 0.5, CA.borderWidth 1 ]
-        , C.scatter .w [ CA.opacity 0.5, CA.borderWidth 1 ]
-        , C.scatter .p [ CA.opacity 0.5, CA.borderWidth 1 ]
+    , C.bars []
+        [ C.bar .y [ CA.opacity 0.5, CA.borderWidth 1 ]
+            |> C.format (\v -> String.fromFloat v ++ " m/s")
+        , C.bar .z [ CA.opacity 0.5, CA.borderWidth 1 ]
+            |> C.format (\v -> String.fromFloat v ++ " m/s")
         ]
         data
     , C.each model.hovering <| \p dot ->
-        let color = CI.getColor dot
-            x = CI.getX dot
-            y = CI.getY dot
-        in
-        [ C.tooltip dot []
-            [ HA.style "color" color ]
-            [ H.text "x: "
-            , H.text (String.fromFloat x)
-            , H.text " y: "
-            , H.text (String.fromFloat y)
-            ]
-        ]
+        [ C.tooltip dot [ CA.onLeftOrRight ] [] [] ]
     ]
 {-| @SMALL END -}
 {-| @LARGE END -}
@@ -70,8 +59,8 @@ view model =
 meta =
   { category = "Interactivity"
   , categoryOrder = 5
-  , name = "Change content"
-  , description = "Change the content of the tooltip."
+  , name = "Change value formatting"
+  , description = "Change the value print in the tooltip."
   , order = 7
   }
 

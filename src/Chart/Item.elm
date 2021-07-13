@@ -6,7 +6,7 @@ module Chart.Item exposing
 
   , One, Any, Bar, Dot
   , getData, getX, getX1, getX2, getY
-  , getName, getColor, getSize
+  , getName, getColor, getSize, getTooltipValue
   , isReal, isSame, filter
 
   , Many, getMembers, getMember, getDatas, getOneData
@@ -47,7 +47,7 @@ Or when using functions like `C.eachBar` or `C.eachBin`:
 # Single items
 @docs One, Any, Bar, Dot
 @docs getData, getX, getX1, getX2, getY
-@docs getName, getColor, getSize
+@docs getName, getColor, getSize, getTooltipValue
 @docs isReal, isSame, filter
 
 # Groups of items
@@ -64,7 +64,7 @@ Or when using functions like `C.eachBar` or `C.eachBin`:
 @docs Item
 @docs getCenter, getTop, getBottom, getLeft, getRight
 @docs getTopLeft, getTopRight, getBottomLeft, getBottomRight
-@docs getPosition, getLimits, getTooltip
+@docs getPosition, getLimits, getTooltip, getTooltipValue
 
 
 -}
@@ -237,6 +237,12 @@ getName =
 getColor : One data x -> String
 getColor =
   I.getColor
+
+
+{-| Get the formatted y value. -}
+getTooltipValue  : One data x -> String
+getTooltipValue =
+  I.getTooltipValue
 
 
 {-| Get the size of a dot. -}

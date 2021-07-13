@@ -48,6 +48,7 @@ type alias TooltipInfo =
   , color : String
   , border : String
   , borderWidth : Float
+  , formatted : String
   }
 
 
@@ -159,6 +160,12 @@ getStackIndex (Rendered item) =
 getDataIndex : One data x -> Int
 getDataIndex (Rendered item) =
   item.config.tooltipInfo.data
+
+
+{-| -}
+getTooltipValue : One data x -> String
+getTooltipValue (Rendered item) =
+  item.config.tooltipInfo.formatted
 
 
 {-| -}

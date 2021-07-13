@@ -155,13 +155,14 @@ toBarSeries elIndex barsAttrs properties data =
                   , color = product.color
                   , border = product.border
                   , borderWidth = product.borderWidth
+                  , formatted = section.format bin.datum
                   }
               , toAny = I.Bar
               }
           , toLimits = \config -> { x1 = x1, x2 = x2, y1 = min y1 y2, y2 = max y1 y2 }
           , toPosition = \_ config -> { x1 = x1, x2 = x2, y1 = y1, y2 = y2 }
           , toSvg = \plane config position -> S.bar plane product position
-          , toHtml = \c -> [ tooltipRow c.tooltipInfo.color (toDefaultName colorIndex c.tooltipInfo.name) value ]
+          , toHtml = \c -> [ tooltipRow c.tooltipInfo.color (toDefaultName colorIndex c.tooltipInfo.name) (section.format bin.datum) ]
           }
   in
   Helpers.withSurround data toBin |> \bins ->
@@ -225,7 +226,7 @@ toDotSeries elIndex toX properties data =
               case prop.value datum_ of
                 Nothing -> S.text ""
                 Just _ -> S.dot plane .x .y config { x = x_, y = y_ }
-          , toHtml = \c -> [ tooltipRow c.tooltipInfo.color (toDefaultName colorIndex c.tooltipInfo.name) (prop.value datum_) ]
+          , toHtml = \c -> [ tooltipRow c.tooltipInfo.color (toDefaultName colorIndex c.tooltipInfo.name) (prop.format datum_) ]
           , toLimits = \_ -> { x1 = x_, x2 = x_, y1 = y_, y2 = y_ }
           , toPosition = \plane _ ->
               let radius = Maybe.withDefault 0 <| Maybe.map (S.toRadius config.size) config.shape
@@ -262,6 +263,7 @@ toDotSeries elIndex toX properties data =
                         _ -> config.color
                   , border = config.border
                   , borderWidth = config.borderWidth
+                  , formatted = prop.format datum_
                   }
               , toAny = I.Dot
               }
@@ -278,8 +280,8 @@ toDotSeries elIndex toX properties data =
 -- RENDER
 
 
-tooltipRow : String -> String -> Maybe Float -> H.Html msg
-tooltipRow color title maybeValue =
+tooltipRow : String -> String -> String -> H.Html msg
+tooltipRow color title text =
   H.tr
     []
     [ H.td
@@ -292,7 +294,7 @@ tooltipRow color title maybeValue =
         [ HA.style "text-align" "right"
         , HA.style "padding" "0"
         ]
-        [ H.text (Maybe.withDefault "N/A" <| Maybe.map String.fromFloat maybeValue) ]
+        [ H.text text ]
     ]
 
 
