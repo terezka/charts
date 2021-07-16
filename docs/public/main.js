@@ -41049,7 +41049,7 @@ var $author$project$Charts$Landing$view = function (model) {
 				$author$project$Chart$Attributes$margin(
 				{bottom: 18, left: 0, right: 0, top: 0}),
 				$author$project$Chart$Attributes$padding(
-				{bottom: 0, left: 0, right: 35, top: 0}),
+				{bottom: 0, left: 0, right: 35, top: 5}),
 				A2(
 				$author$project$Chart$Events$on,
 				'mousemove',
