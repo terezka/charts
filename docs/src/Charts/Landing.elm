@@ -26,6 +26,7 @@ import Element.Background as BG
 
 import Time
 import DateFormat as F
+import Session
 
 
 type alias Model =
@@ -54,10 +55,10 @@ update msg model =
       { model | hovering = hovering, hoveringBars = hoveringBars }
 
 
-view : Model -> H.Html Msg
-view model =
+view : Session.Window -> Model -> H.Html Msg
+view window model =
   C.chart
-    [ CA.height 300
+    [ CA.height (if window.width > 950 then 300 else 450)
     , CA.width 1000
     , CA.margin { top = 0, bottom = 18, left = 0, right = 0 }
     , CA.padding { top = 5, bottom = 0, left = 0, right = 35 }
@@ -86,6 +87,18 @@ view model =
             |> C.named "Sales"
         ]
         barData
+
+    , C.labelAt (CA.middle) (CA.percent 57)
+        [ CA.fontSize 20, CA.moveUp 90, CA.color "rgb(120, 120, 120)" ]
+        [ S.text "Not finished yet- please do not tweet!"
+        ]
+
+    , C.labelAt (CA.middle) (CA.percent 57)
+        [ CA.fontSize (if window.width > 950 then 100 else 150)
+        , CA.color "rgb(90, 90, 90)"
+        ]
+        [ S.text "elm-charts"
+        ]
 
     , C.seriesMap Dot .x
         [ C.interpolated .y
@@ -138,16 +151,6 @@ view model =
             [ HA.style "font-size" "14px"
             ]
             [ header, body ]
-        ]
-
-    , C.labelAt (CA.middle) (CA.percent 57)
-        [ CA.fontSize 20, CA.moveUp 90, CA.color "rgb(120, 120, 120)" ]
-        [ S.text "Not finished yet- please do not tweet!"
-        ]
-
-    , C.labelAt (CA.middle) (CA.percent 57)
-        [ CA.fontSize 100, CA.color "rgb(90, 90, 90)" ]
-        [ S.text "elm-charts"
         ]
     ]
 

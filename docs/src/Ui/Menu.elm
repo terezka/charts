@@ -73,8 +73,8 @@ small window model =
     , if model.isOpen then
         E.column
           [ E.centerX
-          , E.spacing 5
-          , E.paddingEach { top = 20, bottom = 0, left = 0, right = 0 }
+          , E.spacing 10
+          , E.paddingEach { top = 30, bottom = 0, left = 0, right = 0 }
           ] links
       else
         E.none

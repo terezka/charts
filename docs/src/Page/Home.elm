@@ -145,12 +145,12 @@ view model =
           , E.el
               [ E.width E.fill
               ]
-              (E.html <| H.map LandingMsg (Landing.view model.landing))
+              (E.html <| H.map LandingMsg (Landing.view model.window model.landing))
 
           , E.column
               [ E.width E.fill
-              , E.spacing 140
-              , E.paddingXY 0 120
+              , E.spacing (if model.window.width > 950 then 140 else 50)
+              , E.paddingXY 0 (if model.window.width > 950 then 120 else 40)
               ]
               [ feature model.window
                   { title = "Intuitive"
@@ -181,10 +181,10 @@ view model =
                   }
 
               , feature model.window
-                  { title = "Plenty of examples"
+                  { title = "Learn by example"
                   , body =
-                      [ E.text "Charts are visual and so should the documentation be! "
-                      , E.text "There is more than 100 examples on this site to help you "
+                      [ E.text "Outside the regular elm documentation of the API, "
+                      , E.text "there are more than 100 examples on this site to help you "
                       , E.text "compose your exact chart. "
                       , E.link [ F.underline ] { url = "/documentation", label = E.text "Explore the catalog" }
                       , E.text "."
@@ -237,26 +237,24 @@ feature window config =
     , E.height E.fill
     , E.spacing 50
     ] <| (if config.flipped && window.width > 950 then List.reverse else identity)
-    [ E.column
+    [ E.textColumn
         [ E.width E.fill
         , E.alignTop
         , E.alignLeft
         , E.spacing 10
         ]
-        [ E.textColumn [ E.width E.fill ]
-            [ E.paragraph
-                [ E.width E.fill
-                , F.size 40
-                ]
-                [ E.text config.title ]
-            , E.paragraph
-                [ F.size 16
-                , F.color (E.rgb255 100 100 100)
-                , E.paddingXY 0 10
-                , E.width E.fill
-                ]
-                config.body
+        [ E.paragraph
+            [ E.width E.fill
+            , F.size 40
             ]
+            [ E.text config.title ]
+        , E.paragraph
+            [ F.size 16
+            , F.color (E.rgb255 100 100 100)
+            , E.paddingXY 0 10
+            , E.width E.fill
+            ]
+            config.body
         ]
     , case config.togglable of
         Nothing ->
@@ -273,7 +271,16 @@ feature window config =
             , E.alignTop
             , E.centerX
             ]
-            [ if isToggled then
+            [ I.button
+                [ E.paddingXY 15 15
+                , E.alignRight
+                , F.size 14
+                ]
+                { onPress = Just onToggle
+                , label = E.text (if isToggled then "Show chart" else "Show code")
+                }
+
+            , if isToggled then
                 E.el
                   [ E.width E.fill
                   , E.height E.fill
@@ -288,15 +295,6 @@ feature window config =
                   ]
                   config.chart
 
-            , I.button
-                [ E.paddingXY 15 15
-                , F.size 14
-                , E.htmlAttribute (HA.style "position" "absolute")
-                , E.htmlAttribute (HA.style "right" "0")
-                ]
-                { onPress = Just onToggle
-                , label = E.text (if isToggled then "Show chart" else "Show code")
-                }
             ]
     ]
 
