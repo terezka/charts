@@ -61,7 +61,7 @@ small window model =
             , E.alignRight
             , F.size 13
             ] <|
-            if window.width > 950
+            if window.width > 700
               then links
               else
                 [ I.button []
@@ -73,8 +73,9 @@ small window model =
     , if model.isOpen then
         E.column
           [ E.centerX
-          , E.spacing 10
-          , E.paddingEach { top = 30, bottom = 0, left = 0, right = 0 }
+          , E.spacing 15
+          , E.paddingEach { top = 30, bottom = 20, left = 0, right = 0 }
+          , F.size 16
           ] links
       else
         E.none

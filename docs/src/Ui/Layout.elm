@@ -1,4 +1,4 @@
-module Ui.Layout exposing (view, link)
+module Ui.Layout exposing (..)
 
 
 import Html as H
@@ -6,6 +6,63 @@ import Element as E
 import Element.Font as F
 import Element.Border as B
 import Element.Background as BG
+import Session
+
+
+type Screen
+  = Small
+  | Medium
+  | Large
+
+
+screen : Session.Window -> Screen
+screen window =
+  if window.width > 950 then Large
+  else if window.width > 760 then Medium
+  else Small
+
+
+title : Session.Window -> { title : String, tag : List (E.Element msg), padding : Int } -> E.Element msg
+title window config =
+  E.textColumn
+    [ E.width E.fill
+    , F.center
+    , E.paddingXY 0 config.padding
+    , E.spacing 10
+    ]
+    [ E.paragraph
+        [ F.size <|
+            case screen window of
+              Large -> 120
+              Medium -> 80
+              Small -> 52
+        ]
+        [ E.text config.title ]
+    , E.paragraph
+        [ F.size <|
+            case screen window of
+              Large -> 28
+              Medium -> 28
+              Small -> 20
+        ]
+        config.tag
+    ]
+
+
+heading : Session.Window -> String -> E.Element msg
+heading window text =
+  E.paragraph
+    [ F.size <|
+        case screen window of
+          Large -> 32
+          Medium -> 28
+          Small -> 24
+    ]
+    [ E.text text ]
+
+
+
+-- CONTAINER
 
 
 view : List (E.Element msg) -> List (H.Html msg)

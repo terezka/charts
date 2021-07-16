@@ -15291,7 +15291,7 @@ var $author$project$Ui$Menu$small = F2(
 									$mdgriffith$elm_ui$Element$alignRight,
 									$mdgriffith$elm_ui$Element$Font$size(13)
 								]),
-							(window.width > 950) ? $author$project$Ui$Menu$links : _List_fromArray(
+							(window.width > 700) ? $author$project$Ui$Menu$links : _List_fromArray(
 								[
 									A2(
 									$mdgriffith$elm_ui$Element$Input$button,
@@ -15311,9 +15311,10 @@ var $author$project$Ui$Menu$small = F2(
 					_List_fromArray(
 						[
 							$mdgriffith$elm_ui$Element$centerX,
-							$mdgriffith$elm_ui$Element$spacing(10),
+							$mdgriffith$elm_ui$Element$spacing(15),
 							$mdgriffith$elm_ui$Element$paddingEach(
-							{bottom: 0, left: 0, right: 0, top: 30})
+							{bottom: 20, left: 0, right: 0, top: 30}),
+							$mdgriffith$elm_ui$Element$Font$size(16)
 						]),
 					$author$project$Ui$Menu$links) : $mdgriffith$elm_ui$Element$none
 				]));
@@ -40744,9 +40745,342 @@ var $author$project$Page$Gallery$view = function (model) {
 		title: 'elm-charts'
 	};
 };
+var $author$project$Page$Home$MenuMsg = function (a) {
+	return {$: 'MenuMsg', a: a};
+};
 var $author$project$Page$Home$ConciseMsg = function (a) {
 	return {$: 'ConciseMsg', a: a};
 };
+var $author$project$Page$Home$FamiliarToggle = {$: 'FamiliarToggle'};
+var $author$project$Page$Home$None = {$: 'None'};
+var $author$project$Ui$Layout$Large = {$: 'Large'};
+var $author$project$Ui$Layout$Medium = {$: 'Medium'};
+var $author$project$Ui$Layout$Small = {$: 'Small'};
+var $author$project$Ui$Layout$screen = function (window) {
+	return (window.width > 950) ? $author$project$Ui$Layout$Large : ((window.width > 760) ? $author$project$Ui$Layout$Medium : $author$project$Ui$Layout$Small);
+};
+var $author$project$Page$Home$features = function (model) {
+	return _List_fromArray(
+		[
+			{
+			body: _List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$text('Charts shouldn\'t be hard to make, and with elm-charts they aren\'t. '),
+					$mdgriffith$elm_ui$Element$text('The interface mirrors the element and attribute pattern which '),
+					$mdgriffith$elm_ui$Element$text('you already know and love. '),
+					A2($author$project$Ui$Layout$link, '/quick-start', 'Get started'),
+					$mdgriffith$elm_ui$Element$text(' composing your chart in minutes!')
+				]),
+			chart: $mdgriffith$elm_ui$Element$html(
+				A2(
+					$elm$html$Html$map,
+					function (_v0) {
+						return $author$project$Page$Home$None;
+					},
+					$author$project$Examples$Frontpage$Familiar$view(_Utils_Tuple0))),
+			code: $author$project$Examples$Frontpage$Familiar$smallCode,
+			flipped: false,
+			title: 'Intuitive',
+			togglable: $elm$core$Maybe$Just(
+				_Utils_Tuple2($author$project$Page$Home$FamiliarToggle, model.familiarToggle))
+		},
+			{
+			body: _List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$text('No clutter, even with tricky requirements. Great support for '),
+					$mdgriffith$elm_ui$Element$text('interactivity, advanced labeling, guidence lines, and '),
+					$mdgriffith$elm_ui$Element$text('irregular details.')
+				]),
+			chart: $mdgriffith$elm_ui$Element$html(
+				A2(
+					$elm$html$Html$map,
+					$author$project$Page$Home$ConciseMsg,
+					$author$project$Examples$Frontpage$Concise$view(model.concise))),
+			code: $author$project$Examples$Frontpage$Concise$smallCode,
+			flipped: true,
+			title: 'Flexible, yet concise',
+			togglable: $elm$core$Maybe$Nothing
+		},
+			{
+			body: _List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$text('Outside the regular elm documentation of the API, '),
+					$mdgriffith$elm_ui$Element$text('there are more than 100 examples on this site to help you '),
+					$mdgriffith$elm_ui$Element$text('compose your exact chart. '),
+					A2(
+					$mdgriffith$elm_ui$Element$link,
+					_List_fromArray(
+						[$mdgriffith$elm_ui$Element$Font$underline]),
+					{
+						label: $mdgriffith$elm_ui$Element$text('Explore the catalog'),
+						url: '/documentation'
+					}),
+					$mdgriffith$elm_ui$Element$text('.')
+				]),
+			chart: function () {
+				var viewOne = function () {
+					var _v2 = $author$project$Ui$Layout$screen(model.window);
+					switch (_v2.$) {
+						case 'Large':
+							return $mdgriffith$elm_ui$Element$el(
+								_List_fromArray(
+									[
+										$mdgriffith$elm_ui$Element$width(
+										A2($mdgriffith$elm_ui$Element$minimum, 90, $mdgriffith$elm_ui$Element$fill)),
+										$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill)
+									]));
+						case 'Medium':
+							return $mdgriffith$elm_ui$Element$el(
+								_List_fromArray(
+									[
+										$mdgriffith$elm_ui$Element$width(
+										A2($mdgriffith$elm_ui$Element$minimum, 90, $mdgriffith$elm_ui$Element$fill)),
+										$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill)
+									]));
+						default:
+							return $mdgriffith$elm_ui$Element$el(
+								_List_fromArray(
+									[
+										$mdgriffith$elm_ui$Element$width(
+										A2($mdgriffith$elm_ui$Element$minimum, 50, $mdgriffith$elm_ui$Element$fill)),
+										$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill)
+									]));
+					}
+				}();
+				return A2(
+					$mdgriffith$elm_ui$Element$map,
+					function (_v1) {
+						return $author$project$Page$Home$None;
+					},
+					A2(
+						$mdgriffith$elm_ui$Element$wrappedRow,
+						_List_fromArray(
+							[
+								$mdgriffith$elm_ui$Element$spacing(30),
+								$mdgriffith$elm_ui$Element$alignTop,
+								$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+							]),
+						A2(
+							$elm$core$List$map,
+							A2($elm$core$Basics$composeR, $mdgriffith$elm_ui$Element$html, viewOne),
+							A2(
+								$elm$core$List$map,
+								$author$project$Examples$view($author$project$Examples$init),
+								_List_fromArray(
+									[$author$project$Examples$BarCharts__Histogram, $author$project$Examples$BarCharts__TooltipStack, $author$project$Examples$Interactivity__Zoom, $author$project$Examples$Frame__Titles, $author$project$Examples$LineCharts__Stepped, $author$project$Examples$ScatterCharts__Labels, $author$project$Examples$ScatterCharts__DataDependent, $author$project$Examples$LineCharts__TooltipStack, $author$project$Examples$LineCharts__Labels, $author$project$Examples$BarCharts__BarLabels, $author$project$Examples$BarCharts__Margin, $author$project$Examples$ScatterCharts__Shapes])))));
+			}(),
+			code: '',
+			flipped: false,
+			title: 'Learn by example',
+			togglable: $elm$core$Maybe$Nothing
+		}
+		]);
+};
+var $mdgriffith$elm_ui$Internal$Flag$fontAlignment = $mdgriffith$elm_ui$Internal$Flag$flag(12);
+var $mdgriffith$elm_ui$Element$Font$center = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$fontAlignment, $mdgriffith$elm_ui$Internal$Style$classes.textCenter);
+var $author$project$Ui$Layout$title = F2(
+	function (window, config) {
+		return A2(
+			$mdgriffith$elm_ui$Element$textColumn,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+					$mdgriffith$elm_ui$Element$Font$center,
+					A2($mdgriffith$elm_ui$Element$paddingXY, 0, config.padding),
+					$mdgriffith$elm_ui$Element$spacing(10)
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$mdgriffith$elm_ui$Element$paragraph,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$Font$size(
+							function () {
+								var _v0 = $author$project$Ui$Layout$screen(window);
+								switch (_v0.$) {
+									case 'Large':
+										return 120;
+									case 'Medium':
+										return 80;
+									default:
+										return 52;
+								}
+							}())
+						]),
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$text(config.title)
+						])),
+					A2(
+					$mdgriffith$elm_ui$Element$paragraph,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$Font$size(
+							function () {
+								var _v1 = $author$project$Ui$Layout$screen(window);
+								switch (_v1.$) {
+									case 'Large':
+										return 28;
+									case 'Medium':
+										return 28;
+									default:
+										return 20;
+								}
+							}())
+						]),
+					config.tag)
+				]));
+	});
+var $author$project$Ui$Layout$heading = F2(
+	function (window, text) {
+		return A2(
+			$mdgriffith$elm_ui$Element$paragraph,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$Font$size(
+					function () {
+						var _v0 = $author$project$Ui$Layout$screen(window);
+						switch (_v0.$) {
+							case 'Large':
+								return 32;
+							case 'Medium':
+								return 28;
+							default:
+								return 24;
+						}
+					}())
+				]),
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$text(text)
+				]));
+	});
+var $author$project$Page$Home$viewFeature = F2(
+	function (window, config) {
+		var viewToggler = F2(
+			function (onToggle, isToggled) {
+				return A2(
+					$mdgriffith$elm_ui$Element$Input$button,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$alignRight,
+							$mdgriffith$elm_ui$Element$Font$size(14)
+						]),
+					{
+						label: $mdgriffith$elm_ui$Element$text(
+							isToggled ? 'Show chart' : 'Show code'),
+						onPress: $elm$core$Maybe$Just(onToggle)
+					});
+			});
+		var viewText = A2(
+			$mdgriffith$elm_ui$Element$textColumn,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+					$mdgriffith$elm_ui$Element$alignTop,
+					$mdgriffith$elm_ui$Element$alignLeft,
+					$mdgriffith$elm_ui$Element$spacing(10)
+				]),
+			_List_fromArray(
+				[
+					A2($author$project$Ui$Layout$heading, window, config.title),
+					A2(
+					$mdgriffith$elm_ui$Element$paragraph,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$Font$size(16),
+							$mdgriffith$elm_ui$Element$Font$color(
+							A3($mdgriffith$elm_ui$Element$rgb255, 100, 100, 100)),
+							A2($mdgriffith$elm_ui$Element$paddingXY, 0, 10),
+							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+						]),
+					config.body)
+				]));
+		var viewCode = A2(
+			$mdgriffith$elm_ui$Element$el,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+					$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
+					$mdgriffith$elm_ui$Element$Background$color(
+					A3($mdgriffith$elm_ui$Element$rgb255, 250, 250, 250))
+				]),
+			$author$project$Ui$Code$view(
+				{edits: _List_Nil, template: config.code}));
+		var viewChart = A2(
+			$mdgriffith$elm_ui$Element$el,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+					$mdgriffith$elm_ui$Element$centerX,
+					$mdgriffith$elm_ui$Element$alignTop
+				]),
+			config.chart);
+		var viewImage = function () {
+			var _v1 = config.togglable;
+			if (_v1.$ === 'Nothing') {
+				return viewChart;
+			} else {
+				var _v2 = _v1.a;
+				var onToggle = _v2.a;
+				var isToggled = _v2.b;
+				return A2(
+					$mdgriffith$elm_ui$Element$column,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+							$mdgriffith$elm_ui$Element$alignTop,
+							$mdgriffith$elm_ui$Element$centerX,
+							$mdgriffith$elm_ui$Element$spacing(20)
+						]),
+					_List_fromArray(
+						[
+							A2(viewToggler, onToggle, isToggled),
+							isToggled ? viewCode : viewChart
+						]));
+			}
+		}();
+		var _v0 = $author$project$Ui$Layout$screen(window);
+		switch (_v0.$) {
+			case 'Large':
+				return A2(
+					$mdgriffith$elm_ui$Element$row,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+							$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
+							$mdgriffith$elm_ui$Element$spacing(60)
+						]),
+					config.flipped ? _List_fromArray(
+						[viewImage, viewText]) : _List_fromArray(
+						[viewText, viewImage]));
+			case 'Medium':
+				return A2(
+					$mdgriffith$elm_ui$Element$column,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$width(
+							A2($mdgriffith$elm_ui$Element$maximum, 550, $mdgriffith$elm_ui$Element$fill)),
+							$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
+							$mdgriffith$elm_ui$Element$spacing(30),
+							$mdgriffith$elm_ui$Element$centerX
+						]),
+					_List_fromArray(
+						[viewText, viewImage]));
+			default:
+				return A2(
+					$mdgriffith$elm_ui$Element$column,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+							$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
+							$mdgriffith$elm_ui$Element$spacing(20)
+						]),
+					_List_fromArray(
+						[viewText, viewImage]));
+		}
+	});
 var $author$project$Page$Home$Dashboard1Msg = function (a) {
 	return {$: 'Dashboard1Msg', a: a};
 };
@@ -40759,123 +41093,6 @@ var $author$project$Page$Home$Dashboard3Msg = function (a) {
 var $author$project$Page$Home$Dashboard4Msg = function (a) {
 	return {$: 'Dashboard4Msg', a: a};
 };
-var $author$project$Page$Home$FamiliarToggle = {$: 'FamiliarToggle'};
-var $author$project$Page$Home$MenuMsg = function (a) {
-	return {$: 'MenuMsg', a: a};
-};
-var $author$project$Page$Home$None = {$: 'None'};
-var $mdgriffith$elm_ui$Internal$Flag$fontAlignment = $mdgriffith$elm_ui$Internal$Flag$flag(12);
-var $mdgriffith$elm_ui$Element$Font$center = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$fontAlignment, $mdgriffith$elm_ui$Internal$Style$classes.textCenter);
-var $author$project$Page$Home$feature = F2(
-	function (window, config) {
-		return A2(
-			(window.width > 950) ? $mdgriffith$elm_ui$Element$row : $mdgriffith$elm_ui$Element$column,
-			_List_fromArray(
-				[
-					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-					$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
-					$mdgriffith$elm_ui$Element$spacing(50)
-				]),
-			((config.flipped && (window.width > 950)) ? $elm$core$List$reverse : $elm$core$Basics$identity)(
-				_List_fromArray(
-					[
-						A2(
-						$mdgriffith$elm_ui$Element$textColumn,
-						_List_fromArray(
-							[
-								$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-								$mdgriffith$elm_ui$Element$alignTop,
-								$mdgriffith$elm_ui$Element$alignLeft,
-								$mdgriffith$elm_ui$Element$spacing(10)
-							]),
-						_List_fromArray(
-							[
-								A2(
-								$mdgriffith$elm_ui$Element$paragraph,
-								_List_fromArray(
-									[
-										$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-										$mdgriffith$elm_ui$Element$Font$size(40)
-									]),
-								_List_fromArray(
-									[
-										$mdgriffith$elm_ui$Element$text(config.title)
-									])),
-								A2(
-								$mdgriffith$elm_ui$Element$paragraph,
-								_List_fromArray(
-									[
-										$mdgriffith$elm_ui$Element$Font$size(16),
-										$mdgriffith$elm_ui$Element$Font$color(
-										A3($mdgriffith$elm_ui$Element$rgb255, 100, 100, 100)),
-										A2($mdgriffith$elm_ui$Element$paddingXY, 0, 10),
-										$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
-									]),
-								config.body)
-							])),
-						function () {
-						var _v0 = config.togglable;
-						if (_v0.$ === 'Nothing') {
-							return A2(
-								$mdgriffith$elm_ui$Element$el,
-								_List_fromArray(
-									[
-										$mdgriffith$elm_ui$Element$centerX,
-										$mdgriffith$elm_ui$Element$alignTop,
-										$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
-									]),
-								config.chart);
-						} else {
-							var _v1 = _v0.a;
-							var onToggle = _v1.a;
-							var isToggled = _v1.b;
-							return A2(
-								$mdgriffith$elm_ui$Element$column,
-								_List_fromArray(
-									[
-										$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-										$mdgriffith$elm_ui$Element$alignTop,
-										$mdgriffith$elm_ui$Element$centerX
-									]),
-								_List_fromArray(
-									[
-										A2(
-										$mdgriffith$elm_ui$Element$Input$button,
-										_List_fromArray(
-											[
-												A2($mdgriffith$elm_ui$Element$paddingXY, 15, 15),
-												$mdgriffith$elm_ui$Element$alignRight,
-												$mdgriffith$elm_ui$Element$Font$size(14)
-											]),
-										{
-											label: $mdgriffith$elm_ui$Element$text(
-												isToggled ? 'Show chart' : 'Show code'),
-											onPress: $elm$core$Maybe$Just(onToggle)
-										}),
-										isToggled ? A2(
-										$mdgriffith$elm_ui$Element$el,
-										_List_fromArray(
-											[
-												$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-												$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
-												$mdgriffith$elm_ui$Element$Background$color(
-												A3($mdgriffith$elm_ui$Element$rgb255, 250, 250, 250))
-											]),
-										$author$project$Ui$Code$view(
-											{edits: _List_Nil, template: config.code})) : A2(
-										$mdgriffith$elm_ui$Element$el,
-										_List_fromArray(
-											[
-												$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-												$mdgriffith$elm_ui$Element$centerX,
-												$mdgriffith$elm_ui$Element$alignTop
-											]),
-										config.chart)
-									]));
-						}
-					}()
-					])));
-	});
 var $author$project$Charts$Dashboard1$Bar = function (a) {
 	return {$: 'Bar', a: a};
 };
@@ -41955,6 +42172,133 @@ var $author$project$Charts$Dashboard4$view = function (model) {
 					}))
 			]));
 };
+var $author$project$Page$Home$viewLanding = function (model) {
+	var viewChart = F2(
+		function (func, chart) {
+			return A2(
+				$mdgriffith$elm_ui$Element$el,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+					]),
+				$mdgriffith$elm_ui$Element$html(
+					A2($elm$html$Html$map, func, chart)));
+		});
+	var chart4 = A2(
+		viewChart,
+		$author$project$Page$Home$Dashboard4Msg,
+		$author$project$Charts$Dashboard4$view(model.dashboard4));
+	var chart3 = A2(
+		viewChart,
+		$author$project$Page$Home$Dashboard3Msg,
+		$author$project$Charts$Dashboard3$view(model.dashboard3));
+	var chart2 = A2(
+		viewChart,
+		$author$project$Page$Home$Dashboard2Msg,
+		$author$project$Charts$Dashboard2$view(model.dashboard2));
+	var chart1 = A2(
+		viewChart,
+		$author$project$Page$Home$Dashboard1Msg,
+		$author$project$Charts$Dashboard1$view(model.dashboard1));
+	var _v0 = $author$project$Ui$Layout$screen(model.window);
+	switch (_v0.$) {
+		case 'Large':
+			return A2(
+				$mdgriffith$elm_ui$Element$row,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+						$mdgriffith$elm_ui$Element$spacing(20)
+					]),
+				_List_fromArray(
+					[
+						chart1,
+						A2(
+						$mdgriffith$elm_ui$Element$column,
+						_List_fromArray(
+							[
+								$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+								$mdgriffith$elm_ui$Element$spacing(20)
+							]),
+						_List_fromArray(
+							[
+								A2(
+								$mdgriffith$elm_ui$Element$row,
+								_List_fromArray(
+									[
+										$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+										$mdgriffith$elm_ui$Element$spacing(20)
+									]),
+								_List_fromArray(
+									[chart2, chart3])),
+								chart4
+							]))
+					]));
+		case 'Medium':
+			return A2(
+				$mdgriffith$elm_ui$Element$row,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+						$mdgriffith$elm_ui$Element$spacing(20)
+					]),
+				_List_fromArray(
+					[
+						chart1,
+						A2(
+						$mdgriffith$elm_ui$Element$column,
+						_List_fromArray(
+							[
+								$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+								$mdgriffith$elm_ui$Element$spacing(20)
+							]),
+						_List_fromArray(
+							[
+								A2(
+								$mdgriffith$elm_ui$Element$row,
+								_List_fromArray(
+									[
+										$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+										$mdgriffith$elm_ui$Element$spacing(20)
+									]),
+								_List_fromArray(
+									[chart2, chart3])),
+								chart4
+							]))
+					]));
+		default:
+			return A2(
+				$mdgriffith$elm_ui$Element$column,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+						$mdgriffith$elm_ui$Element$spacing(20)
+					]),
+				_List_fromArray(
+					[
+						chart4,
+						A2(
+						$mdgriffith$elm_ui$Element$row,
+						_List_fromArray(
+							[
+								$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+								$mdgriffith$elm_ui$Element$spacing(20)
+							]),
+						_List_fromArray(
+							[
+								A2(
+								$mdgriffith$elm_ui$Element$row,
+								_List_fromArray(
+									[
+										$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+										$mdgriffith$elm_ui$Element$spacing(20)
+									]),
+								_List_fromArray(
+									[chart2, chart3]))
+							]))
+					]));
+	}
+};
 var $author$project$Page$Home$view = function (model) {
 	return {
 		body: $author$project$Ui$Layout$view(
@@ -41964,279 +42308,62 @@ var $author$project$Page$Home$view = function (model) {
 					$mdgriffith$elm_ui$Element$map,
 					$author$project$Page$Home$MenuMsg,
 					A2($author$project$Ui$Menu$small, model.window, model.menu)),
-					(model.window.width > 950) ? A2(
-					$mdgriffith$elm_ui$Element$row,
-					_List_fromArray(
-						[
-							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-							$mdgriffith$elm_ui$Element$spacing(20)
-						]),
-					_List_fromArray(
-						[
-							A2(
-							$mdgriffith$elm_ui$Element$el,
-							_List_fromArray(
-								[
-									$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
-								]),
-							$mdgriffith$elm_ui$Element$html(
-								A2(
-									$elm$html$Html$map,
-									$author$project$Page$Home$Dashboard1Msg,
-									$author$project$Charts$Dashboard1$view(model.dashboard1)))),
-							A2(
-							$mdgriffith$elm_ui$Element$column,
-							_List_fromArray(
-								[
-									$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-									$mdgriffith$elm_ui$Element$spacing(20)
-								]),
-							_List_fromArray(
-								[
-									A2(
-									$mdgriffith$elm_ui$Element$row,
-									_List_fromArray(
-										[
-											$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-											$mdgriffith$elm_ui$Element$spacing(20)
-										]),
-									_List_fromArray(
-										[
-											A2(
-											$mdgriffith$elm_ui$Element$el,
-											_List_fromArray(
-												[
-													$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
-												]),
-											$mdgriffith$elm_ui$Element$html(
-												A2(
-													$elm$html$Html$map,
-													$author$project$Page$Home$Dashboard2Msg,
-													$author$project$Charts$Dashboard2$view(model.dashboard2)))),
-											A2(
-											$mdgriffith$elm_ui$Element$el,
-											_List_fromArray(
-												[
-													$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
-												]),
-											$mdgriffith$elm_ui$Element$html(
-												A2(
-													$elm$html$Html$map,
-													$author$project$Page$Home$Dashboard3Msg,
-													$author$project$Charts$Dashboard3$view(model.dashboard3))))
-										])),
-									A2(
-									$mdgriffith$elm_ui$Element$el,
-									_List_fromArray(
-										[
-											$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
-										]),
-									$mdgriffith$elm_ui$Element$html(
-										A2(
-											$elm$html$Html$map,
-											$author$project$Page$Home$Dashboard4Msg,
-											$author$project$Charts$Dashboard4$view(model.dashboard4))))
-								]))
-						])) : A2(
-					$mdgriffith$elm_ui$Element$column,
-					_List_fromArray(
-						[
-							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-							$mdgriffith$elm_ui$Element$spacing(20)
-						]),
-					_List_fromArray(
-						[
-							A2(
-							$mdgriffith$elm_ui$Element$el,
-							_List_fromArray(
-								[
-									$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
-								]),
-							$mdgriffith$elm_ui$Element$html(
-								A2(
-									$elm$html$Html$map,
-									$author$project$Page$Home$Dashboard4Msg,
-									$author$project$Charts$Dashboard4$view(model.dashboard4)))),
-							(model.window.width < 650) ? A2(
-							$mdgriffith$elm_ui$Element$paragraph,
-							_List_fromArray(
-								[
-									$mdgriffith$elm_ui$Element$centerX,
-									A2($mdgriffith$elm_ui$Element$paddingXY, 0, 10),
-									$mdgriffith$elm_ui$Element$Font$size(
-									(model.window.width > 600) ? 100 : ((model.window.width > 350) ? 60 : 45)),
-									$mdgriffith$elm_ui$Element$Font$center
-								]),
-							_List_fromArray(
-								[
-									$mdgriffith$elm_ui$Element$text('elm-charts')
-								])) : $mdgriffith$elm_ui$Element$none,
-							A2(
-							$mdgriffith$elm_ui$Element$row,
-							_List_fromArray(
-								[
-									$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-									$mdgriffith$elm_ui$Element$spacing(20)
-								]),
-							_List_fromArray(
-								[
-									A2(
-									$mdgriffith$elm_ui$Element$row,
-									_List_fromArray(
-										[
-											$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-											$mdgriffith$elm_ui$Element$spacing(20)
-										]),
-									_List_fromArray(
-										[
-											A2(
-											$mdgriffith$elm_ui$Element$el,
-											_List_fromArray(
-												[
-													$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
-												]),
-											$mdgriffith$elm_ui$Element$html(
-												A2(
-													$elm$html$Html$map,
-													$author$project$Page$Home$Dashboard2Msg,
-													$author$project$Charts$Dashboard2$view(model.dashboard2)))),
-											A2(
-											$mdgriffith$elm_ui$Element$el,
-											_List_fromArray(
-												[
-													$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
-												]),
-											$mdgriffith$elm_ui$Element$html(
-												A2(
-													$elm$html$Html$map,
-													$author$project$Page$Home$Dashboard3Msg,
-													$author$project$Charts$Dashboard3$view(model.dashboard3))))
-										]))
-								]))
-						])),
-					(model.window.width < 950) ? $mdgriffith$elm_ui$Element$none : A2(
-					$mdgriffith$elm_ui$Element$el,
-					_List_fromArray(
-						[
-							$mdgriffith$elm_ui$Element$centerX,
-							A2($mdgriffith$elm_ui$Element$paddingXY, 0, 50),
-							$mdgriffith$elm_ui$Element$Font$size(120)
-						]),
-					$mdgriffith$elm_ui$Element$text('elm-charts')),
+					$author$project$Page$Home$viewLanding(model),
 					A2(
-					$mdgriffith$elm_ui$Element$column,
-					_List_fromArray(
-						[
-							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-							$mdgriffith$elm_ui$Element$spacing(
-							(model.window.width > 950) ? 80 : 50),
-							A2(
-							$mdgriffith$elm_ui$Element$paddingXY,
-							0,
-							(model.window.width > 950) ? 20 : 60)
-						]),
-					_List_fromArray(
-						[
-							A2(
-							$author$project$Page$Home$feature,
-							model.window,
-							{
-								body: _List_fromArray(
+					$author$project$Ui$Layout$title,
+					model.window,
+					{
+						padding: 30,
+						tag: _List_fromArray(
+							[
+								$mdgriffith$elm_ui$Element$text('Compose your chart with delight.')
+							]),
+						title: 'elm-charts'
+					}),
+					function () {
+					var _v0 = $author$project$Ui$Layout$screen(model.window);
+					switch (_v0.$) {
+						case 'Large':
+							return A2(
+								$mdgriffith$elm_ui$Element$column,
+								_List_fromArray(
 									[
-										$mdgriffith$elm_ui$Element$text('Charts shouldn\'t be hard to make, and with elm-charts they aren\'t. '),
-										$mdgriffith$elm_ui$Element$text('The interface mirrors the element and attribute pattern which '),
-										$mdgriffith$elm_ui$Element$text('you already know and love. '),
-										A2($author$project$Ui$Layout$link, '/quick-start', 'Get started'),
-										$mdgriffith$elm_ui$Element$text(' composing your chart in minutes!')
+										$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+										$mdgriffith$elm_ui$Element$spacing(80),
+										A2($mdgriffith$elm_ui$Element$paddingXY, 0, 40)
 									]),
-								chart: $mdgriffith$elm_ui$Element$html(
-									A2(
-										$elm$html$Html$map,
-										function (_v0) {
-											return $author$project$Page$Home$None;
-										},
-										$author$project$Examples$Frontpage$Familiar$view(_Utils_Tuple0))),
-								code: $author$project$Examples$Frontpage$Familiar$smallCode,
-								flipped: false,
-								title: 'Intuitive',
-								togglable: $elm$core$Maybe$Just(
-									_Utils_Tuple2($author$project$Page$Home$FamiliarToggle, model.familiarToggle))
-							}),
-							A2(
-							$author$project$Page$Home$feature,
-							model.window,
-							{
-								body: _List_fromArray(
+								A2(
+									$elm$core$List$map,
+									$author$project$Page$Home$viewFeature(model.window),
+									$author$project$Page$Home$features(model)));
+						case 'Medium':
+							return A2(
+								$mdgriffith$elm_ui$Element$column,
+								_List_fromArray(
 									[
-										$mdgriffith$elm_ui$Element$text('No clutter, even with tricky requirements. Great support for '),
-										$mdgriffith$elm_ui$Element$text('interactivity, advanced labeling, guidence lines, and '),
-										$mdgriffith$elm_ui$Element$text('irregular details.')
+										$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+										$mdgriffith$elm_ui$Element$spacing(70),
+										A2($mdgriffith$elm_ui$Element$paddingXY, 0, 40)
 									]),
-								chart: $mdgriffith$elm_ui$Element$html(
-									A2(
-										$elm$html$Html$map,
-										$author$project$Page$Home$ConciseMsg,
-										$author$project$Examples$Frontpage$Concise$view(model.concise))),
-								code: $author$project$Examples$Frontpage$Concise$smallCode,
-								flipped: true,
-								title: 'Flexible, yet concise',
-								togglable: $elm$core$Maybe$Nothing
-							}),
-							A2(
-							$author$project$Page$Home$feature,
-							model.window,
-							{
-								body: _List_fromArray(
+								A2(
+									$elm$core$List$map,
+									$author$project$Page$Home$viewFeature(model.window),
+									$author$project$Page$Home$features(model)));
+						default:
+							return A2(
+								$mdgriffith$elm_ui$Element$column,
+								_List_fromArray(
 									[
-										$mdgriffith$elm_ui$Element$text('Outside the regular elm documentation of the API, '),
-										$mdgriffith$elm_ui$Element$text('there are more than 100 examples on this site to help you '),
-										$mdgriffith$elm_ui$Element$text('compose your exact chart. '),
-										A2(
-										$mdgriffith$elm_ui$Element$link,
-										_List_fromArray(
-											[$mdgriffith$elm_ui$Element$Font$underline]),
-										{
-											label: $mdgriffith$elm_ui$Element$text('Explore the catalog'),
-											url: '/documentation'
-										}),
-										$mdgriffith$elm_ui$Element$text('.')
+										$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+										$mdgriffith$elm_ui$Element$spacing(60),
+										A2($mdgriffith$elm_ui$Element$paddingXY, 0, 40)
 									]),
-								chart: A2(
-									$mdgriffith$elm_ui$Element$map,
-									function (_v1) {
-										return $author$project$Page$Home$None;
-									},
-									A2(
-										$mdgriffith$elm_ui$Element$wrappedRow,
-										_List_fromArray(
-											[
-												$mdgriffith$elm_ui$Element$spacing(30),
-												$mdgriffith$elm_ui$Element$alignTop,
-												$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
-											]),
-										A2(
-											$elm$core$List$map,
-											A2(
-												$elm$core$Basics$composeR,
-												$mdgriffith$elm_ui$Element$html,
-												$mdgriffith$elm_ui$Element$el(
-													_List_fromArray(
-														[
-															$mdgriffith$elm_ui$Element$width(
-															A2($mdgriffith$elm_ui$Element$minimum, 90, $mdgriffith$elm_ui$Element$fill)),
-															$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill)
-														]))),
-											A2(
-												$elm$core$List$map,
-												$author$project$Examples$view($author$project$Examples$init),
-												_List_fromArray(
-													[$author$project$Examples$BarCharts__Histogram, $author$project$Examples$BarCharts__TooltipStack, $author$project$Examples$Interactivity__Zoom, $author$project$Examples$Frame__Titles, $author$project$Examples$LineCharts__Stepped, $author$project$Examples$ScatterCharts__Labels, $author$project$Examples$ScatterCharts__DataDependent, $author$project$Examples$LineCharts__TooltipStack, $author$project$Examples$LineCharts__Labels, $author$project$Examples$BarCharts__BarLabels, $author$project$Examples$BarCharts__Margin, $author$project$Examples$ScatterCharts__Shapes]))))),
-								code: '',
-								flipped: false,
-								title: 'Learn by example',
-								togglable: $elm$core$Maybe$Nothing
-							})
-						]))
+								A2(
+									$elm$core$List$map,
+									$author$project$Page$Home$viewFeature(model.window),
+									$author$project$Page$Home$features(model)));
+					}
+				}()
 				])),
 		title: 'elm-charts'
 	};
