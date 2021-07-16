@@ -42129,7 +42129,7 @@ var $author$project$Page$Home$view = function (model) {
 						[
 							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
 							$mdgriffith$elm_ui$Element$spacing(
-							(model.window.width > 950) ? 140 : 50),
+							(model.window.width > 950) ? 80 : 50),
 							A2(
 							$mdgriffith$elm_ui$Element$paddingXY,
 							0,

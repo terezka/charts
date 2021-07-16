@@ -234,7 +234,7 @@ view model =
 
           , E.column
               [ E.width E.fill
-              , E.spacing (if model.window.width > 950 then 140 else 50)
+              , E.spacing (if model.window.width > 950 then 80 else 50)
               , E.paddingXY 0 (if model.window.width > 950 then 20 else 60)
               ]
               [ feature model.window
