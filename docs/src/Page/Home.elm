@@ -376,7 +376,19 @@ viewFeature window config =
 
 features : Model -> List (Feature Msg)
 features model =
-  [ { title = "Intuitive"
+  [ { title = "Flexible, yet concise"
+    , body =
+        [ E.text "No clutter, even with tricky requirements. Great support for "
+        , E.text "interactivity, advanced labeling, guidence lines, and "
+        , E.text "irregular details."
+        ]
+    , togglable = Nothing
+    , chart = E.html <| H.map ConciseMsg (Concise.view model.concise)
+    , code = Concise.smallCode
+    , flipped = True
+    }
+
+  , { title = "Intuitive"
     , body =
         [ E.text "Charts shouldn't be hard to make, and with elm-charts they aren't. "
         , E.text "The interface mirrors the element and attribute pattern which "
@@ -388,18 +400,6 @@ features model =
     , chart = E.html <| H.map (\_ -> None) (Familiar.view ())
     , code = Familiar.smallCode
     , flipped = False
-    }
-
-  , { title = "Flexible, yet concise"
-    , body =
-        [ E.text "No clutter, even with tricky requirements. Great support for "
-        , E.text "interactivity, advanced labeling, guidence lines, and "
-        , E.text "irregular details."
-        ]
-    , togglable = Nothing
-    , chart = E.html <| H.map ConciseMsg (Concise.view model.concise)
-    , code = Concise.smallCode
-    , flipped = True
     }
 
   , { title = "Learn by example"
