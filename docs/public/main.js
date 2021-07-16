@@ -40765,6 +40765,23 @@ var $author$project$Page$Home$features = function (model) {
 			{
 			body: _List_fromArray(
 				[
+					$mdgriffith$elm_ui$Element$text('No clutter, even with tricky requirements. Great support for '),
+					$mdgriffith$elm_ui$Element$text('interactivity, advanced labeling, guidence lines, and '),
+					$mdgriffith$elm_ui$Element$text('irregular details.')
+				]),
+			chart: $mdgriffith$elm_ui$Element$html(
+				A2(
+					$elm$html$Html$map,
+					$author$project$Page$Home$ConciseMsg,
+					$author$project$Examples$Frontpage$Concise$view(model.concise))),
+			code: $author$project$Examples$Frontpage$Concise$smallCode,
+			flipped: true,
+			title: 'Flexible, yet concise',
+			togglable: $elm$core$Maybe$Nothing
+		},
+			{
+			body: _List_fromArray(
+				[
 					$mdgriffith$elm_ui$Element$text('Charts shouldn\'t be hard to make, and with elm-charts they aren\'t. '),
 					$mdgriffith$elm_ui$Element$text('The interface mirrors the element and attribute pattern which '),
 					$mdgriffith$elm_ui$Element$text('you already know and love. '),
@@ -40783,23 +40800,6 @@ var $author$project$Page$Home$features = function (model) {
 			title: 'Intuitive',
 			togglable: $elm$core$Maybe$Just(
 				_Utils_Tuple2($author$project$Page$Home$FamiliarToggle, model.familiarToggle))
-		},
-			{
-			body: _List_fromArray(
-				[
-					$mdgriffith$elm_ui$Element$text('No clutter, even with tricky requirements. Great support for '),
-					$mdgriffith$elm_ui$Element$text('interactivity, advanced labeling, guidence lines, and '),
-					$mdgriffith$elm_ui$Element$text('irregular details.')
-				]),
-			chart: $mdgriffith$elm_ui$Element$html(
-				A2(
-					$elm$html$Html$map,
-					$author$project$Page$Home$ConciseMsg,
-					$author$project$Examples$Frontpage$Concise$view(model.concise))),
-			code: $author$project$Examples$Frontpage$Concise$smallCode,
-			flipped: true,
-			title: 'Flexible, yet concise',
-			togglable: $elm$core$Maybe$Nothing
 		},
 			{
 			body: _List_fromArray(
