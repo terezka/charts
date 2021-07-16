@@ -7050,17 +7050,7 @@ var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
 var $author$project$Page$Administration$subscriptions = function (model) {
 	return $elm$core$Platform$Sub$none;
 };
-var $author$project$Page$Section$subscriptions = function (model) {
-	return $elm$core$Platform$Sub$none;
-};
-var $author$project$Page$Documentation$subscriptions = $author$project$Page$Section$subscriptions;
-var $author$project$Page$Example$subscriptions = function (model) {
-	return $elm$core$Platform$Sub$none;
-};
-var $author$project$Page$Gallery$subscriptions = function (model) {
-	return $elm$core$Platform$Sub$none;
-};
-var $author$project$Page$Home$OnResize = F2(
+var $author$project$Page$Section$OnResize = F2(
 	function (a, b) {
 		return {$: 'OnResize', a: a, b: b};
 	});
@@ -7367,6 +7357,20 @@ var $elm$browser$Browser$Events$onResize = function (func) {
 				A2($elm$json$Json$Decode$field, 'innerWidth', $elm$json$Json$Decode$int),
 				A2($elm$json$Json$Decode$field, 'innerHeight', $elm$json$Json$Decode$int))));
 };
+var $author$project$Page$Section$subscriptions = function (model) {
+	return $elm$browser$Browser$Events$onResize($author$project$Page$Section$OnResize);
+};
+var $author$project$Page$Documentation$subscriptions = $author$project$Page$Section$subscriptions;
+var $author$project$Page$Example$subscriptions = function (model) {
+	return $elm$core$Platform$Sub$none;
+};
+var $author$project$Page$Gallery$subscriptions = function (model) {
+	return $elm$core$Platform$Sub$none;
+};
+var $author$project$Page$Home$OnResize = F2(
+	function (a, b) {
+		return {$: 'OnResize', a: a, b: b};
+	});
 var $author$project$Page$Home$subscriptions = function (model) {
 	return $elm$browser$Browser$Events$onResize($author$project$Page$Home$OnResize);
 };
@@ -8721,24 +8725,35 @@ var $author$project$Examples$update = F2(
 	});
 var $author$project$Page$Section$update = F3(
 	function (key, msg, model) {
-		if (msg.$ === 'MenuMsg') {
-			var subMsg = msg.a;
-			return _Utils_Tuple2(
-				_Utils_update(
-					model,
-					{
-						menu: A2($author$project$Ui$Menu$update, subMsg, model.menu)
-					}),
-				$elm$core$Platform$Cmd$none);
-		} else {
-			var sub = msg.a;
-			return _Utils_Tuple2(
-				_Utils_update(
-					model,
-					{
-						examples: A2($author$project$Examples$update, sub, model.examples)
-					}),
-				$elm$core$Platform$Cmd$none);
+		switch (msg.$) {
+			case 'OnResize':
+				var width = msg.a;
+				var height = msg.b;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							window: {height: height, width: width}
+						}),
+					$elm$core$Platform$Cmd$none);
+			case 'MenuMsg':
+				var subMsg = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							menu: A2($author$project$Ui$Menu$update, subMsg, model.menu)
+						}),
+					$elm$core$Platform$Cmd$none);
+			default:
+				var sub = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							examples: A2($author$project$Examples$update, sub, model.examples)
+						}),
+					$elm$core$Platform$Cmd$none);
 		}
 	});
 var $author$project$Page$Documentation$update = $author$project$Page$Section$update;
@@ -15849,6 +15864,17 @@ var $author$project$Ui$Layout$heading = F2(
 					$mdgriffith$elm_ui$Element$text(text)
 				]));
 	});
+var $mdgriffith$elm_ui$Element$spacingXY = F2(
+	function (x, y) {
+		return A2(
+			$mdgriffith$elm_ui$Internal$Model$StyleClass,
+			$mdgriffith$elm_ui$Internal$Flag$spacing,
+			A3(
+				$mdgriffith$elm_ui$Internal$Model$SpacingStyle,
+				A2($mdgriffith$elm_ui$Internal$Model$spacingName, x, y),
+				x,
+				y));
+	});
 var $author$project$Internal$Svg$End = {$: 'End'};
 var $author$project$Chart$Attributes$alignRight = function (config) {
 	return _Utils_update(
@@ -22850,8 +22876,12 @@ var $author$project$Ui$Tabs$view = function (config) {
 		_List_fromArray(
 			[
 				$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-				$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
-				A2($mdgriffith$elm_ui$Element$paddingXY, 0, 30)
+				A2($mdgriffith$elm_ui$Element$paddingXY, 0, 30),
+				$mdgriffith$elm_ui$Element$scrollbarX,
+				$mdgriffith$elm_ui$Element$htmlAttribute(
+				A2($elm$html$Html$Attributes$style, 'min-height', '38px')),
+				$mdgriffith$elm_ui$Element$htmlAttribute(
+				A2($elm$html$Html$Attributes$style, 'box-sizing', 'content-box'))
 			]),
 		A2(
 			$mdgriffith$elm_ui$Element$row,
@@ -22864,10 +22894,7 @@ var $author$project$Ui$Tabs$view = function (config) {
 					$mdgriffith$elm_ui$Element$Border$color(
 					A3($mdgriffith$elm_ui$Element$rgb255, 220, 220, 220)),
 					$mdgriffith$elm_ui$Element$Border$widthEach(
-					{bottom: 1, left: 0, right: 0, top: 0}),
-					$mdgriffith$elm_ui$Element$scrollbarX,
-					$mdgriffith$elm_ui$Element$htmlAttribute(
-					A2($elm$html$Html$Attributes$style, 'overflow', 'visible'))
+					{bottom: 1, left: 0, right: 0, top: 0})
 				]),
 			A2(
 				$elm$core$List$map,
@@ -22879,17 +22906,6 @@ var $author$project$Ui$Tabs$view = function (config) {
 					},
 					config.all))));
 };
-var $mdgriffith$elm_ui$Element$spacingXY = F2(
-	function (x, y) {
-		return A2(
-			$mdgriffith$elm_ui$Internal$Model$StyleClass,
-			$mdgriffith$elm_ui$Internal$Flag$spacing,
-			A3(
-				$mdgriffith$elm_ui$Internal$Model$SpacingStyle,
-				A2($mdgriffith$elm_ui$Internal$Model$spacingName, x, y),
-				x,
-				y));
-	});
 var $author$project$Ui$Thumbnail$toUrl = function (id) {
 	var meta = $author$project$Examples$meta(id);
 	return '/documentation/' + ($author$project$Ui$Thumbnail$urlify(meta.category) + ('/' + $author$project$Ui$Thumbnail$urlify(meta.name)));
@@ -33809,8 +33825,8 @@ var $author$project$Ui$Thumbnail$viewOne = F2(
 			$mdgriffith$elm_ui$Element$link,
 			_List_fromArray(
 				[
-					$mdgriffith$elm_ui$Element$width(
-					$mdgriffith$elm_ui$Element$px(265))
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+					$mdgriffith$elm_ui$Element$centerX
 				]),
 			{
 				label: function () {
@@ -33827,6 +33843,31 @@ var $author$project$Ui$Thumbnail$viewOne = F2(
 				}(),
 				url: $author$project$Ui$Thumbnail$toUrl(id)
 			});
+	});
+var $author$project$Ui$Thumbnail$viewGroup = F2(
+	function (model, group) {
+		return A2(
+			$elm$core$List$map,
+			$author$project$Ui$Thumbnail$viewOne(model),
+			A2(
+				$elm$core$List$sortBy,
+				A2(
+					$elm$core$Basics$composeR,
+					$author$project$Examples$meta,
+					function ($) {
+						return $.order;
+					}),
+				group.ids));
+	});
+var $author$project$Ui$Thumbnail$viewSelected = F2(
+	function (model, selected) {
+		return A2(
+			$author$project$Ui$Thumbnail$viewGroup,
+			model,
+			A2(
+				$elm$core$Maybe$withDefault,
+				$author$project$Ui$Thumbnail$firstGroup,
+				A2($elm$core$Dict$get, selected, $author$project$Ui$Thumbnail$dictGroups)));
 	});
 var $mdgriffith$elm_ui$Internal$Model$Padding = F5(
 	function (a, b, c, d, e) {
@@ -34016,49 +34057,6 @@ var $mdgriffith$elm_ui$Element$wrappedRow = F2(
 			}
 		}
 	});
-var $author$project$Ui$Thumbnail$viewGroup = F2(
-	function (model, group) {
-		return A2(
-			$mdgriffith$elm_ui$Element$column,
-			_List_fromArray(
-				[
-					$mdgriffith$elm_ui$Element$paddingEach(
-					{bottom: 100, left: 0, right: 0, top: 30})
-				]),
-			_List_fromArray(
-				[
-					A2(
-					$mdgriffith$elm_ui$Element$wrappedRow,
-					_List_fromArray(
-						[
-							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-							$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
-							A2($mdgriffith$elm_ui$Element$spacingXY, 100, 70)
-						]),
-					A2(
-						$elm$core$List$map,
-						$author$project$Ui$Thumbnail$viewOne(model),
-						A2(
-							$elm$core$List$sortBy,
-							A2(
-								$elm$core$Basics$composeR,
-								$author$project$Examples$meta,
-								function ($) {
-									return $.order;
-								}),
-							group.ids)))
-				]));
-	});
-var $author$project$Ui$Thumbnail$viewSelected = F2(
-	function (model, selected) {
-		return A2(
-			$author$project$Ui$Thumbnail$viewGroup,
-			model,
-			A2(
-				$elm$core$Maybe$withDefault,
-				$author$project$Ui$Thumbnail$firstGroup,
-				A2($elm$core$Dict$get, selected, $author$project$Ui$Thumbnail$dictGroups)));
-	});
 var $author$project$Page$Section$view = function (model) {
 	return {
 		body: $author$project$Ui$Layout$view(
@@ -34076,7 +34074,7 @@ var $author$project$Page$Section$view = function (model) {
 							A2($mdgriffith$elm_ui$Element$paddingXY, 0, 10),
 							$mdgriffith$elm_ui$Element$Font$size(14),
 							$mdgriffith$elm_ui$Element$width(
-							$mdgriffith$elm_ui$Element$px(700))
+							A2($mdgriffith$elm_ui$Element$maximum, 700, $mdgriffith$elm_ui$Element$fill))
 						]),
 					_List_fromArray(
 						[
@@ -34146,10 +34144,75 @@ var $author$project$Page$Section$view = function (model) {
 						return $mdgriffith$elm_ui$Element$none;
 					}
 				}(),
-					A2(
-					$mdgriffith$elm_ui$Element$map,
-					$author$project$Page$Section$OnExampleMsg,
-					A2($author$project$Ui$Thumbnail$viewSelected, model.examples, '/documentation/' + model.selectedTab))
+					function () {
+					var _v1 = $author$project$Ui$Layout$screen(model.window);
+					switch (_v1.$) {
+						case 'Large':
+							return A2(
+								$mdgriffith$elm_ui$Element$map,
+								$author$project$Page$Section$OnExampleMsg,
+								A2(
+									$mdgriffith$elm_ui$Element$wrappedRow,
+									_List_fromArray(
+										[
+											$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+											$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
+											$mdgriffith$elm_ui$Element$centerX,
+											A2($mdgriffith$elm_ui$Element$spacingXY, 100, 70),
+											$mdgriffith$elm_ui$Element$paddingEach(
+											{bottom: 100, left: 0, right: 0, top: 30})
+										]),
+									A2(
+										$elm$core$List$map,
+										$mdgriffith$elm_ui$Element$el(
+											_List_fromArray(
+												[
+													$mdgriffith$elm_ui$Element$width(
+													$mdgriffith$elm_ui$Element$px(265))
+												])),
+										A2($author$project$Ui$Thumbnail$viewSelected, model.examples, '/documentation/' + model.selectedTab))));
+						case 'Medium':
+							return A2(
+								$mdgriffith$elm_ui$Element$map,
+								$author$project$Page$Section$OnExampleMsg,
+								A2(
+									$mdgriffith$elm_ui$Element$wrappedRow,
+									_List_fromArray(
+										[
+											$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+											$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
+											$mdgriffith$elm_ui$Element$centerX,
+											A2($mdgriffith$elm_ui$Element$spacingXY, 100, 70),
+											$mdgriffith$elm_ui$Element$paddingEach(
+											{bottom: 100, left: 0, right: 0, top: 30})
+										]),
+									A2(
+										$elm$core$List$map,
+										$mdgriffith$elm_ui$Element$el(
+											_List_fromArray(
+												[
+													$mdgriffith$elm_ui$Element$width(
+													$mdgriffith$elm_ui$Element$px(265))
+												])),
+										A2($author$project$Ui$Thumbnail$viewSelected, model.examples, '/documentation/' + model.selectedTab))));
+						default:
+							return A2(
+								$mdgriffith$elm_ui$Element$map,
+								$author$project$Page$Section$OnExampleMsg,
+								A2(
+									$mdgriffith$elm_ui$Element$column,
+									_List_fromArray(
+										[
+											$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+											$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
+											$mdgriffith$elm_ui$Element$centerX,
+											A2($mdgriffith$elm_ui$Element$spacingXY, 100, 70),
+											$mdgriffith$elm_ui$Element$paddingEach(
+											{bottom: 100, left: 20, right: 20, top: 30})
+										]),
+									A2($author$project$Ui$Thumbnail$viewSelected, model.examples, '/documentation/' + model.selectedTab)));
+					}
+				}()
 				])),
 		title: 'elm-charts | Documentation'
 	};

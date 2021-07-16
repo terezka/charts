@@ -26,8 +26,10 @@ view : Config a -> E.Element msg
 view config =
   E.el
     [ E.width E.fill
-    , E.height E.fill
     , E.paddingXY 0 30
+    , E.scrollbarX
+    , E.htmlAttribute (HA.style "min-height" "38px")
+    , E.htmlAttribute (HA.style "box-sizing" "content-box")
     ] <|
     E.row
       [ E.width E.fill
@@ -36,8 +38,6 @@ view config =
       , E.paddingXY 10 0
       , B.color (E.rgb255 220 220 220)
       , B.widthEach { top = 0, bottom = 1, left = 0, right = 0 }
-      , E.scrollbarX
-      , E.htmlAttribute (HA.style "overflow" "visible")
       ]
       (List.map (viewOne config) <| List.filter (\a -> config.toTitle a /= "Front page") config.all)
 

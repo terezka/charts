@@ -4,6 +4,7 @@ module Page.Section exposing (Model, Params, Msg, init, subscriptions, exit, upd
 import Browser exposing (Document)
 import Route exposing (Route)
 import Session exposing (Session)
+import Browser.Events as E
 import Browser.Navigation as Navigation
 import Html
 import Ui.Layout as Layout
@@ -64,13 +65,17 @@ exit model session =
 
 
 type Msg
-  = MenuMsg Menu.Msg
+  = OnResize Int Int
+  | MenuMsg Menu.Msg
   | OnExampleMsg Examples.Msg
 
 
 update : Navigation.Key -> Msg -> Model -> ( Model, Cmd Msg )
 update key msg model =
   case msg of
+    OnResize width height ->
+      ( { model | window = { width = width, height = height } }, Cmd.none )
+
     MenuMsg subMsg ->
       ( { model | menu = Menu.update subMsg model.menu }, Cmd.none )
 
@@ -87,7 +92,7 @@ update key msg model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-  Sub.none
+  E.onResize OnResize
 
 
 
@@ -107,7 +112,7 @@ view model =
         , E.paragraph
             [ E.paddingXY 0 10
             , F.size 14
-            , E.width (E.px 700)
+            , E.width (E.maximum 700 E.fill)
             ]
             [ E.text "This catalog is meant to document through example. For documentation of exact interface, see the "
             , E.link
@@ -141,7 +146,39 @@ view model =
             _ ->
               E.none
 
-        , E.map OnExampleMsg
-            (Ui.Thumbnail.viewSelected model.examples <| "/documentation/" ++ model.selectedTab)
+        , case Layout.screen model.window of
+            Layout.Large ->
+              E.map OnExampleMsg <|
+                E.wrappedRow
+                  [ E.width E.fill
+                  , E.height E.fill
+                  , E.centerX
+                  , E.spacingXY 100 70
+                  , E.paddingEach { top = 30, bottom = 100, left = 0, right = 0 }
+                  ] <| List.map (E.el [ E.width (E.px 265) ])
+                  (Ui.Thumbnail.viewSelected model.examples <| "/documentation/" ++ model.selectedTab)
+
+            Layout.Medium ->
+              E.map OnExampleMsg <|
+                E.wrappedRow
+                  [ E.width E.fill
+                  , E.height E.fill
+                  , E.centerX
+                  , E.spacingXY 100 70
+                  , E.paddingEach { top = 30, bottom = 100, left = 0, right = 0 }
+                  ]  <| List.map (E.el [ E.width (E.px 265) ])
+                  (Ui.Thumbnail.viewSelected model.examples <| "/documentation/" ++ model.selectedTab)
+
+            Layout.Small ->
+              E.map OnExampleMsg <|
+                E.column
+                  [ E.width E.fill
+                  , E.height E.fill
+                  , E.centerX
+                  , E.spacingXY 100 70
+                  , E.paddingEach { top = 30, bottom = 100, left = 20, right = 20 }
+                  ]
+                  (Ui.Thumbnail.viewSelected model.examples <| "/documentation/" ++ model.selectedTab)
+
         ]
   }

@@ -63,7 +63,7 @@ dictGroups =
   List.foldl groupBy Dict.empty Examples.all
 
 
-viewSelected : Examples.Model -> String -> E.Element Examples.Msg
+viewSelected : Examples.Model -> String -> List (E.Element Examples.Msg)
 viewSelected model selected =
   dictGroups
     |> Dict.get selected
@@ -71,19 +71,11 @@ viewSelected model selected =
     |> viewGroup model
 
 
-viewGroup : Examples.Model -> Group -> E.Element Examples.Msg
+viewGroup : Examples.Model -> Group -> List (E.Element Examples.Msg)
 viewGroup model group =
-  E.column
-    [ E.paddingEach { top = 30, bottom = 100, left = 0, right = 0 } ]
-    [ group.ids
-        |> List.sortBy (Examples.meta >> .order)
-        |> List.map (viewOne model)
-        |> E.wrappedRow
-            [ E.width E.fill
-            , E.height E.fill
-            , E.spacingXY 100 70
-            ]
-    ]
+  group.ids
+    |> List.sortBy (Examples.meta >> .order)
+    |> List.map (viewOne model)
 
 
 viewOne : Examples.Model -> Examples.Id -> E.Element Examples.Msg
@@ -105,7 +97,9 @@ viewOne model id =
           ]
   in
   E.link
-    [ E.width (E.px 265) ]
+    [ E.width E.fill
+    , E.centerX
+    ]
     { url = toUrl id
     , label =
         let meta = Examples.meta id in
