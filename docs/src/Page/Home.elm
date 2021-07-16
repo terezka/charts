@@ -52,6 +52,12 @@ type alias Model =
   , hovering : List (CI.One { year : Float, income : Float} CI.Any)
   , window : Session.Window
   , menu : Menu.Model
+
+  , dashboard1 : Dashboard1.Model
+  , dashboard2 : Dashboard2.Model
+  , dashboard3 : Dashboard3.Model
+  , dashboard4 : Dashboard4.Model
+  , dashboard5 : Dashboard5.Model
   }
 
 
@@ -71,6 +77,12 @@ init key session params =
     , hovering = []
     , window = session.window
     , menu = Menu.init
+
+    , dashboard1 = Dashboard1.init
+    , dashboard2 = Dashboard2.init
+    , dashboard3 = Dashboard3.init
+    , dashboard4 = Dashboard4.init
+    , dashboard5 = Dashboard5.init
     }
   , Cmd.none
   )
@@ -93,7 +105,11 @@ type Msg
   | FamiliarToggle
   | OnHover (List (CI.One { year : Float, income : Float} CI.Any))
   | None
-
+  | Dashboard1Msg Dashboard1.Msg
+  | Dashboard2Msg Dashboard2.Msg
+  | Dashboard3Msg Dashboard3.Msg
+  | Dashboard4Msg Dashboard4.Msg
+  | Dashboard5Msg Dashboard5.Msg
 
 
 update : Navigation.Key -> Msg -> Model -> ( Model, Cmd Msg )
@@ -116,6 +132,21 @@ update key msg model =
 
     OnHover hovering ->
       ( { model | hovering = hovering }, Cmd.none )
+
+    Dashboard1Msg subMsg ->
+      ( { model | dashboard1 = Dashboard1.update subMsg model.dashboard1 }, Cmd.none )
+
+    Dashboard2Msg subMsg ->
+      ( { model | dashboard2 = Dashboard2.update subMsg model.dashboard2 }, Cmd.none )
+
+    Dashboard3Msg subMsg ->
+      ( { model | dashboard3 = Dashboard3.update subMsg model.dashboard3 }, Cmd.none )
+
+    Dashboard4Msg subMsg ->
+      ( { model | dashboard4 = Dashboard4.update subMsg model.dashboard4 }, Cmd.none )
+
+    Dashboard5Msg subMsg ->
+      ( { model | dashboard5 = Dashboard5.update subMsg model.dashboard5 }, Cmd.none )
 
     None ->
       ( model, Cmd.none)
@@ -142,15 +173,69 @@ view model =
           [ Menu.small model.window model.menu
             |> E.map MenuMsg
 
-          , E.el
-              [ E.width E.fill
+          , if model.window.width > 950 then
+              E.row
+                [ E.width E.fill
+                , E.spacing 20
+                ]
+                [ E.el [ E.width E.fill ] <| E.html <| H.map Dashboard1Msg (Dashboard1.view model.dashboard1)
+                , E.column
+                    [ E.width E.fill
+                    , E.spacing 20
+                    ]
+                    [ E.row
+                        [ E.width E.fill
+                        , E.spacing 20
+                        ]
+                        [ E.el [ E.width E.fill ] <| E.html <| H.map Dashboard2Msg (Dashboard2.view model.dashboard2)
+                        , E.el [ E.width E.fill ] <| E.html <| H.map Dashboard3Msg (Dashboard3.view model.dashboard3)
+                        ]
+                    , E.el [ E.width E.fill ] <| E.html <| H.map Dashboard4Msg (Dashboard4.view model.dashboard4)
+                    ]
+                ]
+            else
+              E.column
+                [ E.width E.fill
+                , E.spacing 20
+                ]
+                [ E.el [ E.width E.fill ] <| E.html <| H.map Dashboard4Msg (Dashboard4.view model.dashboard4)
+                , if model.window.width < 650 then
+                    E.paragraph
+                      [ E.centerX
+                      , E.paddingXY 0 10
+                      , F.size (if model.window.width > 600 then 100 else if model.window.width > 350 then 60 else 45)
+                      , F.center
+                      ]
+                      [ E.text "elm-charts" ]
+                  else
+                    E.none
+                , E.row
+                    [ E.width E.fill
+                    , E.spacing 20
+                    ]
+                    [ E.row
+                        [ E.width E.fill
+                        , E.spacing 20
+                        ]
+                        [ E.el [ E.width E.fill ] <| E.html <| H.map Dashboard2Msg (Dashboard2.view model.dashboard2)
+                        , E.el [ E.width E.fill ] <| E.html <| H.map Dashboard3Msg (Dashboard3.view model.dashboard3)
+                        ]
+                    ]
+                ]
+
+          , if model.window.width < 950 then E.none
+            else
+              E.el
+              [ E.centerX
+              , E.paddingXY 0 50
+              , F.size 120
               ]
-              (E.html <| H.map LandingMsg (Landing.view model.window model.landing))
+              (E.text "elm-charts")
 
           , E.column
               [ E.width E.fill
               , E.spacing (if model.window.width > 950 then 140 else 50)
-              , E.paddingXY 0 (if model.window.width > 950 then 120 else 40)
+              , E.paddingXY 0 (if model.window.width > 950 then 20 else 60)
               ]
               [ feature model.window
                   { title = "Intuitive"

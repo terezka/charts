@@ -54,7 +54,7 @@ view model =
   C.chart
     [ CA.height 140
     , CA.width 490
-    , CA.margin { top = 0, bottom = 0, left = 0, right = 15 }
+    , CA.margin { top = 0, bottom = 0, left = 0, right = 20 }
     , CE.onMouseMove OnHover (CE.getNearestX CI.bars)
     , CE.onMouseLeave (OnHover [])
     ]
