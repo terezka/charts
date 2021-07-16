@@ -144,8 +144,8 @@ view model =
 
           , E.el
               [ E.width E.fill
-              , E.height E.fill
-              ] (E.html <| H.map LandingMsg (Landing.view model.landing))
+              ]
+              (E.html <| H.map LandingMsg (Landing.view model.landing))
 
           , E.column
               [ E.width E.fill

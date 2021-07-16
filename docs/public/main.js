@@ -17797,9 +17797,7 @@ var $author$project$Internal$Svg$container = F5(
 			]);
 		var htmlAttrsDef = _List_fromArray(
 			[
-				$elm$html$Html$Attributes$class('elm-charts__container-inner'),
-				A2($elm$html$Html$Attributes$style, 'display', 'flex'),
-				A2($elm$html$Html$Attributes$style, 'flex-direction', 'column')
+				$elm$html$Html$Attributes$class('elm-charts__container-inner')
 			]);
 		var htmlAttrs = _Utils_ap(
 			config.htmlAttrs,
@@ -41049,7 +41047,7 @@ var $author$project$Charts$Landing$view = function (model) {
 				$author$project$Chart$Attributes$margin(
 				{bottom: 18, left: 0, right: 0, top: 0}),
 				$author$project$Chart$Attributes$padding(
-				{bottom: 0, left: 0, right: 35, top: 10}),
+				{bottom: 0, left: 0, right: 35, top: 0}),
 				A2(
 				$author$project$Chart$Events$on,
 				'mousemove',
@@ -41326,8 +41324,7 @@ var $author$project$Page$Home$view = function (model) {
 					$mdgriffith$elm_ui$Element$el,
 					_List_fromArray(
 						[
-							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-							$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill)
+							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
 						]),
 					$mdgriffith$elm_ui$Element$html(
 						A2(

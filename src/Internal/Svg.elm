@@ -52,8 +52,6 @@ container plane config below chartEls above =
   -- TODO preserveAspectRatio?
   let htmlAttrsDef =
         [ HA.class "elm-charts__container-inner"
-        , HA.style "display" "flex"
-        , HA.style "flex-direction" "column"
         ]
 
       htmlAttrsSize =
