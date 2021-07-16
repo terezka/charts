@@ -37448,7 +37448,7 @@ var $author$project$Page$Example$viewContent = function (model) {
 								_List_fromArray(
 									[
 										$mdgriffith$elm_ui$Element$width(
-										$mdgriffith$elm_ui$Element$fillPortion(8)),
+										$mdgriffith$elm_ui$Element$fillPortion(2)),
 										$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
 										$mdgriffith$elm_ui$Element$spacing(20)
 									]),
@@ -37487,7 +37487,7 @@ var $author$project$Page$Example$viewContent = function (model) {
 								_List_fromArray(
 									[
 										$mdgriffith$elm_ui$Element$width(
-										$mdgriffith$elm_ui$Element$fillPortion(8)),
+										$mdgriffith$elm_ui$Element$fillPortion(2)),
 										$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
 										$mdgriffith$elm_ui$Element$spacing(20)
 									]),

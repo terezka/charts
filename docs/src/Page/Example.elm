@@ -220,7 +220,7 @@ viewContent model =
             ]
             [ viewChart
             , E.column
-                [ E.width (E.fillPortion 8)
+                [ E.width (E.fillPortion 2)
                 , E.height E.fill
                 , E.spacing 20
                 ]
@@ -246,7 +246,7 @@ viewContent model =
             ]
             [ viewChart
             , E.column
-                [ E.width (E.fillPortion 8)
+                [ E.width (E.fillPortion 2)
                 , E.height E.fill
                 , E.spacing 20
                 ]
