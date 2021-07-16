@@ -37386,21 +37386,24 @@ var $author$project$Page$Example$viewContent = function (model) {
 						$mdgriffith$elm_ui$Element$text(meta.description)
 					]))
 			]));
-	var viewChart = A2(
-		$mdgriffith$elm_ui$Element$el,
-		_List_fromArray(
-			[
-				$mdgriffith$elm_ui$Element$width(
-				A2($mdgriffith$elm_ui$Element$maximum, 320, $mdgriffith$elm_ui$Element$fill)),
-				$mdgriffith$elm_ui$Element$alignTop,
-				$mdgriffith$elm_ui$Element$paddingEach(
-				{bottom: 40, left: 0, right: 0, top: 0})
-			]),
-		A2(
-			$mdgriffith$elm_ui$Element$map,
-			$author$project$Page$Example$OnExampleMsg,
-			$mdgriffith$elm_ui$Element$html(
-				A2($author$project$Examples$view, model.examples, currentId))));
+	var viewChart = function (isCenter) {
+		return A2(
+			$mdgriffith$elm_ui$Element$el,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$width(
+					A2($mdgriffith$elm_ui$Element$maximum, 320, $mdgriffith$elm_ui$Element$fill)),
+					isCenter ? $mdgriffith$elm_ui$Element$centerX : $mdgriffith$elm_ui$Element$alignTop,
+					$mdgriffith$elm_ui$Element$alignTop,
+					$mdgriffith$elm_ui$Element$paddingEach(
+					{bottom: 40, left: 0, right: 0, top: 0})
+				]),
+			A2(
+				$mdgriffith$elm_ui$Element$map,
+				$author$project$Page$Example$OnExampleMsg,
+				$mdgriffith$elm_ui$Element$html(
+					A2($author$project$Examples$view, model.examples, currentId))));
+	};
 	var viewCode = A2(
 		$mdgriffith$elm_ui$Element$el,
 		_List_fromArray(
@@ -37442,7 +37445,7 @@ var $author$project$Page$Example$viewContent = function (model) {
 							]),
 						_List_fromArray(
 							[
-								viewChart,
+								viewChart(false),
 								A2(
 								$mdgriffith$elm_ui$Element$column,
 								_List_fromArray(
@@ -37481,7 +37484,7 @@ var $author$project$Page$Example$viewContent = function (model) {
 							]),
 						_List_fromArray(
 							[
-								viewChart,
+								viewChart(false),
 								A2(
 								$mdgriffith$elm_ui$Element$column,
 								_List_fromArray(
@@ -37508,7 +37511,7 @@ var $author$project$Page$Example$viewContent = function (model) {
 				_List_fromArray(
 					[
 						viewText,
-						viewChart,
+						viewChart(true),
 						viewToggler,
 						A2(
 						$mdgriffith$elm_ui$Element$column,

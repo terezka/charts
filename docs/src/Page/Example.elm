@@ -174,9 +174,10 @@ viewContent model =
           , E.paragraph [ F.size 14 ] [ E.text meta.description ]
           ]
 
-      viewChart =
+      viewChart isCenter =
         E.el
           [ E.width (E.maximum 320 E.fill)
+          , if isCenter then E.centerX else E.alignTop
           , E.alignTop
           , E.paddingEach { top = 0, bottom = 40, left = 0, right = 0 }
           ]
@@ -218,7 +219,7 @@ viewContent model =
             , E.spacing 50
             , E.alignTop
             ]
-            [ viewChart
+            [ viewChart False
             , E.column
                 [ E.width (E.fillPortion 2)
                 , E.height E.fill
@@ -244,7 +245,7 @@ viewContent model =
             , E.spacing 50
             , E.alignTop
             ]
-            [ viewChart
+            [ viewChart False
             , E.column
                 [ E.width (E.fillPortion 2)
                 , E.height E.fill
@@ -263,7 +264,7 @@ viewContent model =
         , E.spacing 30
         ]
         [ viewText
-        , viewChart
+        , viewChart True
         , viewToggler
         , E.column
               [ E.width E.fill
