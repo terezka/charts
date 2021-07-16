@@ -40775,7 +40775,7 @@ var $author$project$Page$Home$features = function (model) {
 					$author$project$Page$Home$ConciseMsg,
 					$author$project$Examples$Frontpage$Concise$view(model.concise))),
 			code: $author$project$Examples$Frontpage$Concise$smallCode,
-			flipped: true,
+			flipped: false,
 			title: 'Flexible, yet concise',
 			togglable: $elm$core$Maybe$Nothing
 		},
@@ -40796,7 +40796,7 @@ var $author$project$Page$Home$features = function (model) {
 					},
 					$author$project$Examples$Frontpage$Familiar$view(_Utils_Tuple0))),
 			code: $author$project$Examples$Frontpage$Familiar$smallCode,
-			flipped: false,
+			flipped: true,
 			title: 'Intuitive',
 			togglable: $elm$core$Maybe$Just(
 				_Utils_Tuple2($author$project$Page$Home$FamiliarToggle, model.familiarToggle))

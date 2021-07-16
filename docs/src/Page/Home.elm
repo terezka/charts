@@ -385,7 +385,7 @@ features model =
     , togglable = Nothing
     , chart = E.html <| H.map ConciseMsg (Concise.view model.concise)
     , code = Concise.smallCode
-    , flipped = True
+    , flipped = False
     }
 
   , { title = "Intuitive"
@@ -399,7 +399,7 @@ features model =
     , togglable = Just ( FamiliarToggle, model.familiarToggle )
     , chart = E.html <| H.map (\_ -> None) (Familiar.view ())
     , code = Familiar.smallCode
-    , flipped = False
+    , flipped = True
     }
 
   , { title = "Learn by example"
