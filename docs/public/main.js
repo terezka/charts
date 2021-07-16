@@ -17772,13 +17772,15 @@ var $author$project$Internal$Svg$container = F5(
 		var svgAttrsSize = config.responsive ? _List_fromArray(
 			[
 				$elm$svg$Svg$Attributes$viewBox(
-				'0 0 ' + ($elm$core$String$fromFloat(plane.width) + (' ' + $elm$core$String$fromFloat(plane.height))))
+				'0 0 ' + ($elm$core$String$fromFloat(plane.width) + (' ' + $elm$core$String$fromFloat(plane.height)))),
+				A2($elm$html$Html$Attributes$style, 'display', 'block')
 			]) : _List_fromArray(
 			[
 				$elm$svg$Svg$Attributes$width(
 				$elm$core$String$fromFloat(plane.width)),
 				$elm$svg$Svg$Attributes$height(
-				$elm$core$String$fromFloat(plane.height))
+				$elm$core$String$fromFloat(plane.height)),
+				A2($elm$html$Html$Attributes$style, 'display', 'block')
 			]);
 		var htmlAttrsSize = config.responsive ? _List_fromArray(
 			[
@@ -23996,7 +23998,7 @@ var $author$project$Internal$Coordinates$left = function (pos) {
 var $elm$html$Html$node = $elm$virtual_dom$VirtualDom$node;
 var $author$project$Internal$Svg$positionHtml = F7(
 	function (plane, x, y, xOff, yOff, attrs, content) {
-		var yPercentage = ((A2($author$project$Internal$Coordinates$toSVGY, plane, y) + (-yOff)) * 100) / plane.height;
+		var yPercentage = ((A2($author$project$Internal$Coordinates$toSVGY, plane, y) - yOff) * 100) / plane.height;
 		var xPercentage = ((A2($author$project$Internal$Coordinates$toSVGX, plane, x) + xOff) * 100) / plane.width;
 		var posititonStyles = _List_fromArray(
 			[

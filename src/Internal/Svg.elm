@@ -74,10 +74,13 @@ container plane config below chartEls above =
 
       svgAttrsSize =
         if config.responsive then
-          [ SA.viewBox ("0 0 " ++ String.fromFloat plane.width ++ " " ++ String.fromFloat plane.height) ]
+          [ SA.viewBox ("0 0 " ++ String.fromFloat plane.width ++ " " ++ String.fromFloat plane.height)
+          , HA.style "display" "block"
+          ]
         else
           [ SA.width (String.fromFloat plane.width)
           , SA.height (String.fromFloat plane.height)
+          , HA.style "display" "block"
           ]
 
       catcher =
@@ -1486,7 +1489,7 @@ positionHtml : Plane -> Float -> Float -> Float -> Float -> List (H.Attribute ms
 positionHtml plane x y xOff yOff attrs content =
     let
         xPercentage = (Coord.toSVGX plane x + xOff) * 100 / plane.width
-        yPercentage = (Coord.toSVGY plane y + -yOff) * 100 / plane.height
+        yPercentage = (Coord.toSVGY plane y - yOff) * 100 / plane.height
 
         posititonStyles =
           [ HA.style "left" (String.fromFloat xPercentage ++ "%")
