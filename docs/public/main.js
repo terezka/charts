@@ -15819,6 +15819,36 @@ var $author$project$Page$Section$MenuMsg = function (a) {
 var $author$project$Page$Section$OnExampleMsg = function (a) {
 	return {$: 'OnExampleMsg', a: a};
 };
+var $author$project$Ui$Layout$Large = {$: 'Large'};
+var $author$project$Ui$Layout$Medium = {$: 'Medium'};
+var $author$project$Ui$Layout$Small = {$: 'Small'};
+var $author$project$Ui$Layout$screen = function (window) {
+	return (window.width > 950) ? $author$project$Ui$Layout$Large : ((window.width > 760) ? $author$project$Ui$Layout$Medium : $author$project$Ui$Layout$Small);
+};
+var $author$project$Ui$Layout$heading = F2(
+	function (window, text) {
+		return A2(
+			$mdgriffith$elm_ui$Element$paragraph,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$Font$size(
+					function () {
+						var _v0 = $author$project$Ui$Layout$screen(window);
+						switch (_v0.$) {
+							case 'Large':
+								return 32;
+							case 'Medium':
+								return 28;
+							default:
+								return 24;
+						}
+					}())
+				]),
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$text(text)
+				]));
+	});
 var $author$project$Internal$Svg$End = {$: 'End'};
 var $author$project$Chart$Attributes$alignRight = function (config) {
 	return _Utils_update(
@@ -22682,6 +22712,9 @@ var $mdgriffith$elm_ui$Element$Border$color = function (clr) {
 			'border-color',
 			clr));
 };
+var $mdgriffith$elm_ui$Element$htmlAttribute = $mdgriffith$elm_ui$Internal$Model$Attr;
+var $mdgriffith$elm_ui$Internal$Flag$overflow = $mdgriffith$elm_ui$Internal$Flag$flag(20);
+var $mdgriffith$elm_ui$Element$scrollbarX = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$overflow, $mdgriffith$elm_ui$Internal$Style$classes.scrollbarsX);
 var $mdgriffith$elm_ui$Element$Background$color = function (clr) {
 	return A2(
 		$mdgriffith$elm_ui$Internal$Model$StyleClass,
@@ -22775,6 +22808,15 @@ var $author$project$Ui$Tabs$viewOne = F2(
 					$mdgriffith$elm_ui$Element$Font$size(14),
 					A2($mdgriffith$elm_ui$Element$paddingXY, 30, 10),
 					$mdgriffith$elm_ui$Element$moveDown(1),
+					$mdgriffith$elm_ui$Element$paddingEach(
+					{
+						bottom: _Utils_eq(
+							config.selected,
+							config.toUrl(item)) ? 11 : 10,
+						left: 30,
+						right: 30,
+						top: 10
+					}),
 					$mdgriffith$elm_ui$Element$Background$color(
 					A3($mdgriffith$elm_ui$Element$rgb255, 255, 255, 255)),
 					$mdgriffith$elm_ui$Element$Border$color(
@@ -22808,6 +22850,7 @@ var $author$project$Ui$Tabs$view = function (config) {
 		_List_fromArray(
 			[
 				$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+				$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
 				A2($mdgriffith$elm_ui$Element$paddingXY, 0, 30)
 			]),
 		A2(
@@ -22815,12 +22858,16 @@ var $author$project$Ui$Tabs$view = function (config) {
 			_List_fromArray(
 				[
 					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+					$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
 					$mdgriffith$elm_ui$Element$spacing(10),
 					A2($mdgriffith$elm_ui$Element$paddingXY, 10, 0),
 					$mdgriffith$elm_ui$Element$Border$color(
 					A3($mdgriffith$elm_ui$Element$rgb255, 220, 220, 220)),
 					$mdgriffith$elm_ui$Element$Border$widthEach(
-					{bottom: 1, left: 0, right: 0, top: 0})
+					{bottom: 1, left: 0, right: 0, top: 0}),
+					$mdgriffith$elm_ui$Element$scrollbarX,
+					$mdgriffith$elm_ui$Element$htmlAttribute(
+					A2($elm$html$Html$Attributes$style, 'overflow', 'visible'))
 				]),
 			A2(
 				$elm$core$List$map,
@@ -22843,7 +22890,6 @@ var $mdgriffith$elm_ui$Element$spacingXY = F2(
 				x,
 				y));
 	});
-var $mdgriffith$elm_ui$Element$htmlAttribute = $mdgriffith$elm_ui$Internal$Model$Attr;
 var $author$project$Ui$Thumbnail$toUrl = function (id) {
 	var meta = $author$project$Examples$meta(id);
 	return '/documentation/' + ($author$project$Ui$Thumbnail$urlify(meta.category) + ('/' + $author$project$Ui$Thumbnail$urlify(meta.name)));
@@ -34022,14 +34068,7 @@ var $author$project$Page$Section$view = function (model) {
 					$mdgriffith$elm_ui$Element$map,
 					$author$project$Page$Section$MenuMsg,
 					A2($author$project$Ui$Menu$small, model.window, model.menu)),
-					A2(
-					$mdgriffith$elm_ui$Element$el,
-					_List_fromArray(
-						[
-							$mdgriffith$elm_ui$Element$Font$size(32),
-							A2($mdgriffith$elm_ui$Element$paddingXY, 0, 10)
-						]),
-					$mdgriffith$elm_ui$Element$text('Documentation')),
+					A2($author$project$Ui$Layout$heading, model.window, 'Documentation'),
 					A2(
 					$mdgriffith$elm_ui$Element$paragraph,
 					_List_fromArray(
@@ -34041,7 +34080,7 @@ var $author$project$Page$Section$view = function (model) {
 						]),
 					_List_fromArray(
 						[
-							$mdgriffith$elm_ui$Element$text('This is an attempt at documentation through example. For documentation of exact API, see '),
+							$mdgriffith$elm_ui$Element$text('This catalog is meant to document through example. For documentation of exact interface, see the '),
 							A2(
 							$mdgriffith$elm_ui$Element$link,
 							_List_fromArray(
@@ -40753,12 +40792,6 @@ var $author$project$Page$Home$ConciseMsg = function (a) {
 };
 var $author$project$Page$Home$FamiliarToggle = {$: 'FamiliarToggle'};
 var $author$project$Page$Home$None = {$: 'None'};
-var $author$project$Ui$Layout$Large = {$: 'Large'};
-var $author$project$Ui$Layout$Medium = {$: 'Medium'};
-var $author$project$Ui$Layout$Small = {$: 'Small'};
-var $author$project$Ui$Layout$screen = function (window) {
-	return (window.width > 950) ? $author$project$Ui$Layout$Large : ((window.width > 760) ? $author$project$Ui$Layout$Medium : $author$project$Ui$Layout$Small);
-};
 var $author$project$Page$Home$features = function (model) {
 	return _List_fromArray(
 		[
@@ -40930,30 +40963,6 @@ var $author$project$Ui$Layout$title = F2(
 							}())
 						]),
 					config.tag)
-				]));
-	});
-var $author$project$Ui$Layout$heading = F2(
-	function (window, text) {
-		return A2(
-			$mdgriffith$elm_ui$Element$paragraph,
-			_List_fromArray(
-				[
-					$mdgriffith$elm_ui$Element$Font$size(
-					function () {
-						var _v0 = $author$project$Ui$Layout$screen(window);
-						switch (_v0.$) {
-							case 'Large':
-								return 32;
-							case 'Medium':
-								return 28;
-							default:
-								return 24;
-						}
-					}())
-				]),
-			_List_fromArray(
-				[
-					$mdgriffith$elm_ui$Element$text(text)
 				]));
 	});
 var $author$project$Page$Home$viewFeature = F2(

@@ -101,17 +101,15 @@ view model =
       Layout.view <|
         [ Menu.small model.window model.menu
             |> E.map MenuMsg
-        , E.el
-            [ F.size 32
-            , E.paddingXY 0 10
-            ]
-            (E.text "Documentation")
+
+        , Layout.heading model.window "Documentation"
+
         , E.paragraph
             [ E.paddingXY 0 10
             , F.size 14
             , E.width (E.px 700)
             ]
-            [ E.text "This is an attempt at documentation through example. For documentation of exact API, see "
+            [ E.text "This catalog is meant to document through example. For documentation of exact interface, see the "
             , E.link
                 [ F.underline ]
                 { url = "https://package.elm-lang.org/packages/terezka/charts/latest"
@@ -119,6 +117,7 @@ view model =
                 }
             , E.text "."
             ]
+
         , Ui.Tabs.view
             { toUrl = Ui.Thumbnail.toUrlGroup << .title
             , toTitle = .title
