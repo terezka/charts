@@ -7361,8 +7361,12 @@ var $author$project$Page$Section$subscriptions = function (model) {
 	return $elm$browser$Browser$Events$onResize($author$project$Page$Section$OnResize);
 };
 var $author$project$Page$Documentation$subscriptions = $author$project$Page$Section$subscriptions;
+var $author$project$Page$Example$OnResize = F2(
+	function (a, b) {
+		return {$: 'OnResize', a: a, b: b};
+	});
 var $author$project$Page$Example$subscriptions = function (model) {
-	return $elm$core$Platform$Sub$none;
+	return $elm$browser$Browser$Events$onResize($author$project$Page$Example$OnResize);
 };
 var $author$project$Page$Gallery$subscriptions = function (model) {
 	return $elm$core$Platform$Sub$none;
@@ -8760,6 +8764,16 @@ var $author$project$Page$Documentation$update = $author$project$Page$Section$upd
 var $author$project$Page$Example$update = F3(
 	function (key, msg, model) {
 		switch (msg.$) {
+			case 'OnResize':
+				var width = msg.a;
+				var height = msg.b;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							window: {height: height, width: width}
+						}),
+					$elm$core$Platform$Cmd$none);
 			case 'MenuMsg':
 				var subMsg = msg.a;
 				return _Utils_Tuple2(
@@ -34817,6 +34831,32 @@ var $author$project$Examples$smallCode = function (chosen) {
 			return $author$project$Examples$ScatterCharts$Basic$smallCode;
 	}
 };
+var $mdgriffith$elm_ui$Internal$Model$AsTextColumn = {$: 'AsTextColumn'};
+var $mdgriffith$elm_ui$Internal$Model$asTextColumn = $mdgriffith$elm_ui$Internal$Model$AsTextColumn;
+var $mdgriffith$elm_ui$Internal$Model$Min = F2(
+	function (a, b) {
+		return {$: 'Min', a: a, b: b};
+	});
+var $mdgriffith$elm_ui$Element$minimum = F2(
+	function (i, l) {
+		return A2($mdgriffith$elm_ui$Internal$Model$Min, i, l);
+	});
+var $mdgriffith$elm_ui$Element$textColumn = F2(
+	function (attrs, children) {
+		return A4(
+			$mdgriffith$elm_ui$Internal$Model$element,
+			$mdgriffith$elm_ui$Internal$Model$asTextColumn,
+			$mdgriffith$elm_ui$Internal$Model$div,
+			A2(
+				$elm$core$List$cons,
+				$mdgriffith$elm_ui$Element$width(
+					A2(
+						$mdgriffith$elm_ui$Element$maximum,
+						750,
+						A2($mdgriffith$elm_ui$Element$minimum, 500, $mdgriffith$elm_ui$Element$fill))),
+				attrs),
+			$mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
+	});
 var $elm$html$Html$code = _VirtualDom_node('code');
 var $pablohirafuji$elm_syntax_highlight$SyntaxHighlight$HCode = function (a) {
 	return {$: 'HCode', a: a};
@@ -37287,6 +37327,15 @@ var $author$project$Ui$Code$view = function (config) {
 					]))));
 };
 var $author$project$Page$Example$viewContent = function (model) {
+	var viewToggler = A2(
+		$mdgriffith$elm_ui$Element$Input$button,
+		_List_fromArray(
+			[$mdgriffith$elm_ui$Element$alignRight]),
+		{
+			label: $mdgriffith$elm_ui$Element$text(
+				model.showFullCode ? 'Show essence' : 'Show full code'),
+			onPress: $elm$core$Maybe$Just($author$project$Page$Example$OnToggleCode)
+		});
 	var currentId = A2(
 		$elm$core$Maybe$withDefault,
 		$author$project$Examples$first,
@@ -37307,107 +37356,173 @@ var $author$project$Page$Example$viewContent = function (model) {
 					},
 					$author$project$Examples$all))));
 	var meta = $author$project$Examples$meta(currentId);
-	return A2(
-		$mdgriffith$elm_ui$Element$column,
+	var viewText = A2(
+		$mdgriffith$elm_ui$Element$textColumn,
 		_List_fromArray(
 			[
 				$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-				$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
-				$mdgriffith$elm_ui$Element$paddingEach(
-				{bottom: 0, left: 0, right: 0, top: 20})
+				$mdgriffith$elm_ui$Element$spacing(20)
 			]),
 		_List_fromArray(
 			[
 				A2(
-				$mdgriffith$elm_ui$Element$row,
+				$mdgriffith$elm_ui$Element$paragraph,
 				_List_fromArray(
 					[
-						$mdgriffith$elm_ui$Element$Font$size(28),
-						$mdgriffith$elm_ui$Element$paddingEach(
-						{bottom: 20, left: 0, right: 0, top: 0})
+						$mdgriffith$elm_ui$Element$Font$size(28)
 					]),
 				_List_fromArray(
 					[
 						$mdgriffith$elm_ui$Element$text(meta.name)
 					])),
 				A2(
-				$mdgriffith$elm_ui$Element$row,
+				$mdgriffith$elm_ui$Element$paragraph,
 				_List_fromArray(
 					[
-						$mdgriffith$elm_ui$Element$Font$size(14),
-						$mdgriffith$elm_ui$Element$paddingEach(
-						{bottom: 40, left: 0, right: 0, top: 0})
+						$mdgriffith$elm_ui$Element$Font$size(14)
 					]),
 				_List_fromArray(
 					[
 						$mdgriffith$elm_ui$Element$text(meta.description)
-					])),
-				A2(
-				$mdgriffith$elm_ui$Element$row,
+					]))
+			]));
+	var viewChart = A2(
+		$mdgriffith$elm_ui$Element$el,
+		_List_fromArray(
+			[
+				$mdgriffith$elm_ui$Element$width(
+				A2($mdgriffith$elm_ui$Element$maximum, 320, $mdgriffith$elm_ui$Element$fill)),
+				$mdgriffith$elm_ui$Element$alignTop,
+				$mdgriffith$elm_ui$Element$paddingEach(
+				{bottom: 40, left: 0, right: 0, top: 0})
+			]),
+		A2(
+			$mdgriffith$elm_ui$Element$map,
+			$author$project$Page$Example$OnExampleMsg,
+			$mdgriffith$elm_ui$Element$html(
+				A2($author$project$Examples$view, model.examples, currentId))));
+	var viewCode = A2(
+		$mdgriffith$elm_ui$Element$el,
+		_List_fromArray(
+			[
+				$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+				$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
+				$mdgriffith$elm_ui$Element$Background$color(
+				A3($mdgriffith$elm_ui$Element$rgb255, 250, 250, 250))
+			]),
+		$author$project$Ui$Code$view(
+			{
+				edits: _List_Nil,
+				template: model.showFullCode ? $author$project$Examples$largeCode(currentId) : $author$project$Examples$smallCode(currentId)
+			}));
+	var _v0 = $author$project$Ui$Layout$screen(model.window);
+	switch (_v0.$) {
+		case 'Large':
+			return A2(
+				$mdgriffith$elm_ui$Element$column,
 				_List_fromArray(
 					[
 						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
 						$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
-						$mdgriffith$elm_ui$Element$spacing(50),
-						$mdgriffith$elm_ui$Element$alignTop
+						$mdgriffith$elm_ui$Element$paddingEach(
+						{bottom: 0, left: 0, right: 0, top: 20}),
+						$mdgriffith$elm_ui$Element$spacing(30)
 					]),
 				_List_fromArray(
 					[
+						viewText,
 						A2(
-						$mdgriffith$elm_ui$Element$el,
+						$mdgriffith$elm_ui$Element$row,
 						_List_fromArray(
 							[
-								$mdgriffith$elm_ui$Element$width(
-								$mdgriffith$elm_ui$Element$px(300)),
-								$mdgriffith$elm_ui$Element$alignTop,
-								$mdgriffith$elm_ui$Element$paddingEach(
-								{bottom: 40, left: 0, right: 0, top: 0})
-							]),
-						A2(
-							$mdgriffith$elm_ui$Element$map,
-							$author$project$Page$Example$OnExampleMsg,
-							$mdgriffith$elm_ui$Element$html(
-								A2($author$project$Examples$view, model.examples, currentId)))),
-						A2(
-						$mdgriffith$elm_ui$Element$column,
-						_List_fromArray(
-							[
-								$mdgriffith$elm_ui$Element$width(
-								$mdgriffith$elm_ui$Element$fillPortion(8)),
+								$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
 								$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
-								$mdgriffith$elm_ui$Element$spacing(20)
+								$mdgriffith$elm_ui$Element$spacing(50),
+								$mdgriffith$elm_ui$Element$alignTop
 							]),
 						_List_fromArray(
 							[
-								A2(
-								$mdgriffith$elm_ui$Element$Input$button,
-								_List_fromArray(
-									[$mdgriffith$elm_ui$Element$alignRight]),
-								{
-									label: $mdgriffith$elm_ui$Element$text(
-										model.showFullCode ? 'Show essence' : 'Show full code'),
-									onPress: $elm$core$Maybe$Just($author$project$Page$Example$OnToggleCode)
-								}),
+								viewChart,
 								A2(
 								$mdgriffith$elm_ui$Element$column,
 								_List_fromArray(
 									[
-										$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+										$mdgriffith$elm_ui$Element$width(
+										$mdgriffith$elm_ui$Element$fillPortion(8)),
 										$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
-										$mdgriffith$elm_ui$Element$Background$color(
-										A3($mdgriffith$elm_ui$Element$rgb255, 250, 250, 250))
+										$mdgriffith$elm_ui$Element$spacing(20)
 									]),
 								_List_fromArray(
-									[
-										$author$project$Ui$Code$view(
-										{
-											edits: _List_Nil,
-											template: model.showFullCode ? $author$project$Examples$largeCode(currentId) : $author$project$Examples$smallCode(currentId)
-										})
-									]))
+									[viewToggler, viewCode]))
 							]))
-					]))
-			]));
+					]));
+		case 'Medium':
+			return A2(
+				$mdgriffith$elm_ui$Element$column,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+						$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
+						$mdgriffith$elm_ui$Element$paddingEach(
+						{bottom: 0, left: 0, right: 0, top: 20}),
+						$mdgriffith$elm_ui$Element$spacing(30)
+					]),
+				_List_fromArray(
+					[
+						viewText,
+						A2(
+						$mdgriffith$elm_ui$Element$row,
+						_List_fromArray(
+							[
+								$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+								$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
+								$mdgriffith$elm_ui$Element$spacing(50),
+								$mdgriffith$elm_ui$Element$alignTop
+							]),
+						_List_fromArray(
+							[
+								viewChart,
+								A2(
+								$mdgriffith$elm_ui$Element$column,
+								_List_fromArray(
+									[
+										$mdgriffith$elm_ui$Element$width(
+										$mdgriffith$elm_ui$Element$fillPortion(8)),
+										$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
+										$mdgriffith$elm_ui$Element$spacing(20)
+									]),
+								_List_fromArray(
+									[viewToggler, viewCode]))
+							]))
+					]));
+		default:
+			return A2(
+				$mdgriffith$elm_ui$Element$column,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+						$mdgriffith$elm_ui$Element$paddingEach(
+						{bottom: 0, left: 0, right: 0, top: 20}),
+						$mdgriffith$elm_ui$Element$spacing(30)
+					]),
+				_List_fromArray(
+					[
+						viewText,
+						viewChart,
+						viewToggler,
+						A2(
+						$mdgriffith$elm_ui$Element$column,
+						_List_fromArray(
+							[
+								$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+								$mdgriffith$elm_ui$Element$alignTop,
+								$mdgriffith$elm_ui$Element$centerX,
+								$mdgriffith$elm_ui$Element$spacing(20)
+							]),
+						_List_fromArray(
+							[viewCode]))
+					]));
+	}
 };
 var $author$project$Page$Example$view = function (model) {
 	return {
@@ -37433,11 +37548,20 @@ var $author$project$Page$Example$view = function (model) {
 							A2($mdgriffith$elm_ui$Element$paddingXY, 0, 10),
 							$mdgriffith$elm_ui$Element$Font$size(14),
 							$mdgriffith$elm_ui$Element$width(
-							$mdgriffith$elm_ui$Element$px(700))
+							A2($mdgriffith$elm_ui$Element$maximum, 700, $mdgriffith$elm_ui$Element$fill))
 						]),
 					_List_fromArray(
 						[
-							$mdgriffith$elm_ui$Element$text('This is an attempt at documentation through example. For documentation of exact API, see official Elm documentation.')
+							$mdgriffith$elm_ui$Element$text('This catalog is meant to document through example. For documentation of exact interface, see the '),
+							A2(
+							$mdgriffith$elm_ui$Element$link,
+							_List_fromArray(
+								[$mdgriffith$elm_ui$Element$Font$underline]),
+							{
+								label: $mdgriffith$elm_ui$Element$text('official Elm documentation'),
+								url: 'https://package.elm-lang.org/packages/terezka/charts/latest'
+							}),
+							$mdgriffith$elm_ui$Element$text('.')
 						])),
 					$author$project$Ui$Tabs$view(
 					{
@@ -40621,32 +40745,6 @@ var $author$project$Internal$Item$getName = function (_v0) {
 	}
 };
 var $author$project$Chart$Item$getName = $author$project$Internal$Item$getName;
-var $mdgriffith$elm_ui$Internal$Model$AsTextColumn = {$: 'AsTextColumn'};
-var $mdgriffith$elm_ui$Internal$Model$asTextColumn = $mdgriffith$elm_ui$Internal$Model$AsTextColumn;
-var $mdgriffith$elm_ui$Internal$Model$Min = F2(
-	function (a, b) {
-		return {$: 'Min', a: a, b: b};
-	});
-var $mdgriffith$elm_ui$Element$minimum = F2(
-	function (i, l) {
-		return A2($mdgriffith$elm_ui$Internal$Model$Min, i, l);
-	});
-var $mdgriffith$elm_ui$Element$textColumn = F2(
-	function (attrs, children) {
-		return A4(
-			$mdgriffith$elm_ui$Internal$Model$element,
-			$mdgriffith$elm_ui$Internal$Model$asTextColumn,
-			$mdgriffith$elm_ui$Internal$Model$div,
-			A2(
-				$elm$core$List$cons,
-				$mdgriffith$elm_ui$Element$width(
-					A2(
-						$mdgriffith$elm_ui$Element$maximum,
-						750,
-						A2($mdgriffith$elm_ui$Element$minimum, 500, $mdgriffith$elm_ui$Element$fill))),
-				attrs),
-			$mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
-	});
 var $author$project$Charts$SalaryDistBar$viewTooltip = function (chartBin) {
 	var viewJob = F3(
 		function (color, name, datum) {

@@ -1,6 +1,7 @@
 module Page.Example exposing (Model, Params, Msg, init, subscriptions, exit, update, view)
 
 
+import Browser.Events as E
 import Browser exposing (Document)
 import Route exposing (Route)
 import Session exposing (Session)
@@ -68,7 +69,8 @@ exit model session =
 
 
 type Msg
-  = MenuMsg Menu.Msg
+  = OnResize Int Int
+  | MenuMsg Menu.Msg
   | OnExampleMsg Examples.Msg
   | OnToggleCode
 
@@ -76,6 +78,9 @@ type Msg
 update : Navigation.Key -> Msg -> Model -> ( Model, Cmd Msg )
 update key msg model =
   case msg of
+    OnResize width height ->
+      ( { model | window = { width = width, height = height } }, Cmd.none )
+
     MenuMsg subMsg ->
       ( { model | menu = Menu.update subMsg model.menu }, Cmd.none )
 
@@ -96,7 +101,7 @@ update key msg model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-  Sub.none
+  E.onResize OnResize
 
 
 
@@ -107,27 +112,37 @@ view : Model -> Document Msg
 view model =
   { title = "elm-charts | Documentation"
   , body =
-      Layout.view <|
+      Layout.view
         [ Menu.small model.window model.menu
             |> E.map MenuMsg
+
         , E.el
             [ F.size 32
             , E.paddingXY 0 10
             ]
             (E.text "Documentation")
+
         , E.paragraph
             [ E.paddingXY 0 10
             , F.size 14
-            , E.width (E.px 700)
+            , E.width (E.maximum 700 E.fill)
             ]
-            [ E.text "This is an attempt at documentation through example. For documentation of exact API, see official Elm documentation."
+            [ E.text "This catalog is meant to document through example. For documentation of exact interface, see the "
+            , E.link
+                [ F.underline ]
+                { url = "https://package.elm-lang.org/packages/terezka/charts/latest"
+                , label = E.text "official Elm documentation"
+                }
+            , E.text "."
             ]
+
         , Ui.Tabs.view
             { toUrl = Ui.Thumbnail.toUrlGroup << .title
             , toTitle = .title
             , selected = "/documentation/" ++ model.selectedTab
             , all = Ui.Thumbnail.groups
             }
+
         , viewContent model
         ]
   }
@@ -151,62 +166,115 @@ viewContent model =
 
       meta =
         Examples.meta currentId
-  in
-  E.column
-    [ E.width E.fill
-    , E.height E.fill
-    , E.paddingEach { top = 20, bottom = 0, left = 0, right = 0 }
-    ]
-    [ E.row
-        [ F.size 28
-        , E.paddingEach { top = 0, bottom = 20, left = 0, right = 0 }
-        ]
-        [ E.text meta.name ]
 
-    , E.row
-        [ F.size 14
-        , E.paddingEach { top = 0, bottom = 40, left = 0, right = 0 }
-        ]
-        [ E.text meta.description ]
-    , E.row
+      viewText =
+        E.textColumn
+          [ E.width E.fill, E.spacing 20 ]
+          [ E.paragraph [ F.size 28 ] [ E.text meta.name ]
+          , E.paragraph [ F.size 14 ] [ E.text meta.description ]
+          ]
+
+      viewChart =
+        E.el
+          [ E.width (E.maximum 320 E.fill)
+          , E.alignTop
+          , E.paddingEach { top = 0, bottom = 40, left = 0, right = 0 }
+          ]
+          (E.map OnExampleMsg <| E.html <| Examples.view model.examples currentId)
+
+      viewToggler =
+        I.button
+          [ E.alignRight ]
+          { onPress = Just OnToggleCode
+          , label = E.text <| if model.showFullCode then "Show essence" else "Show full code"
+          }
+
+      viewCode =
+        E.el
+          [ E.width E.fill
+          , E.height E.fill
+          , BG.color (E.rgb255 250 250 250)
+          ] <|
+          Code.view
+              { template =
+                  if model.showFullCode
+                  then Examples.largeCode currentId
+                  else Examples.smallCode currentId
+              , edits = []
+              }
+  in
+  case Layout.screen model.window of
+    Layout.Large ->
+      E.column
         [ E.width E.fill
         , E.height E.fill
-        , E.spacing 50
-        , E.alignTop
+        , E.paddingEach { top = 20, bottom = 0, left = 0, right = 0 }
+        , E.spacing 30
         ]
-        [ E.el
-            [ E.width (E.px 300)
-            , E.alignTop
-            , E.paddingEach { top = 0, bottom = 40, left = 0, right = 0 }
-            ]
-            (E.map OnExampleMsg <| E.html <| Examples.view model.examples currentId)
-        , E.column
-            [ E.width (E.fillPortion 8)
+        [ viewText
+        , E.row
+            [ E.width E.fill
             , E.height E.fill
-            , E.spacing 20
+            , E.spacing 50
+            , E.alignTop
             ]
-            [ I.button
-                [ E.alignRight
-                ]
-                { onPress = Just OnToggleCode
-                , label = E.text <| if model.showFullCode then "Show essence" else "Show full code"
-                }
+            [ viewChart
             , E.column
-                [ E.width E.fill
+                [ E.width (E.fillPortion 8)
                 , E.height E.fill
-                , BG.color (E.rgb255 250 250 250)
+                , E.spacing 20
                 ]
-                [ Code.view
-                    { template =
-                        if model.showFullCode
-                        then Examples.largeCode currentId
-                        else Examples.smallCode currentId
-                    , edits = []
-                    }
+                [ viewToggler
+                , viewCode
                 ]
+              ]
+        ]
+
+    Layout.Medium ->
+      E.column
+        [ E.width E.fill
+        , E.height E.fill
+        , E.paddingEach { top = 20, bottom = 0, left = 0, right = 0 }
+        , E.spacing 30
+        ]
+        [ viewText
+        , E.row
+            [ E.width E.fill
+            , E.height E.fill
+            , E.spacing 50
+            , E.alignTop
             ]
-          ]
-    ]
+            [ viewChart
+            , E.column
+                [ E.width (E.fillPortion 8)
+                , E.height E.fill
+                , E.spacing 20
+                ]
+                [ viewToggler
+                , viewCode
+                ]
+              ]
+        ]
+
+    Layout.Small ->
+      E.column
+        [ E.width E.fill
+        , E.paddingEach { top = 20, bottom = 0, left = 0, right = 0 }
+        , E.spacing 30
+        ]
+        [ viewText
+        , viewChart
+        , viewToggler
+        , E.column
+              [ E.width E.fill
+              , E.alignTop
+              , E.centerX
+              , E.spacing 20
+              ]
+              [ viewCode
+              ]
+        ]
+
 
 
 
