@@ -4,6 +4,7 @@ module Page.Home exposing (Model, Params, Msg, init, subscriptions, exit, update
 import Browser exposing (Document)
 import Route exposing (Route)
 import Session exposing (Session)
+import Browser.Events as E
 import Browser.Navigation as Navigation
 import Charts.Landing as Landing
 import Charts.Dashboard1 as Dashboard1
@@ -49,6 +50,8 @@ type alias Model =
   , concise : Concise.Model
   , familiarToggle : Bool
   , hovering : List (CI.One { year : Float, income : Float} CI.Any)
+  , window : Session.Window
+  , menu : Menu.Model
   }
 
 
@@ -66,6 +69,8 @@ init key session params =
     , concise = Concise.init
     , familiarToggle = True
     , hovering = []
+    , window = session.window
+    , menu = Menu.init
     }
   , Cmd.none
   )
@@ -73,7 +78,7 @@ init key session params =
 
 exit : Model -> Session -> Session
 exit model session =
-  session
+  { session | window = model.window }
 
 
 
@@ -81,7 +86,9 @@ exit model session =
 
 
 type Msg
-  = LandingMsg Landing.Msg
+  = OnResize Int Int
+  | MenuMsg Menu.Msg
+  | LandingMsg Landing.Msg
   | ConciseMsg Concise.Msg
   | FamiliarToggle
   | OnHover (List (CI.One { year : Float, income : Float} CI.Any))
@@ -92,6 +99,12 @@ type Msg
 update : Navigation.Key -> Msg -> Model -> ( Model, Cmd Msg )
 update key msg model =
   case msg of
+    OnResize width height ->
+      ( { model | window = { width = width, height = height } }, Cmd.none )
+
+    MenuMsg subMsg ->
+      ( { model | menu = Menu.update subMsg model.menu }, Cmd.none )
+
     ConciseMsg subMsg ->
       ( { model | concise = Concise.update subMsg model.concise }, Cmd.none )
 
@@ -114,7 +127,7 @@ update key msg model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-  Sub.none
+  E.onResize OnResize
 
 
 
@@ -126,16 +139,20 @@ view model =
     { title = "elm-charts"
     , body =
         Layout.view
-          [ Menu.small
+          [ Menu.small model.window model.menu
+            |> E.map MenuMsg
 
-          , E.el [] (E.html <| H.map LandingMsg (Landing.view model.landing))
+          , E.el
+              [ E.width E.fill
+              , E.height E.fill
+              ] (E.html <| H.map LandingMsg (Landing.view model.landing))
 
           , E.column
               [ E.width E.fill
               , E.spacing 140
               , E.paddingXY 0 120
               ]
-              [ feature
+              [ feature model.window
                   { title = "Intuitive"
                   , body =
                       [ E.text "Charts shouldn't be hard to make, and with elm-charts they aren't. "
@@ -148,10 +165,9 @@ view model =
                   , chart = E.html <| H.map (\_ -> None) (Familiar.view ())
                   , code = Familiar.smallCode
                   , flipped = False
-                  , height = 350
                   }
 
-              , feature
+              , feature model.window
                   { title = "Flexible, yet concise"
                   , body =
                       [ E.text "No clutter, even with tricky requirements. Great support for "
@@ -162,10 +178,9 @@ view model =
                   , chart = E.html <| H.map ConciseMsg (Concise.view model.concise)
                   , code = Concise.smallCode
                   , flipped = True
-                  , height = 300
                   }
 
-              , feature
+              , feature model.window
                   { title = "Plenty of examples"
                   , body =
                       [ E.text "Charts are visual and so should the documentation be! "
@@ -176,7 +191,6 @@ view model =
                       ]
                   , togglable = Nothing
                   , flipped = False
-                  , height = 350
                   , chart =
                       [ Examples.BarCharts__Histogram
                       , Examples.BarCharts__TooltipStack
@@ -192,11 +206,11 @@ view model =
                       , Examples.ScatterCharts__Shapes
                       ]
                         |> List.map (Examples.view Examples.init)
-                        |> List.map (E.html >> E.el [ E.width (E.minimum 90 E.fill) ])
+                        |> List.map (E.html >> E.el [ E.width (E.minimum 90 E.fill), E.height E.fill ])
                         |> E.wrappedRow
-                            [ E.width (E.px 550)
-                            , E.spacing 30
+                            [ E.spacing 30
                             , E.alignTop
+                            , E.width E.fill
                             ]
                         |> E.map (\_ -> None)
                   , code = ""
@@ -206,49 +220,58 @@ view model =
     }
 
 
+
 feature :
+  Session.Window ->
   { title : String
   , body : List (E.Element msg)
-  , height : Int
   , togglable : Maybe ( msg, Bool )
   , chart : E.Element msg
   , code : String
   , flipped : Bool
   }
   -> E.Element msg
-feature config =
-  E.row
+feature window config =
+  (if window.width > 950 then E.row else E.column)
     [ E.width E.fill
-    , E.height (E.minimum config.height E.fill)
+    , E.height E.fill
     , E.spacing 50
-    ] <| (if config.flipped then List.reverse else identity)
+    ] <| (if config.flipped && window.width > 950 then List.reverse else identity)
     [ E.column
         [ E.width E.fill
         , E.alignTop
         , E.alignLeft
         , E.spacing 10
-        , E.width (E.fillPortion 5)
         ]
-        [ E.el
-            [ E.width E.fill
-            , F.size 40
+        [ E.textColumn [ E.width E.fill ]
+            [ E.paragraph
+                [ E.width E.fill
+                , F.size 40
+                ]
+                [ E.text config.title ]
+            , E.paragraph
+                [ F.size 16
+                , F.color (E.rgb255 100 100 100)
+                , E.paddingXY 0 10
+                , E.width E.fill
+                ]
+                config.body
             ]
-            (E.text config.title)
-        , E.paragraph
-            [ F.size 16
-            , F.color (E.rgb255 120 120 120)
-            , E.paddingXY 0 10
-            ]
-            config.body
         ]
     , case config.togglable of
         Nothing ->
-          E.el [ E.centerX, E.alignTop ] config.chart
+          E.el
+            [ E.centerX
+            , E.alignTop
+            , E.width E.fill
+            ]
+            config.chart
 
         Just ( onToggle, isToggled ) ->
           E.column
-            [ E.width (E.fillPortion 7)
+            [ E.width E.fill
             , E.alignTop
+            , E.centerX
             ]
             [ if isToggled then
                 E.el
@@ -258,7 +281,13 @@ feature config =
                   ]
                   (Code.view { template = config.code, edits = [] })
               else
-                E.el [ E.centerX, E.alignTop ] config.chart
+                E.el
+                  [ E.width E.fill
+                  , E.centerX
+                  , E.alignTop
+                  ]
+                  config.chart
+
             , I.button
                 [ E.paddingXY 15 15
                 , F.size 14

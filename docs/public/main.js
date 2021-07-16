@@ -5399,7 +5399,9 @@ var $author$project$Page$Gallery$exit = F2(
 	});
 var $author$project$Page$Home$exit = F2(
 	function (model, session) {
-		return session;
+		return _Utils_update(
+			session,
+			{window: model.window});
 	});
 var $author$project$Page$QuickStart$exit = F2(
 	function (model, session) {
@@ -5439,11 +5441,14 @@ var $author$project$Main$exit = function (model) {
 			return A2($author$project$Page$QuickStart$exit, subModel, model.session);
 	}
 };
+var $author$project$Ui$Menu$init = {isOpen: false};
 var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $author$project$Page$Administration$init = F3(
 	function (key, session, params) {
-		return _Utils_Tuple2(_Utils_Tuple0, $elm$core$Platform$Cmd$none);
+		return _Utils_Tuple2(
+			{menu: $author$project$Ui$Menu$init, window: session.window},
+			$elm$core$Platform$Cmd$none);
 	});
 var $author$project$Ui$Thumbnail$Group = F3(
 	function (title, order, ids) {
@@ -5580,7 +5585,7 @@ var $author$project$Examples$Frame$Background$meta = {category: 'Navigation', ca
 var $author$project$Examples$Frame$Basic$meta = {category: 'Navigation', categoryOrder: 4, description: 'Add grid, axes, ticks, and labels.', name: 'Basic', order: 1};
 var $author$project$Examples$Frame$Color$meta = {category: 'Navigation', categoryOrder: 4, description: 'Change color of items.', name: 'Color', order: 2};
 var $author$project$Examples$Frame$Coordinates$meta = {category: 'Navigation', categoryOrder: 4, description: 'Using the low level coordinate system.', name: 'Coordinates', order: 39};
-var $author$project$Examples$Frame$CustomElements$meta = {category: 'Navigation', categoryOrder: 4, description: 'Add custom tracked elements', name: 'Custom elements', order: 100};
+var $author$project$Examples$Frame$CustomElements$meta = {category: 'Navigation', categoryOrder: 4, description: 'Add custom tracked elements', name: 'Custom chart elements', order: 100};
 var $author$project$Examples$Frame$CustomLabels$meta = {category: 'Navigation', categoryOrder: 4, description: 'Control labels entirely.', name: 'Custom labels', order: 9};
 var $author$project$Examples$Frame$Dimensions$meta = {category: 'Navigation', categoryOrder: 4, description: 'Limit or extend your range and domain.', name: 'Control dimensions', order: 11};
 var $author$project$Examples$Frame$DotGrid$meta = {category: 'Navigation', categoryOrder: 4, description: 'Use dots instead of grid lines.', name: 'Dotted grid', order: 13};
@@ -6552,7 +6557,7 @@ var $author$project$Examples$init = {example0: $author$project$Examples$BarChart
 var $author$project$Page$Section$init = F3(
 	function (key, session, params) {
 		return _Utils_Tuple2(
-			{examples: $author$project$Examples$init, selectedTab: params.section},
+			{examples: $author$project$Examples$init, menu: $author$project$Ui$Menu$init, selectedTab: params.section, window: session.window},
 			$elm$core$Platform$Cmd$none);
 	});
 var $author$project$Page$Documentation$init = F3(
@@ -6568,7 +6573,7 @@ var $author$project$Page$Documentation$init = F3(
 var $author$project$Page$Example$init = F3(
 	function (key, session, params) {
 		return _Utils_Tuple2(
-			{examples: $author$project$Examples$init, selectedTab: params.section, selectedThumb: params.example, showFullCode: false},
+			{examples: $author$project$Examples$init, menu: $author$project$Ui$Menu$init, selectedTab: params.section, selectedThumb: params.example, showFullCode: false, window: session.window},
 			$elm$core$Platform$Cmd$none);
 	});
 var $author$project$Charts$SalaryDist$init = {hovering: _List_Nil, selection: $elm$core$Maybe$Nothing, window: $elm$core$Maybe$Nothing, year: 2019};
@@ -6576,19 +6581,21 @@ var $author$project$Charts$SalaryDistBar$init = {binSize: 5000, hovering: _List_
 var $author$project$Page$Gallery$init = F3(
 	function (key, session, params) {
 		return _Utils_Tuple2(
-			{salaryDist: $author$project$Charts$SalaryDist$init, salaryDistBar: $author$project$Charts$SalaryDistBar$init},
+			{menu: $author$project$Ui$Menu$init, salaryDist: $author$project$Charts$SalaryDist$init, salaryDistBar: $author$project$Charts$SalaryDistBar$init, window: session.window},
 			$elm$core$Platform$Cmd$none);
 	});
 var $author$project$Charts$Landing$init = {hovering: _List_Nil, hoveringBars: _List_Nil};
 var $author$project$Page$Home$init = F3(
 	function (key, session, params) {
 		return _Utils_Tuple2(
-			{concise: $author$project$Examples$Frontpage$Concise$init, familiarToggle: true, hovering: _List_Nil, landing: $author$project$Charts$Landing$init},
+			{concise: $author$project$Examples$Frontpage$Concise$init, familiarToggle: true, hovering: _List_Nil, landing: $author$project$Charts$Landing$init, menu: $author$project$Ui$Menu$init, window: session.window},
 			$elm$core$Platform$Cmd$none);
 	});
 var $author$project$Page$QuickStart$init = F3(
 	function (key, session, params) {
-		return _Utils_Tuple2(_Utils_Tuple0, $elm$core$Platform$Cmd$none);
+		return _Utils_Tuple2(
+			{menu: $author$project$Ui$Menu$init, window: session.window},
+			$elm$core$Platform$Cmd$none);
 	});
 var $elm$browser$Browser$Navigation$pushUrl = _Browser_pushUrl;
 var $elm$core$Platform$Cmd$map = _Platform_map;
@@ -6996,8 +7003,30 @@ var $author$project$Route$parser = $elm$url$Url$Parser$oneOf(
 var $author$project$Route$fromUrl = function (url) {
 	return A2($elm$url$Url$Parser$parse, $author$project$Route$parser, url);
 };
-var $author$project$Session$init = function (flags) {
-	return _Utils_Tuple0;
+var $author$project$Session$Session = function (window) {
+	return {window: window};
+};
+var $elm$json$Json$Decode$decodeValue = _Json_run;
+var $author$project$Session$Window = F2(
+	function (width, height) {
+		return {height: height, width: width};
+	});
+var $elm$json$Json$Decode$field = _Json_decodeField;
+var $elm$json$Json$Decode$int = _Json_decodeInt;
+var $author$project$Session$decoder = A3(
+	$elm$json$Json$Decode$map2,
+	$author$project$Session$Window,
+	A2($elm$json$Json$Decode$field, 'width', $elm$json$Json$Decode$int),
+	A2($elm$json$Json$Decode$field, 'height', $elm$json$Json$Decode$int));
+var $author$project$Session$init = function (json) {
+	var _v0 = A2($elm$json$Json$Decode$decodeValue, $author$project$Session$decoder, json);
+	if (_v0.$ === 'Ok') {
+		var flags = _v0.a;
+		return $author$project$Session$Session(flags);
+	} else {
+		return $author$project$Session$Session(
+			{height: 800, width: 1000});
+	}
 };
 var $author$project$Main$init = F3(
 	function (flags, url, key) {
@@ -7026,8 +7055,315 @@ var $author$project$Page$Example$subscriptions = function (model) {
 var $author$project$Page$Gallery$subscriptions = function (model) {
 	return $elm$core$Platform$Sub$none;
 };
+var $author$project$Page$Home$OnResize = F2(
+	function (a, b) {
+		return {$: 'OnResize', a: a, b: b};
+	});
+var $elm$browser$Browser$Events$Window = {$: 'Window'};
+var $elm$browser$Browser$Events$MySub = F3(
+	function (a, b, c) {
+		return {$: 'MySub', a: a, b: b, c: c};
+	});
+var $elm$browser$Browser$Events$State = F2(
+	function (subs, pids) {
+		return {pids: pids, subs: subs};
+	});
+var $elm$browser$Browser$Events$init = $elm$core$Task$succeed(
+	A2($elm$browser$Browser$Events$State, _List_Nil, $elm$core$Dict$empty));
+var $elm$browser$Browser$Events$nodeToKey = function (node) {
+	if (node.$ === 'Document') {
+		return 'd_';
+	} else {
+		return 'w_';
+	}
+};
+var $elm$browser$Browser$Events$addKey = function (sub) {
+	var node = sub.a;
+	var name = sub.b;
+	return _Utils_Tuple2(
+		_Utils_ap(
+			$elm$browser$Browser$Events$nodeToKey(node),
+			name),
+		sub);
+};
+var $elm$core$Dict$fromList = function (assocs) {
+	return A3(
+		$elm$core$List$foldl,
+		F2(
+			function (_v0, dict) {
+				var key = _v0.a;
+				var value = _v0.b;
+				return A3($elm$core$Dict$insert, key, value, dict);
+			}),
+		$elm$core$Dict$empty,
+		assocs);
+};
+var $elm$core$Process$kill = _Scheduler_kill;
+var $elm$core$Dict$foldl = F3(
+	function (func, acc, dict) {
+		foldl:
+		while (true) {
+			if (dict.$ === 'RBEmpty_elm_builtin') {
+				return acc;
+			} else {
+				var key = dict.b;
+				var value = dict.c;
+				var left = dict.d;
+				var right = dict.e;
+				var $temp$func = func,
+					$temp$acc = A3(
+					func,
+					key,
+					value,
+					A3($elm$core$Dict$foldl, func, acc, left)),
+					$temp$dict = right;
+				func = $temp$func;
+				acc = $temp$acc;
+				dict = $temp$dict;
+				continue foldl;
+			}
+		}
+	});
+var $elm$core$Dict$merge = F6(
+	function (leftStep, bothStep, rightStep, leftDict, rightDict, initialResult) {
+		var stepState = F3(
+			function (rKey, rValue, _v0) {
+				stepState:
+				while (true) {
+					var list = _v0.a;
+					var result = _v0.b;
+					if (!list.b) {
+						return _Utils_Tuple2(
+							list,
+							A3(rightStep, rKey, rValue, result));
+					} else {
+						var _v2 = list.a;
+						var lKey = _v2.a;
+						var lValue = _v2.b;
+						var rest = list.b;
+						if (_Utils_cmp(lKey, rKey) < 0) {
+							var $temp$rKey = rKey,
+								$temp$rValue = rValue,
+								$temp$_v0 = _Utils_Tuple2(
+								rest,
+								A3(leftStep, lKey, lValue, result));
+							rKey = $temp$rKey;
+							rValue = $temp$rValue;
+							_v0 = $temp$_v0;
+							continue stepState;
+						} else {
+							if (_Utils_cmp(lKey, rKey) > 0) {
+								return _Utils_Tuple2(
+									list,
+									A3(rightStep, rKey, rValue, result));
+							} else {
+								return _Utils_Tuple2(
+									rest,
+									A4(bothStep, lKey, lValue, rValue, result));
+							}
+						}
+					}
+				}
+			});
+		var _v3 = A3(
+			$elm$core$Dict$foldl,
+			stepState,
+			_Utils_Tuple2(
+				$elm$core$Dict$toList(leftDict),
+				initialResult),
+			rightDict);
+		var leftovers = _v3.a;
+		var intermediateResult = _v3.b;
+		return A3(
+			$elm$core$List$foldl,
+			F2(
+				function (_v4, result) {
+					var k = _v4.a;
+					var v = _v4.b;
+					return A3(leftStep, k, v, result);
+				}),
+			intermediateResult,
+			leftovers);
+	});
+var $elm$browser$Browser$Events$Event = F2(
+	function (key, event) {
+		return {event: event, key: key};
+	});
+var $elm$core$Platform$sendToSelf = _Platform_sendToSelf;
+var $elm$browser$Browser$Events$spawn = F3(
+	function (router, key, _v0) {
+		var node = _v0.a;
+		var name = _v0.b;
+		var actualNode = function () {
+			if (node.$ === 'Document') {
+				return _Browser_doc;
+			} else {
+				return _Browser_window;
+			}
+		}();
+		return A2(
+			$elm$core$Task$map,
+			function (value) {
+				return _Utils_Tuple2(key, value);
+			},
+			A3(
+				_Browser_on,
+				actualNode,
+				name,
+				function (event) {
+					return A2(
+						$elm$core$Platform$sendToSelf,
+						router,
+						A2($elm$browser$Browser$Events$Event, key, event));
+				}));
+	});
+var $elm$core$Dict$union = F2(
+	function (t1, t2) {
+		return A3($elm$core$Dict$foldl, $elm$core$Dict$insert, t2, t1);
+	});
+var $elm$browser$Browser$Events$onEffects = F3(
+	function (router, subs, state) {
+		var stepRight = F3(
+			function (key, sub, _v6) {
+				var deads = _v6.a;
+				var lives = _v6.b;
+				var news = _v6.c;
+				return _Utils_Tuple3(
+					deads,
+					lives,
+					A2(
+						$elm$core$List$cons,
+						A3($elm$browser$Browser$Events$spawn, router, key, sub),
+						news));
+			});
+		var stepLeft = F3(
+			function (_v4, pid, _v5) {
+				var deads = _v5.a;
+				var lives = _v5.b;
+				var news = _v5.c;
+				return _Utils_Tuple3(
+					A2($elm$core$List$cons, pid, deads),
+					lives,
+					news);
+			});
+		var stepBoth = F4(
+			function (key, pid, _v2, _v3) {
+				var deads = _v3.a;
+				var lives = _v3.b;
+				var news = _v3.c;
+				return _Utils_Tuple3(
+					deads,
+					A3($elm$core$Dict$insert, key, pid, lives),
+					news);
+			});
+		var newSubs = A2($elm$core$List$map, $elm$browser$Browser$Events$addKey, subs);
+		var _v0 = A6(
+			$elm$core$Dict$merge,
+			stepLeft,
+			stepBoth,
+			stepRight,
+			state.pids,
+			$elm$core$Dict$fromList(newSubs),
+			_Utils_Tuple3(_List_Nil, $elm$core$Dict$empty, _List_Nil));
+		var deadPids = _v0.a;
+		var livePids = _v0.b;
+		var makeNewPids = _v0.c;
+		return A2(
+			$elm$core$Task$andThen,
+			function (pids) {
+				return $elm$core$Task$succeed(
+					A2(
+						$elm$browser$Browser$Events$State,
+						newSubs,
+						A2(
+							$elm$core$Dict$union,
+							livePids,
+							$elm$core$Dict$fromList(pids))));
+			},
+			A2(
+				$elm$core$Task$andThen,
+				function (_v1) {
+					return $elm$core$Task$sequence(makeNewPids);
+				},
+				$elm$core$Task$sequence(
+					A2($elm$core$List$map, $elm$core$Process$kill, deadPids))));
+	});
+var $elm$core$List$maybeCons = F3(
+	function (f, mx, xs) {
+		var _v0 = f(mx);
+		if (_v0.$ === 'Just') {
+			var x = _v0.a;
+			return A2($elm$core$List$cons, x, xs);
+		} else {
+			return xs;
+		}
+	});
+var $elm$core$List$filterMap = F2(
+	function (f, xs) {
+		return A3(
+			$elm$core$List$foldr,
+			$elm$core$List$maybeCons(f),
+			_List_Nil,
+			xs);
+	});
+var $elm$browser$Browser$Events$onSelfMsg = F3(
+	function (router, _v0, state) {
+		var key = _v0.key;
+		var event = _v0.event;
+		var toMessage = function (_v2) {
+			var subKey = _v2.a;
+			var _v3 = _v2.b;
+			var node = _v3.a;
+			var name = _v3.b;
+			var decoder = _v3.c;
+			return _Utils_eq(subKey, key) ? A2(_Browser_decodeEvent, decoder, event) : $elm$core$Maybe$Nothing;
+		};
+		var messages = A2($elm$core$List$filterMap, toMessage, state.subs);
+		return A2(
+			$elm$core$Task$andThen,
+			function (_v1) {
+				return $elm$core$Task$succeed(state);
+			},
+			$elm$core$Task$sequence(
+				A2(
+					$elm$core$List$map,
+					$elm$core$Platform$sendToApp(router),
+					messages)));
+	});
+var $elm$browser$Browser$Events$subMap = F2(
+	function (func, _v0) {
+		var node = _v0.a;
+		var name = _v0.b;
+		var decoder = _v0.c;
+		return A3(
+			$elm$browser$Browser$Events$MySub,
+			node,
+			name,
+			A2($elm$json$Json$Decode$map, func, decoder));
+	});
+_Platform_effectManagers['Browser.Events'] = _Platform_createManager($elm$browser$Browser$Events$init, $elm$browser$Browser$Events$onEffects, $elm$browser$Browser$Events$onSelfMsg, 0, $elm$browser$Browser$Events$subMap);
+var $elm$browser$Browser$Events$subscription = _Platform_leaf('Browser.Events');
+var $elm$browser$Browser$Events$on = F3(
+	function (node, name, decoder) {
+		return $elm$browser$Browser$Events$subscription(
+			A3($elm$browser$Browser$Events$MySub, node, name, decoder));
+	});
+var $elm$browser$Browser$Events$onResize = function (func) {
+	return A3(
+		$elm$browser$Browser$Events$on,
+		$elm$browser$Browser$Events$Window,
+		'resize',
+		A2(
+			$elm$json$Json$Decode$field,
+			'target',
+			A3(
+				$elm$json$Json$Decode$map2,
+				func,
+				A2($elm$json$Json$Decode$field, 'innerWidth', $elm$json$Json$Decode$int),
+				A2($elm$json$Json$Decode$field, 'innerHeight', $elm$json$Json$Decode$int))));
+};
 var $author$project$Page$Home$subscriptions = function (model) {
-	return $elm$core$Platform$Sub$none;
+	return $elm$browser$Browser$Events$onResize($author$project$Page$Home$OnResize);
 };
 var $author$project$Page$QuickStart$subscriptions = function (model) {
 	return $elm$core$Platform$Sub$none;
@@ -7128,9 +7464,23 @@ var $elm$url$Url$toString = function (url) {
 					_Utils_ap(http, url.host)),
 				url.path)));
 };
+var $elm$core$Basics$not = _Basics_not;
+var $author$project$Ui$Menu$update = F2(
+	function (msg, model) {
+		return _Utils_update(
+			model,
+			{isOpen: !model.isOpen});
+	});
 var $author$project$Page$Administration$update = F3(
 	function (key, msg, model) {
-		return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+		var subMsg = msg.a;
+		return _Utils_Tuple2(
+			_Utils_update(
+				model,
+				{
+					menu: A2($author$project$Ui$Menu$update, subMsg, model.menu)
+				}),
+			$elm$core$Platform$Cmd$none);
 	});
 var $author$project$Examples$BarCharts$BarLabels$update = F2(
 	function (msg, model) {
@@ -8366,20 +8716,16 @@ var $author$project$Examples$update = F2(
 	});
 var $author$project$Page$Section$update = F3(
 	function (key, msg, model) {
-		var sub = msg.a;
-		return _Utils_Tuple2(
-			_Utils_update(
-				model,
-				{
-					examples: A2($author$project$Examples$update, sub, model.examples)
-				}),
-			$elm$core$Platform$Cmd$none);
-	});
-var $author$project$Page$Documentation$update = $author$project$Page$Section$update;
-var $elm$core$Basics$not = _Basics_not;
-var $author$project$Page$Example$update = F3(
-	function (key, msg, model) {
-		if (msg.$ === 'OnExampleMsg') {
+		if (msg.$ === 'MenuMsg') {
+			var subMsg = msg.a;
+			return _Utils_Tuple2(
+				_Utils_update(
+					model,
+					{
+						menu: A2($author$project$Ui$Menu$update, subMsg, model.menu)
+					}),
+				$elm$core$Platform$Cmd$none);
+		} else {
 			var sub = msg.a;
 			return _Utils_Tuple2(
 				_Utils_update(
@@ -8388,12 +8734,36 @@ var $author$project$Page$Example$update = F3(
 						examples: A2($author$project$Examples$update, sub, model.examples)
 					}),
 				$elm$core$Platform$Cmd$none);
-		} else {
-			return _Utils_Tuple2(
-				_Utils_update(
-					model,
-					{showFullCode: !model.showFullCode}),
-				$elm$core$Platform$Cmd$none);
+		}
+	});
+var $author$project$Page$Documentation$update = $author$project$Page$Section$update;
+var $author$project$Page$Example$update = F3(
+	function (key, msg, model) {
+		switch (msg.$) {
+			case 'MenuMsg':
+				var subMsg = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							menu: A2($author$project$Ui$Menu$update, subMsg, model.menu)
+						}),
+					$elm$core$Platform$Cmd$none);
+			case 'OnExampleMsg':
+				var sub = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							examples: A2($author$project$Examples$update, sub, model.examples)
+						}),
+					$elm$core$Platform$Cmd$none);
+			default:
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{showFullCode: !model.showFullCode}),
+					$elm$core$Platform$Cmd$none);
 		}
 	});
 var $author$project$Charts$SalaryDist$update = F2(
@@ -8486,24 +8856,34 @@ var $author$project$Charts$SalaryDistBar$update = F2(
 	});
 var $author$project$Page$Gallery$update = F3(
 	function (key, msg, model) {
-		if (msg.$ === 'SalaryDistMsg') {
-			var subMsg = msg.a;
-			return _Utils_Tuple2(
-				_Utils_update(
-					model,
-					{
-						salaryDist: A2($author$project$Charts$SalaryDist$update, subMsg, model.salaryDist)
-					}),
-				$elm$core$Platform$Cmd$none);
-		} else {
-			var subMsg = msg.a;
-			return _Utils_Tuple2(
-				_Utils_update(
-					model,
-					{
-						salaryDistBar: A2($author$project$Charts$SalaryDistBar$update, subMsg, model.salaryDistBar)
-					}),
-				$elm$core$Platform$Cmd$none);
+		switch (msg.$) {
+			case 'MenuMsg':
+				var subMsg = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							menu: A2($author$project$Ui$Menu$update, subMsg, model.menu)
+						}),
+					$elm$core$Platform$Cmd$none);
+			case 'SalaryDistMsg':
+				var subMsg = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							salaryDist: A2($author$project$Charts$SalaryDist$update, subMsg, model.salaryDist)
+						}),
+					$elm$core$Platform$Cmd$none);
+			default:
+				var subMsg = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							salaryDistBar: A2($author$project$Charts$SalaryDistBar$update, subMsg, model.salaryDistBar)
+						}),
+					$elm$core$Platform$Cmd$none);
 		}
 	});
 var $author$project$Charts$Landing$update = F2(
@@ -8517,6 +8897,25 @@ var $author$project$Charts$Landing$update = F2(
 var $author$project$Page$Home$update = F3(
 	function (key, msg, model) {
 		switch (msg.$) {
+			case 'OnResize':
+				var width = msg.a;
+				var height = msg.b;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							window: {height: height, width: width}
+						}),
+					$elm$core$Platform$Cmd$none);
+			case 'MenuMsg':
+				var subMsg = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							menu: A2($author$project$Ui$Menu$update, subMsg, model.menu)
+						}),
+					$elm$core$Platform$Cmd$none);
 			case 'ConciseMsg':
 				var subMsg = msg.a;
 				return _Utils_Tuple2(
@@ -8554,7 +8953,14 @@ var $author$project$Page$Home$update = F3(
 	});
 var $author$project$Page$QuickStart$update = F3(
 	function (key, msg, model) {
-		return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+		var subMsg = msg.a;
+		return _Utils_Tuple2(
+			_Utils_update(
+				model,
+				{
+					menu: A2($author$project$Ui$Menu$update, subMsg, model.menu)
+				}),
+			$elm$core$Platform$Cmd$none);
 	});
 var $author$project$Main$update = F2(
 	function (msg, model) {
@@ -8684,6 +9090,9 @@ var $elm$virtual_dom$VirtualDom$map = _VirtualDom_map;
 var $elm$html$Html$map = $elm$virtual_dom$VirtualDom$map;
 var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
+var $author$project$Page$Administration$MenuMsg = function (a) {
+	return {$: 'MenuMsg', a: a};
+};
 var $mdgriffith$elm_ui$Internal$Model$Class = F2(
 	function (a, b) {
 		return {$: 'Class', a: a, b: b};
@@ -9014,24 +9423,6 @@ var $mdgriffith$elm_ui$Internal$Model$Style = F2(
 var $mdgriffith$elm_ui$Internal$Style$dot = function (c) {
 	return '.' + c;
 };
-var $elm$core$List$maybeCons = F3(
-	function (f, mx, xs) {
-		var _v0 = f(mx);
-		if (_v0.$ === 'Just') {
-			var x = _v0.a;
-			return A2($elm$core$List$cons, x, xs);
-		} else {
-			return xs;
-		}
-	});
-var $elm$core$List$filterMap = F2(
-	function (f, xs) {
-		return A3(
-			$elm$core$List$foldr,
-			$elm$core$List$maybeCons(f),
-			_List_Nil,
-			xs);
-	});
 var $elm$core$String$fromFloat = _String_fromNumber;
 var $mdgriffith$elm_ui$Internal$Model$formatColor = function (_v0) {
 	var red = _v0.a;
@@ -14224,6 +14615,38 @@ var $author$project$Ui$Layout$link = F2(
 				url: url
 			});
 	});
+var $mdgriffith$elm_ui$Internal$Model$Empty = {$: 'Empty'};
+var $mdgriffith$elm_ui$Internal$Model$map = F2(
+	function (fn, el) {
+		switch (el.$) {
+			case 'Styled':
+				var styled = el.a;
+				return $mdgriffith$elm_ui$Internal$Model$Styled(
+					{
+						html: F2(
+							function (add, context) {
+								return A2(
+									$elm$virtual_dom$VirtualDom$map,
+									fn,
+									A2(styled.html, add, context));
+							}),
+						styles: styled.styles
+					});
+			case 'Unstyled':
+				var html = el.a;
+				return $mdgriffith$elm_ui$Internal$Model$Unstyled(
+					A2(
+						$elm$core$Basics$composeL,
+						$elm$virtual_dom$VirtualDom$map(fn),
+						html));
+			case 'Text':
+				var str = el.a;
+				return $mdgriffith$elm_ui$Internal$Model$Text(str);
+			default:
+				return $mdgriffith$elm_ui$Internal$Model$Empty;
+		}
+	});
+var $mdgriffith$elm_ui$Element$map = $mdgriffith$elm_ui$Internal$Model$map;
 var $mdgriffith$elm_ui$Internal$Model$PaddingStyle = F5(
 	function (a, b, c, d, e) {
 		return {$: 'PaddingStyle', a: a, b: b, c: c, d: d, e: e};
@@ -14375,6 +14798,7 @@ var $mdgriffith$elm_ui$Element$Font$size = function (i) {
 		$mdgriffith$elm_ui$Internal$Flag$fontSize,
 		$mdgriffith$elm_ui$Internal$Model$FontSize(i));
 };
+var $author$project$Ui$Menu$OnToggle = {$: 'OnToggle'};
 var $mdgriffith$elm_ui$Internal$Model$AlignX = function (a) {
 	return {$: 'AlignX', a: a};
 };
@@ -14387,6 +14811,152 @@ var $mdgriffith$elm_ui$Internal$Model$AlignY = function (a) {
 };
 var $mdgriffith$elm_ui$Internal$Model$Top = {$: 'Top'};
 var $mdgriffith$elm_ui$Element$alignTop = $mdgriffith$elm_ui$Internal$Model$AlignY($mdgriffith$elm_ui$Internal$Model$Top);
+var $mdgriffith$elm_ui$Internal$Model$Button = {$: 'Button'};
+var $elm$json$Json$Encode$bool = _Json_wrap;
+var $elm$html$Html$Attributes$boolProperty = F2(
+	function (key, bool) {
+		return A2(
+			_VirtualDom_property,
+			key,
+			$elm$json$Json$Encode$bool(bool));
+	});
+var $elm$html$Html$Attributes$disabled = $elm$html$Html$Attributes$boolProperty('disabled');
+var $mdgriffith$elm_ui$Element$Input$enter = 'Enter';
+var $mdgriffith$elm_ui$Internal$Model$NoAttribute = {$: 'NoAttribute'};
+var $mdgriffith$elm_ui$Element$Input$hasFocusStyle = function (attr) {
+	if (((attr.$ === 'StyleClass') && (attr.b.$ === 'PseudoSelector')) && (attr.b.a.$ === 'Focus')) {
+		var _v1 = attr.b;
+		var _v2 = _v1.a;
+		return true;
+	} else {
+		return false;
+	}
+};
+var $mdgriffith$elm_ui$Element$Input$focusDefault = function (attrs) {
+	return A2($elm$core$List$any, $mdgriffith$elm_ui$Element$Input$hasFocusStyle, attrs) ? $mdgriffith$elm_ui$Internal$Model$NoAttribute : $mdgriffith$elm_ui$Internal$Model$htmlClass('focusable');
+};
+var $elm$virtual_dom$VirtualDom$Normal = function (a) {
+	return {$: 'Normal', a: a};
+};
+var $elm$virtual_dom$VirtualDom$on = _VirtualDom_on;
+var $elm$html$Html$Events$on = F2(
+	function (event, decoder) {
+		return A2(
+			$elm$virtual_dom$VirtualDom$on,
+			event,
+			$elm$virtual_dom$VirtualDom$Normal(decoder));
+	});
+var $elm$html$Html$Events$onClick = function (msg) {
+	return A2(
+		$elm$html$Html$Events$on,
+		'click',
+		$elm$json$Json$Decode$succeed(msg));
+};
+var $mdgriffith$elm_ui$Element$Events$onClick = A2($elm$core$Basics$composeL, $mdgriffith$elm_ui$Internal$Model$Attr, $elm$html$Html$Events$onClick);
+var $elm$json$Json$Decode$andThen = _Json_andThen;
+var $elm$json$Json$Decode$fail = _Json_fail;
+var $elm$virtual_dom$VirtualDom$MayPreventDefault = function (a) {
+	return {$: 'MayPreventDefault', a: a};
+};
+var $elm$html$Html$Events$preventDefaultOn = F2(
+	function (event, decoder) {
+		return A2(
+			$elm$virtual_dom$VirtualDom$on,
+			event,
+			$elm$virtual_dom$VirtualDom$MayPreventDefault(decoder));
+	});
+var $elm$json$Json$Decode$string = _Json_decodeString;
+var $mdgriffith$elm_ui$Element$Input$onKeyLookup = function (lookup) {
+	var decode = function (code) {
+		var _v0 = lookup(code);
+		if (_v0.$ === 'Nothing') {
+			return $elm$json$Json$Decode$fail('No key matched');
+		} else {
+			var msg = _v0.a;
+			return $elm$json$Json$Decode$succeed(msg);
+		}
+	};
+	var isKey = A2(
+		$elm$json$Json$Decode$andThen,
+		decode,
+		A2($elm$json$Json$Decode$field, 'key', $elm$json$Json$Decode$string));
+	return $mdgriffith$elm_ui$Internal$Model$Attr(
+		A2(
+			$elm$html$Html$Events$preventDefaultOn,
+			'keydown',
+			A2(
+				$elm$json$Json$Decode$map,
+				function (fired) {
+					return _Utils_Tuple2(fired, true);
+				},
+				isKey)));
+};
+var $mdgriffith$elm_ui$Internal$Flag$cursor = $mdgriffith$elm_ui$Internal$Flag$flag(21);
+var $mdgriffith$elm_ui$Element$pointer = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$cursor, $mdgriffith$elm_ui$Internal$Style$classes.cursorPointer);
+var $mdgriffith$elm_ui$Element$Input$space = ' ';
+var $elm$html$Html$Attributes$tabindex = function (n) {
+	return A2(
+		_VirtualDom_attribute,
+		'tabIndex',
+		$elm$core$String$fromInt(n));
+};
+var $mdgriffith$elm_ui$Element$Input$button = F2(
+	function (attrs, _v0) {
+		var onPress = _v0.onPress;
+		var label = _v0.label;
+		return A4(
+			$mdgriffith$elm_ui$Internal$Model$element,
+			$mdgriffith$elm_ui$Internal$Model$asEl,
+			$mdgriffith$elm_ui$Internal$Model$div,
+			A2(
+				$elm$core$List$cons,
+				$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
+				A2(
+					$elm$core$List$cons,
+					$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
+					A2(
+						$elm$core$List$cons,
+						$mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.contentCenterX + (' ' + ($mdgriffith$elm_ui$Internal$Style$classes.contentCenterY + (' ' + ($mdgriffith$elm_ui$Internal$Style$classes.seButton + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.noTextSelection)))))),
+						A2(
+							$elm$core$List$cons,
+							$mdgriffith$elm_ui$Element$pointer,
+							A2(
+								$elm$core$List$cons,
+								$mdgriffith$elm_ui$Element$Input$focusDefault(attrs),
+								A2(
+									$elm$core$List$cons,
+									$mdgriffith$elm_ui$Internal$Model$Describe($mdgriffith$elm_ui$Internal$Model$Button),
+									A2(
+										$elm$core$List$cons,
+										$mdgriffith$elm_ui$Internal$Model$Attr(
+											$elm$html$Html$Attributes$tabindex(0)),
+										function () {
+											if (onPress.$ === 'Nothing') {
+												return A2(
+													$elm$core$List$cons,
+													$mdgriffith$elm_ui$Internal$Model$Attr(
+														$elm$html$Html$Attributes$disabled(true)),
+													attrs);
+											} else {
+												var msg = onPress.a;
+												return A2(
+													$elm$core$List$cons,
+													$mdgriffith$elm_ui$Element$Events$onClick(msg),
+													A2(
+														$elm$core$List$cons,
+														$mdgriffith$elm_ui$Element$Input$onKeyLookup(
+															function (code) {
+																return _Utils_eq(code, $mdgriffith$elm_ui$Element$Input$enter) ? $elm$core$Maybe$Just(msg) : (_Utils_eq(code, $mdgriffith$elm_ui$Element$Input$space) ? $elm$core$Maybe$Just(msg) : $elm$core$Maybe$Nothing);
+															}),
+														attrs));
+											}
+										}()))))))),
+			$mdgriffith$elm_ui$Internal$Model$Unkeyed(
+				_List_fromArray(
+					[label])));
+	});
+var $mdgriffith$elm_ui$Internal$Model$CenterX = {$: 'CenterX'};
+var $mdgriffith$elm_ui$Element$centerX = $mdgriffith$elm_ui$Internal$Model$AlignX($mdgriffith$elm_ui$Internal$Model$CenterX);
 var $mdgriffith$elm_ui$Internal$Model$AsColumn = {$: 'AsColumn'};
 var $mdgriffith$elm_ui$Internal$Model$asColumn = $mdgriffith$elm_ui$Internal$Model$AsColumn;
 var $mdgriffith$elm_ui$Element$column = F2(
@@ -14429,60 +14999,242 @@ var $author$project$Ui$Menu$links = A2(
 			A2($author$project$Ui$Menu$Link, '/documentation', 'Documentation'),
 			A2($author$project$Ui$Menu$Link, '/administration', 'Administration')
 		]));
-var $author$project$Ui$Menu$small = A2(
-	$mdgriffith$elm_ui$Element$row,
-	_List_fromArray(
-		[
-			$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-			$mdgriffith$elm_ui$Element$paddingEach(
-			{bottom: 40, left: 0, right: 0, top: 0})
-		]),
+var $mdgriffith$elm_ui$Internal$Model$Max = F2(
+	function (a, b) {
+		return {$: 'Max', a: a, b: b};
+	});
+var $mdgriffith$elm_ui$Element$maximum = F2(
+	function (i, l) {
+		return A2($mdgriffith$elm_ui$Internal$Model$Max, i, l);
+	});
+var $elm$svg$Svg$trustedNode = _VirtualDom_nodeNS('http://www.w3.org/2000/svg');
+var $elm$svg$Svg$line = $elm$svg$Svg$trustedNode('line');
+var $feathericons$elm_feather$FeatherIcons$Icon = function (a) {
+	return {$: 'Icon', a: a};
+};
+var $feathericons$elm_feather$FeatherIcons$defaultAttributes = function (name) {
+	return {
+		_class: $elm$core$Maybe$Just('feather feather-' + name),
+		size: 24,
+		sizeUnit: '',
+		strokeWidth: 2,
+		viewBox: '0 0 24 24'
+	};
+};
+var $feathericons$elm_feather$FeatherIcons$makeBuilder = F2(
+	function (name, src) {
+		return $feathericons$elm_feather$FeatherIcons$Icon(
+			{
+				attrs: $feathericons$elm_feather$FeatherIcons$defaultAttributes(name),
+				src: src
+			});
+	});
+var $elm$svg$Svg$Attributes$x1 = _VirtualDom_attribute('x1');
+var $elm$svg$Svg$Attributes$x2 = _VirtualDom_attribute('x2');
+var $elm$svg$Svg$Attributes$y1 = _VirtualDom_attribute('y1');
+var $elm$svg$Svg$Attributes$y2 = _VirtualDom_attribute('y2');
+var $feathericons$elm_feather$FeatherIcons$menu = A2(
+	$feathericons$elm_feather$FeatherIcons$makeBuilder,
+	'menu',
 	_List_fromArray(
 		[
 			A2(
+			$elm$svg$Svg$line,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$x1('3'),
+					$elm$svg$Svg$Attributes$y1('12'),
+					$elm$svg$Svg$Attributes$x2('21'),
+					$elm$svg$Svg$Attributes$y2('12')
+				]),
+			_List_Nil),
+			A2(
+			$elm$svg$Svg$line,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$x1('3'),
+					$elm$svg$Svg$Attributes$y1('6'),
+					$elm$svg$Svg$Attributes$x2('21'),
+					$elm$svg$Svg$Attributes$y2('6')
+				]),
+			_List_Nil),
+			A2(
+			$elm$svg$Svg$line,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$x1('3'),
+					$elm$svg$Svg$Attributes$y1('18'),
+					$elm$svg$Svg$Attributes$x2('21'),
+					$elm$svg$Svg$Attributes$y2('18')
+				]),
+			_List_Nil)
+		]));
+var $mdgriffith$elm_ui$Element$none = $mdgriffith$elm_ui$Internal$Model$Empty;
+var $elm$svg$Svg$Attributes$class = _VirtualDom_attribute('class');
+var $elm$svg$Svg$Attributes$fill = _VirtualDom_attribute('fill');
+var $elm$svg$Svg$Attributes$height = _VirtualDom_attribute('height');
+var $elm$svg$Svg$map = $elm$virtual_dom$VirtualDom$map;
+var $elm$svg$Svg$Attributes$stroke = _VirtualDom_attribute('stroke');
+var $elm$svg$Svg$Attributes$strokeLinecap = _VirtualDom_attribute('stroke-linecap');
+var $elm$svg$Svg$Attributes$strokeLinejoin = _VirtualDom_attribute('stroke-linejoin');
+var $elm$svg$Svg$Attributes$strokeWidth = _VirtualDom_attribute('stroke-width');
+var $elm$svg$Svg$svg = $elm$svg$Svg$trustedNode('svg');
+var $elm$svg$Svg$Attributes$viewBox = _VirtualDom_attribute('viewBox');
+var $elm$svg$Svg$Attributes$width = _VirtualDom_attribute('width');
+var $feathericons$elm_feather$FeatherIcons$toHtml = F2(
+	function (attributes, _v0) {
+		var src = _v0.a.src;
+		var attrs = _v0.a.attrs;
+		var strSize = $elm$core$String$fromFloat(attrs.size);
+		var baseAttributes = _List_fromArray(
+			[
+				$elm$svg$Svg$Attributes$fill('none'),
+				$elm$svg$Svg$Attributes$height(
+				_Utils_ap(strSize, attrs.sizeUnit)),
+				$elm$svg$Svg$Attributes$width(
+				_Utils_ap(strSize, attrs.sizeUnit)),
+				$elm$svg$Svg$Attributes$stroke('currentColor'),
+				$elm$svg$Svg$Attributes$strokeLinecap('round'),
+				$elm$svg$Svg$Attributes$strokeLinejoin('round'),
+				$elm$svg$Svg$Attributes$strokeWidth(
+				$elm$core$String$fromFloat(attrs.strokeWidth)),
+				$elm$svg$Svg$Attributes$viewBox(attrs.viewBox)
+			]);
+		var combinedAttributes = _Utils_ap(
+			function () {
+				var _v1 = attrs._class;
+				if (_v1.$ === 'Just') {
+					var c = _v1.a;
+					return A2(
+						$elm$core$List$cons,
+						$elm$svg$Svg$Attributes$class(c),
+						baseAttributes);
+				} else {
+					return baseAttributes;
+				}
+			}(),
+			attributes);
+		return A2(
+			$elm$svg$Svg$svg,
+			combinedAttributes,
+			A2(
+				$elm$core$List$map,
+				$elm$svg$Svg$map($elm$core$Basics$never),
+				src));
+	});
+var $feathericons$elm_feather$FeatherIcons$x = A2(
+	$feathericons$elm_feather$FeatherIcons$makeBuilder,
+	'x',
+	_List_fromArray(
+		[
+			A2(
+			$elm$svg$Svg$line,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$x1('18'),
+					$elm$svg$Svg$Attributes$y1('6'),
+					$elm$svg$Svg$Attributes$x2('6'),
+					$elm$svg$Svg$Attributes$y2('18')
+				]),
+			_List_Nil),
+			A2(
+			$elm$svg$Svg$line,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$x1('6'),
+					$elm$svg$Svg$Attributes$y1('6'),
+					$elm$svg$Svg$Attributes$x2('18'),
+					$elm$svg$Svg$Attributes$y2('18')
+				]),
+			_List_Nil)
+		]));
+var $author$project$Ui$Menu$small = F2(
+	function (window, model) {
+		return A2(
 			$mdgriffith$elm_ui$Element$column,
 			_List_fromArray(
 				[
-					$mdgriffith$elm_ui$Element$alignTop,
-					$mdgriffith$elm_ui$Element$spacing(5),
-					$mdgriffith$elm_ui$Element$alignLeft,
-					$mdgriffith$elm_ui$Element$width(
-					$mdgriffith$elm_ui$Element$px(300))
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+					$mdgriffith$elm_ui$Element$paddingEach(
+					{bottom: 40, left: 0, right: 0, top: 0})
 				]),
 			_List_fromArray(
 				[
 					A2(
-					$mdgriffith$elm_ui$Element$link,
-					_List_Nil,
-					{
-						label: A2(
-							$mdgriffith$elm_ui$Element$row,
+					$mdgriffith$elm_ui$Element$row,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+						]),
+					_List_fromArray(
+						[
+							A2(
+							$mdgriffith$elm_ui$Element$column,
 							_List_fromArray(
 								[
-									$mdgriffith$elm_ui$Element$Font$size(20)
+									$mdgriffith$elm_ui$Element$alignTop,
+									$mdgriffith$elm_ui$Element$spacing(5),
+									$mdgriffith$elm_ui$Element$alignLeft,
+									$mdgriffith$elm_ui$Element$width(
+									A2($mdgriffith$elm_ui$Element$maximum, 300, $mdgriffith$elm_ui$Element$fill))
 								]),
 							_List_fromArray(
 								[
-									$mdgriffith$elm_ui$Element$text('elm-charts')
+									A2(
+									$mdgriffith$elm_ui$Element$link,
+									_List_Nil,
+									{
+										label: A2(
+											$mdgriffith$elm_ui$Element$row,
+											_List_fromArray(
+												[
+													$mdgriffith$elm_ui$Element$Font$size(20)
+												]),
+											_List_fromArray(
+												[
+													$mdgriffith$elm_ui$Element$text('elm-charts')
+												])),
+										url: '/'
+									})
 								])),
-						url: '/'
-					})
-				])),
-			A2(
-			$mdgriffith$elm_ui$Element$row,
-			_List_fromArray(
-				[
-					$mdgriffith$elm_ui$Element$spacing(40),
-					$mdgriffith$elm_ui$Element$alignRight,
-					$mdgriffith$elm_ui$Element$Font$size(13)
-				]),
-			$author$project$Ui$Menu$links)
-		]));
+							A2(
+							$mdgriffith$elm_ui$Element$row,
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$spacing(40),
+									$mdgriffith$elm_ui$Element$alignRight,
+									$mdgriffith$elm_ui$Element$Font$size(13)
+								]),
+							(window.width > 950) ? $author$project$Ui$Menu$links : _List_fromArray(
+								[
+									A2(
+									$mdgriffith$elm_ui$Element$Input$button,
+									_List_Nil,
+									{
+										label: $mdgriffith$elm_ui$Element$html(
+											A2(
+												$feathericons$elm_feather$FeatherIcons$toHtml,
+												_List_Nil,
+												model.isOpen ? $feathericons$elm_feather$FeatherIcons$x : $feathericons$elm_feather$FeatherIcons$menu)),
+										onPress: $elm$core$Maybe$Just($author$project$Ui$Menu$OnToggle)
+									})
+								]))
+						])),
+					model.isOpen ? A2(
+					$mdgriffith$elm_ui$Element$column,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$centerX,
+							$mdgriffith$elm_ui$Element$spacing(5),
+							$mdgriffith$elm_ui$Element$paddingEach(
+							{bottom: 0, left: 0, right: 0, top: 20})
+						]),
+					$author$project$Ui$Menu$links) : $mdgriffith$elm_ui$Element$none
+				]));
+	});
 var $elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
 var $elm$html$Html$Attributes$style = $elm$virtual_dom$VirtualDom$style;
 var $elm$html$Html$ul = _VirtualDom_node('ul');
-var $mdgriffith$elm_ui$Internal$Model$CenterX = {$: 'CenterX'};
-var $mdgriffith$elm_ui$Element$centerX = $mdgriffith$elm_ui$Internal$Model$AlignX($mdgriffith$elm_ui$Internal$Model$CenterX);
 var $mdgriffith$elm_ui$Internal$Model$Colored = F3(
 	function (a, b, c) {
 		return {$: 'Colored', a: a, b: b, c: c};
@@ -14786,14 +15538,6 @@ var $mdgriffith$elm_ui$Element$layoutWith = F3(
 	});
 var $mdgriffith$elm_ui$Element$layout = $mdgriffith$elm_ui$Element$layoutWith(
 	{options: _List_Nil});
-var $mdgriffith$elm_ui$Internal$Model$Max = F2(
-	function (a, b) {
-		return {$: 'Max', a: a, b: b};
-	});
-var $mdgriffith$elm_ui$Element$maximum = F2(
-	function (i, l) {
-		return A2($mdgriffith$elm_ui$Internal$Model$Max, i, l);
-	});
 var $mdgriffith$elm_ui$Element$Font$sansSerif = $mdgriffith$elm_ui$Internal$Model$SansSerif;
 var $elm$core$List$singleton = function (value) {
 	return _List_fromArray(
@@ -14819,9 +15563,9 @@ var $author$project$Ui$Layout$view = function (children) {
 				_List_fromArray(
 					[
 						$mdgriffith$elm_ui$Element$width(
-						A2($mdgriffith$elm_ui$Element$maximum, 1000, $mdgriffith$elm_ui$Element$fill)),
+						A2($mdgriffith$elm_ui$Element$maximum, 1060, $mdgriffith$elm_ui$Element$fill)),
 						$mdgriffith$elm_ui$Element$paddingEach(
-						{bottom: 20, left: 0, right: 0, top: 30}),
+						{bottom: 20, left: 30, right: 30, top: 30}),
 						$mdgriffith$elm_ui$Element$centerX,
 						$mdgriffith$elm_ui$Element$Font$size(12),
 						$mdgriffith$elm_ui$Element$Font$color(
@@ -14837,7 +15581,10 @@ var $author$project$Page$Administration$view = function (model) {
 		body: $author$project$Ui$Layout$view(
 			_List_fromArray(
 				[
-					$author$project$Ui$Menu$small,
+					A2(
+					$mdgriffith$elm_ui$Element$map,
+					$author$project$Page$Administration$MenuMsg,
+					A2($author$project$Ui$Menu$small, model.window, model.menu)),
 					A2(
 					$mdgriffith$elm_ui$Element$el,
 					_List_fromArray(
@@ -14979,42 +15726,12 @@ var $author$project$Page$Administration$view = function (model) {
 		title: 'elm-charts'
 	};
 };
+var $author$project$Page$Section$MenuMsg = function (a) {
+	return {$: 'MenuMsg', a: a};
+};
 var $author$project$Page$Section$OnExampleMsg = function (a) {
 	return {$: 'OnExampleMsg', a: a};
 };
-var $mdgriffith$elm_ui$Internal$Model$Empty = {$: 'Empty'};
-var $mdgriffith$elm_ui$Internal$Model$map = F2(
-	function (fn, el) {
-		switch (el.$) {
-			case 'Styled':
-				var styled = el.a;
-				return $mdgriffith$elm_ui$Internal$Model$Styled(
-					{
-						html: F2(
-							function (add, context) {
-								return A2(
-									$elm$virtual_dom$VirtualDom$map,
-									fn,
-									A2(styled.html, add, context));
-							}),
-						styles: styled.styles
-					});
-			case 'Unstyled':
-				var html = el.a;
-				return $mdgriffith$elm_ui$Internal$Model$Unstyled(
-					A2(
-						$elm$core$Basics$composeL,
-						$elm$virtual_dom$VirtualDom$map(fn),
-						html));
-			case 'Text':
-				var str = el.a;
-				return $mdgriffith$elm_ui$Internal$Model$Text(str);
-			default:
-				return $mdgriffith$elm_ui$Internal$Model$Empty;
-		}
-	});
-var $mdgriffith$elm_ui$Element$map = $mdgriffith$elm_ui$Internal$Model$map;
-var $mdgriffith$elm_ui$Element$none = $mdgriffith$elm_ui$Internal$Model$Empty;
 var $author$project$Internal$Svg$End = {$: 'End'};
 var $author$project$Chart$Attributes$alignRight = function (config) {
 	return _Utils_update(
@@ -15158,7 +15875,6 @@ var $author$project$Internal$Helpers$gatherWith = F2(
 			});
 		return A2(helper, list, _List_Nil);
 	});
-var $elm$svg$Svg$Attributes$class = _VirtualDom_attribute('class');
 var $author$project$Internal$Coordinates$Position = F4(
 	function (x1, x2, y1, y2) {
 		return {x1: x1, x2: x2, y1: y1, y2: y2};
@@ -15198,7 +15914,6 @@ var $author$project$Internal$Coordinates$foldPosition = F2(
 			A4($author$project$Internal$Coordinates$Position, 0, 0, 0, 0),
 			A3($elm$core$List$foldl, fold, $elm$core$Maybe$Nothing, data));
 	});
-var $elm$svg$Svg$trustedNode = _VirtualDom_nodeNS('http://www.w3.org/2000/svg');
 var $elm$svg$Svg$g = $elm$svg$Svg$trustedNode('g');
 var $author$project$Internal$Item$getLimits = function (_v0) {
 	var item = _v0.a;
@@ -15412,7 +16127,6 @@ var $author$project$Internal$Item$map = F2(
 					})
 			});
 	});
-var $elm$svg$Svg$map = $elm$virtual_dom$VirtualDom$map;
 var $author$project$Internal$Legend$BarLegend = F2(
 	function (a, b) {
 		return {$: 'BarLegend', a: a, b: b};
@@ -15458,18 +16172,6 @@ var $author$project$Internal$Helpers$green = '#71c614';
 var $author$project$Internal$Helpers$orange = '#FF8400';
 var $author$project$Internal$Helpers$purple = '#7b4dff';
 var $author$project$Internal$Helpers$red = '#F5325B';
-var $elm$core$Dict$fromList = function (assocs) {
-	return A3(
-		$elm$core$List$foldl,
-		F2(
-			function (_v0, dict) {
-				var key = _v0.a;
-				var value = _v0.b;
-				return A3($elm$core$Dict$insert, key, value, dict);
-			}),
-		$elm$core$Dict$empty,
-		assocs);
-};
 var $elm$core$Tuple$pair = F2(
 	function (a, b) {
 		return _Utils_Tuple2(a, b);
@@ -15819,7 +16521,6 @@ var $author$project$Internal$Commands$description = F2(
 					$author$project$Internal$Commands$stringCommand),
 				commands));
 	});
-var $elm$svg$Svg$Attributes$fill = _VirtualDom_attribute('fill');
 var $elm$svg$Svg$Attributes$fillOpacity = _VirtualDom_attribute('fill-opacity');
 var $elm$svg$Svg$path = $elm$svg$Svg$trustedNode('path');
 var $author$project$Internal$Coordinates$scaleCartesianX = F2(
@@ -15830,9 +16531,7 @@ var $author$project$Internal$Coordinates$scaleCartesianY = F2(
 	function (plane, value) {
 		return (value * $author$project$Internal$Coordinates$range(plane.y)) / $author$project$Internal$Coordinates$innerHeight(plane);
 	});
-var $elm$svg$Svg$Attributes$stroke = _VirtualDom_attribute('stroke');
 var $elm$svg$Svg$Attributes$strokeOpacity = _VirtualDom_attribute('stroke-opacity');
-var $elm$svg$Svg$Attributes$strokeWidth = _VirtualDom_attribute('stroke-width');
 var $elm$svg$Svg$Attributes$style = _VirtualDom_attribute('style');
 var $author$project$Internal$Svg$apply = F2(
 	function (funcs, _default) {
@@ -15846,9 +16545,7 @@ var $elm$svg$Svg$circle = $elm$svg$Svg$trustedNode('circle');
 var $elm$svg$Svg$Attributes$cx = _VirtualDom_attribute('cx');
 var $elm$svg$Svg$Attributes$cy = _VirtualDom_attribute('cy');
 var $elm$svg$Svg$defs = $elm$svg$Svg$trustedNode('defs');
-var $elm$svg$Svg$Attributes$height = _VirtualDom_attribute('height');
 var $elm$svg$Svg$Attributes$id = _VirtualDom_attribute('id');
-var $elm$svg$Svg$line = $elm$svg$Svg$trustedNode('line');
 var $elm$svg$Svg$linearGradient = $elm$svg$Svg$trustedNode('linearGradient');
 var $elm$svg$Svg$Attributes$offset = _VirtualDom_attribute('offset');
 var $elm$svg$Svg$pattern = $elm$svg$Svg$trustedNode('pattern');
@@ -15857,12 +16554,7 @@ var $elm$svg$Svg$Attributes$patternUnits = _VirtualDom_attribute('patternUnits')
 var $elm$svg$Svg$Attributes$r = _VirtualDom_attribute('r');
 var $elm$svg$Svg$stop = $elm$svg$Svg$trustedNode('stop');
 var $elm$svg$Svg$Attributes$stopColor = _VirtualDom_attribute('stop-color');
-var $elm$svg$Svg$Attributes$width = _VirtualDom_attribute('width');
-var $elm$svg$Svg$Attributes$x1 = _VirtualDom_attribute('x1');
-var $elm$svg$Svg$Attributes$x2 = _VirtualDom_attribute('x2');
 var $elm$svg$Svg$Attributes$y = _VirtualDom_attribute('y');
-var $elm$svg$Svg$Attributes$y1 = _VirtualDom_attribute('y1');
-var $elm$svg$Svg$Attributes$y2 = _VirtualDom_attribute('y2');
 var $author$project$Internal$Svg$toPattern = F2(
 	function (defaultColor, design) {
 		var toPatternId = function (props) {
@@ -16936,11 +17628,9 @@ var $author$project$Internal$Svg$Event = F2(
 		return {handler: handler, name: name};
 	});
 var $elm$json$Json$Decode$map3 = _Json_map3;
-var $elm$json$Json$Decode$field = _Json_decodeField;
 var $elm$json$Json$Decode$float = _Json_decodeFloat;
 var $debois$elm_dom$DOM$offsetHeight = A2($elm$json$Json$Decode$field, 'offsetHeight', $elm$json$Json$Decode$float);
 var $debois$elm_dom$DOM$offsetWidth = A2($elm$json$Json$Decode$field, 'offsetWidth', $elm$json$Json$Decode$float);
-var $elm$json$Json$Decode$andThen = _Json_andThen;
 var $elm$json$Json$Decode$map4 = _Json_map4;
 var $debois$elm_dom$DOM$offsetLeft = A2($elm$json$Json$Decode$field, 'offsetLeft', $elm$json$Json$Decode$float);
 var $elm$json$Json$Decode$null = _Json_decodeNull;
@@ -17068,21 +17758,8 @@ var $author$project$Internal$Svg$decoder = F2(
 			A2($elm$json$Json$Decode$field, 'pageY', $elm$json$Json$Decode$float),
 			$debois$elm_dom$DOM$target($author$project$Internal$Svg$decodePosition));
 	});
-var $elm$virtual_dom$VirtualDom$Normal = function (a) {
-	return {$: 'Normal', a: a};
-};
-var $elm$virtual_dom$VirtualDom$on = _VirtualDom_on;
-var $elm$html$Html$Events$on = F2(
-	function (event, decoder) {
-		return A2(
-			$elm$virtual_dom$VirtualDom$on,
-			event,
-			$elm$virtual_dom$VirtualDom$Normal(decoder));
-	});
 var $elm$svg$Svg$Events$on = $elm$html$Html$Events$on;
 var $elm$svg$Svg$rect = $elm$svg$Svg$trustedNode('rect');
-var $elm$svg$Svg$svg = $elm$svg$Svg$trustedNode('svg');
-var $elm$svg$Svg$Attributes$viewBox = _VirtualDom_attribute('viewBox');
 var $elm$svg$Svg$Attributes$x = _VirtualDom_attribute('x');
 var $author$project$Internal$Svg$container = F5(
 	function (plane, config, below, chartEls, above) {
@@ -27994,11 +28671,6 @@ var $author$project$Chart$productLabel = F2(
 	});
 var $author$project$Examples$Frontpage$Concise$purple1 = '#653bf4B0';
 var $author$project$Examples$Frontpage$Concise$purple2 = '#653bf470';
-var $author$project$Chart$Attributes$static = function (config) {
-	return _Utils_update(
-		config,
-		{responsive: false});
-};
 var $author$project$Examples$Frontpage$Concise$weakWhite = 'rgba(255, 255, 255, 0.7)';
 var $author$project$Examples$Frontpage$Concise$white = 'white';
 var $author$project$Examples$Frontpage$Concise$view = function (model) {
@@ -28008,7 +28680,8 @@ var $author$project$Examples$Frontpage$Concise$view = function (model) {
 			[
 				$author$project$Chart$Attributes$height(300),
 				$author$project$Chart$Attributes$width(500),
-				$author$project$Chart$Attributes$static,
+				$author$project$Chart$Attributes$margin(
+				{bottom: 25, left: 40, right: 0, top: 10}),
 				A2(
 				$author$project$Chart$Events$onMouseMove,
 				$author$project$Examples$Frontpage$Concise$OnHover,
@@ -28229,7 +28902,6 @@ var $author$project$Examples$Frontpage$Familiar$chart = A2(
 		[
 			$author$project$Chart$Attributes$height(350),
 			$author$project$Chart$Attributes$width(570),
-			$author$project$Chart$Attributes$static,
 			$author$project$Chart$Attributes$margin(
 			{bottom: 30, left: 30, right: 10, top: 40})
 		]),
@@ -30343,12 +31015,6 @@ var $author$project$Examples$Interactivity$Zoom$getNewSelection = function (mode
 		default:
 			return $elm$core$Maybe$Nothing;
 	}
-};
-var $elm$html$Html$Events$onClick = function (msg) {
-	return A2(
-		$elm$html$Html$Events$on,
-		'click',
-		$elm$json$Json$Decode$succeed(msg));
 };
 var $author$project$Chart$Events$onMouseDown = F2(
 	function (onMsg, decoder) {
@@ -33265,7 +33931,10 @@ var $author$project$Page$Section$view = function (model) {
 		body: $author$project$Ui$Layout$view(
 			_List_fromArray(
 				[
-					$author$project$Ui$Menu$small,
+					A2(
+					$mdgriffith$elm_ui$Element$map,
+					$author$project$Page$Section$MenuMsg,
+					A2($author$project$Ui$Menu$small, model.window, model.menu)),
 					A2(
 					$mdgriffith$elm_ui$Element$el,
 					_List_fromArray(
@@ -33360,136 +34029,13 @@ var $author$project$Page$Section$view = function (model) {
 	};
 };
 var $author$project$Page$Documentation$view = $author$project$Page$Section$view;
+var $author$project$Page$Example$MenuMsg = function (a) {
+	return {$: 'MenuMsg', a: a};
+};
 var $author$project$Page$Example$OnExampleMsg = function (a) {
 	return {$: 'OnExampleMsg', a: a};
 };
 var $author$project$Page$Example$OnToggleCode = {$: 'OnToggleCode'};
-var $mdgriffith$elm_ui$Internal$Model$Button = {$: 'Button'};
-var $elm$json$Json$Encode$bool = _Json_wrap;
-var $elm$html$Html$Attributes$boolProperty = F2(
-	function (key, bool) {
-		return A2(
-			_VirtualDom_property,
-			key,
-			$elm$json$Json$Encode$bool(bool));
-	});
-var $elm$html$Html$Attributes$disabled = $elm$html$Html$Attributes$boolProperty('disabled');
-var $mdgriffith$elm_ui$Element$Input$enter = 'Enter';
-var $mdgriffith$elm_ui$Internal$Model$NoAttribute = {$: 'NoAttribute'};
-var $mdgriffith$elm_ui$Element$Input$hasFocusStyle = function (attr) {
-	if (((attr.$ === 'StyleClass') && (attr.b.$ === 'PseudoSelector')) && (attr.b.a.$ === 'Focus')) {
-		var _v1 = attr.b;
-		var _v2 = _v1.a;
-		return true;
-	} else {
-		return false;
-	}
-};
-var $mdgriffith$elm_ui$Element$Input$focusDefault = function (attrs) {
-	return A2($elm$core$List$any, $mdgriffith$elm_ui$Element$Input$hasFocusStyle, attrs) ? $mdgriffith$elm_ui$Internal$Model$NoAttribute : $mdgriffith$elm_ui$Internal$Model$htmlClass('focusable');
-};
-var $mdgriffith$elm_ui$Element$Events$onClick = A2($elm$core$Basics$composeL, $mdgriffith$elm_ui$Internal$Model$Attr, $elm$html$Html$Events$onClick);
-var $elm$json$Json$Decode$fail = _Json_fail;
-var $elm$virtual_dom$VirtualDom$MayPreventDefault = function (a) {
-	return {$: 'MayPreventDefault', a: a};
-};
-var $elm$html$Html$Events$preventDefaultOn = F2(
-	function (event, decoder) {
-		return A2(
-			$elm$virtual_dom$VirtualDom$on,
-			event,
-			$elm$virtual_dom$VirtualDom$MayPreventDefault(decoder));
-	});
-var $elm$json$Json$Decode$string = _Json_decodeString;
-var $mdgriffith$elm_ui$Element$Input$onKeyLookup = function (lookup) {
-	var decode = function (code) {
-		var _v0 = lookup(code);
-		if (_v0.$ === 'Nothing') {
-			return $elm$json$Json$Decode$fail('No key matched');
-		} else {
-			var msg = _v0.a;
-			return $elm$json$Json$Decode$succeed(msg);
-		}
-	};
-	var isKey = A2(
-		$elm$json$Json$Decode$andThen,
-		decode,
-		A2($elm$json$Json$Decode$field, 'key', $elm$json$Json$Decode$string));
-	return $mdgriffith$elm_ui$Internal$Model$Attr(
-		A2(
-			$elm$html$Html$Events$preventDefaultOn,
-			'keydown',
-			A2(
-				$elm$json$Json$Decode$map,
-				function (fired) {
-					return _Utils_Tuple2(fired, true);
-				},
-				isKey)));
-};
-var $mdgriffith$elm_ui$Internal$Flag$cursor = $mdgriffith$elm_ui$Internal$Flag$flag(21);
-var $mdgriffith$elm_ui$Element$pointer = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$cursor, $mdgriffith$elm_ui$Internal$Style$classes.cursorPointer);
-var $mdgriffith$elm_ui$Element$Input$space = ' ';
-var $elm$html$Html$Attributes$tabindex = function (n) {
-	return A2(
-		_VirtualDom_attribute,
-		'tabIndex',
-		$elm$core$String$fromInt(n));
-};
-var $mdgriffith$elm_ui$Element$Input$button = F2(
-	function (attrs, _v0) {
-		var onPress = _v0.onPress;
-		var label = _v0.label;
-		return A4(
-			$mdgriffith$elm_ui$Internal$Model$element,
-			$mdgriffith$elm_ui$Internal$Model$asEl,
-			$mdgriffith$elm_ui$Internal$Model$div,
-			A2(
-				$elm$core$List$cons,
-				$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
-				A2(
-					$elm$core$List$cons,
-					$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
-					A2(
-						$elm$core$List$cons,
-						$mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.contentCenterX + (' ' + ($mdgriffith$elm_ui$Internal$Style$classes.contentCenterY + (' ' + ($mdgriffith$elm_ui$Internal$Style$classes.seButton + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.noTextSelection)))))),
-						A2(
-							$elm$core$List$cons,
-							$mdgriffith$elm_ui$Element$pointer,
-							A2(
-								$elm$core$List$cons,
-								$mdgriffith$elm_ui$Element$Input$focusDefault(attrs),
-								A2(
-									$elm$core$List$cons,
-									$mdgriffith$elm_ui$Internal$Model$Describe($mdgriffith$elm_ui$Internal$Model$Button),
-									A2(
-										$elm$core$List$cons,
-										$mdgriffith$elm_ui$Internal$Model$Attr(
-											$elm$html$Html$Attributes$tabindex(0)),
-										function () {
-											if (onPress.$ === 'Nothing') {
-												return A2(
-													$elm$core$List$cons,
-													$mdgriffith$elm_ui$Internal$Model$Attr(
-														$elm$html$Html$Attributes$disabled(true)),
-													attrs);
-											} else {
-												var msg = onPress.a;
-												return A2(
-													$elm$core$List$cons,
-													$mdgriffith$elm_ui$Element$Events$onClick(msg),
-													A2(
-														$elm$core$List$cons,
-														$mdgriffith$elm_ui$Element$Input$onKeyLookup(
-															function (code) {
-																return _Utils_eq(code, $mdgriffith$elm_ui$Element$Input$enter) ? $elm$core$Maybe$Just(msg) : (_Utils_eq(code, $mdgriffith$elm_ui$Element$Input$space) ? $elm$core$Maybe$Just(msg) : $elm$core$Maybe$Nothing);
-															}),
-														attrs));
-											}
-										}()))))))),
-			$mdgriffith$elm_ui$Internal$Model$Unkeyed(
-				_List_fromArray(
-					[label])));
-	});
 var $mdgriffith$elm_ui$Element$fillPortion = $mdgriffith$elm_ui$Internal$Model$Fill;
 var $author$project$Examples$first = $author$project$Examples$BarCharts__Gradient;
 var $author$project$Examples$BarCharts$BarLabels$largeCode = '\nimport Html as H\nimport Svg as S\nimport Chart as C\nimport Chart.Attributes as CA\nimport Chart.Events as CE\nimport Chart.Item as CI\n\n\nview : Model -> H.Html Msg\nview model =\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    ]\n    [ C.grid []\n    , C.xLabels []\n    , C.yLabels []\n    , C.bars []\n        [ C.bar .q []\n        , C.bar .p []\n        ]\n        data\n\n    , C.barLabels [ CA.moveDown 15, CA.color "white" ]\n    ]\n  ';
@@ -33540,8 +34086,8 @@ var $author$project$Examples$Frame$Position$largeCode = '\nimport Html as H\nimp
 var $author$project$Examples$Frame$Rect$largeCode = '\nimport Html as H\nimport Svg as S\nimport Chart as C\nimport Chart.Attributes as CA\n\n\nview : Model -> H.Html Msg\nview model =\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    ]\n    [ C.grid []\n    , C.xAxis []\n    , C.xTicks []\n    , C.xLabels []\n    , C.yAxis []\n    , C.yTicks []\n    , C.yLabels []\n    , C.withPlane <| \\p ->\n        [ C.rect\n            [ CA.x1 3\n            , CA.y1 3\n            , CA.x2 7\n            , CA.y2 9\n            , CA.color "rgb(210, 210, 210)"\n            , CA.opacity 0.3\n            ]\n        ]\n    ]\n  ';
 var $author$project$Examples$Frame$Times$largeCode = '\nimport Html as H\nimport Svg as S\nimport Chart as C\nimport Chart.Attributes as CA\nimport Time\n\n\nview : Model -> H.Html Msg\nview model =\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    , CA.padding { top = 10, bottom = 0, left = 0, right = 25 }\n    , CA.range\n        [ CA.lowest 1591974241000 CA.exactly\n        , CA.highest 1623510241000 CA.exactly\n        ]\n    ]\n    [ C.grid []\n    , C.xAxis []\n    , C.xTicks [ CA.times Time.utc ]\n    , C.xLabels [ CA.times Time.utc ]\n    ]\n  ';
 var $author$project$Examples$Frame$Titles$largeCode = '\nimport Html as H\nimport Svg as S\nimport Chart as C\nimport Chart.Attributes as CA\n\n\nview : Model -> H.Html Msg\nview model =\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    , CA.padding { top = 25, bottom = 0, left = 0, right = 10 }\n    , CA.range [ CA.lowest 0 CA.exactly ]\n    ]\n    [ C.grid []\n    , C.xAxis []\n    , C.xTicks [ CA.ints ]\n    , C.xLabels [ CA.ints ]\n    , C.yAxis []\n    , C.yTicks [ CA.ints ]\n    , C.yLabels [ CA.ints ]\n    , C.series .age\n        [ C.scatter .toys [ CA.opacity 0, CA.borderWidth 1 ]\n        ]\n        data\n\n    , C.labelAt .min CA.middle [ CA.moveLeft 35, CA.rotate 90 ]\n        [ S.text "Fruits" ]\n    , C.labelAt CA.middle .min [ CA.moveDown 30 ]\n        [ S.text "Age" ]\n    , C.labelAt CA.middle .max [ CA.fontSize 14 ]\n        [ S.text "How many fruits do children eat? (2021)" ]\n    , C.labelAt CA.middle .max [ CA.moveDown 15 ]\n        [ S.text "Data from fruits.com" ]\n    ]\n\n\ntype alias Datum =\n  { age : Float\n  , toys : Float\n  }\n\ndata : List Datum\ndata =\n  [ Datum 0.5 4\n  , Datum 0.8 5\n  , Datum 1.2 6\n  , Datum 1.4 6\n  , Datum 1.6 4\n  , Datum 3 8\n  , Datum 3 9\n  , Datum 3.2 10\n  , Datum 3.8 7\n  , Datum 6 12\n  , Datum 6.2 8\n  , Datum 6 10\n  , Datum 6 9\n  , Datum 9.1 8\n  , Datum 9.2 13\n  , Datum 9.8 10\n  , Datum 12 7\n  , Datum 12.5 5\n  , Datum 12.5 2\n  ]\n\n\n  ';
-var $author$project$Examples$Frontpage$Concise$largeCode = '\nimport Html as H\nimport Svg as S\nimport Chart as C\nimport Chart.Svg as CS\nimport Chart.Attributes as CA\nimport Chart.Events as CE\nimport Chart.Item as CI\nimport Chart.Item as CI\n\n\ntype alias Model =\n  { hovering : List (CI.Many Datum CI.Any) }\n\n\ninit : Model\ninit =\n  { hovering = [] }\n\n\ntype Msg\n  = OnHover (List (CI.Many Datum CI.Any))\n\n\nupdate : Msg -> Model -> Model\nupdate msg model =\n  case msg of\n    OnHover hovering ->\n      { model | hovering = hovering }\n\n\nview : Model -> H.Html Msg\nview model =\n  C.chart\n    [ CA.height 300\n    , CA.width 500\n    , CA.static\n    , CE.onMouseMove OnHover (CE.getNearest CI.stacks)\n    , CE.onMouseLeave (OnHover [])\n    ]\n    [ C.grid []\n    , C.yLabels [ CA.format (\\y -> String.fromFloat y ++ "M")]\n\n    , C.bars\n        [ CA.roundTop 0.2\n        , CA.margin 0.2\n        , CA.spacing 0.05\n        , CA.noGrid\n        ]\n        [ C.stacked\n            [ C.bar .cats\n                [ CA.gradient [ mint1, mint2 ] ]\n                |> C.named "Cats"\n            , C.bar .dogs\n                [ CA.gradient [ blue1, blue2 ] ]\n                |> C.named "Dogs"\n            ]\n        , C.bar .people\n            [ CA.gradient [ purple1, purple2 ] ]\n                |> C.named "People"\n        ]\n        data\n\n    , C.labelAt (CA.percent 30) .max\n        [ CA.moveDown 3, CA.fontSize 15 ]\n        [ S.text "Populations in Scandinavia" ]\n\n    , C.labelAt (CA.percent 30) .max\n        [ CA.moveDown 20, CA.fontSize 12 ]\n        [ S.text "Note: Based on made up data." ]\n\n    , C.binLabels .country [ CA.moveDown 18 ]\n    , C.barLabels [ CA.moveDown 18, CA.color weakWhite ]\n    , C.legendsAt .max .max [ CA.alignRight, CA.column, CA.spacing 7 ] []\n\n    , let\n        toBrightLabel =\n          C.productLabel [ CA.moveDown 18, CA.color white ]\n      in\n      C.each model.hovering <| \\p stack ->\n        List.map toBrightLabel (CI.getMembers stack)\n\n    , C.eachBin <| \\p bin ->\n        let bar = CI.getMember bin\n            datum = CI.getOneData bin\n            yPos = (CI.getTop p bin).y\n            xMid = (CI.getCenter p bin).x\n        in\n        if datum.country == "Finland" then\n          [ C.line\n              [ CA.x1 (CI.getX1 bar)\n              , CA.x2 (CI.getX2 bar)\n              , CA.y1 yPos\n              , CA.moveUp 15\n              , CA.tickLength 5\n              ]\n          , C.label\n              [ CA.moveUp 22, CA.fontSize 10 ]\n              [ S.text "Most pets per person"]\n              { x = xMid, y = yPos }\n          ]\n        else\n          []\n    ]\n\nmint1 = "#54c8ddD0"\nmint2 = "#54c8dd90"\nblue1 = "#0f9ff0D0"\nblue2 = "#0f9ff090"\npurple1 = "#653bf4B0"\npurple2 = "#653bf470"\nweakWhite = "rgba(255, 255, 255, 0.7)"\nwhite = "white"\n\n  ';
-var $author$project$Examples$Frontpage$Familiar$largeCode = '\nimport Html exposing (Html)\nimport Chart as C\nimport Chart.Attributes as CA\nimport Time\n\n\nchart : Html Msg\nchart =\n  C.chart\n    [ CA.height 350\n    , CA.width 570\n    , CA.static\n    , CA.margin { top = 40, bottom = 30, left = 30, right = 10 }\n    ]\n    [ C.grid []\n    , C.xLabels [ CA.times Time.utc, CA.amount 12 ]\n    , C.yLabels [ CA.amount 6 ]\n    , C.xAxis []\n    , C.yAxis []\n    , C.series .x\n        [ C.interpolated .y [ CA.width 2 ] []\n        , C.interpolated .z [ CA.width 2 ] []\n        ]\n        data\n    ]\n  ';
+var $author$project$Examples$Frontpage$Concise$largeCode = '\nimport Html as H\nimport Svg as S\nimport Chart as C\nimport Chart.Svg as CS\nimport Chart.Attributes as CA\nimport Chart.Events as CE\nimport Chart.Item as CI\nimport Chart.Item as CI\n\n\ntype alias Model =\n  { hovering : List (CI.Many Datum CI.Any) }\n\n\ninit : Model\ninit =\n  { hovering = [] }\n\n\ntype Msg\n  = OnHover (List (CI.Many Datum CI.Any))\n\n\nupdate : Msg -> Model -> Model\nupdate msg model =\n  case msg of\n    OnHover hovering ->\n      { model | hovering = hovering }\n\n\nview : Model -> H.Html Msg\nview model =\n  C.chart\n    [ CA.height 300\n    , CA.width 500\n    , CA.margin { top = 10, left = 40, right = 0, bottom = 25 }\n    , CE.onMouseMove OnHover (CE.getNearest CI.stacks)\n    , CE.onMouseLeave (OnHover [])\n    ]\n    [ C.grid []\n    , C.yLabels [ CA.format (\\y -> String.fromFloat y ++ "M")]\n\n    , C.bars\n        [ CA.roundTop 0.2\n        , CA.margin 0.2\n        , CA.spacing 0.05\n        , CA.noGrid\n        ]\n        [ C.stacked\n            [ C.bar .cats\n                [ CA.gradient [ mint1, mint2 ] ]\n                |> C.named "Cats"\n            , C.bar .dogs\n                [ CA.gradient [ blue1, blue2 ] ]\n                |> C.named "Dogs"\n            ]\n        , C.bar .people\n            [ CA.gradient [ purple1, purple2 ] ]\n                |> C.named "People"\n        ]\n        data\n\n    , C.labelAt (CA.percent 30) .max\n        [ CA.moveDown 3, CA.fontSize 15 ]\n        [ S.text "Populations in Scandinavia" ]\n\n    , C.labelAt (CA.percent 30) .max\n        [ CA.moveDown 20, CA.fontSize 12 ]\n        [ S.text "Note: Based on made up data." ]\n\n    , C.binLabels .country [ CA.moveDown 18 ]\n    , C.barLabels [ CA.moveDown 18, CA.color weakWhite ]\n    , C.legendsAt .max .max [ CA.alignRight, CA.column, CA.spacing 7 ] []\n\n    , let\n        toBrightLabel =\n          C.productLabel [ CA.moveDown 18, CA.color white ]\n      in\n      C.each model.hovering <| \\p stack ->\n        List.map toBrightLabel (CI.getMembers stack)\n\n    , C.eachBin <| \\p bin ->\n        let bar = CI.getMember bin\n            datum = CI.getOneData bin\n            yPos = (CI.getTop p bin).y\n            xMid = (CI.getCenter p bin).x\n        in\n        if datum.country == "Finland" then\n          [ C.line\n              [ CA.x1 (CI.getX1 bar)\n              , CA.x2 (CI.getX2 bar)\n              , CA.y1 yPos\n              , CA.moveUp 15\n              , CA.tickLength 5\n              ]\n          , C.label\n              [ CA.moveUp 22, CA.fontSize 10 ]\n              [ S.text "Most pets per person"]\n              { x = xMid, y = yPos }\n          ]\n        else\n          []\n    ]\n\nmint1 = "#54c8ddD0"\nmint2 = "#54c8dd90"\nblue1 = "#0f9ff0D0"\nblue2 = "#0f9ff090"\npurple1 = "#653bf4B0"\npurple2 = "#653bf470"\nweakWhite = "rgba(255, 255, 255, 0.7)"\nwhite = "white"\n\n  ';
+var $author$project$Examples$Frontpage$Familiar$largeCode = '\nimport Html exposing (Html)\nimport Chart as C\nimport Chart.Attributes as CA\nimport Time\n\n\nchart : Html Msg\nchart =\n  C.chart\n    [ CA.height 350\n    , CA.width 570\n    , CA.margin { top = 40, bottom = 30, left = 30, right = 10 }\n    ]\n    [ C.grid []\n    , C.xLabels [ CA.times Time.utc, CA.amount 12 ]\n    , C.yLabels [ CA.amount 6 ]\n    , C.xAxis []\n    , C.yAxis []\n    , C.series .x\n        [ C.interpolated .y [ CA.width 2 ] []\n        , C.interpolated .z [ CA.width 2 ] []\n        ]\n        data\n    ]\n  ';
 var $author$project$Examples$Interactivity$Background$largeCode = '\nimport Html as H\nimport Svg as S\nimport Chart as C\nimport Chart.Attributes as CA\nimport Chart.Events as CE\nimport Chart.Item as CI\n\n\ntype alias Model =\n  { hovering : List (CI.One Datum CI.Bar) }\n\n\ninit : Model\ninit =\n  { hovering = [] }\n\n\ntype Msg\n  = OnHover (List (CI.One Datum CI.Bar))\n\n\nupdate : Msg -> Model -> Model\nupdate msg model =\n  case msg of\n    OnHover hovering ->\n      { model | hovering = hovering }\n\n\nview : Model -> H.Html Msg\nview model =\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    , CE.onMouseMove OnHover (CE.getNearest CI.bars)\n    , CE.onMouseLeave (OnHover [])\n    ]\n    [ C.grid []\n    , C.xLabels []\n    , C.yLabels []\n    , C.bars []\n        [ C.bar .y [ CA.opacity 0.3, CA.borderWidth 1 ]\n        , C.bar .z [ CA.opacity 0.3, CA.borderWidth 1, CA.striped [] ]\n        ]\n        data\n    , C.each model.hovering <| \\p item ->\n        [ C.tooltip item [ CA.background "#fcf9e9" ] [] [] ]\n    ]\n  ';
 var $author$project$Examples$Interactivity$BasicArea$largeCode = '\nimport Html as H\nimport Chart as C\nimport Chart.Attributes as CA\nimport Chart.Events as CE\nimport Chart.Item as CI\n\n\ntype alias Model =\n  { hovering : List (CI.Many Datum CI.Any) }\n\n\ninit : Model\ninit =\n  { hovering = [] }\n\n\ntype Msg\n  = OnHover (List (CI.Many Datum CI.Any))\n\n\nupdate : Msg -> Model -> Model\nupdate msg model =\n  case msg of\n    OnHover hovering ->\n      { model | hovering = hovering }\n\n\nview : Model -> H.Html Msg\nview model =\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    , CE.onMouseMove OnHover (CE.getNearest CI.stacks)\n    , CE.onMouseLeave (OnHover [])\n    ]\n    [ C.grid []\n    , C.xLabels []\n    , C.yLabels []\n    , C.series .x\n        [ C.stacked\n          [ C.interpolated .y\n              [ CA.monotone, CA.opacity 0.2 ]\n              [ CA.circle, CA.color "white", CA.borderWidth 1 ]\n              |> C.named "line1"\n          , C.interpolated .z\n              [ CA.monotone, CA.opacity 0, CA.color CA.purple ]\n              [ CA.circle, CA.color "white", CA.borderWidth 1 ]\n              |> C.named "line2"\n          ]\n        ]\n        data\n    , C.each model.hovering <| \\p item ->\n        [ C.tooltip item [] [] [] ]\n    ]\n  ';
 var $author$project$Examples$Interactivity$BasicBar$largeCode = '\nimport Html as H\nimport Svg as S\nimport Chart as C\nimport Chart.Attributes as CA\nimport Chart.Events as CE\nimport Chart.Item as CI\n\n\ntype alias Model =\n  { hovering : List (CI.One Datum CI.Bar) }\n\n\ninit : Model\ninit =\n  { hovering = [] }\n\n\ntype Msg\n  = OnHover (List (CI.One Datum CI.Bar))\n\n\nupdate : Msg -> Model -> Model\nupdate msg model =\n  case msg of\n    OnHover hovering ->\n      { model | hovering = hovering }\n\n\nview : Model -> H.Html Msg\nview model =\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    , CE.onMouseMove OnHover (CE.getNearest CI.bars)\n    , CE.onMouseLeave (OnHover [])\n    ]\n    [ C.grid []\n    , C.xLabels []\n    , C.yLabels []\n    , C.bars []\n        [ C.stacked\n            [ C.bar .z []\n            , C.bar .y []\n            ]\n        , C.bar .v [ CA.dotted [] ]\n        ]\n        data\n    , C.each model.hovering <| \\p item ->\n        [ C.tooltip item [] [] [] ]\n    ]\n  ';
@@ -33835,8 +34381,8 @@ var $author$project$Examples$Frame$Position$smallCode = '\n  C.chart\n    [ CA.h
 var $author$project$Examples$Frame$Rect$smallCode = '\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    ]\n    [ C.grid []\n    , C.xAxis []\n    , C.xTicks []\n    , C.xLabels []\n    , C.yAxis []\n    , C.yTicks []\n    , C.yLabels []\n    , C.withPlane <| \\p ->\n        [ C.rect\n            [ CA.x1 3\n            , CA.y1 3\n            , CA.x2 7\n            , CA.y2 9\n            , CA.color "rgb(210, 210, 210)"\n            , CA.opacity 0.3\n            ]\n        ]\n    ]\n  ';
 var $author$project$Examples$Frame$Times$smallCode = '\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    , CA.padding { top = 10, bottom = 0, left = 0, right = 25 }\n    , CA.range\n        [ CA.lowest 1591974241000 CA.exactly\n        , CA.highest 1623510241000 CA.exactly\n        ]\n    ]\n    [ C.grid []\n    , C.xAxis []\n    , C.xTicks [ CA.times Time.utc ]\n    , C.xLabels [ CA.times Time.utc ]\n    ]\n  ';
 var $author$project$Examples$Frame$Titles$smallCode = '\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    , CA.padding { top = 25, bottom = 0, left = 0, right = 10 }\n    , CA.range [ CA.lowest 0 CA.exactly ]\n    ]\n    [ C.grid []\n    , C.xAxis []\n    , C.xTicks [ CA.ints ]\n    , C.xLabels [ CA.ints ]\n    , C.yAxis []\n    , C.yTicks [ CA.ints ]\n    , C.yLabels [ CA.ints ]\n    , C.series .age\n        [ C.scatter .toys [ CA.opacity 0, CA.borderWidth 1 ]\n        ]\n        data\n\n    , C.labelAt .min CA.middle [ CA.moveLeft 35, CA.rotate 90 ]\n        [ S.text "Fruits" ]\n    , C.labelAt CA.middle .min [ CA.moveDown 30 ]\n        [ S.text "Age" ]\n    , C.labelAt CA.middle .max [ CA.fontSize 14 ]\n        [ S.text "How many fruits do children eat? (2021)" ]\n    , C.labelAt CA.middle .max [ CA.moveDown 15 ]\n        [ S.text "Data from fruits.com" ]\n    ]\n  ';
-var $author$project$Examples$Frontpage$Concise$smallCode = '\n  C.chart\n    [ CA.height 300\n    , CA.width 500\n    , CA.static\n    , CE.onMouseMove OnHover (CE.getNearest CI.stacks)\n    , CE.onMouseLeave (OnHover [])\n    ]\n    [ C.grid []\n    , C.yLabels [ CA.format (\\y -> String.fromFloat y ++ "M")]\n\n    , C.bars\n        [ CA.roundTop 0.2\n        , CA.margin 0.2\n        , CA.spacing 0.05\n        , CA.noGrid\n        ]\n        [ C.stacked\n            [ C.bar .cats\n                [ CA.gradient [ mint1, mint2 ] ]\n                |> C.named "Cats"\n            , C.bar .dogs\n                [ CA.gradient [ blue1, blue2 ] ]\n                |> C.named "Dogs"\n            ]\n        , C.bar .people\n            [ CA.gradient [ purple1, purple2 ] ]\n                |> C.named "People"\n        ]\n        data\n\n    , C.labelAt (CA.percent 30) .max\n        [ CA.moveDown 3, CA.fontSize 15 ]\n        [ S.text "Populations in Scandinavia" ]\n\n    , C.labelAt (CA.percent 30) .max\n        [ CA.moveDown 20, CA.fontSize 12 ]\n        [ S.text "Note: Based on made up data." ]\n\n    , C.binLabels .country [ CA.moveDown 18 ]\n    , C.barLabels [ CA.moveDown 18, CA.color weakWhite ]\n    , C.legendsAt .max .max [ CA.alignRight, CA.column, CA.spacing 7 ] []\n\n    , let\n        toBrightLabel =\n          C.productLabel [ CA.moveDown 18, CA.color white ]\n      in\n      C.each model.hovering <| \\p stack ->\n        List.map toBrightLabel (CI.getMembers stack)\n\n    , C.eachBin <| \\p bin ->\n        let bar = CI.getMember bin\n            datum = CI.getOneData bin\n            yPos = (CI.getTop p bin).y\n            xMid = (CI.getCenter p bin).x\n        in\n        if datum.country == "Finland" then\n          [ C.line\n              [ CA.x1 (CI.getX1 bar)\n              , CA.x2 (CI.getX2 bar)\n              , CA.y1 yPos\n              , CA.moveUp 15\n              , CA.tickLength 5\n              ]\n          , C.label\n              [ CA.moveUp 22, CA.fontSize 10 ]\n              [ S.text "Most pets per person"]\n              { x = xMid, y = yPos }\n          ]\n        else\n          []\n    ]\n  ';
-var $author$project$Examples$Frontpage$Familiar$smallCode = '\nimport Chart as C\nimport Chart.Attributes as CA\nimport Time\n\n\nchart : Html Msg\nchart =\n  C.chart\n    [ CA.height 350\n    , CA.width 570\n    , CA.static\n    , CA.margin { top = 40, bottom = 30, left = 30, right = 10 }\n    ]\n    [ C.grid []\n    , C.xLabels [ CA.times Time.utc, CA.amount 12 ]\n    , C.yLabels [ CA.amount 6 ]\n    , C.xAxis []\n    , C.yAxis []\n    , C.series .x\n        [ C.interpolated .y [ CA.width 2 ] []\n        , C.interpolated .z [ CA.width 2 ] []\n        ]\n        data\n    ]\n  ';
+var $author$project$Examples$Frontpage$Concise$smallCode = '\n  C.chart\n    [ CA.height 300\n    , CA.width 500\n    , CA.margin { top = 10, left = 40, right = 0, bottom = 25 }\n    , CE.onMouseMove OnHover (CE.getNearest CI.stacks)\n    , CE.onMouseLeave (OnHover [])\n    ]\n    [ C.grid []\n    , C.yLabels [ CA.format (\\y -> String.fromFloat y ++ "M")]\n\n    , C.bars\n        [ CA.roundTop 0.2\n        , CA.margin 0.2\n        , CA.spacing 0.05\n        , CA.noGrid\n        ]\n        [ C.stacked\n            [ C.bar .cats\n                [ CA.gradient [ mint1, mint2 ] ]\n                |> C.named "Cats"\n            , C.bar .dogs\n                [ CA.gradient [ blue1, blue2 ] ]\n                |> C.named "Dogs"\n            ]\n        , C.bar .people\n            [ CA.gradient [ purple1, purple2 ] ]\n                |> C.named "People"\n        ]\n        data\n\n    , C.labelAt (CA.percent 30) .max\n        [ CA.moveDown 3, CA.fontSize 15 ]\n        [ S.text "Populations in Scandinavia" ]\n\n    , C.labelAt (CA.percent 30) .max\n        [ CA.moveDown 20, CA.fontSize 12 ]\n        [ S.text "Note: Based on made up data." ]\n\n    , C.binLabels .country [ CA.moveDown 18 ]\n    , C.barLabels [ CA.moveDown 18, CA.color weakWhite ]\n    , C.legendsAt .max .max [ CA.alignRight, CA.column, CA.spacing 7 ] []\n\n    , let\n        toBrightLabel =\n          C.productLabel [ CA.moveDown 18, CA.color white ]\n      in\n      C.each model.hovering <| \\p stack ->\n        List.map toBrightLabel (CI.getMembers stack)\n\n    , C.eachBin <| \\p bin ->\n        let bar = CI.getMember bin\n            datum = CI.getOneData bin\n            yPos = (CI.getTop p bin).y\n            xMid = (CI.getCenter p bin).x\n        in\n        if datum.country == "Finland" then\n          [ C.line\n              [ CA.x1 (CI.getX1 bar)\n              , CA.x2 (CI.getX2 bar)\n              , CA.y1 yPos\n              , CA.moveUp 15\n              , CA.tickLength 5\n              ]\n          , C.label\n              [ CA.moveUp 22, CA.fontSize 10 ]\n              [ S.text "Most pets per person"]\n              { x = xMid, y = yPos }\n          ]\n        else\n          []\n    ]\n  ';
+var $author$project$Examples$Frontpage$Familiar$smallCode = '\nimport Chart as C\nimport Chart.Attributes as CA\nimport Time\n\n\nchart : Html Msg\nchart =\n  C.chart\n    [ CA.height 350\n    , CA.width 570\n    , CA.margin { top = 40, bottom = 30, left = 30, right = 10 }\n    ]\n    [ C.grid []\n    , C.xLabels [ CA.times Time.utc, CA.amount 12 ]\n    , C.yLabels [ CA.amount 6 ]\n    , C.xAxis []\n    , C.yAxis []\n    , C.series .x\n        [ C.interpolated .y [ CA.width 2 ] []\n        , C.interpolated .z [ CA.width 2 ] []\n        ]\n        data\n    ]\n  ';
 var $author$project$Examples$Interactivity$Background$smallCode = '\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    , CE.onMouseMove OnHover (CE.getNearest CI.bars)\n    , CE.onMouseLeave (OnHover [])\n    ]\n    [ C.grid []\n    , C.xLabels []\n    , C.yLabels []\n    , C.bars []\n        [ C.bar .y [ CA.opacity 0.3, CA.borderWidth 1 ]\n        , C.bar .z [ CA.opacity 0.3, CA.borderWidth 1, CA.striped [] ]\n        ]\n        data\n    , C.each model.hovering <| \\p item ->\n        [ C.tooltip item [ CA.background "#fcf9e9" ] [] [] ]\n    ]\n  ';
 var $author$project$Examples$Interactivity$BasicArea$smallCode = '\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    , CE.onMouseMove OnHover (CE.getNearest CI.stacks)\n    , CE.onMouseLeave (OnHover [])\n    ]\n    [ C.grid []\n    , C.xLabels []\n    , C.yLabels []\n    , C.series .x\n        [ C.stacked\n          [ C.interpolated .y\n              [ CA.monotone, CA.opacity 0.2 ]\n              [ CA.circle, CA.color "white", CA.borderWidth 1 ]\n              |> C.named "line1"\n          , C.interpolated .z\n              [ CA.monotone, CA.opacity 0, CA.color CA.purple ]\n              [ CA.circle, CA.color "white", CA.borderWidth 1 ]\n              |> C.named "line2"\n          ]\n        ]\n        data\n    , C.each model.hovering <| \\p item ->\n        [ C.tooltip item [] [] [] ]\n    ]\n  ';
 var $author$project$Examples$Interactivity$BasicBar$smallCode = '\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    , CE.onMouseMove OnHover (CE.getNearest CI.bars)\n    , CE.onMouseLeave (OnHover [])\n    ]\n    [ C.grid []\n    , C.xLabels []\n    , C.yLabels []\n    , C.bars []\n        [ C.stacked\n            [ C.bar .z []\n            , C.bar .y []\n            ]\n        , C.bar .v [ CA.dotted [] ]\n        ]\n        data\n    , C.each model.hovering <| \\p item ->\n        [ C.tooltip item [] [] [] ]\n    ]\n  ';
@@ -36505,6 +37051,8 @@ var $author$project$Ui$Code$view = function (config) {
 				A2($elm$html$Html$Attributes$style, 'white-space', 'pre')),
 				$mdgriffith$elm_ui$Element$htmlAttribute(
 				A2($elm$html$Html$Attributes$style, 'padding', '0 20px')),
+				$mdgriffith$elm_ui$Element$htmlAttribute(
+				A2($elm$html$Html$Attributes$style, 'overflow-x', 'scroll')),
 				$mdgriffith$elm_ui$Element$Font$size(14),
 				$mdgriffith$elm_ui$Element$Font$family(
 				_List_fromArray(
@@ -36677,7 +37225,10 @@ var $author$project$Page$Example$view = function (model) {
 		body: $author$project$Ui$Layout$view(
 			_List_fromArray(
 				[
-					$author$project$Ui$Menu$small,
+					A2(
+					$mdgriffith$elm_ui$Element$map,
+					$author$project$Page$Example$MenuMsg,
+					A2($author$project$Ui$Menu$small, model.window, model.menu)),
 					A2(
 					$mdgriffith$elm_ui$Element$el,
 					_List_fromArray(
@@ -36717,6 +37268,9 @@ var $author$project$Page$Example$view = function (model) {
 				])),
 		title: 'elm-charts | Documentation'
 	};
+};
+var $author$project$Page$Gallery$MenuMsg = function (a) {
+	return {$: 'MenuMsg', a: a};
 };
 var $author$project$Page$Gallery$SalaryDistBarMsg = function (a) {
 	return {$: 'SalaryDistBarMsg', a: a};
@@ -38112,6 +38666,11 @@ var $author$project$Charts$SalaryDist$tooltipContent = function (hovered) {
 							]))
 					]))
 			]));
+};
+var $author$project$Chart$Attributes$static = function (config) {
+	return _Utils_update(
+		config,
+		{responsive: false});
 };
 var $author$project$Charts$SalaryDist$viewSalaryDiscrepancyMini = function (model) {
 	return A2(
@@ -40012,7 +40571,10 @@ var $author$project$Page$Gallery$view = function (model) {
 		body: $author$project$Ui$Layout$view(
 			_List_fromArray(
 				[
-					$author$project$Ui$Menu$small,
+					A2(
+					$mdgriffith$elm_ui$Element$map,
+					$author$project$Page$Gallery$MenuMsg,
+					A2($author$project$Ui$Menu$small, model.window, model.menu)),
 					A2(
 					$mdgriffith$elm_ui$Element$el,
 					_List_fromArray(
@@ -40103,110 +40665,132 @@ var $author$project$Page$Home$FamiliarToggle = {$: 'FamiliarToggle'};
 var $author$project$Page$Home$LandingMsg = function (a) {
 	return {$: 'LandingMsg', a: a};
 };
+var $author$project$Page$Home$MenuMsg = function (a) {
+	return {$: 'MenuMsg', a: a};
+};
 var $author$project$Page$Home$None = {$: 'None'};
-var $author$project$Page$Home$feature = function (config) {
-	return A2(
-		$mdgriffith$elm_ui$Element$row,
-		_List_fromArray(
-			[
-				$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-				$mdgriffith$elm_ui$Element$height(
-				A2($mdgriffith$elm_ui$Element$minimum, config.height, $mdgriffith$elm_ui$Element$fill)),
-				$mdgriffith$elm_ui$Element$spacing(50)
-			]),
-		(config.flipped ? $elm$core$List$reverse : $elm$core$Basics$identity)(
+var $author$project$Page$Home$feature = F2(
+	function (window, config) {
+		return A2(
+			(window.width > 950) ? $mdgriffith$elm_ui$Element$row : $mdgriffith$elm_ui$Element$column,
 			_List_fromArray(
 				[
-					A2(
-					$mdgriffith$elm_ui$Element$column,
-					_List_fromArray(
-						[
-							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-							$mdgriffith$elm_ui$Element$alignTop,
-							$mdgriffith$elm_ui$Element$alignLeft,
-							$mdgriffith$elm_ui$Element$spacing(10),
-							$mdgriffith$elm_ui$Element$width(
-							$mdgriffith$elm_ui$Element$fillPortion(5))
-						]),
-					_List_fromArray(
-						[
-							A2(
-							$mdgriffith$elm_ui$Element$el,
-							_List_fromArray(
-								[
-									$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-									$mdgriffith$elm_ui$Element$Font$size(40)
-								]),
-							$mdgriffith$elm_ui$Element$text(config.title)),
-							A2(
-							$mdgriffith$elm_ui$Element$paragraph,
-							_List_fromArray(
-								[
-									$mdgriffith$elm_ui$Element$Font$size(16),
-									$mdgriffith$elm_ui$Element$Font$color(
-									A3($mdgriffith$elm_ui$Element$rgb255, 120, 120, 120)),
-									A2($mdgriffith$elm_ui$Element$paddingXY, 0, 10)
-								]),
-							config.body)
-						])),
-					function () {
-					var _v0 = config.togglable;
-					if (_v0.$ === 'Nothing') {
-						return A2(
-							$mdgriffith$elm_ui$Element$el,
-							_List_fromArray(
-								[$mdgriffith$elm_ui$Element$centerX, $mdgriffith$elm_ui$Element$alignTop]),
-							config.chart);
-					} else {
-						var _v1 = _v0.a;
-						var onToggle = _v1.a;
-						var isToggled = _v1.b;
-						return A2(
-							$mdgriffith$elm_ui$Element$column,
-							_List_fromArray(
-								[
-									$mdgriffith$elm_ui$Element$width(
-									$mdgriffith$elm_ui$Element$fillPortion(7)),
-									$mdgriffith$elm_ui$Element$alignTop
-								]),
-							_List_fromArray(
-								[
-									isToggled ? A2(
-									$mdgriffith$elm_ui$Element$el,
-									_List_fromArray(
-										[
-											$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-											$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
-											$mdgriffith$elm_ui$Element$Background$color(
-											A3($mdgriffith$elm_ui$Element$rgb255, 250, 250, 250))
-										]),
-									$author$project$Ui$Code$view(
-										{edits: _List_Nil, template: config.code})) : A2(
-									$mdgriffith$elm_ui$Element$el,
-									_List_fromArray(
-										[$mdgriffith$elm_ui$Element$centerX, $mdgriffith$elm_ui$Element$alignTop]),
-									config.chart),
-									A2(
-									$mdgriffith$elm_ui$Element$Input$button,
-									_List_fromArray(
-										[
-											A2($mdgriffith$elm_ui$Element$paddingXY, 15, 15),
-											$mdgriffith$elm_ui$Element$Font$size(14),
-											$mdgriffith$elm_ui$Element$htmlAttribute(
-											A2($elm$html$Html$Attributes$style, 'position', 'absolute')),
-											$mdgriffith$elm_ui$Element$htmlAttribute(
-											A2($elm$html$Html$Attributes$style, 'right', '0'))
-										]),
-									{
-										label: $mdgriffith$elm_ui$Element$text(
-											isToggled ? 'Show chart' : 'Show code'),
-										onPress: $elm$core$Maybe$Just(onToggle)
-									})
-								]));
-					}
-				}()
-				])));
-};
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+					$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
+					$mdgriffith$elm_ui$Element$spacing(50)
+				]),
+			((config.flipped && (window.width > 950)) ? $elm$core$List$reverse : $elm$core$Basics$identity)(
+				_List_fromArray(
+					[
+						A2(
+						$mdgriffith$elm_ui$Element$column,
+						_List_fromArray(
+							[
+								$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+								$mdgriffith$elm_ui$Element$alignTop,
+								$mdgriffith$elm_ui$Element$alignLeft,
+								$mdgriffith$elm_ui$Element$spacing(10)
+							]),
+						_List_fromArray(
+							[
+								A2(
+								$mdgriffith$elm_ui$Element$textColumn,
+								_List_fromArray(
+									[
+										$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+									]),
+								_List_fromArray(
+									[
+										A2(
+										$mdgriffith$elm_ui$Element$paragraph,
+										_List_fromArray(
+											[
+												$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+												$mdgriffith$elm_ui$Element$Font$size(40)
+											]),
+										_List_fromArray(
+											[
+												$mdgriffith$elm_ui$Element$text(config.title)
+											])),
+										A2(
+										$mdgriffith$elm_ui$Element$paragraph,
+										_List_fromArray(
+											[
+												$mdgriffith$elm_ui$Element$Font$size(16),
+												$mdgriffith$elm_ui$Element$Font$color(
+												A3($mdgriffith$elm_ui$Element$rgb255, 100, 100, 100)),
+												A2($mdgriffith$elm_ui$Element$paddingXY, 0, 10),
+												$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+											]),
+										config.body)
+									]))
+							])),
+						function () {
+						var _v0 = config.togglable;
+						if (_v0.$ === 'Nothing') {
+							return A2(
+								$mdgriffith$elm_ui$Element$el,
+								_List_fromArray(
+									[
+										$mdgriffith$elm_ui$Element$centerX,
+										$mdgriffith$elm_ui$Element$alignTop,
+										$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+									]),
+								config.chart);
+						} else {
+							var _v1 = _v0.a;
+							var onToggle = _v1.a;
+							var isToggled = _v1.b;
+							return A2(
+								$mdgriffith$elm_ui$Element$column,
+								_List_fromArray(
+									[
+										$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+										$mdgriffith$elm_ui$Element$alignTop,
+										$mdgriffith$elm_ui$Element$centerX
+									]),
+								_List_fromArray(
+									[
+										isToggled ? A2(
+										$mdgriffith$elm_ui$Element$el,
+										_List_fromArray(
+											[
+												$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+												$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
+												$mdgriffith$elm_ui$Element$Background$color(
+												A3($mdgriffith$elm_ui$Element$rgb255, 250, 250, 250))
+											]),
+										$author$project$Ui$Code$view(
+											{edits: _List_Nil, template: config.code})) : A2(
+										$mdgriffith$elm_ui$Element$el,
+										_List_fromArray(
+											[
+												$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+												$mdgriffith$elm_ui$Element$centerX,
+												$mdgriffith$elm_ui$Element$alignTop
+											]),
+										config.chart),
+										A2(
+										$mdgriffith$elm_ui$Element$Input$button,
+										_List_fromArray(
+											[
+												A2($mdgriffith$elm_ui$Element$paddingXY, 15, 15),
+												$mdgriffith$elm_ui$Element$Font$size(14),
+												$mdgriffith$elm_ui$Element$htmlAttribute(
+												A2($elm$html$Html$Attributes$style, 'position', 'absolute')),
+												$mdgriffith$elm_ui$Element$htmlAttribute(
+												A2($elm$html$Html$Attributes$style, 'right', '0'))
+											]),
+										{
+											label: $mdgriffith$elm_ui$Element$text(
+												isToggled ? 'Show chart' : 'Show code'),
+											onPress: $elm$core$Maybe$Just(onToggle)
+										})
+									]));
+						}
+					}()
+					])));
+	});
 var $author$project$Charts$Landing$Bar = function (a) {
 	return {$: 'Bar', a: a};
 };
@@ -40462,7 +41046,6 @@ var $author$project$Charts$Landing$view = function (model) {
 			[
 				$author$project$Chart$Attributes$height(300),
 				$author$project$Chart$Attributes$width(1000),
-				$author$project$Chart$Attributes$static,
 				$author$project$Chart$Attributes$margin(
 				{bottom: 18, left: 0, right: 0, top: 0}),
 				$author$project$Chart$Attributes$padding(
@@ -40735,10 +41318,17 @@ var $author$project$Page$Home$view = function (model) {
 		body: $author$project$Ui$Layout$view(
 			_List_fromArray(
 				[
-					$author$project$Ui$Menu$small,
+					A2(
+					$mdgriffith$elm_ui$Element$map,
+					$author$project$Page$Home$MenuMsg,
+					A2($author$project$Ui$Menu$small, model.window, model.menu)),
 					A2(
 					$mdgriffith$elm_ui$Element$el,
-					_List_Nil,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+							$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill)
+						]),
 					$mdgriffith$elm_ui$Element$html(
 						A2(
 							$elm$html$Html$map,
@@ -40754,7 +41344,9 @@ var $author$project$Page$Home$view = function (model) {
 						]),
 					_List_fromArray(
 						[
-							$author$project$Page$Home$feature(
+							A2(
+							$author$project$Page$Home$feature,
+							model.window,
 							{
 								body: _List_fromArray(
 									[
@@ -40773,12 +41365,13 @@ var $author$project$Page$Home$view = function (model) {
 										$author$project$Examples$Frontpage$Familiar$view(_Utils_Tuple0))),
 								code: $author$project$Examples$Frontpage$Familiar$smallCode,
 								flipped: false,
-								height: 350,
 								title: 'Intuitive',
 								togglable: $elm$core$Maybe$Just(
 									_Utils_Tuple2($author$project$Page$Home$FamiliarToggle, model.familiarToggle))
 							}),
-							$author$project$Page$Home$feature(
+							A2(
+							$author$project$Page$Home$feature,
+							model.window,
 							{
 								body: _List_fromArray(
 									[
@@ -40793,11 +41386,12 @@ var $author$project$Page$Home$view = function (model) {
 										$author$project$Examples$Frontpage$Concise$view(model.concise))),
 								code: $author$project$Examples$Frontpage$Concise$smallCode,
 								flipped: true,
-								height: 300,
 								title: 'Flexible, yet concise',
 								togglable: $elm$core$Maybe$Nothing
 							}),
-							$author$project$Page$Home$feature(
+							A2(
+							$author$project$Page$Home$feature,
+							model.window,
 							{
 								body: _List_fromArray(
 									[
@@ -40823,10 +41417,9 @@ var $author$project$Page$Home$view = function (model) {
 										$mdgriffith$elm_ui$Element$wrappedRow,
 										_List_fromArray(
 											[
-												$mdgriffith$elm_ui$Element$width(
-												$mdgriffith$elm_ui$Element$px(550)),
 												$mdgriffith$elm_ui$Element$spacing(30),
-												$mdgriffith$elm_ui$Element$alignTop
+												$mdgriffith$elm_ui$Element$alignTop,
+												$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
 											]),
 										A2(
 											$elm$core$List$map,
@@ -40837,7 +41430,8 @@ var $author$project$Page$Home$view = function (model) {
 													_List_fromArray(
 														[
 															$mdgriffith$elm_ui$Element$width(
-															A2($mdgriffith$elm_ui$Element$minimum, 90, $mdgriffith$elm_ui$Element$fill))
+															A2($mdgriffith$elm_ui$Element$minimum, 90, $mdgriffith$elm_ui$Element$fill)),
+															$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill)
 														]))),
 											A2(
 												$elm$core$List$map,
@@ -40846,7 +41440,6 @@ var $author$project$Page$Home$view = function (model) {
 													[$author$project$Examples$BarCharts__Histogram, $author$project$Examples$BarCharts__TooltipStack, $author$project$Examples$Interactivity__Zoom, $author$project$Examples$Frame__Titles, $author$project$Examples$LineCharts__Stepped, $author$project$Examples$ScatterCharts__Labels, $author$project$Examples$ScatterCharts__DataDependent, $author$project$Examples$LineCharts__TooltipStack, $author$project$Examples$LineCharts__Labels, $author$project$Examples$BarCharts__BarLabels, $author$project$Examples$BarCharts__Margin, $author$project$Examples$ScatterCharts__Shapes]))))),
 								code: '',
 								flipped: false,
-								height: 350,
 								title: 'Plenty of examples',
 								togglable: $elm$core$Maybe$Nothing
 							})
@@ -40854,6 +41447,9 @@ var $author$project$Page$Home$view = function (model) {
 				])),
 		title: 'elm-charts'
 	};
+};
+var $author$project$Page$QuickStart$MenuMsg = function (a) {
+	return {$: 'MenuMsg', a: a};
 };
 var $author$project$Charts$Basics$areas = {
 	chart: function (_v0) {
@@ -41205,7 +41801,10 @@ var $author$project$Page$QuickStart$view = function (model) {
 		body: $author$project$Ui$Layout$view(
 			_List_fromArray(
 				[
-					$author$project$Ui$Menu$small,
+					A2(
+					$mdgriffith$elm_ui$Element$map,
+					$author$project$Page$QuickStart$MenuMsg,
+					A2($author$project$Ui$Menu$small, model.window, model.menu)),
 					A2(
 					$mdgriffith$elm_ui$Element$el,
 					_List_fromArray(

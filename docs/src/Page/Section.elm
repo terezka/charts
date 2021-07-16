@@ -29,6 +29,8 @@ import Charts.Terminology
 type alias Model =
   { examples : Examples.Model
   , selectedTab : String
+  , window : Session.Window
+  , menu : Menu.Model
   }
 
 
@@ -45,6 +47,8 @@ init : Navigation.Key -> Session -> Params -> ( Model, Cmd Msg )
 init key session params =
   ( { examples = Examples.init
     , selectedTab = params.section
+    , window = session.window
+    , menu = Menu.init
     }
   , Cmd.none
   )
@@ -60,12 +64,16 @@ exit model session =
 
 
 type Msg
-  = OnExampleMsg Examples.Msg
+  = MenuMsg Menu.Msg
+  | OnExampleMsg Examples.Msg
 
 
 update : Navigation.Key -> Msg -> Model -> ( Model, Cmd Msg )
 update key msg model =
   case msg of
+    MenuMsg subMsg ->
+      ( { model | menu = Menu.update subMsg model.menu }, Cmd.none )
+
     OnExampleMsg sub ->
       ( { model | examples = Examples.update sub model.examples }
       , Cmd.none
@@ -91,7 +99,8 @@ view model =
   { title = "elm-charts | Documentation"
   , body =
       Layout.view <|
-        [ Menu.small
+        [ Menu.small model.window model.menu
+            |> E.map MenuMsg
         , E.el
             [ F.size 32
             , E.paddingXY 0 10

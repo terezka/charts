@@ -16,8 +16,8 @@ view children =
       , F.family [ F.typeface "IBM Plex Sans", F.sansSerif ]
       ] <|
       E.column
-        [ E.width (E.maximum 1000 E.fill)
-        , E.paddingEach { top = 30, bottom = 20, left = 0, right = 0 }
+        [ E.width (E.maximum 1060 E.fill)
+        , E.paddingEach { top = 30, bottom = 20, left = 30, right = 30 }
         , E.centerX
         , F.size 12
         , F.color (E.rgb255 80 80 80)

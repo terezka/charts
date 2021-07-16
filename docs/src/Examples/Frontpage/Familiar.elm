@@ -14,7 +14,6 @@ chart =
   C.chart
     [ CA.height 350
     , CA.width 570
-    , CA.static
     , CA.margin { top = 40, bottom = 30, left = 30, right = 10 }
     ]
     [ C.grid []
@@ -100,7 +99,6 @@ chart =
   C.chart
     [ CA.height 350
     , CA.width 570
-    , CA.static
     , CA.margin { top = 40, bottom = 30, left = 30, right = 10 }
     ]
     [ C.grid []
@@ -131,7 +129,6 @@ chart =
   C.chart
     [ CA.height 350
     , CA.width 570
-    , CA.static
     , CA.margin { top = 40, bottom = 30, left = 30, right = 10 }
     ]
     [ C.grid []

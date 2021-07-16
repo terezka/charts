@@ -33,6 +33,7 @@ view config =
         , E.height E.fill
         , E.htmlAttribute (HA.style "white-space" "pre")
         , E.htmlAttribute (HA.style "padding" "0 20px")
+        , E.htmlAttribute (HA.style "overflow-x" "scroll")
         , F.size 14
         , F.family [ F.typeface "Source Code Pro", F.monospace ]
         , E.alignTop

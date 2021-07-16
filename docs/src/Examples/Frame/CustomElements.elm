@@ -91,7 +91,7 @@ view model =
 meta =
   { category = "Navigation"
   , categoryOrder = 4
-  , name = "Custom elements"
+  , name = "Custom chart elements"
   , description = "Add custom tracked elements"
   , order = 100
   }

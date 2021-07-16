@@ -37,7 +37,7 @@ view model =
   C.chart
     [ CA.height 300
     , CA.width 500
-    , CA.static
+    , CA.margin { top = 10, left = 40, right = 0, bottom = 25 }
     , CE.onMouseMove OnHover (CE.getNearest CI.stacks)
     , CE.onMouseLeave (OnHover [])
     ]

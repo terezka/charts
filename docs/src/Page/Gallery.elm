@@ -28,6 +28,8 @@ import Ui.Menu as Menu
 type alias Model =
   { salaryDist : SalaryDist.Model
   , salaryDistBar : SalaryDistBar.Model
+  , window : Session.Window
+  , menu : Menu.Model
   }
 
 
@@ -43,6 +45,8 @@ init : Navigation.Key -> Session -> Params -> ( Model, Cmd Msg )
 init key session params =
   ( { salaryDist = SalaryDist.init
     , salaryDistBar = SalaryDistBar.init
+    , window = session.window
+    , menu = Menu.init
     }
   , Cmd.none
   )
@@ -58,7 +62,8 @@ exit model session =
 
 
 type Msg
-  = SalaryDistMsg SalaryDist.Msg
+  = MenuMsg Menu.Msg
+  | SalaryDistMsg SalaryDist.Msg
   | SalaryDistBarMsg SalaryDistBar.Msg
 
 
@@ -66,6 +71,9 @@ type Msg
 update : Navigation.Key -> Msg -> Model -> ( Model, Cmd Msg )
 update key msg model =
   case msg of
+    MenuMsg subMsg ->
+      ( { model | menu = Menu.update subMsg model.menu }, Cmd.none )
+
     SalaryDistMsg subMsg ->
       ( { model | salaryDist = SalaryDist.update subMsg model.salaryDist }, Cmd.none )
 
@@ -92,7 +100,8 @@ view model =
   { title = "elm-charts"
     , body =
         Layout.view
-          [ Menu.small
+          [ Menu.small model.window model.menu
+              |> E.map MenuMsg
           , E.el
               [ F.size 32
               , E.paddingXY 0 10

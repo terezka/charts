@@ -23,7 +23,9 @@ import Ui.Menu as Menu
 
 
 type alias Model =
-  ()
+  { window : Session.Window
+  , menu : Menu.Model
+  }
 
 
 type alias Params =
@@ -36,7 +38,9 @@ type alias Params =
 
 init : Navigation.Key -> Session -> Params -> ( Model, Cmd Msg )
 init key session params =
-  ( ()
+  ( { window = session.window
+    , menu = Menu.init
+    }
   , Cmd.none
   )
 
@@ -51,14 +55,14 @@ exit model session =
 
 
 type Msg
-  = NoOp
+  = MenuMsg Menu.Msg
 
 
 update : Navigation.Key -> Msg -> Model -> ( Model, Cmd Msg )
 update key msg model =
   case msg of
-    NoOp ->
-      ( model, Cmd.none )
+    MenuMsg subMsg ->
+      ( { model | menu = Menu.update subMsg model.menu }, Cmd.none )
 
 
 
@@ -70,7 +74,8 @@ view model =
     { title = "elm-charts"
     , body =
         Layout.view
-          [ Menu.small
+          [ Menu.small model.window model.menu
+              |> E.map MenuMsg
           , E.el
               [ F.size 32
               , E.paddingXY 0 10
