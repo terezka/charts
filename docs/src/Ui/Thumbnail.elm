@@ -34,7 +34,7 @@ toUrlGroup title =
 
 urlify : String -> String
 urlify =
-  String.replace " " "-" >> String.toLower
+  String.replace " " "-" >> String.replace "/" "-" >> String.toLower
 
 
 groups : List Group

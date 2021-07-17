@@ -5869,7 +5869,10 @@ var $elm$core$String$toLower = _String_toLower;
 var $author$project$Ui$Thumbnail$urlify = A2(
 	$elm$core$Basics$composeR,
 	A2($elm$core$String$replace, ' ', '-'),
-	$elm$core$String$toLower);
+	A2(
+		$elm$core$Basics$composeR,
+		A2($elm$core$String$replace, '/', '-'),
+		$elm$core$String$toLower));
 var $author$project$Ui$Thumbnail$toUrlGroup = function (title) {
 	return '/documentation/' + $author$project$Ui$Thumbnail$urlify(title);
 };
