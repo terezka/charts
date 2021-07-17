@@ -59,7 +59,7 @@ meta =
   , categoryOrder = 5
   , name = "Change style based on events"
   , description = "Change styling if hovered."
-  , order = 4
+  , order = 7
   }
 
 
