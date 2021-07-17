@@ -90,7 +90,13 @@ import Examples.LineCharts.Labels
 import Examples.LineCharts.Missing
 import Examples.LineCharts.Legends
 import Examples.LineCharts.Basic
+import Examples.Frontpage.BasicBubble
+import Examples.Frontpage.BasicNavigation
+import Examples.Frontpage.BasicBar
+import Examples.Frontpage.BasicArea
 import Examples.Frontpage.Concise
+import Examples.Frontpage.BasicLine
+import Examples.Frontpage.BasicScatter
 import Examples.Frontpage.Familiar
 import Examples.ScatterCharts.Colors
 import Examples.ScatterCharts.Shapes
@@ -192,7 +198,13 @@ type Id
   | LineCharts__Missing
   | LineCharts__Legends
   | LineCharts__Basic
+  | Frontpage__BasicBubble
+  | Frontpage__BasicNavigation
+  | Frontpage__BasicBar
+  | Frontpage__BasicArea
   | Frontpage__Concise
+  | Frontpage__BasicLine
+  | Frontpage__BasicScatter
   | Frontpage__Familiar
   | ScatterCharts__Colors
   | ScatterCharts__Shapes
@@ -294,19 +306,25 @@ type alias Model =
   , example83 : Examples.LineCharts.Missing.Model
   , example84 : Examples.LineCharts.Legends.Model
   , example85 : Examples.LineCharts.Basic.Model
-  , example86 : Examples.Frontpage.Concise.Model
-  , example87 : Examples.Frontpage.Familiar.Model
-  , example88 : Examples.ScatterCharts.Colors.Model
-  , example89 : Examples.ScatterCharts.Shapes.Model
-  , example90 : Examples.ScatterCharts.Tooltip.Model
-  , example91 : Examples.ScatterCharts.Highlight.Model
-  , example92 : Examples.ScatterCharts.DataDependent.Model
-  , example93 : Examples.ScatterCharts.Borders.Model
-  , example94 : Examples.ScatterCharts.Labels.Model
-  , example95 : Examples.ScatterCharts.Opacity.Model
-  , example96 : Examples.ScatterCharts.Sizes.Model
-  , example97 : Examples.ScatterCharts.Legends.Model
-  , example98 : Examples.ScatterCharts.Basic.Model
+  , example86 : Examples.Frontpage.BasicBubble.Model
+  , example87 : Examples.Frontpage.BasicNavigation.Model
+  , example88 : Examples.Frontpage.BasicBar.Model
+  , example89 : Examples.Frontpage.BasicArea.Model
+  , example90 : Examples.Frontpage.Concise.Model
+  , example91 : Examples.Frontpage.BasicLine.Model
+  , example92 : Examples.Frontpage.BasicScatter.Model
+  , example93 : Examples.Frontpage.Familiar.Model
+  , example94 : Examples.ScatterCharts.Colors.Model
+  , example95 : Examples.ScatterCharts.Shapes.Model
+  , example96 : Examples.ScatterCharts.Tooltip.Model
+  , example97 : Examples.ScatterCharts.Highlight.Model
+  , example98 : Examples.ScatterCharts.DataDependent.Model
+  , example99 : Examples.ScatterCharts.Borders.Model
+  , example100 : Examples.ScatterCharts.Labels.Model
+  , example101 : Examples.ScatterCharts.Opacity.Model
+  , example102 : Examples.ScatterCharts.Sizes.Model
+  , example103 : Examples.ScatterCharts.Legends.Model
+  , example104 : Examples.ScatterCharts.Basic.Model
   }
 
 
@@ -398,19 +416,25 @@ init =
   , example83 = Examples.LineCharts.Missing.init
   , example84 = Examples.LineCharts.Legends.init
   , example85 = Examples.LineCharts.Basic.init
-  , example86 = Examples.Frontpage.Concise.init
-  , example87 = Examples.Frontpage.Familiar.init
-  , example88 = Examples.ScatterCharts.Colors.init
-  , example89 = Examples.ScatterCharts.Shapes.init
-  , example90 = Examples.ScatterCharts.Tooltip.init
-  , example91 = Examples.ScatterCharts.Highlight.init
-  , example92 = Examples.ScatterCharts.DataDependent.init
-  , example93 = Examples.ScatterCharts.Borders.init
-  , example94 = Examples.ScatterCharts.Labels.init
-  , example95 = Examples.ScatterCharts.Opacity.init
-  , example96 = Examples.ScatterCharts.Sizes.init
-  , example97 = Examples.ScatterCharts.Legends.init
-  , example98 = Examples.ScatterCharts.Basic.init
+  , example86 = Examples.Frontpage.BasicBubble.init
+  , example87 = Examples.Frontpage.BasicNavigation.init
+  , example88 = Examples.Frontpage.BasicBar.init
+  , example89 = Examples.Frontpage.BasicArea.init
+  , example90 = Examples.Frontpage.Concise.init
+  , example91 = Examples.Frontpage.BasicLine.init
+  , example92 = Examples.Frontpage.BasicScatter.init
+  , example93 = Examples.Frontpage.Familiar.init
+  , example94 = Examples.ScatterCharts.Colors.init
+  , example95 = Examples.ScatterCharts.Shapes.init
+  , example96 = Examples.ScatterCharts.Tooltip.init
+  , example97 = Examples.ScatterCharts.Highlight.init
+  , example98 = Examples.ScatterCharts.DataDependent.init
+  , example99 = Examples.ScatterCharts.Borders.init
+  , example100 = Examples.ScatterCharts.Labels.init
+  , example101 = Examples.ScatterCharts.Opacity.init
+  , example102 = Examples.ScatterCharts.Sizes.init
+  , example103 = Examples.ScatterCharts.Legends.init
+  , example104 = Examples.ScatterCharts.Basic.init
   }
 
 
@@ -501,19 +525,25 @@ type Msg
   | ExampleMsg83 Examples.LineCharts.Missing.Msg
   | ExampleMsg84 Examples.LineCharts.Legends.Msg
   | ExampleMsg85 Examples.LineCharts.Basic.Msg
-  | ExampleMsg86 Examples.Frontpage.Concise.Msg
-  | ExampleMsg87 Examples.Frontpage.Familiar.Msg
-  | ExampleMsg88 Examples.ScatterCharts.Colors.Msg
-  | ExampleMsg89 Examples.ScatterCharts.Shapes.Msg
-  | ExampleMsg90 Examples.ScatterCharts.Tooltip.Msg
-  | ExampleMsg91 Examples.ScatterCharts.Highlight.Msg
-  | ExampleMsg92 Examples.ScatterCharts.DataDependent.Msg
-  | ExampleMsg93 Examples.ScatterCharts.Borders.Msg
-  | ExampleMsg94 Examples.ScatterCharts.Labels.Msg
-  | ExampleMsg95 Examples.ScatterCharts.Opacity.Msg
-  | ExampleMsg96 Examples.ScatterCharts.Sizes.Msg
-  | ExampleMsg97 Examples.ScatterCharts.Legends.Msg
-  | ExampleMsg98 Examples.ScatterCharts.Basic.Msg
+  | ExampleMsg86 Examples.Frontpage.BasicBubble.Msg
+  | ExampleMsg87 Examples.Frontpage.BasicNavigation.Msg
+  | ExampleMsg88 Examples.Frontpage.BasicBar.Msg
+  | ExampleMsg89 Examples.Frontpage.BasicArea.Msg
+  | ExampleMsg90 Examples.Frontpage.Concise.Msg
+  | ExampleMsg91 Examples.Frontpage.BasicLine.Msg
+  | ExampleMsg92 Examples.Frontpage.BasicScatter.Msg
+  | ExampleMsg93 Examples.Frontpage.Familiar.Msg
+  | ExampleMsg94 Examples.ScatterCharts.Colors.Msg
+  | ExampleMsg95 Examples.ScatterCharts.Shapes.Msg
+  | ExampleMsg96 Examples.ScatterCharts.Tooltip.Msg
+  | ExampleMsg97 Examples.ScatterCharts.Highlight.Msg
+  | ExampleMsg98 Examples.ScatterCharts.DataDependent.Msg
+  | ExampleMsg99 Examples.ScatterCharts.Borders.Msg
+  | ExampleMsg100 Examples.ScatterCharts.Labels.Msg
+  | ExampleMsg101 Examples.ScatterCharts.Opacity.Msg
+  | ExampleMsg102 Examples.ScatterCharts.Sizes.Msg
+  | ExampleMsg103 Examples.ScatterCharts.Legends.Msg
+  | ExampleMsg104 Examples.ScatterCharts.Basic.Msg
 
 
 update : Msg -> Model -> Model
@@ -605,19 +635,25 @@ update msg model =
     ExampleMsg83 sub -> { model | example83 = Examples.LineCharts.Missing.update sub model.example83 }
     ExampleMsg84 sub -> { model | example84 = Examples.LineCharts.Legends.update sub model.example84 }
     ExampleMsg85 sub -> { model | example85 = Examples.LineCharts.Basic.update sub model.example85 }
-    ExampleMsg86 sub -> { model | example86 = Examples.Frontpage.Concise.update sub model.example86 }
-    ExampleMsg87 sub -> { model | example87 = Examples.Frontpage.Familiar.update sub model.example87 }
-    ExampleMsg88 sub -> { model | example88 = Examples.ScatterCharts.Colors.update sub model.example88 }
-    ExampleMsg89 sub -> { model | example89 = Examples.ScatterCharts.Shapes.update sub model.example89 }
-    ExampleMsg90 sub -> { model | example90 = Examples.ScatterCharts.Tooltip.update sub model.example90 }
-    ExampleMsg91 sub -> { model | example91 = Examples.ScatterCharts.Highlight.update sub model.example91 }
-    ExampleMsg92 sub -> { model | example92 = Examples.ScatterCharts.DataDependent.update sub model.example92 }
-    ExampleMsg93 sub -> { model | example93 = Examples.ScatterCharts.Borders.update sub model.example93 }
-    ExampleMsg94 sub -> { model | example94 = Examples.ScatterCharts.Labels.update sub model.example94 }
-    ExampleMsg95 sub -> { model | example95 = Examples.ScatterCharts.Opacity.update sub model.example95 }
-    ExampleMsg96 sub -> { model | example96 = Examples.ScatterCharts.Sizes.update sub model.example96 }
-    ExampleMsg97 sub -> { model | example97 = Examples.ScatterCharts.Legends.update sub model.example97 }
-    ExampleMsg98 sub -> { model | example98 = Examples.ScatterCharts.Basic.update sub model.example98 }
+    ExampleMsg86 sub -> { model | example86 = Examples.Frontpage.BasicBubble.update sub model.example86 }
+    ExampleMsg87 sub -> { model | example87 = Examples.Frontpage.BasicNavigation.update sub model.example87 }
+    ExampleMsg88 sub -> { model | example88 = Examples.Frontpage.BasicBar.update sub model.example88 }
+    ExampleMsg89 sub -> { model | example89 = Examples.Frontpage.BasicArea.update sub model.example89 }
+    ExampleMsg90 sub -> { model | example90 = Examples.Frontpage.Concise.update sub model.example90 }
+    ExampleMsg91 sub -> { model | example91 = Examples.Frontpage.BasicLine.update sub model.example91 }
+    ExampleMsg92 sub -> { model | example92 = Examples.Frontpage.BasicScatter.update sub model.example92 }
+    ExampleMsg93 sub -> { model | example93 = Examples.Frontpage.Familiar.update sub model.example93 }
+    ExampleMsg94 sub -> { model | example94 = Examples.ScatterCharts.Colors.update sub model.example94 }
+    ExampleMsg95 sub -> { model | example95 = Examples.ScatterCharts.Shapes.update sub model.example95 }
+    ExampleMsg96 sub -> { model | example96 = Examples.ScatterCharts.Tooltip.update sub model.example96 }
+    ExampleMsg97 sub -> { model | example97 = Examples.ScatterCharts.Highlight.update sub model.example97 }
+    ExampleMsg98 sub -> { model | example98 = Examples.ScatterCharts.DataDependent.update sub model.example98 }
+    ExampleMsg99 sub -> { model | example99 = Examples.ScatterCharts.Borders.update sub model.example99 }
+    ExampleMsg100 sub -> { model | example100 = Examples.ScatterCharts.Labels.update sub model.example100 }
+    ExampleMsg101 sub -> { model | example101 = Examples.ScatterCharts.Opacity.update sub model.example101 }
+    ExampleMsg102 sub -> { model | example102 = Examples.ScatterCharts.Sizes.update sub model.example102 }
+    ExampleMsg103 sub -> { model | example103 = Examples.ScatterCharts.Legends.update sub model.example103 }
+    ExampleMsg104 sub -> { model | example104 = Examples.ScatterCharts.Basic.update sub model.example104 }
 
 
 view : Model -> Id -> Html.Html Msg
@@ -709,19 +745,25 @@ view model chosen =
     LineCharts__Missing -> Html.map ExampleMsg83 (Examples.LineCharts.Missing.view model.example83)
     LineCharts__Legends -> Html.map ExampleMsg84 (Examples.LineCharts.Legends.view model.example84)
     LineCharts__Basic -> Html.map ExampleMsg85 (Examples.LineCharts.Basic.view model.example85)
-    Frontpage__Concise -> Html.map ExampleMsg86 (Examples.Frontpage.Concise.view model.example86)
-    Frontpage__Familiar -> Html.map ExampleMsg87 (Examples.Frontpage.Familiar.view model.example87)
-    ScatterCharts__Colors -> Html.map ExampleMsg88 (Examples.ScatterCharts.Colors.view model.example88)
-    ScatterCharts__Shapes -> Html.map ExampleMsg89 (Examples.ScatterCharts.Shapes.view model.example89)
-    ScatterCharts__Tooltip -> Html.map ExampleMsg90 (Examples.ScatterCharts.Tooltip.view model.example90)
-    ScatterCharts__Highlight -> Html.map ExampleMsg91 (Examples.ScatterCharts.Highlight.view model.example91)
-    ScatterCharts__DataDependent -> Html.map ExampleMsg92 (Examples.ScatterCharts.DataDependent.view model.example92)
-    ScatterCharts__Borders -> Html.map ExampleMsg93 (Examples.ScatterCharts.Borders.view model.example93)
-    ScatterCharts__Labels -> Html.map ExampleMsg94 (Examples.ScatterCharts.Labels.view model.example94)
-    ScatterCharts__Opacity -> Html.map ExampleMsg95 (Examples.ScatterCharts.Opacity.view model.example95)
-    ScatterCharts__Sizes -> Html.map ExampleMsg96 (Examples.ScatterCharts.Sizes.view model.example96)
-    ScatterCharts__Legends -> Html.map ExampleMsg97 (Examples.ScatterCharts.Legends.view model.example97)
-    ScatterCharts__Basic -> Html.map ExampleMsg98 (Examples.ScatterCharts.Basic.view model.example98)
+    Frontpage__BasicBubble -> Html.map ExampleMsg86 (Examples.Frontpage.BasicBubble.view model.example86)
+    Frontpage__BasicNavigation -> Html.map ExampleMsg87 (Examples.Frontpage.BasicNavigation.view model.example87)
+    Frontpage__BasicBar -> Html.map ExampleMsg88 (Examples.Frontpage.BasicBar.view model.example88)
+    Frontpage__BasicArea -> Html.map ExampleMsg89 (Examples.Frontpage.BasicArea.view model.example89)
+    Frontpage__Concise -> Html.map ExampleMsg90 (Examples.Frontpage.Concise.view model.example90)
+    Frontpage__BasicLine -> Html.map ExampleMsg91 (Examples.Frontpage.BasicLine.view model.example91)
+    Frontpage__BasicScatter -> Html.map ExampleMsg92 (Examples.Frontpage.BasicScatter.view model.example92)
+    Frontpage__Familiar -> Html.map ExampleMsg93 (Examples.Frontpage.Familiar.view model.example93)
+    ScatterCharts__Colors -> Html.map ExampleMsg94 (Examples.ScatterCharts.Colors.view model.example94)
+    ScatterCharts__Shapes -> Html.map ExampleMsg95 (Examples.ScatterCharts.Shapes.view model.example95)
+    ScatterCharts__Tooltip -> Html.map ExampleMsg96 (Examples.ScatterCharts.Tooltip.view model.example96)
+    ScatterCharts__Highlight -> Html.map ExampleMsg97 (Examples.ScatterCharts.Highlight.view model.example97)
+    ScatterCharts__DataDependent -> Html.map ExampleMsg98 (Examples.ScatterCharts.DataDependent.view model.example98)
+    ScatterCharts__Borders -> Html.map ExampleMsg99 (Examples.ScatterCharts.Borders.view model.example99)
+    ScatterCharts__Labels -> Html.map ExampleMsg100 (Examples.ScatterCharts.Labels.view model.example100)
+    ScatterCharts__Opacity -> Html.map ExampleMsg101 (Examples.ScatterCharts.Opacity.view model.example101)
+    ScatterCharts__Sizes -> Html.map ExampleMsg102 (Examples.ScatterCharts.Sizes.view model.example102)
+    ScatterCharts__Legends -> Html.map ExampleMsg103 (Examples.ScatterCharts.Legends.view model.example103)
+    ScatterCharts__Basic -> Html.map ExampleMsg104 (Examples.ScatterCharts.Basic.view model.example104)
 
 
 smallCode : Id -> String
@@ -813,7 +855,13 @@ smallCode chosen =
     LineCharts__Missing -> Examples.LineCharts.Missing.smallCode
     LineCharts__Legends -> Examples.LineCharts.Legends.smallCode
     LineCharts__Basic -> Examples.LineCharts.Basic.smallCode
+    Frontpage__BasicBubble -> Examples.Frontpage.BasicBubble.smallCode
+    Frontpage__BasicNavigation -> Examples.Frontpage.BasicNavigation.smallCode
+    Frontpage__BasicBar -> Examples.Frontpage.BasicBar.smallCode
+    Frontpage__BasicArea -> Examples.Frontpage.BasicArea.smallCode
     Frontpage__Concise -> Examples.Frontpage.Concise.smallCode
+    Frontpage__BasicLine -> Examples.Frontpage.BasicLine.smallCode
+    Frontpage__BasicScatter -> Examples.Frontpage.BasicScatter.smallCode
     Frontpage__Familiar -> Examples.Frontpage.Familiar.smallCode
     ScatterCharts__Colors -> Examples.ScatterCharts.Colors.smallCode
     ScatterCharts__Shapes -> Examples.ScatterCharts.Shapes.smallCode
@@ -917,7 +965,13 @@ largeCode chosen =
     LineCharts__Missing -> Examples.LineCharts.Missing.largeCode
     LineCharts__Legends -> Examples.LineCharts.Legends.largeCode
     LineCharts__Basic -> Examples.LineCharts.Basic.largeCode
+    Frontpage__BasicBubble -> Examples.Frontpage.BasicBubble.largeCode
+    Frontpage__BasicNavigation -> Examples.Frontpage.BasicNavigation.largeCode
+    Frontpage__BasicBar -> Examples.Frontpage.BasicBar.largeCode
+    Frontpage__BasicArea -> Examples.Frontpage.BasicArea.largeCode
     Frontpage__Concise -> Examples.Frontpage.Concise.largeCode
+    Frontpage__BasicLine -> Examples.Frontpage.BasicLine.largeCode
+    Frontpage__BasicScatter -> Examples.Frontpage.BasicScatter.largeCode
     Frontpage__Familiar -> Examples.Frontpage.Familiar.largeCode
     ScatterCharts__Colors -> Examples.ScatterCharts.Colors.largeCode
     ScatterCharts__Shapes -> Examples.ScatterCharts.Shapes.largeCode
@@ -1021,7 +1075,13 @@ name chosen =
     LineCharts__Missing -> "Examples.LineCharts.Missing"
     LineCharts__Legends -> "Examples.LineCharts.Legends"
     LineCharts__Basic -> "Examples.LineCharts.Basic"
+    Frontpage__BasicBubble -> "Examples.Frontpage.BasicBubble"
+    Frontpage__BasicNavigation -> "Examples.Frontpage.BasicNavigation"
+    Frontpage__BasicBar -> "Examples.Frontpage.BasicBar"
+    Frontpage__BasicArea -> "Examples.Frontpage.BasicArea"
     Frontpage__Concise -> "Examples.Frontpage.Concise"
+    Frontpage__BasicLine -> "Examples.Frontpage.BasicLine"
+    Frontpage__BasicScatter -> "Examples.Frontpage.BasicScatter"
     Frontpage__Familiar -> "Examples.Frontpage.Familiar"
     ScatterCharts__Colors -> "Examples.ScatterCharts.Colors"
     ScatterCharts__Shapes -> "Examples.ScatterCharts.Shapes"
@@ -1124,7 +1184,13 @@ meta chosen =
     LineCharts__Missing -> Examples.LineCharts.Missing.meta
     LineCharts__Legends -> Examples.LineCharts.Legends.meta
     LineCharts__Basic -> Examples.LineCharts.Basic.meta
+    Frontpage__BasicBubble -> Examples.Frontpage.BasicBubble.meta
+    Frontpage__BasicNavigation -> Examples.Frontpage.BasicNavigation.meta
+    Frontpage__BasicBar -> Examples.Frontpage.BasicBar.meta
+    Frontpage__BasicArea -> Examples.Frontpage.BasicArea.meta
     Frontpage__Concise -> Examples.Frontpage.Concise.meta
+    Frontpage__BasicLine -> Examples.Frontpage.BasicLine.meta
+    Frontpage__BasicScatter -> Examples.Frontpage.BasicScatter.meta
     Frontpage__Familiar -> Examples.Frontpage.Familiar.meta
     ScatterCharts__Colors -> Examples.ScatterCharts.Colors.meta
     ScatterCharts__Shapes -> Examples.ScatterCharts.Shapes.meta
@@ -1227,7 +1293,13 @@ all =
   , LineCharts__Missing
   , LineCharts__Legends
   , LineCharts__Basic
+  , Frontpage__BasicBubble
+  , Frontpage__BasicNavigation
+  , Frontpage__BasicBar
+  , Frontpage__BasicArea
   , Frontpage__Concise
+  , Frontpage__BasicLine
+  , Frontpage__BasicScatter
   , Frontpage__Familiar
   , ScatterCharts__Colors
   , ScatterCharts__Shapes

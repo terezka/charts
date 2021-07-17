@@ -8,14 +8,12 @@ import Browser.Navigation as Navigation
 import Html
 import Charts.SalaryDist as SalaryDist
 import Charts.SalaryDistBar as SalaryDistBar
-import Charts.Basics exposing (Example)
 import Html as H
 import Element as E
 import Element.Font as F
 import Element.Border as B
 import Element.Background as BG
 import Ui.Layout as Layout
-import Ui.CompactExample as CompactExample
 import Ui.Code as Code
 import Ui.Menu as Menu
 

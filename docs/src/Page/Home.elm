@@ -25,7 +25,6 @@ import Element.Input as I
 import Element.Border as B
 import Element.Background as BG
 import Ui.Layout as Layout
-import Ui.CompactExample as CompactExample
 import Ui.Code as Code
 import Ui.Menu as Menu
 
