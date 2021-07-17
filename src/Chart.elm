@@ -230,6 +230,15 @@ the `chart` element.
         , ..
         ]
 
+Explore live examples for the following attributes:
+- [margin](https://www.elm-charts.org/documentation/navigation/margin)
+- [padding](https://www.elm-charts.org/documentation/navigation/padding)
+- [range](https://www.elm-charts.org/documentation/navigation/control-dimensions)
+- [domain](https://www.elm-charts.org/documentation/navigation/control-dimensions)
+- [onMouseMove](https://www.elm-charts.org/documentation/interactivity/basic-bar-tooltip)
+- [onMouseLeave](https://www.elm-charts.org/documentation/interactivity/basic-bar-tooltip)
+- [htmlAttrs](https://www.elm-charts.org/documentation/navigation/background)
+
 -}
 chart : List (Attribute (Container data msg)) -> List (Element data msg) -> H.Html msg
 chart edits unindexedElements =
@@ -593,6 +602,18 @@ Customizations:
       [] -- Add any HTML children (Will be filled with default tooltip if left empty)
 
 
+Explore live examples for the following attributes:
+- [onTopOrBottom](https://www.elm-charts.org/documentation/interactivity/direction)
+- [top](https://www.elm-charts.org/documentation/interactivity/set-focal-point)
+- [offset](https://www.elm-charts.org/documentation/interactivity/edit-offset)
+- [noArrow](https://www.elm-charts.org/documentation/interactivity/remove-pointer)
+- [border](https://www.elm-charts.org/documentation/interactivity/edit-border)
+- [background](https://www.elm-charts.org/documentation/interactivity/edit-background)
+
+See also [example of custom formatting](https://www.elm-charts.org/documentation/interactivity/change-value-formatting)
+and [example of custom content](https://www.elm-charts.org/documentation/interactivity/change-content) and the other
+examples pertaining to [interactivity](https://www.elm-charts.org/documentation/interactivity).
+
 -}
 tooltip : CI.Item a -> List (Attribute Tooltip) -> List (H.Attribute Never) -> List (H.Html Never) -> Element data msg
 tooltip i edits attrs_ content =
@@ -641,6 +662,12 @@ the styling options:
               -- The example will make a line where x1 = 2 to x2 = 8
           ]
       ]
+
+Explore live examples for the following attributes:
+- [color](https://www.elm-charts.org/documentation/navigation/color)
+- [noArrow](https://www.elm-charts.org/documentation/navigation/remove-arrow)
+- [pinned](https://www.elm-charts.org/documentation/navigation/position)
+- [limits](https://www.elm-charts.org/documentation/navigation/adjust-axis-line)
 
 -}
 xAxis : List (Attribute Axis) -> Element item msg
@@ -759,6 +786,14 @@ The example below illustrates the configuration:
               -- The example will add ticks between x = 2 and 8.
           ]
       ]
+
+Explore live examples for the following attributes:
+- [pinned](https://www.elm-charts.org/documentation/navigation/position)
+- [ints](https://www.elm-charts.org/documentation/navigation/only-integers)
+- [times](https://www.elm-charts.org/documentation/navigation/timeline)
+- [noGrid](https://www.elm-charts.org/documentation/navigation/remove-grid-lines)
+- [amount](https://www.elm-charts.org/documentation/navigation/amount-of-labels-ticks)
+
 -}
 xTicks : List (Attribute Ticks) -> Element item msg
 xTicks edits =
@@ -900,7 +935,15 @@ The example below illustrates the configuration:
           ]
       ]
 
-For more in depth and irregular customization, see `xLabel`.
+Explore live examples for the following attributes:
+- [alignLeft](https://www.elm-charts.org/documentation/navigation/move-labels)
+- [moveUp](https://www.elm-charts.org/documentation/navigation/move-labels)
+- [amount](https://www.elm-charts.org/documentation/navigation/amount-of-labels-ticks)
+- [ints](https://www.elm-charts.org/documentation/navigation/only-integers)
+- [times](https://www.elm-charts.org/documentation/navigation/timeline)
+
+For more in depth and irregular customization, see `xLabel` or check out
+the [custom labels example](https://www.elm-charts.org/documentation/navigation/custom-labels).
 
 -}
 xLabels : List (Attribute Labels) -> Element item msg
@@ -1070,6 +1113,9 @@ A full list of possible attributes:
           ]
           [ S.text "hello!" ]
       ]
+
+See also the [custom labels example](https://www.elm-charts.org/documentation/navigation/custom-labels).
+
 
 -}
 xLabel : List (Attribute Label) -> List (S.Svg msg) -> Element data msg
@@ -1399,6 +1445,18 @@ styling options are available.
           ]
       ]
 
+
+Explore live examples for the following attributes:
+- [color](https://www.elm-charts.org/documentation/bar-charts/color)
+- [borderWidth](https://www.elm-charts.org/documentation/bar-charts/borders)
+- [opacity](https://www.elm-charts.org/documentation/bar-charts/borders)
+- [striped](https://www.elm-charts.org/documentation/bar-charts/pattern)
+- [dotted](https://www.elm-charts.org/documentation/bar-charts/pattern)
+- [gradient](https://www.elm-charts.org/documentation/bar-charts/gradient)
+- [roundTop](https://www.elm-charts.org/documentation/bar-charts/corners)
+- [roundBottom](https://www.elm-charts.org/documentation/bar-charts/corners)
+- [highlight](https://www.elm-charts.org/documentation/bar-charts/highlight)
+
 -}
 bar : (data -> Float) -> List (Attribute CS.Bar) -> Property data inter CS.Bar
 bar y =
@@ -1453,6 +1511,15 @@ options are available.
       , { year = 2020, income = 62000 }
       ]
 
+Explore live examples for the following attributes:
+- [size](https://www.elm-charts.org/documentation/scatter-charts/sizes)
+- [opacity](https://www.elm-charts.org/documentation/scatter-charts/opacity)
+- [border](https://www.elm-charts.org/documentation/scatter-charts/borders)
+- [borderWidth](https://www.elm-charts.org/documentation/scatter-charts/borders)
+- [highlight](https://www.elm-charts.org/documentation/scatter-charts/highlight)
+- [triangle](https://www.elm-charts.org/documentation/scatter-charts/shapes)
+- [square](https://www.elm-charts.org/documentation/scatter-charts/shapes)
+- [cross](https://www.elm-charts.org/documentation/scatter-charts/shapes)
 -}
 scatter : (data -> Float) -> List (Attribute CS.Dot) -> Property data inter CS.Dot
 scatter y =
@@ -1520,6 +1587,16 @@ The example below illustrates what styling options are available.
       , { age = 20, height = 184 }
       ]
 
+Explore live examples for the following attributes:
+- [monotone](https://www.elm-charts.org/documentation/line-charts/linear)
+- [stepped](https://www.elm-charts.org/documentation/line-charts/stepped)
+- [color](https://www.elm-charts.org/documentation/line-charts/color)
+- [width](https://www.elm-charts.org/documentation/line-charts/width)
+- [opacity](https://www.elm-charts.org/documentation/line-charts/area-under-curve)
+- [striped](https://www.elm-charts.org/documentation/line-charts/pattern)
+- [dotted](https://www.elm-charts.org/documentation/line-charts/pattern)
+- [gradient](https://www.elm-charts.org/documentation/line-charts/gradient)
+
 -}
 interpolated : (data -> Float) -> List (Attribute CS.Interpolation) -> List (Attribute CS.Dot) -> Property data CS.Interpolation CS.Dot
 interpolated y inter =
@@ -1539,6 +1616,7 @@ interpolated y inter =
           ]
       ]
 
+See live example of [missing data in line chart](https://www.elm-charts.org/documentation/line-charts/missing-data).
 -}
 interpolatedMaybe : (data -> Maybe Float) -> List (Attribute CS.Interpolation) -> List (Attribute CS.Dot) -> Property data CS.Interpolation CS.Dot
 interpolatedMaybe y inter =
@@ -1559,6 +1637,8 @@ in the default tooltip, and you can use it to identify items from this series.
           ]
       ]
 
+See [live example](https://www.elm-charts.org/documentation/interactivity/change-name).
+
 -}
 named : String -> Property data inter deco -> Property data inter deco
 named name =
@@ -1567,6 +1647,8 @@ named name =
 
 {-| Easily format the value which shows up by default in your tooltip if you add one. You
 can also access it using `Chart.Item.getTooltipValue`.
+
+See [live example](https://www.elm-charts.org/documentation/interactivity/change-value-formatting).
 
 -}
 format : (Float -> String) -> Property data inter deco -> Property data inter deco
@@ -1599,6 +1681,8 @@ and the data point itself.
           ]
       ]
 
+See [live example](https://www.elm-charts.org/documentation/scatter-charts/data-dependent-styling).
+
 -}
 variation : (Int -> data -> List (Attribute deco)) -> Property data inter deco -> Property data inter deco
 variation func =
@@ -1620,6 +1704,8 @@ attrained through events like `Chart.Events.onMouseMove` or similar.
           , { year = 2020, income = 62000, people = 180 }
           ]
       ]
+
+See [live example](https://www.elm-charts.org/documentation/interactivity/change-style-based-on-events).
 
 -}
 amongst : List (CI.One data x) -> (data -> List (Attribute deco)) -> Property data inter deco -> Property data inter deco
@@ -1649,6 +1735,9 @@ amongst inQuestion func =
           , { cats = 6, dogs = 1 }
           ]
       ]
+
+See [live example](https://www.elm-charts.org/documentation/bar-charts/stacked).
+
 -}
 stacked : List (Property data inter deco) -> Property data inter deco
 stacked =
@@ -1750,6 +1839,8 @@ Attributes you can use:
       , CA.format (\bin -> String.fromFloat (CI.getShared bin).start)
       ]
 
+See [live example](https://www.elm-charts.org/documentation/bar-charts/labels-for-bins).
+
 -}
 binLabels : (data -> String) -> List (Attribute (ItemLabel (CI.Many data CI.Bar))) -> Element data msg
 binLabels toLabel edits =
@@ -1808,6 +1899,9 @@ Attributes you can use:
        -- Change the text of the label
       , CA.format (\bar -> String.fromFloat (CI.getY bar))
       ]
+
+See [live example](https://www.elm-charts.org/documentation/bar-charts/labels-for-bars).
+
 -}
 barLabels : List (Attribute (ItemLabel (CI.One data CI.Bar))) -> Element data msg
 barLabels edits =
@@ -1929,6 +2023,9 @@ Attributes you can use:
        -- Change the text of the label
       , CA.format (\dot -> String.fromFloat (CI.getY dot))
       ]
+
+See [live example](https://www.elm-charts.org/documentation/line-charts/labels-for-each-point).
+
 -}
 dotLabels : List (Attribute (ItemLabel (CI.One data CI.Dot))) -> Element data msg
 dotLabels edits =
@@ -2032,6 +2129,13 @@ The rest of the configuration options concern styling:
       , { income = 12, spending = 6 }
       , { income = 18, spending = 16 }
       ]
+
+Explore live examples for the following attributes:
+- [spacing](https://www.elm-charts.org/documentation/bar-charts/spacing)
+- [margin](https://www.elm-charts.org/documentation/bar-charts/margin)
+- [roundTop](https://www.elm-charts.org/documentation/bar-charts/corners)
+- [roundBottom](https://www.elm-charts.org/documentation/bar-charts/corners)
+
 -}
 bars : List (Attribute (Bars data)) -> List (Property data () CS.Bar) -> List data -> Element data msg
 bars edits properties data =
@@ -2182,13 +2286,24 @@ seriesMap mapData toX properties data =
 
 
 
-{-| -}
+{-| Add a list of elements. -}
 list : List (Element data msg) -> Element data msg
 list =
   ListOfElements
 
 
-{-| -}
+{-| Add a custom element.
+
+- _name_ is the name of the element. Will show up in tooltip if using.
+- _color_ is the color of the element. Will show up in tooltip if using.
+- _position_ is the position of the element. Will be used to locate item for events.
+- _format_ is the formating of the element. Will be applied in tooltip if using.
+- _data_ is the data associated with element. Useful for advanced interactivity.
+- _render_ is how to render this element.
+
+See [live example](https://www.elm-charts.org/documentation/navigation/custom-chart-elements).
+
+-}
 custom :
   { name : String
   , color : String
@@ -2308,6 +2423,8 @@ withItems func =
       , C.each model.hovering <| \plane product ->
           [ C.tooltip product [] [] [] ]
       ]
+
+See [live example](https://www.elm-charts.org/documentation/interactivity/basic-bar-tooltip).
 
 -}
 each : List a -> (C.Plane -> a -> List (Element data msg)) -> Element data msg
@@ -2484,6 +2601,12 @@ eachCustom grouping func =
           , CA.htmlAttrs [ HA.class "my-legends" ] -- Add arbitrary HTML attributes.
           ]
       ]
+
+See live example:
+- [Basic bar legends](https://www.elm-charts.org/documentation/bar-charts/legends).
+- [Basic dot legends](https://www.elm-charts.org/documentation/scatter-charts/legends).
+- [Basic line legends](https://www.elm-charts.org/documentation/line-charts/legends).
+- [Mutiple chart types](https://www.elm-charts.org/documentation/navigation/legends).
 -}
 legendsAt : (C.Axis -> Float) -> (C.Axis -> Float) -> List (Attribute (CS.Legends msg)) -> List (Attribute (CS.Legend msg)) -> Element data msg
 legendsAt toX toY attrs children =
@@ -2507,6 +2630,8 @@ legendsAt toX toY attrs children =
 
 The example above generates 10 ints on the x axis between x = -5 and x = 15. For each of those
 ints, it adds a tick and a label.
+
+See [live example](https://www.elm-charts.org/documentation/navigation/custom-labels).
 
 -}
 generate : Int -> CS.Generator a -> (C.Plane -> C.Axis) -> List (Attribute C.Axis) -> (C.Plane -> a -> List (Element data msg)) -> Element data msg
@@ -2610,6 +2735,8 @@ Other attributes you can use:
       ]
       [ S.text "Data from Fruits.com" ]
 
+See [live example](https://www.elm-charts.org/documentation/navigation/titles).
+
 -}
 labelAt : (C.Axis -> Float) -> (C.Axis -> Float) -> List (Attribute CS.Label) -> List (S.Svg msg) -> Element data msg
 labelAt toX toY attrs inner =
@@ -2651,6 +2778,8 @@ labelAt toX toY attrs inner =
           ]
       ]
 
+See [live example](https://www.elm-charts.org/documentation/navigation/lines).
+
 -}
 line : List (Attribute CS.Line) -> Element data msg
 line attrs =
@@ -2676,6 +2805,8 @@ line attrs =
           ]
       ]
 
+See [live example](https://www.elm-charts.org/documentation/navigation/rectangle).
+
 -}
 rect : List (Attribute CS.Rect) -> Element data msg
 rect attrs =
@@ -2683,6 +2814,8 @@ rect attrs =
 
 
 {-| Add arbitrary SVG. See `Chart.Svg` for handy SVG helpers.
+
+See [live example](https://www.elm-charts.org/documentation/navigation/arbitrary-svg-and-html).
 
 -}
 svg : (C.Plane -> S.Svg msg) -> Element data msg
@@ -2714,6 +2847,8 @@ svgAt toX toY xOff yOff view =
 
 
 {-| Add arbitrary HTML at a specific location.
+
+See [live example](https://www.elm-charts.org/documentation/navigation/arbitrary-svg-and-html).
 
 -}
 htmlAt : (C.Axis -> Float) -> (C.Axis -> Float) -> Float -> Float -> List (H.Attribute msg) -> List (H.Html msg) -> Element data msg
