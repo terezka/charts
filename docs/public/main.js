@@ -7060,10 +7060,7 @@ var $author$project$Main$init = F3(
 var $elm$core$Platform$Sub$map = _Platform_map;
 var $elm$core$Platform$Sub$batch = _Platform_batch;
 var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
-var $author$project$Page$Administration$subscriptions = function (model) {
-	return $elm$core$Platform$Sub$none;
-};
-var $author$project$Page$Section$OnResize = F2(
+var $author$project$Page$Administration$OnResize = F2(
 	function (a, b) {
 		return {$: 'OnResize', a: a, b: b};
 	});
@@ -7370,6 +7367,13 @@ var $elm$browser$Browser$Events$onResize = function (func) {
 				A2($elm$json$Json$Decode$field, 'innerWidth', $elm$json$Json$Decode$int),
 				A2($elm$json$Json$Decode$field, 'innerHeight', $elm$json$Json$Decode$int))));
 };
+var $author$project$Page$Administration$subscriptions = function (model) {
+	return $elm$browser$Browser$Events$onResize($author$project$Page$Administration$OnResize);
+};
+var $author$project$Page$Section$OnResize = F2(
+	function (a, b) {
+		return {$: 'OnResize', a: a, b: b};
+	});
 var $author$project$Page$Section$subscriptions = function (model) {
 	return $elm$browser$Browser$Events$onResize($author$project$Page$Section$OnResize);
 };
@@ -7499,14 +7503,26 @@ var $author$project$Ui$Menu$update = F2(
 	});
 var $author$project$Page$Administration$update = F3(
 	function (key, msg, model) {
-		var subMsg = msg.a;
-		return _Utils_Tuple2(
-			_Utils_update(
-				model,
-				{
-					menu: A2($author$project$Ui$Menu$update, subMsg, model.menu)
-				}),
-			$elm$core$Platform$Cmd$none);
+		if (msg.$ === 'OnResize') {
+			var width = msg.a;
+			var height = msg.b;
+			return _Utils_Tuple2(
+				_Utils_update(
+					model,
+					{
+						window: {height: height, width: width}
+					}),
+				$elm$core$Platform$Cmd$none);
+		} else {
+			var subMsg = msg.a;
+			return _Utils_Tuple2(
+				_Utils_update(
+					model,
+					{
+						menu: A2($author$project$Ui$Menu$update, subMsg, model.menu)
+					}),
+				$elm$core$Platform$Cmd$none);
+		}
 	});
 var $author$project$Examples$BarCharts$BarLabels$update = F2(
 	function (msg, model) {
@@ -14694,6 +14710,10 @@ var $mdgriffith$elm_ui$Element$el = F2(
 				_List_fromArray(
 					[child])));
 	});
+var $mdgriffith$elm_ui$Internal$Model$Fill = function (a) {
+	return {$: 'Fill', a: a};
+};
+var $mdgriffith$elm_ui$Element$fill = $mdgriffith$elm_ui$Internal$Model$Fill(1);
 var $elm$core$Basics$always = F2(
 	function (a, _v0) {
 		return a;
@@ -14800,6 +14820,14 @@ var $mdgriffith$elm_ui$Internal$Model$map = F2(
 		}
 	});
 var $mdgriffith$elm_ui$Element$map = $mdgriffith$elm_ui$Internal$Model$map;
+var $mdgriffith$elm_ui$Internal$Model$Max = F2(
+	function (a, b) {
+		return {$: 'Max', a: a, b: b};
+	});
+var $mdgriffith$elm_ui$Element$maximum = F2(
+	function (i, l) {
+		return A2($mdgriffith$elm_ui$Internal$Model$Max, i, l);
+	});
 var $mdgriffith$elm_ui$Internal$Model$PaddingStyle = F5(
 	function (a, b, c, d, e) {
 		return {$: 'PaddingStyle', a: a, b: b, c: c, d: d, e: e};
@@ -14876,10 +14904,6 @@ var $mdgriffith$elm_ui$Internal$Model$Describe = function (a) {
 	return {$: 'Describe', a: a};
 };
 var $mdgriffith$elm_ui$Internal$Model$Paragraph = {$: 'Paragraph'};
-var $mdgriffith$elm_ui$Internal$Model$Fill = function (a) {
-	return {$: 'Fill', a: a};
-};
-var $mdgriffith$elm_ui$Element$fill = $mdgriffith$elm_ui$Internal$Model$Fill(1);
 var $mdgriffith$elm_ui$Internal$Model$SpacingStyle = F3(
 	function (a, b, c) {
 		return {$: 'SpacingStyle', a: a, b: b, c: c};
@@ -14917,10 +14941,6 @@ var $mdgriffith$elm_ui$Element$paragraph = F2(
 						attrs))),
 			$mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
 	});
-var $mdgriffith$elm_ui$Internal$Model$Px = function (a) {
-	return {$: 'Px', a: a};
-};
-var $mdgriffith$elm_ui$Element$px = $mdgriffith$elm_ui$Internal$Model$Px;
 var $mdgriffith$elm_ui$Internal$Model$AsRow = {$: 'AsRow'};
 var $mdgriffith$elm_ui$Internal$Model$asRow = $mdgriffith$elm_ui$Internal$Model$AsRow;
 var $mdgriffith$elm_ui$Element$row = F2(
@@ -15152,14 +15172,6 @@ var $author$project$Ui$Menu$links = A2(
 			A2($author$project$Ui$Menu$Link, '/documentation', 'Documentation'),
 			A2($author$project$Ui$Menu$Link, '/administration', 'Administration')
 		]));
-var $mdgriffith$elm_ui$Internal$Model$Max = F2(
-	function (a, b) {
-		return {$: 'Max', a: a, b: b};
-	});
-var $mdgriffith$elm_ui$Element$maximum = F2(
-	function (i, l) {
-		return A2($mdgriffith$elm_ui$Internal$Model$Max, i, l);
-	});
 var $elm$svg$Svg$trustedNode = _VirtualDom_nodeNS('http://www.w3.org/2000/svg');
 var $elm$svg$Svg$line = $elm$svg$Svg$trustedNode('line');
 var $feathericons$elm_feather$FeatherIcons$Icon = function (a) {
@@ -15388,6 +15400,32 @@ var $author$project$Ui$Menu$small = F2(
 	});
 var $elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
 var $elm$html$Html$Attributes$style = $elm$virtual_dom$VirtualDom$style;
+var $mdgriffith$elm_ui$Internal$Model$AsTextColumn = {$: 'AsTextColumn'};
+var $mdgriffith$elm_ui$Internal$Model$asTextColumn = $mdgriffith$elm_ui$Internal$Model$AsTextColumn;
+var $mdgriffith$elm_ui$Internal$Model$Min = F2(
+	function (a, b) {
+		return {$: 'Min', a: a, b: b};
+	});
+var $mdgriffith$elm_ui$Element$minimum = F2(
+	function (i, l) {
+		return A2($mdgriffith$elm_ui$Internal$Model$Min, i, l);
+	});
+var $mdgriffith$elm_ui$Element$textColumn = F2(
+	function (attrs, children) {
+		return A4(
+			$mdgriffith$elm_ui$Internal$Model$element,
+			$mdgriffith$elm_ui$Internal$Model$asTextColumn,
+			$mdgriffith$elm_ui$Internal$Model$div,
+			A2(
+				$elm$core$List$cons,
+				$mdgriffith$elm_ui$Element$width(
+					A2(
+						$mdgriffith$elm_ui$Element$maximum,
+						750,
+						A2($mdgriffith$elm_ui$Element$minimum, 500, $mdgriffith$elm_ui$Element$fill))),
+				attrs),
+			$mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
+	});
 var $elm$html$Html$ul = _VirtualDom_node('ul');
 var $mdgriffith$elm_ui$Internal$Model$Colored = F3(
 	function (a, b, c) {
@@ -15740,127 +15778,141 @@ var $author$project$Page$Administration$view = function (model) {
 					$author$project$Page$Administration$MenuMsg,
 					A2($author$project$Ui$Menu$small, model.window, model.menu)),
 					A2(
-					$mdgriffith$elm_ui$Element$el,
+					$mdgriffith$elm_ui$Element$textColumn,
 					_List_fromArray(
 						[
-							$mdgriffith$elm_ui$Element$Font$size(32),
-							A2($mdgriffith$elm_ui$Element$paddingXY, 0, 10)
-						]),
-					$mdgriffith$elm_ui$Element$text('Administration')),
-					A2(
-					$mdgriffith$elm_ui$Element$paragraph,
-					_List_fromArray(
-						[
-							A2($mdgriffith$elm_ui$Element$paddingXY, 0, 10),
-							$mdgriffith$elm_ui$Element$Font$size(14),
 							$mdgriffith$elm_ui$Element$width(
-							$mdgriffith$elm_ui$Element$px(700))
+							A2($mdgriffith$elm_ui$Element$maximum, 700, $mdgriffith$elm_ui$Element$fill))
 						]),
 					_List_fromArray(
 						[
-							$mdgriffith$elm_ui$Element$text('This library is developed and managed by '),
-							A2($author$project$Ui$Layout$link, 'https://twitter.com/tereza_sokol', 'Tereza Sokol'),
-							$mdgriffith$elm_ui$Element$text('. If you\'d '),
+							A2(
+							$mdgriffith$elm_ui$Element$paragraph,
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$Font$size(32),
+									A2($mdgriffith$elm_ui$Element$paddingXY, 0, 10)
+								]),
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$text('Administration')
+								])),
+							A2(
+							$mdgriffith$elm_ui$Element$paragraph,
+							_List_fromArray(
+								[
+									A2($mdgriffith$elm_ui$Element$paddingXY, 0, 10),
+									$mdgriffith$elm_ui$Element$Font$size(14)
+								]),
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$text('This library is developed and managed by '),
+									A2($author$project$Ui$Layout$link, 'https://twitter.com/tereza_sokol', 'Tereza Sokol'),
+									$mdgriffith$elm_ui$Element$text('. If you\'d '),
+									A2(
+									$mdgriffith$elm_ui$Element$el,
+									_List_fromArray(
+										[$mdgriffith$elm_ui$Element$Font$bold]),
+									$mdgriffith$elm_ui$Element$text('like to support  the maintanence and furter development')),
+									$mdgriffith$elm_ui$Element$text(' through a commission of work, you are welcome to contact me '),
+									$mdgriffith$elm_ui$Element$text('at '),
+									A2($author$project$Ui$Layout$link, 'mailto:terezasokol@gmail.com', 'terezasokol@gmail.com'),
+									$mdgriffith$elm_ui$Element$text('.')
+								])),
+							A2(
+							$mdgriffith$elm_ui$Element$paragraph,
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$Font$size(22),
+									$mdgriffith$elm_ui$Element$paddingEach(
+									{bottom: 5, left: 0, right: 0, top: 30})
+								]),
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$text('Contracting')
+								])),
+							A2(
+							$mdgriffith$elm_ui$Element$paragraph,
+							_List_fromArray(
+								[
+									A2($mdgriffith$elm_ui$Element$paddingXY, 0, 10),
+									$mdgriffith$elm_ui$Element$Font$size(14)
+								]),
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$text('If you or your company would like me to build you a chart with elm-charts, I\'m happy to do so! '),
+									$mdgriffith$elm_ui$Element$text('Feel free to contact me at '),
+									A2($author$project$Ui$Layout$link, 'mailto:terezasokol@gmail.com', 'terezasokol@gmail.com'),
+									$mdgriffith$elm_ui$Element$text(' and we can figure out the details.')
+								])),
+							A2(
+							$mdgriffith$elm_ui$Element$paragraph,
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$Font$size(22),
+									$mdgriffith$elm_ui$Element$paddingEach(
+									{bottom: 5, left: 0, right: 0, top: 30})
+								]),
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$text('Roadmap')
+								])),
+							A2(
+							$mdgriffith$elm_ui$Element$paragraph,
+							_List_fromArray(
+								[
+									A2($mdgriffith$elm_ui$Element$paddingXY, 0, 10),
+									$mdgriffith$elm_ui$Element$Font$size(14)
+								]),
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$text('Here are some upcoming features and improvements in approximate order of priority. '),
+									$mdgriffith$elm_ui$Element$text('If you have more suggestions or have wishes regarding the priority, then '),
+									$mdgriffith$elm_ui$Element$text('you\'re welcome to '),
+									A2($author$project$Ui$Layout$link, 'https://github.com/terezka/charts/issues', 'open an issue'),
+									$mdgriffith$elm_ui$Element$text('.')
+								])),
 							A2(
 							$mdgriffith$elm_ui$Element$el,
 							_List_fromArray(
-								[$mdgriffith$elm_ui$Element$Font$bold]),
-							$mdgriffith$elm_ui$Element$text('like to support  the maintanence and furter development')),
-							$mdgriffith$elm_ui$Element$text(' through a commission of work, you are welcome to contact me '),
-							$mdgriffith$elm_ui$Element$text('at '),
-							A2($author$project$Ui$Layout$link, 'mailto:terezasokol@gmail.com', 'terezasokol@gmail.com'),
-							$mdgriffith$elm_ui$Element$text('.')
+								[
+									$mdgriffith$elm_ui$Element$Font$size(14)
+								]),
+							$mdgriffith$elm_ui$Element$html(
+								function () {
+									var item = function (text) {
+										return A2(
+											$elm$html$Html$li,
+											_List_fromArray(
+												[
+													A2($elm$html$Html$Attributes$style, 'padding', '5px 0')
+												]),
+											_List_fromArray(
+												[
+													$elm$html$Html$text(text)
+												]));
+									};
+									return A2(
+										$elm$html$Html$ul,
+										_List_fromArray(
+											[
+												A2($elm$html$Html$Attributes$style, 'padding-left', '25px')
+											]),
+										_List_fromArray(
+											[
+												item('Heat maps charts'),
+												item('Horizontal bar charts'),
+												item('Logarithmic scales'),
+												item('Multiple scales'),
+												item('Relative stacked bars'),
+												item('Further improvements of automatic \"nice\" ticks'),
+												item('Pie charts'),
+												item('Confidence intervals'),
+												item('More interpolation options'),
+												item('Animations')
+											]));
+								}()))
 						])),
-					A2(
-					$mdgriffith$elm_ui$Element$el,
-					_List_fromArray(
-						[
-							$mdgriffith$elm_ui$Element$Font$size(22),
-							$mdgriffith$elm_ui$Element$paddingEach(
-							{bottom: 5, left: 0, right: 0, top: 30})
-						]),
-					$mdgriffith$elm_ui$Element$text('Contracting')),
-					A2(
-					$mdgriffith$elm_ui$Element$paragraph,
-					_List_fromArray(
-						[
-							A2($mdgriffith$elm_ui$Element$paddingXY, 0, 10),
-							$mdgriffith$elm_ui$Element$Font$size(14),
-							$mdgriffith$elm_ui$Element$width(
-							$mdgriffith$elm_ui$Element$px(700))
-						]),
-					_List_fromArray(
-						[
-							$mdgriffith$elm_ui$Element$text('If you or your company would like me to build you a chart with elm-charts, I\'m happy to do so! '),
-							$mdgriffith$elm_ui$Element$text('Feel free to contact me at '),
-							A2($author$project$Ui$Layout$link, 'mailto:terezasokol@gmail.com', 'terezasokol@gmail.com'),
-							$mdgriffith$elm_ui$Element$text(' and we can figure out the details.')
-						])),
-					A2(
-					$mdgriffith$elm_ui$Element$el,
-					_List_fromArray(
-						[
-							$mdgriffith$elm_ui$Element$Font$size(22),
-							$mdgriffith$elm_ui$Element$paddingEach(
-							{bottom: 5, left: 0, right: 0, top: 30})
-						]),
-					$mdgriffith$elm_ui$Element$text('Roadmap')),
-					A2(
-					$mdgriffith$elm_ui$Element$paragraph,
-					_List_fromArray(
-						[
-							A2($mdgriffith$elm_ui$Element$paddingXY, 0, 10),
-							$mdgriffith$elm_ui$Element$Font$size(14),
-							$mdgriffith$elm_ui$Element$width(
-							$mdgriffith$elm_ui$Element$px(700))
-						]),
-					_List_fromArray(
-						[
-							$mdgriffith$elm_ui$Element$text('Here are some upcoming features and improvements in approximate order of priority. '),
-							$mdgriffith$elm_ui$Element$text('If you have more suggestions or have wishes regarding the priority, then '),
-							$mdgriffith$elm_ui$Element$text('you\'re welcome to '),
-							A2($author$project$Ui$Layout$link, 'https://github.com/terezka/charts/issues', 'open an issue'),
-							$mdgriffith$elm_ui$Element$text('.')
-						])),
-					A2(
-					$mdgriffith$elm_ui$Element$el,
-					_List_fromArray(
-						[
-							$mdgriffith$elm_ui$Element$Font$size(14)
-						]),
-					$mdgriffith$elm_ui$Element$html(
-						function () {
-							var item = function (text) {
-								return A2(
-									$elm$html$Html$li,
-									_List_fromArray(
-										[
-											A2($elm$html$Html$Attributes$style, 'padding', '5px 0')
-										]),
-									_List_fromArray(
-										[
-											$elm$html$Html$text(text)
-										]));
-							};
-							return A2(
-								$elm$html$Html$ul,
-								_List_fromArray(
-									[
-										A2($elm$html$Html$Attributes$style, 'padding-left', '25px')
-									]),
-								_List_fromArray(
-									[
-										item('Heat maps charts'),
-										item('Horizontal bar charts'),
-										item('Logarithmic scales'),
-										item('Multiple scales'),
-										item('Relative stacked bars'),
-										item('Further improvements of automatic \"nice\" ticks'),
-										item('Pie charts'),
-										item('Confidence intervals'),
-										item('More interpolation options')
-									]));
-						}())),
 					A2(
 					$mdgriffith$elm_ui$Element$row,
 					_List_fromArray(
@@ -15916,6 +15968,10 @@ var $author$project$Ui$Layout$heading = F2(
 					$mdgriffith$elm_ui$Element$text(text)
 				]));
 	});
+var $mdgriffith$elm_ui$Internal$Model$Px = function (a) {
+	return {$: 'Px', a: a};
+};
+var $mdgriffith$elm_ui$Element$px = $mdgriffith$elm_ui$Internal$Model$Px;
 var $mdgriffith$elm_ui$Element$spacingXY = F2(
 	function (x, y) {
 		return A2(
@@ -35019,32 +35075,6 @@ var $author$project$Examples$smallCode = function (chosen) {
 			return $author$project$Examples$ScatterCharts$Basic$smallCode;
 	}
 };
-var $mdgriffith$elm_ui$Internal$Model$AsTextColumn = {$: 'AsTextColumn'};
-var $mdgriffith$elm_ui$Internal$Model$asTextColumn = $mdgriffith$elm_ui$Internal$Model$AsTextColumn;
-var $mdgriffith$elm_ui$Internal$Model$Min = F2(
-	function (a, b) {
-		return {$: 'Min', a: a, b: b};
-	});
-var $mdgriffith$elm_ui$Element$minimum = F2(
-	function (i, l) {
-		return A2($mdgriffith$elm_ui$Internal$Model$Min, i, l);
-	});
-var $mdgriffith$elm_ui$Element$textColumn = F2(
-	function (attrs, children) {
-		return A4(
-			$mdgriffith$elm_ui$Internal$Model$element,
-			$mdgriffith$elm_ui$Internal$Model$asTextColumn,
-			$mdgriffith$elm_ui$Internal$Model$div,
-			A2(
-				$elm$core$List$cons,
-				$mdgriffith$elm_ui$Element$width(
-					A2(
-						$mdgriffith$elm_ui$Element$maximum,
-						750,
-						A2($mdgriffith$elm_ui$Element$minimum, 500, $mdgriffith$elm_ui$Element$fill))),
-				attrs),
-			$mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
-	});
 var $elm$html$Html$code = _VirtualDom_node('code');
 var $pablohirafuji$elm_syntax_highlight$SyntaxHighlight$HCode = function (a) {
 	return {$: 'HCode', a: a};
