@@ -54,6 +54,7 @@ import Examples.Frame.Legends
 import Examples.Frame.Basic
 import Examples.Interactivity.ChangeContent
 import Examples.Interactivity.Direction
+import Examples.Interactivity.ChangeDot
 import Examples.Interactivity.Border
 import Examples.Interactivity.Zoom
 import Examples.Interactivity.BasicBin
@@ -154,6 +155,7 @@ type Id
   | Frame__Basic
   | Interactivity__ChangeContent
   | Interactivity__Direction
+  | Interactivity__ChangeDot
   | Interactivity__Border
   | Interactivity__Zoom
   | Interactivity__BasicBin
@@ -254,53 +256,54 @@ type alias Model =
   , example47 : Examples.Frame.Basic.Model
   , example48 : Examples.Interactivity.ChangeContent.Model
   , example49 : Examples.Interactivity.Direction.Model
-  , example50 : Examples.Interactivity.Border.Model
-  , example51 : Examples.Interactivity.Zoom.Model
-  , example52 : Examples.Interactivity.BasicBin.Model
-  , example53 : Examples.Interactivity.BasicStack.Model
-  , example54 : Examples.Interactivity.Coordinates.Model
-  , example55 : Examples.Interactivity.ChangeName.Model
-  , example56 : Examples.Interactivity.NoArrow.Model
-  , example57 : Examples.Interactivity.FilterSearch.Model
-  , example58 : Examples.Interactivity.Background.Model
-  , example59 : Examples.Interactivity.BasicBar.Model
-  , example60 : Examples.Interactivity.BasicArea.Model
-  , example61 : Examples.Interactivity.TrickyTooltip.Model
-  , example62 : Examples.Interactivity.Multiple.Model
-  , example63 : Examples.Interactivity.BasicLine.Model
-  , example64 : Examples.Interactivity.Offset.Model
-  , example65 : Examples.Interactivity.DoubleSearch.Model
-  , example66 : Examples.Interactivity.ChangeUnit.Model
-  , example67 : Examples.Interactivity.Focal.Model
-  , example68 : Examples.LineCharts.Area.Model
-  , example69 : Examples.LineCharts.Gradient.Model
-  , example70 : Examples.LineCharts.Width.Model
-  , example71 : Examples.LineCharts.TooltipStack.Model
-  , example72 : Examples.LineCharts.Tooltip.Model
-  , example73 : Examples.LineCharts.Montone.Model
-  , example74 : Examples.LineCharts.Pattern.Model
-  , example75 : Examples.LineCharts.Dots.Model
-  , example76 : Examples.LineCharts.Dashed.Model
-  , example77 : Examples.LineCharts.Color.Model
-  , example78 : Examples.LineCharts.Stepped.Model
-  , example79 : Examples.LineCharts.Stacked.Model
-  , example80 : Examples.LineCharts.Labels.Model
-  , example81 : Examples.LineCharts.Missing.Model
-  , example82 : Examples.LineCharts.Legends.Model
-  , example83 : Examples.LineCharts.Basic.Model
-  , example84 : Examples.Frontpage.Concise.Model
-  , example85 : Examples.Frontpage.Familiar.Model
-  , example86 : Examples.ScatterCharts.Colors.Model
-  , example87 : Examples.ScatterCharts.Shapes.Model
-  , example88 : Examples.ScatterCharts.Tooltip.Model
-  , example89 : Examples.ScatterCharts.Highlight.Model
-  , example90 : Examples.ScatterCharts.DataDependent.Model
-  , example91 : Examples.ScatterCharts.Borders.Model
-  , example92 : Examples.ScatterCharts.Labels.Model
-  , example93 : Examples.ScatterCharts.Opacity.Model
-  , example94 : Examples.ScatterCharts.Sizes.Model
-  , example95 : Examples.ScatterCharts.Legends.Model
-  , example96 : Examples.ScatterCharts.Basic.Model
+  , example50 : Examples.Interactivity.ChangeDot.Model
+  , example51 : Examples.Interactivity.Border.Model
+  , example52 : Examples.Interactivity.Zoom.Model
+  , example53 : Examples.Interactivity.BasicBin.Model
+  , example54 : Examples.Interactivity.BasicStack.Model
+  , example55 : Examples.Interactivity.Coordinates.Model
+  , example56 : Examples.Interactivity.ChangeName.Model
+  , example57 : Examples.Interactivity.NoArrow.Model
+  , example58 : Examples.Interactivity.FilterSearch.Model
+  , example59 : Examples.Interactivity.Background.Model
+  , example60 : Examples.Interactivity.BasicBar.Model
+  , example61 : Examples.Interactivity.BasicArea.Model
+  , example62 : Examples.Interactivity.TrickyTooltip.Model
+  , example63 : Examples.Interactivity.Multiple.Model
+  , example64 : Examples.Interactivity.BasicLine.Model
+  , example65 : Examples.Interactivity.Offset.Model
+  , example66 : Examples.Interactivity.DoubleSearch.Model
+  , example67 : Examples.Interactivity.ChangeUnit.Model
+  , example68 : Examples.Interactivity.Focal.Model
+  , example69 : Examples.LineCharts.Area.Model
+  , example70 : Examples.LineCharts.Gradient.Model
+  , example71 : Examples.LineCharts.Width.Model
+  , example72 : Examples.LineCharts.TooltipStack.Model
+  , example73 : Examples.LineCharts.Tooltip.Model
+  , example74 : Examples.LineCharts.Montone.Model
+  , example75 : Examples.LineCharts.Pattern.Model
+  , example76 : Examples.LineCharts.Dots.Model
+  , example77 : Examples.LineCharts.Dashed.Model
+  , example78 : Examples.LineCharts.Color.Model
+  , example79 : Examples.LineCharts.Stepped.Model
+  , example80 : Examples.LineCharts.Stacked.Model
+  , example81 : Examples.LineCharts.Labels.Model
+  , example82 : Examples.LineCharts.Missing.Model
+  , example83 : Examples.LineCharts.Legends.Model
+  , example84 : Examples.LineCharts.Basic.Model
+  , example85 : Examples.Frontpage.Concise.Model
+  , example86 : Examples.Frontpage.Familiar.Model
+  , example87 : Examples.ScatterCharts.Colors.Model
+  , example88 : Examples.ScatterCharts.Shapes.Model
+  , example89 : Examples.ScatterCharts.Tooltip.Model
+  , example90 : Examples.ScatterCharts.Highlight.Model
+  , example91 : Examples.ScatterCharts.DataDependent.Model
+  , example92 : Examples.ScatterCharts.Borders.Model
+  , example93 : Examples.ScatterCharts.Labels.Model
+  , example94 : Examples.ScatterCharts.Opacity.Model
+  , example95 : Examples.ScatterCharts.Sizes.Model
+  , example96 : Examples.ScatterCharts.Legends.Model
+  , example97 : Examples.ScatterCharts.Basic.Model
   }
 
 
@@ -356,53 +359,54 @@ init =
   , example47 = Examples.Frame.Basic.init
   , example48 = Examples.Interactivity.ChangeContent.init
   , example49 = Examples.Interactivity.Direction.init
-  , example50 = Examples.Interactivity.Border.init
-  , example51 = Examples.Interactivity.Zoom.init
-  , example52 = Examples.Interactivity.BasicBin.init
-  , example53 = Examples.Interactivity.BasicStack.init
-  , example54 = Examples.Interactivity.Coordinates.init
-  , example55 = Examples.Interactivity.ChangeName.init
-  , example56 = Examples.Interactivity.NoArrow.init
-  , example57 = Examples.Interactivity.FilterSearch.init
-  , example58 = Examples.Interactivity.Background.init
-  , example59 = Examples.Interactivity.BasicBar.init
-  , example60 = Examples.Interactivity.BasicArea.init
-  , example61 = Examples.Interactivity.TrickyTooltip.init
-  , example62 = Examples.Interactivity.Multiple.init
-  , example63 = Examples.Interactivity.BasicLine.init
-  , example64 = Examples.Interactivity.Offset.init
-  , example65 = Examples.Interactivity.DoubleSearch.init
-  , example66 = Examples.Interactivity.ChangeUnit.init
-  , example67 = Examples.Interactivity.Focal.init
-  , example68 = Examples.LineCharts.Area.init
-  , example69 = Examples.LineCharts.Gradient.init
-  , example70 = Examples.LineCharts.Width.init
-  , example71 = Examples.LineCharts.TooltipStack.init
-  , example72 = Examples.LineCharts.Tooltip.init
-  , example73 = Examples.LineCharts.Montone.init
-  , example74 = Examples.LineCharts.Pattern.init
-  , example75 = Examples.LineCharts.Dots.init
-  , example76 = Examples.LineCharts.Dashed.init
-  , example77 = Examples.LineCharts.Color.init
-  , example78 = Examples.LineCharts.Stepped.init
-  , example79 = Examples.LineCharts.Stacked.init
-  , example80 = Examples.LineCharts.Labels.init
-  , example81 = Examples.LineCharts.Missing.init
-  , example82 = Examples.LineCharts.Legends.init
-  , example83 = Examples.LineCharts.Basic.init
-  , example84 = Examples.Frontpage.Concise.init
-  , example85 = Examples.Frontpage.Familiar.init
-  , example86 = Examples.ScatterCharts.Colors.init
-  , example87 = Examples.ScatterCharts.Shapes.init
-  , example88 = Examples.ScatterCharts.Tooltip.init
-  , example89 = Examples.ScatterCharts.Highlight.init
-  , example90 = Examples.ScatterCharts.DataDependent.init
-  , example91 = Examples.ScatterCharts.Borders.init
-  , example92 = Examples.ScatterCharts.Labels.init
-  , example93 = Examples.ScatterCharts.Opacity.init
-  , example94 = Examples.ScatterCharts.Sizes.init
-  , example95 = Examples.ScatterCharts.Legends.init
-  , example96 = Examples.ScatterCharts.Basic.init
+  , example50 = Examples.Interactivity.ChangeDot.init
+  , example51 = Examples.Interactivity.Border.init
+  , example52 = Examples.Interactivity.Zoom.init
+  , example53 = Examples.Interactivity.BasicBin.init
+  , example54 = Examples.Interactivity.BasicStack.init
+  , example55 = Examples.Interactivity.Coordinates.init
+  , example56 = Examples.Interactivity.ChangeName.init
+  , example57 = Examples.Interactivity.NoArrow.init
+  , example58 = Examples.Interactivity.FilterSearch.init
+  , example59 = Examples.Interactivity.Background.init
+  , example60 = Examples.Interactivity.BasicBar.init
+  , example61 = Examples.Interactivity.BasicArea.init
+  , example62 = Examples.Interactivity.TrickyTooltip.init
+  , example63 = Examples.Interactivity.Multiple.init
+  , example64 = Examples.Interactivity.BasicLine.init
+  , example65 = Examples.Interactivity.Offset.init
+  , example66 = Examples.Interactivity.DoubleSearch.init
+  , example67 = Examples.Interactivity.ChangeUnit.init
+  , example68 = Examples.Interactivity.Focal.init
+  , example69 = Examples.LineCharts.Area.init
+  , example70 = Examples.LineCharts.Gradient.init
+  , example71 = Examples.LineCharts.Width.init
+  , example72 = Examples.LineCharts.TooltipStack.init
+  , example73 = Examples.LineCharts.Tooltip.init
+  , example74 = Examples.LineCharts.Montone.init
+  , example75 = Examples.LineCharts.Pattern.init
+  , example76 = Examples.LineCharts.Dots.init
+  , example77 = Examples.LineCharts.Dashed.init
+  , example78 = Examples.LineCharts.Color.init
+  , example79 = Examples.LineCharts.Stepped.init
+  , example80 = Examples.LineCharts.Stacked.init
+  , example81 = Examples.LineCharts.Labels.init
+  , example82 = Examples.LineCharts.Missing.init
+  , example83 = Examples.LineCharts.Legends.init
+  , example84 = Examples.LineCharts.Basic.init
+  , example85 = Examples.Frontpage.Concise.init
+  , example86 = Examples.Frontpage.Familiar.init
+  , example87 = Examples.ScatterCharts.Colors.init
+  , example88 = Examples.ScatterCharts.Shapes.init
+  , example89 = Examples.ScatterCharts.Tooltip.init
+  , example90 = Examples.ScatterCharts.Highlight.init
+  , example91 = Examples.ScatterCharts.DataDependent.init
+  , example92 = Examples.ScatterCharts.Borders.init
+  , example93 = Examples.ScatterCharts.Labels.init
+  , example94 = Examples.ScatterCharts.Opacity.init
+  , example95 = Examples.ScatterCharts.Sizes.init
+  , example96 = Examples.ScatterCharts.Legends.init
+  , example97 = Examples.ScatterCharts.Basic.init
   }
 
 
@@ -457,53 +461,54 @@ type Msg
   | ExampleMsg47 Examples.Frame.Basic.Msg
   | ExampleMsg48 Examples.Interactivity.ChangeContent.Msg
   | ExampleMsg49 Examples.Interactivity.Direction.Msg
-  | ExampleMsg50 Examples.Interactivity.Border.Msg
-  | ExampleMsg51 Examples.Interactivity.Zoom.Msg
-  | ExampleMsg52 Examples.Interactivity.BasicBin.Msg
-  | ExampleMsg53 Examples.Interactivity.BasicStack.Msg
-  | ExampleMsg54 Examples.Interactivity.Coordinates.Msg
-  | ExampleMsg55 Examples.Interactivity.ChangeName.Msg
-  | ExampleMsg56 Examples.Interactivity.NoArrow.Msg
-  | ExampleMsg57 Examples.Interactivity.FilterSearch.Msg
-  | ExampleMsg58 Examples.Interactivity.Background.Msg
-  | ExampleMsg59 Examples.Interactivity.BasicBar.Msg
-  | ExampleMsg60 Examples.Interactivity.BasicArea.Msg
-  | ExampleMsg61 Examples.Interactivity.TrickyTooltip.Msg
-  | ExampleMsg62 Examples.Interactivity.Multiple.Msg
-  | ExampleMsg63 Examples.Interactivity.BasicLine.Msg
-  | ExampleMsg64 Examples.Interactivity.Offset.Msg
-  | ExampleMsg65 Examples.Interactivity.DoubleSearch.Msg
-  | ExampleMsg66 Examples.Interactivity.ChangeUnit.Msg
-  | ExampleMsg67 Examples.Interactivity.Focal.Msg
-  | ExampleMsg68 Examples.LineCharts.Area.Msg
-  | ExampleMsg69 Examples.LineCharts.Gradient.Msg
-  | ExampleMsg70 Examples.LineCharts.Width.Msg
-  | ExampleMsg71 Examples.LineCharts.TooltipStack.Msg
-  | ExampleMsg72 Examples.LineCharts.Tooltip.Msg
-  | ExampleMsg73 Examples.LineCharts.Montone.Msg
-  | ExampleMsg74 Examples.LineCharts.Pattern.Msg
-  | ExampleMsg75 Examples.LineCharts.Dots.Msg
-  | ExampleMsg76 Examples.LineCharts.Dashed.Msg
-  | ExampleMsg77 Examples.LineCharts.Color.Msg
-  | ExampleMsg78 Examples.LineCharts.Stepped.Msg
-  | ExampleMsg79 Examples.LineCharts.Stacked.Msg
-  | ExampleMsg80 Examples.LineCharts.Labels.Msg
-  | ExampleMsg81 Examples.LineCharts.Missing.Msg
-  | ExampleMsg82 Examples.LineCharts.Legends.Msg
-  | ExampleMsg83 Examples.LineCharts.Basic.Msg
-  | ExampleMsg84 Examples.Frontpage.Concise.Msg
-  | ExampleMsg85 Examples.Frontpage.Familiar.Msg
-  | ExampleMsg86 Examples.ScatterCharts.Colors.Msg
-  | ExampleMsg87 Examples.ScatterCharts.Shapes.Msg
-  | ExampleMsg88 Examples.ScatterCharts.Tooltip.Msg
-  | ExampleMsg89 Examples.ScatterCharts.Highlight.Msg
-  | ExampleMsg90 Examples.ScatterCharts.DataDependent.Msg
-  | ExampleMsg91 Examples.ScatterCharts.Borders.Msg
-  | ExampleMsg92 Examples.ScatterCharts.Labels.Msg
-  | ExampleMsg93 Examples.ScatterCharts.Opacity.Msg
-  | ExampleMsg94 Examples.ScatterCharts.Sizes.Msg
-  | ExampleMsg95 Examples.ScatterCharts.Legends.Msg
-  | ExampleMsg96 Examples.ScatterCharts.Basic.Msg
+  | ExampleMsg50 Examples.Interactivity.ChangeDot.Msg
+  | ExampleMsg51 Examples.Interactivity.Border.Msg
+  | ExampleMsg52 Examples.Interactivity.Zoom.Msg
+  | ExampleMsg53 Examples.Interactivity.BasicBin.Msg
+  | ExampleMsg54 Examples.Interactivity.BasicStack.Msg
+  | ExampleMsg55 Examples.Interactivity.Coordinates.Msg
+  | ExampleMsg56 Examples.Interactivity.ChangeName.Msg
+  | ExampleMsg57 Examples.Interactivity.NoArrow.Msg
+  | ExampleMsg58 Examples.Interactivity.FilterSearch.Msg
+  | ExampleMsg59 Examples.Interactivity.Background.Msg
+  | ExampleMsg60 Examples.Interactivity.BasicBar.Msg
+  | ExampleMsg61 Examples.Interactivity.BasicArea.Msg
+  | ExampleMsg62 Examples.Interactivity.TrickyTooltip.Msg
+  | ExampleMsg63 Examples.Interactivity.Multiple.Msg
+  | ExampleMsg64 Examples.Interactivity.BasicLine.Msg
+  | ExampleMsg65 Examples.Interactivity.Offset.Msg
+  | ExampleMsg66 Examples.Interactivity.DoubleSearch.Msg
+  | ExampleMsg67 Examples.Interactivity.ChangeUnit.Msg
+  | ExampleMsg68 Examples.Interactivity.Focal.Msg
+  | ExampleMsg69 Examples.LineCharts.Area.Msg
+  | ExampleMsg70 Examples.LineCharts.Gradient.Msg
+  | ExampleMsg71 Examples.LineCharts.Width.Msg
+  | ExampleMsg72 Examples.LineCharts.TooltipStack.Msg
+  | ExampleMsg73 Examples.LineCharts.Tooltip.Msg
+  | ExampleMsg74 Examples.LineCharts.Montone.Msg
+  | ExampleMsg75 Examples.LineCharts.Pattern.Msg
+  | ExampleMsg76 Examples.LineCharts.Dots.Msg
+  | ExampleMsg77 Examples.LineCharts.Dashed.Msg
+  | ExampleMsg78 Examples.LineCharts.Color.Msg
+  | ExampleMsg79 Examples.LineCharts.Stepped.Msg
+  | ExampleMsg80 Examples.LineCharts.Stacked.Msg
+  | ExampleMsg81 Examples.LineCharts.Labels.Msg
+  | ExampleMsg82 Examples.LineCharts.Missing.Msg
+  | ExampleMsg83 Examples.LineCharts.Legends.Msg
+  | ExampleMsg84 Examples.LineCharts.Basic.Msg
+  | ExampleMsg85 Examples.Frontpage.Concise.Msg
+  | ExampleMsg86 Examples.Frontpage.Familiar.Msg
+  | ExampleMsg87 Examples.ScatterCharts.Colors.Msg
+  | ExampleMsg88 Examples.ScatterCharts.Shapes.Msg
+  | ExampleMsg89 Examples.ScatterCharts.Tooltip.Msg
+  | ExampleMsg90 Examples.ScatterCharts.Highlight.Msg
+  | ExampleMsg91 Examples.ScatterCharts.DataDependent.Msg
+  | ExampleMsg92 Examples.ScatterCharts.Borders.Msg
+  | ExampleMsg93 Examples.ScatterCharts.Labels.Msg
+  | ExampleMsg94 Examples.ScatterCharts.Opacity.Msg
+  | ExampleMsg95 Examples.ScatterCharts.Sizes.Msg
+  | ExampleMsg96 Examples.ScatterCharts.Legends.Msg
+  | ExampleMsg97 Examples.ScatterCharts.Basic.Msg
 
 
 update : Msg -> Model -> Model
@@ -559,53 +564,54 @@ update msg model =
     ExampleMsg47 sub -> { model | example47 = Examples.Frame.Basic.update sub model.example47 }
     ExampleMsg48 sub -> { model | example48 = Examples.Interactivity.ChangeContent.update sub model.example48 }
     ExampleMsg49 sub -> { model | example49 = Examples.Interactivity.Direction.update sub model.example49 }
-    ExampleMsg50 sub -> { model | example50 = Examples.Interactivity.Border.update sub model.example50 }
-    ExampleMsg51 sub -> { model | example51 = Examples.Interactivity.Zoom.update sub model.example51 }
-    ExampleMsg52 sub -> { model | example52 = Examples.Interactivity.BasicBin.update sub model.example52 }
-    ExampleMsg53 sub -> { model | example53 = Examples.Interactivity.BasicStack.update sub model.example53 }
-    ExampleMsg54 sub -> { model | example54 = Examples.Interactivity.Coordinates.update sub model.example54 }
-    ExampleMsg55 sub -> { model | example55 = Examples.Interactivity.ChangeName.update sub model.example55 }
-    ExampleMsg56 sub -> { model | example56 = Examples.Interactivity.NoArrow.update sub model.example56 }
-    ExampleMsg57 sub -> { model | example57 = Examples.Interactivity.FilterSearch.update sub model.example57 }
-    ExampleMsg58 sub -> { model | example58 = Examples.Interactivity.Background.update sub model.example58 }
-    ExampleMsg59 sub -> { model | example59 = Examples.Interactivity.BasicBar.update sub model.example59 }
-    ExampleMsg60 sub -> { model | example60 = Examples.Interactivity.BasicArea.update sub model.example60 }
-    ExampleMsg61 sub -> { model | example61 = Examples.Interactivity.TrickyTooltip.update sub model.example61 }
-    ExampleMsg62 sub -> { model | example62 = Examples.Interactivity.Multiple.update sub model.example62 }
-    ExampleMsg63 sub -> { model | example63 = Examples.Interactivity.BasicLine.update sub model.example63 }
-    ExampleMsg64 sub -> { model | example64 = Examples.Interactivity.Offset.update sub model.example64 }
-    ExampleMsg65 sub -> { model | example65 = Examples.Interactivity.DoubleSearch.update sub model.example65 }
-    ExampleMsg66 sub -> { model | example66 = Examples.Interactivity.ChangeUnit.update sub model.example66 }
-    ExampleMsg67 sub -> { model | example67 = Examples.Interactivity.Focal.update sub model.example67 }
-    ExampleMsg68 sub -> { model | example68 = Examples.LineCharts.Area.update sub model.example68 }
-    ExampleMsg69 sub -> { model | example69 = Examples.LineCharts.Gradient.update sub model.example69 }
-    ExampleMsg70 sub -> { model | example70 = Examples.LineCharts.Width.update sub model.example70 }
-    ExampleMsg71 sub -> { model | example71 = Examples.LineCharts.TooltipStack.update sub model.example71 }
-    ExampleMsg72 sub -> { model | example72 = Examples.LineCharts.Tooltip.update sub model.example72 }
-    ExampleMsg73 sub -> { model | example73 = Examples.LineCharts.Montone.update sub model.example73 }
-    ExampleMsg74 sub -> { model | example74 = Examples.LineCharts.Pattern.update sub model.example74 }
-    ExampleMsg75 sub -> { model | example75 = Examples.LineCharts.Dots.update sub model.example75 }
-    ExampleMsg76 sub -> { model | example76 = Examples.LineCharts.Dashed.update sub model.example76 }
-    ExampleMsg77 sub -> { model | example77 = Examples.LineCharts.Color.update sub model.example77 }
-    ExampleMsg78 sub -> { model | example78 = Examples.LineCharts.Stepped.update sub model.example78 }
-    ExampleMsg79 sub -> { model | example79 = Examples.LineCharts.Stacked.update sub model.example79 }
-    ExampleMsg80 sub -> { model | example80 = Examples.LineCharts.Labels.update sub model.example80 }
-    ExampleMsg81 sub -> { model | example81 = Examples.LineCharts.Missing.update sub model.example81 }
-    ExampleMsg82 sub -> { model | example82 = Examples.LineCharts.Legends.update sub model.example82 }
-    ExampleMsg83 sub -> { model | example83 = Examples.LineCharts.Basic.update sub model.example83 }
-    ExampleMsg84 sub -> { model | example84 = Examples.Frontpage.Concise.update sub model.example84 }
-    ExampleMsg85 sub -> { model | example85 = Examples.Frontpage.Familiar.update sub model.example85 }
-    ExampleMsg86 sub -> { model | example86 = Examples.ScatterCharts.Colors.update sub model.example86 }
-    ExampleMsg87 sub -> { model | example87 = Examples.ScatterCharts.Shapes.update sub model.example87 }
-    ExampleMsg88 sub -> { model | example88 = Examples.ScatterCharts.Tooltip.update sub model.example88 }
-    ExampleMsg89 sub -> { model | example89 = Examples.ScatterCharts.Highlight.update sub model.example89 }
-    ExampleMsg90 sub -> { model | example90 = Examples.ScatterCharts.DataDependent.update sub model.example90 }
-    ExampleMsg91 sub -> { model | example91 = Examples.ScatterCharts.Borders.update sub model.example91 }
-    ExampleMsg92 sub -> { model | example92 = Examples.ScatterCharts.Labels.update sub model.example92 }
-    ExampleMsg93 sub -> { model | example93 = Examples.ScatterCharts.Opacity.update sub model.example93 }
-    ExampleMsg94 sub -> { model | example94 = Examples.ScatterCharts.Sizes.update sub model.example94 }
-    ExampleMsg95 sub -> { model | example95 = Examples.ScatterCharts.Legends.update sub model.example95 }
-    ExampleMsg96 sub -> { model | example96 = Examples.ScatterCharts.Basic.update sub model.example96 }
+    ExampleMsg50 sub -> { model | example50 = Examples.Interactivity.ChangeDot.update sub model.example50 }
+    ExampleMsg51 sub -> { model | example51 = Examples.Interactivity.Border.update sub model.example51 }
+    ExampleMsg52 sub -> { model | example52 = Examples.Interactivity.Zoom.update sub model.example52 }
+    ExampleMsg53 sub -> { model | example53 = Examples.Interactivity.BasicBin.update sub model.example53 }
+    ExampleMsg54 sub -> { model | example54 = Examples.Interactivity.BasicStack.update sub model.example54 }
+    ExampleMsg55 sub -> { model | example55 = Examples.Interactivity.Coordinates.update sub model.example55 }
+    ExampleMsg56 sub -> { model | example56 = Examples.Interactivity.ChangeName.update sub model.example56 }
+    ExampleMsg57 sub -> { model | example57 = Examples.Interactivity.NoArrow.update sub model.example57 }
+    ExampleMsg58 sub -> { model | example58 = Examples.Interactivity.FilterSearch.update sub model.example58 }
+    ExampleMsg59 sub -> { model | example59 = Examples.Interactivity.Background.update sub model.example59 }
+    ExampleMsg60 sub -> { model | example60 = Examples.Interactivity.BasicBar.update sub model.example60 }
+    ExampleMsg61 sub -> { model | example61 = Examples.Interactivity.BasicArea.update sub model.example61 }
+    ExampleMsg62 sub -> { model | example62 = Examples.Interactivity.TrickyTooltip.update sub model.example62 }
+    ExampleMsg63 sub -> { model | example63 = Examples.Interactivity.Multiple.update sub model.example63 }
+    ExampleMsg64 sub -> { model | example64 = Examples.Interactivity.BasicLine.update sub model.example64 }
+    ExampleMsg65 sub -> { model | example65 = Examples.Interactivity.Offset.update sub model.example65 }
+    ExampleMsg66 sub -> { model | example66 = Examples.Interactivity.DoubleSearch.update sub model.example66 }
+    ExampleMsg67 sub -> { model | example67 = Examples.Interactivity.ChangeUnit.update sub model.example67 }
+    ExampleMsg68 sub -> { model | example68 = Examples.Interactivity.Focal.update sub model.example68 }
+    ExampleMsg69 sub -> { model | example69 = Examples.LineCharts.Area.update sub model.example69 }
+    ExampleMsg70 sub -> { model | example70 = Examples.LineCharts.Gradient.update sub model.example70 }
+    ExampleMsg71 sub -> { model | example71 = Examples.LineCharts.Width.update sub model.example71 }
+    ExampleMsg72 sub -> { model | example72 = Examples.LineCharts.TooltipStack.update sub model.example72 }
+    ExampleMsg73 sub -> { model | example73 = Examples.LineCharts.Tooltip.update sub model.example73 }
+    ExampleMsg74 sub -> { model | example74 = Examples.LineCharts.Montone.update sub model.example74 }
+    ExampleMsg75 sub -> { model | example75 = Examples.LineCharts.Pattern.update sub model.example75 }
+    ExampleMsg76 sub -> { model | example76 = Examples.LineCharts.Dots.update sub model.example76 }
+    ExampleMsg77 sub -> { model | example77 = Examples.LineCharts.Dashed.update sub model.example77 }
+    ExampleMsg78 sub -> { model | example78 = Examples.LineCharts.Color.update sub model.example78 }
+    ExampleMsg79 sub -> { model | example79 = Examples.LineCharts.Stepped.update sub model.example79 }
+    ExampleMsg80 sub -> { model | example80 = Examples.LineCharts.Stacked.update sub model.example80 }
+    ExampleMsg81 sub -> { model | example81 = Examples.LineCharts.Labels.update sub model.example81 }
+    ExampleMsg82 sub -> { model | example82 = Examples.LineCharts.Missing.update sub model.example82 }
+    ExampleMsg83 sub -> { model | example83 = Examples.LineCharts.Legends.update sub model.example83 }
+    ExampleMsg84 sub -> { model | example84 = Examples.LineCharts.Basic.update sub model.example84 }
+    ExampleMsg85 sub -> { model | example85 = Examples.Frontpage.Concise.update sub model.example85 }
+    ExampleMsg86 sub -> { model | example86 = Examples.Frontpage.Familiar.update sub model.example86 }
+    ExampleMsg87 sub -> { model | example87 = Examples.ScatterCharts.Colors.update sub model.example87 }
+    ExampleMsg88 sub -> { model | example88 = Examples.ScatterCharts.Shapes.update sub model.example88 }
+    ExampleMsg89 sub -> { model | example89 = Examples.ScatterCharts.Tooltip.update sub model.example89 }
+    ExampleMsg90 sub -> { model | example90 = Examples.ScatterCharts.Highlight.update sub model.example90 }
+    ExampleMsg91 sub -> { model | example91 = Examples.ScatterCharts.DataDependent.update sub model.example91 }
+    ExampleMsg92 sub -> { model | example92 = Examples.ScatterCharts.Borders.update sub model.example92 }
+    ExampleMsg93 sub -> { model | example93 = Examples.ScatterCharts.Labels.update sub model.example93 }
+    ExampleMsg94 sub -> { model | example94 = Examples.ScatterCharts.Opacity.update sub model.example94 }
+    ExampleMsg95 sub -> { model | example95 = Examples.ScatterCharts.Sizes.update sub model.example95 }
+    ExampleMsg96 sub -> { model | example96 = Examples.ScatterCharts.Legends.update sub model.example96 }
+    ExampleMsg97 sub -> { model | example97 = Examples.ScatterCharts.Basic.update sub model.example97 }
 
 
 view : Model -> Id -> Html.Html Msg
@@ -661,53 +667,54 @@ view model chosen =
     Frame__Basic -> Html.map ExampleMsg47 (Examples.Frame.Basic.view model.example47)
     Interactivity__ChangeContent -> Html.map ExampleMsg48 (Examples.Interactivity.ChangeContent.view model.example48)
     Interactivity__Direction -> Html.map ExampleMsg49 (Examples.Interactivity.Direction.view model.example49)
-    Interactivity__Border -> Html.map ExampleMsg50 (Examples.Interactivity.Border.view model.example50)
-    Interactivity__Zoom -> Html.map ExampleMsg51 (Examples.Interactivity.Zoom.view model.example51)
-    Interactivity__BasicBin -> Html.map ExampleMsg52 (Examples.Interactivity.BasicBin.view model.example52)
-    Interactivity__BasicStack -> Html.map ExampleMsg53 (Examples.Interactivity.BasicStack.view model.example53)
-    Interactivity__Coordinates -> Html.map ExampleMsg54 (Examples.Interactivity.Coordinates.view model.example54)
-    Interactivity__ChangeName -> Html.map ExampleMsg55 (Examples.Interactivity.ChangeName.view model.example55)
-    Interactivity__NoArrow -> Html.map ExampleMsg56 (Examples.Interactivity.NoArrow.view model.example56)
-    Interactivity__FilterSearch -> Html.map ExampleMsg57 (Examples.Interactivity.FilterSearch.view model.example57)
-    Interactivity__Background -> Html.map ExampleMsg58 (Examples.Interactivity.Background.view model.example58)
-    Interactivity__BasicBar -> Html.map ExampleMsg59 (Examples.Interactivity.BasicBar.view model.example59)
-    Interactivity__BasicArea -> Html.map ExampleMsg60 (Examples.Interactivity.BasicArea.view model.example60)
-    Interactivity__TrickyTooltip -> Html.map ExampleMsg61 (Examples.Interactivity.TrickyTooltip.view model.example61)
-    Interactivity__Multiple -> Html.map ExampleMsg62 (Examples.Interactivity.Multiple.view model.example62)
-    Interactivity__BasicLine -> Html.map ExampleMsg63 (Examples.Interactivity.BasicLine.view model.example63)
-    Interactivity__Offset -> Html.map ExampleMsg64 (Examples.Interactivity.Offset.view model.example64)
-    Interactivity__DoubleSearch -> Html.map ExampleMsg65 (Examples.Interactivity.DoubleSearch.view model.example65)
-    Interactivity__ChangeUnit -> Html.map ExampleMsg66 (Examples.Interactivity.ChangeUnit.view model.example66)
-    Interactivity__Focal -> Html.map ExampleMsg67 (Examples.Interactivity.Focal.view model.example67)
-    LineCharts__Area -> Html.map ExampleMsg68 (Examples.LineCharts.Area.view model.example68)
-    LineCharts__Gradient -> Html.map ExampleMsg69 (Examples.LineCharts.Gradient.view model.example69)
-    LineCharts__Width -> Html.map ExampleMsg70 (Examples.LineCharts.Width.view model.example70)
-    LineCharts__TooltipStack -> Html.map ExampleMsg71 (Examples.LineCharts.TooltipStack.view model.example71)
-    LineCharts__Tooltip -> Html.map ExampleMsg72 (Examples.LineCharts.Tooltip.view model.example72)
-    LineCharts__Montone -> Html.map ExampleMsg73 (Examples.LineCharts.Montone.view model.example73)
-    LineCharts__Pattern -> Html.map ExampleMsg74 (Examples.LineCharts.Pattern.view model.example74)
-    LineCharts__Dots -> Html.map ExampleMsg75 (Examples.LineCharts.Dots.view model.example75)
-    LineCharts__Dashed -> Html.map ExampleMsg76 (Examples.LineCharts.Dashed.view model.example76)
-    LineCharts__Color -> Html.map ExampleMsg77 (Examples.LineCharts.Color.view model.example77)
-    LineCharts__Stepped -> Html.map ExampleMsg78 (Examples.LineCharts.Stepped.view model.example78)
-    LineCharts__Stacked -> Html.map ExampleMsg79 (Examples.LineCharts.Stacked.view model.example79)
-    LineCharts__Labels -> Html.map ExampleMsg80 (Examples.LineCharts.Labels.view model.example80)
-    LineCharts__Missing -> Html.map ExampleMsg81 (Examples.LineCharts.Missing.view model.example81)
-    LineCharts__Legends -> Html.map ExampleMsg82 (Examples.LineCharts.Legends.view model.example82)
-    LineCharts__Basic -> Html.map ExampleMsg83 (Examples.LineCharts.Basic.view model.example83)
-    Frontpage__Concise -> Html.map ExampleMsg84 (Examples.Frontpage.Concise.view model.example84)
-    Frontpage__Familiar -> Html.map ExampleMsg85 (Examples.Frontpage.Familiar.view model.example85)
-    ScatterCharts__Colors -> Html.map ExampleMsg86 (Examples.ScatterCharts.Colors.view model.example86)
-    ScatterCharts__Shapes -> Html.map ExampleMsg87 (Examples.ScatterCharts.Shapes.view model.example87)
-    ScatterCharts__Tooltip -> Html.map ExampleMsg88 (Examples.ScatterCharts.Tooltip.view model.example88)
-    ScatterCharts__Highlight -> Html.map ExampleMsg89 (Examples.ScatterCharts.Highlight.view model.example89)
-    ScatterCharts__DataDependent -> Html.map ExampleMsg90 (Examples.ScatterCharts.DataDependent.view model.example90)
-    ScatterCharts__Borders -> Html.map ExampleMsg91 (Examples.ScatterCharts.Borders.view model.example91)
-    ScatterCharts__Labels -> Html.map ExampleMsg92 (Examples.ScatterCharts.Labels.view model.example92)
-    ScatterCharts__Opacity -> Html.map ExampleMsg93 (Examples.ScatterCharts.Opacity.view model.example93)
-    ScatterCharts__Sizes -> Html.map ExampleMsg94 (Examples.ScatterCharts.Sizes.view model.example94)
-    ScatterCharts__Legends -> Html.map ExampleMsg95 (Examples.ScatterCharts.Legends.view model.example95)
-    ScatterCharts__Basic -> Html.map ExampleMsg96 (Examples.ScatterCharts.Basic.view model.example96)
+    Interactivity__ChangeDot -> Html.map ExampleMsg50 (Examples.Interactivity.ChangeDot.view model.example50)
+    Interactivity__Border -> Html.map ExampleMsg51 (Examples.Interactivity.Border.view model.example51)
+    Interactivity__Zoom -> Html.map ExampleMsg52 (Examples.Interactivity.Zoom.view model.example52)
+    Interactivity__BasicBin -> Html.map ExampleMsg53 (Examples.Interactivity.BasicBin.view model.example53)
+    Interactivity__BasicStack -> Html.map ExampleMsg54 (Examples.Interactivity.BasicStack.view model.example54)
+    Interactivity__Coordinates -> Html.map ExampleMsg55 (Examples.Interactivity.Coordinates.view model.example55)
+    Interactivity__ChangeName -> Html.map ExampleMsg56 (Examples.Interactivity.ChangeName.view model.example56)
+    Interactivity__NoArrow -> Html.map ExampleMsg57 (Examples.Interactivity.NoArrow.view model.example57)
+    Interactivity__FilterSearch -> Html.map ExampleMsg58 (Examples.Interactivity.FilterSearch.view model.example58)
+    Interactivity__Background -> Html.map ExampleMsg59 (Examples.Interactivity.Background.view model.example59)
+    Interactivity__BasicBar -> Html.map ExampleMsg60 (Examples.Interactivity.BasicBar.view model.example60)
+    Interactivity__BasicArea -> Html.map ExampleMsg61 (Examples.Interactivity.BasicArea.view model.example61)
+    Interactivity__TrickyTooltip -> Html.map ExampleMsg62 (Examples.Interactivity.TrickyTooltip.view model.example62)
+    Interactivity__Multiple -> Html.map ExampleMsg63 (Examples.Interactivity.Multiple.view model.example63)
+    Interactivity__BasicLine -> Html.map ExampleMsg64 (Examples.Interactivity.BasicLine.view model.example64)
+    Interactivity__Offset -> Html.map ExampleMsg65 (Examples.Interactivity.Offset.view model.example65)
+    Interactivity__DoubleSearch -> Html.map ExampleMsg66 (Examples.Interactivity.DoubleSearch.view model.example66)
+    Interactivity__ChangeUnit -> Html.map ExampleMsg67 (Examples.Interactivity.ChangeUnit.view model.example67)
+    Interactivity__Focal -> Html.map ExampleMsg68 (Examples.Interactivity.Focal.view model.example68)
+    LineCharts__Area -> Html.map ExampleMsg69 (Examples.LineCharts.Area.view model.example69)
+    LineCharts__Gradient -> Html.map ExampleMsg70 (Examples.LineCharts.Gradient.view model.example70)
+    LineCharts__Width -> Html.map ExampleMsg71 (Examples.LineCharts.Width.view model.example71)
+    LineCharts__TooltipStack -> Html.map ExampleMsg72 (Examples.LineCharts.TooltipStack.view model.example72)
+    LineCharts__Tooltip -> Html.map ExampleMsg73 (Examples.LineCharts.Tooltip.view model.example73)
+    LineCharts__Montone -> Html.map ExampleMsg74 (Examples.LineCharts.Montone.view model.example74)
+    LineCharts__Pattern -> Html.map ExampleMsg75 (Examples.LineCharts.Pattern.view model.example75)
+    LineCharts__Dots -> Html.map ExampleMsg76 (Examples.LineCharts.Dots.view model.example76)
+    LineCharts__Dashed -> Html.map ExampleMsg77 (Examples.LineCharts.Dashed.view model.example77)
+    LineCharts__Color -> Html.map ExampleMsg78 (Examples.LineCharts.Color.view model.example78)
+    LineCharts__Stepped -> Html.map ExampleMsg79 (Examples.LineCharts.Stepped.view model.example79)
+    LineCharts__Stacked -> Html.map ExampleMsg80 (Examples.LineCharts.Stacked.view model.example80)
+    LineCharts__Labels -> Html.map ExampleMsg81 (Examples.LineCharts.Labels.view model.example81)
+    LineCharts__Missing -> Html.map ExampleMsg82 (Examples.LineCharts.Missing.view model.example82)
+    LineCharts__Legends -> Html.map ExampleMsg83 (Examples.LineCharts.Legends.view model.example83)
+    LineCharts__Basic -> Html.map ExampleMsg84 (Examples.LineCharts.Basic.view model.example84)
+    Frontpage__Concise -> Html.map ExampleMsg85 (Examples.Frontpage.Concise.view model.example85)
+    Frontpage__Familiar -> Html.map ExampleMsg86 (Examples.Frontpage.Familiar.view model.example86)
+    ScatterCharts__Colors -> Html.map ExampleMsg87 (Examples.ScatterCharts.Colors.view model.example87)
+    ScatterCharts__Shapes -> Html.map ExampleMsg88 (Examples.ScatterCharts.Shapes.view model.example88)
+    ScatterCharts__Tooltip -> Html.map ExampleMsg89 (Examples.ScatterCharts.Tooltip.view model.example89)
+    ScatterCharts__Highlight -> Html.map ExampleMsg90 (Examples.ScatterCharts.Highlight.view model.example90)
+    ScatterCharts__DataDependent -> Html.map ExampleMsg91 (Examples.ScatterCharts.DataDependent.view model.example91)
+    ScatterCharts__Borders -> Html.map ExampleMsg92 (Examples.ScatterCharts.Borders.view model.example92)
+    ScatterCharts__Labels -> Html.map ExampleMsg93 (Examples.ScatterCharts.Labels.view model.example93)
+    ScatterCharts__Opacity -> Html.map ExampleMsg94 (Examples.ScatterCharts.Opacity.view model.example94)
+    ScatterCharts__Sizes -> Html.map ExampleMsg95 (Examples.ScatterCharts.Sizes.view model.example95)
+    ScatterCharts__Legends -> Html.map ExampleMsg96 (Examples.ScatterCharts.Legends.view model.example96)
+    ScatterCharts__Basic -> Html.map ExampleMsg97 (Examples.ScatterCharts.Basic.view model.example97)
 
 
 smallCode : Id -> String
@@ -763,6 +770,7 @@ smallCode chosen =
     Frame__Basic -> Examples.Frame.Basic.smallCode
     Interactivity__ChangeContent -> Examples.Interactivity.ChangeContent.smallCode
     Interactivity__Direction -> Examples.Interactivity.Direction.smallCode
+    Interactivity__ChangeDot -> Examples.Interactivity.ChangeDot.smallCode
     Interactivity__Border -> Examples.Interactivity.Border.smallCode
     Interactivity__Zoom -> Examples.Interactivity.Zoom.smallCode
     Interactivity__BasicBin -> Examples.Interactivity.BasicBin.smallCode
@@ -865,6 +873,7 @@ largeCode chosen =
     Frame__Basic -> Examples.Frame.Basic.largeCode
     Interactivity__ChangeContent -> Examples.Interactivity.ChangeContent.largeCode
     Interactivity__Direction -> Examples.Interactivity.Direction.largeCode
+    Interactivity__ChangeDot -> Examples.Interactivity.ChangeDot.largeCode
     Interactivity__Border -> Examples.Interactivity.Border.largeCode
     Interactivity__Zoom -> Examples.Interactivity.Zoom.largeCode
     Interactivity__BasicBin -> Examples.Interactivity.BasicBin.largeCode
@@ -967,6 +976,7 @@ name chosen =
     Frame__Basic -> "Examples.Frame.Basic"
     Interactivity__ChangeContent -> "Examples.Interactivity.ChangeContent"
     Interactivity__Direction -> "Examples.Interactivity.Direction"
+    Interactivity__ChangeDot -> "Examples.Interactivity.ChangeDot"
     Interactivity__Border -> "Examples.Interactivity.Border"
     Interactivity__Zoom -> "Examples.Interactivity.Zoom"
     Interactivity__BasicBin -> "Examples.Interactivity.BasicBin"
@@ -1068,6 +1078,7 @@ meta chosen =
     Frame__Basic -> Examples.Frame.Basic.meta
     Interactivity__ChangeContent -> Examples.Interactivity.ChangeContent.meta
     Interactivity__Direction -> Examples.Interactivity.Direction.meta
+    Interactivity__ChangeDot -> Examples.Interactivity.ChangeDot.meta
     Interactivity__Border -> Examples.Interactivity.Border.meta
     Interactivity__Zoom -> Examples.Interactivity.Zoom.meta
     Interactivity__BasicBin -> Examples.Interactivity.BasicBin.meta
@@ -1169,6 +1180,7 @@ all =
   , Frame__Basic
   , Interactivity__ChangeContent
   , Interactivity__Direction
+  , Interactivity__ChangeDot
   , Interactivity__Border
   , Interactivity__Zoom
   , Interactivity__BasicBin
