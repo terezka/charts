@@ -109,7 +109,7 @@ view model =
           , E.paragraph
               [ E.paddingEach { top = 10, bottom = 40, left = 0, right = 0 }
               , F.size 14
-              , E.width (E.px 700)
+              , E.width (E.px 600)
               ]
               [ E.text "Examples of charts build with elm-charts using real data."
               ]
@@ -123,7 +123,7 @@ view model =
           , E.paragraph
               [ E.paddingEach { top = 10, bottom = 10, left = 0, right = 0 }
               , F.size 14
-              , E.width (E.px 700)
+              , E.width (E.px 600)
               ]
               [ E.text "Note that the data visualized here is already aggregated into averages. This means that there might "
               , E.text "be women or men earning more or less than what the numbers show. For example, there may well be a woman CEO being payed the "

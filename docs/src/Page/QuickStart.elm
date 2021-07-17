@@ -101,45 +101,39 @@ view model =
         [ Menu.small model.window model.menu
             |> E.map MenuMsg
 
-        , E.textColumn
-            [ E.width (E.maximum 700 E.fill) ]
-            [ E.paragraph
-                [ F.size 32
-                , E.paddingXY 0 10
-                ]
-                [ E.text "Quick start" ]
+        , Layout.heading model.window "Quick start"
 
-            , E.paragraph
-                [ E.paddingEach { top = 10, bottom = 70, left = 0, right = 0 }
-                , F.size 14
-                ]
-                [ E.text "Here's how to make basic charts. If your needs exceed these, check out "
-                , E.text "the "
-                , E.link
-                    [ F.underline ]
-                    { url = "/documentation"
-                    , label = E.text "many other examples"
-                    }
-                , E.text " or the "
-                , E.link
-                    [ F.underline ]
-                    { url = "https://package.elm-lang.org/packages/terezka/charts/latest"
-                    , label = E.text "official Elm documentation"
-                    }
-                , E.text "."
-                ]
+        , E.paragraph
+            [ E.paddingEach { top = 20, bottom = 50, left = 0, right = 0 }
+            , F.size 14
+            , E.width (E.maximum 600 E.fill)
+            ]
+            [ E.text "Here's how to make basic charts. If your needs exceed these, check out "
+            , E.text "the "
+            , E.link
+                [ F.underline ]
+                { url = "/documentation"
+                , label = E.text "many other examples"
+                }
+            , E.text " or the "
+            , E.link
+                [ F.underline ]
+                { url = "https://package.elm-lang.org/packages/terezka/charts/latest"
+                , label = E.text "official Elm documentation"
+                }
+            , E.text "."
             ]
 
         , let frame title attr els =
                 case Layout.screen model.window of
                   Layout.Large ->
                     E.column
-                      [ E.width E.fill, E.spacing 35 ]
+                      [ E.width E.fill, E.spacing 40 ]
                       [ viewTitle title, E.row attr els ]
 
                   Layout.Medium ->
                     E.column
-                      [ E.width E.fill, E.spacing 35 ]
+                      [ E.width E.fill, E.spacing 40 ]
                       [ viewTitle title, E.row attr els ]
 
                   Layout.Small ->
@@ -157,7 +151,7 @@ view model =
                       [ E.width (E.maximum 320 E.fill)
                       , E.paddingXY 15 0
                       , E.alignTop
-                      , F.size 10
+                      , F.size 12
                       ] <| E.html chart
 
                   , E.el
@@ -170,10 +164,10 @@ view model =
                       (Code.view { template = code, edits = [] })
                   ]
           in
-            E.column
+          E.column
             [ E.width E.fill
             , E.height E.fill
-            , E.spacing 80
+            , E.spacing 90
             , E.paddingEach { top = 0, bottom = 50, left = 0, right = 0 }
             ]
             <| List.map viewExample
@@ -184,5 +178,17 @@ view model =
                 , ( Html.map (\_ -> None) <| BasicScatter.view (), BasicScatter.meta.name, BasicScatter.smallCode )
                 , ( Html.map (\_ -> None) <| BasicBubble.view (), BasicBubble.meta.name, BasicBubble.smallCode )
                 ]
+
+        , E.paragraph
+            [ F.underline
+            , F.size 18
+            , F.center
+            , E.paddingXY 0 20
+            ]
+            [ E.link []
+                { url = "/documentation"
+                , label = E.text "See more examples →"
+                }
+            ]
         ]
   }

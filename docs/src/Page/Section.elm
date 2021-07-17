@@ -110,9 +110,9 @@ view model =
         , Layout.heading model.window "Documentation"
 
         , E.paragraph
-            [ E.paddingXY 0 10
+            [ E.paddingXY 0 20
             , F.size 14
-            , E.width (E.maximum 700 E.fill)
+            , E.width (E.maximum 600 E.fill)
             ]
             [ E.text "This catalog is meant to document through example. For documentation of exact interface, see the "
             , E.link

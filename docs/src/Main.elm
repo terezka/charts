@@ -8,7 +8,6 @@ import Page.Administration
 import Page.Documentation
 import Page.Section
 import Page.Example
-import Page.Gallery
 import Page.QuickStart
 import Route exposing (Route)
 import Session exposing (Session)
@@ -41,7 +40,6 @@ type Page
     | Page_Documentation Page.Documentation.Model
     | Page_Section Page.Section.Model
     | Page_Example Page.Example.Model
-    | Page_Gallery Page.Gallery.Model
     | Page_QuickStart Page.QuickStart.Model
 
 
@@ -84,9 +82,6 @@ view model =
         Page_Example subModel ->
             viewPage Page_Example_Msg (Page.Example.view subModel)
 
-        Page_Gallery subModel ->
-            viewPage Page_Gallery_Msg (Page.Gallery.view subModel)
-
         Page_QuickStart subModel ->
             viewPage Page_QuickStart_Msg (Page.QuickStart.view subModel)
 
@@ -99,7 +94,6 @@ type Msg
     | Page_Documentation_Msg Page.Documentation.Msg
     | Page_Section_Msg Page.Section.Msg
     | Page_Example_Msg Page.Example.Msg
-    | Page_Gallery_Msg Page.Gallery.Msg
     | Page_QuickStart_Msg Page.QuickStart.Msg
 
 
@@ -141,10 +135,6 @@ update msg model =
             Page.Example.update model.navigation subMsg subModel
                 |> updateWith Page_Example Page_Example_Msg model
 
-        ( Page_Gallery_Msg subMsg, Page_Gallery subModel ) ->
-            Page.Gallery.update model.navigation subMsg subModel
-                |> updateWith Page_Gallery Page_Gallery_Msg model
-
         ( Page_QuickStart_Msg subMsg, Page_QuickStart subModel ) ->
             Page.QuickStart.update model.navigation subMsg subModel
                 |> updateWith Page_QuickStart Page_QuickStart_Msg model
@@ -177,9 +167,6 @@ subscriptions model =
 
         Page_Example subModel ->
             Sub.map Page_Example_Msg (Page.Example.subscriptions subModel)
-
-        Page_Gallery subModel ->
-            Sub.map Page_Gallery_Msg (Page.Gallery.subscriptions subModel)
 
         Page_QuickStart subModel ->
             Sub.map Page_QuickStart_Msg (Page.QuickStart.subscriptions subModel)
@@ -218,10 +205,6 @@ changeRouteTo maybeRoute old =
             Page.Example.init model.navigation session { section = p1, example = p2 }
                 |> updateWith Page_Example Page_Example_Msg model
 
-        Just (Route.Gallery ) ->
-            Page.Gallery.init model.navigation session ()
-                |> updateWith Page_Gallery Page_Gallery_Msg model
-
         Just (Route.Quick_start ) ->
             Page.QuickStart.init model.navigation session ()
                 |> updateWith Page_QuickStart Page_QuickStart_Msg model
@@ -257,9 +240,6 @@ exit model =
 
         Page_Example subModel ->
             Page.Example.exit subModel model.session
-
-        Page_Gallery subModel ->
-            Page.Gallery.exit subModel model.session
 
         Page_QuickStart subModel ->
             Page.QuickStart.exit subModel model.session

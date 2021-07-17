@@ -83,10 +83,10 @@ view model =
               |> E.map MenuMsg
 
           , E.textColumn
-              [ E.width (E.maximum 700 E.fill) ]
+              [ E.width (E.maximum 600 E.fill) ]
               [ E.paragraph
                   [ F.size 32
-                  , E.paddingXY 0 10
+                  , E.paddingXY 0 20
                   ]
                   [ E.text "Administration" ]
 

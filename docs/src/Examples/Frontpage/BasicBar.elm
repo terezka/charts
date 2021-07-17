@@ -14,7 +14,6 @@ view model =
   C.chart
     [ CA.height 300
     , CA.width 300
-    , CA.margin { top = 0, bottom = 20, left = 0, right = 0 }
     ]
     [ C.grid []
     , C.xLabels [ CA.ints ]
@@ -86,7 +85,6 @@ smallCode =
   C.chart
     [ CA.height 300
     , CA.width 300
-    , CA.margin { top = 0, bottom = 20, left = 0, right = 0 }
     ]
     [ C.grid []
     , C.xLabels [ CA.ints ]
@@ -118,7 +116,6 @@ view model =
   C.chart
     [ CA.height 300
     , CA.width 300
-    , CA.margin { top = 0, bottom = 20, left = 0, right = 0 }
     ]
     [ C.grid []
     , C.xLabels [ CA.ints ]

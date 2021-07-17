@@ -13,7 +13,6 @@ view model =
   C.chart
     [ CA.height 300
     , CA.width 300
-    , CA.margin { top = 0, bottom = 20, left = 0, right = 0 }
     , CA.padding { top = 30, bottom = 5, left = 40, right = 40 }
     ]
     [ C.grid []
@@ -68,7 +67,6 @@ smallCode =
   C.chart
     [ CA.height 300
     , CA.width 300
-    , CA.margin { top = 0, bottom = 20, left = 0, right = 0 }
     , CA.padding { top = 30, bottom = 5, left = 40, right = 40 }
     ]
     [ C.grid []
@@ -103,7 +101,6 @@ view model =
   C.chart
     [ CA.height 300
     , CA.width 300
-    , CA.margin { top = 0, bottom = 20, left = 0, right = 0 }
     , CA.padding { top = 30, bottom = 5, left = 40, right = 40 }
     ]
     [ C.grid []
