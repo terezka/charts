@@ -38185,7 +38185,7 @@ var $author$project$Page$Home$features = function (model) {
 					var _v2 = $author$project$Ui$Layout$screen(model.window);
 					switch (_v2.$) {
 						case 'Large':
-							return $mdgriffith$elm_ui$Element$el(
+							return $mdgriffith$elm_ui$Element$link(
 								_List_fromArray(
 									[
 										$mdgriffith$elm_ui$Element$width(
@@ -38193,7 +38193,7 @@ var $author$project$Page$Home$features = function (model) {
 										$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill)
 									]));
 						case 'Medium':
-							return $mdgriffith$elm_ui$Element$el(
+							return $mdgriffith$elm_ui$Element$link(
 								_List_fromArray(
 									[
 										$mdgriffith$elm_ui$Element$width(
@@ -38201,7 +38201,7 @@ var $author$project$Page$Home$features = function (model) {
 										$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill)
 									]));
 						default:
-							return $mdgriffith$elm_ui$Element$el(
+							return $mdgriffith$elm_ui$Element$link(
 								_List_fromArray(
 									[
 										$mdgriffith$elm_ui$Element$width(
@@ -38225,10 +38225,16 @@ var $author$project$Page$Home$features = function (model) {
 							]),
 						A2(
 							$elm$core$List$map,
-							A2($elm$core$Basics$composeR, $mdgriffith$elm_ui$Element$html, viewOne),
+							viewOne,
 							A2(
 								$elm$core$List$map,
-								$author$project$Examples$view($author$project$Examples$init),
+								function (id) {
+									return {
+										label: $mdgriffith$elm_ui$Element$html(
+											A2($author$project$Examples$view, $author$project$Examples$init, id)),
+										url: $author$project$Ui$Thumbnail$toUrl(id)
+									};
+								},
 								_List_fromArray(
 									[$author$project$Examples$BarCharts__Histogram, $author$project$Examples$BarCharts__TooltipStack, $author$project$Examples$Interactivity__Zoom, $author$project$Examples$Frame__Titles, $author$project$Examples$LineCharts__Stepped, $author$project$Examples$ScatterCharts__Labels, $author$project$Examples$ScatterCharts__DataDependent, $author$project$Examples$LineCharts__TooltipStack, $author$project$Examples$LineCharts__Labels, $author$project$Examples$BarCharts__BarLabels, $author$project$Examples$BarCharts__Margin, $author$project$Examples$ScatterCharts__Shapes])))));
 			}(),

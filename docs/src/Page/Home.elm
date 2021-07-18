@@ -27,6 +27,7 @@ import Element.Background as BG
 import Ui.Layout as Layout
 import Ui.Code as Code
 import Ui.Menu as Menu
+import Ui.Thumbnail as Thumbnail
 
 import Html as H
 import Html.Attributes as HA
@@ -416,13 +417,13 @@ features model =
         let viewOne =
               case Layout.screen model.window of
                 Layout.Large ->
-                  E.el [ E.width (E.minimum 90 E.fill), E.height E.fill ]
+                  E.link [ E.width (E.minimum 90 E.fill), E.height E.fill ]
 
                 Layout.Medium ->
-                  E.el [ E.width (E.minimum 90 E.fill), E.height E.fill ]
+                  E.link [ E.width (E.minimum 90 E.fill), E.height E.fill ]
 
                 Layout.Small ->
-                  E.el [ E.width (E.minimum 50 E.fill), E.height E.fill ]
+                  E.link [ E.width (E.minimum 50 E.fill), E.height E.fill ]
         in
         [ Examples.BarCharts__Histogram
         , Examples.BarCharts__TooltipStack
@@ -437,8 +438,8 @@ features model =
         , Examples.BarCharts__Margin
         , Examples.ScatterCharts__Shapes
         ]
-          |> List.map (Examples.view Examples.init)
-          |> List.map (E.html >> viewOne)
+          |> List.map (\id -> { url = Thumbnail.toUrl id, label = E.html (Examples.view Examples.init id) })
+          |> List.map viewOne
           |> E.wrappedRow
               [ E.spacing 30
               , E.alignTop
