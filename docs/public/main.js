@@ -15752,7 +15752,7 @@ var $author$project$Page$Administration$view = function (model) {
 									$mdgriffith$elm_ui$Element$el,
 									_List_fromArray(
 										[$mdgriffith$elm_ui$Element$Font$bold]),
-									$mdgriffith$elm_ui$Element$text('like to support  the maintanence and furter development')),
+									$mdgriffith$elm_ui$Element$text('like to support the maintanence and further development')),
 									$mdgriffith$elm_ui$Element$text(' through a commission of work, you are welcome to contact me '),
 									$mdgriffith$elm_ui$Element$text('at '),
 									A2($author$project$Ui$Layout$link, 'mailto:terezasokol@gmail.com', 'terezasokol@gmail.com'),
