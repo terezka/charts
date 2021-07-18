@@ -38123,11 +38123,10 @@ var $author$project$Page$Home$features = function (model) {
 			{
 			body: _List_fromArray(
 				[
-					$mdgriffith$elm_ui$Element$text('Charts shouldn\'t be hard to make, and with elm-charts they aren\'t. '),
-					$mdgriffith$elm_ui$Element$text('The interface mirrors the element and attribute pattern which '),
-					$mdgriffith$elm_ui$Element$text('you already know and love. '),
+					$mdgriffith$elm_ui$Element$text('The interface of elm-charts mirrors the element and attribute pattern which '),
+					$mdgriffith$elm_ui$Element$text('you already know from regular HTML. '),
 					A2($author$project$Ui$Layout$link, '/quick-start', 'Get started'),
-					$mdgriffith$elm_ui$Element$text(' composing your chart in minutes!')
+					$mdgriffith$elm_ui$Element$text(' composing your chart in minutes, then learn and add features gradually.')
 				]),
 			chart: $mdgriffith$elm_ui$Element$html(
 				A2(
@@ -38163,7 +38162,13 @@ var $author$project$Page$Home$features = function (model) {
 			body: _List_fromArray(
 				[
 					$mdgriffith$elm_ui$Element$text('Outside the regular elm documentation of the API, '),
-					$mdgriffith$elm_ui$Element$text('there are more than 100 examples on this site to help you '),
+					$mdgriffith$elm_ui$Element$text('there are '),
+					A2(
+					$mdgriffith$elm_ui$Element$el,
+					_List_fromArray(
+						[$mdgriffith$elm_ui$Element$Font$bold]),
+					$mdgriffith$elm_ui$Element$text('more than 100 examples ')),
+					$mdgriffith$elm_ui$Element$text('on this site to help you '),
 					$mdgriffith$elm_ui$Element$text('compose your exact chart. '),
 					A2(
 					$mdgriffith$elm_ui$Element$link,

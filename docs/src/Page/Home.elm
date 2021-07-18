@@ -377,11 +377,10 @@ features : Model -> List (Feature Msg)
 features model =
   [ { title = "Intuitive"
     , body =
-        [ E.text "Charts shouldn't be hard to make, and with elm-charts they aren't. "
-        , E.text "The interface mirrors the element and attribute pattern which "
-        , E.text "you already know and love. "
+        [ E.text "The interface of elm-charts mirrors the element and attribute pattern which "
+        , E.text "you already know from regular HTML. "
         , Layout.link "/quick-start" "Get started"
-        , E.text " composing your chart in minutes!"
+        , E.text " composing your chart in minutes, then learn and add features gradually."
         ]
     , togglable = Just ( FamiliarToggle, model.familiarToggle )
     , chart = E.html <| H.map (\_ -> None) (Familiar.view ())
@@ -404,7 +403,9 @@ features model =
   , { title = "Learn by example"
     , body =
         [ E.text "Outside the regular elm documentation of the API, "
-        , E.text "there are more than 100 examples on this site to help you "
+        , E.text "there are "
+        , E.el [ F.bold ] (E.text "more than 100 examples ")
+        , E.text "on this site to help you "
         , E.text "compose your exact chart. "
         , E.link [ F.underline ] { url = "/documentation", label = E.text "Explore the catalog" }
         , E.text "."
