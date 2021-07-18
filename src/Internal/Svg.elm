@@ -1868,10 +1868,12 @@ tooltipPointerStyle direction className background borderColor =
     border-""" ++ config.b ++ """: 5px solid """ ++ background ++ """;
     margin-""" ++ config.b ++ """: -1px;
     z-index: 1;
+    height: 0px;
   }
 
   .""" ++ className ++ """:before {
     border-""" ++ config.b ++ """: 5px solid """ ++ borderColor ++ """;
+    height: 0px;
   }
   """
 
