@@ -17,7 +17,7 @@ view model =
     ]
     [ C.grid []
     , C.xLabels []
-    , C.yLabels []
+    , C.yLabels [ CA.withGrid ]
     , C.bars
         [ CA.margin 0.4 ] -- Number is percentage of bin width
         [ C.bar .y []
@@ -84,7 +84,7 @@ smallCode =
     ]
     [ C.grid []
     , C.xLabels []
-    , C.yLabels []
+    , C.yLabels [ CA.withGrid ]
     , C.bars
         [ CA.margin 0.4 ] -- Number is percentage of bin width
         [ C.bar .y []
@@ -112,7 +112,7 @@ view model =
     ]
     [ C.grid []
     , C.xLabels []
-    , C.yLabels []
+    , C.yLabels [ CA.withGrid ]
     , C.bars
         [ CA.margin 0.4 ] -- Number is percentage of bin width
         [ C.bar .y []

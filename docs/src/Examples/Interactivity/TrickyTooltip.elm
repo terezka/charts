@@ -45,7 +45,7 @@ view model =
     ]
     [ C.grid []
     , C.yLabels [ CA.pinned .min ]
-    , C.yLabels []
+    , C.yLabels [ CA.withGrid ]
     , C.bars
         []
         [ C.bar .w []
@@ -110,7 +110,7 @@ smallCode =
     ]
     [ C.grid []
     , C.yLabels [ CA.pinned .min ]
-    , C.yLabels []
+    , C.yLabels [ CA.withGrid ]
     , C.bars
         []
         [ C.bar .w []
@@ -174,7 +174,7 @@ view model =
     ]
     [ C.grid []
     , C.yLabels [ CA.pinned .min ]
-    , C.yLabels []
+    , C.yLabels [ CA.withGrid ]
     , C.bars
         []
         [ C.bar .w []

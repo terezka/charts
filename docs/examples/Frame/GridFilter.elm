@@ -15,8 +15,10 @@ view model =
     , CA.width 300
     ]
     [ C.grid []
-    , C.xLabels [ CA.noGrid ]
+    , C.xLabels []
+    , C.xTicks [ CA.noGrid ]
     , C.yLabels []
+    , C.yTicks [ CA.noGrid ]
     ]
 {-| @SMALL END -}
 {-| @LARGE END -}

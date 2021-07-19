@@ -17,7 +17,7 @@ view model =
     ]
     [ C.grid []
     , C.xLabels []
-    , C.yLabels []
+    , C.yLabels [ CA.withGrid ]
     , C.bars
         []
         [ C.bar .y [ CA.gradient [ CA.purple, CA.pink ] ]
@@ -83,7 +83,7 @@ smallCode =
     ]
     [ C.grid []
     , C.xLabels []
-    , C.yLabels []
+    , C.yLabels [ CA.withGrid ]
     , C.bars
         []
         [ C.bar .y [ CA.gradient [ CA.purple, CA.pink ] ]
@@ -110,7 +110,7 @@ view model =
     ]
     [ C.grid []
     , C.xLabels []
-    , C.yLabels []
+    , C.yLabels [ CA.withGrid ]
     , C.bars
         []
         [ C.bar .y [ CA.gradient [ CA.purple, CA.pink ] ]

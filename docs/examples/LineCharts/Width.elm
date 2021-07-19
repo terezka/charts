@@ -16,7 +16,7 @@ view model =
     ]
     [ C.grid []
     , C.xLabels []
-    , C.yLabels []
+    , C.yLabels [ CA.withGrid ]
     , C.series .x
         [ C.interpolated .y [ CA.width 4 ] []
         , C.interpolated .z [ CA.width 3 ] []

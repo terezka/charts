@@ -22,6 +22,7 @@ view model =
         let isEven = remainderBy 2 num == 0 in
         [ C.xLabel
             [ CA.x (toFloat num)
+            , CA.withGrid
             , if isEven then identity else CA.y p.y.max
             , if isEven then identity else CA.moveUp 28
             , if isEven then identity else CA.fontSize 10
@@ -73,6 +74,7 @@ smallCode =
         let isEven = remainderBy 2 num == 0 in
         [ C.xLabel
             [ CA.x (toFloat num)
+            , CA.withGrid
             , if isEven then identity else CA.y p.y.max
             , if isEven then identity else CA.moveUp 28
             , if isEven then identity else CA.fontSize 10
@@ -106,6 +108,7 @@ view model =
         let isEven = remainderBy 2 num == 0 in
         [ C.xLabel
             [ CA.x (toFloat num)
+            , CA.withGrid
             , if isEven then identity else CA.y p.y.max
             , if isEven then identity else CA.moveUp 28
             , if isEven then identity else CA.fontSize 10

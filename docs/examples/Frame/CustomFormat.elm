@@ -16,7 +16,7 @@ view model =
     ]
     [ C.grid []
     , C.xAxis []
-    , C.xLabels [ CA.format (\x -> String.fromFloat x ++ " C°") ]
+    , C.xLabels [ CA.format (\x -> String.fromFloat x ++ " C°"), CA.withGrid ]
     ]
 {-| @SMALL END -}
 {-| @LARGE END -}

@@ -40,8 +40,8 @@ view model =
     , CE.onMouseLeave (OnHover [])
     ]
     [ C.grid []
-    , C.xLabels []
-    , C.yLabels []
+    , C.xLabels [ CA.withGrid ]
+    , C.yLabels [ CA.withGrid ]
     , C.series .x
         [ C.scatter .y [ CA.color "white", CA.size 20, CA.borderWidth 2, CA.border CA.pink ]
         , C.scatter .z [ CA.color "white", CA.size 20, CA.borderWidth 2, CA.border CA.purple ]
@@ -94,8 +94,8 @@ smallCode =
     , CE.onMouseLeave (OnHover [])
     ]
     [ C.grid []
-    , C.xLabels []
-    , C.yLabels []
+    , C.xLabels [ CA.withGrid ]
+    , C.yLabels [ CA.withGrid ]
     , C.series .x
         [ C.scatter .y [ CA.color "white", CA.size 20, CA.borderWidth 2, CA.border CA.pink ]
         , C.scatter .z [ CA.color "white", CA.size 20, CA.borderWidth 2, CA.border CA.purple ]
@@ -147,8 +147,8 @@ view model =
     , CE.onMouseLeave (OnHover [])
     ]
     [ C.grid []
-    , C.xLabels []
-    , C.yLabels []
+    , C.xLabels [ CA.withGrid ]
+    , C.yLabels [ CA.withGrid ]
     , C.series .x
         [ C.scatter .y [ CA.color "white", CA.size 20, CA.borderWidth 2, CA.border CA.pink ]
         , C.scatter .z [ CA.color "white", CA.size 20, CA.borderWidth 2, CA.border CA.purple ]

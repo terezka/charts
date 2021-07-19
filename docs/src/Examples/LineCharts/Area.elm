@@ -16,7 +16,7 @@ view model =
     ]
     [ C.grid []
     , C.xLabels []
-    , C.yLabels []
+    , C.yLabels [ CA.withGrid ]
     , C.series .x
         [ C.interpolated .y [ CA.opacity 0.2 ] []
         , C.interpolated .z [ CA.opacity 0.2 ] []
@@ -88,7 +88,7 @@ smallCode =
     ]
     [ C.grid []
     , C.xLabels []
-    , C.yLabels []
+    , C.yLabels [ CA.withGrid ]
     , C.series .x
         [ C.interpolated .y [ CA.opacity 0.2 ] []
         , C.interpolated .z [ CA.opacity 0.2 ] []
@@ -114,7 +114,7 @@ view model =
     ]
     [ C.grid []
     , C.xLabels []
-    , C.yLabels []
+    , C.yLabels [ CA.withGrid ]
     , C.series .x
         [ C.interpolated .y [ CA.opacity 0.2 ] []
         , C.interpolated .z [ CA.opacity 0.2 ] []

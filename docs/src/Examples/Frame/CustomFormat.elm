@@ -17,7 +17,7 @@ view model =
     ]
     [ C.grid []
     , C.xAxis []
-    , C.xLabels [ CA.format (\x -> String.fromFloat x ++ " C°") ]
+    , C.xLabels [ CA.format (\x -> String.fromFloat x ++ " C°"), CA.withGrid ]
     ]
 
 
@@ -57,7 +57,7 @@ smallCode =
     ]
     [ C.grid []
     , C.xAxis []
-    , C.xLabels [ CA.format (\\x -> String.fromFloat x ++ " C°") ]
+    , C.xLabels [ CA.format (\\x -> String.fromFloat x ++ " C°"), CA.withGrid ]
     ]
   """
 
@@ -79,6 +79,6 @@ view model =
     ]
     [ C.grid []
     , C.xAxis []
-    , C.xLabels [ CA.format (\\x -> String.fromFloat x ++ " C°") ]
+    , C.xLabels [ CA.format (\\x -> String.fromFloat x ++ " C°"), CA.withGrid ]
     ]
   """

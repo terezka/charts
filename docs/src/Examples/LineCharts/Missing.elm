@@ -16,7 +16,7 @@ view model =
     ]
     [ C.grid []
     , C.xLabels []
-    , C.yLabels []
+    , C.yLabels [ CA.withGrid ]
     , C.series .x
         [ C.interpolatedMaybe .y [ CA.stepped ] []
         ]
@@ -85,7 +85,7 @@ smallCode =
     ]
     [ C.grid []
     , C.xLabels []
-    , C.yLabels []
+    , C.yLabels [ CA.withGrid ]
     , C.series .x
         [ C.interpolatedMaybe .y [ CA.stepped ] []
         ]
@@ -110,7 +110,7 @@ view model =
     ]
     [ C.grid []
     , C.xLabels []
-    , C.yLabels []
+    , C.yLabels [ CA.withGrid ]
     , C.series .x
         [ C.interpolatedMaybe .y [ CA.stepped ] []
         ]

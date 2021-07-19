@@ -39,13 +39,17 @@ view model =
     , CE.onMouseLeave (OnHover [])
     ]
     [ C.grid []
-    , C.xLabels []
-    , C.yLabels []
+    , C.xLabels [ CA.withGrid ]
+    , C.yLabels [ CA.withGrid ]
     , C.series .x
         [ C.scatter .y [ CA.circle, CA.size 8 ]
-            |> C.amongst model.hovering (\_ -> [ CA.opacity 0, CA.borderWidth 2 ])
+            |> C.amongst model.hovering (\_ ->
+                [ CA.opacity 0, CA.borderWidth 2 ]
+              )
         , C.scatter .z [ CA.circle, CA.size 8 ]
-            |> C.amongst model.hovering (\_ -> [ CA.opacity 0, CA.borderWidth 2 ])
+            |> C.amongst model.hovering (\_ ->
+                [ CA.opacity 0, CA.borderWidth 2 ]
+              )
         ]
         data
     , C.each model.hovering <| \p item ->
@@ -99,13 +103,17 @@ smallCode =
     , CE.onMouseLeave (OnHover [])
     ]
     [ C.grid []
-    , C.xLabels []
-    , C.yLabels []
+    , C.xLabels [ CA.withGrid ]
+    , C.yLabels [ CA.withGrid ]
     , C.series .x
         [ C.scatter .y [ CA.circle, CA.size 8 ]
-            |> C.amongst model.hovering (\\_ -> [ CA.opacity 0, CA.borderWidth 2 ])
+            |> C.amongst model.hovering (\\_ ->
+                [ CA.opacity 0, CA.borderWidth 2 ]
+              )
         , C.scatter .z [ CA.circle, CA.size 8 ]
-            |> C.amongst model.hovering (\\_ -> [ CA.opacity 0, CA.borderWidth 2 ])
+            |> C.amongst model.hovering (\\_ ->
+                [ CA.opacity 0, CA.borderWidth 2 ]
+              )
         ]
         data
     , C.each model.hovering <| \\p item ->
@@ -153,13 +161,17 @@ view model =
     , CE.onMouseLeave (OnHover [])
     ]
     [ C.grid []
-    , C.xLabels []
-    , C.yLabels []
+    , C.xLabels [ CA.withGrid ]
+    , C.yLabels [ CA.withGrid ]
     , C.series .x
         [ C.scatter .y [ CA.circle, CA.size 8 ]
-            |> C.amongst model.hovering (\\_ -> [ CA.opacity 0, CA.borderWidth 2 ])
+            |> C.amongst model.hovering (\\_ ->
+                [ CA.opacity 0, CA.borderWidth 2 ]
+              )
         , C.scatter .z [ CA.circle, CA.size 8 ]
-            |> C.amongst model.hovering (\\_ -> [ CA.opacity 0, CA.borderWidth 2 ])
+            |> C.amongst model.hovering (\\_ ->
+                [ CA.opacity 0, CA.borderWidth 2 ]
+              )
         ]
         data
     , C.each model.hovering <| \\p item ->

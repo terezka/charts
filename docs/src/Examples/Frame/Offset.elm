@@ -16,7 +16,7 @@ view model =
     , CA.width 300
     ]
     [ C.grid []
-    , C.xLabels [ CA.moveRight 5, CA.moveUp 20, CA.alignLeft ]
+    , C.xLabels [ CA.moveRight 5, CA.moveUp 20, CA.alignLeft, CA.withGrid ]
     ]
 
 
@@ -56,7 +56,7 @@ smallCode =
     , CA.width 300
     ]
     [ C.grid []
-    , C.xLabels [ CA.moveRight 5, CA.moveUp 20, CA.alignLeft ]
+    , C.xLabels [ CA.moveRight 5, CA.moveUp 20, CA.alignLeft, CA.withGrid ]
     ]
   """
 
@@ -77,6 +77,6 @@ view model =
     , CA.width 300
     ]
     [ C.grid []
-    , C.xLabels [ CA.moveRight 5, CA.moveUp 20, CA.alignLeft ]
+    , C.xLabels [ CA.moveRight 5, CA.moveUp 20, CA.alignLeft, CA.withGrid ]
     ]
   """

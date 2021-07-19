@@ -17,7 +17,7 @@ view model =
     ]
     [ C.grid []
     , C.xLabels [ CA.times Time.utc ]
-    , C.yLabels []
+    , C.yLabels [ CA.withGrid ]
     , C.bars
         [ CA.x1 .start
         , CA.x2 .end

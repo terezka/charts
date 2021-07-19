@@ -15,7 +15,7 @@ view model =
     ]
     [ C.grid []
     , C.xLabels []
-    , C.yLabels []
+    , C.yLabels [ CA.withGrid ]
     , C.series .x
         [ C.interpolated .y [ CA.monotone, CA.dashed [ 1, 2 ] ] []
         , C.interpolated .z [ CA.monotone, CA.dashed [ 10, 5 ] ] []

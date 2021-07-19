@@ -30,7 +30,7 @@ view model =
         , { x = 85, y = 80 }
         ]
     , C.xAxis [ CA.noArrow, CA.limits [ CA.likeData ] ]
-    , C.xLabels []
+    , C.xLabels [ CA.withGrid ]
     ]
 
 
@@ -85,7 +85,7 @@ smallCode =
         , { x = 85, y = 80 }
         ]
     , C.xAxis [ CA.noArrow, CA.limits [ CA.likeData ] ]
-    , C.xLabels []
+    , C.xLabels [ CA.withGrid ]
     ]
   """
 
@@ -120,6 +120,6 @@ view model =
         , { x = 85, y = 80 }
         ]
     , C.xAxis [ CA.noArrow, CA.limits [ CA.likeData ] ]
-    , C.xLabels []
+    , C.xLabels [ CA.withGrid ]
     ]
   """

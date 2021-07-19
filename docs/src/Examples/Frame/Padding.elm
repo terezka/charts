@@ -24,8 +24,8 @@ view model =
         [ { x = 0, y = 0 }
         , { x = 10, y = 10 }
         ]
-    , C.xLabels [ CA.pinned .min ]
-    , C.yLabels [ CA.pinned .min ]
+    , C.xLabels [ CA.pinned .min, CA.withGrid ]
+    , C.yLabels [ CA.pinned .min, CA.withGrid ]
     ]
 
 
@@ -73,8 +73,8 @@ smallCode =
         [ { x = 0, y = 0 }
         , { x = 10, y = 10 }
         ]
-    , C.xLabels [ CA.pinned .min ]
-    , C.yLabels [ CA.pinned .min ]
+    , C.xLabels [ CA.pinned .min, CA.withGrid ]
+    , C.yLabels [ CA.pinned .min, CA.withGrid ]
     ]
   """
 
@@ -103,7 +103,7 @@ view model =
         [ { x = 0, y = 0 }
         , { x = 10, y = 10 }
         ]
-    , C.xLabels [ CA.pinned .min ]
-    , C.yLabels [ CA.pinned .min ]
+    , C.xLabels [ CA.pinned .min, CA.withGrid ]
+    , C.yLabels [ CA.pinned .min, CA.withGrid ]
     ]
   """

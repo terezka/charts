@@ -53,7 +53,7 @@ view model =
     ]
     [ C.grid []
     , C.xLabels []
-    , C.yLabels []
+    , C.yLabels [ CA.withGrid ]
 
     , C.series .x
         [ C.stacked

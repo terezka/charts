@@ -14,11 +14,10 @@ view model =
   C.chart
     [ CA.height 300
     , CA.width 300
-    , CA.padding { top = 0, bottom = 0, left = 15, right = 15 }
     ]
     [ C.grid []
-    , C.xLabels []
-    , C.yLabels []
+    , C.xLabels [ CA.withGrid ]
+    , C.yLabels [ CA.withGrid ]
     , C.series .x
         [ C.scatter .y []
         , C.scatter .z []
@@ -26,7 +25,7 @@ view model =
         data
     , C.legendsAt .max .max
         [ CA.column
-        , CA.moveLeft 12
+        , CA.moveLeft 2
         , CA.spacing 0
         , CA.alignRight
         ]
@@ -95,11 +94,10 @@ smallCode =
   C.chart
     [ CA.height 300
     , CA.width 300
-    , CA.padding { top = 0, bottom = 0, left = 15, right = 15 }
     ]
     [ C.grid []
-    , C.xLabels []
-    , C.yLabels []
+    , C.xLabels [ CA.withGrid ]
+    , C.yLabels [ CA.withGrid ]
     , C.series .x
         [ C.scatter .y []
         , C.scatter .z []
@@ -107,7 +105,7 @@ smallCode =
         data
     , C.legendsAt .max .max
         [ CA.column
-        , CA.moveLeft 12
+        , CA.moveLeft 2
         , CA.spacing 0
         , CA.alignRight
         ]
@@ -131,11 +129,10 @@ view model =
   C.chart
     [ CA.height 300
     , CA.width 300
-    , CA.padding { top = 0, bottom = 0, left = 15, right = 15 }
     ]
     [ C.grid []
-    , C.xLabels []
-    , C.yLabels []
+    , C.xLabels [ CA.withGrid ]
+    , C.yLabels [ CA.withGrid ]
     , C.series .x
         [ C.scatter .y []
         , C.scatter .z []
@@ -143,7 +140,7 @@ view model =
         data
     , C.legendsAt .max .max
         [ CA.column
-        , CA.moveLeft 12
+        , CA.moveLeft 2
         , CA.spacing 0
         , CA.alignRight
         ]

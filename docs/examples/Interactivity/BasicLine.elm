@@ -39,7 +39,7 @@ view model =
     ]
     [ C.grid []
     , C.xLabels []
-    , C.yLabels []
+    , C.yLabels [ CA.withGrid ]
     , C.series .x
         [ C.interpolated .y [  ] [ CA.circle, CA.size 3 ]
         , C.interpolated .z [  ] [ CA.circle, CA.size 3 ]

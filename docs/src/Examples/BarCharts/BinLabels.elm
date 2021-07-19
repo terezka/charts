@@ -19,7 +19,7 @@ view model =
     ]
     [ C.grid []
 
-    , C.yLabels []
+    , C.yLabels [ CA.withGrid ]
     , C.binLabels .label [ CA.moveDown 20 ]
 
     , C.bars []
@@ -91,7 +91,7 @@ smallCode =
     ]
     [ C.grid []
 
-    , C.yLabels []
+    , C.yLabels [ CA.withGrid ]
     , C.binLabels .label [ CA.moveDown 20 ]
 
     , C.bars []
@@ -122,7 +122,7 @@ view model =
     ]
     [ C.grid []
 
-    , C.yLabels []
+    , C.yLabels [ CA.withGrid ]
     , C.binLabels .label [ CA.moveDown 20 ]
 
     , C.bars []

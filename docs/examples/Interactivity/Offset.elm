@@ -39,8 +39,8 @@ view model =
     , CE.onMouseLeave (OnHover [])
     ]
     [ C.grid []
-    , C.xLabels []
-    , C.yLabels []
+    , C.xLabels [ CA.withGrid ]
+    , C.yLabels [ CA.withGrid ]
     , C.series .x
         [ C.scatter .y [ CA.size 60, CA.opacity 0.3, CA.borderWidth 1 ]
         , C.scatter .z [ CA.size 50, CA.opacity 0.3, CA.borderWidth 1 ]

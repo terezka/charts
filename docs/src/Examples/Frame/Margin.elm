@@ -27,8 +27,8 @@ view model =
         [ { x = 0, y = 0 }
         , { x = 10, y = 10 }
         ]
-    , C.xLabels []
-    , C.yLabels []
+    , C.xLabels [ CA.withGrid ]
+    , C.yLabels [ CA.withGrid ]
     ]
 
 
@@ -78,8 +78,8 @@ smallCode =
         [ { x = 0, y = 0 }
         , { x = 10, y = 10 }
         ]
-    , C.xLabels []
-    , C.yLabels []
+    , C.xLabels [ CA.withGrid ]
+    , C.yLabels [ CA.withGrid ]
     ]
   """
 
@@ -111,7 +111,7 @@ view model =
         [ { x = 0, y = 0 }
         , { x = 10, y = 10 }
         ]
-    , C.xLabels []
-    , C.yLabels []
+    , C.xLabels [ CA.withGrid ]
+    , C.yLabels [ CA.withGrid ]
     ]
   """

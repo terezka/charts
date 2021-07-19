@@ -54,7 +54,7 @@ view model =
     ]
     [ C.grid []
     , C.xLabels []
-    , C.yLabels []
+    , C.yLabels [ CA.withGrid ]
 
     , C.series .x
         [ C.stacked
@@ -134,7 +134,7 @@ smallCode =
     ]
     [ C.grid []
     , C.xLabels []
-    , C.yLabels []
+    , C.yLabels [ CA.withGrid ]
 
     , C.series .x
         [ C.stacked
@@ -221,7 +221,7 @@ view model =
     ]
     [ C.grid []
     , C.xLabels []
-    , C.yLabels []
+    , C.yLabels [ CA.withGrid ]
 
     , C.series .x
         [ C.stacked

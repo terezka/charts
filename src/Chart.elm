@@ -914,6 +914,7 @@ The example below illustrates the configuration:
           , CA.flip        -- Flip to opposite direction
           , CA.noGrid      -- By default a grid line is added
                            -- for each label. This removes them.
+          , CA.withGrid    -- Add grid line by each label.
 
           , CA.ints            -- Add ticks at "nice" ints
           , CA.times Time.utc  -- Add ticks at "nice" times
@@ -959,7 +960,7 @@ xLabels edits =
           , anchor = Nothing
           , xOff = 0
           , yOff = 18
-          , grid = True
+          , grid = False
           , format = Nothing
           , uppercase = False
           , rotate = 0
@@ -1011,7 +1012,7 @@ yLabels edits =
           , flip = False
           , xOff = -10
           , yOff = 3
-          , grid = True
+          , grid = False
           , format = Nothing
           , uppercase = False
           , fontSize = Nothing
@@ -1108,8 +1109,7 @@ A full list of possible attributes:
           , CA.uppercase    -- Make uppercase
           , CA.flip         -- Flip to opposite direction
 
-          , CA.noGrid      -- By default a grid line is added
-                           -- for each label. This removes it.
+          , CA.withGrid     -- Add grid line by each label.
           ]
           [ S.text "hello!" ]
       ]
@@ -1134,7 +1134,7 @@ xLabel edits inner =
           , anchor = Nothing
           , rotate = 0
           , flip = False
-          , grid = True
+          , grid = False
           }
 
       toTickValues p config ts =
@@ -1184,7 +1184,7 @@ yLabel edits inner =
           , anchor = Nothing
           , rotate = 0
           , flip = False
-          , grid = True
+          , grid = False
           }
 
       toTickValues p config ts =

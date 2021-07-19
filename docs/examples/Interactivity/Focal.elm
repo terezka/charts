@@ -40,7 +40,7 @@ view model =
     ]
     [ C.grid []
     , C.xLabels []
-    , C.yLabels []
+    , C.yLabels [ CA.withGrid ]
     , C.bars []
         [ C.bar .y [ CA.opacity 0.6, CA.borderWidth 1, CA.color CA.green ]
         , C.bar .z [ CA.opacity 0.6, CA.borderWidth 1, CA.color CA.blue ]

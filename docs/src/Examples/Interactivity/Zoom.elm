@@ -127,8 +127,8 @@ view model =
           CA.range []
     ]
     [ C.grid []
-    , C.xLabels []
-    , C.yLabels []
+    , C.xLabels [ CA.withGrid ]
+    , C.yLabels [ CA.withGrid ]
 
     , C.series .sepalWidth
         [ C.scatterMaybe (Data.Iris.only Data.Iris.Setosa .petalWidth)
@@ -216,8 +216,8 @@ smallCode =
           CA.range []
     ]
     [ C.grid []
-    , C.xLabels []
-    , C.yLabels []
+    , C.xLabels [ CA.withGrid ]
+    , C.yLabels [ CA.withGrid ]
 
     , C.series .sepalWidth
         [ C.scatterMaybe (Data.Iris.only Data.Iris.Setosa .petalWidth)
@@ -390,8 +390,8 @@ view model =
           CA.range []
     ]
     [ C.grid []
-    , C.xLabels []
-    , C.yLabels []
+    , C.xLabels [ CA.withGrid ]
+    , C.yLabels [ CA.withGrid ]
 
     , C.series .sepalWidth
         [ C.scatterMaybe (Data.Iris.only Data.Iris.Setosa .petalWidth)

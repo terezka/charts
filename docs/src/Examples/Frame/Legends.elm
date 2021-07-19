@@ -21,8 +21,8 @@ view model =
     ]
     [ C.grid []
     , C.xAxis []
-    , C.yLabels [ CA.pinned .min ]
-    , C.xLabels [ CA.noGrid ]
+    , C.yLabels [ CA.withGrid, CA.pinned .min ]
+    , C.xLabels []
 
     -- BAR CHART
     , C.bars
@@ -116,8 +116,8 @@ smallCode =
     ]
     [ C.grid []
     , C.xAxis []
-    , C.yLabels [ CA.pinned .min ]
-    , C.xLabels [ CA.noGrid ]
+    , C.yLabels [ CA.withGrid, CA.pinned .min ]
+    , C.xLabels []
 
     -- BAR CHART
     , C.bars
@@ -173,8 +173,8 @@ view model =
     ]
     [ C.grid []
     , C.xAxis []
-    , C.yLabels [ CA.pinned .min ]
-    , C.xLabels [ CA.noGrid ]
+    , C.yLabels [ CA.withGrid, CA.pinned .min ]
+    , C.xLabels []
 
     -- BAR CHART
     , C.bars

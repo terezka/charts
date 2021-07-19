@@ -16,7 +16,7 @@ view model =
     ]
     [ C.grid []
     , C.xLabels []
-    , C.yLabels []
+    , C.yLabels [ CA.withGrid ]
     , C.series .x
         [ C.interpolated .y [  ] [ CA.cross, CA.borderWidth 2, CA.border "white" ]
             |> C.named "Cats"
@@ -95,7 +95,7 @@ smallCode =
     ]
     [ C.grid []
     , C.xLabels []
-    , C.yLabels []
+    , C.yLabels [ CA.withGrid ]
     , C.series .x
         [ C.interpolated .y [  ] [ CA.cross, CA.borderWidth 2, CA.border "white" ]
             |> C.named "Cats"
@@ -129,7 +129,7 @@ view model =
     ]
     [ C.grid []
     , C.xLabels []
-    , C.yLabels []
+    , C.yLabels [ CA.withGrid ]
     , C.series .x
         [ C.interpolated .y [  ] [ CA.cross, CA.borderWidth 2, CA.border "white" ]
             |> C.named "Cats"
