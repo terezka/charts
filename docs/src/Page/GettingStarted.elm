@@ -95,13 +95,13 @@ subscriptions model =
 
 view : Model -> Document Msg
 view model =
-  { title = "elm-charts | Quick start"
+  { title = "elm-charts | Getting started"
   , body =
       Layout.view
         [ Menu.small model.window model.menu
             |> E.map MenuMsg
 
-        , Layout.heading model.window "Quick start"
+        , Layout.heading model.window "Getting started"
 
         , E.paragraph
             [ E.paddingEach { top = 20, bottom = 50, left = 0, right = 0 }

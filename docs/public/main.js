@@ -38425,7 +38425,7 @@ var $author$project$Page$GettingStarted$view = function (model) {
 					$mdgriffith$elm_ui$Element$map,
 					$author$project$Page$GettingStarted$MenuMsg,
 					A2($author$project$Ui$Menu$small, model.window, model.menu)),
-					A2($author$project$Ui$Layout$heading, model.window, 'Quick start'),
+					A2($author$project$Ui$Layout$heading, model.window, 'Getting started'),
 					A2(
 					$mdgriffith$elm_ui$Element$paragraph,
 					_List_fromArray(
@@ -38643,7 +38643,7 @@ var $author$project$Page$GettingStarted$view = function (model) {
 							})
 						]))
 				])),
-		title: 'elm-charts | Quick start'
+		title: 'elm-charts | Getting started'
 	};
 };
 var $author$project$Page$Home$MenuMsg = function (a) {
