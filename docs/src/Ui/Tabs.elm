@@ -12,6 +12,7 @@ import Element.Input as I
 import Element.Border as B
 import Element.Background as BG
 import Examples
+import Session
 
 
 type alias Config a =
@@ -22,38 +23,63 @@ type alias Config a =
   }
 
 
-view : Config a -> E.Element msg
-view config =
+view : Session.Window -> Config a -> E.Element msg
+view window config =
+  let contianerAttrs =
+        case Layout.screen window of
+          Layout.Large ->
+            [ B.color (E.rgb255 220 220 220)
+            , B.widthEach { top = 0, bottom = 1, left = 0, right = 0 }
+            ]
+
+          Layout.Medium ->
+            [ BG.color (E.rgb255 250 250 250), E.scrollbarX ]
+
+          Layout.Small ->
+            [ BG.color (E.rgb255 250 250 250), E.scrollbarX ]
+  in
   E.el
     [ E.width E.fill
+    , E.height E.fill
     , E.paddingXY 0 30
-    , E.scrollbarX
-    , E.htmlAttribute (HA.style "min-height" "38px")
-    , E.htmlAttribute (HA.style "box-sizing" "content-box")
     ] <|
     E.row
-      [ E.width E.fill
+      ([ E.width E.fill
       , E.height E.fill
-      , E.spacing 10
-      , E.paddingXY 10 0
-      , B.color (E.rgb255 220 220 220)
-      , B.widthEach { top = 0, bottom = 1, left = 0, right = 0 }
-      ]
-      (List.map (viewOne config) <| List.filter (\a -> config.toTitle a /= "Front page" && config.toTitle a /= "Basic") config.all)
+      ] ++ contianerAttrs )
+      (List.map (viewOne window config) <| List.filter (\a -> config.toTitle a /= "Front page" && config.toTitle a /= "Basic") config.all)
 
 
-viewOne : Config a -> a -> E.Element msg
-viewOne config item =
+viewOne : Session.Window -> Config a -> a -> E.Element msg
+viewOne window config item =
+  let offset =
+        case Layout.screen window of
+          Layout.Large ->
+            if isSelected then E.moveDown 1 else E.moveDown 0
+
+          Layout.Medium ->
+            E.moveDown 0
+
+          Layout.Small ->
+            E.moveDown 0
+
+      isSelected =
+        config.selected == config.toUrl item
+  in
   E.link
     [ F.size 14
-    , E.paddingXY 30 10
-    , E.moveDown 1
-    , E.paddingEach { top = 10, bottom = if config.selected == config.toUrl item then 11 else 10, left = 30, right = 30 }
-    , BG.color (E.rgb255 255 255 255)
-    , B.color (E.rgb255 220 220 220)
-    , if config.selected == config.toUrl item then F.color (E.rgb255 0 0 0) else F.color (E.rgb255 120 120 120)
-    , B.widthEach { top = 1, bottom = if config.selected == config.toUrl item then 0 else 1, left = 1, right = 1 }
-    , B.roundEach { topLeft = 5, topRight = 5, bottomLeft = 0, bottomRight = 0 }
+    , F.color (if isSelected then E.rgb255 123 77 255 else E.rgb255 120 120 120)
+    , offset
+    , E.paddingXY 25 10
+    , B.color (E.rgb255 123 77 255)
+    , B.widthEach { top = 0, bottom = if isSelected then 1 else 0, left = 0, right = 0 }
+    , E.centerX
+    , E.mouseOver
+        [ BG.color (E.rgba255 123 77 255 0.05)
+        ]
+    , E.focused
+        [ BG.color (if isSelected then E.rgba255 123 77 255 0.1 else E.rgb255 250 250 250)
+        ]
     ]
     { url = config.toUrl item
     , label = E.text (config.toTitle item)

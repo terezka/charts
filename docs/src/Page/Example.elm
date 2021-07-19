@@ -132,7 +132,7 @@ view model =
             , E.text "."
             ]
 
-        , Ui.Tabs.view
+        , Ui.Tabs.view model.window
             { toUrl = Ui.Thumbnail.toUrlGroup << .title
             , toTitle = .title
             , selected = Route.documentation ++ "/" ++ model.selectedTab

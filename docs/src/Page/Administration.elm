@@ -94,14 +94,9 @@ view model =
                   [ E.paddingXY 0 10
                   , F.size 14
                   ]
-                  [ E.text "This library is developed and managed by "
+                  [ E.text "This library is managed by "
                   , Layout.link "https://twitter.com/tereza_sokol" "Tereza Sokol"
-                  , E.text ". If you'd "
-                  , E.el [ F.bold ] (E.text "like to support the maintanence and further development")
-                  , E.text " through a commission of work, you are welcome to contact me "
-                  , E.text "at "
-                  , Layout.link "mailto:terezasokol@gmail.com" "terezasokol@gmail.com"
-                  , E.text "."
+                  , E.text ", with the support of various other contributors."
                   ]
 
               , E.paragraph
@@ -114,8 +109,8 @@ view model =
                   [ E.paddingXY 0 10
                   , F.size 14
                   ]
-                  [ E.text "If you or your company would like me to build you a chart with elm-charts, I'm happy to do so! "
-                  , E.text "Feel free to contact me at "
+                  [ E.text "If you or your company would like me to build you a chart with elm-charts or add "
+                  , E.text "a specific feature to the library, feel free to contact me at "
                   , Layout.link "mailto:terezasokol@gmail.com" "terezasokol@gmail.com"
                   , E.text " and we can figure out the details."
                   ]
@@ -134,7 +129,7 @@ view model =
                   , E.text "If you have more suggestions or have wishes regarding the priority, then "
                   , E.text "you're welcome to "
                   , Layout.link "https://github.com/terezka/charts/issues" "open an issue"
-                  , E.text "."
+                  , E.text " or contact me directly."
                   ]
 
               , E.el [ F.size 14 ] <| E.html <|
