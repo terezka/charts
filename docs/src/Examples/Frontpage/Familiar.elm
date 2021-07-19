@@ -17,7 +17,7 @@ chart =
     , CA.margin { top = 10, bottom = 30, left = 30, right = 10 }
     ]
     [ C.xLabels [ CA.times Time.utc, CA.amount 12 ]
-    , C.yLabels [ CA.amount 6 ]
+    , C.yLabels [ CA.amount 6, CA.withGrid ]
     , C.xAxis []
     , C.yAxis []
     , C.series .x
@@ -101,7 +101,7 @@ chart =
     , CA.margin { top = 10, bottom = 30, left = 30, right = 10 }
     ]
     [ C.xLabels [ CA.times Time.utc, CA.amount 12 ]
-    , C.yLabels [ CA.amount 6 ]
+    , C.yLabels [ CA.amount 6, CA.withGrid ]
     , C.xAxis []
     , C.yAxis []
     , C.series .x
@@ -130,7 +130,7 @@ chart =
     , CA.margin { top = 10, bottom = 30, left = 30, right = 10 }
     ]
     [ C.xLabels [ CA.times Time.utc, CA.amount 12 ]
-    , C.yLabels [ CA.amount 6 ]
+    , C.yLabels [ CA.amount 6, CA.withGrid ]
     , C.xAxis []
     , C.yAxis []
     , C.series .x
