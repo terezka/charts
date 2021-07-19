@@ -42,8 +42,8 @@ view model =
     [ C.xLabels [ CA.withGrid ]
     , C.yLabels [ CA.withGrid ]
     , C.series .x
-        [ C.scatter .y [ CA.color "white", CA.size 20, CA.borderWidth 2, CA.border CA.pink ]
-        , C.scatter .z [ CA.color "white", CA.size 20, CA.borderWidth 2, CA.border CA.purple ]
+        [ C.scatter .y [ CA.color "white", CA.size 20, CA.borderWidth 2 ]
+        , C.scatter .z [ CA.color "white", CA.size 20, CA.borderWidth 2 ]
         ]
         data
     , C.each model.hovering <| \p item ->
@@ -95,8 +95,8 @@ smallCode =
     [ C.xLabels [ CA.withGrid ]
     , C.yLabels [ CA.withGrid ]
     , C.series .x
-        [ C.scatter .y [ CA.color "white", CA.size 20, CA.borderWidth 2, CA.border CA.pink ]
-        , C.scatter .z [ CA.color "white", CA.size 20, CA.borderWidth 2, CA.border CA.purple ]
+        [ C.scatter .y [ CA.color "white", CA.size 20, CA.borderWidth 2 ]
+        , C.scatter .z [ CA.color "white", CA.size 20, CA.borderWidth 2 ]
         ]
         data
     , C.each model.hovering <| \\p item ->
@@ -147,8 +147,8 @@ view model =
     [ C.xLabels [ CA.withGrid ]
     , C.yLabels [ CA.withGrid ]
     , C.series .x
-        [ C.scatter .y [ CA.color "white", CA.size 20, CA.borderWidth 2, CA.border CA.pink ]
-        , C.scatter .z [ CA.color "white", CA.size 20, CA.borderWidth 2, CA.border CA.purple ]
+        [ C.scatter .y [ CA.color "white", CA.size 20, CA.borderWidth 2 ]
+        , C.scatter .z [ CA.color "white", CA.size 20, CA.borderWidth 2 ]
         ]
         data
     , C.each model.hovering <| \\p item ->

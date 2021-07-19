@@ -42,8 +42,8 @@ view model =
         |> CE.onMouseMove OnHover
     , CE.onMouseLeave (OnHover [])
     ]
-    [ C.xLabels []
-    , C.yLabels [ CA.pinned .min ]
+    [ C.xLabels [ CA.withGrid ]
+    , C.yLabels [ CA.withGrid, CA.pinned .min ]
     , C.series .x
         [ C.stacked
           [ C.interpolated .p [  ] [ CA.circle ]

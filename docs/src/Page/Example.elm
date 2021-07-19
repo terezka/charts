@@ -172,7 +172,7 @@ viewContent model =
 
       viewChart isCenter =
         E.el
-          [ E.width (E.maximum 320 E.fill)
+          [ E.width (E.fill |> E.maximum 320 |> E.minimum 300 )
           , if isCenter then E.centerX else E.alignTop
           , E.alignTop
           , E.paddingEach { top = 0, bottom = 40, left = 0, right = 0 }
