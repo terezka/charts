@@ -73,7 +73,6 @@ viewOne window config item =
     , E.paddingXY 25 10
     , B.color (E.rgb255 123 77 255)
     , B.widthEach { top = 0, bottom = if isSelected then 1 else 0, left = 0, right = 0 }
-    , E.centerX
     , E.mouseOver
         [ BG.color (E.rgba255 123 77 255 0.05)
         ]

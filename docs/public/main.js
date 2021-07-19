@@ -23070,7 +23070,6 @@ var $author$project$Ui$Tabs$viewOne = F3(
 						right: 0,
 						top: 0
 					}),
-					$mdgriffith$elm_ui$Element$centerX,
 					$mdgriffith$elm_ui$Element$mouseOver(
 					_List_fromArray(
 						[
