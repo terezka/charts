@@ -16,8 +16,7 @@ view model =
     [ CA.height 300
     , CA.width 300
     ]
-    [ C.grid []
-    , C.xAxis []
+    [ C.xAxis []
     , C.generate 12 CS.ints .x [] <| \p num ->
         let isEven = remainderBy 2 num == 0 in
         [ C.xLabel
@@ -68,8 +67,7 @@ smallCode =
     [ CA.height 300
     , CA.width 300
     ]
-    [ C.grid []
-    , C.xAxis []
+    [ C.xAxis []
     , C.generate 12 CS.ints .x [] <| \\p num ->
         let isEven = remainderBy 2 num == 0 in
         [ C.xLabel
@@ -102,8 +100,7 @@ view model =
     [ CA.height 300
     , CA.width 300
     ]
-    [ C.grid []
-    , C.xAxis []
+    [ C.xAxis []
     , C.generate 12 CS.ints .x [] <| \\p num ->
         let isEven = remainderBy 2 num == 0 in
         [ C.xLabel

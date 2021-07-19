@@ -17,8 +17,7 @@ view model =
     [ CA.height 300
     , CA.width 300
     ]
-    [ C.grid []
-    , C.yLabels [ CA.withGrid ]
+    [ C.yLabels [ CA.withGrid ]
 
     , C.eachBin <| \p bin ->
         let bar = CI.getMember bin
@@ -108,8 +107,7 @@ smallCode =
     [ CA.height 300
     , CA.width 300
     ]
-    [ C.grid []
-    , C.yLabels [ CA.withGrid ]
+    [ C.yLabels [ CA.withGrid ]
 
     , C.eachBin <| \\p bin ->
         let bar = CI.getMember bin
@@ -163,8 +161,7 @@ view model =
     [ CA.height 300
     , CA.width 300
     ]
-    [ C.grid []
-    , C.yLabels [ CA.withGrid ]
+    [ C.yLabels [ CA.withGrid ]
 
     , C.eachBin <| \\p bin ->
         let bar = CI.getMember bin

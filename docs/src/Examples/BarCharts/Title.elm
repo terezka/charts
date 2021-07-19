@@ -15,8 +15,7 @@ view model =
     [ CA.height 300
     , CA.width 300
     ]
-    [ C.grid []
-    , C.xLabels []
+    [ C.xLabels []
     , C.yLabels [ CA.withGrid ]
 
     , C.labelAt .max .max
@@ -95,8 +94,7 @@ smallCode =
     [ CA.height 300
     , CA.width 300
     ]
-    [ C.grid []
-    , C.xLabels []
+    [ C.xLabels []
     , C.yLabels [ CA.withGrid ]
 
     , C.labelAt .max .max
@@ -135,8 +133,7 @@ view model =
     [ CA.height 300
     , CA.width 300
     ]
-    [ C.grid []
-    , C.xLabels []
+    [ C.xLabels []
     , C.yLabels [ CA.withGrid ]
 
     , C.labelAt .max .max

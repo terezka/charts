@@ -14,8 +14,7 @@ view model =
     [ CA.height 300
     , CA.width 300
     ]
-    [ C.grid []
-    , C.xAxis [ CA.noArrow ]
+    [ C.xAxis [ CA.noArrow ]
     , C.xTicks []
     , C.xLabels []
     ]

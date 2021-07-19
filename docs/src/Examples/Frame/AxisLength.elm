@@ -23,8 +23,7 @@ view model =
         , CA.highest 100 CA.orHigher
         ]
     ]
-    [ C.grid []
-    , C.series .x
+    [ C.series .x
         [ C.interpolated .y [  ] [] ]
         [ { x = 10, y = 20 }
         , { x = 85, y = 80 }
@@ -78,8 +77,7 @@ smallCode =
         , CA.highest 100 CA.orHigher
         ]
     ]
-    [ C.grid []
-    , C.series .x
+    [ C.series .x
         [ C.interpolated .y [  ] [] ]
         [ { x = 10, y = 20 }
         , { x = 85, y = 80 }
@@ -113,8 +111,7 @@ view model =
         , CA.highest 100 CA.orHigher
         ]
     ]
-    [ C.grid []
-    , C.series .x
+    [ C.series .x
         [ C.interpolated .y [  ] [] ]
         [ { x = 10, y = 20 }
         , { x = 85, y = 80 }

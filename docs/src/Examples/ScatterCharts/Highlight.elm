@@ -15,8 +15,7 @@ view model =
     , CA.width 300
     , CA.padding { top = 0, bottom = 0, left = 15, right = 15 }
     ]
-    [ C.grid []
-    , C.xLabels [ CA.withGrid ]
+    [ C.xLabels [ CA.withGrid ]
     , C.yLabels [ CA.withGrid ]
     , C.series .x
         [ C.scatter .y []
@@ -88,8 +87,7 @@ smallCode =
     , CA.width 300
     , CA.padding { top = 0, bottom = 0, left = 15, right = 15 }
     ]
-    [ C.grid []
-    , C.xLabels [ CA.withGrid ]
+    [ C.xLabels [ CA.withGrid ]
     , C.yLabels [ CA.withGrid ]
     , C.series .x
         [ C.scatter .y []
@@ -115,8 +113,7 @@ view model =
     , CA.width 300
     , CA.padding { top = 0, bottom = 0, left = 15, right = 15 }
     ]
-    [ C.grid []
-    , C.xLabels [ CA.withGrid ]
+    [ C.xLabels [ CA.withGrid ]
     , C.yLabels [ CA.withGrid ]
     , C.series .x
         [ C.scatter .y []

@@ -16,8 +16,7 @@ view model =
     , CA.padding { top = 25, bottom = 0, left = 0, right = 10 }
     , CA.range [ CA.lowest 0 CA.exactly ]
     ]
-    [ C.grid []
-    , C.xAxis []
+    [ C.xAxis []
     , C.xTicks [ CA.ints ]
     , C.xLabels [ CA.ints ]
     , C.yAxis []

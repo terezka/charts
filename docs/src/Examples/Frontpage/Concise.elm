@@ -42,8 +42,7 @@ view model =
     , CE.onMouseMove OnHover (CE.getNearest CI.stacks)
     , CE.onMouseLeave (OnHover [])
     ]
-    [ C.grid []
-    , C.yLabels [ CA.format (\y -> String.fromFloat y ++ "M")]
+    [ C.yLabels [ CA.format (\y -> String.fromFloat y ++ "M")]
 
     , C.bars
         [ CA.roundTop 0.2
@@ -155,8 +154,7 @@ smallCode =
     , CE.onMouseMove OnHover (CE.getNearest CI.stacks)
     , CE.onMouseLeave (OnHover [])
     ]
-    [ C.grid []
-    , C.yLabels [ CA.format (\\y -> String.fromFloat y ++ "M")]
+    [ C.yLabels [ CA.format (\\y -> String.fromFloat y ++ "M")]
 
     , C.bars
         [ CA.roundTop 0.2
@@ -264,8 +262,7 @@ view model =
     , CE.onMouseMove OnHover (CE.getNearest CI.stacks)
     , CE.onMouseLeave (OnHover [])
     ]
-    [ C.grid []
-    , C.yLabels [ CA.format (\\y -> String.fromFloat y ++ "M")]
+    [ C.yLabels [ CA.format (\\y -> String.fromFloat y ++ "M")]
 
     , C.bars
         [ CA.roundTop 0.2

@@ -42,8 +42,7 @@ view model =
     , CA.domain [ CA.lowest 0 CA.exactly, CA.highest 10 CA.exactly ]
     , CA.range [ CA.lowest 0 CA.exactly, CA.highest 10 CA.exactly ]
     ]
-    [ C.grid []
-    , C.xLabels [ CA.withGrid ]
+    [ C.xLabels [ CA.withGrid ]
     , C.yLabels [ CA.withGrid ]
 
     , case model.hovering of
@@ -116,8 +115,7 @@ smallCode =
     , CA.domain [ CA.lowest 0 CA.exactly, CA.highest 10 CA.exactly ]
     , CA.range [ CA.lowest 0 CA.exactly, CA.highest 10 CA.exactly ]
     ]
-    [ C.grid []
-    , C.xLabels [ CA.withGrid ]
+    [ C.xLabels [ CA.withGrid ]
     , C.yLabels [ CA.withGrid ]
 
     , case model.hovering of
@@ -190,8 +188,7 @@ view model =
     , CA.domain [ CA.lowest 0 CA.exactly, CA.highest 10 CA.exactly ]
     , CA.range [ CA.lowest 0 CA.exactly, CA.highest 10 CA.exactly ]
     ]
-    [ C.grid []
-    , C.xLabels [ CA.withGrid ]
+    [ C.xLabels [ CA.withGrid ]
     , C.yLabels [ CA.withGrid ]
 
     , case model.hovering of

@@ -19,8 +19,7 @@ view model =
     , CA.htmlAttrs
         [ HA.style "border" "1px solid darkgray" ]
     ]
-    [ C.grid []
-    , C.xAxis []
+    [ C.xAxis []
     , C.yAxis []
     , C.series .x
         [ C.interpolated .y [  ] [] ]
@@ -70,8 +69,7 @@ smallCode =
     , CA.htmlAttrs
         [ HA.style "border" "1px solid darkgray" ]
     ]
-    [ C.grid []
-    , C.xAxis []
+    [ C.xAxis []
     , C.yAxis []
     , C.series .x
         [ C.interpolated .y [  ] [] ]
@@ -103,8 +101,7 @@ view model =
     , CA.htmlAttrs
         [ HA.style "border" "1px solid darkgray" ]
     ]
-    [ C.grid []
-    , C.xAxis []
+    [ C.xAxis []
     , C.yAxis []
     , C.series .x
         [ C.interpolated .y [  ] [] ]

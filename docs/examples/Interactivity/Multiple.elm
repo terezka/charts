@@ -38,8 +38,7 @@ view model =
     , CE.onMouseMove OnHover (CE.getNearest CI.any)
     , CE.onMouseLeave (OnHover [])
     ]
-    [ C.grid []
-    , C.xLabels []
+    [ C.xLabels []
     , C.yLabels [ CA.withGrid ]
 
     , C.bars

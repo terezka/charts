@@ -39,8 +39,7 @@ view model =
     , CE.onMouseLeave (OnHover [])
     , CA.padding { top = 10, bottom = 0, left = 0, right = 0 }
     ]
-    [ C.grid []
-    , C.xLabels []
+    [ C.xLabels []
     , C.yLabels [ CA.withGrid ]
     , C.bars
         [ CA.roundTop 0.2

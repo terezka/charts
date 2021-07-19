@@ -16,8 +16,7 @@ view model =
     , CA.width 300
     , CA.padding { top = 20, bottom = 20, left = 20, right = 20 }
     ]
-    [ C.grid []
-    , C.xAxis []
+    [ C.xAxis []
     , C.yAxis []
     , C.series .x
         [ C.interpolated .y [  ] [] ]
@@ -65,8 +64,7 @@ smallCode =
     , CA.width 300
     , CA.padding { top = 20, bottom = 20, left = 20, right = 20 }
     ]
-    [ C.grid []
-    , C.xAxis []
+    [ C.xAxis []
     , C.yAxis []
     , C.series .x
         [ C.interpolated .y [  ] [] ]
@@ -95,8 +93,7 @@ view model =
     , CA.width 300
     , CA.padding { top = 20, bottom = 20, left = 20, right = 20 }
     ]
-    [ C.grid []
-    , C.xAxis []
+    [ C.xAxis []
     , C.yAxis []
     , C.series .x
         [ C.interpolated .y [  ] [] ]

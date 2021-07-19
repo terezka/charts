@@ -12,9 +12,9 @@ main =
   C.chart
     [ CA.height 300
     , CA.width 300
-    , CA.static
     ]
-    [ C.grid []
+    [ C.xTicks []
+    , C.yTicks []
     , C.xLabels []
     , C.yLabels []
     , C.xAxis []

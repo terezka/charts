@@ -19,8 +19,7 @@ view model =
     , CA.width 300
     , CA.margin { top = 30, bottom = 0, left = 0, right = 0 }
     ]
-    [ C.grid []
-    , C.xAxis []
+    [ C.xAxis []
     , C.yLabels [ CA.withGrid, CA.pinned .min ]
     , C.xLabels []
 
@@ -114,8 +113,7 @@ smallCode =
     , CA.width 300
     , CA.margin { top = 30, bottom = 0, left = 0, right = 0 }
     ]
-    [ C.grid []
-    , C.xAxis []
+    [ C.xAxis []
     , C.yLabels [ CA.withGrid, CA.pinned .min ]
     , C.xLabels []
 
@@ -171,8 +169,7 @@ view model =
     , CA.width 300
     , CA.margin { top = 30, bottom = 0, left = 0, right = 0 }
     ]
-    [ C.grid []
-    , C.xAxis []
+    [ C.xAxis []
     , C.yLabels [ CA.withGrid, CA.pinned .min ]
     , C.xLabels []
 

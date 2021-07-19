@@ -126,8 +126,7 @@ view model =
         Nothing ->
           CA.range []
     ]
-    [ C.grid []
-    , C.xLabels [ CA.withGrid ]
+    [ C.xLabels [ CA.withGrid ]
     , C.yLabels [ CA.withGrid ]
 
     , C.series .sepalWidth
@@ -215,8 +214,7 @@ smallCode =
         Nothing ->
           CA.range []
     ]
-    [ C.grid []
-    , C.xLabels [ CA.withGrid ]
+    [ C.xLabels [ CA.withGrid ]
     , C.yLabels [ CA.withGrid ]
 
     , C.series .sepalWidth
@@ -389,8 +387,7 @@ view model =
         Nothing ->
           CA.range []
     ]
-    [ C.grid []
-    , C.xLabels [ CA.withGrid ]
+    [ C.xLabels [ CA.withGrid ]
     , C.yLabels [ CA.withGrid ]
 
     , C.series .sepalWidth

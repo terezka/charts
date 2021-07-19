@@ -37,8 +37,7 @@ view model =
     , CE.onMouseMove OnHover (CE.getNearest CI.dots)
     , CE.onMouseLeave (OnHover [])
     ]
-    [ C.grid []
-    , C.xLabels []
+    [ C.xLabels []
     , C.yLabels [ CA.withGrid ]
     , C.series .x
         [ C.interpolated .y [  ] [ CA.circle, CA.size 3 ]

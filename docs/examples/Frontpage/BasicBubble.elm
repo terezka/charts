@@ -14,8 +14,7 @@ view model =
     , CA.width 300
     , CA.padding { top = 30, bottom = 5, left = 40, right = 40 }
     ]
-    [ C.grid []
-    , C.xLabels [ CA.withGrid ]
+    [ C.xLabels [ CA.withGrid ]
     , C.yLabels [ CA.withGrid ]
     , C.series .x
         [ C.scatter .y [ CA.opacity 0.3, CA.borderWidth 1 ]

@@ -39,8 +39,7 @@ view model =
     , CE.onMouseMove OnHover (CE.getNearest CI.dots)
     , CE.onMouseLeave (OnHover [])
     ]
-    [ C.grid []
-    , C.xLabels [ CA.withGrid ]
+    [ C.xLabels [ CA.withGrid ]
     , C.yLabels [ CA.withGrid ]
     , C.series .x
         [ C.scatter .y [ CA.color "white", CA.size 20, CA.borderWidth 2, CA.border CA.pink ]
@@ -93,8 +92,7 @@ smallCode =
     , CE.onMouseMove OnHover (CE.getNearest CI.dots)
     , CE.onMouseLeave (OnHover [])
     ]
-    [ C.grid []
-    , C.xLabels [ CA.withGrid ]
+    [ C.xLabels [ CA.withGrid ]
     , C.yLabels [ CA.withGrid ]
     , C.series .x
         [ C.scatter .y [ CA.color "white", CA.size 20, CA.borderWidth 2, CA.border CA.pink ]
@@ -146,8 +144,7 @@ view model =
     , CE.onMouseMove OnHover (CE.getNearest CI.dots)
     , CE.onMouseLeave (OnHover [])
     ]
-    [ C.grid []
-    , C.xLabels [ CA.withGrid ]
+    [ C.xLabels [ CA.withGrid ]
     , C.yLabels [ CA.withGrid ]
     , C.series .x
         [ C.scatter .y [ CA.color "white", CA.size 20, CA.borderWidth 2, CA.border CA.pink ]

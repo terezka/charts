@@ -259,7 +259,7 @@ chart edits unindexedElements =
           , htmlAttrs = []
           }
 
-      elements =
+      indexedElements =
         let toIndexedEl el ( acc, index ) =
               case el of
                 Indexed toElAndIndex ->
@@ -274,6 +274,14 @@ chart edits unindexedElements =
         in
         List.foldl toIndexedEl ( [], 0 ) unindexedElements
           |> Tuple.first
+
+      elements =
+        let isGrid el =
+              case el of
+                GridElement _ -> True
+                _ -> False
+        in
+        if List.any isGrid indexedElements then indexedElements else grid [] :: indexedElements
 
       plane =
         definePlane config elements

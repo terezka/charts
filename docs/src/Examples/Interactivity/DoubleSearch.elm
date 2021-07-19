@@ -52,8 +52,7 @@ view model =
     , CE.onMouseLeave
         (OnHover [] [])
     ]
-    [ C.grid []
-    , C.xLabels []
+    [ C.xLabels []
     , C.yLabels [ CA.withGrid ]
 
     , C.series .x
@@ -132,8 +131,7 @@ smallCode =
     , CE.onMouseLeave
         (OnHover [] [])
     ]
-    [ C.grid []
-    , C.xLabels []
+    [ C.xLabels []
     , C.yLabels [ CA.withGrid ]
 
     , C.series .x
@@ -219,8 +217,7 @@ view model =
     , CE.onMouseLeave
         (OnHover [] [])
     ]
-    [ C.grid []
-    , C.xLabels []
+    [ C.xLabels []
     , C.yLabels [ CA.withGrid ]
 
     , C.series .x

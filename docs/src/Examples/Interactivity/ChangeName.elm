@@ -39,8 +39,7 @@ view model =
     , CE.onMouseMove OnHover (CE.getNearest CI.bins)
     , CE.onMouseLeave (OnHover [])
     ]
-    [ C.grid []
-    , C.xLabels []
+    [ C.xLabels []
     , C.yLabels [ CA.withGrid ]
     , C.bars []
         [ C.bar .z []
@@ -97,8 +96,7 @@ smallCode =
     , CE.onMouseMove OnHover (CE.getNearest CI.bins)
     , CE.onMouseLeave (OnHover [])
     ]
-    [ C.grid []
-    , C.xLabels []
+    [ C.xLabels []
     , C.yLabels [ CA.withGrid ]
     , C.bars []
         [ C.bar .z []
@@ -154,8 +152,7 @@ view model =
     , CE.onMouseMove OnHover (CE.getNearest CI.bins)
     , CE.onMouseLeave (OnHover [])
     ]
-    [ C.grid []
-    , C.xLabels []
+    [ C.xLabels []
     , C.yLabels [ CA.withGrid ]
     , C.bars []
         [ C.bar .z []

@@ -39,8 +39,7 @@ view model =
     , CE.onMouseMove OnHover (CE.getNearest CI.any)
     , CE.onMouseLeave (OnHover [])
     ]
-    [ C.grid []
-    , C.xTicks []
+    [ C.xTicks []
     , C.xLabels []
     , C.yTicks []
     , C.yLabels []
