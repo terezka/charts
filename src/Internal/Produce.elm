@@ -35,7 +35,7 @@ defaultBars =
   , roundTop = 0
   , roundBottom = 0
   , grouped = True
-  , grid = True
+  , grid = False
   , x1 = Nothing
   , x2 = Nothing
   }
