@@ -169,7 +169,7 @@ view : Model -> Document Msg
 view model =
     { title = "elm-charts"
     , body =
-        Layout.view
+        Layout.view model.window
           [ Menu.small model.window model.menu
             |> E.map MenuMsg
 

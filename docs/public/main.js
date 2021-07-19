@@ -15458,18 +15458,36 @@ var $mdgriffith$elm_ui$Element$rgb255 = F3(
 	function (red, green, blue) {
 		return A4($mdgriffith$elm_ui$Internal$Model$Rgba, red / 255, green / 255, blue / 255, 1);
 	});
-var $author$project$Ui$Layout$copyright = A2(
-	$mdgriffith$elm_ui$Element$el,
-	_List_fromArray(
-		[
-			$mdgriffith$elm_ui$Element$Font$size(12),
-			$mdgriffith$elm_ui$Element$Font$color(
-			A3($mdgriffith$elm_ui$Element$rgb255, 180, 180, 180)),
-			$mdgriffith$elm_ui$Element$paddingEach(
-			{bottom: 20, left: 0, right: 0, top: 30}),
-			$mdgriffith$elm_ui$Element$alignRight
-		]),
-	$mdgriffith$elm_ui$Element$text('Designed and developed by Tereza Sokol © 2021'));
+var $author$project$Ui$Layout$Large = {$: 'Large'};
+var $author$project$Ui$Layout$Medium = {$: 'Medium'};
+var $author$project$Ui$Layout$Small = {$: 'Small'};
+var $author$project$Ui$Layout$screen = function (window) {
+	return (window.width > 950) ? $author$project$Ui$Layout$Large : ((window.width > 760) ? $author$project$Ui$Layout$Medium : $author$project$Ui$Layout$Small);
+};
+var $author$project$Ui$Layout$copyright = function (window) {
+	return A2(
+		$mdgriffith$elm_ui$Element$el,
+		_List_fromArray(
+			[
+				$mdgriffith$elm_ui$Element$Font$size(12),
+				$mdgriffith$elm_ui$Element$Font$color(
+				A3($mdgriffith$elm_ui$Element$rgb255, 180, 180, 180)),
+				$mdgriffith$elm_ui$Element$paddingEach(
+				{bottom: 20, left: 0, right: 0, top: 30}),
+				function () {
+				var _v0 = $author$project$Ui$Layout$screen(window);
+				switch (_v0.$) {
+					case 'Large':
+						return $mdgriffith$elm_ui$Element$alignRight;
+					case 'Medium':
+						return $mdgriffith$elm_ui$Element$centerX;
+					default:
+						return $mdgriffith$elm_ui$Element$centerX;
+				}
+			}()
+			]),
+		$mdgriffith$elm_ui$Element$text('Designed and developed by Tereza Sokol © 2021'));
+};
 var $mdgriffith$elm_ui$Internal$Model$FontFamily = F2(
 	function (a, b) {
 		return {$: 'FontFamily', a: a, b: b};
@@ -15737,41 +15755,46 @@ var $elm$core$List$singleton = function (value) {
 		[value]);
 };
 var $mdgriffith$elm_ui$Element$Font$typeface = $mdgriffith$elm_ui$Internal$Model$Typeface;
-var $author$project$Ui$Layout$view = function (children) {
-	return $elm$core$List$singleton(
-		A2(
-			$mdgriffith$elm_ui$Element$layout,
-			_List_fromArray(
-				[
-					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-					$mdgriffith$elm_ui$Element$Font$family(
-					_List_fromArray(
-						[
-							$mdgriffith$elm_ui$Element$Font$typeface('IBM Plex Sans'),
-							$mdgriffith$elm_ui$Element$Font$sansSerif
-						]))
-				]),
+var $author$project$Ui$Layout$view = F2(
+	function (window, children) {
+		return $elm$core$List$singleton(
 			A2(
-				$mdgriffith$elm_ui$Element$column,
+				$mdgriffith$elm_ui$Element$layout,
 				_List_fromArray(
 					[
-						$mdgriffith$elm_ui$Element$width(
-						A2($mdgriffith$elm_ui$Element$maximum, 1060, $mdgriffith$elm_ui$Element$fill)),
-						$mdgriffith$elm_ui$Element$paddingEach(
-						{bottom: 20, left: 30, right: 30, top: 30}),
-						$mdgriffith$elm_ui$Element$centerX,
-						$mdgriffith$elm_ui$Element$Font$size(12),
-						$mdgriffith$elm_ui$Element$Font$color(
-						A3($mdgriffith$elm_ui$Element$rgb255, 80, 80, 80))
+						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+						$mdgriffith$elm_ui$Element$Font$family(
+						_List_fromArray(
+							[
+								$mdgriffith$elm_ui$Element$Font$typeface('IBM Plex Sans'),
+								$mdgriffith$elm_ui$Element$Font$sansSerif
+							]))
 					]),
-				_Utils_ap(
-					children,
+				A2(
+					$mdgriffith$elm_ui$Element$column,
 					_List_fromArray(
-						[$author$project$Ui$Layout$copyright])))));
-};
+						[
+							$mdgriffith$elm_ui$Element$width(
+							A2($mdgriffith$elm_ui$Element$maximum, 1060, $mdgriffith$elm_ui$Element$fill)),
+							$mdgriffith$elm_ui$Element$paddingEach(
+							{bottom: 20, left: 30, right: 30, top: 30}),
+							$mdgriffith$elm_ui$Element$centerX,
+							$mdgriffith$elm_ui$Element$Font$size(12),
+							$mdgriffith$elm_ui$Element$Font$color(
+							A3($mdgriffith$elm_ui$Element$rgb255, 80, 80, 80))
+						]),
+					_Utils_ap(
+						children,
+						_List_fromArray(
+							[
+								$author$project$Ui$Layout$copyright(window)
+							])))));
+	});
 var $author$project$Page$Administration$view = function (model) {
 	return {
-		body: $author$project$Ui$Layout$view(
+		body: A2(
+			$author$project$Ui$Layout$view,
+			model.window,
 			_List_fromArray(
 				[
 					A2(
@@ -15929,12 +15952,6 @@ var $author$project$Page$Section$MenuMsg = function (a) {
 };
 var $author$project$Page$Section$OnExampleMsg = function (a) {
 	return {$: 'OnExampleMsg', a: a};
-};
-var $author$project$Ui$Layout$Large = {$: 'Large'};
-var $author$project$Ui$Layout$Medium = {$: 'Medium'};
-var $author$project$Ui$Layout$Small = {$: 'Small'};
-var $author$project$Ui$Layout$screen = function (window) {
-	return (window.width > 950) ? $author$project$Ui$Layout$Large : ((window.width > 760) ? $author$project$Ui$Layout$Medium : $author$project$Ui$Layout$Small);
 };
 var $author$project$Ui$Layout$heading = F2(
 	function (window, text) {
@@ -34876,7 +34893,9 @@ var $mdgriffith$elm_ui$Element$wrappedRow = F2(
 	});
 var $author$project$Page$Section$view = function (model) {
 	return {
-		body: $author$project$Ui$Layout$view(
+		body: A2(
+			$author$project$Ui$Layout$view,
+			model.window,
 			_List_fromArray(
 				[
 					A2(
@@ -38359,7 +38378,9 @@ var $author$project$Page$Example$viewContent = function (model) {
 };
 var $author$project$Page$Example$view = function (model) {
 	return {
-		body: $author$project$Ui$Layout$view(
+		body: A2(
+			$author$project$Ui$Layout$view,
+			model.window,
 			_List_fromArray(
 				[
 					A2(
@@ -38418,7 +38439,9 @@ var $mdgriffith$elm_ui$Internal$Flag$fontAlignment = $mdgriffith$elm_ui$Internal
 var $mdgriffith$elm_ui$Element$Font$center = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$fontAlignment, $mdgriffith$elm_ui$Internal$Style$classes.textCenter);
 var $author$project$Page$GettingStarted$view = function (model) {
 	return {
-		body: $author$project$Ui$Layout$view(
+		body: A2(
+			$author$project$Ui$Layout$view,
+			model.window,
 			_List_fromArray(
 				[
 					A2(
@@ -40197,7 +40220,9 @@ var $author$project$Page$Home$viewLanding = function (model) {
 };
 var $author$project$Page$Home$view = function (model) {
 	return {
-		body: $author$project$Ui$Layout$view(
+		body: A2(
+			$author$project$Ui$Layout$view,
+			model.window,
 			_List_fromArray(
 				[
 					A2(

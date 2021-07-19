@@ -65,8 +65,8 @@ heading window text =
 -- CONTAINER
 
 
-view : List (E.Element msg) -> List (H.Html msg)
-view children =
+view : Session.Window -> List (E.Element msg) -> List (H.Html msg)
+view window children =
   List.singleton <|
     E.layout
       [ E.width E.fill
@@ -79,16 +79,19 @@ view children =
         , F.size 12
         , F.color (E.rgb255 80 80 80)
         ]
-        (children ++ [copyright])
+        (children ++ [ copyright window ])
 
 
-copyright : E.Element msg
-copyright =
+copyright : Session.Window -> E.Element msg
+copyright window =
   E.el
     [ F.size 12
     , F.color (E.rgb255 180 180 180)
     , E.paddingEach { top = 30, bottom = 20, left = 0, right = 0 }
-    , E.alignRight
+    , case screen window of
+        Large -> E.alignRight
+        Medium -> E.centerX
+        Small -> E.centerX
     ]
     (E.text "Designed and developed by Tereza Sokol © 2021")
 
