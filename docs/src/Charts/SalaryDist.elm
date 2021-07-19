@@ -169,6 +169,7 @@ view model =
             , HA.style "background" "white"
             , HA.style "border" "1px solid rgb(210, 210, 210)"
             , HA.style "cursor" "pointer"
+            , HA.style "width" "167px"
             , HE.onClick OnExitWindow
             ]
             [ viewSalaryDiscrepancyMini model
@@ -248,7 +249,6 @@ viewSalaryDiscrepancyMini model =
   C.chart
     [ CA.height 100
     , CA.width 167
-    , CA.static
     , CA.padding { top = 15, bottom = 0, left = 15, right = 15 }
     , CA.range [ CA.lowest 20000 CA.orHigher ]
     , CA.domain [ CA.lowest 76 CA.orHigher ]

@@ -2,7 +2,7 @@ module Chart.Attributes exposing
   ( Attribute
 
   -- CONTAINER
-  , width, height, attrs, htmlAttrs, static, events, margin, padding
+  , width, height, attrs, htmlAttrs, events, margin, padding
 
   -- LIMITS
   , range, domain, limits
@@ -63,7 +63,7 @@ below are only guiding.
 @docs Attribute
 
 ## Container
-@docs width, height, attrs, htmlAttrs, static, events, margin, padding
+@docs width, height, attrs, htmlAttrs, events, margin, padding
 
 ## Limits
 @docs range, domain, limits
@@ -582,12 +582,6 @@ roundBottom v config =
 ungroup : Attribute { a | grouped : Bool }
 ungroup config =
   { config | grouped = False }
-
-
-{-| -}
-static : Attribute { a | responsive : Bool }
-static config =
-  { config | responsive = False }
 
 
 {-| -}

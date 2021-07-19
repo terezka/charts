@@ -189,9 +189,9 @@ the `chart` element.
     view : Html msg
     view =
       C.chart
-        [ CA.width 300    -- Sets width of chart
-        , CA.height 500   -- Sets height of chart
-        , CA.static       -- Don't scale with parent container
+        [ CA.width 300    -- Sets width dimension of chart
+        , CA.height 500   -- Sets height dimension of chart
+          -- Note that the chart scales with it's container
 
         , CA.margin { top = 10, bottom = 20, left = 20, right = 20 }
                           -- Add space around your chart.
