@@ -14,9 +14,8 @@ view model =
     , CA.width 300
     , CA.padding { top = 0, bottom = 0, left = 10, right = 10 }
     ]
-    [ C.grid []
-    , C.xLabels []
-    , C.yLabels []
+    [ C.xLabels [ CA.withGrid ]
+    , C.yLabels [ CA.withGrid ]
     , C.series .x
         [ C.scatter .z [ CA.opacity 0.5, CA.borderWidth 1 ]
             |> C.variation (\i d -> [ CA.size (d.x * 20 + 2) ])

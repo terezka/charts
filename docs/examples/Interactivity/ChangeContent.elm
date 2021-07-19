@@ -7,10 +7,11 @@ import Svg as S
 import Chart as C
 import Chart.Attributes as CA
 import Chart.Events as CE
+import Chart.Item as CI
 
 
 type alias Model =
-  { hovering : List (CE.Product CE.Dot Float Datum) }
+  { hovering : List (CI.One Datum CI.Dot) }
 
 
 init : Model
@@ -19,7 +20,7 @@ init =
 
 
 type Msg
-  = OnHover (List (CE.Product CE.Dot Float Datum))
+  = OnHover (List (CI.One Datum CI.Dot))
 
 
 update : Msg -> Model -> Model
@@ -35,12 +36,11 @@ view model =
   C.chart
     [ CA.height 300
     , CA.width 300
-    , CE.onMouseMove OnHover (CE.getNearest <| CE.collect CE.realValues CE.dot)
+    , CE.onMouseMove OnHover (CE.getNearest CI.dots)
     , CE.onMouseLeave (OnHover [])
     ]
-    [ C.grid []
-    , C.xLabels []
-    , C.yLabels []
+    [ C.xLabels [ CA.withGrid ]
+    , C.yLabels [ CA.withGrid ]
     , C.series .x
         [ C.scatter .z [ CA.opacity 0.5, CA.borderWidth 1 ]
         , C.scatter .y [ CA.opacity 0.5, CA.borderWidth 1 ]
@@ -49,9 +49,9 @@ view model =
         ]
         data
     , C.each model.hovering <| \p dot ->
-        let color = CE.getColor dot
-            x = CE.getIndependent dot
-            y = CE.getDependent dot
+        let color = CI.getColor dot
+            x = CI.getX dot
+            y = CI.getY dot
         in
         [ C.tooltip dot []
             [ HA.style "color" color ]

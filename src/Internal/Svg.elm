@@ -52,8 +52,6 @@ container plane config below chartEls above =
   -- TODO preserveAspectRatio?
   let htmlAttrsDef =
         [ HA.class "elm-charts__container-inner"
-        , HA.style "display" "flex"
-        , HA.style "flex-direction" "column"
         ]
 
       htmlAttrsSize =
@@ -76,10 +74,13 @@ container plane config below chartEls above =
 
       svgAttrsSize =
         if config.responsive then
-          [ SA.viewBox ("0 0 " ++ String.fromFloat plane.width ++ " " ++ String.fromFloat plane.height) ]
+          [ SA.viewBox ("0 0 " ++ String.fromFloat plane.width ++ " " ++ String.fromFloat plane.height)
+          , HA.style "display" "block"
+          ]
         else
           [ SA.width (String.fromFloat plane.width)
           , SA.height (String.fromFloat plane.height)
+          , HA.style "display" "block"
           ]
 
       catcher =
@@ -182,6 +183,7 @@ type alias Line =
   , dashed : List Float
   , opacity : Float
   , break : Bool
+  , flip : Bool
   , attrs : List (S.Attribute Never)
   }
 
@@ -203,6 +205,7 @@ defaultLine =
   , dashed = []
   , opacity = 1
   , break = False
+  , flip = False
   , attrs = []
   }
 
@@ -249,26 +252,50 @@ line plane config =
           ( ( Just a, Nothing ), ( Nothing, Just b ), ( Nothing, Nothing ) ) ->
             ( ( a, plane.x.max ), ( b, b ) )
 
-          ( ( Just a, Nothing ), ( Nothing, Just b ), ( Just x2Svg, Just y2Svg ) ) ->
-            ( ( a, a + Coord.scaleCartesianX plane x2Svg ), ( b, b + Coord.scaleCartesianY plane y2Svg ) )
+          ( ( Just a, Nothing ), ( Nothing, Just b ), ( Just xOff, Just yOff ) ) ->
+            ( ( a, a + Coord.scaleCartesianX plane xOff ), ( b, b + Coord.scaleCartesianY plane yOff ) )
+
+          ( ( Just a, Nothing ), ( Nothing, Just b ), ( Just xOff, Nothing ) ) ->
+            ( ( a, a + Coord.scaleCartesianX plane xOff ), ( b, b ) )
+
+          ( ( Just a, Nothing ), ( Nothing, Just b ), ( Nothing, Just yOff ) ) ->
+            ( ( a, a ), ( b, b + Coord.scaleCartesianY plane yOff ) )
 
           ( ( Just a, Nothing ), ( Just b, Nothing ), ( Nothing, Nothing ) ) ->
             ( ( a, plane.x.max ), ( b, b ) )
 
-          ( ( Just a, Nothing ), ( Just b, Nothing ), ( Just x2Svg, Just y2Svg ) ) ->
-            ( ( a, a + Coord.scaleCartesianX plane x2Svg ), ( b, b + Coord.scaleCartesianY plane y2Svg ) )
+          ( ( Just a, Nothing ), ( Just b, Nothing ), ( Just xOff, Just yOff ) ) ->
+            ( ( a, a + Coord.scaleCartesianX plane xOff ), ( b, b + Coord.scaleCartesianY plane yOff ) )
+
+          ( ( Just a, Nothing ), ( Just b, Nothing ), ( Just xOff, Nothing ) ) ->
+            ( ( a, a + Coord.scaleCartesianX plane xOff ), ( b, b ) )
+
+          ( ( Just a, Nothing ), ( Just b, Nothing ), ( Nothing, Just yOff ) ) ->
+            ( ( a, a ), ( b, b + Coord.scaleCartesianY plane yOff ) )
 
           ( ( Nothing, Just a ), ( Nothing, Just b ), ( Nothing, Nothing ) ) ->
             ( ( a, plane.x.max ), ( b, b ) )
 
-          ( ( Nothing, Just a ), ( Nothing, Just b ), ( Just x2Svg, Just y2Svg ) ) ->
-            ( ( a, a + Coord.scaleCartesianX plane x2Svg ), ( b, b + Coord.scaleCartesianY plane y2Svg ) )
+          ( ( Nothing, Just a ), ( Nothing, Just b ), ( Just xOff, Just yOff ) ) ->
+            ( ( a, a + Coord.scaleCartesianX plane xOff ), ( b, b + Coord.scaleCartesianY plane yOff ) )
+
+          ( ( Nothing, Just a ), ( Nothing, Just b ), ( Just xOff, Nothing ) ) ->
+            ( ( a, a + Coord.scaleCartesianX plane xOff ), ( b, b ) )
+
+          ( ( Nothing, Just a ), ( Nothing, Just b ), ( Nothing, Just yOff ) ) ->
+            ( ( a, a ), ( b, b + Coord.scaleCartesianY plane yOff ) )
 
           ( ( Nothing, Just a ), ( Just b, Nothing ), ( Nothing, Nothing ) ) ->
             ( ( a, plane.x.max ), ( b, b ) )
 
-          ( ( Nothing, Just a ), ( Just b, Nothing ), ( Just x2Svg, Just y2Svg ) ) ->
-            ( ( a, a + Coord.scaleCartesianX plane x2Svg ), ( b, b + Coord.scaleCartesianY plane y2Svg ) )
+          ( ( Nothing, Just a ), ( Just b, Nothing ), ( Just xOff, Just yOff ) ) ->
+            ( ( a, a + Coord.scaleCartesianX plane xOff ), ( b, b + Coord.scaleCartesianY plane yOff ) )
+
+          ( ( Nothing, Just a ), ( Just b, Nothing ), ( Just xOff, Nothing ) ) ->
+            ( ( a, a + Coord.scaleCartesianX plane xOff ), ( b, b ) )
+
+          ( ( Nothing, Just a ), ( Just b, Nothing ), ( Nothing, Just yOff ) ) ->
+            ( ( a, a ), ( b, b + Coord.scaleCartesianY plane yOff ) )
 
           -- NEITHER
           ( ( Nothing, Nothing ), ( Nothing, Nothing ), _ ) ->
@@ -298,17 +325,31 @@ line plane config =
       y2_ = y2 - lengthInCartesianY plane config.yOff
 
       cmds =
-        (if config.tickLength > 0
-          then [ C.Move (x1_ + tickOffsetX) (y1_ + tickOffsetY), C.Line x1_ y1_ ]
-          else [ C.Move x1_ y1_ ])
-        ++
-        (if config.break
-        then [ C.Line x1_ y2_, C.Line x2_ y2_ ]
-        else [ C.Line x2_ y2_ ])
-        ++
-        (if config.tickLength > 0
-        then [ C.Line (x2_ + tickOffsetX) (y2_ + tickOffsetY) ]
-        else [])
+        if config.flip then
+          (if config.tickLength > 0
+            then [ C.Move (x2_ + tickOffsetX) (y2_ + tickOffsetY), C.Line x2_ y2_ ]
+            else [ C.Move x2_ y2_ ])
+          ++
+          (if config.break
+          then [ C.Line x2_ y1_, C.Line x1_ y1_ ]
+          else [ C.Line x1_ y1_ ])
+          ++
+          (if config.tickLength > 0
+          then [ C.Line (x1_ + tickOffsetX) (y1_ + tickOffsetY) ]
+          else [])
+
+        else
+          (if config.tickLength > 0
+            then [ C.Move (x1_ + tickOffsetX) (y1_ + tickOffsetY), C.Line x1_ y1_ ]
+            else [ C.Move x1_ y1_ ])
+          ++
+          (if config.break
+          then [ C.Line x1_ y2_, C.Line x2_ y2_ ]
+          else [ C.Line x2_ y2_ ])
+          ++
+          (if config.tickLength > 0
+          then [ C.Line (x2_ + tickOffsetX) (y2_ + tickOffsetY) ]
+          else [])
   in
   withAttrs config.attrs S.path
     [ SA.class "elm-charts__line"
@@ -1448,7 +1489,7 @@ positionHtml : Plane -> Float -> Float -> Float -> Float -> List (H.Attribute ms
 positionHtml plane x y xOff yOff attrs content =
     let
         xPercentage = (Coord.toSVGX plane x + xOff) * 100 / plane.width
-        yPercentage = (Coord.toSVGY plane y + -yOff) * 100 / plane.height
+        yPercentage = (Coord.toSVGY plane y - yOff) * 100 / plane.height
 
         posititonStyles =
           [ HA.style "left" (String.fromFloat xPercentage ++ "%")
@@ -1833,10 +1874,12 @@ tooltipPointerStyle direction className background borderColor =
     border-""" ++ config.b ++ """: 5px solid """ ++ background ++ """;
     margin-""" ++ config.b ++ """: -1px;
     z-index: 1;
+    height: 0px;
   }
 
   .""" ++ className ++ """:before {
     border-""" ++ config.b ++ """: 5px solid """ ++ borderColor ++ """;
+    height: 0px;
   }
   """
 

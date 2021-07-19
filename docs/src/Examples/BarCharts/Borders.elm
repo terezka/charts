@@ -15,14 +15,13 @@ view model =
     [ CA.height 300
     , CA.width 300
     ]
-    [ C.grid []
-    , C.xLabels []
-    , C.yLabels []
+    [ C.xLabels []
+    , C.yLabels [ CA.withGrid ]
     , C.bars
         []
         [ C.stacked
-            [ C.bar .z [ CA.borderWidth 2 ]
-            , C.bar .y [ CA.borderWidth 2 ]
+            [ C.bar .z [ CA.borderWidth 2, CA.opacity 0.4 ]
+            , C.bar .y [ CA.borderWidth 2, CA.opacity 0.4 ]
             ]
         ]
         data
@@ -85,14 +84,13 @@ smallCode =
     [ CA.height 300
     , CA.width 300
     ]
-    [ C.grid []
-    , C.xLabels []
-    , C.yLabels []
+    [ C.xLabels []
+    , C.yLabels [ CA.withGrid ]
     , C.bars
         []
         [ C.stacked
-            [ C.bar .z [ CA.borderWidth 2 ]
-            , C.bar .y [ CA.borderWidth 2 ]
+            [ C.bar .z [ CA.borderWidth 2, CA.opacity 0.4 ]
+            , C.bar .y [ CA.borderWidth 2, CA.opacity 0.4 ]
             ]
         ]
         data
@@ -115,14 +113,13 @@ view model =
     [ CA.height 300
     , CA.width 300
     ]
-    [ C.grid []
-    , C.xLabels []
-    , C.yLabels []
+    [ C.xLabels []
+    , C.yLabels [ CA.withGrid ]
     , C.bars
         []
         [ C.stacked
-            [ C.bar .z [ CA.borderWidth 2 ]
-            , C.bar .y [ CA.borderWidth 2 ]
+            [ C.bar .z [ CA.borderWidth 2, CA.opacity 0.4 ]
+            , C.bar .y [ CA.borderWidth 2, CA.opacity 0.4 ]
             ]
         ]
         data

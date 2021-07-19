@@ -8,6 +8,7 @@ import Svg as S
 import Chart as C
 import Chart.Attributes as CA
 import Chart.Events as CE
+import Chart.Item as CI
 
 
 view : Model -> H.Html Msg
@@ -18,7 +19,7 @@ view model =
     ]
     [ C.grid []
 
-    , C.yLabels []
+    , C.yLabels [ CA.withGrid ]
     , C.binLabels .label [ CA.moveDown 20 ]
 
     , C.bars []
@@ -90,7 +91,7 @@ smallCode =
     ]
     [ C.grid []
 
-    , C.yLabels []
+    , C.yLabels [ CA.withGrid ]
     , C.binLabels .label [ CA.moveDown 20 ]
 
     , C.bars []
@@ -110,6 +111,7 @@ import Svg as S
 import Chart as C
 import Chart.Attributes as CA
 import Chart.Events as CE
+import Chart.Item as CI
 
 
 view : Model -> H.Html Msg
@@ -120,7 +122,7 @@ view model =
     ]
     [ C.grid []
 
-    , C.yLabels []
+    , C.yLabels [ CA.withGrid ]
     , C.binLabels .label [ CA.moveDown 20 ]
 
     , C.bars []

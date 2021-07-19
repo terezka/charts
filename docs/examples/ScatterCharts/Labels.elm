@@ -6,6 +6,7 @@ import Svg as S
 import Chart as C
 import Chart.Attributes as CA
 import Chart.Events as CE
+import Chart.Item as CI
 
 
 view : Model -> H.Html Msg
@@ -16,9 +17,8 @@ view model =
     , CA.width 300
     , CA.padding { top = 0, bottom = 0, left = 30, right = 10 }
     ]
-    [ C.grid []
-    , C.xLabels []
-    , C.yLabels []
+    [ C.xLabels [ CA.withGrid ]
+    , C.yLabels [ CA.withGrid ]
     , C.series .x
         [ C.scatter .y [ CA.opacity 0.2, CA.borderWidth 1 ]
             |> C.variation (\i d -> [ CA.size (d.w * 30) ])
@@ -27,9 +27,9 @@ view model =
 
     , C.eachDot <| \p dot ->
         [ C.label
-            [ CA.moveDown 4, CA.color (CE.getColor dot) ]
-            [ S.text (String.fromFloat (CE.getDatum dot).w) ]
-            (CE.getCenter p dot)
+            [ CA.moveDown 4, CA.color (CI.getColor dot) ]
+            [ S.text (String.fromFloat (CI.getData dot).w) ]
+            (CI.getCenter p dot)
         ]
     ]
 {-| @SMALL END -}

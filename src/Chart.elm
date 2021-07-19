@@ -2,9 +2,10 @@ module Chart exposing
   ( chart
 
   , Element, bars, series, seriesMap, barsMap
+  , list, custom
   , Property, bar, scatter, interpolated
   , barMaybe, scatterMaybe, interpolatedMaybe
-  , stacked, named, variation, amongst
+  , stacked, variation, amongst, named, format, formatMaybe
 
   , xAxis, yAxis, xTicks, yTicks, xLabels, yLabels, grid
   , binLabels, barLabels, dotLabels, productLabel
@@ -17,8 +18,8 @@ module Chart exposing
 
   , svg, svgAt, html, htmlAt
 
-  , each, eachBin, eachStack, eachBar, eachDot, eachProduct, eachCustom
-  , withPlane, withBins, withStacks, withBars, withDots, withProducts
+  , each, eachBin, eachStack, eachBar, eachDot, eachItem, eachCustom
+  , withPlane, withBins, withStacks, withBars, withDots, withItems
 
   , binned
   )
@@ -42,7 +43,8 @@ and attributes. It looks something like this:
         [ CA.width 300
         , CA.height 300
         ]
-        [ C.grid []
+        [ C.xTicks []
+        , C.yTicks []
         , C.xLabels []
         , C.yLabels []
         , C.bars []
@@ -52,26 +54,26 @@ and attributes. It looks something like this:
             data
         ]
 
-All the elements, like `chart`, `grid`, `xLabels`, `yLabels`, `bars` and `bar` in the example
-above, are defined in this module. All the attributes, like `width`, `height`, `color`, and `opacity`,
+All the elements, like `chart`, `xTicks`, `yTicks`, `xLabels`, `yLabels`, `bars` and `bar` in the example
+above, and many others, are defined in this module. All the attributes, like `width`, `height`, `color`, and `opacity`,
 are defined in `Chart.Attributes`. Attributes and other functions related to events are located in
-the `Chart.Events` module. Lastly, `Chart.Svg` holds charting primitives in case you have very special
-needs.
-
-NOTE: Some of the more advanced elements utilize helper functions in `Chart.Events`
-too. If that is the case, I will make a note in the comment of the element.
+the `Chart.Events` module. Functions for working with rendered chart items are located in `Chart.Item`.
+Lastly, `Chart.Svg` holds charting primitives in case you have very special needs.
 
 In the following examples, I will assume the imports:
 
     import Html as H exposing (Html)
     import Html.Attributes as HA
     import Html.Events as HE
+
     import Svg as S
     import Svg.Attributes as SA
     import Svg.Events as SE
+
     import Chart as C
     import Chart.Attributes as CA
     import Chart.Events as CE
+    import Chart.Item as CI
 
 
 # The frame
@@ -87,7 +89,7 @@ In the following examples, I will assume the imports:
 @docs series, seriesMap, scatter, scatterMaybe, interpolated, interpolatedMaybe
 
 ## Stacking, naming, and variation
-@docs Property, stacked, named, variation, amongst
+@docs Property, stacked, variation, amongst, named, format, formatMaybe
 
 # Navigation elements
 
@@ -120,18 +122,21 @@ In the following examples, I will assume the imports:
 @docs tooltip, line, rect
 
 # Arbitrary elements
-@docs svgAt, htmlAt, svg, html, none
+@docs list, svgAt, htmlAt, svg, html, none
 
 # Advanced elements
 
 ## For each item, do..
-@docs eachBin, eachStack, eachBar, eachDot, eachProduct, each, eachCustom
+@docs eachBin, eachStack, eachBar, eachDot, eachItem, each, eachCustom
 
 ## With all item, do..
-@docs withBins, withStacks, withBars, withDots, withProducts
+@docs withBins, withStacks, withBars, withDots, withItems
 
 ## Using the plane, do..
 @docs withPlane
+
+## Make a custom element
+@docs custom
 
 # Data helper
 @docs binned
@@ -152,13 +157,14 @@ import Dict exposing (Dict)
 import Internal.Item as Item
 import Internal.Produce as Produce
 import Internal.Legend as Legend
-import Internal.Group as Group
+import Internal.Many as Many
 import Internal.Helpers as Helpers
 import Internal.Svg as IS
 import Internal.Events as IE
 import Chart.Svg as CS
 import Chart.Attributes as CA exposing (Attribute)
 import Chart.Events as CE
+import Chart.Item as CI
 
 
 {-| -}
@@ -217,7 +223,7 @@ the `chart` element.
 
         -- Add event triggers to your chart. Learn more about these in
         -- the `Chart.Events` module.
-        , CE.onMouseMove OnHovering (CE.getNearest C.bar)
+        , CE.onMouseMove OnHovering (CE.getNearest CI.bars)
         , CE.onMouseLeave (OnHovering [])
 
         -- Add arbitrary HTML and SVG attributes to your chart.
@@ -229,6 +235,15 @@ the `chart` element.
         , C.yLabels []
         , ..
         ]
+
+Explore live examples for the following attributes:
+- [margin](https://www.elm-charts.org/documentation/navigation/margin)
+- [padding](https://www.elm-charts.org/documentation/navigation/padding)
+- [range](https://www.elm-charts.org/documentation/navigation/control-dimensions)
+- [domain](https://www.elm-charts.org/documentation/navigation/control-dimensions)
+- [onMouseMove](https://www.elm-charts.org/documentation/interactivity/basic-bar-tooltip)
+- [onMouseLeave](https://www.elm-charts.org/documentation/interactivity/basic-bar-tooltip)
+- [htmlAttrs](https://www.elm-charts.org/documentation/navigation/background)
 
 -}
 chart : List (Attribute (Container data msg)) -> List (Element data msg) -> H.Html msg
@@ -247,18 +262,29 @@ chart edits unindexedElements =
           , htmlAttrs = []
           }
 
-      elements =
+      indexedElements =
         let toIndexedEl el ( acc, index ) =
               case el of
                 Indexed toElAndIndex ->
                   let ( newEl, newIndex ) = toElAndIndex index in
                   ( acc ++ [ newEl ], newIndex )
 
+                ListOfElements els ->
+                  List.foldl toIndexedEl ( acc, index ) els
+
                 _ ->
                   ( acc ++ [ el ], index )
         in
         List.foldl toIndexedEl ( [], 0 ) unindexedElements
           |> Tuple.first
+
+      elements =
+        let isGrid el =
+              case el of
+                GridElement _ -> True
+                _ -> False
+        in
+        if List.any isGrid indexedElements then indexedElements else grid [] :: indexedElements
 
       plane =
         definePlane config elements
@@ -301,14 +327,17 @@ type Element data msg
   = Indexed (Int -> ( Element data msg, Int ))
   | SeriesElement
       (List C.Position)
-      (List (Item.Product CE.Any (Maybe Float) data))
+      (List (CI.One data CI.Any))
       (List Legend.Legend)
       (C.Plane -> S.Svg msg)
   | BarsElement
       (List C.Position)
-      (List (Item.Product CE.Any (Maybe Float) data))
+      (List (CI.One data CI.Any))
       (List Legend.Legend)
       (C.Plane -> TickValues -> TickValues)
+      (C.Plane -> S.Svg msg)
+  | CustomElement
+      (CI.One data CI.Any)
       (C.Plane -> S.Svg msg)
   | AxisElement
       (C.Plane -> TickValues -> TickValues)
@@ -331,7 +360,7 @@ type Element data msg
   | GridElement
       (C.Plane -> TickValues -> S.Svg msg)
   | SubElements
-      (C.Plane -> List (Item.Product CE.Any (Maybe Float) data) -> List (Element data msg))
+      (C.Plane -> List (CI.One data CI.Any) -> List (Element data msg))
   | ListOfElements
       (List (Element data msg))
   | SvgElement
@@ -347,6 +376,7 @@ definePlane config elements =
           Indexed _ -> acc
           SeriesElement lims _ _ _ -> acc ++ lims
           BarsElement lims _ _ _ _ -> acc ++ lims
+          CustomElement _ _ -> acc
           AxisElement _ _ -> acc
           TicksElement _ _ -> acc
           TickElement _ _ _ -> acc
@@ -416,13 +446,14 @@ definePlane config elements =
   }
 
 
-getItems : C.Plane -> List (Element data msg) -> List (Item.Product CE.Any (Maybe Float) data)
+getItems : C.Plane -> List (Element data msg) -> List (CI.One data CI.Any)
 getItems plane elements =
   let toItems el acc =
         case el of
           Indexed _ -> acc
           SeriesElement _ items _ _ -> acc ++ items
           BarsElement _ items _ _ _ -> acc ++ items
+          CustomElement item _ -> acc ++ [ item ]
           AxisElement func _ -> acc
           TicksElement _ _ -> acc
           TickElement _ _ _ -> acc
@@ -444,6 +475,7 @@ getLegends elements =
           Indexed _ -> acc
           SeriesElement _ _ legends_ _ -> acc ++ legends_
           BarsElement _ _ legends_ _ _ -> acc ++ legends_
+          CustomElement _ _ -> acc
           AxisElement _ _ -> acc
           TicksElement _ _ -> acc
           TickElement _ _ _ -> acc
@@ -468,13 +500,14 @@ type alias TickValues =
   }
 
 
-getTickValues : C.Plane -> List (Item.Product CE.Any (Maybe Float) data) -> List (Element data msg) -> TickValues
+getTickValues : C.Plane -> List (CI.One data CI.Any) -> List (Element data msg) -> TickValues
 getTickValues plane items elements =
   let toValues el acc =
         case el of
           Indexed _ -> acc
           SeriesElement _ _ _ _     -> acc
           BarsElement _ _ _ func _  -> func plane acc
+          CustomElement _ func      -> acc
           AxisElement func _        -> func plane acc
           TicksElement func _       -> func plane acc
           TickElement toC func _    -> func plane (toC plane) acc
@@ -489,13 +522,14 @@ getTickValues plane items elements =
   List.foldl toValues (TickValues [] [] [] []) elements
 
 
-viewElements : Container data msg -> C.Plane -> TickValues -> List (Item.Product CE.Any (Maybe Float) data) -> List Legend.Legend -> List (Element data msg) -> ( List (H.Html msg), List (S.Svg msg), List (H.Html msg) )
+viewElements : Container data msg -> C.Plane -> TickValues -> List (CI.One data CI.Any) -> List Legend.Legend -> List (Element data msg) -> ( List (H.Html msg), List (S.Svg msg), List (H.Html msg) )
 viewElements config plane tickValues allItems allLegends elements =
   let viewOne el ( before, chart_, after ) =
         case el of
           Indexed _                 -> ( before,chart_, after )
           SeriesElement _ _ _ view  -> ( before, view plane :: chart_, after )
           BarsElement _ _ _ _ view  -> ( before, view plane :: chart_, after )
+          CustomElement _ view      -> ( before, view plane :: chart_, after )
           AxisElement _ view        -> ( before, view plane :: chart_, after )
           TicksElement _ view       -> ( before, view plane :: chart_, after )
           TickElement toC _ view    -> ( before, view plane (toC plane) :: chart_, after )
@@ -533,7 +567,7 @@ type alias Tooltip =
 {-| Add a tooltip for a specific item.
 
     C.chart
-      [ CE.onMouseMove OnHover (CE.getNearest CE.product) ]
+      [ CE.onMouseMove OnHover (CE.getNearest CI.any) ]
       [ C.series .year
           [ C.scatter .income [] ]
           [ { year = 2000, income = 40000 }
@@ -582,8 +616,20 @@ Customizations:
       [] -- Add any HTML children (Will be filled with default tooltip if left empty)
 
 
+Explore live examples for the following attributes:
+- [onTopOrBottom](https://www.elm-charts.org/documentation/interactivity/direction)
+- [top](https://www.elm-charts.org/documentation/interactivity/set-focal-point)
+- [offset](https://www.elm-charts.org/documentation/interactivity/edit-offset)
+- [noArrow](https://www.elm-charts.org/documentation/interactivity/remove-pointer)
+- [border](https://www.elm-charts.org/documentation/interactivity/edit-border)
+- [background](https://www.elm-charts.org/documentation/interactivity/edit-background)
+
+See also [example of custom formatting](https://www.elm-charts.org/documentation/interactivity/change-value-formatting)
+and [example of custom content](https://www.elm-charts.org/documentation/interactivity/change-content) and the other
+examples pertaining to [interactivity](https://www.elm-charts.org/documentation/interactivity).
+
 -}
-tooltip : Item.Item a -> List (Attribute Tooltip) -> List (H.Attribute Never) -> List (H.Html Never) -> Element data msg
+tooltip : CI.Item a -> List (Attribute Tooltip) -> List (H.Attribute Never) -> List (H.Html Never) -> Element data msg
 tooltip i edits attrs_ content =
   html <| \p ->
     let pos = Item.getLimits i
@@ -630,6 +676,12 @@ the styling options:
               -- The example will make a line where x1 = 2 to x2 = 8
           ]
       ]
+
+Explore live examples for the following attributes:
+- [color](https://www.elm-charts.org/documentation/navigation/color)
+- [noArrow](https://www.elm-charts.org/documentation/navigation/remove-arrow)
+- [pinned](https://www.elm-charts.org/documentation/navigation/position)
+- [limits](https://www.elm-charts.org/documentation/navigation/adjust-axis-line)
 
 -}
 xAxis : List (Attribute Axis) -> Element item msg
@@ -748,6 +800,14 @@ The example below illustrates the configuration:
               -- The example will add ticks between x = 2 and 8.
           ]
       ]
+
+Explore live examples for the following attributes:
+- [pinned](https://www.elm-charts.org/documentation/navigation/position)
+- [ints](https://www.elm-charts.org/documentation/navigation/only-integers)
+- [times](https://www.elm-charts.org/documentation/navigation/timeline)
+- [noGrid](https://www.elm-charts.org/documentation/navigation/remove-grid-lines)
+- [amount](https://www.elm-charts.org/documentation/navigation/amount-of-labels-ticks)
+
 -}
 xTicks : List (Attribute Ticks) -> Element item msg
 xTicks edits =
@@ -866,8 +926,7 @@ The example below illustrates the configuration:
 
           , CA.amount 15   -- Change amount of ticks
           , CA.flip        -- Flip to opposite direction
-          , CA.noGrid      -- By default a grid line is added
-                           -- for each label. This removes them.
+          , CA.withGrid    -- Add grid line by each label.
 
           , CA.ints            -- Add ticks at "nice" ints
           , CA.times Time.utc  -- Add ticks at "nice" times
@@ -889,7 +948,15 @@ The example below illustrates the configuration:
           ]
       ]
 
-For more in depth and irregular customization, see `xLabel`.
+Explore live examples for the following attributes:
+- [alignLeft](https://www.elm-charts.org/documentation/navigation/move-labels)
+- [moveUp](https://www.elm-charts.org/documentation/navigation/move-labels)
+- [amount](https://www.elm-charts.org/documentation/navigation/amount-of-labels-ticks)
+- [ints](https://www.elm-charts.org/documentation/navigation/only-integers)
+- [times](https://www.elm-charts.org/documentation/navigation/timeline)
+
+For more in depth and irregular customization, see `xLabel` or check out
+the [custom labels example](https://www.elm-charts.org/documentation/navigation/custom-labels).
 
 -}
 xLabels : List (Attribute Labels) -> Element item msg
@@ -905,7 +972,7 @@ xLabels edits =
           , anchor = Nothing
           , xOff = 0
           , yOff = 18
-          , grid = True
+          , grid = False
           , format = Nothing
           , uppercase = False
           , rotate = 0
@@ -957,7 +1024,7 @@ yLabels edits =
           , flip = False
           , xOff = -10
           , yOff = 3
-          , grid = True
+          , grid = False
           , format = Nothing
           , uppercase = False
           , fontSize = Nothing
@@ -1054,11 +1121,13 @@ A full list of possible attributes:
           , CA.uppercase    -- Make uppercase
           , CA.flip         -- Flip to opposite direction
 
-          , CA.noGrid      -- By default a grid line is added
-                           -- for each label. This removes it.
+          , CA.withGrid     -- Add grid line by each label.
           ]
           [ S.text "hello!" ]
       ]
+
+See also the [custom labels example](https://www.elm-charts.org/documentation/navigation/custom-labels).
+
 
 -}
 xLabel : List (Attribute Label) -> List (S.Svg msg) -> Element data msg
@@ -1077,7 +1146,7 @@ xLabel edits inner =
           , anchor = Nothing
           , rotate = 0
           , flip = False
-          , grid = True
+          , grid = False
           }
 
       toTickValues p config ts =
@@ -1127,7 +1196,7 @@ yLabel edits inner =
           , anchor = Nothing
           , rotate = 0
           , flip = False
-          , grid = True
+          , grid = False
           }
 
       toTickValues p config ts =
@@ -1267,15 +1336,18 @@ type alias Grid =
     }
 
 
-{-| Add a grid to your chart.
+{-| Add a custom grid to your chart.
 
     C.chart []
-      [ C.grid []
-      , C.xLabels []
-      , C.yLabels []
+      [ C.grid [ CA.width 2 ]
+      , C.xTicks []
+      , C.yTicks []
       ]
 
-Grid lines are added where labels or ticks are added.
+Grid lines are added by default where ticks are added. You can add
+grid lines to where your labels are using the `CA.withGrid` attribute:
+
+    C.yLabels [ CA.withGrid ]
 
 Customizations:
 
@@ -1388,6 +1460,18 @@ styling options are available.
           ]
       ]
 
+
+Explore live examples for the following attributes:
+- [color](https://www.elm-charts.org/documentation/bar-charts/color)
+- [borderWidth](https://www.elm-charts.org/documentation/bar-charts/borders)
+- [opacity](https://www.elm-charts.org/documentation/bar-charts/borders)
+- [striped](https://www.elm-charts.org/documentation/bar-charts/pattern)
+- [dotted](https://www.elm-charts.org/documentation/bar-charts/pattern)
+- [gradient](https://www.elm-charts.org/documentation/bar-charts/gradient)
+- [roundTop](https://www.elm-charts.org/documentation/bar-charts/corners)
+- [roundBottom](https://www.elm-charts.org/documentation/bar-charts/corners)
+- [highlight](https://www.elm-charts.org/documentation/bar-charts/highlight)
+
 -}
 bar : (data -> Float) -> List (Attribute CS.Bar) -> Property data inter CS.Bar
 bar y =
@@ -1442,6 +1526,15 @@ options are available.
       , { year = 2020, income = 62000 }
       ]
 
+Explore live examples for the following attributes:
+- [size](https://www.elm-charts.org/documentation/scatter-charts/sizes)
+- [opacity](https://www.elm-charts.org/documentation/scatter-charts/opacity)
+- [border](https://www.elm-charts.org/documentation/scatter-charts/borders)
+- [borderWidth](https://www.elm-charts.org/documentation/scatter-charts/borders)
+- [highlight](https://www.elm-charts.org/documentation/scatter-charts/highlight)
+- [triangle](https://www.elm-charts.org/documentation/scatter-charts/shapes)
+- [square](https://www.elm-charts.org/documentation/scatter-charts/shapes)
+- [cross](https://www.elm-charts.org/documentation/scatter-charts/shapes)
 -}
 scatter : (data -> Float) -> List (Attribute CS.Dot) -> Property data inter CS.Dot
 scatter y =
@@ -1509,6 +1602,16 @@ The example below illustrates what styling options are available.
       , { age = 20, height = 184 }
       ]
 
+Explore live examples for the following attributes:
+- [monotone](https://www.elm-charts.org/documentation/line-charts/linear)
+- [stepped](https://www.elm-charts.org/documentation/line-charts/stepped)
+- [color](https://www.elm-charts.org/documentation/line-charts/color)
+- [width](https://www.elm-charts.org/documentation/line-charts/width)
+- [opacity](https://www.elm-charts.org/documentation/line-charts/area-under-curve)
+- [striped](https://www.elm-charts.org/documentation/line-charts/pattern)
+- [dotted](https://www.elm-charts.org/documentation/line-charts/pattern)
+- [gradient](https://www.elm-charts.org/documentation/line-charts/gradient)
+
 -}
 interpolated : (data -> Float) -> List (Attribute CS.Interpolation) -> List (Attribute CS.Dot) -> Property data CS.Interpolation CS.Dot
 interpolated y inter =
@@ -1528,6 +1631,7 @@ interpolated y inter =
           ]
       ]
 
+See live example of [missing data in line chart](https://www.elm-charts.org/documentation/line-charts/missing-data).
 -}
 interpolatedMaybe : (data -> Maybe Float) -> List (Attribute CS.Interpolation) -> List (Attribute CS.Dot) -> Property data CS.Interpolation CS.Dot
 interpolatedMaybe y inter =
@@ -1548,10 +1652,34 @@ in the default tooltip, and you can use it to identify items from this series.
           ]
       ]
 
+See [live example](https://www.elm-charts.org/documentation/interactivity/change-name).
+
 -}
 named : String -> Property data inter deco -> Property data inter deco
 named name =
   P.meta name
+
+
+{-| Easily format the value which shows up by default in your tooltip if you add one. You
+can also access it using `Chart.Item.getTooltipValue`.
+
+See [live example](https://www.elm-charts.org/documentation/interactivity/change-value-formatting).
+
+-}
+format : (Float -> String) -> Property data inter deco -> Property data inter deco
+format func =
+  P.format <| \v ->
+    case v of
+      Just v_ -> func v_
+      Nothing -> "N/A"
+
+
+{-| Like `format`, except it allows you customize the formatting of missing values too!
+
+-}
+formatMaybe : (Maybe Float -> String) -> Property data inter deco -> Property data inter deco
+formatMaybe =
+  P.format
 
 
 {-| Change the style of your bars or dots based on the index of its data point
@@ -1568,6 +1696,8 @@ and the data point itself.
           ]
       ]
 
+See [live example](https://www.elm-charts.org/documentation/scatter-charts/data-dependent-styling).
+
 -}
 variation : (Int -> data -> List (Attribute deco)) -> Property data inter deco -> Property data inter deco
 variation func =
@@ -1579,7 +1709,7 @@ of the group of products which you list. A such group of products can be
 attrained through events like `Chart.Events.onMouseMove` or similar.
 
     C.chart
-      [ CE.onMouseMove OnHover (CE.getNearest CE.dot) ]
+      [ CE.onMouseMove OnHover (CE.getNearest CI.dots) ]
       [ C.series .year
           [ C.scatter .income [ CA.opacity 0.6 ]
               |> C.amongst model.hovering (\datum -> [ CA.highlight 0.5 ])
@@ -1590,8 +1720,10 @@ attrained through events like `Chart.Events.onMouseMove` or similar.
           ]
       ]
 
+See [live example](https://www.elm-charts.org/documentation/interactivity/change-style-based-on-events).
+
 -}
-amongst : List (CE.Product config value data) -> (data -> List (Attribute deco)) -> Property data inter deco -> Property data inter deco
+amongst : List (CI.One data x) -> (data -> List (Attribute deco)) -> Property data inter deco -> Property data inter deco
 amongst inQuestion func =
   P.variation <| \p s i meta d ->
     let check product =
@@ -1618,6 +1750,9 @@ amongst inQuestion func =
           , { cats = 6, dogs = 1 }
           ]
       ]
+
+See [live example](https://www.elm-charts.org/documentation/bar-charts/stacked).
+
 -}
 stacked : List (Property data inter deco) -> Property data inter deco
 stacked =
@@ -1645,7 +1780,7 @@ type alias ItemLabel a =
   }
 
 
-defaultLabel : ItemLabel (CE.Item a)
+defaultLabel : ItemLabel (CI.Item a)
 defaultLabel =
   { xOff = IS.defaultLabel.xOff
   , yOff = IS.defaultLabel.yOff
@@ -1657,12 +1792,12 @@ defaultLabel =
   , rotate = IS.defaultLabel.rotate
   , uppercase = IS.defaultLabel.uppercase
   , attrs = IS.defaultLabel.attrs
-  , position = CE.getBottom
+  , position = CI.getBottom
   , format = Nothing
   }
 
 
-toLabelFromItemLabel : ItemLabel (CE.Item a) -> CS.Label
+toLabelFromItemLabel : ItemLabel (CI.Item a) -> CS.Label
 toLabelFromItemLabel config =
   { xOff = config.xOff
   , yOff = config.yOff
@@ -1712,24 +1847,26 @@ Attributes you can use:
       , CA.attrs [ SA.class "my-bin-labels" ]
 
        -- Edit the position of the label
-      , CA.position CE.getTop
+      , CA.position CI.getTop
 
        -- Given the entire bin item (not just the data)
        -- produce a string.
-      , CA.format (\bin -> String.fromFloat (CE.getCommonality bin).start)
+      , CA.format (\bin -> String.fromFloat (CI.getShared bin).start)
       ]
 
+See [live example](https://www.elm-charts.org/documentation/bar-charts/labels-for-bins).
+
 -}
-binLabels : (data -> String) -> List (Attribute (ItemLabel (CE.Group (CE.Bin data) CE.Bar (Maybe Float) data))) -> Element data msg
+binLabels : (data -> String) -> List (Attribute (ItemLabel (CI.Many data CI.Bar))) -> Element data msg
 binLabels toLabel edits =
-  eachCustom (CE.collect CE.bin CE.bar) <| \p item ->
+  eachCustom (CI.andThen CI.bins CI.bars) <| \p item ->
     let config =
           Helpers.apply edits defaultLabel
 
         text =
           case config.format of
             Just formatting -> formatting item
-            Nothing -> toLabel (CE.getCommonality item).datum
+            Nothing -> toLabel (CI.getOneData item)
     in
     [ svg <| \_ ->
         IS.label p (toLabelFromItemLabel config) [ S.text text ] (config.position p item)
@@ -1772,22 +1909,25 @@ Attributes you can use:
       , CA.attrs [ SA.class "my-bar-labels" ]
 
        -- Edit the position of the label
-      , CA.position CE.getTop
+      , CA.position CI.getTop
 
        -- Change the text of the label
-      , CA.format (\bar -> String.fromFloat (CE.getDependent bar))
+      , CA.format (\bar -> String.fromFloat (CI.getY bar))
       ]
+
+See [live example](https://www.elm-charts.org/documentation/bar-charts/labels-for-bars).
+
 -}
-barLabels : List (Attribute (ItemLabel (CE.Product CE.Bar Float data))) -> Element data msg
+barLabels : List (Attribute (ItemLabel (CI.One data CI.Bar))) -> Element data msg
 barLabels edits =
   eachBar <| \p item ->
     let config =
-          Helpers.apply edits { defaultLabel | position = CE.getTop }
+          Helpers.apply edits { defaultLabel | position = CI.getTop }
 
         text =
           case config.format of
             Just formatting -> formatting item
-            Nothing -> String.fromFloat (CE.getDependent item)
+            Nothing -> String.fromFloat (CI.getY item)
     in
     [ svg <| \_ ->
         IS.label p (toLabelFromItemLabel config) [ S.text text ] (config.position p item)
@@ -1797,7 +1937,7 @@ barLabels edits =
 {-| Helper to add a label by a particular product.
 
     C.chart
-      [ CE.onMouseMove OnHover (CE.getNearest CE.bar) ]
+      [ CE.onMouseMove OnHover (CE.getNearest CI.bars) ]
       [ C.bars []
           [ C.bar .income [] ]
           [ { name = "Anna", income = 60 }
@@ -1832,24 +1972,24 @@ Attributes you can use:
       , CA.attrs [ SA.class "my-bar-labels" ]
 
        -- Edit the position of the label
-      , CA.position CE.getTop
+      , CA.position CI.getTop
 
        -- Change the text of the label
-      , CA.format (\bar -> String.fromFloat (CE.getDependent bar))
+      , CA.format (\bar -> String.fromFloat (CI.getY bar))
       ]
       product
 
 -}
-productLabel : List (Attribute (ItemLabel (CE.Product config value data))) -> CE.Product config value data -> Element data msg
+productLabel : List (Attribute (ItemLabel (CI.One data x))) -> CI.One data x -> Element data msg
 productLabel edits item =
   withPlane <| \p ->
     let config =
-          Helpers.apply edits { defaultLabel | position = CE.getTop }
+          Helpers.apply edits { defaultLabel | position = CI.getTop }
 
         text =
           case config.format of
             Just formatting -> formatting item
-            Nothing -> String.fromFloat (Item.getDependentSafe item)
+            Nothing -> String.fromFloat (CI.getY item)
     in
     [ svg <| \_ ->
         IS.label p (toLabelFromItemLabel config) [ S.text text ] (config.position p item)
@@ -1867,7 +2007,7 @@ productLabel edits item =
           , { age = 48, income = 80 }
           ]
 
-      , C.dotLabels CE.getCenter [ CA.moveUp 6 ]
+      , C.dotLabels CI.getCenter [ CA.moveUp 6 ]
       ]
 
 Attributes you can use:
@@ -1893,22 +2033,25 @@ Attributes you can use:
       , CA.attrs [ SA.class "my-dot-labels" ]
 
        -- Edit the position of the label
-      , CA.position CE.getTop
+      , CA.position CI.getTop
 
        -- Change the text of the label
-      , CA.format (\dot -> String.fromFloat (CE.getDependent dot))
+      , CA.format (\dot -> String.fromFloat (CI.getY dot))
       ]
+
+See [live example](https://www.elm-charts.org/documentation/line-charts/labels-for-each-point).
+
 -}
-dotLabels : List (Attribute (ItemLabel (CE.Product CE.Dot Float data))) -> Element data msg
+dotLabels : List (Attribute (ItemLabel (CI.One data CI.Dot))) -> Element data msg
 dotLabels edits =
   eachDot <| \p item ->
     let config =
-          Helpers.apply edits { defaultLabel | position = CE.getCenter  }
+          Helpers.apply edits { defaultLabel | position = CI.getCenter  }
 
         text =
           case config.format of
             Just formatting -> formatting item
-            Nothing -> String.fromFloat (Item.getDependent item)
+            Nothing -> String.fromFloat (CI.getY item)
     in
     [ svg <| \_ ->
         IS.label p (toLabelFromItemLabel config) [ S.text text ] (config.position p item)
@@ -1932,7 +2075,11 @@ type alias Bars data =
   }
 
 
-{-| Add a bar series to your chart. Each `data` in your `List data` is a "bin". For
+{-| Add a bar series to your chart. Here's some handy terminology:
+
+![bar chart terminology](https://github.com/terezka/charts/blob/master/docs/images/bar-chart-terminology.png?raw=true)
+
+Each `data` in your `List data` is a "bin". For
 each "bin", whatever number of bars your have specified in the second argument will
 show up, side-by-side.
 
@@ -1988,7 +2135,7 @@ The rest of the configuration options concern styling:
       , CA.margin 0.2       -- The spacing _around_ the bars in each bin relative to the full length (1).
       , CA.roundTop 0.2     -- The rounding of your bars' top corners. It gets weird after around 0.5.
       , CA.roundBottom 0.2  -- The rounding of your bars' bottom corners. It gets weird after around 0.5.
-      , CA.noGrid           -- Grid lines are by default added at the bin limits. This removes them.
+      , CA.withGrid         -- Add grid lines at the bin limits.
       ]
       [ C.bar .income []
       , C.bar .spending []
@@ -1997,6 +2144,13 @@ The rest of the configuration options concern styling:
       , { income = 12, spending = 6 }
       , { income = 18, spending = 16 }
       ]
+
+Explore live examples for the following attributes:
+- [spacing](https://www.elm-charts.org/documentation/bar-charts/spacing)
+- [margin](https://www.elm-charts.org/documentation/bar-charts/margin)
+- [roundTop](https://www.elm-charts.org/documentation/bar-charts/corners)
+- [roundBottom](https://www.elm-charts.org/documentation/bar-charts/corners)
+
 -}
 bars : List (Attribute (Bars data)) -> List (Property data () CS.Bar) -> List data -> Element data msg
 bars edits properties data =
@@ -2041,11 +2195,11 @@ barsMap mapData edits properties data =
           Produce.toBarSeries index edits properties data
 
         generalized =
-          List.concatMap Group.getGenerals items
+          List.concatMap Many.getGenerals items
             |> List.map (Item.map mapData)
 
         bins =
-          CE.group CE.bin generalized
+          CI.apply CI.bins generalized
 
         legends_ =
           Legend.toBarLegends index edits properties
@@ -2053,7 +2207,7 @@ barsMap mapData edits properties data =
         toTicks plane acc =
           { acc | xs = acc.xs ++
               if barsConfig.grid then
-                List.concatMap (CE.getLimits >> \pos -> [ pos.x1, pos.x2 ]) bins
+                List.concatMap (CI.getLimits >> \pos -> [ pos.x1, pos.x2 ]) bins
               else
                 []
           }
@@ -2130,7 +2284,7 @@ seriesMap mapData toX properties data =
           Produce.toDotSeries index toX properties data
 
         generalized =
-          List.concatMap Group.getGenerals items
+          List.concatMap Many.getGenerals items
             |> List.map (Item.map mapData)
 
         legends_ =
@@ -2143,6 +2297,72 @@ seriesMap mapData toX properties data =
         S.g [ SA.class "elm-charts__dot-series" ] (List.map (Item.toSvg p) items)
           |> S.map never
     , index + List.length (List.concatMap P.toConfigs properties)
+    )
+
+
+
+{-| Add a list of elements. -}
+list : List (Element data msg) -> Element data msg
+list =
+  ListOfElements
+
+
+{-| Add a custom element.
+
+- _name_ is the name of the element. Will show up in tooltip if using.
+- _color_ is the color of the element. Will show up in tooltip if using.
+- _position_ is the position of the element. Will be used to locate item for events.
+- _format_ is the formating of the element. Will be applied in tooltip if using.
+- _data_ is the data associated with element. Useful for advanced interactivity.
+- _render_ is how to render this element.
+
+See [live example](https://www.elm-charts.org/documentation/navigation/custom-chart-elements).
+
+-}
+custom :
+  { name : String
+  , color : String
+  , position : CS.Position
+  , format : data -> String
+  , data : data
+  , render : CS.Plane -> S.Svg Never
+  } -> Element data msg
+custom config =
+  Indexed <| \elIndex ->
+    let item =
+          Item.Rendered
+            { config =
+                { product = ()
+                , values =
+                    { datum = config.data
+                    , x1 = config.position.x1
+                    , x2 = config.position.x2
+                    , y = config.position.y2
+                    , isReal = True
+                    }
+                , tooltipInfo =
+                    { property = 0
+                    , stack = 0
+                    , data = 0
+                    , index = 0
+                    , elIndex = elIndex
+                    , name = Just config.name
+                    , color = config.color
+                    , border = config.color
+                    , borderWidth = 0
+                    , formatted = config.format config.data
+                    }
+                , toAny = always Item.Custom
+                }
+            , toLimits = \_ -> config.position
+            , toPosition = \_ _ -> config.position
+            , toSvg = \plane _ position -> config.render plane
+            , toHtml = \c -> [ Produce.tooltipRow c.tooltipInfo.color (Maybe.withDefault "Custom" c.tooltipInfo.name) (c.tooltipInfo.formatted) ]
+            }
+    in
+    ( CustomElement (Item.getGeneral item) <| \p ->
+        S.map never (Item.toSvg p item)
+    , elIndex + 1
     )
 
 
@@ -2160,54 +2380,54 @@ withPlane func =
 
 
 {-| Given all your bins, add a list of elements.
-Use helpers in `Chart.Events` to interact with bins.
+Use helpers in `Chart.Item` to interact with bins.
 
 -}
-withBins : (C.Plane -> List (CE.Group (CE.Bin data) CE.Any (Maybe Float) data) -> List (Element data msg)) -> Element data msg
+withBins : (C.Plane -> List (CI.Many data CI.Any) -> List (Element data msg)) -> Element data msg
 withBins func =
-  SubElements <| \p is -> func p (CE.group CE.bin is)
+  SubElements <| \p is -> func p (CI.apply CI.bins is)
 
 
 {-| Given all your stacks, add a list of elements.
-Use helpers in `Chart.Events` to interact with stacks.
+Use helpers in `Chart.Item` to interact with stacks.
 
 -}
-withStacks : (C.Plane -> List (CE.Group (CE.Stack data) CE.Any (Maybe Float) data) -> List (Element data msg)) -> Element data msg
+withStacks : (C.Plane -> List (CI.Many data CI.Any) -> List (Element data msg)) -> Element data msg
 withStacks func =
-  SubElements <| \p is -> func p (CE.group CE.stack is)
+  SubElements <| \p is -> func p (CI.apply CI.stacks is)
 
 
 {-| Given all your bars, add a list of elements.
-Use helpers in `Chart.Events` to interact with bars.
+Use helpers in `Chart.Item` to interact with bars.
 
 -}
-withBars : (C.Plane -> List (CE.Product CE.Bar (Maybe Float) data) -> List (Element data msg)) -> Element data msg
+withBars : (C.Plane -> List (CI.One data CI.Bar) -> List (Element data msg)) -> Element data msg
 withBars func =
-  SubElements <| \p is -> func p (CE.group CE.bar is)
+  SubElements <| \p is -> func p (CI.apply CI.bars is)
 
 
 {-| Given all your dots, add a list of elements.
-Use helpers in `Chart.Events` to interact with dots.
+Use helpers in `Chart.Item` to interact with dots.
 
 -}
-withDots : (C.Plane -> List (CE.Product CE.Dot (Maybe Float) data) -> List (Element data msg)) -> Element data msg
+withDots : (C.Plane -> List (CI.One data CI.Dot) -> List (Element data msg)) -> Element data msg
 withDots func =
-  SubElements <| \p is -> func p (CE.group CE.dot is)
+  SubElements <| \p is -> func p (CI.apply CI.dots is)
 
 
 {-| Given all your products, add a list of elements.
-Use helpers in `Chart.Events` to interact with products.
+Use helpers in `Chart.Item` to interact with products.
 
 -}
-withProducts : (C.Plane -> List (CE.Product CE.Any (Maybe Float) data) -> List (Element data msg)) -> Element data msg
-withProducts func =
+withItems : (C.Plane -> List (CI.One data CI.Any) -> List (Element data msg)) -> Element data msg
+withItems func =
   SubElements <| \p is -> func p is
 
 
 {-| Add elements for each item of whatever list in the first argument.
 
     C.chart
-      [ CE.onMouseMove OnHover (CE.getNearest CE.product) ]
+      [ CE.onMouseMove OnHover (CE.getNearest CI.any) ]
       [ C.series .year
           [ C.scatter .income [] ]
           [ { year = 2000, income = 40000 }
@@ -2218,6 +2438,8 @@ withProducts func =
       , C.each model.hovering <| \plane product ->
           [ C.tooltip product [] [] [] ]
       ]
+
+See [live example](https://www.elm-charts.org/documentation/interactivity/basic-bar-tooltip).
 
 -}
 each : List a -> (C.Plane -> a -> List (Element data msg)) -> Element data msg
@@ -2238,16 +2460,16 @@ each items func =
           ]
 
       , C.eachBin <| \plane bin ->
-          let common = CE.getCommonality bin in
-          [ C.label [] [ S.text common.datum.country ] (CE.getBottom plane bin) ]
+          let common = CI.getShared bin in
+          [ C.label [] [ S.text common.datum.country ] (CI.getBottom plane bin) ]
       ]
 
-Use the functions in `Chart.Events` to access information about your bins.
+Use the functions in `Chart.Item` to access information about your bins.
 
 -}
-eachBin : (C.Plane -> CE.Group (CE.Bin data) CE.Any Float data -> List (Element data msg)) -> Element data msg
+eachBin : (C.Plane -> CI.Many data CI.Any -> List (Element data msg)) -> Element data msg
 eachBin func =
-  SubElements <| \p is -> List.concatMap (func p) (CE.group (CE.collect CE.bin <| CE.keep CE.realValues CE.product) is)
+  SubElements <| \p is -> List.concatMap (func p) (CI.apply (CI.andThen CI.bins <| CI.andThen CI.real CI.any) is)
 
 
 {-| Add elements for each stack.
@@ -2265,16 +2487,16 @@ eachBin func =
           ]
 
       , C.eachStack <| \plane stack ->
-          let total = List.sum (List.map CE.getDependent (CE.getProducts stack)) in
-          [ C.label [] [ S.text (String.fromFloat total) ] (CE.getTop plane stack) ]
+          let total = List.sum (List.map CI.getY (CI.getMembers stack)) in
+          [ C.label [] [ S.text (String.fromFloat total) ] (CI.getTop plane stack) ]
       ]
 
-Use the functions in `Chart.Events` to access information about your stacks.
+Use the functions in `Chart.Item` to access information about your stacks.
 
 -}
-eachStack : (C.Plane -> CE.Group (CE.Stack data) CE.Any Float data -> List (Element data msg)) -> Element data msg
+eachStack : (C.Plane -> CI.Many data CI.Any -> List (Element data msg)) -> Element data msg
 eachStack func =
-  SubElements <| \p is -> List.concatMap (func p) (CE.group (CE.collect CE.stack <| CE.keep CE.realValues CE.product) is)
+  SubElements <| \p is -> List.concatMap (func p) (CI.apply (CI.andThen CI.stacks <| CI.andThen CI.real CI.any) is)
 
 
 {-| Add elements for each bar.
@@ -2290,16 +2512,16 @@ eachStack func =
           ]
 
       , C.eachBar <| \plane bar ->
-          let yValue = CE.getDependent bar in
-          [ C.label [] [ S.text (String.fromFloat yValue) ] (CE.getTop plane bar) ]
+          let yValue = CI.getY bar in
+          [ C.label [] [ S.text (String.fromFloat yValue) ] (CI.getTop plane bar) ]
       ]
 
-Use the functions in `Chart.Events` to access information about your bars.
+Use the functions in `Chart.Item` to access information about your bars.
 
 -}
-eachBar : (C.Plane -> CE.Product CE.Bar Float data -> List (Element data msg)) -> Element data msg
+eachBar : (C.Plane -> CI.One data CI.Bar -> List (Element data msg)) -> Element data msg
 eachBar func =
-  SubElements <| \p is -> List.concatMap (func p) (CE.group (CE.keep CE.realValues CE.bar) is)
+  SubElements <| \p is -> List.concatMap (func p) (CI.apply (CI.andThen CI.real CI.bars) is)
 
 
 {-| Add elements for each dot.
@@ -2315,45 +2537,45 @@ eachBar func =
           ]
 
       , C.eachBar <| \plane bar ->
-          let yValue = CE.getDependent bar in
-          [ C.label [] [ S.text (String.fromFloat yValue) ] (CE.getTop plane bar) ]
+          let yValue = CI.getY bar in
+          [ C.label [] [ S.text (String.fromFloat yValue) ] (CI.getTop plane bar) ]
       ]
 
-Use the functions in `Chart.Events` to access information about your dots.
+Use the functions in `Chart.Item` to access information about your dots.
 
 -}
-eachDot : (C.Plane -> CE.Product CE.Dot Float data -> List (Element data msg)) -> Element data msg
+eachDot : (C.Plane -> CI.One data CI.Dot -> List (Element data msg)) -> Element data msg
 eachDot func =
-  SubElements <| \p is -> List.concatMap (func p) (CE.group (CE.keep CE.realValues CE.dot) is)
+  SubElements <| \p is -> List.concatMap (func p) (CI.apply (CI.andThen CI.real CI.dots) is)
 
 
-{-| Add elements for each product. Works like `eachBar` and `eachDot`, but includes both
+{-| Add elements for each dot or bar. Works like `eachBar` and `eachDot`, but includes both
 bars and dots.
 
-Use the functions in `Chart.Events` to access information about your products.
+Use the functions in `Chart.Item` to access information about your items.
 
 -}
-eachProduct : (C.Plane -> CE.Product CE.Any Float data -> List (Element data msg)) -> Element data msg
-eachProduct func =
-  SubElements <| \p is -> List.concatMap (func p) (CE.group (CE.keep CE.realValues CE.product) is)
+eachItem : (C.Plane -> CI.One data CI.Any -> List (Element data msg)) -> Element data msg
+eachItem func =
+  SubElements <| \p is -> List.concatMap (func p) (CI.apply (CI.andThen CI.real CI.any) is)
 
 
 {-| Filter and group products in any way you'd like and add elements for each of them.
 
     C.chart []
-      [ C.eachCustom (CE.named "cats") <| \plane product ->
-          [ C.label [] [ S.text "hello" ] (CE.getTop plane product) ]
+      [ C.eachCustom (CI.named "cats") <| \plane product ->
+          [ C.label [] [ S.text "hello" ] (CI.getTop plane product) ]
       ]
 
 The above example adds a label for each product of the series named "cats".
 
-Use the functions in `Chart.Events` to access information about your items.
+Use the functions in `Chart.Item` to access information about your items.
 
 -}
-eachCustom : CE.Grouping (CE.Product CE.Any (Maybe Float) data) a -> (C.Plane -> a -> List (Element data msg)) -> Element data msg
+eachCustom : CI.Remodel (CI.One data CI.Any) a -> (C.Plane -> a -> List (Element data msg)) -> Element data msg
 eachCustom grouping func =
   SubElements <| \p items ->
-    let processed = CE.group grouping items in
+    let processed = CI.apply grouping items in
     List.concatMap (func p) processed
 
 
@@ -2394,6 +2616,12 @@ eachCustom grouping func =
           , CA.htmlAttrs [ HA.class "my-legends" ] -- Add arbitrary HTML attributes.
           ]
       ]
+
+See live example:
+- [Basic bar legends](https://www.elm-charts.org/documentation/bar-charts/legends).
+- [Basic dot legends](https://www.elm-charts.org/documentation/scatter-charts/legends).
+- [Basic line legends](https://www.elm-charts.org/documentation/line-charts/legends).
+- [Mutiple chart types](https://www.elm-charts.org/documentation/navigation/legends).
 -}
 legendsAt : (C.Axis -> Float) -> (C.Axis -> Float) -> List (Attribute (CS.Legends msg)) -> List (Attribute (CS.Legend msg)) -> Element data msg
 legendsAt toX toY attrs children =
@@ -2417,6 +2645,8 @@ legendsAt toX toY attrs children =
 
 The example above generates 10 ints on the x axis between x = -5 and x = 15. For each of those
 ints, it adds a tick and a label.
+
+See [live example](https://www.elm-charts.org/documentation/navigation/custom-labels).
 
 -}
 generate : Int -> CS.Generator a -> (C.Plane -> C.Axis) -> List (Attribute C.Axis) -> (C.Plane -> a -> List (Element data msg)) -> Element data msg
@@ -2520,6 +2750,8 @@ Other attributes you can use:
       ]
       [ S.text "Data from Fruits.com" ]
 
+See [live example](https://www.elm-charts.org/documentation/navigation/titles).
+
 -}
 labelAt : (C.Axis -> Float) -> (C.Axis -> Float) -> List (Attribute CS.Label) -> List (S.Svg msg) -> Element data msg
 labelAt toX toY attrs inner =
@@ -2547,6 +2779,7 @@ labelAt toX toY attrs inner =
           , CA.y2Svg 30
 
           , CA.break            -- "break" line, so it it has a 90° angle
+          , CA.flip             -- flip break to opposite direction
           , CA.tickLength       -- Add "ticks" at the ends of the line
           , CA.tickDirection    -- The angle of the ticks
 
@@ -2559,6 +2792,8 @@ labelAt toX toY attrs inner =
           , CA.attrs [ SA.id "my-line" ]
           ]
       ]
+
+See [live example](https://www.elm-charts.org/documentation/navigation/lines).
 
 -}
 line : List (Attribute CS.Line) -> Element data msg
@@ -2585,6 +2820,8 @@ line attrs =
           ]
       ]
 
+See [live example](https://www.elm-charts.org/documentation/navigation/rectangle).
+
 -}
 rect : List (Attribute CS.Rect) -> Element data msg
 rect attrs =
@@ -2592,6 +2829,8 @@ rect attrs =
 
 
 {-| Add arbitrary SVG. See `Chart.Svg` for handy SVG helpers.
+
+See [live example](https://www.elm-charts.org/documentation/navigation/arbitrary-svg-and-html).
 
 -}
 svg : (C.Plane -> S.Svg msg) -> Element data msg
@@ -2623,6 +2862,8 @@ svgAt toX toY xOff yOff view =
 
 
 {-| Add arbitrary HTML at a specific location.
+
+See [live example](https://www.elm-charts.org/documentation/navigation/arbitrary-svg-and-html).
 
 -}
 htmlAt : (C.Axis -> Float) -> (C.Axis -> Float) -> Float -> Float -> List (H.Attribute msg) -> List (H.Html msg) -> Element data msg
@@ -2699,7 +2940,7 @@ generateValues amount tick maybeFormat axis =
             { value = toValue i
             , label =
                 case maybeFormat of
-                  Just format -> format (toValue i)
+                  Just formatter -> formatter (toValue i)
                   Nothing -> toString i
             }
   in

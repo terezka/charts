@@ -4,6 +4,7 @@ module Page.Home exposing (Model, Params, Msg, init, subscriptions, exit, update
 import Browser exposing (Document)
 import Route exposing (Route)
 import Session exposing (Session)
+import Browser.Events as E
 import Browser.Navigation as Navigation
 import Charts.Landing as Landing
 import Charts.Dashboard1 as Dashboard1
@@ -24,9 +25,9 @@ import Element.Input as I
 import Element.Border as B
 import Element.Background as BG
 import Ui.Layout as Layout
-import Ui.CompactExample as CompactExample
 import Ui.Code as Code
 import Ui.Menu as Menu
+import Ui.Thumbnail as Thumbnail
 
 import Html as H
 import Html.Attributes as HA
@@ -37,6 +38,7 @@ import Svg.Attributes as SA
 import Chart as C
 import Chart.Attributes as CA
 import Chart.Events as CE
+import Chart.Item as CI
 import Chart.Svg as CS
 
 
@@ -47,7 +49,15 @@ type alias Model =
   { landing : Landing.Model
   , concise : Concise.Model
   , familiarToggle : Bool
-  , hovering : List (CE.Product CE.Any (Maybe Float) { year : Float, income : Float})
+  , hovering : List (CI.One { year : Float, income : Float} CI.Any)
+  , window : Session.Window
+  , menu : Menu.Model
+
+  , dashboard1 : Dashboard1.Model
+  , dashboard2 : Dashboard2.Model
+  , dashboard3 : Dashboard3.Model
+  , dashboard4 : Dashboard4.Model
+  , dashboard5 : Dashboard5.Model
   }
 
 
@@ -65,6 +75,14 @@ init key session params =
     , concise = Concise.init
     , familiarToggle = True
     , hovering = []
+    , window = session.window
+    , menu = Menu.init
+
+    , dashboard1 = Dashboard1.init
+    , dashboard2 = Dashboard2.init
+    , dashboard3 = Dashboard3.init
+    , dashboard4 = Dashboard4.init
+    , dashboard5 = Dashboard5.init
     }
   , Cmd.none
   )
@@ -72,7 +90,7 @@ init key session params =
 
 exit : Model -> Session -> Session
 exit model session =
-  session
+  { session | window = model.window }
 
 
 
@@ -80,17 +98,29 @@ exit model session =
 
 
 type Msg
-  = LandingMsg Landing.Msg
+  = OnResize Int Int
+  | MenuMsg Menu.Msg
+  | LandingMsg Landing.Msg
   | ConciseMsg Concise.Msg
   | FamiliarToggle
-  | OnHover (List (CE.Product CE.Any (Maybe Float) { year : Float, income : Float}))
+  | OnHover (List (CI.One { year : Float, income : Float} CI.Any))
   | None
-
+  | Dashboard1Msg Dashboard1.Msg
+  | Dashboard2Msg Dashboard2.Msg
+  | Dashboard3Msg Dashboard3.Msg
+  | Dashboard4Msg Dashboard4.Msg
+  | Dashboard5Msg Dashboard5.Msg
 
 
 update : Navigation.Key -> Msg -> Model -> ( Model, Cmd Msg )
 update key msg model =
   case msg of
+    OnResize width height ->
+      ( { model | window = { width = width, height = height } }, Cmd.none )
+
+    MenuMsg subMsg ->
+      ( { model | menu = Menu.update subMsg model.menu }, Cmd.none )
+
     ConciseMsg subMsg ->
       ( { model | concise = Concise.update subMsg model.concise }, Cmd.none )
 
@@ -103,6 +133,21 @@ update key msg model =
     OnHover hovering ->
       ( { model | hovering = hovering }, Cmd.none )
 
+    Dashboard1Msg subMsg ->
+      ( { model | dashboard1 = Dashboard1.update subMsg model.dashboard1 }, Cmd.none )
+
+    Dashboard2Msg subMsg ->
+      ( { model | dashboard2 = Dashboard2.update subMsg model.dashboard2 }, Cmd.none )
+
+    Dashboard3Msg subMsg ->
+      ( { model | dashboard3 = Dashboard3.update subMsg model.dashboard3 }, Cmd.none )
+
+    Dashboard4Msg subMsg ->
+      ( { model | dashboard4 = Dashboard4.update subMsg model.dashboard4 }, Cmd.none )
+
+    Dashboard5Msg subMsg ->
+      ( { model | dashboard5 = Dashboard5.update subMsg model.dashboard5 }, Cmd.none )
+
     None ->
       ( model, Cmd.none)
 
@@ -113,7 +158,7 @@ update key msg model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-  Sub.none
+  E.onResize OnResize
 
 
 
@@ -125,157 +170,282 @@ view model =
     { title = "elm-charts"
     , body =
         Layout.view
-          [ Menu.small
+          [ Menu.small model.window model.menu
+            |> E.map MenuMsg
 
-          , E.el [] (E.html <| H.map LandingMsg (Landing.view model.landing))
+          , viewLanding model
 
-          , E.column
-              [ E.width E.fill
-              , E.spacing 140
-              , E.paddingXY 0 120
-              ]
-              [ feature
-                  { title = "Intuitive"
-                  , body =
-                      [ E.text "Simple charts should be simple to make. The interface "
-                      , E.text "mirrors the element and attribute pattern which you already"
-                      , E.text "know and love. "
-                      , Layout.link "/quick-start" "Get started"
-                      , E.text " composing your chart in minutes!"
-                      ]
-                  , togglable = Just ( FamiliarToggle, model.familiarToggle )
-                  , chart = E.html <| H.map (\_ -> None) (Familiar.view ())
-                  , code = Familiar.smallCode
-                  , flipped = False
-                  , height = 350
-                  }
+          , Layout.title model.window
+              { title = "elm-charts"
+              , tag = [ E.text "Compose your chart with delight." ]
+              , padding = 30
+              }
 
-              , feature
-                  { title = "Flexible, yet concise"
-                  , body =
-                      [ E.text "No clutter, even with tricky requirements. Great support for "
-                      , E.text "interactivity, advanced labeling, guidence lines, and "
-                      , E.text "irregular details."
-                      ]
-                  , togglable = Nothing
-                  , chart = E.html <| H.map ConciseMsg (Concise.view model.concise)
-                  , code = Concise.smallCode
-                  , flipped = True
-                  , height = 300
-                  }
+          , case Layout.screen model.window of
+              Layout.Large ->
+                E.column
+                  [ E.width E.fill
+                  , E.spacing 80
+                  , E.paddingXY 0 40
+                  ]
+                  (List.map (viewFeature model.window) (features model))
 
-              , feature
-                  { title = "Plenty of examples"
-                  , body =
-                      [ E.text "Charts are visual and so should the documentation be! "
-                      , E.text "There is more than 100 examples on this site to help you "
-                      , E.text "compose your exact chart. "
-                      , E.link [ F.underline ] { url = "/documentation", label = E.text "Explore the catalog" }
-                      , E.text "."
-                      ]
-                  , togglable = Nothing
-                  , flipped = False
-                  , height = 350
-                  , chart =
-                      [ Examples.BarCharts__Histogram
-                      , Examples.BarCharts__TooltipStack
-                      , Examples.Interactivity__Zoom
-                      , Examples.Frame__Titles
-                      , Examples.LineCharts__Stepped
-                      , Examples.ScatterCharts__Labels
-                      , Examples.ScatterCharts__DataDependent
-                      , Examples.LineCharts__TooltipStack
-                      , Examples.LineCharts__Labels
-                      , Examples.BarCharts__BarLabels
-                      , Examples.BarCharts__Margin
-                      , Examples.ScatterCharts__Shapes
-                      ]
-                        |> List.map (Examples.view Examples.init)
-                        |> List.map (E.html >> E.el [ E.width (E.minimum 90 E.fill) ])
-                        |> E.wrappedRow
-                            [ E.width (E.px 550)
-                            , E.spacing 30
-                            , E.alignTop
-                            ]
-                        |> E.map (\_ -> None)
-                  , code = ""
-                  }
-              ]
+              Layout.Medium ->
+                E.column
+                  [ E.width E.fill
+                  , E.spacing 70
+                  , E.paddingXY 0 40
+                  ]
+                  (List.map (viewFeature model.window) (features model))
+
+              Layout.Small ->
+                E.column
+                  [ E.width E.fill
+                  , E.spacing 60
+                  , E.paddingXY 0 40
+                  ]
+                  (List.map (viewFeature model.window) (features model))
           ]
     }
 
 
-feature :
+viewLanding : Model -> E.Element Msg
+viewLanding model =
+  let viewChart func chart =
+        E.el [ E.width E.fill ] <| E.html <| H.map func chart
+
+      chart1 =
+         viewChart Dashboard1Msg (Dashboard1.view model.dashboard1)
+
+      chart2 =
+        viewChart Dashboard2Msg (Dashboard2.view model.dashboard2)
+
+      chart3 =
+        viewChart Dashboard3Msg (Dashboard3.view model.dashboard3)
+
+      chart4 =
+        viewChart Dashboard4Msg (Dashboard4.view model.dashboard4)
+  in
+  case Layout.screen model.window of
+    Layout.Large ->
+      E.row
+        [ E.width E.fill
+        , E.spacing 20
+        ]
+        [ chart1
+        , E.column
+            [ E.width E.fill, E.spacing 20 ]
+            [ E.row [ E.width E.fill, E.spacing 20 ] [ chart2, chart3 ]
+            , chart4
+            ]
+        ]
+
+    Layout.Medium ->
+      E.row
+        [ E.width E.fill
+        , E.spacing 20
+        ]
+        [ chart1
+        , E.column
+            [ E.width E.fill, E.spacing 20 ]
+            [ E.row [ E.width E.fill, E.spacing 20 ] [ chart2, chart3 ]
+            , chart4
+            ]
+        ]
+
+    Layout.Small ->
+      E.column
+        [ E.width E.fill
+        , E.spacing 20
+        ]
+        [ chart4
+        , E.row
+            [ E.width E.fill, E.spacing 20 ]
+            [ E.row [ E.width E.fill, E.spacing 20 ] [ chart2, chart3 ]
+            ]
+        ]
+
+
+
+-- FEATURE
+
+
+type alias Feature msg =
   { title : String
   , body : List (E.Element msg)
-  , height : Int
   , togglable : Maybe ( msg, Bool )
   , chart : E.Element msg
   , code : String
   , flipped : Bool
   }
-  -> E.Element msg
-feature config =
-  E.row
-    [ E.width E.fill
-    , E.height (E.minimum config.height E.fill)
-    , E.spacing 50
-    ] <| (if config.flipped then List.reverse else identity)
-    [ E.column
+
+
+viewFeature : Session.Window -> Feature msg  -> E.Element msg
+viewFeature window config =
+  let viewText =
+        E.textColumn
+          [ E.width E.fill
+          , E.alignTop
+          , E.alignLeft
+          , E.spacing 10
+          ]
+          [ Layout.heading window config.title
+          , E.paragraph
+              [ F.size 16
+              , F.color (E.rgb255 100 100 100)
+              , E.paddingXY 0 10
+              , E.width E.fill
+              ]
+              config.body
+          ]
+
+      viewImage =
+        case config.togglable of
+          Nothing ->
+            viewChart
+
+          Just ( onToggle, isToggled ) ->
+            E.column
+              [ E.width E.fill
+              , E.alignTop
+              , E.centerX
+              , E.spacing 20
+              ]
+              [ viewToggler onToggle isToggled
+              , if isToggled then
+                  viewCode
+                else
+                  viewChart
+
+              ]
+
+      viewToggler onToggle isToggled =
+        I.button
+          [ E.alignRight
+          , F.size 14
+          ]
+          { onPress = Just onToggle
+          , label = E.text (if isToggled then "Show chart" else "Show code")
+          }
+
+      viewChart =
+        E.el
+          [ E.width E.fill
+          , E.centerX
+          , E.alignTop
+          ]
+          config.chart
+
+      viewCode =
+        E.el
+          [ E.width E.fill
+          , E.height E.fill
+          , BG.color (E.rgb255 250 250 250)
+          ]
+          (Code.view { template = config.code, edits = [] })
+  in
+  case Layout.screen window of
+    Layout.Large ->
+      E.row
         [ E.width E.fill
-        , E.alignTop
-        , E.alignLeft
-        , E.spacing 10
-        , E.width (E.fillPortion 5)
+        , E.height E.fill
+        , E.spacing 60
+        ] <|
+        if config.flipped
+        then [ viewImage, viewText ]
+        else [ viewText, viewImage ]
+
+    Layout.Medium ->
+      E.column
+        [ E.width (E.maximum 550 E.fill)
+        , E.height E.fill
+        , E.spacing 30
+        , E.centerX
         ]
-        [ E.el
-            [ E.width E.fill
-            , F.size 40
-            ]
-            (E.text config.title)
-        , E.paragraph
-            [ F.size 16
-            , F.color (E.rgb255 120 120 120)
-            , E.paddingXY 0 10
-            ]
-            config.body
+        [ viewText, viewImage ]
+
+    Layout.Small ->
+      E.column
+        [ E.width E.fill
+        , E.height E.fill
+        , E.spacing 20
         ]
-    , case config.togglable of
-        Nothing ->
-          E.el [ E.centerX, E.alignTop ] config.chart
-
-        Just ( onToggle, isToggled ) ->
-          E.column
-            [ E.width (E.fillPortion 7)
-            , E.alignTop
-            ]
-            [ if isToggled then
-                E.el
-                  [ E.width E.fill
-                  , E.height E.fill
-                  , BG.color (E.rgb255 250 250 250)
-                  ]
-                  (Code.view { template = config.code, edits = [] })
-              else
-                E.el [ E.centerX, E.alignTop ] config.chart
-            , I.button
-                [ E.paddingXY 15 15
-                , F.size 14
-                , E.htmlAttribute (HA.style "position" "absolute")
-                , E.htmlAttribute (HA.style "right" "0")
-                ]
-                { onPress = Just onToggle
-                , label = E.text (if isToggled then "Show chart" else "Show code")
-                }
-            ]
-    ]
+        [ viewText, viewImage ]
 
 
-section : Int -> H.Html msg -> E.Element msg
-section portion chart =
-  E.column
-    [ E.alignTop
-    , E.width (E.fillPortion portion)
-    ]
-    [ E.html chart
-    ]
+
+features : Model -> List (Feature Msg)
+features model =
+  [ { title = "Intuitive"
+    , body =
+        [ E.text "The interface of elm-charts mirrors the element and attribute pattern which "
+        , E.text "you already know from regular HTML. "
+        , Layout.link "/quick-start" "Get started"
+        , E.text " composing your chart in minutes, then learn and add features gradually."
+        ]
+    , togglable = Just ( FamiliarToggle, model.familiarToggle )
+    , chart = E.html <| H.map (\_ -> None) (Familiar.view ())
+    , code = Familiar.smallCode
+    , flipped = False
+    }
+
+  , { title = "Flexible, yet concise"
+    , body =
+        [ E.text "No clutter, even with tricky requirements. Great support for "
+        , E.text "interactivity, advanced labeling, guidence lines, and "
+        , E.text "irregular details."
+        ]
+    , togglable = Nothing
+    , chart = E.html <| H.map ConciseMsg (Concise.view model.concise)
+    , code = Concise.smallCode
+    , flipped = True
+    }
+
+  , { title = "Learn by example"
+    , body =
+        [ E.text "Outside the regular elm documentation of the API, "
+        , E.text "there are "
+        , E.el [ F.bold ] (E.text "more than 100 examples ")
+        , E.text "on this site to help you "
+        , E.text "compose your exact chart. "
+        , E.link [ F.underline ] { url = "/documentation", label = E.text "Explore the catalog" }
+        , E.text "."
+        ]
+    , togglable = Nothing
+    , flipped = False
+    , chart =
+        let viewOne =
+              case Layout.screen model.window of
+                Layout.Large ->
+                  E.link [ E.width (E.minimum 90 E.fill), E.height E.fill ]
+
+                Layout.Medium ->
+                  E.link [ E.width (E.minimum 90 E.fill), E.height E.fill ]
+
+                Layout.Small ->
+                  E.link [ E.width (E.minimum 50 E.fill), E.height E.fill ]
+        in
+        [ Examples.BarCharts__Histogram
+        , Examples.BarCharts__TooltipStack
+        , Examples.Interactivity__Zoom
+        , Examples.Frame__Titles
+        , Examples.LineCharts__Stepped
+        , Examples.ScatterCharts__Labels
+        , Examples.ScatterCharts__DataDependent
+        , Examples.LineCharts__TooltipStack
+        , Examples.LineCharts__Labels
+        , Examples.BarCharts__BarLabels
+        , Examples.BarCharts__Margin
+        , Examples.ScatterCharts__Shapes
+        ]
+          |> List.map (\id -> { url = Thumbnail.toUrl id, label = E.html (Examples.view Examples.init id) })
+          |> List.map viewOne
+          |> E.wrappedRow
+              [ E.spacing 30
+              , E.alignTop
+              , E.width E.fill
+              ]
+          |> E.map (\_ -> None)
+    , code = ""
+    }
+  ]

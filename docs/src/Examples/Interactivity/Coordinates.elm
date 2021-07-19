@@ -9,6 +9,7 @@ import Chart as C
 import Chart.Svg as CS
 import Chart.Attributes as CA
 import Chart.Events as CE
+import Chart.Item as CI
 
 
 type alias Model =
@@ -41,13 +42,20 @@ view model =
     , CA.domain [ CA.lowest 0 CA.exactly, CA.highest 10 CA.exactly ]
     , CA.range [ CA.lowest 0 CA.exactly, CA.highest 10 CA.exactly ]
     ]
-    [ C.grid []
-    , C.xLabels []
-    , C.yLabels []
+    [ C.xLabels [ CA.withGrid ]
+    , C.yLabels [ CA.withGrid ]
 
     , case model.hovering of
         Just coords ->
-          C.series .x [ C.scatter .y [ CA.cross ] ] [ coords ]
+          C.series .x
+            [ C.scatter .y
+                [ CA.cross
+                , CA.borderWidth 2
+                , CA.border "white"
+                , CA.size 12
+                ]
+            ]
+            [ coords ]
 
         Nothing ->
           C.none
@@ -107,13 +115,20 @@ smallCode =
     , CA.domain [ CA.lowest 0 CA.exactly, CA.highest 10 CA.exactly ]
     , CA.range [ CA.lowest 0 CA.exactly, CA.highest 10 CA.exactly ]
     ]
-    [ C.grid []
-    , C.xLabels []
-    , C.yLabels []
+    [ C.xLabels [ CA.withGrid ]
+    , C.yLabels [ CA.withGrid ]
 
     , case model.hovering of
         Just coords ->
-          C.series .x [ C.scatter .y [ CA.cross ] ] [ coords ]
+          C.series .x
+            [ C.scatter .y
+                [ CA.cross
+                , CA.borderWidth 2
+                , CA.border "white"
+                , CA.size 12
+                ]
+            ]
+            [ coords ]
 
         Nothing ->
           C.none
@@ -140,6 +155,7 @@ import Chart as C
 import Chart.Svg as CS
 import Chart.Attributes as CA
 import Chart.Events as CE
+import Chart.Item as CI
 
 
 type alias Model =
@@ -172,13 +188,20 @@ view model =
     , CA.domain [ CA.lowest 0 CA.exactly, CA.highest 10 CA.exactly ]
     , CA.range [ CA.lowest 0 CA.exactly, CA.highest 10 CA.exactly ]
     ]
-    [ C.grid []
-    , C.xLabels []
-    , C.yLabels []
+    [ C.xLabels [ CA.withGrid ]
+    , C.yLabels [ CA.withGrid ]
 
     , case model.hovering of
         Just coords ->
-          C.series .x [ C.scatter .y [ CA.cross ] ] [ coords ]
+          C.series .x
+            [ C.scatter .y
+                [ CA.cross
+                , CA.borderWidth 2
+                , CA.border "white"
+                , CA.size 12
+                ]
+            ]
+            [ coords ]
 
         Nothing ->
           C.none

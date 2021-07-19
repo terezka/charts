@@ -45,7 +45,7 @@ module Chart.Attributes exposing
   , title, row, column
 
   -- GRID
-  , noGrid, dotGrid
+  , noGrid, withGrid, dotGrid
 
   -- COLORS
   , pink, purple, blue, green, orange, turquoise, red
@@ -106,12 +106,12 @@ below are only guiding.
 @docs title, row, column
 
 ## Grid
-@docs noGrid, dotGrid
+@docs noGrid, withGrid, dotGrid
 
 ## Colors
 @docs pink, purple, blue, green, orange, turquoise, red
 @docs magenta, brown, mint, yellow, gray
-@docs darkYellow, darkBlue, darkGray
+@docs darkYellow, darkBlue, darkGray, labelGray
 
 
 -}
@@ -318,6 +318,12 @@ noArrow config =
 noGrid : Attribute { a | grid : Bool }
 noGrid config =
   { config | grid = False }
+
+
+{-| -}
+withGrid : Attribute { a | grid : Bool }
+withGrid config =
+  { config | grid = True }
 
 
 {-| -}

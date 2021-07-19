@@ -19,16 +19,15 @@ view model =
     , CA.htmlAttrs
         [ HA.style "border" "1px solid darkgray" ]
     ]
-    [ C.grid []
-    , C.xAxis []
+    [ C.xAxis []
     , C.yAxis []
     , C.series .x
         [ C.interpolated .y [  ] [] ]
         [ { x = 0, y = 0 }
         , { x = 10, y = 10 }
         ]
-    , C.xLabels []
-    , C.yLabels []
+    , C.xLabels [ CA.withGrid ]
+    , C.yLabels [ CA.withGrid ]
     ]
 
 
@@ -70,16 +69,15 @@ smallCode =
     , CA.htmlAttrs
         [ HA.style "border" "1px solid darkgray" ]
     ]
-    [ C.grid []
-    , C.xAxis []
+    [ C.xAxis []
     , C.yAxis []
     , C.series .x
         [ C.interpolated .y [  ] [] ]
         [ { x = 0, y = 0 }
         , { x = 10, y = 10 }
         ]
-    , C.xLabels []
-    , C.yLabels []
+    , C.xLabels [ CA.withGrid ]
+    , C.yLabels [ CA.withGrid ]
     ]
   """
 
@@ -103,15 +101,14 @@ view model =
     , CA.htmlAttrs
         [ HA.style "border" "1px solid darkgray" ]
     ]
-    [ C.grid []
-    , C.xAxis []
+    [ C.xAxis []
     , C.yAxis []
     , C.series .x
         [ C.interpolated .y [  ] [] ]
         [ { x = 0, y = 0 }
         , { x = 10, y = 10 }
         ]
-    , C.xLabels []
-    , C.yLabels []
+    , C.xLabels [ CA.withGrid ]
+    , C.yLabels [ CA.withGrid ]
     ]
   """

@@ -18,8 +18,7 @@ view model =
         , CA.lowest 0 CA.exactly
         ]
     ]
-    [ C.grid []
-    , C.xAxis []
+    [ C.xAxis []
     , C.xTicks [ CA.ints ]
     , C.xLabels [ CA.ints ]
     ]

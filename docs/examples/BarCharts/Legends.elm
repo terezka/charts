@@ -14,9 +14,8 @@ view model =
     [ CA.height 300
     , CA.width 300
     ]
-    [ C.grid []
-    , C.xLabels []
-    , C.yLabels []
+    [ C.xLabels []
+    , C.yLabels [ CA.withGrid ]
     , C.bars [ CA.roundTop 0.3 ]
         [ C.bar .z []
             |> C.named "Cats"

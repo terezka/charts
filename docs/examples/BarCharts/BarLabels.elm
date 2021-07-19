@@ -6,6 +6,7 @@ import Svg as S
 import Chart as C
 import Chart.Attributes as CA
 import Chart.Events as CE
+import Chart.Item as CI
 
 
 view : Model -> H.Html Msg
@@ -15,9 +16,8 @@ view model =
     [ CA.height 300
     , CA.width 300
     ]
-    [ C.grid []
-    , C.xLabels []
-    , C.yLabels []
+    [ C.xLabels []
+    , C.yLabels [ CA.withGrid ]
     , C.bars []
         [ C.bar .q []
         , C.bar .p []

@@ -15,16 +15,15 @@ view model =
     , CA.width 300
     , CA.padding { top = 20, bottom = 20, left = 20, right = 20 }
     ]
-    [ C.grid []
-    , C.xAxis []
+    [ C.xAxis []
     , C.yAxis []
     , C.series .x
         [ C.interpolated .y [  ] [] ]
         [ { x = 0, y = 0 }
         , { x = 10, y = 10 }
         ]
-    , C.xLabels [ CA.pinned .min ]
-    , C.yLabels [ CA.pinned .min ]
+    , C.xLabels [ CA.pinned .min, CA.withGrid ]
+    , C.yLabels [ CA.pinned .min, CA.withGrid ]
     ]
 {-| @SMALL END -}
 {-| @LARGE END -}

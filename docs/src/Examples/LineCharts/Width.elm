@@ -15,9 +15,8 @@ view model =
     , CA.width 300
 
     ]
-    [ C.grid []
-    , C.xLabels []
-    , C.yLabels []
+    [ C.xLabels []
+    , C.yLabels [ CA.withGrid ]
     , C.series .x
         [ C.interpolated .y [ CA.width 4 ] []
         , C.interpolated .z [ CA.width 3 ] []
@@ -88,9 +87,8 @@ smallCode =
     , CA.width 300
 
     ]
-    [ C.grid []
-    , C.xLabels []
-    , C.yLabels []
+    [ C.xLabels []
+    , C.yLabels [ CA.withGrid ]
     , C.series .x
         [ C.interpolated .y [ CA.width 4 ] []
         , C.interpolated .z [ CA.width 3 ] []
@@ -115,9 +113,8 @@ view model =
     , CA.width 300
 
     ]
-    [ C.grid []
-    , C.xLabels []
-    , C.yLabels []
+    [ C.xLabels []
+    , C.yLabels [ CA.withGrid ]
     , C.series .x
         [ C.interpolated .y [ CA.width 4 ] []
         , C.interpolated .z [ CA.width 3 ] []

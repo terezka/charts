@@ -8,10 +8,11 @@ import Svg as S
 import Chart as C
 import Chart.Attributes as CA
 import Chart.Events as CE
+import Chart.Item as CI
 
 
 type alias Model =
-  { hovering : List (CE.Product CE.Any (Maybe Float) Datum) }
+  { hovering : List (CI.One Datum CI.Any) }
 
 
 init : Model
@@ -20,7 +21,7 @@ init =
 
 
 type Msg
-  = OnHover (List (CE.Product CE.Any (Maybe Float) Datum))
+  = OnHover (List (CI.One Datum CI.Any))
 
 
 update : Msg -> Model -> Model
@@ -35,12 +36,11 @@ view model =
   C.chart
     [ CA.height 300
     , CA.width 300
-    , CE.onMouseMove OnHover (CE.getNearest CE.product)
+    , CE.onMouseMove OnHover (CE.getNearest CI.any)
     , CE.onMouseLeave (OnHover [])
     ]
-    [ C.grid []
-    , C.xLabels []
-    , C.yLabels []
+    [ C.xLabels []
+    , C.yLabels [ CA.withGrid ]
 
     , C.bars
         [ CA.x1 .x1
@@ -51,8 +51,8 @@ view model =
         data
 
     , C.series .x
-        [ C.interpolated .p [  ] []
-        , C.interpolated .q [  ] []
+        [ C.interpolated .p [] []
+        , C.interpolated .q [] []
         ]
         data
 
@@ -100,12 +100,11 @@ smallCode =
   C.chart
     [ CA.height 300
     , CA.width 300
-    , CE.onMouseMove OnHover (CE.getNearest CE.product)
+    , CE.onMouseMove OnHover (CE.getNearest CI.any)
     , CE.onMouseLeave (OnHover [])
     ]
-    [ C.grid []
-    , C.xLabels []
-    , C.yLabels []
+    [ C.xLabels []
+    , C.yLabels [ CA.withGrid ]
 
     , C.bars
         [ CA.x1 .x1
@@ -116,8 +115,8 @@ smallCode =
         data
 
     , C.series .x
-        [ C.interpolated .p [  ] []
-        , C.interpolated .q [  ] []
+        [ C.interpolated .p [] []
+        , C.interpolated .q [] []
         ]
         data
 
@@ -135,10 +134,11 @@ import Svg as S
 import Chart as C
 import Chart.Attributes as CA
 import Chart.Events as CE
+import Chart.Item as CI
 
 
 type alias Model =
-  { hovering : List (CE.Product CE.Any (Maybe Float) Datum) }
+  { hovering : List (CI.One Datum CI.Any) }
 
 
 init : Model
@@ -147,7 +147,7 @@ init =
 
 
 type Msg
-  = OnHover (List (CE.Product CE.Any (Maybe Float) Datum))
+  = OnHover (List (CI.One Datum CI.Any))
 
 
 update : Msg -> Model -> Model
@@ -162,12 +162,11 @@ view model =
   C.chart
     [ CA.height 300
     , CA.width 300
-    , CE.onMouseMove OnHover (CE.getNearest CE.product)
+    , CE.onMouseMove OnHover (CE.getNearest CI.any)
     , CE.onMouseLeave (OnHover [])
     ]
-    [ C.grid []
-    , C.xLabels []
-    , C.yLabels []
+    [ C.xLabels []
+    , C.yLabels [ CA.withGrid ]
 
     , C.bars
         [ CA.x1 .x1
@@ -178,8 +177,8 @@ view model =
         data
 
     , C.series .x
-        [ C.interpolated .p [  ] []
-        , C.interpolated .q [  ] []
+        [ C.interpolated .p [] []
+        , C.interpolated .q [] []
         ]
         data
 

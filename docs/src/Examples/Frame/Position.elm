@@ -15,8 +15,7 @@ view model =
     [ CA.height 300
     , CA.width 300
     ]
-    [ C.grid []
-    , C.yAxis [ CA.pinned .max ]
+    [ C.yAxis [ CA.pinned .max ]
     , C.yTicks [ CA.pinned .max, CA.flip ]
     , C.yLabels [ CA.pinned .max, CA.flip ]
     ]
@@ -57,8 +56,7 @@ smallCode =
     [ CA.height 300
     , CA.width 300
     ]
-    [ C.grid []
-    , C.yAxis [ CA.pinned .max ]
+    [ C.yAxis [ CA.pinned .max ]
     , C.yTicks [ CA.pinned .max, CA.flip ]
     , C.yLabels [ CA.pinned .max, CA.flip ]
     ]
@@ -80,8 +78,7 @@ view model =
     [ CA.height 300
     , CA.width 300
     ]
-    [ C.grid []
-    , C.yAxis [ CA.pinned .max ]
+    [ C.yAxis [ CA.pinned .max ]
     , C.yTicks [ CA.pinned .max, CA.flip ]
     , C.yLabels [ CA.pinned .max, CA.flip ]
     ]

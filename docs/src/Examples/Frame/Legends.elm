@@ -9,6 +9,7 @@ import Svg as S
 import Chart as C
 import Chart.Attributes as CA
 import Chart.Events as CE
+import Chart.Item as CI
 
 
 view : Model -> H.Html Msg
@@ -18,10 +19,9 @@ view model =
     , CA.width 300
     , CA.margin { top = 30, bottom = 0, left = 0, right = 0 }
     ]
-    [ C.grid []
-    , C.xAxis []
-    , C.yLabels [ CA.pinned .min ]
-    , C.xLabels [ CA.noGrid ]
+    [ C.xAxis []
+    , C.yLabels [ CA.withGrid, CA.pinned .min ]
+    , C.xLabels []
 
     -- BAR CHART
     , C.bars
@@ -113,10 +113,9 @@ smallCode =
     , CA.width 300
     , CA.margin { top = 30, bottom = 0, left = 0, right = 0 }
     ]
-    [ C.grid []
-    , C.xAxis []
-    , C.yLabels [ CA.pinned .min ]
-    , C.xLabels [ CA.noGrid ]
+    [ C.xAxis []
+    , C.yLabels [ CA.withGrid, CA.pinned .min ]
+    , C.xLabels []
 
     -- BAR CHART
     , C.bars
@@ -160,6 +159,7 @@ import Svg as S
 import Chart as C
 import Chart.Attributes as CA
 import Chart.Events as CE
+import Chart.Item as CI
 
 
 view : Model -> H.Html Msg
@@ -169,10 +169,9 @@ view model =
     , CA.width 300
     , CA.margin { top = 30, bottom = 0, left = 0, right = 0 }
     ]
-    [ C.grid []
-    , C.xAxis []
-    , C.yLabels [ CA.pinned .min ]
-    , C.xLabels [ CA.noGrid ]
+    [ C.xAxis []
+    , C.yLabels [ CA.withGrid, CA.pinned .min ]
+    , C.xLabels []
 
     -- BAR CHART
     , C.bars

@@ -8,10 +8,11 @@ import Svg as S
 import Chart as C
 import Chart.Attributes as CA
 import Chart.Events as CE
+import Chart.Item as CI
 
 
 type alias Model =
-  { hovering : List (CE.Product CE.Dot (Maybe Float) Datum) }
+  { hovering : List (CI.One Datum CI.Dot) }
 
 
 init : Model
@@ -20,7 +21,7 @@ init =
 
 
 type Msg
-  = OnHover (List (CE.Product CE.Dot (Maybe Float) Datum))
+  = OnHover (List (CI.One Datum CI.Dot))
 
 
 update : Msg -> Model -> Model
@@ -36,12 +37,11 @@ view model =
     [ CA.height 300
     , CA.width 300
     , CA.padding { top = 0, bottom = 0, left = 30, right = 15 }
-    , CE.onMouseMove OnHover (CE.getNearest CE.dot)
+    , CE.onMouseMove OnHover (CE.getNearest CI.dots)
     , CE.onMouseLeave (OnHover [])
     ]
-    [ C.grid []
-    , C.xLabels []
-    , C.yLabels []
+    [ C.xLabels [ CA.withGrid ]
+    , C.yLabels [ CA.withGrid ]
     , C.series .x
         [ C.scatter .y [ CA.opacity 0.2, CA.borderWidth 1 ]
             |> C.variation (\i d -> [ CA.size (d.q * 20) ])
@@ -100,12 +100,11 @@ smallCode =
     [ CA.height 300
     , CA.width 300
     , CA.padding { top = 0, bottom = 0, left = 30, right = 15 }
-    , CE.onMouseMove OnHover (CE.getNearest CE.dot)
+    , CE.onMouseMove OnHover (CE.getNearest CI.dots)
     , CE.onMouseLeave (OnHover [])
     ]
-    [ C.grid []
-    , C.xLabels []
-    , C.yLabels []
+    [ C.xLabels [ CA.withGrid ]
+    , C.yLabels [ CA.withGrid ]
     , C.series .x
         [ C.scatter .y [ CA.opacity 0.2, CA.borderWidth 1 ]
             |> C.variation (\\i d -> [ CA.size (d.q * 20) ])
@@ -129,10 +128,11 @@ import Svg as S
 import Chart as C
 import Chart.Attributes as CA
 import Chart.Events as CE
+import Chart.Item as CI
 
 
 type alias Model =
-  { hovering : List (CE.Product CE.Dot (Maybe Float) Datum) }
+  { hovering : List (CI.One Datum CI.Dot) }
 
 
 init : Model
@@ -141,7 +141,7 @@ init =
 
 
 type Msg
-  = OnHover (List (CE.Product CE.Dot (Maybe Float) Datum))
+  = OnHover (List (CI.One Datum CI.Dot))
 
 
 update : Msg -> Model -> Model
@@ -157,12 +157,11 @@ view model =
     [ CA.height 300
     , CA.width 300
     , CA.padding { top = 0, bottom = 0, left = 30, right = 15 }
-    , CE.onMouseMove OnHover (CE.getNearest CE.dot)
+    , CE.onMouseMove OnHover (CE.getNearest CI.dots)
     , CE.onMouseLeave (OnHover [])
     ]
-    [ C.grid []
-    , C.xLabels []
-    , C.yLabels []
+    [ C.xLabels [ CA.withGrid ]
+    , C.yLabels [ CA.withGrid ]
     , C.series .x
         [ C.scatter .y [ CA.opacity 0.2, CA.borderWidth 1 ]
             |> C.variation (\\i d -> [ CA.size (d.q * 20) ])

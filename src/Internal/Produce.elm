@@ -11,7 +11,7 @@ import Chart.Attributes as CA
 import Chart.Events as CE
 import Internal.Svg as S
 import Internal.Helpers as Helpers
-import Internal.Group as G
+import Internal.Many as M
 import Internal.Item as I
 
 
@@ -35,13 +35,13 @@ defaultBars =
   , roundTop = 0
   , roundBottom = 0
   , grouped = True
-  , grid = True
+  , grid = False
   , x1 = Nothing
   , x2 = Nothing
   }
 
 
-toBarSeries : Int -> List (CA.Attribute (Bars data)) -> List (P.Property data String () S.Bar) -> List data -> List (G.Group () S.Bar (Maybe Float) data)
+toBarSeries : Int -> List (CA.Attribute (Bars data)) -> List (P.Property data String () S.Bar) -> List data -> List (M.Many (I.One data S.Bar))
 toBarSeries elIndex barsAttrs properties data =
   let barsConfig =
         Helpers.apply barsAttrs defaultBars
@@ -76,18 +76,22 @@ toBarSeries elIndex barsAttrs properties data =
             { datum = curr, start = toStart curr, end = toEnd curr }
 
 
+      toSeriesItem : List { datum : data, start : Float, end : Float } -> List (P.Config data String () S.Bar) -> Int -> Int -> P.Config data String () S.Bar -> Int -> Maybe (M.Many (I.One data S.Bar))
       toSeriesItem bins sections barIndex sectionIndex section colorIndex =
-        I.Item
-          { config =
-              { config = ()
-              , items = List.indexedMap (toBarItem sections barIndex sectionIndex section colorIndex) bins
-              }
-          , toLimits = \c -> Coord.foldPosition I.getLimits c.items
-          , toPosition = \plane c -> Coord.foldPosition (I.getPosition plane) c.items
-          , toSvg = \plane config _ -> S.g [ SA.class "elm-charts__bar-series" ] (List.map (I.toSvg plane) config.items)
-          , toHtml = \c -> [ H.table [ HA.style "margin" "0" ] (List.concatMap I.toHtml c.items) ]
-          }
+        case List.indexedMap (toBarItem sections barIndex sectionIndex section colorIndex) bins of
+          [] ->
+            Nothing
 
+          first :: rest ->
+            Just <| I.Rendered
+              { config = { items = ( first, rest ) }
+              , toLimits = \c -> Coord.foldPosition I.getLimits ((\(x, xs) -> x :: xs) c.items)
+              , toPosition = \plane c -> Coord.foldPosition (I.getPosition plane) ((\(x, xs) -> x :: xs) c.items)
+              , toSvg = \plane c _ -> S.g [ SA.class "elm-charts__bar-series" ] (List.map (I.toSvg plane) ((\(x, xs) -> x :: xs) c.items))
+              , toHtml = \c -> [ H.table [ HA.style "margin" "0" ] (List.concatMap I.toHtml ((\(x, xs) -> x :: xs) c.items)) ]
+              }
+
+      toBarItem : List (P.Config data String () S.Bar) -> Int -> Int -> P.Config data String () S.Bar -> Int -> Int -> { datum : data, start : Float, end : Float } -> I.One data S.Bar
       toBarItem sections barIndex sectionIndex section colorIndex dataIndex bin =
         let numOfBars = if barsConfig.grouped then toFloat (List.length properties) else 1
             numOfSections = toFloat (List.length sections)
@@ -128,39 +132,45 @@ toBarSeries elIndex barsAttrs properties data =
                       _ -> p)
                 |> (\p -> if p.border == defaultColor then { p | border = p.color } else p)
         in
-        I.Item
+        I.Rendered
           { config =
               { product = product
               , values =
                   { datum = bin.datum
                   , x1 = start
                   , x2 = end
-                  , yOrg = value
-                  , y = value
+                  , y = Maybe.withDefault 0 value
+                  , isReal =
+                      case value of
+                        Just _ -> True
+                        Nothing -> False
                   }
               , tooltipInfo =
                   { property = barIndex
                   , stack = sectionIndex
                   , data = dataIndex
                   , index = colorIndex
+                  , elIndex = elIndex
                   , name = section.meta
                   , color = product.color
                   , border = product.border
                   , borderWidth = product.borderWidth
+                  , formatted = section.format bin.datum
                   }
               , toAny = I.Bar
               }
           , toLimits = \config -> { x1 = x1, x2 = x2, y1 = min y1 y2, y2 = max y1 y2 }
           , toPosition = \_ config -> { x1 = x1, x2 = x2, y1 = y1, y2 = y2 }
           , toSvg = \plane config position -> S.bar plane product position
-          , toHtml = \c -> [ tooltipRow c.tooltipInfo.color (toDefaultName colorIndex c.tooltipInfo.name) value ]
+          , toHtml = \c -> [ tooltipRow c.tooltipInfo.color (toDefaultName colorIndex c.tooltipInfo.name) (section.format bin.datum) ]
           }
   in
   Helpers.withSurround data toBin |> \bins ->
     List.map P.toConfigs properties
-      |> List.indexedMap (\barIndex props -> List.indexedMap (toSeriesItem bins props barIndex) (List.reverse props))
+      |> List.indexedMap (\barIndex stacks -> List.indexedMap (toSeriesItem bins stacks barIndex) (List.reverse stacks))
       |> List.concat
       |> List.indexedMap (\propIndex f -> f (elIndex + propIndex))
+      |> List.filterMap identity
 
 
 
@@ -168,7 +178,7 @@ toBarSeries elIndex barsAttrs properties data =
 
 
 {-| -}
-toDotSeries : Int -> (data -> Float) -> List (Property data String S.Interpolation S.Dot) -> List data -> List (G.Group S.Interpolation S.Dot (Maybe Float) data)
+toDotSeries : Int -> (data -> Float) -> List (Property data String S.Interpolation S.Dot) -> List data -> List (M.Many (I.One data S.Dot))
 toDotSeries elIndex toX properties data =
   let toInterConfig attrs =
         Helpers.apply attrs S.defaultInterpolation
@@ -176,45 +186,47 @@ toDotSeries elIndex toX properties data =
       toDotConfig attrs =
         Helpers.apply attrs S.defaultDot
 
-      toSeriesItem lineIndex props sublineIndex prop colorIndex =
-        let dotItems = List.indexedMap (toDotItem lineIndex sublineIndex colorIndex prop interConfig) data
-            defaultOpacity = if List.length props > 1 then 0.4 else 0
+      toSeriesItem lineIndex stacks stackIndex prop colorIndex =
+        let dotItems = List.indexedMap (toDotItem lineIndex stackIndex colorIndex prop interConfig) data
+            defaultOpacity = if List.length stacks > 1 then 0.4 else 0
             interAttr = [ CA.color (Helpers.toDefaultColor colorIndex), CA.opacity defaultOpacity ] ++ prop.inter
             interConfig = toInterConfig interAttr
         in
-        I.Item
-          { config =
-              { items = dotItems
-              , config = interConfig
-              }
-          , toSvg = \plane _ _ ->
-              let toBottom datum_ =
-                    Maybe.map2 (\real visual -> visual - real) (prop.value datum_) (prop.visual datum_)
-              in
-              S.g
-                [ SA.class "elm-charts__series" ]
-                [ S.area plane toX (Just toBottom) prop.visual interConfig data
-                , S.interpolation plane toX prop.visual interConfig data
-                , S.g [ SA.class "elm-charts__dots" ] (List.map (I.toSvg plane) dotItems)
-                ]
-          , toLimits = \c -> Coord.foldPosition I.getLimits c.items
-          , toPosition = \plane c -> Coord.foldPosition (I.getPosition plane) c.items
-          , toHtml = \c -> [ H.table [ HA.style "margin" "0" ] (List.concatMap I.toHtml c.items) ]
-          }
+        case dotItems of
+          [] ->
+            Nothing
 
-      toDotItem lineIndex sublineIndex colorIndex prop interConfig dataIndex datum_ =
+          first :: rest ->
+            Just <| I.Rendered
+              { config = { items = ( first, rest ) }
+              , toSvg = \plane _ _ ->
+                  let toBottom datum_ =
+                        Maybe.map2 (\real visual -> visual - real) (prop.value datum_) (prop.visual datum_)
+                  in
+                  S.g
+                    [ SA.class "elm-charts__series" ]
+                    [ S.area plane toX (Just toBottom) prop.visual interConfig data
+                    , S.interpolation plane toX prop.visual interConfig data
+                    , S.g [ SA.class "elm-charts__dots" ] (List.map (I.toSvg plane) dotItems)
+                    ]
+              , toLimits = \c -> Coord.foldPosition I.getLimits ((\(x, xs) -> x :: xs) c.items)
+              , toPosition = \plane c -> Coord.foldPosition (I.getPosition plane) ((\(x, xs) -> x :: xs) c.items)
+              , toHtml = \c -> [ H.table [ HA.style "margin" "0" ] (List.concatMap I.toHtml ((\(x, xs) -> x :: xs) c.items)) ]
+              }
+
+      toDotItem lineIndex stackIndex colorIndex prop interConfig dataIndex datum_ =
         let defaultAttrs = [ CA.color interConfig.color, CA.border interConfig.color, if interConfig.method == Nothing then CA.circle else identity ]
-            dotAttrs = defaultAttrs ++ prop.attrs ++ prop.extra lineIndex sublineIndex dataIndex prop.meta datum_
+            dotAttrs = defaultAttrs ++ prop.attrs ++ prop.extra lineIndex stackIndex dataIndex prop.meta datum_
             config = toDotConfig dotAttrs
             x_ = toX datum_
             y_ = Maybe.withDefault 0 (prop.visual datum_)
         in
-        I.Item
+        I.Rendered
           { toSvg = \plane _ _ ->
               case prop.value datum_ of
                 Nothing -> S.text ""
                 Just _ -> S.dot plane .x .y config { x = x_, y = y_ }
-          , toHtml = \c -> [ tooltipRow c.tooltipInfo.color (toDefaultName colorIndex c.tooltipInfo.name) (prop.value datum_) ]
+          , toHtml = \c -> [ tooltipRow c.tooltipInfo.color (toDefaultName colorIndex c.tooltipInfo.name) (prop.format datum_) ]
           , toLimits = \_ -> { x1 = x_, x2 = x_, y1 = y_, y2 = y_ }
           , toPosition = \plane _ ->
               let radius = Maybe.withDefault 0 <| Maybe.map (S.toRadius config.size) config.shape
@@ -232,14 +244,18 @@ toDotSeries elIndex toX properties data =
                   { datum = datum_
                   , x1 = x_
                   , x2 = x_
-                  , yOrg = prop.value datum_
-                  , y = prop.value datum_
+                  , y = y_
+                  , isReal =
+                      case prop.value datum_ of
+                        Just _ -> True
+                        Nothing -> False
                   }
               , tooltipInfo =
                   { property = lineIndex
-                  , stack = sublineIndex
+                  , stack = stackIndex
                   , data = dataIndex
                   , index = colorIndex
+                  , elIndex = elIndex
                   , name = prop.meta
                   , color =
                       case config.color of
@@ -247,23 +263,25 @@ toDotSeries elIndex toX properties data =
                         _ -> config.color
                   , border = config.border
                   , borderWidth = config.borderWidth
+                  , formatted = prop.format datum_
                   }
               , toAny = I.Dot
               }
           }
   in
   List.map P.toConfigs properties
-    |> List.indexedMap (\lineIndex ps -> List.indexedMap (toSeriesItem lineIndex ps) ps)
+    |> List.indexedMap (\lineIndex stacks -> List.indexedMap (toSeriesItem lineIndex stacks) stacks)
     |> List.concat
     |> List.indexedMap (\propIndex f -> f (elIndex + propIndex))
+    |> List.filterMap identity
 
 
 
 -- RENDER
 
 
-tooltipRow : String -> String -> Maybe Float -> H.Html msg
-tooltipRow color title maybeValue =
+tooltipRow : String -> String -> String -> H.Html msg
+tooltipRow color title text =
   H.tr
     []
     [ H.td
@@ -276,7 +294,7 @@ tooltipRow color title maybeValue =
         [ HA.style "text-align" "right"
         , HA.style "padding" "0"
         ]
-        [ H.text (Maybe.withDefault "N/A" <| Maybe.map String.fromFloat maybeValue) ]
+        [ H.text text ]
     ]
 
 

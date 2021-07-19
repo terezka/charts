@@ -15,6 +15,7 @@ import Dict
 import Chart as C
 import Chart.Attributes as CA
 import Chart.Events as CE
+import Chart.Item as CI
 import Chart.Svg as CS
 
 import Element as E
@@ -27,7 +28,7 @@ import Chart.Events
 
 type alias Model =
   { selection : Maybe { a : CS.Point, b : CS.Point }
-  , hovering : List (CE.Product CS.Dot (Maybe Float) Salary.Datum)
+  , hovering : List (CI.One Salary.Datum CI.Dot)
   , window : Maybe CS.Position
   , year : Float
   }
@@ -43,7 +44,7 @@ init =
 
 
 type Msg
-  = OnHover (List (CE.Product CS.Dot (Maybe Float) Salary.Datum)) CS.Point
+  = OnHover (List (CI.One Salary.Datum CI.Dot)) CS.Point
   | OnMouseDown CS.Point
   | OnMouseUp CS.Point
   | OnReset
@@ -107,7 +108,7 @@ view model =
           Nothing -> [ CA.lowest 76 CA.orHigher ]
 
     , CE.on "mousemove" <|
-        CE.map2 OnHover (CE.getNearest CE.dot) CE.getCoords
+        CE.map2 OnHover (CE.getNearest CI.dots) CE.getCoords
 
     , CE.onMouseDown OnMouseDown CE.getCoords
     , CE.onMouseUp OnMouseUp CE.getCoords
@@ -150,10 +151,10 @@ view model =
 
     , salarySeries model 0.7 5 200
 
-    , C.eachProduct <| \p product ->
-        let datum = CE.getDatum product
-            color = CE.getColor product
-            top = CE.getTop p product
+    , C.eachItem <| \p product ->
+        let datum = CI.getData product
+            color = CI.getColor product
+            top = CI.getTop p product
         in
         if String.startsWith "251 " datum.sector then
           [ C.line [ CA.color color, CA.break, CA.x1 top.x, CA.y1 top.y, CA.x2Svg 10, CA.y2Svg 10 ]
@@ -289,9 +290,9 @@ salarySeries model border highlightSize size =
       (List.filter (.year >> (==) model.year) Salary.data)
 
 
-tooltipContent : CE.Product CS.Dot (Maybe Float) Salary.Datum -> H.Html msg
+tooltipContent : CI.One Salary.Datum CI.Dot -> H.Html msg
 tooltipContent hovered =
-  let datum = CE.getDatum hovered
+  let datum = CI.getData hovered
       precentOfWomen = round (Salary.womenPerc datum)
       percentOfSalary = round (Maybe.withDefault 0 (Salary.womenSalaryPerc datum))
       percentOfSalaryMen = round (Maybe.withDefault 0 (Salary.menSalaryPerc datum))
@@ -304,7 +305,7 @@ tooltipContent hovered =
         , HA.style "line-break" "normal"
         , HA.style "white-space" "normal"
         , HA.style "line-height" "1.25"
-        , HA.style "color" (CE.getColor hovered)
+        , HA.style "color" (CI.getColor hovered)
         ]
         [ H.text datum.sector ]
 

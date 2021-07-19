@@ -7,10 +7,11 @@ import Html as H
 import Chart as C
 import Chart.Attributes as CA
 import Chart.Events as CE
+import Chart.Item as CI
 
 
 type alias Model =
-  { hovering : List (CE.Group (CE.Stack Datum) CE.Any (Maybe Float) Datum) }
+  { hovering : List (CI.Many Datum CI.Any) }
 
 
 init : Model
@@ -19,7 +20,7 @@ init =
 
 
 type Msg
-  = OnHover (List (CE.Group (CE.Stack Datum) CE.Any (Maybe Float) Datum))
+  = OnHover (List (CI.Many Datum CI.Any))
 
 
 update : Msg -> Model -> Model
@@ -34,12 +35,11 @@ view model =
   C.chart
     [ CA.height 300
     , CA.width 300
-    , CE.onMouseMove OnHover (CE.getNearest CE.stack)
+    , CE.onMouseMove OnHover (CE.getNearest CI.stacks)
     , CE.onMouseLeave (OnHover [])
     ]
-    [ C.grid []
-    , C.xLabels []
-    , C.yLabels []
+    [ C.xLabels []
+    , C.yLabels [ CA.withGrid ]
     , C.series .x
         [ C.stacked
           [ C.interpolated .y
@@ -97,12 +97,11 @@ smallCode =
   C.chart
     [ CA.height 300
     , CA.width 300
-    , CE.onMouseMove OnHover (CE.getNearest CE.stack)
+    , CE.onMouseMove OnHover (CE.getNearest CI.stacks)
     , CE.onMouseLeave (OnHover [])
     ]
-    [ C.grid []
-    , C.xLabels []
-    , C.yLabels []
+    [ C.xLabels []
+    , C.yLabels [ CA.withGrid ]
     , C.series .x
         [ C.stacked
           [ C.interpolated .y
@@ -127,10 +126,11 @@ import Html as H
 import Chart as C
 import Chart.Attributes as CA
 import Chart.Events as CE
+import Chart.Item as CI
 
 
 type alias Model =
-  { hovering : List (CE.Group (CE.Stack Datum) CE.Any (Maybe Float) Datum) }
+  { hovering : List (CI.Many Datum CI.Any) }
 
 
 init : Model
@@ -139,7 +139,7 @@ init =
 
 
 type Msg
-  = OnHover (List (CE.Group (CE.Stack Datum) CE.Any (Maybe Float) Datum))
+  = OnHover (List (CI.Many Datum CI.Any))
 
 
 update : Msg -> Model -> Model
@@ -154,12 +154,11 @@ view model =
   C.chart
     [ CA.height 300
     , CA.width 300
-    , CE.onMouseMove OnHover (CE.getNearest CE.stack)
+    , CE.onMouseMove OnHover (CE.getNearest CI.stacks)
     , CE.onMouseLeave (OnHover [])
     ]
-    [ C.grid []
-    , C.xLabels []
-    , C.yLabels []
+    [ C.xLabels []
+    , C.yLabels [ CA.withGrid ]
     , C.series .x
         [ C.stacked
           [ C.interpolated .y

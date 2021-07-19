@@ -7,10 +7,12 @@ import Chart as C
 import Chart.Svg as CS
 import Chart.Attributes as CA
 import Chart.Events as CE
+import Chart.Item as CI
+import Chart.Item as CI
 
 
 type alias Model =
-  { hovering : List (CE.Group (CE.Stack Datum) CE.Any (Maybe Float) Datum) }
+  { hovering : List (CI.Many Datum CI.Any) }
 
 
 init : Model
@@ -19,7 +21,7 @@ init =
 
 
 type Msg
-  = OnHover (List (CE.Group (CE.Stack Datum) CE.Any (Maybe Float) Datum))
+  = OnHover (List (CI.Many Datum CI.Any))
 
 
 update : Msg -> Model -> Model
@@ -35,12 +37,11 @@ view model =
   C.chart
     [ CA.height 300
     , CA.width 500
-    , CA.static
-    , CE.onMouseMove OnHover (CE.getNearest CE.stack)
+    , CA.margin { top = 10, left = 40, right = 0, bottom = 25 }
+    , CE.onMouseMove OnHover (CE.getNearest CI.stacks)
     , CE.onMouseLeave (OnHover [])
     ]
-    [ C.grid []
-    , C.yLabels [ CA.format (\y -> String.fromFloat y ++ "M")]
+    [ C.yLabels [ CA.format (\y -> String.fromFloat y ++ "M")]
 
     , C.bars
         [ CA.roundTop 0.2
@@ -79,17 +80,18 @@ view model =
           C.productLabel [ CA.moveDown 18, CA.color white ]
       in
       C.each model.hovering <| \p stack ->
-        List.map toBrightLabel (CE.getProducts stack)
+        List.map toBrightLabel (CI.getMembers stack)
 
     , C.eachBin <| \p bin ->
-        let common = CE.getCommonality bin
-            yPos = (CE.getTop p bin).y
-            xMid = (CE.getCenter p bin).x
+        let bar = CI.getMember bin
+            datum = CI.getOneData bin
+            yPos = (CI.getTop p bin).y
+            xMid = (CI.getCenter p bin).x
         in
-        if common.datum.country == "Finland" then
+        if datum.country == "Finland" then
           [ C.line
-              [ CA.x1 common.start
-              , CA.x2 common.end
+              [ CA.x1 (CI.getX1 bar)
+              , CA.x2 (CI.getX2 bar)
               , CA.y1 yPos
               , CA.moveUp 15
               , CA.tickLength 5

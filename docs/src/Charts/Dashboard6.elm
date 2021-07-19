@@ -16,6 +16,7 @@ import Time
 import Chart as C
 import Chart.Attributes as CA
 import Chart.Events as CE
+import Chart.Item as CI
 import Chart.Svg as CS
 
 import Element as E
@@ -27,7 +28,7 @@ import Chart.Events
 
 
 type alias Model =
-  { hovering : List (CE.Product CE.Bar (Maybe Float) Datum)
+  { hovering : List (CI.One Datum CI.Bar)
   }
 
 
@@ -38,7 +39,7 @@ init =
 
 
 type Msg
-  = OnHover (List (CE.Product CE.Bar (Maybe Float) Datum))
+  = OnHover (List (CI.One Datum CI.Bar))
 
 
 update : Msg -> Model -> Model
@@ -54,7 +55,7 @@ view model =
     [ CA.height 300
     , CA.width 500
     , CA.margin { top = 0, bottom = 15, left = 20, right = 0 }
-    , CE.onMouseMove OnHover (CE.getNearestX CE.bar)
+    , CE.onMouseMove OnHover (CE.getNearestX CI.bars)
     , CE.onMouseLeave (OnHover [])
     ]
     [ C.grid []
@@ -97,14 +98,14 @@ view model =
                     , CA.fontSize 16
                     , CA.uppercase
                     ]
-                    [ S.text (CE.getName bar) ]
-                    (CE.getBottom p bar)
+                    [ S.text (CI.getName bar) ]
+                    (CI.getBottom p bar)
             in
-            List.map toCountryLabel (CE.getProducts first)
+            List.map toCountryLabel (CI.getMembers first)
 
     , C.eachBin <| \p bin ->
-        let common = CE.getCommonality bin in
-        [ C.label [ CA.moveDown 20, CA.fontSize 16 ] [ S.text (String.fromFloat common.datum.year) ] (CE.getBottom p bin) ]
+        let datum = CI.getOneData bin in
+        [ C.label [ CA.moveDown 20, CA.fontSize 16 ] [ S.text (String.fromFloat datum.year) ] (CI.getBottom p bin) ]
     ]
 
 

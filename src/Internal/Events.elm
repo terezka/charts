@@ -10,7 +10,7 @@ import Chart.Attributes as CA exposing (Attribute)
 import Internal.Svg as CS
 import Internal.Item as I
 import Internal.Helpers as Helpers
-import Internal.Group as G
+import Internal.Many as M
 
 
 
@@ -29,7 +29,7 @@ type Event data msg =
 
 
 type Decoder data msg =
-  Decoder (List (I.Product I.Any (Maybe Float) data) -> Plane -> Point -> msg)
+  Decoder (List (I.One data I.Any) -> Plane -> Point -> msg)
 
 
 {-| -}
@@ -39,34 +39,34 @@ getCoords =
 
 
 {-| -}
-getNearest : G.Grouping (I.Product I.Any (Maybe Float) data) (I.Item result) -> Decoder data (List (I.Item result))
-getNearest (G.Grouping toPos _ as grouping) =
+getNearest : M.Remodel (I.One data I.Any) (I.Rendered result) -> Decoder data (List (I.Rendered result))
+getNearest (M.Remodel toPos _ as grouping) =
   Decoder <| \items plane ->
-    let groups = G.group grouping items in
+    let groups = M.apply grouping items in
     CS.getNearest (toPos plane) groups plane
 
 
 {-| -}
-getWithin : Float -> G.Grouping (I.Product I.Any (Maybe Float) data) (I.Item result) -> Decoder data (List (I.Item result))
-getWithin radius (G.Grouping toPos _ as grouping) =
+getWithin : Float -> M.Remodel (I.One data I.Any) (I.Rendered result) -> Decoder data (List (I.Rendered result))
+getWithin radius (M.Remodel toPos _ as grouping) =
   Decoder <| \items plane ->
-    let groups = G.group grouping items in
+    let groups = M.apply grouping items in
     CS.getWithin radius (toPos plane) groups plane
 
 
 {-| -}
-getNearestX : G.Grouping (I.Product I.Any (Maybe Float) data) (I.Item result) -> Decoder data (List (I.Item result))
-getNearestX (G.Grouping toPos _ as grouping) =
+getNearestX : M.Remodel (I.One data I.Any) (I.Rendered result) -> Decoder data (List (I.Rendered result))
+getNearestX (M.Remodel toPos _ as grouping) =
   Decoder <| \items plane ->
-    let groups = G.group grouping items in
+    let groups = M.apply grouping items in
     CS.getNearestX (toPos plane) groups plane
 
 
 {-| -}
-getWithinX : Float -> G.Grouping (I.Product I.Any (Maybe Float) data) (I.Item result) -> Decoder data (List (I.Item result))
-getWithinX radius (G.Grouping toPos _ as grouping) =
+getWithinX : Float -> M.Remodel (I.One data I.Any) (I.Rendered result) -> Decoder data (List (I.Rendered result))
+getWithinX radius (M.Remodel toPos _ as grouping) =
   Decoder <| \items plane ->
-    let groups = G.group grouping items in
+    let groups = M.apply grouping items in
     CS.getWithinX radius (toPos plane) groups plane
 
 

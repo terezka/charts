@@ -1,5 +1,6 @@
 module Ui.Tabs exposing (..)
 
+import Html.Attributes as HA
 import Ui.Layout as Layout
 import Ui.Menu as Menu
 import Ui.Code as Code
@@ -23,15 +24,22 @@ type alias Config a =
 
 view : Config a -> E.Element msg
 view config =
-  E.el [ E.width E.fill, E.paddingXY 0 30 ] <|
+  E.el
+    [ E.width E.fill
+    , E.paddingXY 0 30
+    , E.scrollbarX
+    , E.htmlAttribute (HA.style "min-height" "38px")
+    , E.htmlAttribute (HA.style "box-sizing" "content-box")
+    ] <|
     E.row
       [ E.width E.fill
+      , E.height E.fill
       , E.spacing 10
       , E.paddingXY 10 0
       , B.color (E.rgb255 220 220 220)
       , B.widthEach { top = 0, bottom = 1, left = 0, right = 0 }
       ]
-      (List.map (viewOne config) <| List.filter (\a -> config.toTitle a /= "Front page") config.all)
+      (List.map (viewOne config) <| List.filter (\a -> config.toTitle a /= "Front page" && config.toTitle a /= "Basic") config.all)
 
 
 viewOne : Config a -> a -> E.Element msg
@@ -40,6 +48,7 @@ viewOne config item =
     [ F.size 14
     , E.paddingXY 30 10
     , E.moveDown 1
+    , E.paddingEach { top = 10, bottom = if config.selected == config.toUrl item then 11 else 10, left = 30, right = 30 }
     , BG.color (E.rgb255 255 255 255)
     , B.color (E.rgb255 220 220 220)
     , if config.selected == config.toUrl item then F.color (E.rgb255 0 0 0) else F.color (E.rgb255 120 120 120)

@@ -15,8 +15,7 @@ view model =
     [ CA.height 300
     , CA.width 300
     ]
-    [ C.grid []
-    , C.xAxis []
+    [ C.xAxis []
     , C.xTicks [ CA.amount 4 ]
     , C.xLabels [ CA.amount 4 ]
     ]
@@ -56,8 +55,7 @@ smallCode =
     [ CA.height 300
     , CA.width 300
     ]
-    [ C.grid []
-    , C.xAxis []
+    [ C.xAxis []
     , C.xTicks [ CA.amount 4 ]
     , C.xLabels [ CA.amount 4 ]
     ]
@@ -79,8 +77,7 @@ view model =
     [ CA.height 300
     , CA.width 300
     ]
-    [ C.grid []
-    , C.xAxis []
+    [ C.xAxis []
     , C.xTicks [ CA.amount 4 ]
     , C.xLabels [ CA.amount 4 ]
     ]

@@ -11,9 +11,8 @@ import Internal.Svg as S
 import Internal.Helpers as Helpers
 
 
-
-type Item a =
-  Item
+type Rendered a =
+  Rendered
     { config : a
     , toLimits : a -> Position
     , toPosition : Plane -> a -> Position
@@ -23,12 +22,12 @@ type Item a =
 
 
 {-| -}
-type alias Product config value datum =
-  Item
-    { product : config
+type alias One data x =
+  Rendered
+    { product : x
     , tooltipInfo : TooltipInfo
-    , values : Values value datum
-    , toAny : config -> Any
+    , values : Values data
+    , toAny : x -> Any
     }
 
 
@@ -36,6 +35,7 @@ type alias Product config value datum =
 type Any
   = Dot S.Dot
   | Bar S.Bar
+  | Custom
 
 
 {-| -}
@@ -44,20 +44,22 @@ type alias TooltipInfo =
   , stack : Int
   , data : Int
   , index : Int
+  , elIndex : Int
   , name : Maybe String
   , color : String
   , border : String
   , borderWidth : Float
+  , formatted : String
   }
 
 
 {-| -}
-type alias Values value datum =
-  { datum : datum
+type alias Values data =
+  { datum : data
   , x1 : Float
   , x2 : Float
-  , y : Maybe Float
-  , yOrg : value
+  , y : Float
+  , isReal : Bool
   }
 
 
@@ -66,26 +68,26 @@ type alias Values value datum =
 
 
 {-| -}
-toSvg : Plane -> Item x -> Svg Never
-toSvg plane (Item item) =
+toSvg : Plane -> Rendered x -> Svg Never
+toSvg plane (Rendered item) =
   item.toSvg plane item.config (item.toPosition plane item.config)
 
 
 {-| -}
-toHtml : Item x -> List (Html Never)
-toHtml (Item item) =
+toHtml : Rendered x -> List (Html Never)
+toHtml (Rendered item) =
   item.toHtml item.config
 
 
 {-| -}
-getPosition : Plane -> Item x -> Position
-getPosition plane (Item item) =
+getPosition : Plane -> Rendered x -> Position
+getPosition plane (Rendered item) =
   item.toPosition plane item.config
 
 
 {-| -}
-getLimits : Item x -> Position
-getLimits (Item item) =
+getLimits : Rendered x -> Position
+getLimits (Rendered item) =
   item.toLimits item.config
 
 
@@ -94,84 +96,114 @@ getLimits (Item item) =
 
 
 {-| -}
-getColor : Product config value data -> String
-getColor (Item item) =
+getColor : One data x -> String
+getColor (Rendered item) =
   item.config.tooltipInfo.color
 
 
 {-| -}
-getName : Product config value data -> String
-getName (Item item) =
+getName : One data x -> String
+getName (Rendered item) =
   case item.config.tooltipInfo.name of
     Just name -> name
     Nothing -> "Property #" ++ String.fromInt (item.config.tooltipInfo.index + 1)
 
 
 {-| -}
-getDatum : Product config value data -> data
-getDatum (Item item) =
+getDatum : One data x -> data
+getDatum (Rendered item) =
   item.config.values.datum
 
 
 {-| -}
-getIndependent : Product config value data -> Float
-getIndependent (Item item) =
+getX : One data x -> Float
+getX (Rendered item) =
   item.config.values.x1
 
 
 {-| -}
-getDependent : Product config value data -> value
-getDependent (Item item) =
-  item.config.values.yOrg
+getX1 : One data x -> Float
+getX1 (Rendered item) =
+  item.config.values.x1
 
 
 {-| -}
-getDependentSafe : Product config value data -> Float
-getDependentSafe (Item item) =
-  Maybe.withDefault 0 item.config.values.y
+getX2 : One data x -> Float
+getX2 (Rendered item) =
+  item.config.values.x2
 
 
 {-| -}
-getPropertyIndex : Product config value data -> Int
-getPropertyIndex (Item item) =
+getY : One data x -> Float
+getY (Rendered item) =
+  item.config.values.y
+
+
+{-| -}
+isReal : One data x -> Bool
+isReal (Rendered item) =
+  item.config.values.isReal
+
+
+{-| -}
+getElIndex : One data x -> Int
+getElIndex (Rendered item) =
+  item.config.tooltipInfo.elIndex
+
+
+{-| -}
+getPropertyIndex : One data x -> Int
+getPropertyIndex (Rendered item) =
   item.config.tooltipInfo.property
 
 
 {-| -}
-getStackIndex : Product config value data -> Int
-getStackIndex (Item item) =
+getStackIndex : One data x -> Int
+getStackIndex (Rendered item) =
   item.config.tooltipInfo.stack
 
 
 {-| -}
-getDataIndex : Product config value data -> Int
-getDataIndex (Item item) =
+getDataIndex : One data x -> Int
+getDataIndex (Rendered item) =
   item.config.tooltipInfo.data
 
 
 {-| -}
-getSize : Product S.Dot value data -> Float
-getSize (Item item) =
+getTooltipValue : One data x -> String
+getTooltipValue (Rendered item) =
+  item.config.tooltipInfo.formatted
+
+
+{-| -}
+getGeneral : One data x -> One data Any
+getGeneral (Rendered item) =
+  generalize item.config.toAny (Rendered item)
+
+
+{-| -}
+getSize : One data S.Dot -> Float
+getSize (Rendered item) =
   item.config.product.size
 
 
 {-| -}
-isSame : Product config value data -> Product config value data -> Bool
+isSame : One data x -> One data x -> Bool
 isSame a b =
   getPropertyIndex a == getPropertyIndex b &&
   getStackIndex a == getStackIndex b &&
   getDataIndex a == getDataIndex b &&
-  getDatum a == getDatum b
+  getElIndex a == getElIndex b
 
 
 {-| -}
-map : (a -> b) -> Product config value a -> Product config value b
-map func (Item item) =
-  Item
+map : (a -> b) -> One a x -> One b x
+map func (Rendered item) =
+  Rendered
     { toLimits = \_ -> item.toLimits item.config
     , toPosition = \plane _ -> item.toPosition plane item.config
-    , toSvg = \plane _ _ -> toSvg plane (Item item)
-    , toHtml = \_ -> toHtml (Item item)
+    , toSvg = \plane _ _ -> toSvg plane (Rendered item)
+    , toHtml = \_ -> toHtml (Rendered item)
     , config =
         { product = item.config.product
         , values =
@@ -179,7 +211,7 @@ map func (Item item) =
             , x1 = item.config.values.x1
             , x2 = item.config.values.x2
             , y = item.config.values.y
-            , yOrg = item.config.values.yOrg
+            , isReal = item.config.values.isReal
             }
         , tooltipInfo = item.config.tooltipInfo
         , toAny = item.config.toAny
@@ -188,16 +220,16 @@ map func (Item item) =
 
 
 {-| -}
-filterMap : (a -> Maybe b) -> List (Product config value a) -> List (Product config value b)
+filterMap : (a -> Maybe b) -> List (One a x) -> List (One b x)
 filterMap func =
-  List.filterMap <| \(Item item) ->
+  List.filterMap <| \(Rendered item) ->
     case func item.config.values.datum of
       Just b ->
-        Item
+        Rendered
           { toLimits = \_ -> item.toLimits item.config
           , toPosition = \plane _ -> item.toPosition plane item.config
-          , toSvg = \plane _ _ -> toSvg plane (Item item)
-          , toHtml = \_ -> toHtml (Item item)
+          , toSvg = \plane _ _ -> toSvg plane (Rendered item)
+          , toHtml = \_ -> toHtml (Rendered item)
           , config =
               { product = item.config.product
               , values =
@@ -205,7 +237,7 @@ filterMap func =
                   , x1 = item.config.values.x1
                   , x2 = item.config.values.x2
                   , y = item.config.values.y
-                  , yOrg = item.config.values.yOrg
+                  , isReal = item.config.values.isReal
                   }
               , tooltipInfo = item.config.tooltipInfo
               , toAny = item.config.toAny
@@ -218,49 +250,17 @@ filterMap func =
 
 
 
--- CHANGE VALUE
-
-
-toNonMissing : Product a (Maybe Float) datum -> Maybe (Product a Float datum)
-toNonMissing (Item item) =
-  case item.config.values.yOrg of
-    Just yOrg ->
-      Item
-        { toLimits = \_ -> item.toLimits item.config
-        , toPosition = \plane _ -> item.toPosition plane item.config
-        , toSvg = \plane _ _ -> toSvg plane (Item item)
-        , toHtml = \c -> toHtml (Item item)
-        , config =
-            { product = item.config.product
-            , values =
-                { datum = item.config.values.datum
-                , x1 = item.config.values.x1
-                , x2 = item.config.values.x2
-                , y = item.config.values.y
-                , yOrg = yOrg
-                }
-            , tooltipInfo = item.config.tooltipInfo
-            , toAny = item.config.toAny
-            }
-        }
-        |> Just
-
-    Nothing ->
-      Nothing
-
-
-
 -- GENERALIZATION
 
 
-generalize : (a -> Any) -> Product a value datum -> Product Any value datum
-generalize toAny (Item item) =
+generalize : (x -> Any) -> One data x -> One data Any
+generalize toAny (Rendered item) =
    -- TODO make sure changes are reflected in rendering
-  Item
+  Rendered
     { toLimits = \_ -> item.toLimits item.config
     , toPosition = \plane _ -> item.toPosition plane item.config
-    , toSvg = \plane _ _ -> toSvg plane (Item item)
-    , toHtml = \c -> toHtml (Item item)
+    , toSvg = \plane _ _ -> toSvg plane (Rendered item)
+    , toHtml = \c -> toHtml (Rendered item)
     , config =
         { product = toAny item.config.product
         , values = item.config.values
@@ -270,11 +270,11 @@ generalize toAny (Item item) =
     }
 
 
-isBar : Product Any value datum -> Maybe (Product S.Bar value datum)
-isBar (Item item) =
+isBar : One data Any -> Maybe (One data S.Bar)
+isBar (Rendered item) =
   case item.config.product of
     Bar bar ->
-      Item
+      Rendered
         { toLimits = \_ -> item.toLimits item.config
         , toPosition = \plane _ -> item.toPosition plane item.config
         , toSvg = \plane config -> S.bar plane config.product
@@ -288,21 +288,21 @@ isBar (Item item) =
         }
         |> Just
 
-    Dot _ ->
+    _ ->
       Nothing
 
 
-isDot : Product Any value datum -> Maybe (Product S.Dot value datum)
-isDot (Item item) =
+isDot : One data Any -> Maybe (One data S.Dot)
+isDot (Rendered item) =
   case item.config.product of
     Dot dot ->
-      Item
+      Rendered
         { toLimits = \_ -> item.toLimits item.config
         , toPosition = \plane _ -> item.toPosition plane item.config
         , toSvg = \plane config pos ->
-            config.values.y
-              |> Maybe.map (\y -> S.dot plane .x .y config.product { x = config.values.x1, y = y })
-              |> Maybe.withDefault (S.text "")
+            if config.values.isReal
+            then S.dot plane .x .y config.product { x = config.values.x1, y = config.values.y }
+            else S.text ""
         , toHtml = \c -> item.toHtml item.config
         , config =
             { product = dot
@@ -313,5 +313,5 @@ isDot (Item item) =
         }
         |> Just
 
-    Bar _ ->
+    _ ->
       Nothing

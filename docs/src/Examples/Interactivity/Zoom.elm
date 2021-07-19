@@ -10,6 +10,7 @@ import Svg as S
 import Chart as C
 import Chart.Attributes as CA
 import Chart.Events as CE
+import Chart.Item as CI
 import Data.Iris
 
 
@@ -125,9 +126,8 @@ view model =
         Nothing ->
           CA.range []
     ]
-    [ C.grid []
-    , C.xLabels []
-    , C.yLabels []
+    [ C.xLabels [ CA.withGrid ]
+    , C.yLabels [ CA.withGrid ]
 
     , C.series .sepalWidth
         [ C.scatterMaybe (Data.Iris.only Data.Iris.Setosa .petalWidth)
@@ -214,9 +214,8 @@ smallCode =
         Nothing ->
           CA.range []
     ]
-    [ C.grid []
-    , C.xLabels []
-    , C.yLabels []
+    [ C.xLabels [ CA.withGrid ]
+    , C.yLabels [ CA.withGrid ]
 
     , C.series .sepalWidth
         [ C.scatterMaybe (Data.Iris.only Data.Iris.Setosa .petalWidth)
@@ -272,6 +271,7 @@ import Svg as S
 import Chart as C
 import Chart.Attributes as CA
 import Chart.Events as CE
+import Chart.Item as CI
 import Data.Iris
 
 
@@ -387,9 +387,8 @@ view model =
         Nothing ->
           CA.range []
     ]
-    [ C.grid []
-    , C.xLabels []
-    , C.yLabels []
+    [ C.xLabels [ CA.withGrid ]
+    , C.yLabels [ CA.withGrid ]
 
     , C.series .sepalWidth
         [ C.scatterMaybe (Data.Iris.only Data.Iris.Setosa .petalWidth)

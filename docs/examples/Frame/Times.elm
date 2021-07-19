@@ -20,8 +20,7 @@ view model =
         , CA.highest 1623510241000 CA.exactly
         ]
     ]
-    [ C.grid []
-    , C.xAxis []
+    [ C.xAxis []
     , C.xTicks [ CA.times Time.utc ]
     , C.xLabels [ CA.times Time.utc ]
     ]

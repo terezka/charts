@@ -8,14 +8,12 @@ import Browser.Navigation as Navigation
 import Html
 import Charts.SalaryDist as SalaryDist
 import Charts.SalaryDistBar as SalaryDistBar
-import Charts.Basics exposing (Example)
 import Html as H
 import Element as E
 import Element.Font as F
 import Element.Border as B
 import Element.Background as BG
 import Ui.Layout as Layout
-import Ui.CompactExample as CompactExample
 import Ui.Code as Code
 import Ui.Menu as Menu
 
@@ -28,6 +26,8 @@ import Ui.Menu as Menu
 type alias Model =
   { salaryDist : SalaryDist.Model
   , salaryDistBar : SalaryDistBar.Model
+  , window : Session.Window
+  , menu : Menu.Model
   }
 
 
@@ -43,6 +43,8 @@ init : Navigation.Key -> Session -> Params -> ( Model, Cmd Msg )
 init key session params =
   ( { salaryDist = SalaryDist.init
     , salaryDistBar = SalaryDistBar.init
+    , window = session.window
+    , menu = Menu.init
     }
   , Cmd.none
   )
@@ -58,7 +60,8 @@ exit model session =
 
 
 type Msg
-  = SalaryDistMsg SalaryDist.Msg
+  = MenuMsg Menu.Msg
+  | SalaryDistMsg SalaryDist.Msg
   | SalaryDistBarMsg SalaryDistBar.Msg
 
 
@@ -66,6 +69,9 @@ type Msg
 update : Navigation.Key -> Msg -> Model -> ( Model, Cmd Msg )
 update key msg model =
   case msg of
+    MenuMsg subMsg ->
+      ( { model | menu = Menu.update subMsg model.menu }, Cmd.none )
+
     SalaryDistMsg subMsg ->
       ( { model | salaryDist = SalaryDist.update subMsg model.salaryDist }, Cmd.none )
 
@@ -92,7 +98,8 @@ view model =
   { title = "elm-charts"
     , body =
         Layout.view
-          [ Menu.small
+          [ Menu.small model.window model.menu
+              |> E.map MenuMsg
           , E.el
               [ F.size 32
               , E.paddingXY 0 10
@@ -102,7 +109,7 @@ view model =
           , E.paragraph
               [ E.paddingEach { top = 10, bottom = 40, left = 0, right = 0 }
               , F.size 14
-              , E.width (E.px 700)
+              , E.width (E.px 600)
               ]
               [ E.text "Examples of charts build with elm-charts using real data."
               ]
@@ -116,7 +123,7 @@ view model =
           , E.paragraph
               [ E.paddingEach { top = 10, bottom = 10, left = 0, right = 0 }
               , F.size 14
-              , E.width (E.px 700)
+              , E.width (E.px 600)
               ]
               [ E.text "Note that the data visualized here is already aggregated into averages. This means that there might "
               , E.text "be women or men earning more or less than what the numbers show. For example, there may well be a woman CEO being payed the "

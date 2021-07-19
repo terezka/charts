@@ -15,6 +15,7 @@ import Dict
 import Chart as C
 import Chart.Attributes as CA
 import Chart.Events as CE
+import Chart.Item as CI
 import Chart.Svg as CS
 
 import Element as E
@@ -28,7 +29,7 @@ import Chart.Events
 
 
 type alias Model =
-  { hovering : List (CE.Group (CE.Bin Binned) CS.Bar Float Binned)
+  { hovering : List (CI.Many Binned CI.Bar)
   , binSize : Float
   , year : Float
   }
@@ -57,7 +58,7 @@ init =
 
 
 type Msg
-  = OnHover (List (CE.Group (CE.Bin Binned) CS.Bar Float Binned))
+  = OnHover (List (CI.Many Binned CI.Bar))
   | OnYear Float
   | OnBinSize Float
 
@@ -146,9 +147,9 @@ viewChart model =
     , CA.margin { top = 40, bottom = 50, left = 0, right = 0 }
     , CA.padding { top = 15, bottom = 0, left = 0, right = 0 }
 
-    , CE.realValues
-        |> CE.keep CE.bar
-        |> CE.collect CE.bin
+    , CI.real
+        |> CI.andThen CI.bars
+        |> CI.andThen CI.bins
         |> CE.getNearest
         |> CE.onMouseMove OnHover
     ]
@@ -189,17 +190,17 @@ viewChart model =
         (C.binned model.binSize .salary (womensData ++ mensData))
 
     , C.withPlane <| \p ->
-        let hoveredBars = List.concatMap CE.getProducts model.hovering
-            highestValue = Maybe.withDefault 0 <| List.maximum (List.map CE.getDependent hoveredBars)
+        let hoveredBars = List.concatMap CI.getMembers model.hovering
+            highestValue = Maybe.withDefault 0 <| List.maximum (List.map CI.getY hoveredBars)
             amountOfBars = List.length hoveredBars
             viewLabel index bar =
               let offset = CS.lengthInCartesianY p <| 10 + toFloat (amountOfBars - index - 1) * 20 in
               [ C.line
-                  [ CA.x1 (CE.getTop p bar).x
-                  , CA.y1 (CE.getTop p bar).y
-                  , CA.x2 (CE.getTop p bar).x
+                  [ CA.x1 (CI.getTop p bar).x
+                  , CA.y1 (CI.getTop p bar).y
+                  , CA.x2 (CI.getTop p bar).x
                   , CA.y2 <| highestValue + offset
-                  , CA.color (CE.getColor bar)
+                  , CA.color (CI.getColor bar)
                   ]
 
               , C.label
@@ -207,10 +208,10 @@ viewChart model =
                   , CA.moveLeft 3
                   , CA.moveUp 5
                   , CA.fontSize 10
-                  , CA.color (CE.getColor bar)
+                  , CA.color (CI.getColor bar)
                   ]
-                  [ S.text (String.fromFloat <| CE.getDependent bar) ]
-                  { x = (CE.getTop p bar).x, y = highestValue + offset }
+                  [ S.text (String.fromFloat <| CI.getY bar) ]
+                  { x = (CI.getTop p bar).x, y = highestValue + offset }
               ]
 
         in
@@ -244,9 +245,9 @@ viewChart model =
 
 viewTooltip chartBin =
   let viewJobs chartBar =
-        let color = CE.getColor chartBar
-            dataBin = CE.getDatum chartBar
-            name = CE.getName chartBar
+        let color = CI.getColor chartBar
+            dataBin = CI.getData chartBar
+            name = CI.getName chartBar
             title = "Sectors where " ++ name ++ " on average is payed within selected salary bracket."
         in
         E.textColumn
@@ -261,5 +262,5 @@ viewTooltip chartBin =
           then E.paragraph [ E.htmlAttribute (HA.style "color" color) ] [ E.text datum.sector ]
           else E.none
   in
-  List.map viewJobs (CE.getProducts chartBin)
+  List.map viewJobs (CI.getMembers chartBin)
 

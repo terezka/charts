@@ -16,12 +16,12 @@ view model =
     [ CA.height 300
     , CA.width 300
     ]
-    [ C.grid []
-    , C.xAxis []
+    [ C.xAxis []
     , C.generate 12 CS.ints .x [] <| \p num ->
         let isEven = remainderBy 2 num == 0 in
         [ C.xLabel
             [ CA.x (toFloat num)
+            , CA.withGrid
             , if isEven then identity else CA.y p.y.max
             , if isEven then identity else CA.moveUp 28
             , if isEven then identity else CA.fontSize 10
@@ -67,12 +67,12 @@ smallCode =
     [ CA.height 300
     , CA.width 300
     ]
-    [ C.grid []
-    , C.xAxis []
+    [ C.xAxis []
     , C.generate 12 CS.ints .x [] <| \\p num ->
         let isEven = remainderBy 2 num == 0 in
         [ C.xLabel
             [ CA.x (toFloat num)
+            , CA.withGrid
             , if isEven then identity else CA.y p.y.max
             , if isEven then identity else CA.moveUp 28
             , if isEven then identity else CA.fontSize 10
@@ -100,12 +100,12 @@ view model =
     [ CA.height 300
     , CA.width 300
     ]
-    [ C.grid []
-    , C.xAxis []
+    [ C.xAxis []
     , C.generate 12 CS.ints .x [] <| \\p num ->
         let isEven = remainderBy 2 num == 0 in
         [ C.xLabel
             [ CA.x (toFloat num)
+            , CA.withGrid
             , if isEven then identity else CA.y p.y.max
             , if isEven then identity else CA.moveUp 28
             , if isEven then identity else CA.fontSize 10

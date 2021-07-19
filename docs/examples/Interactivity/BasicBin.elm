@@ -6,10 +6,11 @@ import Svg as S
 import Chart as C
 import Chart.Attributes as CA
 import Chart.Events as CE
+import Chart.Item as CI
 
 
 type alias Model =
-  { hovering : List (CE.Group (CE.Bin Datum) CE.Any (Maybe Float) Datum) }
+  { hovering : List (CI.Many Datum CI.Any) }
 
 
 init : Model
@@ -18,7 +19,7 @@ init =
 
 
 type Msg
-  = OnHover (List (CE.Group (CE.Bin Datum) CE.Any (Maybe Float) Datum))
+  = OnHover (List (CI.Many Datum CI.Any))
 
 
 update : Msg -> Model -> Model
@@ -34,12 +35,11 @@ view model =
   C.chart
     [ CA.height 300
     , CA.width 300
-    , CE.onMouseMove OnHover (CE.getNearest CE.bin)
+    , CE.onMouseMove OnHover (CE.getNearest CI.bins)
     , CE.onMouseLeave (OnHover [])
     ]
-    [ C.grid []
-    , C.xLabels []
-    , C.yLabels []
+    [ C.xLabels []
+    , C.yLabels [ CA.withGrid ]
     , C.bars []
         [ C.bar .z []
         , C.bar .y []

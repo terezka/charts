@@ -22,14 +22,13 @@ view model =
         , CA.highest 100 CA.orHigher
         ]
     ]
-    [ C.grid []
-    , C.series .x
+    [ C.series .x
         [ C.interpolated .y [  ] [] ]
         [ { x = 10, y = 20 }
         , { x = 80, y = 80 }
         ]
-    , C.xLabels [ CA.amount 10 ]
-    , C.yLabels [ CA.amount 10 ]
+    , C.xLabels [ CA.amount 10, CA.withGrid ]
+    , C.yLabels [ CA.amount 10, CA.withGrid ]
     ]
 {-| @SMALL END -}
 {-| @LARGE END -}

@@ -6,11 +6,12 @@ import Svg as S
 import Chart as C
 import Chart.Attributes as CA
 import Chart.Events as CE
+import Chart.Item as CI
 
 
 type alias Model =
-  { hoveringDots : List (CE.Product CE.Dot (Maybe Float) Datum)
-  , hoveringBars : List (CE.Product CE.Bar Float Datum)
+  { hoveringDots : List (CI.One Datum CI.Dot)
+  , hoveringBars : List (CI.One Datum CI.Bar)
   }
 
 
@@ -23,8 +24,8 @@ init =
 
 type Msg
   = OnHover
-      (List (CE.Product CE.Dot (Maybe Float) Datum))
-      (List (CE.Product CE.Bar Float Datum))
+      (List (CI.One Datum CI.Dot))
+      (List (CI.One Datum CI.Bar))
 
 
 update : Msg -> Model -> Model
@@ -45,19 +46,18 @@ view model =
     , CA.width 300
     , CE.on "mousemove" <|
         CE.map2 OnHover
-          (CE.getNearest CE.dot)
-          (CE.getNearest (CE.keep CE.realValues CE.bar))
+          (CE.getNearest CI.dots)
+          (CE.getNearest CI.bars)
     , CE.onMouseLeave
         (OnHover [] [])
     ]
-    [ C.grid []
-    , C.xLabels []
-    , C.yLabels []
+    [ C.xLabels []
+    , C.yLabels [ CA.withGrid ]
 
     , C.series .x
         [ C.stacked
-          [ C.interpolated .p [  ] [ CA.circle ]
-          , C.interpolated .q [  ] [ CA.circle ]
+          [ C.interpolated .p [] [ CA.circle ]
+          , C.interpolated .q [] [ CA.circle ]
           ]
         ]
         data
@@ -78,8 +78,8 @@ view model =
             , CA.moveUp 8
             , CA.fontSize 14
             ]
-            [ S.text (String.fromFloat (CE.getDependent item)) ]
-            (CE.getTop p item)
+            [ S.text (String.fromFloat (CI.getY item)) ]
+            (CI.getTop p item)
         ]
     ]
 {-| @SMALL END -}

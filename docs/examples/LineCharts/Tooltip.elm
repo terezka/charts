@@ -5,10 +5,11 @@ import Html as H
 import Chart as C
 import Chart.Attributes as CA
 import Chart.Events as CE
+import Chart.Item as CI
 
 
 type alias Model =
-  { hovering : List (CE.Product CE.Dot (Maybe Float) Datum) }
+  { hovering : List (CI.One Datum CI.Dot) }
 
 
 init : Model
@@ -17,7 +18,7 @@ init =
 
 
 type Msg
-  = OnHover (List (CE.Product CE.Dot (Maybe Float) Datum))
+  = OnHover (List (CI.One Datum CI.Dot))
 
 
 update : Msg -> Model -> Model
@@ -33,12 +34,11 @@ view model =
   C.chart
     [ CA.height 300
     , CA.width 300
-    , CE.onMouseMove OnHover (CE.getNearest CE.dot)
+    , CE.onMouseMove OnHover (CE.getNearest CI.dots)
     , CE.onMouseLeave (OnHover [])
     ]
-    [ C.grid []
-    , C.xLabels []
-    , C.yLabels []
+    [ C.xLabels []
+    , C.yLabels [ CA.withGrid ]
     , C.series .x
         [ C.interpolated .y [  ] [ CA.circle, CA.size 3 ]
         , C.interpolated .z [  ] [ CA.circle, CA.size 3 ]

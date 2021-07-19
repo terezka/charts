@@ -4,6 +4,5 @@
 , "/documentation": { "module": "Page.Documentation", "name": "documentation" }
 , "/documentation/section:string": { "module": "Page.Section", "name": "section" }
 , "/documentation/section:string/example:string": { "module": "Page.Example", "name": "example" }
-, "/gallery": { "module": "Page.Gallery", "name": "gallery" }
 , "*": { "redirect": "/" }
 }

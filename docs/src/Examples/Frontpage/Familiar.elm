@@ -14,11 +14,9 @@ chart =
   C.chart
     [ CA.height 350
     , CA.width 570
-    , CA.static
-    , CA.margin { top = 40, bottom = 30, left = 30, right = 10 }
+    , CA.margin { top = 10, bottom = 30, left = 30, right = 10 }
     ]
-    [ C.grid []
-    , C.xLabels [ CA.times Time.utc, CA.amount 12 ]
+    [ C.xLabels [ CA.times Time.utc, CA.amount 12 ]
     , C.yLabels [ CA.amount 6 ]
     , C.xAxis []
     , C.yAxis []
@@ -100,11 +98,9 @@ chart =
   C.chart
     [ CA.height 350
     , CA.width 570
-    , CA.static
-    , CA.margin { top = 40, bottom = 30, left = 30, right = 10 }
+    , CA.margin { top = 10, bottom = 30, left = 30, right = 10 }
     ]
-    [ C.grid []
-    , C.xLabels [ CA.times Time.utc, CA.amount 12 ]
+    [ C.xLabels [ CA.times Time.utc, CA.amount 12 ]
     , C.yLabels [ CA.amount 6 ]
     , C.xAxis []
     , C.yAxis []
@@ -131,11 +127,9 @@ chart =
   C.chart
     [ CA.height 350
     , CA.width 570
-    , CA.static
-    , CA.margin { top = 40, bottom = 30, left = 30, right = 10 }
+    , CA.margin { top = 10, bottom = 30, left = 30, right = 10 }
     ]
-    [ C.grid []
-    , C.xLabels [ CA.times Time.utc, CA.amount 12 ]
+    [ C.xLabels [ CA.times Time.utc, CA.amount 12 ]
     , C.yLabels [ CA.amount 6 ]
     , C.xAxis []
     , C.yAxis []

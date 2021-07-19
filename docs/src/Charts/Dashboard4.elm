@@ -16,6 +16,7 @@ import Time
 import Chart as C
 import Chart.Attributes as CA
 import Chart.Events as CE
+import Chart.Item as CI
 import Chart.Svg as CS
 
 import Element as E
@@ -27,7 +28,7 @@ import Chart.Events
 
 
 type alias Model =
-  { hovering : List (CE.Product CE.Bar (Maybe Float) Datum)
+  { hovering : List (CI.One Datum CI.Bar)
   }
 
 
@@ -38,7 +39,7 @@ init =
 
 
 type Msg
-  = OnHover (List (CE.Product CE.Bar (Maybe Float) Datum))
+  = OnHover (List (CI.One Datum CI.Bar))
 
 
 update : Msg -> Model -> Model
@@ -53,8 +54,8 @@ view model =
   C.chart
     [ CA.height 140
     , CA.width 490
-    , CA.margin { top = 0, bottom = 0, left = 0, right = 15 }
-    , CE.onMouseMove OnHover (CE.getNearestX CE.bar)
+    , CA.margin { top = 0, bottom = 0, left = 0, right = 20 }
+    , CE.onMouseMove OnHover (CE.getNearestX CI.bars)
     , CE.onMouseLeave (OnHover [])
     ]
     [ C.grid []
@@ -74,7 +75,7 @@ view model =
 
     , C.labelAt .max CA.middle [ CA.rotate 90, CA.moveRight 18 ] [ S.text "score" ]
     , C.each model.hovering <| \p bar ->
-        let datum = CE.getDatum bar
+        let datum = CI.getData bar
             scoreText =
               case datum.score of
                 Just score -> String.fromFloat score ++ "/100"
@@ -82,7 +83,7 @@ view model =
         in
         [ C.tooltip bar
             [ CA.onTop ]
-            [ HA.style "color" (CE.getColor bar) ]
+            [ HA.style "color" (CI.getColor bar) ]
             [ H.text datum.name, H.text ": ", H.text scoreText ]
         ]
     ]
