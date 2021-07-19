@@ -1,5 +1,5 @@
 { "/": { "module": "Page.Home", "name": "top" }
-, "/quick-start": { "module": "Page.QuickStart", "name": "quickStart" }
+, "/getting-started": { "module": "Page.GettingStarted", "name": "gettingStarted" }
 , "/administration": { "module": "Page.Administration", "name": "administration" }
 , "/documentation": { "module": "Page.Documentation", "name": "documentation" }
 , "/documentation/section:string": { "module": "Page.Section", "name": "section" }

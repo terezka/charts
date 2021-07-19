@@ -126,7 +126,7 @@ view model =
         , Ui.Tabs.view
             { toUrl = Ui.Thumbnail.toUrlGroup << .title
             , toTitle = .title
-            , selected = "/documentation/" ++ model.selectedTab
+            , selected = Route.documentation ++ "/" ++ model.selectedTab
             , all = Ui.Thumbnail.groups
             }
 
@@ -156,7 +156,7 @@ view model =
                   , E.spacingXY 100 70
                   , E.paddingEach { top = 30, bottom = 100, left = 0, right = 0 }
                   ] <| List.map (E.el [ E.width (E.px 265) ])
-                  (Ui.Thumbnail.viewSelected model.examples <| "/documentation/" ++ model.selectedTab)
+                  (Ui.Thumbnail.viewSelected model.examples <| Route.documentation ++ "/" ++ model.selectedTab)
 
             Layout.Medium ->
               E.map OnExampleMsg <|
@@ -167,7 +167,7 @@ view model =
                   , E.spacingXY 100 70
                   , E.paddingEach { top = 30, bottom = 100, left = 0, right = 0 }
                   ]  <| List.map (E.el [ E.width (E.px 265) ])
-                  (Ui.Thumbnail.viewSelected model.examples <| "/documentation/" ++ model.selectedTab)
+                  (Ui.Thumbnail.viewSelected model.examples <| Route.documentation ++ "/" ++ model.selectedTab)
 
             Layout.Small ->
               E.map OnExampleMsg <|
@@ -178,7 +178,7 @@ view model =
                   , E.spacingXY 100 70
                   , E.paddingEach { top = 30, bottom = 100, left = 20, right = 20 }
                   ]
-                  (Ui.Thumbnail.viewSelected model.examples <| "/documentation/" ++ model.selectedTab)
+                  (Ui.Thumbnail.viewSelected model.examples <| Route.documentation ++ "/" ++ model.selectedTab)
 
         ]
   }

@@ -135,7 +135,7 @@ view model =
         , Ui.Tabs.view
             { toUrl = Ui.Thumbnail.toUrlGroup << .title
             , toTitle = .title
-            , selected = "/documentation/" ++ model.selectedTab
+            , selected = Route.documentation ++ "/" ++ model.selectedTab
             , all = Ui.Thumbnail.groups
             }
 

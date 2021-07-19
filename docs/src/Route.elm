@@ -1,4 +1,4 @@
-module Route exposing (Route(..), top, administration, documentation, section, example, quickStart, fromUrl, replaceUrl, toString)
+module Route exposing (Route(..), top, administration, documentation, section, example, gettingStarted, fromUrl, replaceUrl, toString)
 
 import Browser.Navigation as Navigation
 import Url exposing (Url)
@@ -32,9 +32,9 @@ example params =
   toString <| Documentation_String__String_ params.section params.example
 
 
-quickStart : String
-quickStart =
-  toString <| Quick_start 
+gettingStarted : String
+gettingStarted =
+  toString <| Getting_started 
 
 
 type Route
@@ -43,7 +43,7 @@ type Route
     | Documentation 
     | Documentation_String_ String
     | Documentation_String__String_ String String
-    | Quick_start 
+    | Getting_started 
 
 
 fromUrl : Url -> Maybe Route
@@ -74,8 +74,8 @@ toString route =
         Documentation_String__String_ p1 p2 ->
             Builder.absolute ["documentation", p1, p2] (List.filterMap identity [])
 
-        Quick_start  ->
-            Builder.absolute ["quick-start"] (List.filterMap identity [])
+        Getting_started  ->
+            Builder.absolute ["getting-started"] (List.filterMap identity [])
 
 
 -- INTERNAL
@@ -89,5 +89,5 @@ parser =
         , Parser.map Documentation (s "documentation")
         , Parser.map Documentation_String_ (s "documentation" </> string)
         , Parser.map Documentation_String__String_ (s "documentation" </> string </> string)
-        , Parser.map Quick_start (s "quick-start")
+        , Parser.map Getting_started (s "getting-started")
         ]

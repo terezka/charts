@@ -117,11 +117,9 @@ view model =
     , CA.htmlAttrs
         [ HA.style "cursor" "crosshair" ]
     ]
-    [ C.grid []
-
-    , C.generate 10 CS.ints .x [] <| \p t ->
+    [ C.generate 10 CS.ints .x [] <| \p t ->
         [ C.xLabel
-            [ CA.alignLeft, CA.moveUp 20, CA.moveRight 3, CA.x (toFloat t)
+            [ CA.alignLeft, CA.moveUp 20, CA.moveRight 3, CA.x (toFloat t), CA.withGrid
             , if t == 20000 then CA.noGrid else identity
             ]
             [ S.text (String.fromInt t) ]
@@ -130,6 +128,7 @@ view model =
     , C.generate 8 CS.ints .y [] <| \p t ->
         [ C.yLabel
             [ CA.alignLeft
+            , CA.withGrid
             , CA.moveUp 7
             , CA.moveRight 10
             , CA.y (toFloat t)

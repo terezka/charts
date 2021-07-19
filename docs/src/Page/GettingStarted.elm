@@ -1,4 +1,4 @@
-module Page.QuickStart exposing (Model, Params, Msg, init, subscriptions, exit, update, view)
+module Page.GettingStarted exposing (Model, Params, Msg, init, subscriptions, exit, update, view)
 
 
 import Browser.Events as E
@@ -112,7 +112,7 @@ view model =
             , E.text "the "
             , E.link
                 [ F.underline ]
-                { url = "/documentation"
+                { url = Route.documentation
                 , label = E.text "many other examples"
                 }
             , E.text " or the "
@@ -186,7 +186,7 @@ view model =
             , E.paddingXY 0 20
             ]
             [ E.link []
-                { url = "/documentation"
+                { url = Route.documentation
                 , label = E.text "See more examples →"
                 }
             ]

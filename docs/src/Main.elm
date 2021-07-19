@@ -8,7 +8,7 @@ import Page.Administration
 import Page.Documentation
 import Page.Section
 import Page.Example
-import Page.QuickStart
+import Page.GettingStarted
 import Route exposing (Route)
 import Session exposing (Session)
 import Url exposing (Url)
@@ -40,7 +40,7 @@ type Page
     | Page_Documentation Page.Documentation.Model
     | Page_Section Page.Section.Model
     | Page_Example Page.Example.Model
-    | Page_QuickStart Page.QuickStart.Model
+    | Page_GettingStarted Page.GettingStarted.Model
 
 
 init : D.Value -> Url -> Navigation.Key -> ( Model, Cmd Msg )
@@ -82,8 +82,8 @@ view model =
         Page_Example subModel ->
             viewPage Page_Example_Msg (Page.Example.view subModel)
 
-        Page_QuickStart subModel ->
-            viewPage Page_QuickStart_Msg (Page.QuickStart.view subModel)
+        Page_GettingStarted subModel ->
+            viewPage Page_GettingStarted_Msg (Page.GettingStarted.view subModel)
 
 
 type Msg
@@ -94,7 +94,7 @@ type Msg
     | Page_Documentation_Msg Page.Documentation.Msg
     | Page_Section_Msg Page.Section.Msg
     | Page_Example_Msg Page.Example.Msg
-    | Page_QuickStart_Msg Page.QuickStart.Msg
+    | Page_GettingStarted_Msg Page.GettingStarted.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -135,9 +135,9 @@ update msg model =
             Page.Example.update model.navigation subMsg subModel
                 |> updateWith Page_Example Page_Example_Msg model
 
-        ( Page_QuickStart_Msg subMsg, Page_QuickStart subModel ) ->
-            Page.QuickStart.update model.navigation subMsg subModel
-                |> updateWith Page_QuickStart Page_QuickStart_Msg model
+        ( Page_GettingStarted_Msg subMsg, Page_GettingStarted subModel ) ->
+            Page.GettingStarted.update model.navigation subMsg subModel
+                |> updateWith Page_GettingStarted Page_GettingStarted_Msg model
 
         ( _, _ ) ->
             -- Disregard messages that arrived for the wrong page.
@@ -168,8 +168,8 @@ subscriptions model =
         Page_Example subModel ->
             Sub.map Page_Example_Msg (Page.Example.subscriptions subModel)
 
-        Page_QuickStart subModel ->
-            Sub.map Page_QuickStart_Msg (Page.QuickStart.subscriptions subModel)
+        Page_GettingStarted subModel ->
+            Sub.map Page_GettingStarted_Msg (Page.GettingStarted.subscriptions subModel)
 
 
 changeRouteTo : Maybe Route -> Model -> ( Model, Cmd Msg )
@@ -205,9 +205,9 @@ changeRouteTo maybeRoute old =
             Page.Example.init model.navigation session { section = p1, example = p2 }
                 |> updateWith Page_Example Page_Example_Msg model
 
-        Just (Route.Quick_start ) ->
-            Page.QuickStart.init model.navigation session ()
-                |> updateWith Page_QuickStart Page_QuickStart_Msg model
+        Just (Route.Getting_started ) ->
+            Page.GettingStarted.init model.navigation session ()
+                |> updateWith Page_GettingStarted Page_GettingStarted_Msg model
 
 
 updateWith : (model -> Page) -> (msg -> Msg) -> Model -> ( model, Cmd msg ) -> ( Model, Cmd Msg )
@@ -241,5 +241,5 @@ exit model =
         Page_Example subModel ->
             Page.Example.exit subModel model.session
 
-        Page_QuickStart subModel ->
-            Page.QuickStart.exit subModel model.session
+        Page_GettingStarted subModel ->
+            Page.GettingStarted.exit subModel model.session

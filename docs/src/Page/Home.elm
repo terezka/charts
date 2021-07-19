@@ -380,7 +380,7 @@ features model =
     , body =
         [ E.text "The interface of elm-charts mirrors the element and attribute pattern which "
         , E.text "you already know from regular HTML. "
-        , Layout.link "/quick-start" "Get started"
+        , Layout.link Route.gettingStarted "Get started"
         , E.text " composing your chart in minutes, then learn and add features gradually."
         ]
     , togglable = Just ( FamiliarToggle, model.familiarToggle )
@@ -408,7 +408,7 @@ features model =
         , E.el [ F.bold ] (E.text "more than 100 examples ")
         , E.text "on this site to help you "
         , E.text "compose your exact chart. "
-        , E.link [ F.underline ] { url = "/documentation", label = E.text "Explore the catalog" }
+        , E.link [ F.underline ] { url = Route.documentation, label = E.text "Explore the catalog" }
         , E.text "."
         ]
     , togglable = Nothing

@@ -9,6 +9,7 @@ import Element.Border as B
 import Element.Background as BG
 import Session
 import FeatherIcons
+import Route
 
 
 type alias Model =
@@ -91,10 +92,10 @@ type alias Link =
 links : List (E.Element msg)
 links =
   List.map viewLink
-    [ Link "/quick-start" "Getting started"
-    , Link "/documentation" "Documentation"
+    [ Link Route.gettingStarted "Getting started"
+    , Link Route.documentation "Documentation"
     --, Link "/gallery" "Gallery"
-    , Link "/administration" "Administration"
+    , Link Route.administration "Administration"
     ]
 
 
