@@ -100,8 +100,6 @@ container plane config below chartEls above =
   H.div
     [ HA.class "elm-charts__container"
     , HA.style "position" "relative"
-    , HA.style "height" "100%"
-    , HA.style "width" "100%"
     ]
     [ H.div htmlAttrs (below ++ [ chart ] ++ above) ]
 
