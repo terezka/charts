@@ -1333,15 +1333,18 @@ type alias Grid =
     }
 
 
-{-| Add a grid to your chart.
+{-| Add a custom grid to your chart.
 
     C.chart []
-      [ C.grid []
-      , C.xLabels []
-      , C.yLabels []
+      [ C.grid [ CA.width 2 ]
+      , C.xTicks []
+      , C.yTicks []
       ]
 
-Grid lines are added where labels or ticks are added.
+Grid lines are added by default where ticks are added. You can add
+grid lines to where your labels are using the `CA.withGrid` attribute:
+
+    C.yLabels [ CA.withGrid ]
 
 Customizations:
 
