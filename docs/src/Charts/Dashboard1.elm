@@ -67,10 +67,10 @@ view model =
           (CE.getWithinX 8 <| CI.andThen CI.bins CI.bars)
     , CE.onMouseLeave (OnHover [] [])
     ]
-    [ C.grid [ CA.dashed [ 3, 2 ]]
-    , C.xLabels [ CA.times Time.utc, CA.amount 20, CA.fontSize 10 ]
+    [ C.grid [ CA.dashed [ 3, 2 ] ]
+    , C.xLabels [ CA.withGrid, CA.times Time.utc, CA.amount 20, CA.fontSize 10 ]
     , C.yLabels
-        [ CA.pinned .max, CA.moveUp 7, CA.moveRight 10, CA.fontSize 10
+        [ CA.withGrid, CA.pinned .max, CA.moveUp 7, CA.moveRight 10, CA.fontSize 10
         , CA.format (\i -> String.fromFloat (i / 1000) ++ "k")
         ]
 

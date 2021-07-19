@@ -108,7 +108,7 @@ view model =
         , thumb = I.defaultThumb
         }
 
-    , E.html <| viewChart model
+    , E.el [ E.width E.fill ] <| E.html <| viewChart model
 
     , E.row
         [ E.width E.fill
