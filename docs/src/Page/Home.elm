@@ -438,7 +438,7 @@ features model =
         , Examples.BarCharts__Margin
         , Examples.ScatterCharts__Shapes
         ]
-          |> List.map (\id -> { url = Thumbnail.toUrl id, label = E.html (Examples.view Examples.init id) })
+          |> List.map (\id -> { url = Thumbnail.toUrl id, label = E.el [ E.width E.fill ] <| E.html (Examples.view Examples.init id) })
           |> List.map viewOne
           |> E.wrappedRow
               [ E.spacing 30
