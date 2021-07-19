@@ -43,7 +43,8 @@ and attributes. It looks something like this:
         [ CA.width 300
         , CA.height 300
         ]
-        [ C.grid []
+        [ C.xTicks []
+        , C.yTicks []
         , C.xLabels []
         , C.yLabels []
         , C.bars []
@@ -53,8 +54,8 @@ and attributes. It looks something like this:
             data
         ]
 
-All the elements, like `chart`, `grid`, `xLabels`, `yLabels`, `bars` and `bar` in the example
-above, are defined in this module. All the attributes, like `width`, `height`, `color`, and `opacity`,
+All the elements, like `chart`, `xTicks`, `yTicks`, `xLabels`, `yLabels`, `bars` and `bar` in the example
+above, and many others, are defined in this module. All the attributes, like `width`, `height`, `color`, and `opacity`,
 are defined in `Chart.Attributes`. Attributes and other functions related to events are located in
 the `Chart.Events` module. Functions for working with rendered chart items are located in `Chart.Item`.
 Lastly, `Chart.Svg` holds charting primitives in case you have very special needs.
@@ -64,9 +65,11 @@ In the following examples, I will assume the imports:
     import Html as H exposing (Html)
     import Html.Attributes as HA
     import Html.Events as HE
+
     import Svg as S
     import Svg.Attributes as SA
     import Svg.Events as SE
+
     import Chart as C
     import Chart.Attributes as CA
     import Chart.Events as CE
