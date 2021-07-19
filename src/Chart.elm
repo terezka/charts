@@ -2120,7 +2120,7 @@ The rest of the configuration options concern styling:
       , CA.margin 0.2       -- The spacing _around_ the bars in each bin relative to the full length (1).
       , CA.roundTop 0.2     -- The rounding of your bars' top corners. It gets weird after around 0.5.
       , CA.roundBottom 0.2  -- The rounding of your bars' bottom corners. It gets weird after around 0.5.
-      , CA.noGrid           -- Grid lines are by default added at the bin limits. This removes them.
+      , CA.withGrid         -- Add grid lines at the bin limits.
       ]
       [ C.bar .income []
       , C.bar .spending []
