@@ -106,7 +106,7 @@ below are only guiding.
 @docs title, row, column
 
 ## Grid
-@docs noGrid, dotGrid
+@docs noGrid, withGrid, dotGrid
 
 ## Colors
 @docs pink, purple, blue, green, orange, turquoise, red

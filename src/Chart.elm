@@ -119,7 +119,7 @@ In the following examples, I will assume the imports:
 @docs tooltip, line, rect
 
 # Arbitrary elements
-@docs svgAt, htmlAt, svg, html, none
+@docs list, svgAt, htmlAt, svg, html, none
 
 # Advanced elements
 
@@ -131,6 +131,9 @@ In the following examples, I will assume the imports:
 
 ## Using the plane, do..
 @docs withPlane
+
+## Make a custom element
+@docs custom
 
 # Data helper
 @docs binned
