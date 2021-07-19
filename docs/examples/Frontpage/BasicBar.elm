@@ -15,8 +15,8 @@ view model =
     , CA.width 300
     ]
     [ C.grid []
-    , C.xLabels [ CA.ints ]
-    , C.yLabels []
+    , C.xLabels [ CA.withGrid, CA.ints ]
+    , C.yLabels [ CA.withGrid ]
     , C.bars
         [ CA.x1 .x ]
         [ C.bar .z [ CA.striped [] ]

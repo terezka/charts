@@ -912,8 +912,6 @@ The example below illustrates the configuration:
 
           , CA.amount 15   -- Change amount of ticks
           , CA.flip        -- Flip to opposite direction
-          , CA.noGrid      -- By default a grid line is added
-                           -- for each label. This removes them.
           , CA.withGrid    -- Add grid line by each label.
 
           , CA.ints            -- Add ticks at "nice" ints

@@ -14,8 +14,8 @@ view model =
     , CA.width 300
     ]
     [ C.grid []
-    , C.xLabels []
-    , C.yLabels []
+    , C.xLabels [ CA.withGrid ]
+    , C.yLabels [ CA.withGrid ]
     , C.series .x
         [ C.stacked
             [ C.interpolated .y [ CA.opacity 0.2 ] []
