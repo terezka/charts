@@ -5340,28 +5340,28 @@ var $author$project$Main$Page_Administration_Msg = function (a) {
 	return {$: 3, a: a};
 };
 var $author$project$Main$Page_Article = function (a) {
-	return {$: 8, a: a};
+	return {$: 5, a: a};
 };
 var $author$project$Main$Page_Article_Msg = function (a) {
-	return {$: 8, a: a};
+	return {$: 5, a: a};
+};
+var $author$project$Main$Page_Articles = function (a) {
+	return {$: 4, a: a};
+};
+var $author$project$Main$Page_Articles_Msg = function (a) {
+	return {$: 4, a: a};
 };
 var $author$project$Main$Page_Documentation = function (a) {
-	return {$: 4, a: a};
+	return {$: 6, a: a};
 };
 var $author$project$Main$Page_Documentation_Msg = function (a) {
-	return {$: 4, a: a};
+	return {$: 6, a: a};
 };
 var $author$project$Main$Page_Example = function (a) {
-	return {$: 6, a: a};
+	return {$: 8, a: a};
 };
 var $author$project$Main$Page_Example_Msg = function (a) {
-	return {$: 6, a: a};
-};
-var $author$project$Main$Page_Gallery = function (a) {
-	return {$: 7, a: a};
-};
-var $author$project$Main$Page_Gallery_Msg = function (a) {
-	return {$: 7, a: a};
+	return {$: 8, a: a};
 };
 var $author$project$Main$Page_GettingStarted = function (a) {
 	return {$: 9, a: a};
@@ -5376,10 +5376,10 @@ var $author$project$Main$Page_Home_Msg = function (a) {
 	return {$: 2, a: a};
 };
 var $author$project$Main$Page_Section = function (a) {
-	return {$: 5, a: a};
+	return {$: 7, a: a};
 };
 var $author$project$Main$Page_Section_Msg = function (a) {
-	return {$: 5, a: a};
+	return {$: 7, a: a};
 };
 var $author$project$Page$Administration$exit = F2(
 	function (model, session) {
@@ -5389,15 +5389,15 @@ var $author$project$Page$Article$exit = F2(
 	function (model, session) {
 		return session;
 	});
+var $author$project$Page$Articles$exit = F2(
+	function (model, session) {
+		return session;
+	});
 var $author$project$Page$Documentation$exit = F2(
 	function (model, session) {
 		return session;
 	});
 var $author$project$Page$Example$exit = F2(
-	function (model, session) {
-		return session;
-	});
-var $author$project$Page$Gallery$exit = F2(
 	function (model, session) {
 		return session;
 	});
@@ -5430,19 +5430,19 @@ var $author$project$Main$exit = function (model) {
 			return A2($author$project$Page$Administration$exit, subModel, model.L);
 		case 4:
 			var subModel = _v0.a;
-			return A2($author$project$Page$Documentation$exit, subModel, model.L);
+			return A2($author$project$Page$Articles$exit, subModel, model.L);
 		case 5:
 			var subModel = _v0.a;
-			return A2($author$project$Page$Section$exit, subModel, model.L);
+			return A2($author$project$Page$Article$exit, subModel, model.L);
 		case 6:
 			var subModel = _v0.a;
-			return A2($author$project$Page$Example$exit, subModel, model.L);
+			return A2($author$project$Page$Documentation$exit, subModel, model.L);
 		case 7:
 			var subModel = _v0.a;
-			return A2($author$project$Page$Gallery$exit, subModel, model.L);
+			return A2($author$project$Page$Section$exit, subModel, model.L);
 		case 8:
 			var subModel = _v0.a;
-			return A2($author$project$Page$Article$exit, subModel, model.L);
+			return A2($author$project$Page$Example$exit, subModel, model.L);
 		default:
 			var subModel = _v0.a;
 			return A2($author$project$Page$GettingStarted$exit, subModel, model.L);
@@ -5499,6 +5499,12 @@ var $author$project$Page$Article$init = F3(
 			A2($elm$core$List$filter, isCorrectId, $author$project$Articles$all));
 		return _Utils_Tuple2(
 			{a1: $author$project$Articles$init, dX: articleId, c_: $author$project$Ui$Menu$init, af: session.af},
+			$elm$core$Platform$Cmd$none);
+	});
+var $author$project$Page$Articles$init = F3(
+	function (key, session, params) {
+		return _Utils_Tuple2(
+			{c_: $author$project$Ui$Menu$init, af: session.af},
 			$elm$core$Platform$Cmd$none);
 	});
 var $author$project$Ui$Thumbnail$Group = F3(
@@ -6661,12 +6667,6 @@ var $author$project$Page$Example$init = F3(
 			{cT: $author$project$Examples$init, c_: $author$project$Ui$Menu$init, dK: params.fZ, et: params.hs, aV: false, af: session.af},
 			$elm$core$Platform$Cmd$none);
 	});
-var $author$project$Page$Gallery$init = F3(
-	function (key, session, params) {
-		return _Utils_Tuple2(
-			{c_: $author$project$Ui$Menu$init, af: session.af},
-			$elm$core$Platform$Cmd$none);
-	});
 var $author$project$Page$GettingStarted$init = F3(
 	function (key, session, params) {
 		return _Utils_Tuple2(
@@ -6733,45 +6733,11 @@ var $author$project$Main$changeRouteTo = F2(
 					var _v3 = maybeRoute.a;
 					return A4(
 						$author$project$Main$updateWith,
-						$author$project$Main$Page_Documentation,
-						$author$project$Main$Page_Documentation_Msg,
+						$author$project$Main$Page_Articles,
+						$author$project$Main$Page_Articles_Msg,
 						model,
-						A3($author$project$Page$Documentation$init, model.n, session, 0));
+						A3($author$project$Page$Articles$init, model.n, session, 0));
 				case 3:
-					var p1 = maybeRoute.a.a;
-					return A4(
-						$author$project$Main$updateWith,
-						$author$project$Main$Page_Section,
-						$author$project$Main$Page_Section_Msg,
-						model,
-						A3(
-							$author$project$Page$Section$init,
-							model.n,
-							session,
-							{fZ: p1}));
-				case 4:
-					var _v4 = maybeRoute.a;
-					var p1 = _v4.a;
-					var p2 = _v4.b;
-					return A4(
-						$author$project$Main$updateWith,
-						$author$project$Main$Page_Example,
-						$author$project$Main$Page_Example_Msg,
-						model,
-						A3(
-							$author$project$Page$Example$init,
-							model.n,
-							session,
-							{hs: p2, fZ: p1}));
-				case 5:
-					var _v5 = maybeRoute.a;
-					return A4(
-						$author$project$Main$updateWith,
-						$author$project$Main$Page_Gallery,
-						$author$project$Main$Page_Gallery_Msg,
-						model,
-						A3($author$project$Page$Gallery$init, model.n, session, 0));
-				case 6:
 					var p1 = maybeRoute.a.a;
 					return A4(
 						$author$project$Main$updateWith,
@@ -6783,6 +6749,40 @@ var $author$project$Main$changeRouteTo = F2(
 							model.n,
 							session,
 							{hJ: p1}));
+				case 4:
+					var _v4 = maybeRoute.a;
+					return A4(
+						$author$project$Main$updateWith,
+						$author$project$Main$Page_Documentation,
+						$author$project$Main$Page_Documentation_Msg,
+						model,
+						A3($author$project$Page$Documentation$init, model.n, session, 0));
+				case 5:
+					var p1 = maybeRoute.a.a;
+					return A4(
+						$author$project$Main$updateWith,
+						$author$project$Main$Page_Section,
+						$author$project$Main$Page_Section_Msg,
+						model,
+						A3(
+							$author$project$Page$Section$init,
+							model.n,
+							session,
+							{fZ: p1}));
+				case 6:
+					var _v5 = maybeRoute.a;
+					var p1 = _v5.a;
+					var p2 = _v5.b;
+					return A4(
+						$author$project$Main$updateWith,
+						$author$project$Main$Page_Example,
+						$author$project$Main$Page_Example_Msg,
+						model,
+						A3(
+							$author$project$Page$Example$init,
+							model.n,
+							session,
+							{hs: p2, fZ: p1}));
 				default:
 					var _v6 = maybeRoute.a;
 					return A4(
@@ -6914,18 +6914,18 @@ var $elm$url$Url$Parser$parse = F2(
 					$elm$core$Basics$identity)));
 	});
 var $author$project$Route$Administration = {$: 1};
-var $author$project$Route$Documentation = {$: 2};
-var $author$project$Route$Documentation_String_ = function (a) {
+var $author$project$Route$Articles = {$: 2};
+var $author$project$Route$Articles_String_ = function (a) {
 	return {$: 3, a: a};
+};
+var $author$project$Route$Documentation = {$: 4};
+var $author$project$Route$Documentation_String_ = function (a) {
+	return {$: 5, a: a};
 };
 var $author$project$Route$Documentation_String__String_ = F2(
 	function (a, b) {
-		return {$: 4, a: a, b: b};
+		return {$: 6, a: a, b: b};
 	});
-var $author$project$Route$Gallery = {$: 5};
-var $author$project$Route$Gallery_String_ = function (a) {
-	return {$: 6, a: a};
-};
 var $author$project$Route$Getting_started = {$: 7};
 var $author$project$Route$Top = {$: 0};
 var $elm$url$Url$Parser$Parser = $elm$core$Basics$identity;
@@ -7070,6 +7070,17 @@ var $author$project$Route$parser = $elm$url$Url$Parser$oneOf(
 			$elm$url$Url$Parser$s('administration')),
 			A2(
 			$elm$url$Url$Parser$map,
+			$author$project$Route$Articles,
+			$elm$url$Url$Parser$s('articles')),
+			A2(
+			$elm$url$Url$Parser$map,
+			$author$project$Route$Articles_String_,
+			A2(
+				$elm$url$Url$Parser$slash,
+				$elm$url$Url$Parser$s('articles'),
+				$elm$url$Url$Parser$string)),
+			A2(
+			$elm$url$Url$Parser$map,
 			$author$project$Route$Documentation,
 			$elm$url$Url$Parser$s('documentation')),
 			A2(
@@ -7086,17 +7097,6 @@ var $author$project$Route$parser = $elm$url$Url$Parser$oneOf(
 				$elm$url$Url$Parser$slash,
 				$elm$url$Url$Parser$s('documentation'),
 				A2($elm$url$Url$Parser$slash, $elm$url$Url$Parser$string, $elm$url$Url$Parser$string))),
-			A2(
-			$elm$url$Url$Parser$map,
-			$author$project$Route$Gallery,
-			$elm$url$Url$Parser$s('gallery')),
-			A2(
-			$elm$url$Url$Parser$map,
-			$author$project$Route$Gallery_String_,
-			A2(
-				$elm$url$Url$Parser$slash,
-				$elm$url$Url$Parser$s('gallery'),
-				$elm$url$Url$Parser$string)),
 			A2(
 			$elm$url$Url$Parser$map,
 			$author$project$Route$Getting_started,
@@ -7457,6 +7457,9 @@ var $author$project$Page$Administration$subscriptions = function (model) {
 var $author$project$Page$Article$subscriptions = function (model) {
 	return $elm$core$Platform$Sub$none;
 };
+var $author$project$Page$Articles$subscriptions = function (model) {
+	return $elm$core$Platform$Sub$none;
+};
 var $author$project$Page$Section$OnResize = F2(
 	function (a, b) {
 		return {$: 0, a: a, b: b};
@@ -7471,9 +7474,6 @@ var $author$project$Page$Example$OnResize = F2(
 	});
 var $author$project$Page$Example$subscriptions = function (model) {
 	return $elm$browser$Browser$Events$onResize($author$project$Page$Example$OnResize);
-};
-var $author$project$Page$Gallery$subscriptions = function (model) {
-	return $elm$core$Platform$Sub$none;
 };
 var $author$project$Page$GettingStarted$OnResize = F2(
 	function (a, b) {
@@ -7512,32 +7512,32 @@ var $author$project$Main$subscriptions = function (model) {
 			var subModel = _v0.a;
 			return A2(
 				$elm$core$Platform$Sub$map,
-				$author$project$Main$Page_Documentation_Msg,
-				$author$project$Page$Documentation$subscriptions(subModel));
+				$author$project$Main$Page_Articles_Msg,
+				$author$project$Page$Articles$subscriptions(subModel));
 		case 5:
-			var subModel = _v0.a;
-			return A2(
-				$elm$core$Platform$Sub$map,
-				$author$project$Main$Page_Section_Msg,
-				$author$project$Page$Section$subscriptions(subModel));
-		case 6:
-			var subModel = _v0.a;
-			return A2(
-				$elm$core$Platform$Sub$map,
-				$author$project$Main$Page_Example_Msg,
-				$author$project$Page$Example$subscriptions(subModel));
-		case 7:
-			var subModel = _v0.a;
-			return A2(
-				$elm$core$Platform$Sub$map,
-				$author$project$Main$Page_Gallery_Msg,
-				$author$project$Page$Gallery$subscriptions(subModel));
-		case 8:
 			var subModel = _v0.a;
 			return A2(
 				$elm$core$Platform$Sub$map,
 				$author$project$Main$Page_Article_Msg,
 				$author$project$Page$Article$subscriptions(subModel));
+		case 6:
+			var subModel = _v0.a;
+			return A2(
+				$elm$core$Platform$Sub$map,
+				$author$project$Main$Page_Documentation_Msg,
+				$author$project$Page$Documentation$subscriptions(subModel));
+		case 7:
+			var subModel = _v0.a;
+			return A2(
+				$elm$core$Platform$Sub$map,
+				$author$project$Main$Page_Section_Msg,
+				$author$project$Page$Section$subscriptions(subModel));
+		case 8:
+			var subModel = _v0.a;
+			return A2(
+				$elm$core$Platform$Sub$map,
+				$author$project$Main$Page_Example_Msg,
+				$author$project$Page$Example$subscriptions(subModel));
 		default:
 			var subModel = _v0.a;
 			return A2(
@@ -7764,6 +7764,21 @@ var $author$project$Page$Article$update = F3(
 						a1: A2($author$project$Articles$update, subMsg, model.a1)
 					}),
 				$elm$core$Platform$Cmd$none);
+		}
+	});
+var $author$project$Page$Articles$update = F3(
+	function (key, msg, model) {
+		if (!msg.$) {
+			var subMsg = msg.a;
+			return _Utils_Tuple2(
+				_Utils_update(
+					model,
+					{
+						c_: A2($author$project$Ui$Menu$update, subMsg, model.c_)
+					}),
+				$elm$core$Platform$Cmd$none);
+		} else {
+			return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 		}
 	});
 var $author$project$Examples$BarCharts$BarLabels$update = F2(
@@ -9158,21 +9173,6 @@ var $author$project$Page$Example$update = F3(
 					$elm$core$Platform$Cmd$none);
 		}
 	});
-var $author$project$Page$Gallery$update = F3(
-	function (key, msg, model) {
-		if (!msg.$) {
-			var subMsg = msg.a;
-			return _Utils_Tuple2(
-				_Utils_update(
-					model,
-					{
-						c_: A2($author$project$Ui$Menu$update, subMsg, model.c_)
-					}),
-				$elm$core$Platform$Cmd$none);
-		} else {
-			return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-		}
-	});
 var $author$project$Page$GettingStarted$update = F3(
 	function (key, msg, model) {
 		switch (msg.$) {
@@ -9405,6 +9405,32 @@ var $author$project$Main$update = F2(
 						var subModel = _v0.b.a;
 						return A4(
 							$author$project$Main$updateWith,
+							$author$project$Main$Page_Articles,
+							$author$project$Main$Page_Articles_Msg,
+							model,
+							A3($author$project$Page$Articles$update, model.n, subMsg, subModel));
+					} else {
+						break _v0$10;
+					}
+				case 5:
+					if (_v0.b.$ === 5) {
+						var subMsg = _v0.a.a;
+						var subModel = _v0.b.a;
+						return A4(
+							$author$project$Main$updateWith,
+							$author$project$Main$Page_Article,
+							$author$project$Main$Page_Article_Msg,
+							model,
+							A3($author$project$Page$Article$update, model.n, subMsg, subModel));
+					} else {
+						break _v0$10;
+					}
+				case 6:
+					if (_v0.b.$ === 6) {
+						var subMsg = _v0.a.a;
+						var subModel = _v0.b.a;
+						return A4(
+							$author$project$Main$updateWith,
 							$author$project$Main$Page_Documentation,
 							$author$project$Main$Page_Documentation_Msg,
 							model,
@@ -9412,8 +9438,8 @@ var $author$project$Main$update = F2(
 					} else {
 						break _v0$10;
 					}
-				case 5:
-					if (_v0.b.$ === 5) {
+				case 7:
+					if (_v0.b.$ === 7) {
 						var subMsg = _v0.a.a;
 						var subModel = _v0.b.a;
 						return A4(
@@ -9425,8 +9451,8 @@ var $author$project$Main$update = F2(
 					} else {
 						break _v0$10;
 					}
-				case 6:
-					if (_v0.b.$ === 6) {
+				case 8:
+					if (_v0.b.$ === 8) {
 						var subMsg = _v0.a.a;
 						var subModel = _v0.b.a;
 						return A4(
@@ -9435,32 +9461,6 @@ var $author$project$Main$update = F2(
 							$author$project$Main$Page_Example_Msg,
 							model,
 							A3($author$project$Page$Example$update, model.n, subMsg, subModel));
-					} else {
-						break _v0$10;
-					}
-				case 7:
-					if (_v0.b.$ === 7) {
-						var subMsg = _v0.a.a;
-						var subModel = _v0.b.a;
-						return A4(
-							$author$project$Main$updateWith,
-							$author$project$Main$Page_Gallery,
-							$author$project$Main$Page_Gallery_Msg,
-							model,
-							A3($author$project$Page$Gallery$update, model.n, subMsg, subModel));
-					} else {
-						break _v0$10;
-					}
-				case 8:
-					if (_v0.b.$ === 8) {
-						var subMsg = _v0.a.a;
-						var subModel = _v0.b.a;
-						return A4(
-							$author$project$Main$updateWith,
-							$author$project$Main$Page_Article,
-							$author$project$Main$Page_Article_Msg,
-							model,
-							A3($author$project$Page$Article$update, model.n, subMsg, subModel));
 					} else {
 						break _v0$10;
 					}
@@ -15387,35 +15387,35 @@ var $author$project$Route$toString = function (route) {
 			return A2(
 				$elm$url$Url$Builder$absolute,
 				_List_fromArray(
-					['documentation']),
+					['articles']),
 				A2($elm$core$List$filterMap, $elm$core$Basics$identity, _List_Nil));
 		case 3:
 			var p1 = route.a;
 			return A2(
 				$elm$url$Url$Builder$absolute,
 				_List_fromArray(
-					['documentation', p1]),
+					['articles', p1]),
 				A2($elm$core$List$filterMap, $elm$core$Basics$identity, _List_Nil));
 		case 4:
+			return A2(
+				$elm$url$Url$Builder$absolute,
+				_List_fromArray(
+					['documentation']),
+				A2($elm$core$List$filterMap, $elm$core$Basics$identity, _List_Nil));
+		case 5:
+			var p1 = route.a;
+			return A2(
+				$elm$url$Url$Builder$absolute,
+				_List_fromArray(
+					['documentation', p1]),
+				A2($elm$core$List$filterMap, $elm$core$Basics$identity, _List_Nil));
+		case 6:
 			var p1 = route.a;
 			var p2 = route.b;
 			return A2(
 				$elm$url$Url$Builder$absolute,
 				_List_fromArray(
 					['documentation', p1, p2]),
-				A2($elm$core$List$filterMap, $elm$core$Basics$identity, _List_Nil));
-		case 5:
-			return A2(
-				$elm$url$Url$Builder$absolute,
-				_List_fromArray(
-					['gallery']),
-				A2($elm$core$List$filterMap, $elm$core$Basics$identity, _List_Nil));
-		case 6:
-			var p1 = route.a;
-			return A2(
-				$elm$url$Url$Builder$absolute,
-				_List_fromArray(
-					['gallery', p1]),
 				A2($elm$core$List$filterMap, $elm$core$Basics$identity, _List_Nil));
 		default:
 			return A2(
@@ -15426,8 +15426,8 @@ var $author$project$Route$toString = function (route) {
 	}
 };
 var $author$project$Route$administration = $author$project$Route$toString($author$project$Route$Administration);
+var $author$project$Route$articles = $author$project$Route$toString($author$project$Route$Articles);
 var $author$project$Route$documentation = $author$project$Route$toString($author$project$Route$Documentation);
-var $author$project$Route$gallery = $author$project$Route$toString($author$project$Route$Gallery);
 var $author$project$Route$gettingStarted = $author$project$Route$toString($author$project$Route$Getting_started);
 var $author$project$Ui$Menu$viewLink = function (link) {
 	return A2(
@@ -15445,7 +15445,7 @@ var $author$project$Ui$Menu$links = A2(
 		[
 			A2($author$project$Ui$Menu$Link, $author$project$Route$gettingStarted, 'Getting started'),
 			A2($author$project$Ui$Menu$Link, $author$project$Route$documentation, 'Documentation'),
-			A2($author$project$Ui$Menu$Link, $author$project$Route$gallery, 'Gallery'),
+			A2($author$project$Ui$Menu$Link, $author$project$Route$articles, 'Articles'),
 			A2($author$project$Ui$Menu$Link, $author$project$Route$administration, 'Administration')
 		]));
 var $elm$svg$Svg$trustedNode = _VirtualDom_nodeNS('http://www.w3.org/2000/svg');
@@ -19219,7 +19219,7 @@ var $author$project$Internal$Svg$bar = F3(
 		var roundingTop = (A2($author$project$Internal$Coordinates$scaleSVGX, plane, width) * 0.5) * A3($elm$core$Basics$clamp, 0, 1, config.iu);
 		var radiusTopX = A2($author$project$Internal$Coordinates$scaleCartesianX, plane, roundingTop);
 		var radiusTopY = A2($author$project$Internal$Coordinates$scaleCartesianY, plane, roundingTop);
-		var _v0 = ((((height - radiusTopY) - radiusBottomY) <= 0) || (((width - radiusTopX) - radiusBottomX) <= 0)) ? _Utils_Tuple2(0, 0) : _Utils_Tuple2(config.iu, config.it);
+		var _v0 = ((((height - (radiusTopY * 0.8)) - (radiusBottomY * 0.8)) <= 0) || (((width - (radiusTopX * 0.8)) - (radiusBottomX * 0.8)) <= 0)) ? _Utils_Tuple2(0, 0) : _Utils_Tuple2(config.iu, config.it);
 		var roundTop = _v0.a;
 		var roundBottom = _v0.b;
 		var _v1 = function () {
@@ -22116,21 +22116,6 @@ var $author$project$Internal$Svg$distanceX = F3(
 		return $elm$core$Basics$abs(
 			A2($author$project$Internal$Coordinates$toSVGX, plane, point.de) - A2($author$project$Internal$Coordinates$toSVGX, plane, searched.de));
 	});
-var $author$project$Internal$Svg$distanceY = F3(
-	function (plane, searched, point) {
-		return $elm$core$Basics$abs(
-			A2($author$project$Internal$Coordinates$toSVGY, plane, point.eI) - A2($author$project$Internal$Coordinates$toSVGY, plane, searched.eI));
-	});
-var $author$project$Internal$Svg$distanceSquared = F3(
-	function (plane, searched, point) {
-		return A2(
-			$elm$core$Basics$pow,
-			A3($author$project$Internal$Svg$distanceX, plane, searched, point),
-			2) + A2(
-			$elm$core$Basics$pow,
-			A3($author$project$Internal$Svg$distanceY, plane, searched, point),
-			2);
-	});
 var $author$project$Internal$Svg$keepOne = function (toPosition) {
 	var toArea = function (a) {
 		return function (pos) {
@@ -22156,7 +22141,7 @@ var $author$project$Internal$Svg$keepOne = function (toPosition) {
 		});
 	return A2($elm$core$List$foldr, func, _List_Nil);
 };
-var $author$project$Internal$Svg$getNearestHelp = F4(
+var $author$project$Internal$Svg$getNearestXHelp = F4(
 	function (toPosition, items, plane, searched) {
 		var toPoint = function (i) {
 			return A2(
@@ -22164,18 +22149,18 @@ var $author$project$Internal$Svg$getNearestHelp = F4(
 				toPosition(i),
 				searched);
 		};
-		var distanceSquared_ = A2($author$project$Internal$Svg$distanceSquared, plane, searched);
+		var distanceX_ = A2($author$project$Internal$Svg$distanceX, plane, searched);
 		var getClosest = F2(
 			function (item, allClosest) {
 				var _v0 = $elm$core$List$head(allClosest);
 				if (!_v0.$) {
 					var closest = _v0.a;
 					return _Utils_eq(
-						toPoint(closest),
-						toPoint(item)) ? A2($elm$core$List$cons, item, allClosest) : ((_Utils_cmp(
-						distanceSquared_(
+						toPoint(closest).de,
+						toPoint(item).de) ? A2($elm$core$List$cons, item, allClosest) : ((_Utils_cmp(
+						distanceX_(
 							toPoint(closest)),
-						distanceSquared_(
+						distanceX_(
 							toPoint(item))) > 0) ? _List_fromArray(
 						[item]) : allClosest);
 				} else {
@@ -22188,23 +22173,23 @@ var $author$project$Internal$Svg$getNearestHelp = F4(
 			toPosition,
 			A3($elm$core$List$foldl, getClosest, _List_Nil, items));
 	});
-var $author$project$Internal$Svg$getNearest = F4(
+var $author$project$Internal$Svg$getNearestX = F4(
 	function (toPosition, items, plane, searched) {
-		return A4($author$project$Internal$Svg$getNearestHelp, toPosition, items, plane, searched);
+		return A4($author$project$Internal$Svg$getNearestXHelp, toPosition, items, plane, searched);
 	});
-var $author$project$Internal$Events$getNearest = function (grouping) {
+var $author$project$Internal$Events$getNearestX = function (grouping) {
 	var toPos = grouping.a;
 	return F2(
 		function (items, plane) {
 			var groups = A2($author$project$Internal$Many$apply, grouping, items);
 			return A3(
-				$author$project$Internal$Svg$getNearest,
+				$author$project$Internal$Svg$getNearestX,
 				toPos(plane),
 				groups,
 				plane);
 		});
 };
-var $author$project$Chart$Events$getNearest = $author$project$Internal$Events$getNearest;
+var $author$project$Chart$Events$getNearestX = $author$project$Internal$Events$getNearestX;
 var $author$project$Internal$Coordinates$top = function (pos) {
 	return {de: pos.jE + ((pos.eH - pos.jE) / 2), eI: pos.eK};
 };
@@ -22691,11 +22676,11 @@ var $author$project$Articles$GenderAndSalery$Bars$viewChart = F2(
 					$author$project$Chart$Attributes$margin(
 					{eS: 30, fu: 0, fW: 0, f6: 0}),
 					$author$project$Chart$Attributes$padding(
-					{eS: 20, fu: 40, fW: 0, f6: 15}),
+					{eS: 20, fu: 40, fW: 0, f6: 20}),
 					A2(
 					$author$project$Chart$Events$onMouseMove,
 					$author$project$Articles$GenderAndSalery$Bars$OnHover,
-					$author$project$Chart$Events$getNearest(
+					$author$project$Chart$Events$getNearestX(
 						A2(
 							$author$project$Chart$Item$andThen,
 							$author$project$Chart$Item$bins,
@@ -22777,7 +22762,7 @@ var $author$project$Articles$GenderAndSalery$Bars$viewChart = F2(
 									return $.dY;
 								},
 								$elm$core$Basics$add(model.aL))),
-							$author$project$Chart$Attributes$margin(0.25),
+							$author$project$Chart$Attributes$margin(0.15),
 							$author$project$Chart$Attributes$roundTop(0.2),
 							$author$project$Chart$Attributes$roundBottom(0.2),
 							$author$project$Chart$Attributes$withGrid
@@ -22829,7 +22814,7 @@ var $author$project$Articles$GenderAndSalery$Bars$viewChart = F2(
 						var amountOfBars = $elm$core$List$length(hoveredBars);
 						var viewLabel = F2(
 							function (index, bar) {
-								var offset = A2($author$project$Chart$Svg$lengthInCartesianY, p, 10 + (((amountOfBars - index) - 1) * 20));
+								var offset = A2($author$project$Chart$Svg$lengthInCartesianY, p, 5 + (((amountOfBars - index) - 1) * 15));
 								return _List_fromArray(
 									[
 										$author$project$Chart$line(
@@ -22889,7 +22874,7 @@ var $author$project$Articles$GenderAndSalery$Bars$viewChart = F2(
 						]),
 					_List_fromArray(
 						[
-							$elm$svg$Svg$text('People')
+							$elm$svg$Svg$text('Workforce')
 						])),
 					A4(
 					$author$project$Chart$labelAt,
@@ -23010,7 +22995,7 @@ var $author$project$Articles$GenderAndSalery$Bars$view = F2(
 					$mdgriffith$elm_ui$Element$row,
 					_List_fromArray(
 						[
-							$mdgriffith$elm_ui$Element$spacing(20),
+							$mdgriffith$elm_ui$Element$spacing(50),
 							$mdgriffith$elm_ui$Element$Font$size(12),
 							$mdgriffith$elm_ui$Element$Font$bold
 						]),
@@ -23051,7 +23036,7 @@ var $author$project$Articles$GenderAndSalery$Bars$view = F2(
 										$mdgriffith$elm_ui$Element$px(30)),
 										$mdgriffith$elm_ui$Element$width(
 										$mdgriffith$elm_ui$Element$px(100)),
-										$mdgriffith$elm_ui$Element$spacing(10),
+										$mdgriffith$elm_ui$Element$spacing(20),
 										$mdgriffith$elm_ui$Element$behindContent(
 										A2(
 											$mdgriffith$elm_ui$Element$el,
@@ -23062,7 +23047,7 @@ var $author$project$Articles$GenderAndSalery$Bars$view = F2(
 													$mdgriffith$elm_ui$Element$px(10)),
 													$mdgriffith$elm_ui$Element$centerY,
 													$mdgriffith$elm_ui$Element$Background$color(
-													A3($mdgriffith$elm_ui$Element$rgb255, 220, 220, 220)),
+													A3($mdgriffith$elm_ui$Element$rgb255, 230, 230, 230)),
 													$mdgriffith$elm_ui$Element$Border$rounded(10)
 												]),
 											$mdgriffith$elm_ui$Element$none))
@@ -23076,7 +23061,7 @@ var $author$project$Articles$GenderAndSalery$Bars$view = F2(
 												$mdgriffith$elm_ui$Element$Font$size(12),
 												$mdgriffith$elm_ui$Element$Font$bold
 											]),
-										$mdgriffith$elm_ui$Element$text('Bin size')),
+										$mdgriffith$elm_ui$Element$text('Salery bracket size:')),
 									eg: 20000,
 									dC: 5000,
 									ia: $author$project$Articles$GenderAndSalery$Bars$OnBinSize,
@@ -23098,13 +23083,23 @@ var $author$project$Articles$GenderAndSalery$Bars$view = F2(
 									jy: model.aL
 								}),
 								A2(
-								circle,
-								A3($mdgriffith$elm_ui$Element$rgba255, 88, 169, 246),
-								'Men'),
-								A2(
-								circle,
-								A3($mdgriffith$elm_ui$Element$rgba255, 245, 109, 188),
-								'Women')
+								$mdgriffith$elm_ui$Element$row,
+								_List_fromArray(
+									[
+										$mdgriffith$elm_ui$Element$spacing(20)
+									]),
+								_List_fromArray(
+									[
+										$mdgriffith$elm_ui$Element$text('Workforce: '),
+										A2(
+										circle,
+										A3($mdgriffith$elm_ui$Element$rgba255, 222, 116, 215),
+										'Women'),
+										A2(
+										circle,
+										A3($mdgriffith$elm_ui$Element$rgba255, 138, 145, 247),
+										'Men')
+									]))
 							]);
 					}()),
 					A2(
@@ -23241,6 +23236,70 @@ var $author$project$Internal$Events$getCoords = F3(
 		return searched;
 	});
 var $author$project$Chart$Events$getCoords = $author$project$Internal$Events$getCoords;
+var $author$project$Internal$Svg$distanceY = F3(
+	function (plane, searched, point) {
+		return $elm$core$Basics$abs(
+			A2($author$project$Internal$Coordinates$toSVGY, plane, point.eI) - A2($author$project$Internal$Coordinates$toSVGY, plane, searched.eI));
+	});
+var $author$project$Internal$Svg$distanceSquared = F3(
+	function (plane, searched, point) {
+		return A2(
+			$elm$core$Basics$pow,
+			A3($author$project$Internal$Svg$distanceX, plane, searched, point),
+			2) + A2(
+			$elm$core$Basics$pow,
+			A3($author$project$Internal$Svg$distanceY, plane, searched, point),
+			2);
+	});
+var $author$project$Internal$Svg$getNearestHelp = F4(
+	function (toPosition, items, plane, searched) {
+		var toPoint = function (i) {
+			return A2(
+				$author$project$Internal$Svg$closestPoint,
+				toPosition(i),
+				searched);
+		};
+		var distanceSquared_ = A2($author$project$Internal$Svg$distanceSquared, plane, searched);
+		var getClosest = F2(
+			function (item, allClosest) {
+				var _v0 = $elm$core$List$head(allClosest);
+				if (!_v0.$) {
+					var closest = _v0.a;
+					return _Utils_eq(
+						toPoint(closest),
+						toPoint(item)) ? A2($elm$core$List$cons, item, allClosest) : ((_Utils_cmp(
+						distanceSquared_(
+							toPoint(closest)),
+						distanceSquared_(
+							toPoint(item))) > 0) ? _List_fromArray(
+						[item]) : allClosest);
+				} else {
+					return _List_fromArray(
+						[item]);
+				}
+			});
+		return A2(
+			$author$project$Internal$Svg$keepOne,
+			toPosition,
+			A3($elm$core$List$foldl, getClosest, _List_Nil, items));
+	});
+var $author$project$Internal$Svg$getNearest = F4(
+	function (toPosition, items, plane, searched) {
+		return A4($author$project$Internal$Svg$getNearestHelp, toPosition, items, plane, searched);
+	});
+var $author$project$Internal$Events$getNearest = function (grouping) {
+	var toPos = grouping.a;
+	return F2(
+		function (items, plane) {
+			var groups = A2($author$project$Internal$Many$apply, grouping, items);
+			return A3(
+				$author$project$Internal$Svg$getNearest,
+				toPos(plane),
+				groups,
+				plane);
+		});
+};
+var $author$project$Chart$Events$getNearest = $author$project$Internal$Events$getNearest;
 var $author$project$Chart$Attributes$highest = F3(
 	function (v, edit, b) {
 		return _Utils_update(
@@ -25337,7 +25396,7 @@ var $author$project$Articles$GenderAndSalery$Bubble$viewChart = F2(
 									]),
 								_List_fromArray(
 									[
-										$elm$svg$Svg$text('Average salary in DKK')
+										$elm$svg$Svg$text('Average salary')
 									]),
 								{de: p.de.eg, eI: p.eI.dC}),
 								A3(
@@ -25643,7 +25702,7 @@ var $author$project$Articles$GenderAndSalery$view = function (model) {
 						[
 							$mdgriffith$elm_ui$Element$Font$size(18)
 						]),
-					$mdgriffith$elm_ui$Element$text('Womens percentage of mens salary')),
+					$mdgriffith$elm_ui$Element$text('Women\'s percentage of men\'s salary')),
 					A2(
 					$mdgriffith$elm_ui$Element$row,
 					_List_fromArray(
@@ -25734,15 +25793,8 @@ var $author$project$Articles$GenderAndSalery$view = function (model) {
 					$mdgriffith$elm_ui$Element$el,
 					_List_fromArray(
 						[
-							$mdgriffith$elm_ui$Element$Font$size(18)
-						]),
-					$mdgriffith$elm_ui$Element$text('Women in each salary bracket')),
-					A2(
-					$mdgriffith$elm_ui$Element$el,
-					_List_fromArray(
-						[
 							$mdgriffith$elm_ui$Element$paddingEach(
-							{eS: 80, fu: 0, fW: 0, f6: 0}),
+							{eS: 0, fu: 0, fW: 0, f6: 0}),
 							$mdgriffith$elm_ui$Element$width(
 							A2($mdgriffith$elm_ui$Element$maximum, 1000, $mdgriffith$elm_ui$Element$fill))
 						]),
@@ -25760,10 +25812,11 @@ var $author$project$Articles$GenderAndSalery$view = function (model) {
 				]);
 		},
 		hZ: function (_v1) {
-			return A2(
-				$mdgriffith$elm_ui$Element$map,
-				$author$project$Articles$GenderAndSalery$BubbleMsg,
-				A2($author$project$Articles$GenderAndSalery$Bubble$view, model.ar, 2019));
+			return $mdgriffith$elm_ui$Element$html(
+				A2(
+					$elm$html$Html$map,
+					$author$project$Articles$GenderAndSalery$BubbleMsg,
+					A2($author$project$Articles$GenderAndSalery$Bubble$viewChart, model.ar, 2019)));
 		},
 		ja: 'Salary distribution in Denmark'
 	};
@@ -25815,6 +25868,261 @@ var $author$project$Page$Article$view = function (model) {
 								]));
 					}
 				}()
+				])),
+		ja: 'elm-charts'
+	};
+};
+var $author$project$Page$Articles$MenuMsg = function (a) {
+	return {$: 0, a: a};
+};
+var $author$project$Page$Articles$None = {$: 1};
+var $mdgriffith$elm_ui$Internal$Model$Padding = F5(
+	function (a, b, c, d, e) {
+		return {$: 0, a: a, b: b, c: c, d: d, e: e};
+	});
+var $mdgriffith$elm_ui$Internal$Model$Spaced = F3(
+	function (a, b, c) {
+		return {$: 0, a: a, b: b, c: c};
+	});
+var $mdgriffith$elm_ui$Internal$Model$extractSpacingAndPadding = function (attrs) {
+	return A3(
+		$elm$core$List$foldr,
+		F2(
+			function (attr, _v0) {
+				var pad = _v0.a;
+				var spacing = _v0.b;
+				return _Utils_Tuple2(
+					function () {
+						if (!pad.$) {
+							var x = pad.a;
+							return pad;
+						} else {
+							if ((attr.$ === 4) && (attr.b.$ === 7)) {
+								var _v3 = attr.b;
+								var name = _v3.a;
+								var t = _v3.b;
+								var r = _v3.c;
+								var b = _v3.d;
+								var l = _v3.e;
+								return $elm$core$Maybe$Just(
+									A5($mdgriffith$elm_ui$Internal$Model$Padding, name, t, r, b, l));
+							} else {
+								return $elm$core$Maybe$Nothing;
+							}
+						}
+					}(),
+					function () {
+						if (!spacing.$) {
+							var x = spacing.a;
+							return spacing;
+						} else {
+							if ((attr.$ === 4) && (attr.b.$ === 5)) {
+								var _v6 = attr.b;
+								var name = _v6.a;
+								var x = _v6.b;
+								var y = _v6.c;
+								return $elm$core$Maybe$Just(
+									A3($mdgriffith$elm_ui$Internal$Model$Spaced, name, x, y));
+							} else {
+								return $elm$core$Maybe$Nothing;
+							}
+						}
+					}());
+			}),
+		_Utils_Tuple2($elm$core$Maybe$Nothing, $elm$core$Maybe$Nothing),
+		attrs);
+};
+var $mdgriffith$elm_ui$Internal$Model$paddingNameFloat = F4(
+	function (top, right, bottom, left) {
+		return 'pad-' + ($mdgriffith$elm_ui$Internal$Model$floatClass(top) + ('-' + ($mdgriffith$elm_ui$Internal$Model$floatClass(right) + ('-' + ($mdgriffith$elm_ui$Internal$Model$floatClass(bottom) + ('-' + $mdgriffith$elm_ui$Internal$Model$floatClass(left)))))));
+	});
+var $mdgriffith$elm_ui$Element$wrappedRow = F2(
+	function (attrs, children) {
+		var _v0 = $mdgriffith$elm_ui$Internal$Model$extractSpacingAndPadding(attrs);
+		var padded = _v0.a;
+		var spaced = _v0.b;
+		if (spaced.$ === 1) {
+			return A4(
+				$mdgriffith$elm_ui$Internal$Model$element,
+				$mdgriffith$elm_ui$Internal$Model$asRow,
+				$mdgriffith$elm_ui$Internal$Model$div,
+				A2(
+					$elm$core$List$cons,
+					$mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.a6 + (' ' + ($mdgriffith$elm_ui$Internal$Style$classes.ai + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.eG)))),
+					A2(
+						$elm$core$List$cons,
+						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
+						A2(
+							$elm$core$List$cons,
+							$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
+							attrs))),
+				$mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
+		} else {
+			var _v2 = spaced.a;
+			var spaceName = _v2.a;
+			var x = _v2.b;
+			var y = _v2.c;
+			var newPadding = function () {
+				if (!padded.$) {
+					var _v5 = padded.a;
+					var name = _v5.a;
+					var t = _v5.b;
+					var r = _v5.c;
+					var b = _v5.d;
+					var l = _v5.e;
+					if ((_Utils_cmp(r, x / 2) > -1) && (_Utils_cmp(b, y / 2) > -1)) {
+						var newTop = t - (y / 2);
+						var newRight = r - (x / 2);
+						var newLeft = l - (x / 2);
+						var newBottom = b - (y / 2);
+						return $elm$core$Maybe$Just(
+							A2(
+								$mdgriffith$elm_ui$Internal$Model$StyleClass,
+								$mdgriffith$elm_ui$Internal$Flag$padding,
+								A5(
+									$mdgriffith$elm_ui$Internal$Model$PaddingStyle,
+									A4($mdgriffith$elm_ui$Internal$Model$paddingNameFloat, newTop, newRight, newBottom, newLeft),
+									newTop,
+									newRight,
+									newBottom,
+									newLeft)));
+					} else {
+						return $elm$core$Maybe$Nothing;
+					}
+				} else {
+					return $elm$core$Maybe$Nothing;
+				}
+			}();
+			if (!newPadding.$) {
+				var pad = newPadding.a;
+				return A4(
+					$mdgriffith$elm_ui$Internal$Model$element,
+					$mdgriffith$elm_ui$Internal$Model$asRow,
+					$mdgriffith$elm_ui$Internal$Model$div,
+					A2(
+						$elm$core$List$cons,
+						$mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.a6 + (' ' + ($mdgriffith$elm_ui$Internal$Style$classes.ai + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.eG)))),
+						A2(
+							$elm$core$List$cons,
+							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
+							A2(
+								$elm$core$List$cons,
+								$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
+								_Utils_ap(
+									attrs,
+									_List_fromArray(
+										[pad]))))),
+					$mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
+			} else {
+				var halfY = -(y / 2);
+				var halfX = -(x / 2);
+				return A4(
+					$mdgriffith$elm_ui$Internal$Model$element,
+					$mdgriffith$elm_ui$Internal$Model$asEl,
+					$mdgriffith$elm_ui$Internal$Model$div,
+					attrs,
+					$mdgriffith$elm_ui$Internal$Model$Unkeyed(
+						_List_fromArray(
+							[
+								A4(
+								$mdgriffith$elm_ui$Internal$Model$element,
+								$mdgriffith$elm_ui$Internal$Model$asRow,
+								$mdgriffith$elm_ui$Internal$Model$div,
+								A2(
+									$elm$core$List$cons,
+									$mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.a6 + (' ' + ($mdgriffith$elm_ui$Internal$Style$classes.ai + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.eG)))),
+									A2(
+										$elm$core$List$cons,
+										$mdgriffith$elm_ui$Internal$Model$Attr(
+											A2(
+												$elm$html$Html$Attributes$style,
+												'margin',
+												$elm$core$String$fromFloat(halfY) + ('px' + (' ' + ($elm$core$String$fromFloat(halfX) + 'px'))))),
+										A2(
+											$elm$core$List$cons,
+											$mdgriffith$elm_ui$Internal$Model$Attr(
+												A2(
+													$elm$html$Html$Attributes$style,
+													'width',
+													'calc(100% + ' + ($elm$core$String$fromInt(x) + 'px)'))),
+											A2(
+												$elm$core$List$cons,
+												$mdgriffith$elm_ui$Internal$Model$Attr(
+													A2(
+														$elm$html$Html$Attributes$style,
+														'height',
+														'calc(100% + ' + ($elm$core$String$fromInt(y) + 'px)'))),
+												A2(
+													$elm$core$List$cons,
+													A2(
+														$mdgriffith$elm_ui$Internal$Model$StyleClass,
+														$mdgriffith$elm_ui$Internal$Flag$spacing,
+														A3($mdgriffith$elm_ui$Internal$Model$SpacingStyle, spaceName, x, y)),
+													_List_Nil))))),
+								$mdgriffith$elm_ui$Internal$Model$Unkeyed(children))
+							])));
+			}
+		}
+	});
+var $author$project$Page$Articles$view = function (model) {
+	return {
+		gV: A2(
+			$author$project$Ui$Layout$view,
+			model.af,
+			_List_fromArray(
+				[
+					A2(
+					$mdgriffith$elm_ui$Element$map,
+					$author$project$Page$Articles$MenuMsg,
+					A2($author$project$Ui$Menu$small, model.af, model.c_)),
+					A2($author$project$Ui$Layout$heading, model.af, 'Gallery'),
+					A2(
+					$mdgriffith$elm_ui$Element$paragraph,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$paddingEach(
+							{eS: 40, fu: 0, fW: 0, f6: 10}),
+							$mdgriffith$elm_ui$Element$Font$size(14),
+							$mdgriffith$elm_ui$Element$width(
+							$mdgriffith$elm_ui$Element$px(600))
+						]),
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$text('Examples of charts build with elm-charts using real data.')
+						])),
+					A2(
+					$mdgriffith$elm_ui$Element$wrappedRow,
+					_List_Nil,
+					function () {
+						var link = function (id) {
+							var url = $author$project$Articles$meta(id).hJ;
+							return A2(
+								$mdgriffith$elm_ui$Element$link,
+								_List_fromArray(
+									[
+										$mdgriffith$elm_ui$Element$width(
+										$mdgriffith$elm_ui$Element$px(300)),
+										$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill)
+									]),
+								{
+									hY: A2(
+										$mdgriffith$elm_ui$Element$map,
+										function (_v0) {
+											return $author$project$Page$Articles$None;
+										},
+										A2(
+											$mdgriffith$elm_ui$Element$el,
+											_List_fromArray(
+												[
+													$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+													$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill)
+												]),
+											A2($author$project$Articles$view, $author$project$Articles$init, id).hZ(0))),
+									jw: '/gallery/' + url
+								});
+						};
+						return A2($elm$core$List$map, link, $author$project$Articles$all);
+					}())
 				])),
 		ja: 'elm-charts'
 	};
@@ -38166,194 +38474,6 @@ var $author$project$Ui$Thumbnail$viewSelected = F2(
 				$author$project$Ui$Thumbnail$firstGroup,
 				A2($elm$core$Dict$get, selected, $author$project$Ui$Thumbnail$dictGroups)));
 	});
-var $mdgriffith$elm_ui$Internal$Model$Padding = F5(
-	function (a, b, c, d, e) {
-		return {$: 0, a: a, b: b, c: c, d: d, e: e};
-	});
-var $mdgriffith$elm_ui$Internal$Model$Spaced = F3(
-	function (a, b, c) {
-		return {$: 0, a: a, b: b, c: c};
-	});
-var $mdgriffith$elm_ui$Internal$Model$extractSpacingAndPadding = function (attrs) {
-	return A3(
-		$elm$core$List$foldr,
-		F2(
-			function (attr, _v0) {
-				var pad = _v0.a;
-				var spacing = _v0.b;
-				return _Utils_Tuple2(
-					function () {
-						if (!pad.$) {
-							var x = pad.a;
-							return pad;
-						} else {
-							if ((attr.$ === 4) && (attr.b.$ === 7)) {
-								var _v3 = attr.b;
-								var name = _v3.a;
-								var t = _v3.b;
-								var r = _v3.c;
-								var b = _v3.d;
-								var l = _v3.e;
-								return $elm$core$Maybe$Just(
-									A5($mdgriffith$elm_ui$Internal$Model$Padding, name, t, r, b, l));
-							} else {
-								return $elm$core$Maybe$Nothing;
-							}
-						}
-					}(),
-					function () {
-						if (!spacing.$) {
-							var x = spacing.a;
-							return spacing;
-						} else {
-							if ((attr.$ === 4) && (attr.b.$ === 5)) {
-								var _v6 = attr.b;
-								var name = _v6.a;
-								var x = _v6.b;
-								var y = _v6.c;
-								return $elm$core$Maybe$Just(
-									A3($mdgriffith$elm_ui$Internal$Model$Spaced, name, x, y));
-							} else {
-								return $elm$core$Maybe$Nothing;
-							}
-						}
-					}());
-			}),
-		_Utils_Tuple2($elm$core$Maybe$Nothing, $elm$core$Maybe$Nothing),
-		attrs);
-};
-var $mdgriffith$elm_ui$Internal$Model$paddingNameFloat = F4(
-	function (top, right, bottom, left) {
-		return 'pad-' + ($mdgriffith$elm_ui$Internal$Model$floatClass(top) + ('-' + ($mdgriffith$elm_ui$Internal$Model$floatClass(right) + ('-' + ($mdgriffith$elm_ui$Internal$Model$floatClass(bottom) + ('-' + $mdgriffith$elm_ui$Internal$Model$floatClass(left)))))));
-	});
-var $mdgriffith$elm_ui$Element$wrappedRow = F2(
-	function (attrs, children) {
-		var _v0 = $mdgriffith$elm_ui$Internal$Model$extractSpacingAndPadding(attrs);
-		var padded = _v0.a;
-		var spaced = _v0.b;
-		if (spaced.$ === 1) {
-			return A4(
-				$mdgriffith$elm_ui$Internal$Model$element,
-				$mdgriffith$elm_ui$Internal$Model$asRow,
-				$mdgriffith$elm_ui$Internal$Model$div,
-				A2(
-					$elm$core$List$cons,
-					$mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.a6 + (' ' + ($mdgriffith$elm_ui$Internal$Style$classes.ai + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.eG)))),
-					A2(
-						$elm$core$List$cons,
-						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
-						A2(
-							$elm$core$List$cons,
-							$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
-							attrs))),
-				$mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
-		} else {
-			var _v2 = spaced.a;
-			var spaceName = _v2.a;
-			var x = _v2.b;
-			var y = _v2.c;
-			var newPadding = function () {
-				if (!padded.$) {
-					var _v5 = padded.a;
-					var name = _v5.a;
-					var t = _v5.b;
-					var r = _v5.c;
-					var b = _v5.d;
-					var l = _v5.e;
-					if ((_Utils_cmp(r, x / 2) > -1) && (_Utils_cmp(b, y / 2) > -1)) {
-						var newTop = t - (y / 2);
-						var newRight = r - (x / 2);
-						var newLeft = l - (x / 2);
-						var newBottom = b - (y / 2);
-						return $elm$core$Maybe$Just(
-							A2(
-								$mdgriffith$elm_ui$Internal$Model$StyleClass,
-								$mdgriffith$elm_ui$Internal$Flag$padding,
-								A5(
-									$mdgriffith$elm_ui$Internal$Model$PaddingStyle,
-									A4($mdgriffith$elm_ui$Internal$Model$paddingNameFloat, newTop, newRight, newBottom, newLeft),
-									newTop,
-									newRight,
-									newBottom,
-									newLeft)));
-					} else {
-						return $elm$core$Maybe$Nothing;
-					}
-				} else {
-					return $elm$core$Maybe$Nothing;
-				}
-			}();
-			if (!newPadding.$) {
-				var pad = newPadding.a;
-				return A4(
-					$mdgriffith$elm_ui$Internal$Model$element,
-					$mdgriffith$elm_ui$Internal$Model$asRow,
-					$mdgriffith$elm_ui$Internal$Model$div,
-					A2(
-						$elm$core$List$cons,
-						$mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.a6 + (' ' + ($mdgriffith$elm_ui$Internal$Style$classes.ai + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.eG)))),
-						A2(
-							$elm$core$List$cons,
-							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
-							A2(
-								$elm$core$List$cons,
-								$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
-								_Utils_ap(
-									attrs,
-									_List_fromArray(
-										[pad]))))),
-					$mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
-			} else {
-				var halfY = -(y / 2);
-				var halfX = -(x / 2);
-				return A4(
-					$mdgriffith$elm_ui$Internal$Model$element,
-					$mdgriffith$elm_ui$Internal$Model$asEl,
-					$mdgriffith$elm_ui$Internal$Model$div,
-					attrs,
-					$mdgriffith$elm_ui$Internal$Model$Unkeyed(
-						_List_fromArray(
-							[
-								A4(
-								$mdgriffith$elm_ui$Internal$Model$element,
-								$mdgriffith$elm_ui$Internal$Model$asRow,
-								$mdgriffith$elm_ui$Internal$Model$div,
-								A2(
-									$elm$core$List$cons,
-									$mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.a6 + (' ' + ($mdgriffith$elm_ui$Internal$Style$classes.ai + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.eG)))),
-									A2(
-										$elm$core$List$cons,
-										$mdgriffith$elm_ui$Internal$Model$Attr(
-											A2(
-												$elm$html$Html$Attributes$style,
-												'margin',
-												$elm$core$String$fromFloat(halfY) + ('px' + (' ' + ($elm$core$String$fromFloat(halfX) + 'px'))))),
-										A2(
-											$elm$core$List$cons,
-											$mdgriffith$elm_ui$Internal$Model$Attr(
-												A2(
-													$elm$html$Html$Attributes$style,
-													'width',
-													'calc(100% + ' + ($elm$core$String$fromInt(x) + 'px)'))),
-											A2(
-												$elm$core$List$cons,
-												$mdgriffith$elm_ui$Internal$Model$Attr(
-													A2(
-														$elm$html$Html$Attributes$style,
-														'height',
-														'calc(100% + ' + ($elm$core$String$fromInt(y) + 'px)'))),
-												A2(
-													$elm$core$List$cons,
-													A2(
-														$mdgriffith$elm_ui$Internal$Model$StyleClass,
-														$mdgriffith$elm_ui$Internal$Flag$spacing,
-														A3($mdgriffith$elm_ui$Internal$Model$SpacingStyle, spaceName, x, y)),
-													_List_Nil))))),
-								$mdgriffith$elm_ui$Internal$Model$Unkeyed(children))
-							])));
-			}
-		}
-	});
 var $author$project$Page$Section$view = function (model) {
 	return {
 		gV: A2(
@@ -41743,73 +41863,6 @@ var $author$project$Page$Example$view = function (model) {
 		ja: 'elm-charts | Documentation'
 	};
 };
-var $author$project$Page$Gallery$MenuMsg = function (a) {
-	return {$: 0, a: a};
-};
-var $author$project$Page$Gallery$None = {$: 1};
-var $author$project$Page$Gallery$view = function (model) {
-	return {
-		gV: A2(
-			$author$project$Ui$Layout$view,
-			model.af,
-			_List_fromArray(
-				[
-					A2(
-					$mdgriffith$elm_ui$Element$map,
-					$author$project$Page$Gallery$MenuMsg,
-					A2($author$project$Ui$Menu$small, model.af, model.c_)),
-					A2($author$project$Ui$Layout$heading, model.af, 'Gallery'),
-					A2(
-					$mdgriffith$elm_ui$Element$paragraph,
-					_List_fromArray(
-						[
-							$mdgriffith$elm_ui$Element$paddingEach(
-							{eS: 40, fu: 0, fW: 0, f6: 10}),
-							$mdgriffith$elm_ui$Element$Font$size(14),
-							$mdgriffith$elm_ui$Element$width(
-							$mdgriffith$elm_ui$Element$px(600))
-						]),
-					_List_fromArray(
-						[
-							$mdgriffith$elm_ui$Element$text('Examples of charts build with elm-charts using real data.')
-						])),
-					A2(
-					$mdgriffith$elm_ui$Element$wrappedRow,
-					_List_Nil,
-					function () {
-						var link = function (id) {
-							var url = $author$project$Articles$meta(id).hJ;
-							return A2(
-								$mdgriffith$elm_ui$Element$link,
-								_List_fromArray(
-									[
-										$mdgriffith$elm_ui$Element$width(
-										$mdgriffith$elm_ui$Element$px(200)),
-										$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill)
-									]),
-								{
-									hY: A2(
-										$mdgriffith$elm_ui$Element$map,
-										function (_v0) {
-											return $author$project$Page$Gallery$None;
-										},
-										A2(
-											$mdgriffith$elm_ui$Element$el,
-											_List_fromArray(
-												[
-													$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-													$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill)
-												]),
-											A2($author$project$Articles$view, $author$project$Articles$init, id).hZ(0))),
-									jw: '/gallery/' + url
-								});
-						};
-						return A2($elm$core$List$map, link, $author$project$Articles$all);
-					}())
-				])),
-		ja: 'elm-charts'
-	};
-};
 var $author$project$Page$GettingStarted$MenuMsg = function (a) {
 	return {$: 1, a: a};
 };
@@ -42527,55 +42580,6 @@ var $author$project$Charts$Dashboard1$formatFullTime = $ryannhg$date_format$Date
 			$ryannhg$date_format$DateFormat$text(':'),
 			$ryannhg$date_format$DateFormat$minuteFixed
 		]));
-var $author$project$Internal$Svg$getNearestXHelp = F4(
-	function (toPosition, items, plane, searched) {
-		var toPoint = function (i) {
-			return A2(
-				$author$project$Internal$Svg$closestPoint,
-				toPosition(i),
-				searched);
-		};
-		var distanceX_ = A2($author$project$Internal$Svg$distanceX, plane, searched);
-		var getClosest = F2(
-			function (item, allClosest) {
-				var _v0 = $elm$core$List$head(allClosest);
-				if (!_v0.$) {
-					var closest = _v0.a;
-					return _Utils_eq(
-						toPoint(closest).de,
-						toPoint(item).de) ? A2($elm$core$List$cons, item, allClosest) : ((_Utils_cmp(
-						distanceX_(
-							toPoint(closest)),
-						distanceX_(
-							toPoint(item))) > 0) ? _List_fromArray(
-						[item]) : allClosest);
-				} else {
-					return _List_fromArray(
-						[item]);
-				}
-			});
-		return A2(
-			$author$project$Internal$Svg$keepOne,
-			toPosition,
-			A3($elm$core$List$foldl, getClosest, _List_Nil, items));
-	});
-var $author$project$Internal$Svg$getNearestX = F4(
-	function (toPosition, items, plane, searched) {
-		return A4($author$project$Internal$Svg$getNearestXHelp, toPosition, items, plane, searched);
-	});
-var $author$project$Internal$Events$getNearestX = function (grouping) {
-	var toPos = grouping.a;
-	return F2(
-		function (items, plane) {
-			var groups = A2($author$project$Internal$Many$apply, grouping, items);
-			return A3(
-				$author$project$Internal$Svg$getNearestX,
-				toPos(plane),
-				groups,
-				plane);
-		});
-};
-var $author$project$Chart$Events$getNearestX = $author$project$Internal$Events$getNearestX;
 var $author$project$Chart$Item$getTooltip = $author$project$Internal$Item$toHtml;
 var $author$project$Internal$Svg$withinRadiusX = F4(
 	function (plane, radius, searched, point) {
@@ -43713,32 +43717,32 @@ var $author$project$Main$view = function (model) {
 			var subModel = _v0.a;
 			return A2(
 				viewPage,
-				$author$project$Main$Page_Documentation_Msg,
-				$author$project$Page$Documentation$view(subModel));
+				$author$project$Main$Page_Articles_Msg,
+				$author$project$Page$Articles$view(subModel));
 		case 5:
-			var subModel = _v0.a;
-			return A2(
-				viewPage,
-				$author$project$Main$Page_Section_Msg,
-				$author$project$Page$Section$view(subModel));
-		case 6:
-			var subModel = _v0.a;
-			return A2(
-				viewPage,
-				$author$project$Main$Page_Example_Msg,
-				$author$project$Page$Example$view(subModel));
-		case 7:
-			var subModel = _v0.a;
-			return A2(
-				viewPage,
-				$author$project$Main$Page_Gallery_Msg,
-				$author$project$Page$Gallery$view(subModel));
-		case 8:
 			var subModel = _v0.a;
 			return A2(
 				viewPage,
 				$author$project$Main$Page_Article_Msg,
 				$author$project$Page$Article$view(subModel));
+		case 6:
+			var subModel = _v0.a;
+			return A2(
+				viewPage,
+				$author$project$Main$Page_Documentation_Msg,
+				$author$project$Page$Documentation$view(subModel));
+		case 7:
+			var subModel = _v0.a;
+			return A2(
+				viewPage,
+				$author$project$Main$Page_Section_Msg,
+				$author$project$Page$Section$view(subModel));
+		case 8:
+			var subModel = _v0.a;
+			return A2(
+				viewPage,
+				$author$project$Main$Page_Example_Msg,
+				$author$project$Page$Example$view(subModel));
 		default:
 			var subModel = _v0.a;
 			return A2(

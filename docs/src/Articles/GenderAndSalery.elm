@@ -57,7 +57,7 @@ update msg model =
 view : Model -> Article.Article Msg
 view model =
   { title = "Salary distribution in Denmark"
-  , landing = \_ -> E.map BubbleMsg (Bubble.view model.bubbles 2019)
+  , landing = \_ -> E.html <| H.map BubbleMsg (Bubble.viewChart model.bubbles 2019)
   , body = \_ ->
       [ E.paragraph
           [ F.size 14
@@ -70,7 +70,7 @@ view model =
           , E.text " this is not the case. This is particularily important to keep in mind when interpreting the second chart."
           ]
 
-      , E.el [ F.size 18 ] (E.text "Womens percentage of mens salary")
+      , E.el [ F.size 18 ] (E.text "Women's percentage of men's salary")
 
       , E.row
           [ E.width E.fill
@@ -114,10 +114,10 @@ view model =
           ]
           (E.map BubbleMsg (Bubble.view model.bubbles model.year))
 
-      , E.el [ F.size 18 ] (E.text "Women in each salary bracket")
+      --, E.el [ F.size 14 ] (E.text "Women in each salary bracket")
 
       , E.el
-          [ E.paddingEach { top = 0, bottom = 80, left = 0, right = 0 }
+          [ E.paddingEach { top = 0, bottom = 0, left = 0, right = 0 }
           , E.width (E.maximum 1000 E.fill)
           ]
           (E.map BarsMsg (Bars.view model.bars model.year))

@@ -1,4 +1,4 @@
-module Articles.GenderAndSalery.Bubble exposing (Model, Msg, init, update, view)
+module Articles.GenderAndSalery.Bubble exposing (Model, Msg, init, update, view, viewChart)
 
 import Html as H
 import Html.Attributes as HA
@@ -162,7 +162,7 @@ viewChart model year =
       ]
 
     , C.withPlane <| \p ->
-        [ C.label [ CA.fontSize 12, CA.moveDown 17, CA.alignRight ] [ S.text "Average salary in DKK" ] { x = p.x.max, y = p.y.min }
+        [ C.label [ CA.fontSize 12, CA.moveDown 17, CA.alignRight ] [ S.text "Average salary" ] { x = p.x.max, y = p.y.min }
         , C.label [ CA.fontSize 12, CA.moveLeft 12, CA.alignRight, CA.rotate 90 ] [ S.text "Womens % of mens salary" ] { x = p.x.min, y = p.y.max }
         , C.line [ CA.dashed [ 4, 2 ], CA.opacity 0.7, CA.color "#f56dbc", CA.x1 (Salary.avgSalaryWomen year) ]
         , C.line [ CA.dashed [ 4, 2 ], CA.opacity 0.7, CA.color "#58a9f6", CA.x1 (Salary.avgSalaryMen year) ]

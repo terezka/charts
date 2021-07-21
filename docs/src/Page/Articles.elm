@@ -1,4 +1,4 @@
-module Page.Gallery exposing (Model, Params, Msg, init, subscriptions, exit, update, view)
+module Page.Articles exposing (Model, Params, Msg, init, subscriptions, exit, update, view)
 
 
 import Browser exposing (Document)
@@ -105,7 +105,7 @@ view model =
               let link id =
                     let url = (Articles.meta id).id in
                     E.link
-                      [ E.width (E.px 200)
+                      [ E.width (E.px 300)
                       , E.height E.fill
                       ]
                       { url = "/gallery/" ++ url

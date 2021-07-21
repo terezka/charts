@@ -82,7 +82,7 @@ view model year =
     , E.spacing 20
     ]
     [ E.row
-        [ E.spacing 20
+        [ E.spacing 50
         , F.size 12
         , F.bold
         ] <|
@@ -101,13 +101,13 @@ view model year =
         [ I.slider
             [ E.height (E.px 30)
             , E.width (E.px 100)
-            , E.spacing 10
+            , E.spacing 20
             , E.behindContent <|
                 E.el
                     [ E.width E.fill
                     , E.height (E.px 10)
                     , E.centerY
-                    , BG.color (E.rgb255 220 220 220)
+                    , BG.color (E.rgb255 230 230 230)
                     , B.rounded 10
                     ]
                     E.none
@@ -119,7 +119,7 @@ view model year =
                   , F.size 12
                   , F.bold
                   ]
-                  (E.text "Bin size")
+                  (E.text "Salery bracket size:")
             , min = 5000
             , max = 20000
             , step = Just 1000
@@ -134,8 +134,12 @@ view model year =
                   , B.rounded 10
                   ]
             }
-        , circle (E.rgba255 88  169 246) "Men"  -- most blue
-        , circle (E.rgba255 245 109 188) "Women" -- most pink
+        , E.row
+            [ E.spacing 20 ]
+            [ E.text "Workforce: "
+            , circle (E.rgba255 222 116 215) "Women" -- most pink
+            , circle (E.rgba255 138 145 247) "Men"  -- most blue
+            ]
         ]
 
     , E.el [ E.width E.fill ] <| E.html <| viewChart model year
@@ -175,12 +179,12 @@ viewChart model year =
     [ CA.height 300
     , CA.width 1000
     , CA.margin { top = 0, bottom = 30, left = 0, right = 0 }
-    , CA.padding { top = 15, bottom = 20, left = 40, right = 0 }
+    , CA.padding { top = 20, bottom = 20, left = 40, right = 0 }
 
     , CI.real
         |> CI.andThen CI.bars
         |> CI.andThen CI.bins
-        |> CE.getNearest
+        |> CE.getNearestX
         |> CE.onMouseMove OnHover
     ]
     [ C.grid []
@@ -219,7 +223,7 @@ viewChart model year =
     , C.bars
         [ CA.x1 .bin
         , CA.x2 (.bin >> (+) model.binSize)
-        , CA.margin 0.25
+        , CA.margin 0.15
         , CA.roundTop 0.2
         , CA.roundBottom 0.2
         , CA.withGrid
@@ -236,7 +240,7 @@ viewChart model year =
             highestValue = Maybe.withDefault 0 <| List.maximum (List.map CI.getY hoveredBars)
             amountOfBars = List.length hoveredBars
             viewLabel index bar =
-              let offset = CS.lengthInCartesianY p <| 10 + toFloat (amountOfBars - index - 1) * 20 in
+              let offset = CS.lengthInCartesianY p <| 5 + toFloat (amountOfBars - index - 1) * 15 in
               [ C.line
                   [ CA.x1 (CI.getTop p bar).x
                   , CA.y1 (CI.getTop p bar).y
@@ -260,7 +264,7 @@ viewChart model year =
         List.indexedMap viewLabel hoveredBars
           |> List.concat
 
-    , C.labelAt .min .max [ CA.fontSize 12, CA.alignRight, CA.moveLeft 12, CA.moveDown 3, CA.rotate 90 ] [ S.text "People" ]
+    , C.labelAt .min .max [ CA.fontSize 12, CA.alignRight, CA.moveLeft 12, CA.moveDown 3, CA.rotate 90 ] [ S.text "Workforce" ]
     , C.labelAt .max .min [ CA.fontSize 12, CA.alignRight, CA.moveDown 15 ] [ S.text "Salary" ]
 
     --, C.legendsAt .max .max [ CA.alignRight, CA.moveLeft 20 ] []

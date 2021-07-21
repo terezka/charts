@@ -871,7 +871,7 @@ bar plane config point =
 
       height = abs (pos.y2 - pos.y1)
       ( roundTop, roundBottom ) =
-        if height - radiusTopY - radiusBottomY <= 0 || width - radiusTopX - radiusBottomX <= 0
+        if height - radiusTopY * 0.8 - radiusBottomY * 0.8 <= 0 || width - radiusTopX * 0.8 - radiusBottomX * 0.8 <= 0
         then ( 0, 0 ) else ( config.roundTop, config.roundBottom )
 
       ( commands, highlightCommands, highlightCut ) =

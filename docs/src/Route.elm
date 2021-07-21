@@ -1,4 +1,4 @@
-module Route exposing (Route(..), top, administration, documentation, section, example, gallery, article, gettingStarted, fromUrl, replaceUrl, toString)
+module Route exposing (Route(..), top, administration, articles, article, documentation, section, example, gettingStarted, fromUrl, replaceUrl, toString)
 
 import Browser.Navigation as Navigation
 import Url exposing (Url)
@@ -17,6 +17,16 @@ administration =
   toString <| Administration 
 
 
+articles : String
+articles =
+  toString <| Articles 
+
+
+article : { id : String } -> String
+article params =
+  toString <| Articles_String_ params.id
+
+
 documentation : String
 documentation =
   toString <| Documentation 
@@ -32,16 +42,6 @@ example params =
   toString <| Documentation_String__String_ params.section params.example
 
 
-gallery : String
-gallery =
-  toString <| Gallery 
-
-
-article : { id : String } -> String
-article params =
-  toString <| Gallery_String_ params.id
-
-
 gettingStarted : String
 gettingStarted =
   toString <| Getting_started 
@@ -50,11 +50,11 @@ gettingStarted =
 type Route
     = Top 
     | Administration 
+    | Articles 
+    | Articles_String_ String
     | Documentation 
     | Documentation_String_ String
     | Documentation_String__String_ String String
-    | Gallery 
-    | Gallery_String_ String
     | Getting_started 
 
 
@@ -77,6 +77,12 @@ toString route =
         Administration  ->
             Builder.absolute ["administration"] (List.filterMap identity [])
 
+        Articles  ->
+            Builder.absolute ["articles"] (List.filterMap identity [])
+
+        Articles_String_ p1 ->
+            Builder.absolute ["articles", p1] (List.filterMap identity [])
+
         Documentation  ->
             Builder.absolute ["documentation"] (List.filterMap identity [])
 
@@ -85,12 +91,6 @@ toString route =
 
         Documentation_String__String_ p1 p2 ->
             Builder.absolute ["documentation", p1, p2] (List.filterMap identity [])
-
-        Gallery  ->
-            Builder.absolute ["gallery"] (List.filterMap identity [])
-
-        Gallery_String_ p1 ->
-            Builder.absolute ["gallery", p1] (List.filterMap identity [])
 
         Getting_started  ->
             Builder.absolute ["getting-started"] (List.filterMap identity [])
@@ -104,10 +104,10 @@ parser =
     oneOf
         [ Parser.map Top Parser.top
         , Parser.map Administration (s "administration")
+        , Parser.map Articles (s "articles")
+        , Parser.map Articles_String_ (s "articles" </> string)
         , Parser.map Documentation (s "documentation")
         , Parser.map Documentation_String_ (s "documentation" </> string)
         , Parser.map Documentation_String__String_ (s "documentation" </> string </> string)
-        , Parser.map Gallery (s "gallery")
-        , Parser.map Gallery_String_ (s "gallery" </> string)
         , Parser.map Getting_started (s "getting-started")
         ]
