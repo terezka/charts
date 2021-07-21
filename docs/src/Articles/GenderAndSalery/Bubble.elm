@@ -185,13 +185,13 @@ viewChart model year =
         let ( xOff, yOff ) =
               case model.moving of
                 Just ( start, end ) ->
-                  ( (model.zoomOffset.x + start.x - end.x) * (model.zoomPercentage / 100)
-                  , (model.zoomOffset.y + start.y - end.y) * (model.zoomPercentage / 100)
+                  ( (model.zoomOffset.x + start.x - end.x)
+                  , (model.zoomOffset.y + start.y - end.y)
                   )
 
                 Nothing ->
-                  ( model.zoomOffset.x * (model.zoomPercentage / 100)
-                  , model.zoomOffset.y * (model.zoomPercentage / 100)
+                  ( model.zoomOffset.x
+                  , model.zoomOffset.y
                   )
         in
         { top = 550 - (550 * model.zoomPercentage / 100) - yOff

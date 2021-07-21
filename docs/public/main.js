@@ -29731,9 +29731,9 @@ var $author$project$Articles$GenderAndSalery$Bubble$viewChart = F2(
 								var _v2 = _v1.a;
 								var start = _v2.a;
 								var end = _v2.b;
-								return _Utils_Tuple2(((model.zoomOffset.x + start.x) - end.x) * (model.zoomPercentage / 100), ((model.zoomOffset.y + start.y) - end.y) * (model.zoomPercentage / 100));
+								return _Utils_Tuple2((model.zoomOffset.x + start.x) - end.x, (model.zoomOffset.y + start.y) - end.y);
 							} else {
-								return _Utils_Tuple2(model.zoomOffset.x * (model.zoomPercentage / 100), model.zoomOffset.y * (model.zoomPercentage / 100));
+								return _Utils_Tuple2(model.zoomOffset.x, model.zoomOffset.y);
 							}
 						}();
 						var xOff = _v0.a;
