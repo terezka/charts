@@ -3,12 +3,8 @@ module Articles.GenderAndSalery.Bubble exposing (Model, Msg, init, update, view)
 import Html as H
 import Html.Attributes as HA
 import Html.Events as HE
-import Svg as S exposing (Svg, svg, g, circle, text_, text)
-import Svg.Attributes as SA exposing (width, height, stroke, fill, r, transform)
-import Browser
-import Time
-import Articles.GenderAndSalery.Data as Salary
-import Dict
+import Svg as S
+import Svg.Attributes as SA
 
 import Chart as C
 import Chart.Attributes as CA
@@ -21,7 +17,7 @@ import Element.Font as F
 import Element.Border as B
 import Element.Background as BG
 
-import Chart.Events
+import Articles.GenderAndSalery.Data as Salary
 
 
 type alias Model =
