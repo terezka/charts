@@ -1,7 +1,7 @@
 module Chart.Events exposing
   ( Attribute, Event
   , onMouseMove, onMouseLeave, onMouseUp, onMouseDown, onClick, on
-  , Decoder, Point, getCoords, getNearest, getNearestX, getWithin, getWithinX
+  , Decoder, Point, getCoords, getSvgCoords, getNearest, getNearestX, getWithin, getWithinX
   , map, map2, map3, map4
   )
 
@@ -133,6 +133,14 @@ type alias Point =
 getCoords : Decoder data Point
 getCoords =
   IE.getCoords
+
+
+{-| Decode to get the SVG coordinates of the event.
+
+-}
+getSvgCoords : Decoder data Point
+getSvgCoords =
+  IE.getSvgCoords
 
 
 {-| Decode to get the nearest item to the event. Use the `Remodel` functions in `Chart.Item`

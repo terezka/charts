@@ -39,6 +39,13 @@ getCoords =
 
 
 {-| -}
+getSvgCoords : Decoder data Point
+getSvgCoords =
+  Decoder <| \_ plane searched ->
+    CS.fromCartesian plane searched
+
+
+{-| -}
 getNearest : M.Remodel (I.One data I.Any) (I.Rendered result) -> Decoder data (List (I.Rendered result))
 getNearest (M.Remodel toPos _ as grouping) =
   Decoder <| \items plane ->

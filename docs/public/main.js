@@ -77,7 +77,7 @@ function A9(fun, a, b, c, d, e, f, g, h, i) {
   return fun.a === 9 ? fun.f(a, b, c, d, e, f, g, h, i) : fun(a)(b)(c)(d)(e)(f)(g)(h)(i);
 }
 
-console.warn('Compiled in DEV mode. Follow the advice at https://elm-lang.org/0.19.1/optimize for better performance and smaller assets.');
+console.warn('Compiled in DEBUG mode. Follow the advice at https://elm-lang.org/0.19.1/optimize for better performance and smaller assets.');
 
 
 // EQUALITY
@@ -3917,6 +3917,589 @@ function _VirtualDom_dekey(keyedNode)
 
 
 
+var _Bitwise_and = F2(function(a, b)
+{
+	return a & b;
+});
+
+var _Bitwise_or = F2(function(a, b)
+{
+	return a | b;
+});
+
+var _Bitwise_xor = F2(function(a, b)
+{
+	return a ^ b;
+});
+
+function _Bitwise_complement(a)
+{
+	return ~a;
+};
+
+var _Bitwise_shiftLeftBy = F2(function(offset, a)
+{
+	return a << offset;
+});
+
+var _Bitwise_shiftRightBy = F2(function(offset, a)
+{
+	return a >> offset;
+});
+
+var _Bitwise_shiftRightZfBy = F2(function(offset, a)
+{
+	return a >>> offset;
+});
+
+
+
+
+// HELPERS
+
+
+function _Debugger_unsafeCoerce(value)
+{
+	return value;
+}
+
+
+
+// PROGRAMS
+
+
+var _Debugger_element = F4(function(impl, flagDecoder, debugMetadata, args)
+{
+	return _Platform_initialize(
+		flagDecoder,
+		args,
+		A3($elm$browser$Debugger$Main$wrapInit, _Json_wrap(debugMetadata), _Debugger_popout(), impl.init),
+		$elm$browser$Debugger$Main$wrapUpdate(impl.update),
+		$elm$browser$Debugger$Main$wrapSubs(impl.subscriptions),
+		function(sendToApp, initialModel)
+		{
+			var view = impl.view;
+			var title = _VirtualDom_doc.title;
+			var domNode = args && args['node'] ? args['node'] : _Debug_crash(0);
+			var currNode = _VirtualDom_virtualize(domNode);
+			var currBlocker = $elm$browser$Debugger$Main$toBlockerType(initialModel);
+			var currPopout;
+
+			var cornerNode = _VirtualDom_doc.createElement('div');
+			domNode.parentNode.insertBefore(cornerNode, domNode.nextSibling);
+			var cornerCurr = _VirtualDom_virtualize(cornerNode);
+
+			initialModel.popout.a = sendToApp;
+
+			return _Browser_makeAnimator(initialModel, function(model)
+			{
+				var nextNode = A2(_VirtualDom_map, $elm$browser$Debugger$Main$UserMsg, view($elm$browser$Debugger$Main$getUserModel(model)));
+				var patches = _VirtualDom_diff(currNode, nextNode);
+				domNode = _VirtualDom_applyPatches(domNode, currNode, patches, sendToApp);
+				currNode = nextNode;
+
+				// update blocker
+
+				var nextBlocker = $elm$browser$Debugger$Main$toBlockerType(model);
+				_Debugger_updateBlocker(currBlocker, nextBlocker);
+				currBlocker = nextBlocker;
+
+				// view corner
+
+				var cornerNext = $elm$browser$Debugger$Main$cornerView(model);
+				var cornerPatches = _VirtualDom_diff(cornerCurr, cornerNext);
+				cornerNode = _VirtualDom_applyPatches(cornerNode, cornerCurr, cornerPatches, sendToApp);
+				cornerCurr = cornerNext;
+
+				if (!model.popout.b)
+				{
+					currPopout = undefined;
+					return;
+				}
+
+				// view popout
+
+				_VirtualDom_doc = model.popout.b; // SWITCH TO POPOUT DOC
+				currPopout || (currPopout = _VirtualDom_virtualize(model.popout.b));
+				var nextPopout = $elm$browser$Debugger$Main$popoutView(model);
+				var popoutPatches = _VirtualDom_diff(currPopout, nextPopout);
+				_VirtualDom_applyPatches(model.popout.b.body, currPopout, popoutPatches, sendToApp);
+				currPopout = nextPopout;
+				_VirtualDom_doc = document; // SWITCH BACK TO NORMAL DOC
+			});
+		}
+	);
+});
+
+
+var _Debugger_document = F4(function(impl, flagDecoder, debugMetadata, args)
+{
+	return _Platform_initialize(
+		flagDecoder,
+		args,
+		A3($elm$browser$Debugger$Main$wrapInit, _Json_wrap(debugMetadata), _Debugger_popout(), impl.init),
+		$elm$browser$Debugger$Main$wrapUpdate(impl.update),
+		$elm$browser$Debugger$Main$wrapSubs(impl.subscriptions),
+		function(sendToApp, initialModel)
+		{
+			var divertHrefToApp = impl.setup && impl.setup(function(x) { return sendToApp($elm$browser$Debugger$Main$UserMsg(x)); });
+			var view = impl.view;
+			var title = _VirtualDom_doc.title;
+			var bodyNode = _VirtualDom_doc.body;
+			var currNode = _VirtualDom_virtualize(bodyNode);
+			var currBlocker = $elm$browser$Debugger$Main$toBlockerType(initialModel);
+			var currPopout;
+
+			initialModel.popout.a = sendToApp;
+
+			return _Browser_makeAnimator(initialModel, function(model)
+			{
+				_VirtualDom_divertHrefToApp = divertHrefToApp;
+				var doc = view($elm$browser$Debugger$Main$getUserModel(model));
+				var nextNode = _VirtualDom_node('body')(_List_Nil)(
+					_Utils_ap(
+						A2($elm$core$List$map, _VirtualDom_map($elm$browser$Debugger$Main$UserMsg), doc.body),
+						_List_Cons($elm$browser$Debugger$Main$cornerView(model), _List_Nil)
+					)
+				);
+				var patches = _VirtualDom_diff(currNode, nextNode);
+				bodyNode = _VirtualDom_applyPatches(bodyNode, currNode, patches, sendToApp);
+				currNode = nextNode;
+				_VirtualDom_divertHrefToApp = 0;
+				(title !== doc.title) && (_VirtualDom_doc.title = title = doc.title);
+
+				// update blocker
+
+				var nextBlocker = $elm$browser$Debugger$Main$toBlockerType(model);
+				_Debugger_updateBlocker(currBlocker, nextBlocker);
+				currBlocker = nextBlocker;
+
+				// view popout
+
+				if (!model.popout.b) { currPopout = undefined; return; }
+
+				_VirtualDom_doc = model.popout.b; // SWITCH TO POPOUT DOC
+				currPopout || (currPopout = _VirtualDom_virtualize(model.popout.b));
+				var nextPopout = $elm$browser$Debugger$Main$popoutView(model);
+				var popoutPatches = _VirtualDom_diff(currPopout, nextPopout);
+				_VirtualDom_applyPatches(model.popout.b.body, currPopout, popoutPatches, sendToApp);
+				currPopout = nextPopout;
+				_VirtualDom_doc = document; // SWITCH BACK TO NORMAL DOC
+			});
+		}
+	);
+});
+
+
+function _Debugger_popout()
+{
+	return {
+		b: undefined,
+		a: undefined
+	};
+}
+
+function _Debugger_isOpen(popout)
+{
+	return !!popout.b;
+}
+
+function _Debugger_open(popout)
+{
+	return _Scheduler_binding(function(callback)
+	{
+		_Debugger_openWindow(popout);
+		callback(_Scheduler_succeed(_Utils_Tuple0));
+	});
+}
+
+function _Debugger_openWindow(popout)
+{
+	var w = $elm$browser$Debugger$Main$initialWindowWidth,
+		h = $elm$browser$Debugger$Main$initialWindowHeight,
+	 	x = screen.width - w,
+		y = screen.height - h;
+
+	var debuggerWindow = window.open('', '', 'width=' + w + ',height=' + h + ',left=' + x + ',top=' + y);
+	var doc = debuggerWindow.document;
+	doc.title = 'Elm Debugger';
+
+	// handle arrow keys
+	doc.addEventListener('keydown', function(event) {
+		event.metaKey && event.which === 82 && window.location.reload();
+		event.key === 'ArrowUp'   && (popout.a($elm$browser$Debugger$Main$Up  ), event.preventDefault());
+		event.key === 'ArrowDown' && (popout.a($elm$browser$Debugger$Main$Down), event.preventDefault());
+	});
+
+	// handle window close
+	window.addEventListener('unload', close);
+	debuggerWindow.addEventListener('unload', function() {
+		popout.b = undefined;
+		popout.a($elm$browser$Debugger$Main$NoOp);
+		window.removeEventListener('unload', close);
+	});
+
+	function close() {
+		popout.b = undefined;
+		popout.a($elm$browser$Debugger$Main$NoOp);
+		debuggerWindow.close();
+	}
+
+	// register new window
+	popout.b = doc;
+}
+
+
+
+// SCROLL
+
+
+function _Debugger_scroll(popout)
+{
+	return _Scheduler_binding(function(callback)
+	{
+		if (popout.b)
+		{
+			var msgs = popout.b.getElementById('elm-debugger-sidebar');
+			if (msgs && msgs.scrollTop !== 0)
+			{
+				msgs.scrollTop = 0;
+			}
+		}
+		callback(_Scheduler_succeed(_Utils_Tuple0));
+	});
+}
+
+
+var _Debugger_scrollTo = F2(function(id, popout)
+{
+	return _Scheduler_binding(function(callback)
+	{
+		if (popout.b)
+		{
+			var msg = popout.b.getElementById(id);
+			if (msg)
+			{
+				msg.scrollIntoView(false);
+			}
+		}
+		callback(_Scheduler_succeed(_Utils_Tuple0));
+	});
+});
+
+
+
+// UPLOAD
+
+
+function _Debugger_upload(popout)
+{
+	return _Scheduler_binding(function(callback)
+	{
+		var doc = popout.b || document;
+		var element = doc.createElement('input');
+		element.setAttribute('type', 'file');
+		element.setAttribute('accept', 'text/json');
+		element.style.display = 'none';
+		element.addEventListener('change', function(event)
+		{
+			var fileReader = new FileReader();
+			fileReader.onload = function(e)
+			{
+				callback(_Scheduler_succeed(e.target.result));
+			};
+			fileReader.readAsText(event.target.files[0]);
+			doc.body.removeChild(element);
+		});
+		doc.body.appendChild(element);
+		element.click();
+	});
+}
+
+
+
+// DOWNLOAD
+
+
+var _Debugger_download = F2(function(historyLength, json)
+{
+	return _Scheduler_binding(function(callback)
+	{
+		var fileName = 'history-' + historyLength + '.txt';
+		var jsonString = JSON.stringify(json);
+		var mime = 'text/plain;charset=utf-8';
+		var done = _Scheduler_succeed(_Utils_Tuple0);
+
+		// for IE10+
+		if (navigator.msSaveBlob)
+		{
+			navigator.msSaveBlob(new Blob([jsonString], {type: mime}), fileName);
+			return callback(done);
+		}
+
+		// for HTML5
+		var element = document.createElement('a');
+		element.setAttribute('href', 'data:' + mime + ',' + encodeURIComponent(jsonString));
+		element.setAttribute('download', fileName);
+		element.style.display = 'none';
+		document.body.appendChild(element);
+		element.click();
+		document.body.removeChild(element);
+		callback(done);
+	});
+});
+
+
+
+// POPOUT CONTENT
+
+
+function _Debugger_messageToString(value)
+{
+	if (typeof value === 'boolean')
+	{
+		return value ? 'True' : 'False';
+	}
+
+	if (typeof value === 'number')
+	{
+		return value + '';
+	}
+
+	if (typeof value === 'string')
+	{
+		return '"' + _Debugger_addSlashes(value, false) + '"';
+	}
+
+	if (value instanceof String)
+	{
+		return "'" + _Debugger_addSlashes(value, true) + "'";
+	}
+
+	if (typeof value !== 'object' || value === null || !('$' in value))
+	{
+		return '…';
+	}
+
+	if (typeof value.$ === 'number')
+	{
+		return '…';
+	}
+
+	var code = value.$.charCodeAt(0);
+	if (code === 0x23 /* # */ || /* a */ 0x61 <= code && code <= 0x7A /* z */)
+	{
+		return '…';
+	}
+
+	if (['Array_elm_builtin', 'Set_elm_builtin', 'RBNode_elm_builtin', 'RBEmpty_elm_builtin'].indexOf(value.$) >= 0)
+	{
+		return '…';
+	}
+
+	var keys = Object.keys(value);
+	switch (keys.length)
+	{
+		case 1:
+			return value.$;
+		case 2:
+			return value.$ + ' ' + _Debugger_messageToString(value.a);
+		default:
+			return value.$ + ' … ' + _Debugger_messageToString(value[keys[keys.length - 1]]);
+	}
+}
+
+
+function _Debugger_init(value)
+{
+	if (typeof value === 'boolean')
+	{
+		return A3($elm$browser$Debugger$Expando$Constructor, $elm$core$Maybe$Just(value ? 'True' : 'False'), true, _List_Nil);
+	}
+
+	if (typeof value === 'number')
+	{
+		return $elm$browser$Debugger$Expando$Primitive(value + '');
+	}
+
+	if (typeof value === 'string')
+	{
+		return $elm$browser$Debugger$Expando$S('"' + _Debugger_addSlashes(value, false) + '"');
+	}
+
+	if (value instanceof String)
+	{
+		return $elm$browser$Debugger$Expando$S("'" + _Debugger_addSlashes(value, true) + "'");
+	}
+
+	if (typeof value === 'object' && '$' in value)
+	{
+		var tag = value.$;
+
+		if (tag === '::' || tag === '[]')
+		{
+			return A3($elm$browser$Debugger$Expando$Sequence, $elm$browser$Debugger$Expando$ListSeq, true,
+				A2($elm$core$List$map, _Debugger_init, value)
+			);
+		}
+
+		if (tag === 'Set_elm_builtin')
+		{
+			return A3($elm$browser$Debugger$Expando$Sequence, $elm$browser$Debugger$Expando$SetSeq, true,
+				A3($elm$core$Set$foldr, _Debugger_initCons, _List_Nil, value)
+			);
+		}
+
+		if (tag === 'RBNode_elm_builtin' || tag == 'RBEmpty_elm_builtin')
+		{
+			return A2($elm$browser$Debugger$Expando$Dictionary, true,
+				A3($elm$core$Dict$foldr, _Debugger_initKeyValueCons, _List_Nil, value)
+			);
+		}
+
+		if (tag === 'Array_elm_builtin')
+		{
+			return A3($elm$browser$Debugger$Expando$Sequence, $elm$browser$Debugger$Expando$ArraySeq, true,
+				A3($elm$core$Array$foldr, _Debugger_initCons, _List_Nil, value)
+			);
+		}
+
+		if (typeof tag === 'number')
+		{
+			return $elm$browser$Debugger$Expando$Primitive('<internals>');
+		}
+
+		var char = tag.charCodeAt(0);
+		if (char === 35 || 65 <= char && char <= 90)
+		{
+			var list = _List_Nil;
+			for (var i in value)
+			{
+				if (i === '$') continue;
+				list = _List_Cons(_Debugger_init(value[i]), list);
+			}
+			return A3($elm$browser$Debugger$Expando$Constructor, char === 35 ? $elm$core$Maybe$Nothing : $elm$core$Maybe$Just(tag), true, $elm$core$List$reverse(list));
+		}
+
+		return $elm$browser$Debugger$Expando$Primitive('<internals>');
+	}
+
+	if (typeof value === 'object')
+	{
+		var dict = $elm$core$Dict$empty;
+		for (var i in value)
+		{
+			dict = A3($elm$core$Dict$insert, i, _Debugger_init(value[i]), dict);
+		}
+		return A2($elm$browser$Debugger$Expando$Record, true, dict);
+	}
+
+	return $elm$browser$Debugger$Expando$Primitive('<internals>');
+}
+
+var _Debugger_initCons = F2(function initConsHelp(value, list)
+{
+	return _List_Cons(_Debugger_init(value), list);
+});
+
+var _Debugger_initKeyValueCons = F3(function(key, value, list)
+{
+	return _List_Cons(
+		_Utils_Tuple2(_Debugger_init(key), _Debugger_init(value)),
+		list
+	);
+});
+
+function _Debugger_addSlashes(str, isChar)
+{
+	var s = str
+		.replace(/\\/g, '\\\\')
+		.replace(/\n/g, '\\n')
+		.replace(/\t/g, '\\t')
+		.replace(/\r/g, '\\r')
+		.replace(/\v/g, '\\v')
+		.replace(/\0/g, '\\0');
+	if (isChar)
+	{
+		return s.replace(/\'/g, '\\\'');
+	}
+	else
+	{
+		return s.replace(/\"/g, '\\"');
+	}
+}
+
+
+
+// BLOCK EVENTS
+
+
+function _Debugger_updateBlocker(oldBlocker, newBlocker)
+{
+	if (oldBlocker === newBlocker) return;
+
+	var oldEvents = _Debugger_blockerToEvents(oldBlocker);
+	var newEvents = _Debugger_blockerToEvents(newBlocker);
+
+	// remove old blockers
+	for (var i = 0; i < oldEvents.length; i++)
+	{
+		document.removeEventListener(oldEvents[i], _Debugger_blocker, true);
+	}
+
+	// add new blockers
+	for (var i = 0; i < newEvents.length; i++)
+	{
+		document.addEventListener(newEvents[i], _Debugger_blocker, true);
+	}
+}
+
+
+function _Debugger_blocker(event)
+{
+	if (event.type === 'keydown' && event.metaKey && event.which === 82)
+	{
+		return;
+	}
+
+	var isScroll = event.type === 'scroll' || event.type === 'wheel';
+	for (var node = event.target; node; node = node.parentNode)
+	{
+		if (isScroll ? node.id === 'elm-debugger-details' : node.id === 'elm-debugger-overlay')
+		{
+			return;
+		}
+	}
+
+	event.stopPropagation();
+	event.preventDefault();
+}
+
+function _Debugger_blockerToEvents(blocker)
+{
+	return blocker === $elm$browser$Debugger$Overlay$BlockNone
+		? []
+		: blocker === $elm$browser$Debugger$Overlay$BlockMost
+			? _Debugger_mostEvents
+			: _Debugger_allEvents;
+}
+
+var _Debugger_mostEvents = [
+	'click', 'dblclick', 'mousemove',
+	'mouseup', 'mousedown', 'mouseenter', 'mouseleave',
+	'touchstart', 'touchend', 'touchcancel', 'touchmove',
+	'pointerdown', 'pointerup', 'pointerover', 'pointerout',
+	'pointerenter', 'pointerleave', 'pointermove', 'pointercancel',
+	'dragstart', 'drag', 'dragend', 'dragenter', 'dragover', 'dragleave', 'drop',
+	'keyup', 'keydown', 'keypress',
+	'input', 'change',
+	'focus', 'blur'
+];
+
+var _Debugger_allEvents = _Debugger_mostEvents.concat('wheel', 'scroll');
+
+
+
 
 // ELEMENT
 
@@ -4373,43 +4956,6 @@ function _Url_percentDecode(string)
 		return $elm$core$Maybe$Nothing;
 	}
 }
-
-
-var _Bitwise_and = F2(function(a, b)
-{
-	return a & b;
-});
-
-var _Bitwise_or = F2(function(a, b)
-{
-	return a | b;
-});
-
-var _Bitwise_xor = F2(function(a, b)
-{
-	return a ^ b;
-});
-
-function _Bitwise_complement(a)
-{
-	return ~a;
-};
-
-var _Bitwise_shiftLeftBy = F2(function(offset, a)
-{
-	return a << offset;
-});
-
-var _Bitwise_shiftRightBy = F2(function(offset, a)
-{
-	return a >> offset;
-});
-
-var _Bitwise_shiftRightZfBy = F2(function(offset, a)
-{
-	return a >>> offset;
-});
-
 
 
 
@@ -5035,161 +5581,104 @@ var $elm$virtual_dom$VirtualDom$toHandlerInt = function (handler) {
 			return 3;
 	}
 };
-var $elm$browser$Browser$External = function (a) {
-	return {$: 'External', a: a};
+var $elm$browser$Debugger$Expando$ArraySeq = {$: 'ArraySeq'};
+var $elm$browser$Debugger$Overlay$BlockMost = {$: 'BlockMost'};
+var $elm$browser$Debugger$Overlay$BlockNone = {$: 'BlockNone'};
+var $elm$browser$Debugger$Expando$Constructor = F3(
+	function (a, b, c) {
+		return {$: 'Constructor', a: a, b: b, c: c};
+	});
+var $elm$browser$Debugger$Expando$Dictionary = F2(
+	function (a, b) {
+		return {$: 'Dictionary', a: a, b: b};
+	});
+var $elm$browser$Debugger$Main$Down = {$: 'Down'};
+var $elm$browser$Debugger$Expando$ListSeq = {$: 'ListSeq'};
+var $elm$browser$Debugger$Main$NoOp = {$: 'NoOp'};
+var $elm$browser$Debugger$Expando$Primitive = function (a) {
+	return {$: 'Primitive', a: a};
 };
-var $elm$browser$Browser$Internal = function (a) {
-	return {$: 'Internal', a: a};
+var $elm$browser$Debugger$Expando$Record = F2(
+	function (a, b) {
+		return {$: 'Record', a: a, b: b};
+	});
+var $elm$browser$Debugger$Expando$S = function (a) {
+	return {$: 'S', a: a};
 };
-var $elm$core$Basics$identity = function (x) {
-	return x;
+var $elm$browser$Debugger$Expando$Sequence = F3(
+	function (a, b, c) {
+		return {$: 'Sequence', a: a, b: b, c: c};
+	});
+var $elm$browser$Debugger$Expando$SetSeq = {$: 'SetSeq'};
+var $elm$browser$Debugger$Main$Up = {$: 'Up'};
+var $elm$browser$Debugger$Main$UserMsg = function (a) {
+	return {$: 'UserMsg', a: a};
 };
-var $elm$browser$Browser$Dom$NotFound = function (a) {
-	return {$: 'NotFound', a: a};
+var $elm$browser$Debugger$Main$Export = {$: 'Export'};
+var $elm$browser$Debugger$Main$Import = {$: 'Import'};
+var $elm$browser$Debugger$Main$Open = {$: 'Open'};
+var $elm$browser$Debugger$Main$OverlayMsg = function (a) {
+	return {$: 'OverlayMsg', a: a};
 };
-var $elm$url$Url$Http = {$: 'Http'};
-var $elm$url$Url$Https = {$: 'Https'};
-var $elm$url$Url$Url = F6(
-	function (protocol, host, port_, path, query, fragment) {
-		return {fragment: fragment, host: host, path: path, port_: port_, protocol: protocol, query: query};
-	});
-var $elm$core$String$contains = _String_contains;
-var $elm$core$String$length = _String_length;
-var $elm$core$String$slice = _String_slice;
-var $elm$core$String$dropLeft = F2(
-	function (n, string) {
-		return (n < 1) ? string : A3(
-			$elm$core$String$slice,
-			n,
-			$elm$core$String$length(string),
-			string);
-	});
-var $elm$core$String$indexes = _String_indexes;
-var $elm$core$String$isEmpty = function (string) {
-	return string === '';
-};
-var $elm$core$String$left = F2(
-	function (n, string) {
-		return (n < 1) ? '' : A3($elm$core$String$slice, 0, n, string);
-	});
-var $elm$core$String$toInt = _String_toInt;
-var $elm$url$Url$chompBeforePath = F5(
-	function (protocol, path, params, frag, str) {
-		if ($elm$core$String$isEmpty(str) || A2($elm$core$String$contains, '@', str)) {
-			return $elm$core$Maybe$Nothing;
-		} else {
-			var _v0 = A2($elm$core$String$indexes, ':', str);
-			if (!_v0.b) {
-				return $elm$core$Maybe$Just(
-					A6($elm$url$Url$Url, protocol, str, $elm$core$Maybe$Nothing, path, params, frag));
-			} else {
-				if (!_v0.b.b) {
-					var i = _v0.a;
-					var _v1 = $elm$core$String$toInt(
-						A2($elm$core$String$dropLeft, i + 1, str));
-					if (_v1.$ === 'Nothing') {
-						return $elm$core$Maybe$Nothing;
-					} else {
-						var port_ = _v1;
-						return $elm$core$Maybe$Just(
-							A6(
-								$elm$url$Url$Url,
-								protocol,
-								A2($elm$core$String$left, i, str),
-								port_,
-								path,
-								params,
-								frag));
-					}
-				} else {
-					return $elm$core$Maybe$Nothing;
-				}
-			}
-		}
-	});
-var $elm$url$Url$chompBeforeQuery = F4(
-	function (protocol, params, frag, str) {
-		if ($elm$core$String$isEmpty(str)) {
-			return $elm$core$Maybe$Nothing;
-		} else {
-			var _v0 = A2($elm$core$String$indexes, '/', str);
-			if (!_v0.b) {
-				return A5($elm$url$Url$chompBeforePath, protocol, '/', params, frag, str);
-			} else {
-				var i = _v0.a;
-				return A5(
-					$elm$url$Url$chompBeforePath,
-					protocol,
-					A2($elm$core$String$dropLeft, i, str),
-					params,
-					frag,
-					A2($elm$core$String$left, i, str));
-			}
-		}
-	});
-var $elm$url$Url$chompBeforeFragment = F3(
-	function (protocol, frag, str) {
-		if ($elm$core$String$isEmpty(str)) {
-			return $elm$core$Maybe$Nothing;
-		} else {
-			var _v0 = A2($elm$core$String$indexes, '?', str);
-			if (!_v0.b) {
-				return A4($elm$url$Url$chompBeforeQuery, protocol, $elm$core$Maybe$Nothing, frag, str);
-			} else {
-				var i = _v0.a;
-				return A4(
-					$elm$url$Url$chompBeforeQuery,
-					protocol,
-					$elm$core$Maybe$Just(
-						A2($elm$core$String$dropLeft, i + 1, str)),
-					frag,
-					A2($elm$core$String$left, i, str));
-			}
-		}
-	});
-var $elm$url$Url$chompAfterProtocol = F2(
-	function (protocol, str) {
-		if ($elm$core$String$isEmpty(str)) {
-			return $elm$core$Maybe$Nothing;
-		} else {
-			var _v0 = A2($elm$core$String$indexes, '#', str);
-			if (!_v0.b) {
-				return A3($elm$url$Url$chompBeforeFragment, protocol, $elm$core$Maybe$Nothing, str);
-			} else {
-				var i = _v0.a;
-				return A3(
-					$elm$url$Url$chompBeforeFragment,
-					protocol,
-					$elm$core$Maybe$Just(
-						A2($elm$core$String$dropLeft, i + 1, str)),
-					A2($elm$core$String$left, i, str));
-			}
-		}
-	});
-var $elm$core$String$startsWith = _String_startsWith;
-var $elm$url$Url$fromString = function (str) {
-	return A2($elm$core$String$startsWith, 'http://', str) ? A2(
-		$elm$url$Url$chompAfterProtocol,
-		$elm$url$Url$Http,
-		A2($elm$core$String$dropLeft, 7, str)) : (A2($elm$core$String$startsWith, 'https://', str) ? A2(
-		$elm$url$Url$chompAfterProtocol,
-		$elm$url$Url$Https,
-		A2($elm$core$String$dropLeft, 8, str)) : $elm$core$Maybe$Nothing);
-};
-var $elm$core$Basics$never = function (_v0) {
-	never:
-	while (true) {
-		var nvr = _v0.a;
-		var $temp$_v0 = nvr;
-		_v0 = $temp$_v0;
-		continue never;
+var $elm$browser$Debugger$Main$Resume = {$: 'Resume'};
+var $elm$browser$Debugger$Main$isPaused = function (state) {
+	if (state.$ === 'Running') {
+		return false;
+	} else {
+		return true;
 	}
 };
-var $elm$core$Task$Perform = function (a) {
-	return {$: 'Perform', a: a};
+var $elm$browser$Debugger$History$size = function (history) {
+	return history.numMessages;
 };
-var $elm$core$Task$succeed = _Scheduler_succeed;
-var $elm$core$Task$init = $elm$core$Task$succeed(_Utils_Tuple0);
+var $elm$browser$Debugger$Overlay$Accept = function (a) {
+	return {$: 'Accept', a: a};
+};
+var $elm$browser$Debugger$Overlay$Choose = F2(
+	function (a, b) {
+		return {$: 'Choose', a: a, b: b};
+	});
+var $elm$html$Html$div = _VirtualDom_node('div');
+var $elm$json$Json$Encode$string = _Json_wrap;
+var $elm$html$Html$Attributes$stringProperty = F2(
+	function (key, string) {
+		return A2(
+			_VirtualDom_property,
+			key,
+			$elm$json$Json$Encode$string(string));
+	});
+var $elm$html$Html$Attributes$id = $elm$html$Html$Attributes$stringProperty('id');
+var $elm$virtual_dom$VirtualDom$Normal = function (a) {
+	return {$: 'Normal', a: a};
+};
+var $elm$virtual_dom$VirtualDom$on = _VirtualDom_on;
+var $elm$html$Html$Events$on = F2(
+	function (event, decoder) {
+		return A2(
+			$elm$virtual_dom$VirtualDom$on,
+			event,
+			$elm$virtual_dom$VirtualDom$Normal(decoder));
+	});
+var $elm$html$Html$Events$onClick = function (msg) {
+	return A2(
+		$elm$html$Html$Events$on,
+		'click',
+		$elm$json$Json$Decode$succeed(msg));
+};
+var $elm$html$Html$span = _VirtualDom_node('span');
+var $elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
+var $elm$html$Html$Attributes$style = $elm$virtual_dom$VirtualDom$style;
+var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
+var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
+var $elm$html$Html$a = _VirtualDom_node('a');
+var $elm$browser$Debugger$Overlay$goodNews1 = '\nThe good news is that having values like this in your message type is not\nso great in the long run. You are better off using simpler data, like\n';
+var $elm$browser$Debugger$Overlay$goodNews2 = '\nfunction can pattern match on that data and call whatever functions, JSON\ndecoders, etc. you need. This makes the code much more explicit and easy to\nfollow for other readers (or you in a few months!)\n';
+var $elm$html$Html$Attributes$href = function (url) {
+	return A2(
+		$elm$html$Html$Attributes$stringProperty,
+		'href',
+		_VirtualDom_noJavaScriptUri(url));
+};
 var $elm$core$List$foldrHelper = F4(
 	function (fn, acc, ctr, ls) {
 		if (!ls.b) {
@@ -5259,6 +5748,3540 @@ var $elm$core$List$map = F2(
 			_List_Nil,
 			xs);
 	});
+var $elm$html$Html$p = _VirtualDom_node('p');
+var $elm$html$Html$ul = _VirtualDom_node('ul');
+var $elm$html$Html$code = _VirtualDom_node('code');
+var $elm$browser$Debugger$Overlay$viewCode = function (name) {
+	return A2(
+		$elm$html$Html$code,
+		_List_Nil,
+		_List_fromArray(
+			[
+				$elm$html$Html$text(name)
+			]));
+};
+var $elm$browser$Debugger$Overlay$addCommas = function (items) {
+	if (!items.b) {
+		return '';
+	} else {
+		if (!items.b.b) {
+			var item = items.a;
+			return item;
+		} else {
+			if (!items.b.b.b) {
+				var item1 = items.a;
+				var _v1 = items.b;
+				var item2 = _v1.a;
+				return item1 + (' and ' + item2);
+			} else {
+				var lastItem = items.a;
+				var otherItems = items.b;
+				return A2(
+					$elm$core$String$join,
+					', ',
+					_Utils_ap(
+						otherItems,
+						_List_fromArray(
+							[' and ' + lastItem])));
+			}
+		}
+	}
+};
+var $elm$html$Html$li = _VirtualDom_node('li');
+var $elm$browser$Debugger$Overlay$problemToString = function (problem) {
+	switch (problem.$) {
+		case 'Function':
+			return 'functions';
+		case 'Decoder':
+			return 'JSON decoders';
+		case 'Task':
+			return 'tasks';
+		case 'Process':
+			return 'processes';
+		case 'Socket':
+			return 'web sockets';
+		case 'Request':
+			return 'HTTP requests';
+		case 'Program':
+			return 'programs';
+		default:
+			return 'virtual DOM values';
+	}
+};
+var $elm$browser$Debugger$Overlay$viewProblemType = function (_v0) {
+	var name = _v0.name;
+	var problems = _v0.problems;
+	return A2(
+		$elm$html$Html$li,
+		_List_Nil,
+		_List_fromArray(
+			[
+				$elm$browser$Debugger$Overlay$viewCode(name),
+				$elm$html$Html$text(
+				' can contain ' + ($elm$browser$Debugger$Overlay$addCommas(
+					A2($elm$core$List$map, $elm$browser$Debugger$Overlay$problemToString, problems)) + '.'))
+			]));
+};
+var $elm$browser$Debugger$Overlay$viewBadMetadata = function (_v0) {
+	var message = _v0.message;
+	var problems = _v0.problems;
+	return _List_fromArray(
+		[
+			A2(
+			$elm$html$Html$p,
+			_List_Nil,
+			_List_fromArray(
+				[
+					$elm$html$Html$text('The '),
+					$elm$browser$Debugger$Overlay$viewCode(message),
+					$elm$html$Html$text(' type of your program cannot be reliably serialized for history files.')
+				])),
+			A2(
+			$elm$html$Html$p,
+			_List_Nil,
+			_List_fromArray(
+				[
+					$elm$html$Html$text('Functions cannot be serialized, nor can values that contain functions. This is a problem in these places:')
+				])),
+			A2(
+			$elm$html$Html$ul,
+			_List_Nil,
+			A2($elm$core$List$map, $elm$browser$Debugger$Overlay$viewProblemType, problems)),
+			A2(
+			$elm$html$Html$p,
+			_List_Nil,
+			_List_fromArray(
+				[
+					$elm$html$Html$text($elm$browser$Debugger$Overlay$goodNews1),
+					A2(
+					$elm$html$Html$a,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$href('https://guide.elm-lang.org/types/custom_types.html')
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text('custom types')
+						])),
+					$elm$html$Html$text(', in your messages. From there, your '),
+					$elm$browser$Debugger$Overlay$viewCode('update'),
+					$elm$html$Html$text($elm$browser$Debugger$Overlay$goodNews2)
+				]))
+		]);
+};
+var $elm$virtual_dom$VirtualDom$map = _VirtualDom_map;
+var $elm$html$Html$map = $elm$virtual_dom$VirtualDom$map;
+var $elm$browser$Debugger$Overlay$Cancel = {$: 'Cancel'};
+var $elm$browser$Debugger$Overlay$Proceed = {$: 'Proceed'};
+var $elm$html$Html$button = _VirtualDom_node('button');
+var $elm$browser$Debugger$Overlay$viewButtons = function (buttons) {
+	var btn = F2(
+		function (msg, string) {
+			return A2(
+				$elm$html$Html$button,
+				_List_fromArray(
+					[
+						A2($elm$html$Html$Attributes$style, 'margin-right', '20px'),
+						$elm$html$Html$Events$onClick(msg)
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text(string)
+					]));
+		});
+	var buttonNodes = function () {
+		if (buttons.$ === 'Accept') {
+			var proceed = buttons.a;
+			return _List_fromArray(
+				[
+					A2(btn, $elm$browser$Debugger$Overlay$Proceed, proceed)
+				]);
+		} else {
+			var cancel = buttons.a;
+			var proceed = buttons.b;
+			return _List_fromArray(
+				[
+					A2(btn, $elm$browser$Debugger$Overlay$Cancel, cancel),
+					A2(btn, $elm$browser$Debugger$Overlay$Proceed, proceed)
+				]);
+		}
+	}();
+	return A2(
+		$elm$html$Html$div,
+		_List_fromArray(
+			[
+				A2($elm$html$Html$Attributes$style, 'height', '60px'),
+				A2($elm$html$Html$Attributes$style, 'line-height', '60px'),
+				A2($elm$html$Html$Attributes$style, 'text-align', 'right'),
+				A2($elm$html$Html$Attributes$style, 'background-color', 'rgb(50, 50, 50)')
+			]),
+		buttonNodes);
+};
+var $elm$browser$Debugger$Overlay$viewMessage = F4(
+	function (config, title, details, buttons) {
+		return A2(
+			$elm$html$Html$div,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$id('elm-debugger-overlay'),
+					A2($elm$html$Html$Attributes$style, 'position', 'fixed'),
+					A2($elm$html$Html$Attributes$style, 'top', '0'),
+					A2($elm$html$Html$Attributes$style, 'left', '0'),
+					A2($elm$html$Html$Attributes$style, 'width', '100vw'),
+					A2($elm$html$Html$Attributes$style, 'height', '100vh'),
+					A2($elm$html$Html$Attributes$style, 'color', 'white'),
+					A2($elm$html$Html$Attributes$style, 'pointer-events', 'none'),
+					A2($elm$html$Html$Attributes$style, 'font-family', '\'Trebuchet MS\', \'Lucida Grande\', \'Bitstream Vera Sans\', \'Helvetica Neue\', sans-serif'),
+					A2($elm$html$Html$Attributes$style, 'z-index', '2147483647')
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$elm$html$Html$div,
+					_List_fromArray(
+						[
+							A2($elm$html$Html$Attributes$style, 'position', 'absolute'),
+							A2($elm$html$Html$Attributes$style, 'width', '600px'),
+							A2($elm$html$Html$Attributes$style, 'height', '100vh'),
+							A2($elm$html$Html$Attributes$style, 'padding-left', 'calc(50% - 300px)'),
+							A2($elm$html$Html$Attributes$style, 'padding-right', 'calc(50% - 300px)'),
+							A2($elm$html$Html$Attributes$style, 'background-color', 'rgba(200, 200, 200, 0.7)'),
+							A2($elm$html$Html$Attributes$style, 'pointer-events', 'auto')
+						]),
+					_List_fromArray(
+						[
+							A2(
+							$elm$html$Html$div,
+							_List_fromArray(
+								[
+									A2($elm$html$Html$Attributes$style, 'font-size', '36px'),
+									A2($elm$html$Html$Attributes$style, 'height', '80px'),
+									A2($elm$html$Html$Attributes$style, 'background-color', 'rgb(50, 50, 50)'),
+									A2($elm$html$Html$Attributes$style, 'padding-left', '22px'),
+									A2($elm$html$Html$Attributes$style, 'vertical-align', 'middle'),
+									A2($elm$html$Html$Attributes$style, 'line-height', '80px')
+								]),
+							_List_fromArray(
+								[
+									$elm$html$Html$text(title)
+								])),
+							A2(
+							$elm$html$Html$div,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$id('elm-debugger-details'),
+									A2($elm$html$Html$Attributes$style, 'padding', ' 8px 20px'),
+									A2($elm$html$Html$Attributes$style, 'overflow-y', 'auto'),
+									A2($elm$html$Html$Attributes$style, 'max-height', 'calc(100vh - 156px)'),
+									A2($elm$html$Html$Attributes$style, 'background-color', 'rgb(61, 61, 61)')
+								]),
+							details),
+							A2(
+							$elm$html$Html$map,
+							config.wrap,
+							$elm$browser$Debugger$Overlay$viewButtons(buttons))
+						]))
+				]));
+	});
+var $elm$virtual_dom$VirtualDom$attribute = F2(
+	function (key, value) {
+		return A2(
+			_VirtualDom_attribute,
+			_VirtualDom_noOnOrFormAction(key),
+			_VirtualDom_noJavaScriptOrHtmlUri(value));
+	});
+var $elm$core$Basics$negate = function (n) {
+	return -n;
+};
+var $elm$virtual_dom$VirtualDom$nodeNS = function (tag) {
+	return _VirtualDom_nodeNS(
+		_VirtualDom_noScript(tag));
+};
+var $elm$core$String$fromFloat = _String_fromNumber;
+var $elm$browser$Debugger$Overlay$viewShape = F4(
+	function (x, y, angle, coordinates) {
+		return A4(
+			$elm$virtual_dom$VirtualDom$nodeNS,
+			'http://www.w3.org/2000/svg',
+			'polygon',
+			_List_fromArray(
+				[
+					A2($elm$virtual_dom$VirtualDom$attribute, 'points', coordinates),
+					A2(
+					$elm$virtual_dom$VirtualDom$attribute,
+					'transform',
+					'translate(' + ($elm$core$String$fromFloat(x) + (' ' + ($elm$core$String$fromFloat(y) + (') rotate(' + ($elm$core$String$fromFloat(-angle) + ')'))))))
+				]),
+			_List_Nil);
+	});
+var $elm$browser$Debugger$Overlay$elmLogo = A4(
+	$elm$virtual_dom$VirtualDom$nodeNS,
+	'http://www.w3.org/2000/svg',
+	'svg',
+	_List_fromArray(
+		[
+			A2($elm$virtual_dom$VirtualDom$attribute, 'viewBox', '-300 -300 600 600'),
+			A2($elm$virtual_dom$VirtualDom$attribute, 'xmlns', 'http://www.w3.org/2000/svg'),
+			A2($elm$virtual_dom$VirtualDom$attribute, 'fill', 'currentColor'),
+			A2($elm$virtual_dom$VirtualDom$attribute, 'width', '24px'),
+			A2($elm$virtual_dom$VirtualDom$attribute, 'height', '24px')
+		]),
+	_List_fromArray(
+		[
+			A4(
+			$elm$virtual_dom$VirtualDom$nodeNS,
+			'http://www.w3.org/2000/svg',
+			'g',
+			_List_fromArray(
+				[
+					A2($elm$virtual_dom$VirtualDom$attribute, 'transform', 'scale(1 -1)')
+				]),
+			_List_fromArray(
+				[
+					A4($elm$browser$Debugger$Overlay$viewShape, 0, -210, 0, '-280,-90 0,190 280,-90'),
+					A4($elm$browser$Debugger$Overlay$viewShape, -210, 0, 90, '-280,-90 0,190 280,-90'),
+					A4($elm$browser$Debugger$Overlay$viewShape, 207, 207, 45, '-198,-66 0,132 198,-66'),
+					A4($elm$browser$Debugger$Overlay$viewShape, 150, 0, 0, '-130,0 0,-130 130,0 0,130'),
+					A4($elm$browser$Debugger$Overlay$viewShape, -89, 239, 0, '-191,61 69,61 191,-61 -69,-61'),
+					A4($elm$browser$Debugger$Overlay$viewShape, 0, 106, 180, '-130,-44 0,86  130,-44'),
+					A4($elm$browser$Debugger$Overlay$viewShape, 256, -150, 270, '-130,-44 0,86  130,-44')
+				]))
+		]));
+var $elm$core$String$length = _String_length;
+var $elm$browser$Debugger$Overlay$viewMiniControls = F2(
+	function (config, numMsgs) {
+		var string = $elm$core$String$fromInt(numMsgs);
+		var width = $elm$core$String$fromInt(
+			2 + $elm$core$String$length(string));
+		return A2(
+			$elm$html$Html$div,
+			_List_fromArray(
+				[
+					A2($elm$html$Html$Attributes$style, 'position', 'fixed'),
+					A2($elm$html$Html$Attributes$style, 'bottom', '2em'),
+					A2($elm$html$Html$Attributes$style, 'right', '2em'),
+					A2($elm$html$Html$Attributes$style, 'width', 'calc(42px + ' + (width + 'ch)')),
+					A2($elm$html$Html$Attributes$style, 'height', '36px'),
+					A2($elm$html$Html$Attributes$style, 'background-color', '#1293D8'),
+					A2($elm$html$Html$Attributes$style, 'color', 'white'),
+					A2($elm$html$Html$Attributes$style, 'font-family', 'monospace'),
+					A2($elm$html$Html$Attributes$style, 'pointer-events', 'auto'),
+					A2($elm$html$Html$Attributes$style, 'z-index', '2147483647'),
+					A2($elm$html$Html$Attributes$style, 'display', 'flex'),
+					A2($elm$html$Html$Attributes$style, 'justify-content', 'center'),
+					A2($elm$html$Html$Attributes$style, 'align-items', 'center'),
+					A2($elm$html$Html$Attributes$style, 'cursor', 'pointer'),
+					$elm$html$Html$Events$onClick(config.open)
+				]),
+			_List_fromArray(
+				[
+					$elm$browser$Debugger$Overlay$elmLogo,
+					A2(
+					$elm$html$Html$span,
+					_List_fromArray(
+						[
+							A2($elm$html$Html$Attributes$style, 'padding-left', 'calc(1ch + 6px)'),
+							A2($elm$html$Html$Attributes$style, 'padding-right', '1ch')
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text(string)
+						]))
+				]));
+	});
+var $elm$browser$Debugger$Overlay$explanationBad = '\nThe messages in this history do not match the messages handled by your\nprogram. I noticed changes in the following types:\n';
+var $elm$browser$Debugger$Overlay$explanationRisky = '\nThis history seems old. It will work with this program, but some\nmessages have been added since the history was created:\n';
+var $elm$core$List$intersperse = F2(
+	function (sep, xs) {
+		if (!xs.b) {
+			return _List_Nil;
+		} else {
+			var hd = xs.a;
+			var tl = xs.b;
+			var step = F2(
+				function (x, rest) {
+					return A2(
+						$elm$core$List$cons,
+						sep,
+						A2($elm$core$List$cons, x, rest));
+				});
+			var spersed = A3($elm$core$List$foldr, step, _List_Nil, tl);
+			return A2($elm$core$List$cons, hd, spersed);
+		}
+	});
+var $elm$browser$Debugger$Overlay$viewMention = F2(
+	function (tags, verbed) {
+		var _v0 = A2(
+			$elm$core$List$map,
+			$elm$browser$Debugger$Overlay$viewCode,
+			$elm$core$List$reverse(tags));
+		if (!_v0.b) {
+			return $elm$html$Html$text('');
+		} else {
+			if (!_v0.b.b) {
+				var tag = _v0.a;
+				return A2(
+					$elm$html$Html$li,
+					_List_Nil,
+					_List_fromArray(
+						[
+							$elm$html$Html$text(verbed),
+							tag,
+							$elm$html$Html$text('.')
+						]));
+			} else {
+				if (!_v0.b.b.b) {
+					var tag2 = _v0.a;
+					var _v1 = _v0.b;
+					var tag1 = _v1.a;
+					return A2(
+						$elm$html$Html$li,
+						_List_Nil,
+						_List_fromArray(
+							[
+								$elm$html$Html$text(verbed),
+								tag1,
+								$elm$html$Html$text(' and '),
+								tag2,
+								$elm$html$Html$text('.')
+							]));
+				} else {
+					var lastTag = _v0.a;
+					var otherTags = _v0.b;
+					return A2(
+						$elm$html$Html$li,
+						_List_Nil,
+						A2(
+							$elm$core$List$cons,
+							$elm$html$Html$text(verbed),
+							_Utils_ap(
+								A2(
+									$elm$core$List$intersperse,
+									$elm$html$Html$text(', '),
+									$elm$core$List$reverse(otherTags)),
+								_List_fromArray(
+									[
+										$elm$html$Html$text(', and '),
+										lastTag,
+										$elm$html$Html$text('.')
+									]))));
+				}
+			}
+		}
+	});
+var $elm$browser$Debugger$Overlay$viewChange = function (change) {
+	return A2(
+		$elm$html$Html$li,
+		_List_fromArray(
+			[
+				A2($elm$html$Html$Attributes$style, 'margin', '8px 0')
+			]),
+		function () {
+			if (change.$ === 'AliasChange') {
+				var name = change.a;
+				return _List_fromArray(
+					[
+						A2(
+						$elm$html$Html$span,
+						_List_fromArray(
+							[
+								A2($elm$html$Html$Attributes$style, 'font-size', '1.5em')
+							]),
+						_List_fromArray(
+							[
+								$elm$browser$Debugger$Overlay$viewCode(name)
+							]))
+					]);
+			} else {
+				var name = change.a;
+				var removed = change.b.removed;
+				var changed = change.b.changed;
+				var added = change.b.added;
+				var argsMatch = change.b.argsMatch;
+				return _List_fromArray(
+					[
+						A2(
+						$elm$html$Html$span,
+						_List_fromArray(
+							[
+								A2($elm$html$Html$Attributes$style, 'font-size', '1.5em')
+							]),
+						_List_fromArray(
+							[
+								$elm$browser$Debugger$Overlay$viewCode(name)
+							])),
+						A2(
+						$elm$html$Html$ul,
+						_List_fromArray(
+							[
+								A2($elm$html$Html$Attributes$style, 'list-style-type', 'disc'),
+								A2($elm$html$Html$Attributes$style, 'padding-left', '2em')
+							]),
+						_List_fromArray(
+							[
+								A2($elm$browser$Debugger$Overlay$viewMention, removed, 'Removed '),
+								A2($elm$browser$Debugger$Overlay$viewMention, changed, 'Changed '),
+								A2($elm$browser$Debugger$Overlay$viewMention, added, 'Added ')
+							])),
+						argsMatch ? $elm$html$Html$text('') : $elm$html$Html$text('This may be due to the fact that the type variable names changed.')
+					]);
+			}
+		}());
+};
+var $elm$browser$Debugger$Overlay$viewReport = F2(
+	function (isBad, report) {
+		switch (report.$) {
+			case 'CorruptHistory':
+				return _List_fromArray(
+					[
+						$elm$html$Html$text('Looks like this history file is corrupt. I cannot understand it.')
+					]);
+			case 'VersionChanged':
+				var old = report.a;
+				var _new = report.b;
+				return _List_fromArray(
+					[
+						$elm$html$Html$text('This history was created with Elm ' + (old + (', but you are using Elm ' + (_new + ' right now.'))))
+					]);
+			case 'MessageChanged':
+				var old = report.a;
+				var _new = report.b;
+				return _List_fromArray(
+					[
+						$elm$html$Html$text('To import some other history, the overall message type must' + ' be the same. The old history has '),
+						$elm$browser$Debugger$Overlay$viewCode(old),
+						$elm$html$Html$text(' messages, but the new program works with '),
+						$elm$browser$Debugger$Overlay$viewCode(_new),
+						$elm$html$Html$text(' messages.')
+					]);
+			default:
+				var changes = report.a;
+				return _List_fromArray(
+					[
+						A2(
+						$elm$html$Html$p,
+						_List_Nil,
+						_List_fromArray(
+							[
+								$elm$html$Html$text(
+								isBad ? $elm$browser$Debugger$Overlay$explanationBad : $elm$browser$Debugger$Overlay$explanationRisky)
+							])),
+						A2(
+						$elm$html$Html$ul,
+						_List_fromArray(
+							[
+								A2($elm$html$Html$Attributes$style, 'list-style-type', 'none'),
+								A2($elm$html$Html$Attributes$style, 'padding-left', '20px')
+							]),
+						A2($elm$core$List$map, $elm$browser$Debugger$Overlay$viewChange, changes))
+					]);
+		}
+	});
+var $elm$browser$Debugger$Overlay$view = F5(
+	function (config, isPaused, isOpen, numMsgs, state) {
+		switch (state.$) {
+			case 'None':
+				return isOpen ? $elm$html$Html$text('') : (isPaused ? A2(
+					$elm$html$Html$div,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$id('elm-debugger-overlay'),
+							A2($elm$html$Html$Attributes$style, 'position', 'fixed'),
+							A2($elm$html$Html$Attributes$style, 'top', '0'),
+							A2($elm$html$Html$Attributes$style, 'left', '0'),
+							A2($elm$html$Html$Attributes$style, 'width', '100vw'),
+							A2($elm$html$Html$Attributes$style, 'height', '100vh'),
+							A2($elm$html$Html$Attributes$style, 'cursor', 'pointer'),
+							A2($elm$html$Html$Attributes$style, 'display', 'flex'),
+							A2($elm$html$Html$Attributes$style, 'align-items', 'center'),
+							A2($elm$html$Html$Attributes$style, 'justify-content', 'center'),
+							A2($elm$html$Html$Attributes$style, 'pointer-events', 'auto'),
+							A2($elm$html$Html$Attributes$style, 'background-color', 'rgba(200, 200, 200, 0.7)'),
+							A2($elm$html$Html$Attributes$style, 'color', 'white'),
+							A2($elm$html$Html$Attributes$style, 'font-family', '\'Trebuchet MS\', \'Lucida Grande\', \'Bitstream Vera Sans\', \'Helvetica Neue\', sans-serif'),
+							A2($elm$html$Html$Attributes$style, 'z-index', '2147483646'),
+							$elm$html$Html$Events$onClick(config.resume)
+						]),
+					_List_fromArray(
+						[
+							A2(
+							$elm$html$Html$span,
+							_List_fromArray(
+								[
+									A2($elm$html$Html$Attributes$style, 'font-size', '80px')
+								]),
+							_List_fromArray(
+								[
+									$elm$html$Html$text('Click to Resume')
+								])),
+							A2($elm$browser$Debugger$Overlay$viewMiniControls, config, numMsgs)
+						])) : A2($elm$browser$Debugger$Overlay$viewMiniControls, config, numMsgs));
+			case 'BadMetadata':
+				var badMetadata_ = state.a;
+				return A4(
+					$elm$browser$Debugger$Overlay$viewMessage,
+					config,
+					'Cannot use Import or Export',
+					$elm$browser$Debugger$Overlay$viewBadMetadata(badMetadata_),
+					$elm$browser$Debugger$Overlay$Accept('Ok'));
+			case 'BadImport':
+				var report = state.a;
+				return A4(
+					$elm$browser$Debugger$Overlay$viewMessage,
+					config,
+					'Cannot Import History',
+					A2($elm$browser$Debugger$Overlay$viewReport, true, report),
+					$elm$browser$Debugger$Overlay$Accept('Ok'));
+			default:
+				var report = state.a;
+				return A4(
+					$elm$browser$Debugger$Overlay$viewMessage,
+					config,
+					'Warning',
+					A2($elm$browser$Debugger$Overlay$viewReport, false, report),
+					A2($elm$browser$Debugger$Overlay$Choose, 'Cancel', 'Import Anyway'));
+		}
+	});
+var $elm$browser$Debugger$Main$cornerView = function (model) {
+	return A5(
+		$elm$browser$Debugger$Overlay$view,
+		{exportHistory: $elm$browser$Debugger$Main$Export, importHistory: $elm$browser$Debugger$Main$Import, open: $elm$browser$Debugger$Main$Open, resume: $elm$browser$Debugger$Main$Resume, wrap: $elm$browser$Debugger$Main$OverlayMsg},
+		$elm$browser$Debugger$Main$isPaused(model.state),
+		_Debugger_isOpen(model.popout),
+		$elm$browser$Debugger$History$size(model.history),
+		model.overlay);
+};
+var $elm$core$Dict$RBEmpty_elm_builtin = {$: 'RBEmpty_elm_builtin'};
+var $elm$core$Dict$empty = $elm$core$Dict$RBEmpty_elm_builtin;
+var $elm$core$Set$foldr = F3(
+	function (func, initialState, _v0) {
+		var dict = _v0.a;
+		return A3(
+			$elm$core$Dict$foldr,
+			F3(
+				function (key, _v1, state) {
+					return A2(func, key, state);
+				}),
+			initialState,
+			dict);
+	});
+var $elm$browser$Debugger$Main$getCurrentModel = function (state) {
+	if (state.$ === 'Running') {
+		var model = state.a;
+		return model;
+	} else {
+		var model = state.b;
+		return model;
+	}
+};
+var $elm$browser$Debugger$Main$getUserModel = function (model) {
+	return $elm$browser$Debugger$Main$getCurrentModel(model.state);
+};
+var $elm$browser$Debugger$Main$initialWindowHeight = 420;
+var $elm$browser$Debugger$Main$initialWindowWidth = 900;
+var $elm$core$Dict$Black = {$: 'Black'};
+var $elm$core$Dict$RBNode_elm_builtin = F5(
+	function (a, b, c, d, e) {
+		return {$: 'RBNode_elm_builtin', a: a, b: b, c: c, d: d, e: e};
+	});
+var $elm$core$Dict$Red = {$: 'Red'};
+var $elm$core$Dict$balance = F5(
+	function (color, key, value, left, right) {
+		if ((right.$ === 'RBNode_elm_builtin') && (right.a.$ === 'Red')) {
+			var _v1 = right.a;
+			var rK = right.b;
+			var rV = right.c;
+			var rLeft = right.d;
+			var rRight = right.e;
+			if ((left.$ === 'RBNode_elm_builtin') && (left.a.$ === 'Red')) {
+				var _v3 = left.a;
+				var lK = left.b;
+				var lV = left.c;
+				var lLeft = left.d;
+				var lRight = left.e;
+				return A5(
+					$elm$core$Dict$RBNode_elm_builtin,
+					$elm$core$Dict$Red,
+					key,
+					value,
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, lK, lV, lLeft, lRight),
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, rK, rV, rLeft, rRight));
+			} else {
+				return A5(
+					$elm$core$Dict$RBNode_elm_builtin,
+					color,
+					rK,
+					rV,
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, key, value, left, rLeft),
+					rRight);
+			}
+		} else {
+			if ((((left.$ === 'RBNode_elm_builtin') && (left.a.$ === 'Red')) && (left.d.$ === 'RBNode_elm_builtin')) && (left.d.a.$ === 'Red')) {
+				var _v5 = left.a;
+				var lK = left.b;
+				var lV = left.c;
+				var _v6 = left.d;
+				var _v7 = _v6.a;
+				var llK = _v6.b;
+				var llV = _v6.c;
+				var llLeft = _v6.d;
+				var llRight = _v6.e;
+				var lRight = left.e;
+				return A5(
+					$elm$core$Dict$RBNode_elm_builtin,
+					$elm$core$Dict$Red,
+					lK,
+					lV,
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, llK, llV, llLeft, llRight),
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, key, value, lRight, right));
+			} else {
+				return A5($elm$core$Dict$RBNode_elm_builtin, color, key, value, left, right);
+			}
+		}
+	});
+var $elm$core$Basics$compare = _Utils_compare;
+var $elm$core$Dict$insertHelp = F3(
+	function (key, value, dict) {
+		if (dict.$ === 'RBEmpty_elm_builtin') {
+			return A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, key, value, $elm$core$Dict$RBEmpty_elm_builtin, $elm$core$Dict$RBEmpty_elm_builtin);
+		} else {
+			var nColor = dict.a;
+			var nKey = dict.b;
+			var nValue = dict.c;
+			var nLeft = dict.d;
+			var nRight = dict.e;
+			var _v1 = A2($elm$core$Basics$compare, key, nKey);
+			switch (_v1.$) {
+				case 'LT':
+					return A5(
+						$elm$core$Dict$balance,
+						nColor,
+						nKey,
+						nValue,
+						A3($elm$core$Dict$insertHelp, key, value, nLeft),
+						nRight);
+				case 'EQ':
+					return A5($elm$core$Dict$RBNode_elm_builtin, nColor, nKey, value, nLeft, nRight);
+				default:
+					return A5(
+						$elm$core$Dict$balance,
+						nColor,
+						nKey,
+						nValue,
+						nLeft,
+						A3($elm$core$Dict$insertHelp, key, value, nRight));
+			}
+		}
+	});
+var $elm$core$Dict$insert = F3(
+	function (key, value, dict) {
+		var _v0 = A3($elm$core$Dict$insertHelp, key, value, dict);
+		if ((_v0.$ === 'RBNode_elm_builtin') && (_v0.a.$ === 'Red')) {
+			var _v1 = _v0.a;
+			var k = _v0.b;
+			var v = _v0.c;
+			var l = _v0.d;
+			var r = _v0.e;
+			return A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, k, v, l, r);
+		} else {
+			var x = _v0;
+			return x;
+		}
+	});
+var $elm$browser$Debugger$Main$cachedHistory = function (model) {
+	var _v0 = model.state;
+	if (_v0.$ === 'Running') {
+		return model.history;
+	} else {
+		var history = _v0.e;
+		return history;
+	}
+};
+var $elm$virtual_dom$VirtualDom$node = function (tag) {
+	return _VirtualDom_node(
+		_VirtualDom_noScript(tag));
+};
+var $elm$html$Html$node = $elm$virtual_dom$VirtualDom$node;
+var $elm$browser$Debugger$Main$DragEnd = {$: 'DragEnd'};
+var $elm$browser$Debugger$Main$getDragStatus = function (layout) {
+	if (layout.$ === 'Horizontal') {
+		var status = layout.a;
+		return status;
+	} else {
+		var status = layout.a;
+		return status;
+	}
+};
+var $elm$browser$Debugger$Main$Drag = function (a) {
+	return {$: 'Drag', a: a};
+};
+var $elm$browser$Debugger$Main$DragInfo = F5(
+	function (x, y, down, width, height) {
+		return {down: down, height: height, width: width, x: x, y: y};
+	});
+var $elm$json$Json$Decode$field = _Json_decodeField;
+var $elm$json$Json$Decode$at = F2(
+	function (fields, decoder) {
+		return A3($elm$core$List$foldr, $elm$json$Json$Decode$field, decoder, fields);
+	});
+var $elm$json$Json$Decode$float = _Json_decodeFloat;
+var $elm$browser$Debugger$Main$decodeDimension = function (field) {
+	return A2(
+		$elm$json$Json$Decode$at,
+		_List_fromArray(
+			['currentTarget', 'ownerDocument', 'defaultView', field]),
+		$elm$json$Json$Decode$float);
+};
+var $elm$json$Json$Decode$int = _Json_decodeInt;
+var $elm$json$Json$Decode$map5 = _Json_map5;
+var $elm$browser$Debugger$Main$onMouseMove = A2(
+	$elm$html$Html$Events$on,
+	'mousemove',
+	A2(
+		$elm$json$Json$Decode$map,
+		$elm$browser$Debugger$Main$Drag,
+		A6(
+			$elm$json$Json$Decode$map5,
+			$elm$browser$Debugger$Main$DragInfo,
+			A2($elm$json$Json$Decode$field, 'pageX', $elm$json$Json$Decode$float),
+			A2($elm$json$Json$Decode$field, 'pageY', $elm$json$Json$Decode$float),
+			A2(
+				$elm$json$Json$Decode$field,
+				'buttons',
+				A2(
+					$elm$json$Json$Decode$map,
+					function (v) {
+						return v === 1;
+					},
+					$elm$json$Json$Decode$int)),
+			$elm$browser$Debugger$Main$decodeDimension('innerWidth'),
+			$elm$browser$Debugger$Main$decodeDimension('innerHeight'))));
+var $elm$html$Html$Events$onMouseUp = function (msg) {
+	return A2(
+		$elm$html$Html$Events$on,
+		'mouseup',
+		$elm$json$Json$Decode$succeed(msg));
+};
+var $elm$browser$Debugger$Main$toDragListeners = function (layout) {
+	var _v0 = $elm$browser$Debugger$Main$getDragStatus(layout);
+	if (_v0.$ === 'Static') {
+		return _List_Nil;
+	} else {
+		return _List_fromArray(
+			[
+				$elm$browser$Debugger$Main$onMouseMove,
+				$elm$html$Html$Events$onMouseUp($elm$browser$Debugger$Main$DragEnd)
+			]);
+	}
+};
+var $elm$browser$Debugger$Main$toFlexDirection = function (layout) {
+	if (layout.$ === 'Horizontal') {
+		return 'row';
+	} else {
+		return 'column-reverse';
+	}
+};
+var $elm$browser$Debugger$Main$DragStart = {$: 'DragStart'};
+var $elm$html$Html$Events$onMouseDown = function (msg) {
+	return A2(
+		$elm$html$Html$Events$on,
+		'mousedown',
+		$elm$json$Json$Decode$succeed(msg));
+};
+var $elm$browser$Debugger$Main$toPercent = function (fraction) {
+	return $elm$core$String$fromFloat(100 * fraction) + '%';
+};
+var $elm$browser$Debugger$Main$viewDragZone = function (layout) {
+	if (layout.$ === 'Horizontal') {
+		var x = layout.b;
+		return A2(
+			$elm$html$Html$div,
+			_List_fromArray(
+				[
+					A2($elm$html$Html$Attributes$style, 'position', 'absolute'),
+					A2($elm$html$Html$Attributes$style, 'top', '0'),
+					A2(
+					$elm$html$Html$Attributes$style,
+					'left',
+					$elm$browser$Debugger$Main$toPercent(x)),
+					A2($elm$html$Html$Attributes$style, 'margin-left', '-5px'),
+					A2($elm$html$Html$Attributes$style, 'width', '10px'),
+					A2($elm$html$Html$Attributes$style, 'height', '100%'),
+					A2($elm$html$Html$Attributes$style, 'cursor', 'col-resize'),
+					$elm$html$Html$Events$onMouseDown($elm$browser$Debugger$Main$DragStart)
+				]),
+			_List_Nil);
+	} else {
+		var y = layout.c;
+		return A2(
+			$elm$html$Html$div,
+			_List_fromArray(
+				[
+					A2($elm$html$Html$Attributes$style, 'position', 'absolute'),
+					A2(
+					$elm$html$Html$Attributes$style,
+					'top',
+					$elm$browser$Debugger$Main$toPercent(y)),
+					A2($elm$html$Html$Attributes$style, 'left', '0'),
+					A2($elm$html$Html$Attributes$style, 'margin-top', '-5px'),
+					A2($elm$html$Html$Attributes$style, 'width', '100%'),
+					A2($elm$html$Html$Attributes$style, 'height', '10px'),
+					A2($elm$html$Html$Attributes$style, 'cursor', 'row-resize'),
+					$elm$html$Html$Events$onMouseDown($elm$browser$Debugger$Main$DragStart)
+				]),
+			_List_Nil);
+	}
+};
+var $elm$browser$Debugger$Main$TweakExpandoModel = function (a) {
+	return {$: 'TweakExpandoModel', a: a};
+};
+var $elm$browser$Debugger$Main$TweakExpandoMsg = function (a) {
+	return {$: 'TweakExpandoMsg', a: a};
+};
+var $elm$browser$Debugger$Main$toExpandoPercents = function (layout) {
+	if (layout.$ === 'Horizontal') {
+		var x = layout.b;
+		return _Utils_Tuple2(
+			$elm$browser$Debugger$Main$toPercent(1 - x),
+			'100%');
+	} else {
+		var y = layout.c;
+		return _Utils_Tuple2(
+			'100%',
+			$elm$browser$Debugger$Main$toPercent(y));
+	}
+};
+var $elm$browser$Debugger$Main$toMouseBlocker = function (layout) {
+	var _v0 = $elm$browser$Debugger$Main$getDragStatus(layout);
+	if (_v0.$ === 'Static') {
+		return 'auto';
+	} else {
+		return 'none';
+	}
+};
+var $elm$browser$Debugger$Expando$Field = F2(
+	function (a, b) {
+		return {$: 'Field', a: a, b: b};
+	});
+var $elm$browser$Debugger$Expando$Index = F3(
+	function (a, b, c) {
+		return {$: 'Index', a: a, b: b, c: c};
+	});
+var $elm$browser$Debugger$Expando$Key = {$: 'Key'};
+var $elm$browser$Debugger$Expando$None = {$: 'None'};
+var $elm$browser$Debugger$Expando$Toggle = {$: 'Toggle'};
+var $elm$browser$Debugger$Expando$Value = {$: 'Value'};
+var $elm$browser$Debugger$Expando$blue = A2($elm$html$Html$Attributes$style, 'color', 'rgb(28, 0, 207)');
+var $elm$core$Basics$composeL = F3(
+	function (g, f, x) {
+		return g(
+			f(x));
+	});
+var $elm$browser$Debugger$Expando$leftPad = function (maybeKey) {
+	if (maybeKey.$ === 'Nothing') {
+		return _List_Nil;
+	} else {
+		return _List_fromArray(
+			[
+				A2($elm$html$Html$Attributes$style, 'padding-left', '4ch')
+			]);
+	}
+};
+var $elm$browser$Debugger$Expando$makeArrow = function (arrow) {
+	return A2(
+		$elm$html$Html$span,
+		_List_fromArray(
+			[
+				A2($elm$html$Html$Attributes$style, 'color', '#777'),
+				A2($elm$html$Html$Attributes$style, 'padding-left', '2ch'),
+				A2($elm$html$Html$Attributes$style, 'width', '2ch'),
+				A2($elm$html$Html$Attributes$style, 'display', 'inline-block')
+			]),
+		_List_fromArray(
+			[
+				$elm$html$Html$text(arrow)
+			]));
+};
+var $elm$browser$Debugger$Expando$purple = A2($elm$html$Html$Attributes$style, 'color', 'rgb(136, 19, 145)');
+var $elm$browser$Debugger$Expando$lineStarter = F3(
+	function (maybeKey, maybeIsClosed, description) {
+		var arrow = function () {
+			if (maybeIsClosed.$ === 'Nothing') {
+				return $elm$browser$Debugger$Expando$makeArrow('');
+			} else {
+				if (maybeIsClosed.a) {
+					return $elm$browser$Debugger$Expando$makeArrow('▸');
+				} else {
+					return $elm$browser$Debugger$Expando$makeArrow('▾');
+				}
+			}
+		}();
+		if (maybeKey.$ === 'Nothing') {
+			return A2($elm$core$List$cons, arrow, description);
+		} else {
+			var key = maybeKey.a;
+			return A2(
+				$elm$core$List$cons,
+				arrow,
+				A2(
+					$elm$core$List$cons,
+					A2(
+						$elm$html$Html$span,
+						_List_fromArray(
+							[$elm$browser$Debugger$Expando$purple]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text(key)
+							])),
+					A2(
+						$elm$core$List$cons,
+						$elm$html$Html$text(' = '),
+						description)));
+		}
+	});
+var $elm$browser$Debugger$Expando$red = A2($elm$html$Html$Attributes$style, 'color', 'rgb(196, 26, 22)');
+var $elm$core$Tuple$second = function (_v0) {
+	var y = _v0.b;
+	return y;
+};
+var $elm$browser$Debugger$Expando$seqTypeToString = F2(
+	function (n, seqType) {
+		switch (seqType.$) {
+			case 'ListSeq':
+				return 'List(' + ($elm$core$String$fromInt(n) + ')');
+			case 'SetSeq':
+				return 'Set(' + ($elm$core$String$fromInt(n) + ')');
+			default:
+				return 'Array(' + ($elm$core$String$fromInt(n) + ')');
+		}
+	});
+var $elm$core$String$slice = _String_slice;
+var $elm$core$String$left = F2(
+	function (n, string) {
+		return (n < 1) ? '' : A3($elm$core$String$slice, 0, n, string);
+	});
+var $elm$core$String$right = F2(
+	function (n, string) {
+		return (n < 1) ? '' : A3(
+			$elm$core$String$slice,
+			-n,
+			$elm$core$String$length(string),
+			string);
+	});
+var $elm$browser$Debugger$Expando$elideMiddle = function (str) {
+	return ($elm$core$String$length(str) <= 18) ? str : (A2($elm$core$String$left, 8, str) + ('...' + A2($elm$core$String$right, 8, str)));
+};
+var $elm$core$Dict$isEmpty = function (dict) {
+	if (dict.$ === 'RBEmpty_elm_builtin') {
+		return true;
+	} else {
+		return false;
+	}
+};
+var $elm$browser$Debugger$Expando$viewExtraTinyRecord = F3(
+	function (length, starter, entries) {
+		if (!entries.b) {
+			return _Utils_Tuple2(
+				length + 1,
+				_List_fromArray(
+					[
+						$elm$html$Html$text('}')
+					]));
+		} else {
+			var field = entries.a;
+			var rest = entries.b;
+			var nextLength = (length + $elm$core$String$length(field)) + 1;
+			if (nextLength > 18) {
+				return _Utils_Tuple2(
+					length + 2,
+					_List_fromArray(
+						[
+							$elm$html$Html$text('…}')
+						]));
+			} else {
+				var _v1 = A3($elm$browser$Debugger$Expando$viewExtraTinyRecord, nextLength, ',', rest);
+				var finalLength = _v1.a;
+				var otherHtmls = _v1.b;
+				return _Utils_Tuple2(
+					finalLength,
+					A2(
+						$elm$core$List$cons,
+						$elm$html$Html$text(starter),
+						A2(
+							$elm$core$List$cons,
+							A2(
+								$elm$html$Html$span,
+								_List_fromArray(
+									[$elm$browser$Debugger$Expando$purple]),
+								_List_fromArray(
+									[
+										$elm$html$Html$text(field)
+									])),
+							otherHtmls)));
+			}
+		}
+	});
+var $elm$browser$Debugger$Expando$viewTinyHelp = function (str) {
+	return _Utils_Tuple2(
+		$elm$core$String$length(str),
+		_List_fromArray(
+			[
+				$elm$html$Html$text(str)
+			]));
+};
+var $elm$core$Maybe$withDefault = F2(
+	function (_default, maybe) {
+		if (maybe.$ === 'Just') {
+			var value = maybe.a;
+			return value;
+		} else {
+			return _default;
+		}
+	});
+var $elm$browser$Debugger$Expando$viewExtraTiny = function (value) {
+	if (value.$ === 'Record') {
+		var record = value.b;
+		return A3(
+			$elm$browser$Debugger$Expando$viewExtraTinyRecord,
+			0,
+			'{',
+			$elm$core$Dict$keys(record));
+	} else {
+		return $elm$browser$Debugger$Expando$viewTiny(value);
+	}
+};
+var $elm$browser$Debugger$Expando$viewTiny = function (value) {
+	switch (value.$) {
+		case 'S':
+			var stringRep = value.a;
+			var str = $elm$browser$Debugger$Expando$elideMiddle(stringRep);
+			return _Utils_Tuple2(
+				$elm$core$String$length(str),
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$span,
+						_List_fromArray(
+							[$elm$browser$Debugger$Expando$red]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text(str)
+							]))
+					]));
+		case 'Primitive':
+			var stringRep = value.a;
+			return _Utils_Tuple2(
+				$elm$core$String$length(stringRep),
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$span,
+						_List_fromArray(
+							[$elm$browser$Debugger$Expando$blue]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text(stringRep)
+							]))
+					]));
+		case 'Sequence':
+			var seqType = value.a;
+			var valueList = value.c;
+			return $elm$browser$Debugger$Expando$viewTinyHelp(
+				A2(
+					$elm$browser$Debugger$Expando$seqTypeToString,
+					$elm$core$List$length(valueList),
+					seqType));
+		case 'Dictionary':
+			var keyValuePairs = value.b;
+			return $elm$browser$Debugger$Expando$viewTinyHelp(
+				'Dict(' + ($elm$core$String$fromInt(
+					$elm$core$List$length(keyValuePairs)) + ')'));
+		case 'Record':
+			var record = value.b;
+			return $elm$browser$Debugger$Expando$viewTinyRecord(record);
+		default:
+			if (!value.c.b) {
+				var maybeName = value.a;
+				return $elm$browser$Debugger$Expando$viewTinyHelp(
+					A2($elm$core$Maybe$withDefault, 'Unit', maybeName));
+			} else {
+				var maybeName = value.a;
+				var valueList = value.c;
+				return $elm$browser$Debugger$Expando$viewTinyHelp(
+					function () {
+						if (maybeName.$ === 'Nothing') {
+							return 'Tuple(' + ($elm$core$String$fromInt(
+								$elm$core$List$length(valueList)) + ')');
+						} else {
+							var name = maybeName.a;
+							return name + ' …';
+						}
+					}());
+			}
+	}
+};
+var $elm$browser$Debugger$Expando$viewTinyRecord = function (record) {
+	return $elm$core$Dict$isEmpty(record) ? _Utils_Tuple2(
+		2,
+		_List_fromArray(
+			[
+				$elm$html$Html$text('{}')
+			])) : A3(
+		$elm$browser$Debugger$Expando$viewTinyRecordHelp,
+		0,
+		'{ ',
+		$elm$core$Dict$toList(record));
+};
+var $elm$browser$Debugger$Expando$viewTinyRecordHelp = F3(
+	function (length, starter, entries) {
+		if (!entries.b) {
+			return _Utils_Tuple2(
+				length + 2,
+				_List_fromArray(
+					[
+						$elm$html$Html$text(' }')
+					]));
+		} else {
+			var _v1 = entries.a;
+			var field = _v1.a;
+			var value = _v1.b;
+			var rest = entries.b;
+			var fieldLen = $elm$core$String$length(field);
+			var _v2 = $elm$browser$Debugger$Expando$viewExtraTiny(value);
+			var valueLen = _v2.a;
+			var valueHtmls = _v2.b;
+			var newLength = ((length + fieldLen) + valueLen) + 5;
+			if (newLength > 60) {
+				return _Utils_Tuple2(
+					length + 4,
+					_List_fromArray(
+						[
+							$elm$html$Html$text(', … }')
+						]));
+			} else {
+				var _v3 = A3($elm$browser$Debugger$Expando$viewTinyRecordHelp, newLength, ', ', rest);
+				var finalLength = _v3.a;
+				var otherHtmls = _v3.b;
+				return _Utils_Tuple2(
+					finalLength,
+					A2(
+						$elm$core$List$cons,
+						$elm$html$Html$text(starter),
+						A2(
+							$elm$core$List$cons,
+							A2(
+								$elm$html$Html$span,
+								_List_fromArray(
+									[$elm$browser$Debugger$Expando$purple]),
+								_List_fromArray(
+									[
+										$elm$html$Html$text(field)
+									])),
+							A2(
+								$elm$core$List$cons,
+								$elm$html$Html$text(' = '),
+								A2(
+									$elm$core$List$cons,
+									A2($elm$html$Html$span, _List_Nil, valueHtmls),
+									otherHtmls)))));
+			}
+		}
+	});
+var $elm$browser$Debugger$Expando$view = F2(
+	function (maybeKey, expando) {
+		switch (expando.$) {
+			case 'S':
+				var stringRep = expando.a;
+				return A2(
+					$elm$html$Html$div,
+					$elm$browser$Debugger$Expando$leftPad(maybeKey),
+					A3(
+						$elm$browser$Debugger$Expando$lineStarter,
+						maybeKey,
+						$elm$core$Maybe$Nothing,
+						_List_fromArray(
+							[
+								A2(
+								$elm$html$Html$span,
+								_List_fromArray(
+									[$elm$browser$Debugger$Expando$red]),
+								_List_fromArray(
+									[
+										$elm$html$Html$text(stringRep)
+									]))
+							])));
+			case 'Primitive':
+				var stringRep = expando.a;
+				return A2(
+					$elm$html$Html$div,
+					$elm$browser$Debugger$Expando$leftPad(maybeKey),
+					A3(
+						$elm$browser$Debugger$Expando$lineStarter,
+						maybeKey,
+						$elm$core$Maybe$Nothing,
+						_List_fromArray(
+							[
+								A2(
+								$elm$html$Html$span,
+								_List_fromArray(
+									[$elm$browser$Debugger$Expando$blue]),
+								_List_fromArray(
+									[
+										$elm$html$Html$text(stringRep)
+									]))
+							])));
+			case 'Sequence':
+				var seqType = expando.a;
+				var isClosed = expando.b;
+				var valueList = expando.c;
+				return A4($elm$browser$Debugger$Expando$viewSequence, maybeKey, seqType, isClosed, valueList);
+			case 'Dictionary':
+				var isClosed = expando.a;
+				var keyValuePairs = expando.b;
+				return A3($elm$browser$Debugger$Expando$viewDictionary, maybeKey, isClosed, keyValuePairs);
+			case 'Record':
+				var isClosed = expando.a;
+				var valueDict = expando.b;
+				return A3($elm$browser$Debugger$Expando$viewRecord, maybeKey, isClosed, valueDict);
+			default:
+				var maybeName = expando.a;
+				var isClosed = expando.b;
+				var valueList = expando.c;
+				return A4($elm$browser$Debugger$Expando$viewConstructor, maybeKey, maybeName, isClosed, valueList);
+		}
+	});
+var $elm$browser$Debugger$Expando$viewConstructor = F4(
+	function (maybeKey, maybeName, isClosed, valueList) {
+		var tinyArgs = A2(
+			$elm$core$List$map,
+			A2($elm$core$Basics$composeL, $elm$core$Tuple$second, $elm$browser$Debugger$Expando$viewExtraTiny),
+			valueList);
+		var description = function () {
+			var _v7 = _Utils_Tuple2(maybeName, tinyArgs);
+			if (_v7.a.$ === 'Nothing') {
+				if (!_v7.b.b) {
+					var _v8 = _v7.a;
+					return _List_fromArray(
+						[
+							$elm$html$Html$text('()')
+						]);
+				} else {
+					var _v9 = _v7.a;
+					var _v10 = _v7.b;
+					var x = _v10.a;
+					var xs = _v10.b;
+					return A2(
+						$elm$core$List$cons,
+						$elm$html$Html$text('( '),
+						A2(
+							$elm$core$List$cons,
+							A2($elm$html$Html$span, _List_Nil, x),
+							A3(
+								$elm$core$List$foldr,
+								F2(
+									function (args, rest) {
+										return A2(
+											$elm$core$List$cons,
+											$elm$html$Html$text(', '),
+											A2(
+												$elm$core$List$cons,
+												A2($elm$html$Html$span, _List_Nil, args),
+												rest));
+									}),
+								_List_fromArray(
+									[
+										$elm$html$Html$text(' )')
+									]),
+								xs)));
+				}
+			} else {
+				if (!_v7.b.b) {
+					var name = _v7.a.a;
+					return _List_fromArray(
+						[
+							$elm$html$Html$text(name)
+						]);
+				} else {
+					var name = _v7.a.a;
+					var _v11 = _v7.b;
+					var x = _v11.a;
+					var xs = _v11.b;
+					return A2(
+						$elm$core$List$cons,
+						$elm$html$Html$text(name + ' '),
+						A2(
+							$elm$core$List$cons,
+							A2($elm$html$Html$span, _List_Nil, x),
+							A3(
+								$elm$core$List$foldr,
+								F2(
+									function (args, rest) {
+										return A2(
+											$elm$core$List$cons,
+											$elm$html$Html$text(' '),
+											A2(
+												$elm$core$List$cons,
+												A2($elm$html$Html$span, _List_Nil, args),
+												rest));
+									}),
+								_List_Nil,
+								xs)));
+				}
+			}
+		}();
+		var _v4 = function () {
+			if (!valueList.b) {
+				return _Utils_Tuple2(
+					$elm$core$Maybe$Nothing,
+					A2($elm$html$Html$div, _List_Nil, _List_Nil));
+			} else {
+				if (!valueList.b.b) {
+					var entry = valueList.a;
+					switch (entry.$) {
+						case 'S':
+							return _Utils_Tuple2(
+								$elm$core$Maybe$Nothing,
+								A2($elm$html$Html$div, _List_Nil, _List_Nil));
+						case 'Primitive':
+							return _Utils_Tuple2(
+								$elm$core$Maybe$Nothing,
+								A2($elm$html$Html$div, _List_Nil, _List_Nil));
+						case 'Sequence':
+							var subValueList = entry.c;
+							return _Utils_Tuple2(
+								$elm$core$Maybe$Just(isClosed),
+								isClosed ? A2($elm$html$Html$div, _List_Nil, _List_Nil) : A2(
+									$elm$html$Html$map,
+									A2($elm$browser$Debugger$Expando$Index, $elm$browser$Debugger$Expando$None, 0),
+									$elm$browser$Debugger$Expando$viewSequenceOpen(subValueList)));
+						case 'Dictionary':
+							var keyValuePairs = entry.b;
+							return _Utils_Tuple2(
+								$elm$core$Maybe$Just(isClosed),
+								isClosed ? A2($elm$html$Html$div, _List_Nil, _List_Nil) : A2(
+									$elm$html$Html$map,
+									A2($elm$browser$Debugger$Expando$Index, $elm$browser$Debugger$Expando$None, 0),
+									$elm$browser$Debugger$Expando$viewDictionaryOpen(keyValuePairs)));
+						case 'Record':
+							var record = entry.b;
+							return _Utils_Tuple2(
+								$elm$core$Maybe$Just(isClosed),
+								isClosed ? A2($elm$html$Html$div, _List_Nil, _List_Nil) : A2(
+									$elm$html$Html$map,
+									A2($elm$browser$Debugger$Expando$Index, $elm$browser$Debugger$Expando$None, 0),
+									$elm$browser$Debugger$Expando$viewRecordOpen(record)));
+						default:
+							var subValueList = entry.c;
+							return _Utils_Tuple2(
+								$elm$core$Maybe$Just(isClosed),
+								isClosed ? A2($elm$html$Html$div, _List_Nil, _List_Nil) : A2(
+									$elm$html$Html$map,
+									A2($elm$browser$Debugger$Expando$Index, $elm$browser$Debugger$Expando$None, 0),
+									$elm$browser$Debugger$Expando$viewConstructorOpen(subValueList)));
+					}
+				} else {
+					return _Utils_Tuple2(
+						$elm$core$Maybe$Just(isClosed),
+						isClosed ? A2($elm$html$Html$div, _List_Nil, _List_Nil) : $elm$browser$Debugger$Expando$viewConstructorOpen(valueList));
+				}
+			}
+		}();
+		var maybeIsClosed = _v4.a;
+		var openHtml = _v4.b;
+		return A2(
+			$elm$html$Html$div,
+			$elm$browser$Debugger$Expando$leftPad(maybeKey),
+			_List_fromArray(
+				[
+					A2(
+					$elm$html$Html$div,
+					_List_fromArray(
+						[
+							$elm$html$Html$Events$onClick($elm$browser$Debugger$Expando$Toggle)
+						]),
+					A3($elm$browser$Debugger$Expando$lineStarter, maybeKey, maybeIsClosed, description)),
+					openHtml
+				]));
+	});
+var $elm$browser$Debugger$Expando$viewConstructorEntry = F2(
+	function (index, value) {
+		return A2(
+			$elm$html$Html$map,
+			A2($elm$browser$Debugger$Expando$Index, $elm$browser$Debugger$Expando$None, index),
+			A2(
+				$elm$browser$Debugger$Expando$view,
+				$elm$core$Maybe$Just(
+					$elm$core$String$fromInt(index)),
+				value));
+	});
+var $elm$browser$Debugger$Expando$viewConstructorOpen = function (valueList) {
+	return A2(
+		$elm$html$Html$div,
+		_List_Nil,
+		A2($elm$core$List$indexedMap, $elm$browser$Debugger$Expando$viewConstructorEntry, valueList));
+};
+var $elm$browser$Debugger$Expando$viewDictionary = F3(
+	function (maybeKey, isClosed, keyValuePairs) {
+		var starter = 'Dict(' + ($elm$core$String$fromInt(
+			$elm$core$List$length(keyValuePairs)) + ')');
+		return A2(
+			$elm$html$Html$div,
+			$elm$browser$Debugger$Expando$leftPad(maybeKey),
+			_List_fromArray(
+				[
+					A2(
+					$elm$html$Html$div,
+					_List_fromArray(
+						[
+							$elm$html$Html$Events$onClick($elm$browser$Debugger$Expando$Toggle)
+						]),
+					A3(
+						$elm$browser$Debugger$Expando$lineStarter,
+						maybeKey,
+						$elm$core$Maybe$Just(isClosed),
+						_List_fromArray(
+							[
+								$elm$html$Html$text(starter)
+							]))),
+					isClosed ? $elm$html$Html$text('') : $elm$browser$Debugger$Expando$viewDictionaryOpen(keyValuePairs)
+				]));
+	});
+var $elm$browser$Debugger$Expando$viewDictionaryEntry = F2(
+	function (index, _v2) {
+		var key = _v2.a;
+		var value = _v2.b;
+		switch (key.$) {
+			case 'S':
+				var stringRep = key.a;
+				return A2(
+					$elm$html$Html$map,
+					A2($elm$browser$Debugger$Expando$Index, $elm$browser$Debugger$Expando$Value, index),
+					A2(
+						$elm$browser$Debugger$Expando$view,
+						$elm$core$Maybe$Just(stringRep),
+						value));
+			case 'Primitive':
+				var stringRep = key.a;
+				return A2(
+					$elm$html$Html$map,
+					A2($elm$browser$Debugger$Expando$Index, $elm$browser$Debugger$Expando$Value, index),
+					A2(
+						$elm$browser$Debugger$Expando$view,
+						$elm$core$Maybe$Just(stringRep),
+						value));
+			default:
+				return A2(
+					$elm$html$Html$div,
+					_List_Nil,
+					_List_fromArray(
+						[
+							A2(
+							$elm$html$Html$map,
+							A2($elm$browser$Debugger$Expando$Index, $elm$browser$Debugger$Expando$Key, index),
+							A2(
+								$elm$browser$Debugger$Expando$view,
+								$elm$core$Maybe$Just('key'),
+								key)),
+							A2(
+							$elm$html$Html$map,
+							A2($elm$browser$Debugger$Expando$Index, $elm$browser$Debugger$Expando$Value, index),
+							A2(
+								$elm$browser$Debugger$Expando$view,
+								$elm$core$Maybe$Just('value'),
+								value))
+						]));
+		}
+	});
+var $elm$browser$Debugger$Expando$viewDictionaryOpen = function (keyValuePairs) {
+	return A2(
+		$elm$html$Html$div,
+		_List_Nil,
+		A2($elm$core$List$indexedMap, $elm$browser$Debugger$Expando$viewDictionaryEntry, keyValuePairs));
+};
+var $elm$browser$Debugger$Expando$viewRecord = F3(
+	function (maybeKey, isClosed, record) {
+		var _v1 = isClosed ? _Utils_Tuple3(
+			$elm$browser$Debugger$Expando$viewTinyRecord(record).b,
+			$elm$html$Html$text(''),
+			$elm$html$Html$text('')) : _Utils_Tuple3(
+			_List_fromArray(
+				[
+					$elm$html$Html$text('{')
+				]),
+			$elm$browser$Debugger$Expando$viewRecordOpen(record),
+			A2(
+				$elm$html$Html$div,
+				$elm$browser$Debugger$Expando$leftPad(
+					$elm$core$Maybe$Just(_Utils_Tuple0)),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('}')
+					])));
+		var start = _v1.a;
+		var middle = _v1.b;
+		var end = _v1.c;
+		return A2(
+			$elm$html$Html$div,
+			$elm$browser$Debugger$Expando$leftPad(maybeKey),
+			_List_fromArray(
+				[
+					A2(
+					$elm$html$Html$div,
+					_List_fromArray(
+						[
+							$elm$html$Html$Events$onClick($elm$browser$Debugger$Expando$Toggle)
+						]),
+					A3(
+						$elm$browser$Debugger$Expando$lineStarter,
+						maybeKey,
+						$elm$core$Maybe$Just(isClosed),
+						start)),
+					middle,
+					end
+				]));
+	});
+var $elm$browser$Debugger$Expando$viewRecordEntry = function (_v0) {
+	var field = _v0.a;
+	var value = _v0.b;
+	return A2(
+		$elm$html$Html$map,
+		$elm$browser$Debugger$Expando$Field(field),
+		A2(
+			$elm$browser$Debugger$Expando$view,
+			$elm$core$Maybe$Just(field),
+			value));
+};
+var $elm$browser$Debugger$Expando$viewRecordOpen = function (record) {
+	return A2(
+		$elm$html$Html$div,
+		_List_Nil,
+		A2(
+			$elm$core$List$map,
+			$elm$browser$Debugger$Expando$viewRecordEntry,
+			$elm$core$Dict$toList(record)));
+};
+var $elm$browser$Debugger$Expando$viewSequence = F4(
+	function (maybeKey, seqType, isClosed, valueList) {
+		var starter = A2(
+			$elm$browser$Debugger$Expando$seqTypeToString,
+			$elm$core$List$length(valueList),
+			seqType);
+		return A2(
+			$elm$html$Html$div,
+			$elm$browser$Debugger$Expando$leftPad(maybeKey),
+			_List_fromArray(
+				[
+					A2(
+					$elm$html$Html$div,
+					_List_fromArray(
+						[
+							$elm$html$Html$Events$onClick($elm$browser$Debugger$Expando$Toggle)
+						]),
+					A3(
+						$elm$browser$Debugger$Expando$lineStarter,
+						maybeKey,
+						$elm$core$Maybe$Just(isClosed),
+						_List_fromArray(
+							[
+								$elm$html$Html$text(starter)
+							]))),
+					isClosed ? $elm$html$Html$text('') : $elm$browser$Debugger$Expando$viewSequenceOpen(valueList)
+				]));
+	});
+var $elm$browser$Debugger$Expando$viewSequenceOpen = function (values) {
+	return A2(
+		$elm$html$Html$div,
+		_List_Nil,
+		A2($elm$core$List$indexedMap, $elm$browser$Debugger$Expando$viewConstructorEntry, values));
+};
+var $elm$browser$Debugger$Main$viewExpando = F3(
+	function (expandoMsg, expandoModel, layout) {
+		var block = $elm$browser$Debugger$Main$toMouseBlocker(layout);
+		var _v0 = $elm$browser$Debugger$Main$toExpandoPercents(layout);
+		var w = _v0.a;
+		var h = _v0.b;
+		return A2(
+			$elm$html$Html$div,
+			_List_fromArray(
+				[
+					A2($elm$html$Html$Attributes$style, 'display', 'block'),
+					A2($elm$html$Html$Attributes$style, 'width', 'calc(' + (w + ' - 4em)')),
+					A2($elm$html$Html$Attributes$style, 'height', 'calc(' + (h + ' - 4em)')),
+					A2($elm$html$Html$Attributes$style, 'padding', '2em'),
+					A2($elm$html$Html$Attributes$style, 'margin', '0'),
+					A2($elm$html$Html$Attributes$style, 'overflow', 'auto'),
+					A2($elm$html$Html$Attributes$style, 'pointer-events', block),
+					A2($elm$html$Html$Attributes$style, '-webkit-user-select', block),
+					A2($elm$html$Html$Attributes$style, '-moz-user-select', block),
+					A2($elm$html$Html$Attributes$style, '-ms-user-select', block),
+					A2($elm$html$Html$Attributes$style, 'user-select', block)
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$elm$html$Html$div,
+					_List_fromArray(
+						[
+							A2($elm$html$Html$Attributes$style, 'color', '#ccc'),
+							A2($elm$html$Html$Attributes$style, 'padding', '0 0 1em 0')
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text('-- MESSAGE')
+						])),
+					A2(
+					$elm$html$Html$map,
+					$elm$browser$Debugger$Main$TweakExpandoMsg,
+					A2($elm$browser$Debugger$Expando$view, $elm$core$Maybe$Nothing, expandoMsg)),
+					A2(
+					$elm$html$Html$div,
+					_List_fromArray(
+						[
+							A2($elm$html$Html$Attributes$style, 'color', '#ccc'),
+							A2($elm$html$Html$Attributes$style, 'padding', '1em 0')
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text('-- MODEL')
+						])),
+					A2(
+					$elm$html$Html$map,
+					$elm$browser$Debugger$Main$TweakExpandoModel,
+					A2($elm$browser$Debugger$Expando$view, $elm$core$Maybe$Nothing, expandoModel))
+				]));
+	});
+var $elm$browser$Debugger$Main$Jump = function (a) {
+	return {$: 'Jump', a: a};
+};
+var $elm$virtual_dom$VirtualDom$lazy = _VirtualDom_lazy;
+var $elm$html$Html$Lazy$lazy = $elm$virtual_dom$VirtualDom$lazy;
+var $elm$browser$Debugger$Main$toHistoryPercents = function (layout) {
+	if (layout.$ === 'Horizontal') {
+		var x = layout.b;
+		return _Utils_Tuple2(
+			$elm$browser$Debugger$Main$toPercent(x),
+			'100%');
+	} else {
+		var y = layout.c;
+		return _Utils_Tuple2(
+			'100%',
+			$elm$browser$Debugger$Main$toPercent(1 - y));
+	}
+};
+var $elm$virtual_dom$VirtualDom$lazy3 = _VirtualDom_lazy3;
+var $elm$html$Html$Lazy$lazy3 = $elm$virtual_dom$VirtualDom$lazy3;
+var $elm$html$Html$Attributes$class = $elm$html$Html$Attributes$stringProperty('className');
+var $elm$browser$Debugger$History$idForMessageIndex = function (index) {
+	return 'msg-' + $elm$core$String$fromInt(index);
+};
+var $elm$html$Html$Attributes$title = $elm$html$Html$Attributes$stringProperty('title');
+var $elm$browser$Debugger$History$viewMessage = F3(
+	function (currentIndex, index, msg) {
+		var messageName = _Debugger_messageToString(msg);
+		var className = _Utils_eq(currentIndex, index) ? 'elm-debugger-entry elm-debugger-entry-selected' : 'elm-debugger-entry';
+		return A2(
+			$elm$html$Html$div,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$id(
+					$elm$browser$Debugger$History$idForMessageIndex(index)),
+					$elm$html$Html$Attributes$class(className),
+					$elm$html$Html$Events$onClick(index)
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$elm$html$Html$span,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$title(messageName),
+							$elm$html$Html$Attributes$class('elm-debugger-entry-content')
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text(messageName)
+						])),
+					A2(
+					$elm$html$Html$span,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('elm-debugger-entry-index')
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text(
+							$elm$core$String$fromInt(index))
+						]))
+				]));
+	});
+var $elm$browser$Debugger$History$consMsg = F3(
+	function (currentIndex, msg, _v0) {
+		var index = _v0.a;
+		var rest = _v0.b;
+		return _Utils_Tuple2(
+			index + 1,
+			A2(
+				$elm$core$List$cons,
+				_Utils_Tuple2(
+					$elm$core$String$fromInt(index),
+					A4($elm$html$Html$Lazy$lazy3, $elm$browser$Debugger$History$viewMessage, currentIndex, index, msg)),
+				rest));
+	});
+var $elm$core$Array$length = function (_v0) {
+	var len = _v0.a;
+	return len;
+};
+var $elm$core$Basics$neq = _Utils_notEqual;
+var $elm$virtual_dom$VirtualDom$keyedNode = function (tag) {
+	return _VirtualDom_keyedNode(
+		_VirtualDom_noScript(tag));
+};
+var $elm$html$Html$Keyed$node = $elm$virtual_dom$VirtualDom$keyedNode;
+var $elm$browser$Debugger$History$maxSnapshotSize = 31;
+var $elm$browser$Debugger$History$showMoreButton = function (numMessages) {
+	var nextIndex = (numMessages - 1) - ($elm$browser$Debugger$History$maxSnapshotSize * 2);
+	var labelText = 'View more messages';
+	return A2(
+		$elm$html$Html$div,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('elm-debugger-entry'),
+				$elm$html$Html$Events$onClick(nextIndex)
+			]),
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$span,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$title(labelText),
+						$elm$html$Html$Attributes$class('elm-debugger-entry-content')
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text(labelText)
+					])),
+				A2(
+				$elm$html$Html$span,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('elm-debugger-entry-index')
+					]),
+				_List_Nil)
+			]));
+};
+var $elm$browser$Debugger$History$styles = A3(
+	$elm$html$Html$node,
+	'style',
+	_List_Nil,
+	_List_fromArray(
+		[
+			$elm$html$Html$text('\n\n.elm-debugger-entry {\n  cursor: pointer;\n  width: 100%;\n  box-sizing: border-box;\n  padding: 8px;\n}\n\n.elm-debugger-entry:hover {\n  background-color: rgb(41, 41, 41);\n}\n\n.elm-debugger-entry-selected, .elm-debugger-entry-selected:hover {\n  background-color: rgb(10, 10, 10);\n}\n\n.elm-debugger-entry-content {\n  width: calc(100% - 40px);\n  padding: 0 5px;\n  box-sizing: border-box;\n  text-overflow: ellipsis;\n  white-space: nowrap;\n  overflow: hidden;\n  display: inline-block;\n}\n\n.elm-debugger-entry-index {\n  color: #666;\n  width: 40px;\n  text-align: right;\n  display: block;\n  float: right;\n}\n\n')
+		]));
+var $elm$core$Basics$ge = _Utils_ge;
+var $elm$browser$Debugger$History$viewSnapshot = F3(
+	function (selectedIndex, index, _v0) {
+		var messages = _v0.messages;
+		return A3(
+			$elm$html$Html$Keyed$node,
+			'div',
+			_List_Nil,
+			A3(
+				$elm$core$Array$foldr,
+				$elm$browser$Debugger$History$consMsg(selectedIndex),
+				_Utils_Tuple2(index, _List_Nil),
+				messages).b);
+	});
+var $elm$browser$Debugger$History$consSnapshot = F3(
+	function (selectedIndex, snapshot, _v0) {
+		var index = _v0.a;
+		var rest = _v0.b;
+		var nextIndex = index + $elm$core$Array$length(snapshot.messages);
+		var selectedIndexHelp = ((_Utils_cmp(nextIndex, selectedIndex) > 0) && (_Utils_cmp(selectedIndex, index) > -1)) ? selectedIndex : (-1);
+		return _Utils_Tuple2(
+			nextIndex,
+			A2(
+				$elm$core$List$cons,
+				A4($elm$html$Html$Lazy$lazy3, $elm$browser$Debugger$History$viewSnapshot, selectedIndexHelp, index, snapshot),
+				rest));
+	});
+var $elm$core$Elm$JsArray$foldl = _JsArray_foldl;
+var $elm$core$Array$foldl = F3(
+	function (func, baseCase, _v0) {
+		var tree = _v0.c;
+		var tail = _v0.d;
+		var helper = F2(
+			function (node, acc) {
+				if (node.$ === 'SubTree') {
+					var subTree = node.a;
+					return A3($elm$core$Elm$JsArray$foldl, helper, acc, subTree);
+				} else {
+					var values = node.a;
+					return A3($elm$core$Elm$JsArray$foldl, func, acc, values);
+				}
+			});
+		return A3(
+			$elm$core$Elm$JsArray$foldl,
+			func,
+			A3($elm$core$Elm$JsArray$foldl, helper, baseCase, tree),
+			tail);
+	});
+var $elm$browser$Debugger$History$viewAllSnapshots = F3(
+	function (selectedIndex, startIndex, snapshots) {
+		return A2(
+			$elm$html$Html$div,
+			_List_Nil,
+			A3(
+				$elm$core$Array$foldl,
+				$elm$browser$Debugger$History$consSnapshot(selectedIndex),
+				_Utils_Tuple2(startIndex, _List_Nil),
+				snapshots).b);
+	});
+var $elm$core$Array$fromListHelp = F3(
+	function (list, nodeList, nodeListSize) {
+		fromListHelp:
+		while (true) {
+			var _v0 = A2($elm$core$Elm$JsArray$initializeFromList, $elm$core$Array$branchFactor, list);
+			var jsArray = _v0.a;
+			var remainingItems = _v0.b;
+			if (_Utils_cmp(
+				$elm$core$Elm$JsArray$length(jsArray),
+				$elm$core$Array$branchFactor) < 0) {
+				return A2(
+					$elm$core$Array$builderToArray,
+					true,
+					{nodeList: nodeList, nodeListSize: nodeListSize, tail: jsArray});
+			} else {
+				var $temp$list = remainingItems,
+					$temp$nodeList = A2(
+					$elm$core$List$cons,
+					$elm$core$Array$Leaf(jsArray),
+					nodeList),
+					$temp$nodeListSize = nodeListSize + 1;
+				list = $temp$list;
+				nodeList = $temp$nodeList;
+				nodeListSize = $temp$nodeListSize;
+				continue fromListHelp;
+			}
+		}
+	});
+var $elm$core$Array$fromList = function (list) {
+	if (!list.b) {
+		return $elm$core$Array$empty;
+	} else {
+		return A3($elm$core$Array$fromListHelp, list, _List_Nil, 0);
+	}
+};
+var $elm$core$Bitwise$and = _Bitwise_and;
+var $elm$core$Bitwise$shiftRightZfBy = _Bitwise_shiftRightZfBy;
+var $elm$core$Array$bitMask = 4294967295 >>> (32 - $elm$core$Array$shiftStep);
+var $elm$core$Elm$JsArray$unsafeGet = _JsArray_unsafeGet;
+var $elm$core$Array$getHelp = F3(
+	function (shift, index, tree) {
+		getHelp:
+		while (true) {
+			var pos = $elm$core$Array$bitMask & (index >>> shift);
+			var _v0 = A2($elm$core$Elm$JsArray$unsafeGet, pos, tree);
+			if (_v0.$ === 'SubTree') {
+				var subTree = _v0.a;
+				var $temp$shift = shift - $elm$core$Array$shiftStep,
+					$temp$index = index,
+					$temp$tree = subTree;
+				shift = $temp$shift;
+				index = $temp$index;
+				tree = $temp$tree;
+				continue getHelp;
+			} else {
+				var values = _v0.a;
+				return A2($elm$core$Elm$JsArray$unsafeGet, $elm$core$Array$bitMask & index, values);
+			}
+		}
+	});
+var $elm$core$Bitwise$shiftLeftBy = _Bitwise_shiftLeftBy;
+var $elm$core$Array$tailIndex = function (len) {
+	return (len >>> 5) << 5;
+};
+var $elm$core$Array$get = F2(
+	function (index, _v0) {
+		var len = _v0.a;
+		var startShift = _v0.b;
+		var tree = _v0.c;
+		var tail = _v0.d;
+		return ((index < 0) || (_Utils_cmp(index, len) > -1)) ? $elm$core$Maybe$Nothing : ((_Utils_cmp(
+			index,
+			$elm$core$Array$tailIndex(len)) > -1) ? $elm$core$Maybe$Just(
+			A2($elm$core$Elm$JsArray$unsafeGet, $elm$core$Array$bitMask & index, tail)) : $elm$core$Maybe$Just(
+			A3($elm$core$Array$getHelp, startShift, index, tree)));
+	});
+var $elm$core$Elm$JsArray$appendN = _JsArray_appendN;
+var $elm$core$Elm$JsArray$slice = _JsArray_slice;
+var $elm$core$Array$appendHelpBuilder = F2(
+	function (tail, builder) {
+		var tailLen = $elm$core$Elm$JsArray$length(tail);
+		var notAppended = ($elm$core$Array$branchFactor - $elm$core$Elm$JsArray$length(builder.tail)) - tailLen;
+		var appended = A3($elm$core$Elm$JsArray$appendN, $elm$core$Array$branchFactor, builder.tail, tail);
+		return (notAppended < 0) ? {
+			nodeList: A2(
+				$elm$core$List$cons,
+				$elm$core$Array$Leaf(appended),
+				builder.nodeList),
+			nodeListSize: builder.nodeListSize + 1,
+			tail: A3($elm$core$Elm$JsArray$slice, notAppended, tailLen, tail)
+		} : ((!notAppended) ? {
+			nodeList: A2(
+				$elm$core$List$cons,
+				$elm$core$Array$Leaf(appended),
+				builder.nodeList),
+			nodeListSize: builder.nodeListSize + 1,
+			tail: $elm$core$Elm$JsArray$empty
+		} : {nodeList: builder.nodeList, nodeListSize: builder.nodeListSize, tail: appended});
+	});
+var $elm$core$List$drop = F2(
+	function (n, list) {
+		drop:
+		while (true) {
+			if (n <= 0) {
+				return list;
+			} else {
+				if (!list.b) {
+					return list;
+				} else {
+					var x = list.a;
+					var xs = list.b;
+					var $temp$n = n - 1,
+						$temp$list = xs;
+					n = $temp$n;
+					list = $temp$list;
+					continue drop;
+				}
+			}
+		}
+	});
+var $elm$core$Array$sliceLeft = F2(
+	function (from, array) {
+		var len = array.a;
+		var tree = array.c;
+		var tail = array.d;
+		if (!from) {
+			return array;
+		} else {
+			if (_Utils_cmp(
+				from,
+				$elm$core$Array$tailIndex(len)) > -1) {
+				return A4(
+					$elm$core$Array$Array_elm_builtin,
+					len - from,
+					$elm$core$Array$shiftStep,
+					$elm$core$Elm$JsArray$empty,
+					A3(
+						$elm$core$Elm$JsArray$slice,
+						from - $elm$core$Array$tailIndex(len),
+						$elm$core$Elm$JsArray$length(tail),
+						tail));
+			} else {
+				var skipNodes = (from / $elm$core$Array$branchFactor) | 0;
+				var helper = F2(
+					function (node, acc) {
+						if (node.$ === 'SubTree') {
+							var subTree = node.a;
+							return A3($elm$core$Elm$JsArray$foldr, helper, acc, subTree);
+						} else {
+							var leaf = node.a;
+							return A2($elm$core$List$cons, leaf, acc);
+						}
+					});
+				var leafNodes = A3(
+					$elm$core$Elm$JsArray$foldr,
+					helper,
+					_List_fromArray(
+						[tail]),
+					tree);
+				var nodesToInsert = A2($elm$core$List$drop, skipNodes, leafNodes);
+				if (!nodesToInsert.b) {
+					return $elm$core$Array$empty;
+				} else {
+					var head = nodesToInsert.a;
+					var rest = nodesToInsert.b;
+					var firstSlice = from - (skipNodes * $elm$core$Array$branchFactor);
+					var initialBuilder = {
+						nodeList: _List_Nil,
+						nodeListSize: 0,
+						tail: A3(
+							$elm$core$Elm$JsArray$slice,
+							firstSlice,
+							$elm$core$Elm$JsArray$length(head),
+							head)
+					};
+					return A2(
+						$elm$core$Array$builderToArray,
+						true,
+						A3($elm$core$List$foldl, $elm$core$Array$appendHelpBuilder, initialBuilder, rest));
+				}
+			}
+		}
+	});
+var $elm$core$Array$fetchNewTail = F4(
+	function (shift, end, treeEnd, tree) {
+		fetchNewTail:
+		while (true) {
+			var pos = $elm$core$Array$bitMask & (treeEnd >>> shift);
+			var _v0 = A2($elm$core$Elm$JsArray$unsafeGet, pos, tree);
+			if (_v0.$ === 'SubTree') {
+				var sub = _v0.a;
+				var $temp$shift = shift - $elm$core$Array$shiftStep,
+					$temp$end = end,
+					$temp$treeEnd = treeEnd,
+					$temp$tree = sub;
+				shift = $temp$shift;
+				end = $temp$end;
+				treeEnd = $temp$treeEnd;
+				tree = $temp$tree;
+				continue fetchNewTail;
+			} else {
+				var values = _v0.a;
+				return A3($elm$core$Elm$JsArray$slice, 0, $elm$core$Array$bitMask & end, values);
+			}
+		}
+	});
+var $elm$core$Array$hoistTree = F3(
+	function (oldShift, newShift, tree) {
+		hoistTree:
+		while (true) {
+			if ((_Utils_cmp(oldShift, newShift) < 1) || (!$elm$core$Elm$JsArray$length(tree))) {
+				return tree;
+			} else {
+				var _v0 = A2($elm$core$Elm$JsArray$unsafeGet, 0, tree);
+				if (_v0.$ === 'SubTree') {
+					var sub = _v0.a;
+					var $temp$oldShift = oldShift - $elm$core$Array$shiftStep,
+						$temp$newShift = newShift,
+						$temp$tree = sub;
+					oldShift = $temp$oldShift;
+					newShift = $temp$newShift;
+					tree = $temp$tree;
+					continue hoistTree;
+				} else {
+					return tree;
+				}
+			}
+		}
+	});
+var $elm$core$Elm$JsArray$unsafeSet = _JsArray_unsafeSet;
+var $elm$core$Array$sliceTree = F3(
+	function (shift, endIdx, tree) {
+		var lastPos = $elm$core$Array$bitMask & (endIdx >>> shift);
+		var _v0 = A2($elm$core$Elm$JsArray$unsafeGet, lastPos, tree);
+		if (_v0.$ === 'SubTree') {
+			var sub = _v0.a;
+			var newSub = A3($elm$core$Array$sliceTree, shift - $elm$core$Array$shiftStep, endIdx, sub);
+			return (!$elm$core$Elm$JsArray$length(newSub)) ? A3($elm$core$Elm$JsArray$slice, 0, lastPos, tree) : A3(
+				$elm$core$Elm$JsArray$unsafeSet,
+				lastPos,
+				$elm$core$Array$SubTree(newSub),
+				A3($elm$core$Elm$JsArray$slice, 0, lastPos + 1, tree));
+		} else {
+			return A3($elm$core$Elm$JsArray$slice, 0, lastPos, tree);
+		}
+	});
+var $elm$core$Array$sliceRight = F2(
+	function (end, array) {
+		var len = array.a;
+		var startShift = array.b;
+		var tree = array.c;
+		var tail = array.d;
+		if (_Utils_eq(end, len)) {
+			return array;
+		} else {
+			if (_Utils_cmp(
+				end,
+				$elm$core$Array$tailIndex(len)) > -1) {
+				return A4(
+					$elm$core$Array$Array_elm_builtin,
+					end,
+					startShift,
+					tree,
+					A3($elm$core$Elm$JsArray$slice, 0, $elm$core$Array$bitMask & end, tail));
+			} else {
+				var endIdx = $elm$core$Array$tailIndex(end);
+				var depth = $elm$core$Basics$floor(
+					A2(
+						$elm$core$Basics$logBase,
+						$elm$core$Array$branchFactor,
+						A2($elm$core$Basics$max, 1, endIdx - 1)));
+				var newShift = A2($elm$core$Basics$max, 5, depth * $elm$core$Array$shiftStep);
+				return A4(
+					$elm$core$Array$Array_elm_builtin,
+					end,
+					newShift,
+					A3(
+						$elm$core$Array$hoistTree,
+						startShift,
+						newShift,
+						A3($elm$core$Array$sliceTree, startShift, endIdx, tree)),
+					A4($elm$core$Array$fetchNewTail, startShift, end, endIdx, tree));
+			}
+		}
+	});
+var $elm$core$Array$translateIndex = F2(
+	function (index, _v0) {
+		var len = _v0.a;
+		var posIndex = (index < 0) ? (len + index) : index;
+		return (posIndex < 0) ? 0 : ((_Utils_cmp(posIndex, len) > 0) ? len : posIndex);
+	});
+var $elm$core$Array$slice = F3(
+	function (from, to, array) {
+		var correctTo = A2($elm$core$Array$translateIndex, to, array);
+		var correctFrom = A2($elm$core$Array$translateIndex, from, array);
+		return (_Utils_cmp(correctFrom, correctTo) > 0) ? $elm$core$Array$empty : A2(
+			$elm$core$Array$sliceLeft,
+			correctFrom,
+			A2($elm$core$Array$sliceRight, correctTo, array));
+	});
+var $elm$browser$Debugger$History$viewRecentSnapshots = F3(
+	function (selectedIndex, recentMessagesNum, snapshots) {
+		var messagesToFill = $elm$browser$Debugger$History$maxSnapshotSize - recentMessagesNum;
+		var arrayLength = $elm$core$Array$length(snapshots);
+		var snapshotsToRender = function () {
+			var _v0 = _Utils_Tuple2(
+				A2($elm$core$Array$get, arrayLength - 2, snapshots),
+				A2($elm$core$Array$get, arrayLength - 1, snapshots));
+			if ((_v0.a.$ === 'Just') && (_v0.b.$ === 'Just')) {
+				var fillerSnapshot = _v0.a.a;
+				var recentSnapshot = _v0.b.a;
+				return $elm$core$Array$fromList(
+					_List_fromArray(
+						[
+							{
+							messages: A3($elm$core$Array$slice, 0, messagesToFill, fillerSnapshot.messages),
+							model: fillerSnapshot.model
+						},
+							recentSnapshot
+						]));
+			} else {
+				return snapshots;
+			}
+		}();
+		var startingIndex = ((arrayLength * $elm$browser$Debugger$History$maxSnapshotSize) - $elm$browser$Debugger$History$maxSnapshotSize) - messagesToFill;
+		return A3($elm$browser$Debugger$History$viewAllSnapshots, selectedIndex, startingIndex, snapshotsToRender);
+	});
+var $elm$browser$Debugger$History$view = F2(
+	function (maybeIndex, _v0) {
+		var snapshots = _v0.snapshots;
+		var recent = _v0.recent;
+		var numMessages = _v0.numMessages;
+		var recentMessageStartIndex = numMessages - recent.numMessages;
+		var index = A2($elm$core$Maybe$withDefault, -1, maybeIndex);
+		var newStuff = A3(
+			$elm$html$Html$Keyed$node,
+			'div',
+			_List_Nil,
+			A3(
+				$elm$core$List$foldr,
+				$elm$browser$Debugger$History$consMsg(index),
+				_Utils_Tuple2(recentMessageStartIndex, _List_Nil),
+				recent.messages).b);
+		var onlyRenderRecentMessages = (!_Utils_eq(index, -1)) || ($elm$core$Array$length(snapshots) < 2);
+		var oldStuff = onlyRenderRecentMessages ? A4($elm$html$Html$Lazy$lazy3, $elm$browser$Debugger$History$viewAllSnapshots, index, 0, snapshots) : A4($elm$html$Html$Lazy$lazy3, $elm$browser$Debugger$History$viewRecentSnapshots, index, recent.numMessages, snapshots);
+		return A2(
+			$elm$html$Html$div,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$id('elm-debugger-sidebar'),
+					A2($elm$html$Html$Attributes$style, 'width', '100%'),
+					A2($elm$html$Html$Attributes$style, 'overflow-y', 'auto'),
+					A2($elm$html$Html$Attributes$style, 'height', 'calc(100% - 72px)')
+				]),
+			A2(
+				$elm$core$List$cons,
+				$elm$browser$Debugger$History$styles,
+				A2(
+					$elm$core$List$cons,
+					newStuff,
+					A2(
+						$elm$core$List$cons,
+						oldStuff,
+						onlyRenderRecentMessages ? _List_Nil : _List_fromArray(
+							[
+								$elm$browser$Debugger$History$showMoreButton(numMessages)
+							])))));
+	});
+var $elm$browser$Debugger$Main$SwapLayout = {$: 'SwapLayout'};
+var $elm$browser$Debugger$Main$toHistoryIcon = function (layout) {
+	if (layout.$ === 'Horizontal') {
+		return 'M13 1a3 3 0 0 1 3 3v8a3 3 0 0 1-3 3h-10a3 3 0 0 1-3-3v-8a3 3 0 0 1 3-3z M13 3h-10a1 1 0 0 0-1 1v5h12v-5a1 1 0 0 0-1-1z M14 10h-12v2a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1z';
+	} else {
+		return 'M0 4a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v8a3 3 0 0 1-3 3h-10a3 3 0 0 1-3-3z M2 4v8a1 1 0 0 0 1 1h2v-10h-2a1 1 0 0 0-1 1z M6 3v10h7a1 1 0 0 0 1-1v-8a1 1 0 0 0-1-1z';
+	}
+};
+var $elm$browser$Debugger$Main$icon = function (path) {
+	return A4(
+		$elm$virtual_dom$VirtualDom$nodeNS,
+		'http://www.w3.org/2000/svg',
+		'svg',
+		_List_fromArray(
+			[
+				A2($elm$virtual_dom$VirtualDom$attribute, 'viewBox', '0 0 16 16'),
+				A2($elm$virtual_dom$VirtualDom$attribute, 'xmlns', 'http://www.w3.org/2000/svg'),
+				A2($elm$virtual_dom$VirtualDom$attribute, 'fill', 'currentColor'),
+				A2($elm$virtual_dom$VirtualDom$attribute, 'width', '16px'),
+				A2($elm$virtual_dom$VirtualDom$attribute, 'height', '16px')
+			]),
+		_List_fromArray(
+			[
+				A4(
+				$elm$virtual_dom$VirtualDom$nodeNS,
+				'http://www.w3.org/2000/svg',
+				'path',
+				_List_fromArray(
+					[
+						A2($elm$virtual_dom$VirtualDom$attribute, 'd', path)
+					]),
+				_List_Nil)
+			]));
+};
+var $elm$browser$Debugger$Main$viewHistoryButton = F3(
+	function (label, msg, path) {
+		return A2(
+			$elm$html$Html$button,
+			_List_fromArray(
+				[
+					A2($elm$html$Html$Attributes$style, 'display', 'flex'),
+					A2($elm$html$Html$Attributes$style, 'flex-direction', 'row'),
+					A2($elm$html$Html$Attributes$style, 'align-items', 'center'),
+					A2($elm$html$Html$Attributes$style, 'background', 'none'),
+					A2($elm$html$Html$Attributes$style, 'border', 'none'),
+					A2($elm$html$Html$Attributes$style, 'color', 'inherit'),
+					A2($elm$html$Html$Attributes$style, 'cursor', 'pointer'),
+					$elm$html$Html$Events$onClick(msg)
+				]),
+			_List_fromArray(
+				[
+					$elm$browser$Debugger$Main$icon(path),
+					A2(
+					$elm$html$Html$span,
+					_List_fromArray(
+						[
+							A2($elm$html$Html$Attributes$style, 'padding-left', '6px')
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text(label)
+						]))
+				]));
+	});
+var $elm$browser$Debugger$Main$viewHistoryOptions = function (layout) {
+	return A2(
+		$elm$html$Html$div,
+		_List_fromArray(
+			[
+				A2($elm$html$Html$Attributes$style, 'width', '100%'),
+				A2($elm$html$Html$Attributes$style, 'height', '36px'),
+				A2($elm$html$Html$Attributes$style, 'display', 'flex'),
+				A2($elm$html$Html$Attributes$style, 'flex-direction', 'row'),
+				A2($elm$html$Html$Attributes$style, 'align-items', 'center'),
+				A2($elm$html$Html$Attributes$style, 'justify-content', 'space-between'),
+				A2($elm$html$Html$Attributes$style, 'background-color', 'rgb(50, 50, 50)')
+			]),
+		_List_fromArray(
+			[
+				A3(
+				$elm$browser$Debugger$Main$viewHistoryButton,
+				'Swap Layout',
+				$elm$browser$Debugger$Main$SwapLayout,
+				$elm$browser$Debugger$Main$toHistoryIcon(layout)),
+				A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						A2($elm$html$Html$Attributes$style, 'display', 'flex'),
+						A2($elm$html$Html$Attributes$style, 'flex-direction', 'row'),
+						A2($elm$html$Html$Attributes$style, 'align-items', 'center'),
+						A2($elm$html$Html$Attributes$style, 'justify-content', 'space-between')
+					]),
+				_List_fromArray(
+					[
+						A3($elm$browser$Debugger$Main$viewHistoryButton, 'Import', $elm$browser$Debugger$Main$Import, 'M5 1a1 1 0 0 1 0 2h-2a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1a1 1 0 0 1 2 0a3 3 0 0 1-3 3h-10a3 3 0 0 1-3-3v-8a3 3 0 0 1 3-3z M10 2a1 1 0 0 0 -2 0v6a1 1 0 0 0 1 1h6a1 1 0 0 0 0-2h-3.586l4.293-4.293a1 1 0 0 0-1.414-1.414l-4.293 4.293z'),
+						A3($elm$browser$Debugger$Main$viewHistoryButton, 'Export', $elm$browser$Debugger$Main$Export, 'M5 1a1 1 0 0 1 0 2h-2a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1 a1 1 0 0 1 2 0a3 3 0 0 1-3 3h-10a3 3 0 0 1-3-3v-8a3 3 0 0 1 3-3z M9 3a1 1 0 1 1 0-2h6a1 1 0 0 1 1 1v6a1 1 0 1 1-2 0v-3.586l-5.293 5.293 a1 1 0 0 1-1.414-1.414l5.293 -5.293z')
+					]))
+			]));
+};
+var $elm$browser$Debugger$Main$SliderJump = function (a) {
+	return {$: 'SliderJump', a: a};
+};
+var $elm$core$Basics$composeR = F3(
+	function (f, g, x) {
+		return g(
+			f(x));
+	});
+var $elm$html$Html$input = _VirtualDom_node('input');
+var $elm$browser$Debugger$Main$isPlaying = function (maybeIndex) {
+	if (maybeIndex.$ === 'Nothing') {
+		return true;
+	} else {
+		return false;
+	}
+};
+var $elm$html$Html$Attributes$max = $elm$html$Html$Attributes$stringProperty('max');
+var $elm$html$Html$Attributes$min = $elm$html$Html$Attributes$stringProperty('min');
+var $elm$html$Html$Events$alwaysStop = function (x) {
+	return _Utils_Tuple2(x, true);
+};
+var $elm$virtual_dom$VirtualDom$MayStopPropagation = function (a) {
+	return {$: 'MayStopPropagation', a: a};
+};
+var $elm$html$Html$Events$stopPropagationOn = F2(
+	function (event, decoder) {
+		return A2(
+			$elm$virtual_dom$VirtualDom$on,
+			event,
+			$elm$virtual_dom$VirtualDom$MayStopPropagation(decoder));
+	});
+var $elm$json$Json$Decode$string = _Json_decodeString;
+var $elm$html$Html$Events$targetValue = A2(
+	$elm$json$Json$Decode$at,
+	_List_fromArray(
+		['target', 'value']),
+	$elm$json$Json$Decode$string);
+var $elm$html$Html$Events$onInput = function (tagger) {
+	return A2(
+		$elm$html$Html$Events$stopPropagationOn,
+		'input',
+		A2(
+			$elm$json$Json$Decode$map,
+			$elm$html$Html$Events$alwaysStop,
+			A2($elm$json$Json$Decode$map, tagger, $elm$html$Html$Events$targetValue)));
+};
+var $elm$core$String$toInt = _String_toInt;
+var $elm$html$Html$Attributes$type_ = $elm$html$Html$Attributes$stringProperty('type');
+var $elm$html$Html$Attributes$value = $elm$html$Html$Attributes$stringProperty('value');
+var $elm$browser$Debugger$Main$viewPlayButton = function (playing) {
+	return A2(
+		$elm$html$Html$button,
+		_List_fromArray(
+			[
+				A2($elm$html$Html$Attributes$style, 'background', '#1293D8'),
+				A2($elm$html$Html$Attributes$style, 'border', 'none'),
+				A2($elm$html$Html$Attributes$style, 'color', 'white'),
+				A2($elm$html$Html$Attributes$style, 'cursor', 'pointer'),
+				A2($elm$html$Html$Attributes$style, 'width', '36px'),
+				A2($elm$html$Html$Attributes$style, 'height', '36px'),
+				$elm$html$Html$Events$onClick($elm$browser$Debugger$Main$Resume)
+			]),
+		_List_fromArray(
+			[
+				playing ? $elm$browser$Debugger$Main$icon('M2 2h4v12h-4v-12z M10 2h4v12h-4v-12z') : $elm$browser$Debugger$Main$icon('M2 2l12 7l-12 7z')
+			]));
+};
+var $elm$browser$Debugger$Main$viewHistorySlider = F2(
+	function (history, maybeIndex) {
+		var lastIndex = $elm$browser$Debugger$History$size(history) - 1;
+		var selectedIndex = A2($elm$core$Maybe$withDefault, lastIndex, maybeIndex);
+		return A2(
+			$elm$html$Html$div,
+			_List_fromArray(
+				[
+					A2($elm$html$Html$Attributes$style, 'display', 'flex'),
+					A2($elm$html$Html$Attributes$style, 'flex-direction', 'row'),
+					A2($elm$html$Html$Attributes$style, 'align-items', 'center'),
+					A2($elm$html$Html$Attributes$style, 'width', '100%'),
+					A2($elm$html$Html$Attributes$style, 'height', '36px'),
+					A2($elm$html$Html$Attributes$style, 'background-color', 'rgb(50, 50, 50)')
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$elm$html$Html$Lazy$lazy,
+					$elm$browser$Debugger$Main$viewPlayButton,
+					$elm$browser$Debugger$Main$isPlaying(maybeIndex)),
+					A2(
+					$elm$html$Html$input,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$type_('range'),
+							A2($elm$html$Html$Attributes$style, 'width', 'calc(100% - 56px)'),
+							A2($elm$html$Html$Attributes$style, 'height', '36px'),
+							A2($elm$html$Html$Attributes$style, 'margin', '0 10px'),
+							$elm$html$Html$Attributes$min('0'),
+							$elm$html$Html$Attributes$max(
+							$elm$core$String$fromInt(lastIndex)),
+							$elm$html$Html$Attributes$value(
+							$elm$core$String$fromInt(selectedIndex)),
+							$elm$html$Html$Events$onInput(
+							A2(
+								$elm$core$Basics$composeR,
+								$elm$core$String$toInt,
+								A2(
+									$elm$core$Basics$composeR,
+									$elm$core$Maybe$withDefault(lastIndex),
+									$elm$browser$Debugger$Main$SliderJump)))
+						]),
+					_List_Nil)
+				]));
+	});
+var $elm$browser$Debugger$Main$viewHistory = F3(
+	function (maybeIndex, history, layout) {
+		var block = $elm$browser$Debugger$Main$toMouseBlocker(layout);
+		var _v0 = $elm$browser$Debugger$Main$toHistoryPercents(layout);
+		var w = _v0.a;
+		var h = _v0.b;
+		return A2(
+			$elm$html$Html$div,
+			_List_fromArray(
+				[
+					A2($elm$html$Html$Attributes$style, 'width', w),
+					A2($elm$html$Html$Attributes$style, 'height', h),
+					A2($elm$html$Html$Attributes$style, 'display', 'flex'),
+					A2($elm$html$Html$Attributes$style, 'flex-direction', 'column'),
+					A2($elm$html$Html$Attributes$style, 'color', '#DDDDDD'),
+					A2($elm$html$Html$Attributes$style, 'background-color', 'rgb(61, 61, 61)'),
+					A2($elm$html$Html$Attributes$style, 'pointer-events', block),
+					A2($elm$html$Html$Attributes$style, 'user-select', block)
+				]),
+			_List_fromArray(
+				[
+					A2($elm$browser$Debugger$Main$viewHistorySlider, history, maybeIndex),
+					A2(
+					$elm$html$Html$map,
+					$elm$browser$Debugger$Main$Jump,
+					A2($elm$browser$Debugger$History$view, maybeIndex, history)),
+					A2($elm$html$Html$Lazy$lazy, $elm$browser$Debugger$Main$viewHistoryOptions, layout)
+				]));
+	});
+var $elm$browser$Debugger$Main$popoutView = function (model) {
+	var maybeIndex = function () {
+		var _v0 = model.state;
+		if (_v0.$ === 'Running') {
+			return $elm$core$Maybe$Nothing;
+		} else {
+			var index = _v0.a;
+			return $elm$core$Maybe$Just(index);
+		}
+	}();
+	var historyToRender = $elm$browser$Debugger$Main$cachedHistory(model);
+	return A3(
+		$elm$html$Html$node,
+		'body',
+		_Utils_ap(
+			$elm$browser$Debugger$Main$toDragListeners(model.layout),
+			_List_fromArray(
+				[
+					A2($elm$html$Html$Attributes$style, 'margin', '0'),
+					A2($elm$html$Html$Attributes$style, 'padding', '0'),
+					A2($elm$html$Html$Attributes$style, 'width', '100%'),
+					A2($elm$html$Html$Attributes$style, 'height', '100%'),
+					A2($elm$html$Html$Attributes$style, 'font-family', 'monospace'),
+					A2($elm$html$Html$Attributes$style, 'display', 'flex'),
+					A2(
+					$elm$html$Html$Attributes$style,
+					'flex-direction',
+					$elm$browser$Debugger$Main$toFlexDirection(model.layout))
+				])),
+		_List_fromArray(
+			[
+				A3($elm$browser$Debugger$Main$viewHistory, maybeIndex, historyToRender, model.layout),
+				$elm$browser$Debugger$Main$viewDragZone(model.layout),
+				A3($elm$browser$Debugger$Main$viewExpando, model.expandoMsg, model.expandoModel, model.layout)
+			]));
+};
+var $elm$browser$Debugger$Overlay$BlockAll = {$: 'BlockAll'};
+var $elm$browser$Debugger$Overlay$toBlockerType = F2(
+	function (isPaused, state) {
+		switch (state.$) {
+			case 'None':
+				return isPaused ? $elm$browser$Debugger$Overlay$BlockAll : $elm$browser$Debugger$Overlay$BlockNone;
+			case 'BadMetadata':
+				return $elm$browser$Debugger$Overlay$BlockMost;
+			case 'BadImport':
+				return $elm$browser$Debugger$Overlay$BlockMost;
+			default:
+				return $elm$browser$Debugger$Overlay$BlockMost;
+		}
+	});
+var $elm$browser$Debugger$Main$toBlockerType = function (model) {
+	return A2(
+		$elm$browser$Debugger$Overlay$toBlockerType,
+		$elm$browser$Debugger$Main$isPaused(model.state),
+		model.overlay);
+};
+var $elm$browser$Debugger$Main$Horizontal = F3(
+	function (a, b, c) {
+		return {$: 'Horizontal', a: a, b: b, c: c};
+	});
+var $elm$browser$Debugger$Main$Running = function (a) {
+	return {$: 'Running', a: a};
+};
+var $elm$browser$Debugger$Main$Static = {$: 'Static'};
+var $elm$browser$Debugger$Metadata$Error = F2(
+	function (message, problems) {
+		return {message: message, problems: problems};
+	});
+var $elm$json$Json$Decode$decodeValue = _Json_run;
+var $elm$browser$Debugger$Metadata$Metadata = F2(
+	function (versions, types) {
+		return {types: types, versions: versions};
+	});
+var $elm$browser$Debugger$Metadata$Types = F3(
+	function (message, aliases, unions) {
+		return {aliases: aliases, message: message, unions: unions};
+	});
+var $elm$browser$Debugger$Metadata$Alias = F2(
+	function (args, tipe) {
+		return {args: args, tipe: tipe};
+	});
+var $elm$json$Json$Decode$list = _Json_decodeList;
+var $elm$browser$Debugger$Metadata$decodeAlias = A3(
+	$elm$json$Json$Decode$map2,
+	$elm$browser$Debugger$Metadata$Alias,
+	A2(
+		$elm$json$Json$Decode$field,
+		'args',
+		$elm$json$Json$Decode$list($elm$json$Json$Decode$string)),
+	A2($elm$json$Json$Decode$field, 'type', $elm$json$Json$Decode$string));
+var $elm$browser$Debugger$Metadata$Union = F2(
+	function (args, tags) {
+		return {args: args, tags: tags};
+	});
+var $elm$core$Dict$fromList = function (assocs) {
+	return A3(
+		$elm$core$List$foldl,
+		F2(
+			function (_v0, dict) {
+				var key = _v0.a;
+				var value = _v0.b;
+				return A3($elm$core$Dict$insert, key, value, dict);
+			}),
+		$elm$core$Dict$empty,
+		assocs);
+};
+var $elm$json$Json$Decode$keyValuePairs = _Json_decodeKeyValuePairs;
+var $elm$json$Json$Decode$dict = function (decoder) {
+	return A2(
+		$elm$json$Json$Decode$map,
+		$elm$core$Dict$fromList,
+		$elm$json$Json$Decode$keyValuePairs(decoder));
+};
+var $elm$browser$Debugger$Metadata$decodeUnion = A3(
+	$elm$json$Json$Decode$map2,
+	$elm$browser$Debugger$Metadata$Union,
+	A2(
+		$elm$json$Json$Decode$field,
+		'args',
+		$elm$json$Json$Decode$list($elm$json$Json$Decode$string)),
+	A2(
+		$elm$json$Json$Decode$field,
+		'tags',
+		$elm$json$Json$Decode$dict(
+			$elm$json$Json$Decode$list($elm$json$Json$Decode$string))));
+var $elm$json$Json$Decode$map3 = _Json_map3;
+var $elm$browser$Debugger$Metadata$decodeTypes = A4(
+	$elm$json$Json$Decode$map3,
+	$elm$browser$Debugger$Metadata$Types,
+	A2($elm$json$Json$Decode$field, 'message', $elm$json$Json$Decode$string),
+	A2(
+		$elm$json$Json$Decode$field,
+		'aliases',
+		$elm$json$Json$Decode$dict($elm$browser$Debugger$Metadata$decodeAlias)),
+	A2(
+		$elm$json$Json$Decode$field,
+		'unions',
+		$elm$json$Json$Decode$dict($elm$browser$Debugger$Metadata$decodeUnion)));
+var $elm$browser$Debugger$Metadata$Versions = function (elm) {
+	return {elm: elm};
+};
+var $elm$browser$Debugger$Metadata$decodeVersions = A2(
+	$elm$json$Json$Decode$map,
+	$elm$browser$Debugger$Metadata$Versions,
+	A2($elm$json$Json$Decode$field, 'elm', $elm$json$Json$Decode$string));
+var $elm$browser$Debugger$Metadata$decoder = A3(
+	$elm$json$Json$Decode$map2,
+	$elm$browser$Debugger$Metadata$Metadata,
+	A2($elm$json$Json$Decode$field, 'versions', $elm$browser$Debugger$Metadata$decodeVersions),
+	A2($elm$json$Json$Decode$field, 'types', $elm$browser$Debugger$Metadata$decodeTypes));
+var $elm$browser$Debugger$Metadata$ProblemType = F2(
+	function (name, problems) {
+		return {name: name, problems: problems};
+	});
+var $elm$core$List$maybeCons = F3(
+	function (f, mx, xs) {
+		var _v0 = f(mx);
+		if (_v0.$ === 'Just') {
+			var x = _v0.a;
+			return A2($elm$core$List$cons, x, xs);
+		} else {
+			return xs;
+		}
+	});
+var $elm$core$List$filterMap = F2(
+	function (f, xs) {
+		return A3(
+			$elm$core$List$foldr,
+			$elm$core$List$maybeCons(f),
+			_List_Nil,
+			xs);
+	});
+var $elm$core$String$contains = _String_contains;
+var $elm$browser$Debugger$Metadata$hasProblem = F2(
+	function (tipe, _v0) {
+		var problem = _v0.a;
+		var token = _v0.b;
+		return A2($elm$core$String$contains, token, tipe) ? $elm$core$Maybe$Just(problem) : $elm$core$Maybe$Nothing;
+	});
+var $elm$browser$Debugger$Metadata$Decoder = {$: 'Decoder'};
+var $elm$browser$Debugger$Metadata$Function = {$: 'Function'};
+var $elm$browser$Debugger$Metadata$Process = {$: 'Process'};
+var $elm$browser$Debugger$Metadata$Program = {$: 'Program'};
+var $elm$browser$Debugger$Metadata$Request = {$: 'Request'};
+var $elm$browser$Debugger$Metadata$Socket = {$: 'Socket'};
+var $elm$browser$Debugger$Metadata$Task = {$: 'Task'};
+var $elm$browser$Debugger$Metadata$VirtualDom = {$: 'VirtualDom'};
+var $elm$browser$Debugger$Metadata$problemTable = _List_fromArray(
+	[
+		_Utils_Tuple2($elm$browser$Debugger$Metadata$Function, '->'),
+		_Utils_Tuple2($elm$browser$Debugger$Metadata$Decoder, 'Json.Decode.Decoder'),
+		_Utils_Tuple2($elm$browser$Debugger$Metadata$Task, 'Task.Task'),
+		_Utils_Tuple2($elm$browser$Debugger$Metadata$Process, 'Process.Id'),
+		_Utils_Tuple2($elm$browser$Debugger$Metadata$Socket, 'WebSocket.LowLevel.WebSocket'),
+		_Utils_Tuple2($elm$browser$Debugger$Metadata$Request, 'Http.Request'),
+		_Utils_Tuple2($elm$browser$Debugger$Metadata$Program, 'Platform.Program'),
+		_Utils_Tuple2($elm$browser$Debugger$Metadata$VirtualDom, 'VirtualDom.Node'),
+		_Utils_Tuple2($elm$browser$Debugger$Metadata$VirtualDom, 'VirtualDom.Attribute')
+	]);
+var $elm$browser$Debugger$Metadata$findProblems = function (tipe) {
+	return A2(
+		$elm$core$List$filterMap,
+		$elm$browser$Debugger$Metadata$hasProblem(tipe),
+		$elm$browser$Debugger$Metadata$problemTable);
+};
+var $elm$browser$Debugger$Metadata$collectBadAliases = F3(
+	function (name, _v0, list) {
+		var tipe = _v0.tipe;
+		var _v1 = $elm$browser$Debugger$Metadata$findProblems(tipe);
+		if (!_v1.b) {
+			return list;
+		} else {
+			var problems = _v1;
+			return A2(
+				$elm$core$List$cons,
+				A2($elm$browser$Debugger$Metadata$ProblemType, name, problems),
+				list);
+		}
+	});
+var $elm$core$List$append = F2(
+	function (xs, ys) {
+		if (!ys.b) {
+			return xs;
+		} else {
+			return A3($elm$core$List$foldr, $elm$core$List$cons, ys, xs);
+		}
+	});
+var $elm$core$List$concat = function (lists) {
+	return A3($elm$core$List$foldr, $elm$core$List$append, _List_Nil, lists);
+};
+var $elm$core$List$concatMap = F2(
+	function (f, list) {
+		return $elm$core$List$concat(
+			A2($elm$core$List$map, f, list));
+	});
+var $elm$core$Dict$values = function (dict) {
+	return A3(
+		$elm$core$Dict$foldr,
+		F3(
+			function (key, value, valueList) {
+				return A2($elm$core$List$cons, value, valueList);
+			}),
+		_List_Nil,
+		dict);
+};
+var $elm$browser$Debugger$Metadata$collectBadUnions = F3(
+	function (name, _v0, list) {
+		var tags = _v0.tags;
+		var _v1 = A2(
+			$elm$core$List$concatMap,
+			$elm$browser$Debugger$Metadata$findProblems,
+			$elm$core$List$concat(
+				$elm$core$Dict$values(tags)));
+		if (!_v1.b) {
+			return list;
+		} else {
+			var problems = _v1;
+			return A2(
+				$elm$core$List$cons,
+				A2($elm$browser$Debugger$Metadata$ProblemType, name, problems),
+				list);
+		}
+	});
+var $elm$core$Dict$foldl = F3(
+	function (func, acc, dict) {
+		foldl:
+		while (true) {
+			if (dict.$ === 'RBEmpty_elm_builtin') {
+				return acc;
+			} else {
+				var key = dict.b;
+				var value = dict.c;
+				var left = dict.d;
+				var right = dict.e;
+				var $temp$func = func,
+					$temp$acc = A3(
+					func,
+					key,
+					value,
+					A3($elm$core$Dict$foldl, func, acc, left)),
+					$temp$dict = right;
+				func = $temp$func;
+				acc = $temp$acc;
+				dict = $temp$dict;
+				continue foldl;
+			}
+		}
+	});
+var $elm$browser$Debugger$Metadata$isPortable = function (_v0) {
+	var types = _v0.types;
+	var badAliases = A3($elm$core$Dict$foldl, $elm$browser$Debugger$Metadata$collectBadAliases, _List_Nil, types.aliases);
+	var _v1 = A3($elm$core$Dict$foldl, $elm$browser$Debugger$Metadata$collectBadUnions, badAliases, types.unions);
+	if (!_v1.b) {
+		return $elm$core$Maybe$Nothing;
+	} else {
+		var problems = _v1;
+		return $elm$core$Maybe$Just(
+			A2($elm$browser$Debugger$Metadata$Error, types.message, problems));
+	}
+};
+var $elm$browser$Debugger$Metadata$decode = function (value) {
+	var _v0 = A2($elm$json$Json$Decode$decodeValue, $elm$browser$Debugger$Metadata$decoder, value);
+	if (_v0.$ === 'Err') {
+		return $elm$core$Result$Err(
+			A2($elm$browser$Debugger$Metadata$Error, 'The compiler is generating bad metadata. This is a compiler bug!', _List_Nil));
+	} else {
+		var metadata = _v0.a;
+		var _v1 = $elm$browser$Debugger$Metadata$isPortable(metadata);
+		if (_v1.$ === 'Nothing') {
+			return $elm$core$Result$Ok(metadata);
+		} else {
+			var error = _v1.a;
+			return $elm$core$Result$Err(error);
+		}
+	}
+};
+var $elm$browser$Debugger$History$History = F3(
+	function (snapshots, recent, numMessages) {
+		return {numMessages: numMessages, recent: recent, snapshots: snapshots};
+	});
+var $elm$browser$Debugger$History$RecentHistory = F3(
+	function (model, messages, numMessages) {
+		return {messages: messages, model: model, numMessages: numMessages};
+	});
+var $elm$browser$Debugger$History$empty = function (model) {
+	return A3(
+		$elm$browser$Debugger$History$History,
+		$elm$core$Array$empty,
+		A3($elm$browser$Debugger$History$RecentHistory, model, _List_Nil, 0),
+		0);
+};
+var $elm$core$Dict$map = F2(
+	function (func, dict) {
+		if (dict.$ === 'RBEmpty_elm_builtin') {
+			return $elm$core$Dict$RBEmpty_elm_builtin;
+		} else {
+			var color = dict.a;
+			var key = dict.b;
+			var value = dict.c;
+			var left = dict.d;
+			var right = dict.e;
+			return A5(
+				$elm$core$Dict$RBNode_elm_builtin,
+				color,
+				key,
+				A2(func, key, value),
+				A2($elm$core$Dict$map, func, left),
+				A2($elm$core$Dict$map, func, right));
+		}
+	});
+var $elm$core$Dict$sizeHelp = F2(
+	function (n, dict) {
+		sizeHelp:
+		while (true) {
+			if (dict.$ === 'RBEmpty_elm_builtin') {
+				return n;
+			} else {
+				var left = dict.d;
+				var right = dict.e;
+				var $temp$n = A2($elm$core$Dict$sizeHelp, n + 1, right),
+					$temp$dict = left;
+				n = $temp$n;
+				dict = $temp$dict;
+				continue sizeHelp;
+			}
+		}
+	});
+var $elm$core$Dict$size = function (dict) {
+	return A2($elm$core$Dict$sizeHelp, 0, dict);
+};
+var $elm$browser$Debugger$Expando$initHelp = F2(
+	function (isOuter, expando) {
+		switch (expando.$) {
+			case 'S':
+				return expando;
+			case 'Primitive':
+				return expando;
+			case 'Sequence':
+				var seqType = expando.a;
+				var isClosed = expando.b;
+				var items = expando.c;
+				return isOuter ? A3(
+					$elm$browser$Debugger$Expando$Sequence,
+					seqType,
+					false,
+					A2(
+						$elm$core$List$map,
+						$elm$browser$Debugger$Expando$initHelp(false),
+						items)) : (($elm$core$List$length(items) <= 8) ? A3($elm$browser$Debugger$Expando$Sequence, seqType, false, items) : expando);
+			case 'Dictionary':
+				var isClosed = expando.a;
+				var keyValuePairs = expando.b;
+				return isOuter ? A2(
+					$elm$browser$Debugger$Expando$Dictionary,
+					false,
+					A2(
+						$elm$core$List$map,
+						function (_v1) {
+							var k = _v1.a;
+							var v = _v1.b;
+							return _Utils_Tuple2(
+								k,
+								A2($elm$browser$Debugger$Expando$initHelp, false, v));
+						},
+						keyValuePairs)) : (($elm$core$List$length(keyValuePairs) <= 8) ? A2($elm$browser$Debugger$Expando$Dictionary, false, keyValuePairs) : expando);
+			case 'Record':
+				var isClosed = expando.a;
+				var entries = expando.b;
+				return isOuter ? A2(
+					$elm$browser$Debugger$Expando$Record,
+					false,
+					A2(
+						$elm$core$Dict$map,
+						F2(
+							function (_v2, v) {
+								return A2($elm$browser$Debugger$Expando$initHelp, false, v);
+							}),
+						entries)) : (($elm$core$Dict$size(entries) <= 4) ? A2($elm$browser$Debugger$Expando$Record, false, entries) : expando);
+			default:
+				var maybeName = expando.a;
+				var isClosed = expando.b;
+				var args = expando.c;
+				return isOuter ? A3(
+					$elm$browser$Debugger$Expando$Constructor,
+					maybeName,
+					false,
+					A2(
+						$elm$core$List$map,
+						$elm$browser$Debugger$Expando$initHelp(false),
+						args)) : (($elm$core$List$length(args) <= 4) ? A3($elm$browser$Debugger$Expando$Constructor, maybeName, false, args) : expando);
+		}
+	});
+var $elm$browser$Debugger$Expando$init = function (value) {
+	return A2(
+		$elm$browser$Debugger$Expando$initHelp,
+		true,
+		_Debugger_init(value));
+};
+var $elm$core$Platform$Cmd$map = _Platform_map;
+var $elm$browser$Debugger$Overlay$None = {$: 'None'};
+var $elm$browser$Debugger$Overlay$none = $elm$browser$Debugger$Overlay$None;
+var $elm$browser$Debugger$Main$wrapInit = F4(
+	function (metadata, popout, init, flags) {
+		var _v0 = init(flags);
+		var userModel = _v0.a;
+		var userCommands = _v0.b;
+		return _Utils_Tuple2(
+			{
+				expandoModel: $elm$browser$Debugger$Expando$init(userModel),
+				expandoMsg: $elm$browser$Debugger$Expando$init(_Utils_Tuple0),
+				history: $elm$browser$Debugger$History$empty(userModel),
+				layout: A3($elm$browser$Debugger$Main$Horizontal, $elm$browser$Debugger$Main$Static, 0.3, 0.5),
+				metadata: $elm$browser$Debugger$Metadata$decode(metadata),
+				overlay: $elm$browser$Debugger$Overlay$none,
+				popout: popout,
+				state: $elm$browser$Debugger$Main$Running(userModel)
+			},
+			A2($elm$core$Platform$Cmd$map, $elm$browser$Debugger$Main$UserMsg, userCommands));
+	});
+var $elm$browser$Debugger$Main$getLatestModel = function (state) {
+	if (state.$ === 'Running') {
+		var model = state.a;
+		return model;
+	} else {
+		var model = state.c;
+		return model;
+	}
+};
+var $elm$core$Platform$Sub$map = _Platform_map;
+var $elm$browser$Debugger$Main$wrapSubs = F2(
+	function (subscriptions, model) {
+		return A2(
+			$elm$core$Platform$Sub$map,
+			$elm$browser$Debugger$Main$UserMsg,
+			subscriptions(
+				$elm$browser$Debugger$Main$getLatestModel(model.state)));
+	});
+var $elm$browser$Debugger$Main$Moving = {$: 'Moving'};
+var $elm$browser$Debugger$Main$Paused = F5(
+	function (a, b, c, d, e) {
+		return {$: 'Paused', a: a, b: b, c: c, d: d, e: e};
+	});
+var $elm$browser$Debugger$History$Snapshot = F2(
+	function (model, messages) {
+		return {messages: messages, model: model};
+	});
+var $elm$browser$Debugger$History$addRecent = F3(
+	function (msg, newModel, _v0) {
+		var model = _v0.model;
+		var messages = _v0.messages;
+		var numMessages = _v0.numMessages;
+		return _Utils_eq(numMessages, $elm$browser$Debugger$History$maxSnapshotSize) ? _Utils_Tuple2(
+			$elm$core$Maybe$Just(
+				A2(
+					$elm$browser$Debugger$History$Snapshot,
+					model,
+					$elm$core$Array$fromList(messages))),
+			A3(
+				$elm$browser$Debugger$History$RecentHistory,
+				newModel,
+				_List_fromArray(
+					[msg]),
+				1)) : _Utils_Tuple2(
+			$elm$core$Maybe$Nothing,
+			A3(
+				$elm$browser$Debugger$History$RecentHistory,
+				model,
+				A2($elm$core$List$cons, msg, messages),
+				numMessages + 1));
+	});
+var $elm$core$Elm$JsArray$push = _JsArray_push;
+var $elm$core$Elm$JsArray$singleton = _JsArray_singleton;
+var $elm$core$Array$insertTailInTree = F4(
+	function (shift, index, tail, tree) {
+		var pos = $elm$core$Array$bitMask & (index >>> shift);
+		if (_Utils_cmp(
+			pos,
+			$elm$core$Elm$JsArray$length(tree)) > -1) {
+			if (shift === 5) {
+				return A2(
+					$elm$core$Elm$JsArray$push,
+					$elm$core$Array$Leaf(tail),
+					tree);
+			} else {
+				var newSub = $elm$core$Array$SubTree(
+					A4($elm$core$Array$insertTailInTree, shift - $elm$core$Array$shiftStep, index, tail, $elm$core$Elm$JsArray$empty));
+				return A2($elm$core$Elm$JsArray$push, newSub, tree);
+			}
+		} else {
+			var value = A2($elm$core$Elm$JsArray$unsafeGet, pos, tree);
+			if (value.$ === 'SubTree') {
+				var subTree = value.a;
+				var newSub = $elm$core$Array$SubTree(
+					A4($elm$core$Array$insertTailInTree, shift - $elm$core$Array$shiftStep, index, tail, subTree));
+				return A3($elm$core$Elm$JsArray$unsafeSet, pos, newSub, tree);
+			} else {
+				var newSub = $elm$core$Array$SubTree(
+					A4(
+						$elm$core$Array$insertTailInTree,
+						shift - $elm$core$Array$shiftStep,
+						index,
+						tail,
+						$elm$core$Elm$JsArray$singleton(value)));
+				return A3($elm$core$Elm$JsArray$unsafeSet, pos, newSub, tree);
+			}
+		}
+	});
+var $elm$core$Array$unsafeReplaceTail = F2(
+	function (newTail, _v0) {
+		var len = _v0.a;
+		var startShift = _v0.b;
+		var tree = _v0.c;
+		var tail = _v0.d;
+		var originalTailLen = $elm$core$Elm$JsArray$length(tail);
+		var newTailLen = $elm$core$Elm$JsArray$length(newTail);
+		var newArrayLen = len + (newTailLen - originalTailLen);
+		if (_Utils_eq(newTailLen, $elm$core$Array$branchFactor)) {
+			var overflow = _Utils_cmp(newArrayLen >>> $elm$core$Array$shiftStep, 1 << startShift) > 0;
+			if (overflow) {
+				var newShift = startShift + $elm$core$Array$shiftStep;
+				var newTree = A4(
+					$elm$core$Array$insertTailInTree,
+					newShift,
+					len,
+					newTail,
+					$elm$core$Elm$JsArray$singleton(
+						$elm$core$Array$SubTree(tree)));
+				return A4($elm$core$Array$Array_elm_builtin, newArrayLen, newShift, newTree, $elm$core$Elm$JsArray$empty);
+			} else {
+				return A4(
+					$elm$core$Array$Array_elm_builtin,
+					newArrayLen,
+					startShift,
+					A4($elm$core$Array$insertTailInTree, startShift, len, newTail, tree),
+					$elm$core$Elm$JsArray$empty);
+			}
+		} else {
+			return A4($elm$core$Array$Array_elm_builtin, newArrayLen, startShift, tree, newTail);
+		}
+	});
+var $elm$core$Array$push = F2(
+	function (a, array) {
+		var tail = array.d;
+		return A2(
+			$elm$core$Array$unsafeReplaceTail,
+			A2($elm$core$Elm$JsArray$push, a, tail),
+			array);
+	});
+var $elm$browser$Debugger$History$add = F3(
+	function (msg, model, _v0) {
+		var snapshots = _v0.snapshots;
+		var recent = _v0.recent;
+		var numMessages = _v0.numMessages;
+		var _v1 = A3($elm$browser$Debugger$History$addRecent, msg, model, recent);
+		if (_v1.a.$ === 'Just') {
+			var snapshot = _v1.a.a;
+			var newRecent = _v1.b;
+			return A3(
+				$elm$browser$Debugger$History$History,
+				A2($elm$core$Array$push, snapshot, snapshots),
+				newRecent,
+				numMessages + 1);
+		} else {
+			var _v2 = _v1.a;
+			var newRecent = _v1.b;
+			return A3($elm$browser$Debugger$History$History, snapshots, newRecent, numMessages + 1);
+		}
+	});
+var $elm$core$Basics$always = F2(
+	function (a, _v0) {
+		return a;
+	});
+var $elm$browser$Debugger$Overlay$BadImport = function (a) {
+	return {$: 'BadImport', a: a};
+};
+var $elm$browser$Debugger$Overlay$RiskyImport = F2(
+	function (a, b) {
+		return {$: 'RiskyImport', a: a, b: b};
+	});
+var $elm$browser$Debugger$Report$VersionChanged = F2(
+	function (a, b) {
+		return {$: 'VersionChanged', a: a, b: b};
+	});
+var $elm$browser$Debugger$Report$MessageChanged = F2(
+	function (a, b) {
+		return {$: 'MessageChanged', a: a, b: b};
+	});
+var $elm$browser$Debugger$Report$SomethingChanged = function (a) {
+	return {$: 'SomethingChanged', a: a};
+};
+var $elm$browser$Debugger$Report$AliasChange = function (a) {
+	return {$: 'AliasChange', a: a};
+};
+var $elm$browser$Debugger$Metadata$checkAlias = F4(
+	function (name, old, _new, changes) {
+		return (_Utils_eq(old.tipe, _new.tipe) && _Utils_eq(old.args, _new.args)) ? changes : A2(
+			$elm$core$List$cons,
+			$elm$browser$Debugger$Report$AliasChange(name),
+			changes);
+	});
+var $elm$browser$Debugger$Report$UnionChange = F2(
+	function (a, b) {
+		return {$: 'UnionChange', a: a, b: b};
+	});
+var $elm$browser$Debugger$Metadata$addTag = F3(
+	function (tag, _v0, changes) {
+		return _Utils_update(
+			changes,
+			{
+				added: A2($elm$core$List$cons, tag, changes.added)
+			});
+	});
+var $elm$browser$Debugger$Metadata$checkTag = F4(
+	function (tag, old, _new, changes) {
+		return _Utils_eq(old, _new) ? changes : _Utils_update(
+			changes,
+			{
+				changed: A2($elm$core$List$cons, tag, changes.changed)
+			});
+	});
+var $elm$browser$Debugger$Report$TagChanges = F4(
+	function (removed, changed, added, argsMatch) {
+		return {added: added, argsMatch: argsMatch, changed: changed, removed: removed};
+	});
+var $elm$browser$Debugger$Report$emptyTagChanges = function (argsMatch) {
+	return A4($elm$browser$Debugger$Report$TagChanges, _List_Nil, _List_Nil, _List_Nil, argsMatch);
+};
+var $elm$browser$Debugger$Report$hasTagChanges = function (tagChanges) {
+	return _Utils_eq(
+		tagChanges,
+		A4($elm$browser$Debugger$Report$TagChanges, _List_Nil, _List_Nil, _List_Nil, true));
+};
+var $elm$core$Dict$merge = F6(
+	function (leftStep, bothStep, rightStep, leftDict, rightDict, initialResult) {
+		var stepState = F3(
+			function (rKey, rValue, _v0) {
+				stepState:
+				while (true) {
+					var list = _v0.a;
+					var result = _v0.b;
+					if (!list.b) {
+						return _Utils_Tuple2(
+							list,
+							A3(rightStep, rKey, rValue, result));
+					} else {
+						var _v2 = list.a;
+						var lKey = _v2.a;
+						var lValue = _v2.b;
+						var rest = list.b;
+						if (_Utils_cmp(lKey, rKey) < 0) {
+							var $temp$rKey = rKey,
+								$temp$rValue = rValue,
+								$temp$_v0 = _Utils_Tuple2(
+								rest,
+								A3(leftStep, lKey, lValue, result));
+							rKey = $temp$rKey;
+							rValue = $temp$rValue;
+							_v0 = $temp$_v0;
+							continue stepState;
+						} else {
+							if (_Utils_cmp(lKey, rKey) > 0) {
+								return _Utils_Tuple2(
+									list,
+									A3(rightStep, rKey, rValue, result));
+							} else {
+								return _Utils_Tuple2(
+									rest,
+									A4(bothStep, lKey, lValue, rValue, result));
+							}
+						}
+					}
+				}
+			});
+		var _v3 = A3(
+			$elm$core$Dict$foldl,
+			stepState,
+			_Utils_Tuple2(
+				$elm$core$Dict$toList(leftDict),
+				initialResult),
+			rightDict);
+		var leftovers = _v3.a;
+		var intermediateResult = _v3.b;
+		return A3(
+			$elm$core$List$foldl,
+			F2(
+				function (_v4, result) {
+					var k = _v4.a;
+					var v = _v4.b;
+					return A3(leftStep, k, v, result);
+				}),
+			intermediateResult,
+			leftovers);
+	});
+var $elm$browser$Debugger$Metadata$removeTag = F3(
+	function (tag, _v0, changes) {
+		return _Utils_update(
+			changes,
+			{
+				removed: A2($elm$core$List$cons, tag, changes.removed)
+			});
+	});
+var $elm$browser$Debugger$Metadata$checkUnion = F4(
+	function (name, old, _new, changes) {
+		var tagChanges = A6(
+			$elm$core$Dict$merge,
+			$elm$browser$Debugger$Metadata$removeTag,
+			$elm$browser$Debugger$Metadata$checkTag,
+			$elm$browser$Debugger$Metadata$addTag,
+			old.tags,
+			_new.tags,
+			$elm$browser$Debugger$Report$emptyTagChanges(
+				_Utils_eq(old.args, _new.args)));
+		return $elm$browser$Debugger$Report$hasTagChanges(tagChanges) ? changes : A2(
+			$elm$core$List$cons,
+			A2($elm$browser$Debugger$Report$UnionChange, name, tagChanges),
+			changes);
+	});
+var $elm$browser$Debugger$Metadata$ignore = F3(
+	function (key, value, report) {
+		return report;
+	});
+var $elm$browser$Debugger$Metadata$checkTypes = F2(
+	function (old, _new) {
+		return (!_Utils_eq(old.message, _new.message)) ? A2($elm$browser$Debugger$Report$MessageChanged, old.message, _new.message) : $elm$browser$Debugger$Report$SomethingChanged(
+			A6(
+				$elm$core$Dict$merge,
+				$elm$browser$Debugger$Metadata$ignore,
+				$elm$browser$Debugger$Metadata$checkUnion,
+				$elm$browser$Debugger$Metadata$ignore,
+				old.unions,
+				_new.unions,
+				A6($elm$core$Dict$merge, $elm$browser$Debugger$Metadata$ignore, $elm$browser$Debugger$Metadata$checkAlias, $elm$browser$Debugger$Metadata$ignore, old.aliases, _new.aliases, _List_Nil)));
+	});
+var $elm$browser$Debugger$Metadata$check = F2(
+	function (old, _new) {
+		return (!_Utils_eq(old.versions.elm, _new.versions.elm)) ? A2($elm$browser$Debugger$Report$VersionChanged, old.versions.elm, _new.versions.elm) : A2($elm$browser$Debugger$Metadata$checkTypes, old.types, _new.types);
+	});
+var $elm$browser$Debugger$Report$CorruptHistory = {$: 'CorruptHistory'};
+var $elm$browser$Debugger$Overlay$corruptImport = $elm$browser$Debugger$Overlay$BadImport($elm$browser$Debugger$Report$CorruptHistory);
+var $elm$json$Json$Decode$decodeString = _Json_runOnString;
+var $elm$browser$Debugger$Report$Fine = {$: 'Fine'};
+var $elm$browser$Debugger$Report$Impossible = {$: 'Impossible'};
+var $elm$browser$Debugger$Report$Risky = {$: 'Risky'};
+var $elm$core$Basics$not = _Basics_not;
+var $elm$core$List$isEmpty = function (xs) {
+	if (!xs.b) {
+		return true;
+	} else {
+		return false;
+	}
+};
+var $elm$browser$Debugger$Report$some = function (list) {
+	return !$elm$core$List$isEmpty(list);
+};
+var $elm$browser$Debugger$Report$evaluateChange = function (change) {
+	if (change.$ === 'AliasChange') {
+		return $elm$browser$Debugger$Report$Impossible;
+	} else {
+		var removed = change.b.removed;
+		var changed = change.b.changed;
+		var added = change.b.added;
+		var argsMatch = change.b.argsMatch;
+		return ((!argsMatch) || ($elm$browser$Debugger$Report$some(changed) || $elm$browser$Debugger$Report$some(removed))) ? $elm$browser$Debugger$Report$Impossible : ($elm$browser$Debugger$Report$some(added) ? $elm$browser$Debugger$Report$Risky : $elm$browser$Debugger$Report$Fine);
+	}
+};
+var $elm$browser$Debugger$Report$worstCase = F2(
+	function (status, statusList) {
+		worstCase:
+		while (true) {
+			if (!statusList.b) {
+				return status;
+			} else {
+				switch (statusList.a.$) {
+					case 'Impossible':
+						var _v1 = statusList.a;
+						return $elm$browser$Debugger$Report$Impossible;
+					case 'Risky':
+						var _v2 = statusList.a;
+						var rest = statusList.b;
+						var $temp$status = $elm$browser$Debugger$Report$Risky,
+							$temp$statusList = rest;
+						status = $temp$status;
+						statusList = $temp$statusList;
+						continue worstCase;
+					default:
+						var _v3 = statusList.a;
+						var rest = statusList.b;
+						var $temp$status = status,
+							$temp$statusList = rest;
+						status = $temp$status;
+						statusList = $temp$statusList;
+						continue worstCase;
+				}
+			}
+		}
+	});
+var $elm$browser$Debugger$Report$evaluate = function (report) {
+	switch (report.$) {
+		case 'CorruptHistory':
+			return $elm$browser$Debugger$Report$Impossible;
+		case 'VersionChanged':
+			return $elm$browser$Debugger$Report$Impossible;
+		case 'MessageChanged':
+			return $elm$browser$Debugger$Report$Impossible;
+		default:
+			var changes = report.a;
+			return A2(
+				$elm$browser$Debugger$Report$worstCase,
+				$elm$browser$Debugger$Report$Fine,
+				A2($elm$core$List$map, $elm$browser$Debugger$Report$evaluateChange, changes));
+	}
+};
+var $elm$json$Json$Decode$value = _Json_decodeValue;
+var $elm$browser$Debugger$Overlay$uploadDecoder = A3(
+	$elm$json$Json$Decode$map2,
+	F2(
+		function (x, y) {
+			return _Utils_Tuple2(x, y);
+		}),
+	A2($elm$json$Json$Decode$field, 'metadata', $elm$browser$Debugger$Metadata$decoder),
+	A2($elm$json$Json$Decode$field, 'history', $elm$json$Json$Decode$value));
+var $elm$browser$Debugger$Overlay$assessImport = F2(
+	function (metadata, jsonString) {
+		var _v0 = A2($elm$json$Json$Decode$decodeString, $elm$browser$Debugger$Overlay$uploadDecoder, jsonString);
+		if (_v0.$ === 'Err') {
+			return $elm$core$Result$Err($elm$browser$Debugger$Overlay$corruptImport);
+		} else {
+			var _v1 = _v0.a;
+			var foreignMetadata = _v1.a;
+			var rawHistory = _v1.b;
+			var report = A2($elm$browser$Debugger$Metadata$check, foreignMetadata, metadata);
+			var _v2 = $elm$browser$Debugger$Report$evaluate(report);
+			switch (_v2.$) {
+				case 'Impossible':
+					return $elm$core$Result$Err(
+						$elm$browser$Debugger$Overlay$BadImport(report));
+				case 'Risky':
+					return $elm$core$Result$Err(
+						A2($elm$browser$Debugger$Overlay$RiskyImport, report, rawHistory));
+				default:
+					return $elm$core$Result$Ok(rawHistory);
+			}
+		}
+	});
+var $elm$core$Platform$Cmd$batch = _Platform_batch;
+var $elm$browser$Debugger$Overlay$close = F2(
+	function (msg, state) {
+		switch (state.$) {
+			case 'None':
+				return $elm$core$Maybe$Nothing;
+			case 'BadMetadata':
+				return $elm$core$Maybe$Nothing;
+			case 'BadImport':
+				return $elm$core$Maybe$Nothing;
+			default:
+				var rawHistory = state.b;
+				if (msg.$ === 'Cancel') {
+					return $elm$core$Maybe$Nothing;
+				} else {
+					return $elm$core$Maybe$Just(rawHistory);
+				}
+		}
+	});
+var $elm$browser$Debugger$History$elmToJs = A2($elm$core$Basics$composeR, _Json_wrap, _Debugger_unsafeCoerce);
+var $elm$browser$Debugger$History$encodeHelp = F2(
+	function (snapshot, allMessages) {
+		return A3($elm$core$Array$foldl, $elm$core$List$cons, allMessages, snapshot.messages);
+	});
+var $elm$json$Json$Encode$list = F2(
+	function (func, entries) {
+		return _Json_wrap(
+			A3(
+				$elm$core$List$foldl,
+				_Json_addEntry(func),
+				_Json_emptyArray(_Utils_Tuple0),
+				entries));
+	});
+var $elm$browser$Debugger$History$encode = function (_v0) {
+	var snapshots = _v0.snapshots;
+	var recent = _v0.recent;
+	return A2(
+		$elm$json$Json$Encode$list,
+		$elm$browser$Debugger$History$elmToJs,
+		A3(
+			$elm$core$Array$foldr,
+			$elm$browser$Debugger$History$encodeHelp,
+			$elm$core$List$reverse(recent.messages),
+			snapshots));
+};
+var $elm$json$Json$Encode$object = function (pairs) {
+	return _Json_wrap(
+		A3(
+			$elm$core$List$foldl,
+			F2(
+				function (_v0, obj) {
+					var k = _v0.a;
+					var v = _v0.b;
+					return A3(_Json_addField, k, v, obj);
+				}),
+			_Json_emptyObject(_Utils_Tuple0),
+			pairs));
+};
+var $elm$browser$Debugger$Metadata$encodeAlias = function (_v0) {
+	var args = _v0.args;
+	var tipe = _v0.tipe;
+	return $elm$json$Json$Encode$object(
+		_List_fromArray(
+			[
+				_Utils_Tuple2(
+				'args',
+				A2($elm$json$Json$Encode$list, $elm$json$Json$Encode$string, args)),
+				_Utils_Tuple2(
+				'type',
+				$elm$json$Json$Encode$string(tipe))
+			]));
+};
+var $elm$browser$Debugger$Metadata$encodeDict = F2(
+	function (f, dict) {
+		return $elm$json$Json$Encode$object(
+			$elm$core$Dict$toList(
+				A2(
+					$elm$core$Dict$map,
+					F2(
+						function (key, value) {
+							return f(value);
+						}),
+					dict)));
+	});
+var $elm$browser$Debugger$Metadata$encodeUnion = function (_v0) {
+	var args = _v0.args;
+	var tags = _v0.tags;
+	return $elm$json$Json$Encode$object(
+		_List_fromArray(
+			[
+				_Utils_Tuple2(
+				'args',
+				A2($elm$json$Json$Encode$list, $elm$json$Json$Encode$string, args)),
+				_Utils_Tuple2(
+				'tags',
+				A2(
+					$elm$browser$Debugger$Metadata$encodeDict,
+					$elm$json$Json$Encode$list($elm$json$Json$Encode$string),
+					tags))
+			]));
+};
+var $elm$browser$Debugger$Metadata$encodeTypes = function (_v0) {
+	var message = _v0.message;
+	var unions = _v0.unions;
+	var aliases = _v0.aliases;
+	return $elm$json$Json$Encode$object(
+		_List_fromArray(
+			[
+				_Utils_Tuple2(
+				'message',
+				$elm$json$Json$Encode$string(message)),
+				_Utils_Tuple2(
+				'aliases',
+				A2($elm$browser$Debugger$Metadata$encodeDict, $elm$browser$Debugger$Metadata$encodeAlias, aliases)),
+				_Utils_Tuple2(
+				'unions',
+				A2($elm$browser$Debugger$Metadata$encodeDict, $elm$browser$Debugger$Metadata$encodeUnion, unions))
+			]));
+};
+var $elm$browser$Debugger$Metadata$encodeVersions = function (_v0) {
+	var elm = _v0.elm;
+	return $elm$json$Json$Encode$object(
+		_List_fromArray(
+			[
+				_Utils_Tuple2(
+				'elm',
+				$elm$json$Json$Encode$string(elm))
+			]));
+};
+var $elm$browser$Debugger$Metadata$encode = function (_v0) {
+	var versions = _v0.versions;
+	var types = _v0.types;
+	return $elm$json$Json$Encode$object(
+		_List_fromArray(
+			[
+				_Utils_Tuple2(
+				'versions',
+				$elm$browser$Debugger$Metadata$encodeVersions(versions)),
+				_Utils_Tuple2(
+				'types',
+				$elm$browser$Debugger$Metadata$encodeTypes(types))
+			]));
+};
+var $elm$core$Basics$identity = function (x) {
+	return x;
+};
+var $elm$core$Task$Perform = function (a) {
+	return {$: 'Perform', a: a};
+};
+var $elm$core$Task$succeed = _Scheduler_succeed;
+var $elm$core$Task$init = $elm$core$Task$succeed(_Utils_Tuple0);
 var $elm$core$Task$andThen = _Scheduler_andThen;
 var $elm$core$Task$map = F2(
 	function (func, taskA) {
@@ -5333,656 +9356,133 @@ var $elm$core$Task$perform = F2(
 			$elm$core$Task$Perform(
 				A2($elm$core$Task$map, toMessage, task)));
 	});
-var $elm$browser$Browser$application = _Browser_application;
-var $author$project$Main$Model = F3(
-	function (navigation, session, page) {
-		return {navigation: navigation, page: page, session: session};
-	});
-var $author$project$Main$Redirect = {$: 'Redirect'};
-var $author$project$Main$Page_Administration = function (a) {
-	return {$: 'Page_Administration', a: a};
-};
-var $author$project$Main$Page_Administration_Msg = function (a) {
-	return {$: 'Page_Administration_Msg', a: a};
-};
-var $author$project$Main$Page_Article = function (a) {
-	return {$: 'Page_Article', a: a};
-};
-var $author$project$Main$Page_Article_Msg = function (a) {
-	return {$: 'Page_Article_Msg', a: a};
-};
-var $author$project$Main$Page_Articles = function (a) {
-	return {$: 'Page_Articles', a: a};
-};
-var $author$project$Main$Page_Articles_Msg = function (a) {
-	return {$: 'Page_Articles_Msg', a: a};
-};
-var $author$project$Main$Page_Documentation = function (a) {
-	return {$: 'Page_Documentation', a: a};
-};
-var $author$project$Main$Page_Documentation_Msg = function (a) {
-	return {$: 'Page_Documentation_Msg', a: a};
-};
-var $author$project$Main$Page_Example = function (a) {
-	return {$: 'Page_Example', a: a};
-};
-var $author$project$Main$Page_Example_Msg = function (a) {
-	return {$: 'Page_Example_Msg', a: a};
-};
-var $author$project$Main$Page_GettingStarted = function (a) {
-	return {$: 'Page_GettingStarted', a: a};
-};
-var $author$project$Main$Page_GettingStarted_Msg = function (a) {
-	return {$: 'Page_GettingStarted_Msg', a: a};
-};
-var $author$project$Main$Page_Home = function (a) {
-	return {$: 'Page_Home', a: a};
-};
-var $author$project$Main$Page_Home_Msg = function (a) {
-	return {$: 'Page_Home_Msg', a: a};
-};
-var $author$project$Main$Page_Section = function (a) {
-	return {$: 'Page_Section', a: a};
-};
-var $author$project$Main$Page_Section_Msg = function (a) {
-	return {$: 'Page_Section_Msg', a: a};
-};
-var $author$project$Page$Administration$exit = F2(
-	function (model, session) {
-		return session;
-	});
-var $author$project$Page$Article$exit = F2(
-	function (model, session) {
-		return session;
-	});
-var $author$project$Page$Articles$exit = F2(
-	function (model, session) {
-		return session;
-	});
-var $author$project$Page$Documentation$exit = F2(
-	function (model, session) {
-		return session;
-	});
-var $author$project$Page$Example$exit = F2(
-	function (model, session) {
-		return session;
-	});
-var $author$project$Page$GettingStarted$exit = F2(
-	function (model, session) {
-		return session;
-	});
-var $author$project$Page$Home$exit = F2(
-	function (model, session) {
-		return _Utils_update(
-			session,
-			{window: model.window});
-	});
-var $author$project$Page$Section$exit = F2(
-	function (model, session) {
-		return session;
-	});
-var $author$project$Main$exit = function (model) {
-	var _v0 = model.page;
-	switch (_v0.$) {
-		case 'Redirect':
-			return model.session;
-		case 'NotFound':
-			return model.session;
-		case 'Page_Home':
-			var subModel = _v0.a;
-			return A2($author$project$Page$Home$exit, subModel, model.session);
-		case 'Page_Administration':
-			var subModel = _v0.a;
-			return A2($author$project$Page$Administration$exit, subModel, model.session);
-		case 'Page_Articles':
-			var subModel = _v0.a;
-			return A2($author$project$Page$Articles$exit, subModel, model.session);
-		case 'Page_Article':
-			var subModel = _v0.a;
-			return A2($author$project$Page$Article$exit, subModel, model.session);
-		case 'Page_Documentation':
-			var subModel = _v0.a;
-			return A2($author$project$Page$Documentation$exit, subModel, model.session);
-		case 'Page_Section':
-			var subModel = _v0.a;
-			return A2($author$project$Page$Section$exit, subModel, model.session);
-		case 'Page_Example':
-			var subModel = _v0.a;
-			return A2($author$project$Page$Example$exit, subModel, model.session);
-		default:
-			var subModel = _v0.a;
-			return A2($author$project$Page$GettingStarted$exit, subModel, model.session);
-	}
-};
-var $author$project$Ui$Menu$init = {isOpen: false};
-var $elm$core$Platform$Cmd$batch = _Platform_batch;
-var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
-var $author$project$Page$Administration$init = F3(
-	function (key, session, params) {
-		return _Utils_Tuple2(
-			{menu: $author$project$Ui$Menu$init, window: session.window},
-			$elm$core$Platform$Cmd$none);
-	});
-var $author$project$Articles$GenderAndSalery = {$: 'GenderAndSalery'};
-var $author$project$Articles$all = _List_fromArray(
-	[$author$project$Articles$GenderAndSalery]);
-var $elm$core$List$filter = F2(
-	function (isGood, list) {
-		return A3(
-			$elm$core$List$foldr,
-			F2(
-				function (x, xs) {
-					return isGood(x) ? A2($elm$core$List$cons, x, xs) : xs;
-				}),
-			_List_Nil,
-			list);
-	});
-var $elm$core$List$head = function (list) {
-	if (list.b) {
-		var x = list.a;
-		var xs = list.b;
-		return $elm$core$Maybe$Just(x);
-	} else {
-		return $elm$core$Maybe$Nothing;
-	}
-};
-var $author$project$Articles$GenderAndSalery$Bars$init = {binSize: 5000, hovering: _List_Nil};
-var $author$project$Articles$GenderAndSalery$Bubble$init = {hovering: _List_Nil, selection: $elm$core$Maybe$Nothing, window: $elm$core$Maybe$Nothing};
-var $author$project$Articles$GenderAndSalery$EducationChart$Long = {$: 'Long'};
-var $author$project$Articles$GenderAndSalery$EducationChart$Medium = {$: 'Medium'};
-var $author$project$Articles$GenderAndSalery$EducationChart$Researcher = {$: 'Researcher'};
-var $author$project$Articles$GenderAndSalery$EducationChart$Short = {$: 'Short'};
-var $author$project$Articles$GenderAndSalery$EducationChart$Stacked = {$: 'Stacked'};
-var $author$project$Articles$GenderAndSalery$EducationChart$init = {
-	education: _List_fromArray(
-		[$author$project$Articles$GenderAndSalery$EducationChart$Short, $author$project$Articles$GenderAndSalery$EducationChart$Medium, $author$project$Articles$GenderAndSalery$EducationChart$Long, $author$project$Articles$GenderAndSalery$EducationChart$Researcher]),
-	hovering: _List_Nil,
-	stacking: $author$project$Articles$GenderAndSalery$EducationChart$Stacked
-};
-var $author$project$Articles$GenderAndSalery$init = {bars: $author$project$Articles$GenderAndSalery$Bars$init, bubbles: $author$project$Articles$GenderAndSalery$Bubble$init, education: $author$project$Articles$GenderAndSalery$EducationChart$init, year: 2019};
-var $author$project$Articles$init = {example0: $author$project$Articles$GenderAndSalery$init};
-var $author$project$Articles$GenderAndSalery$meta = {id: 'gender-equality-in-denmark'};
-var $author$project$Articles$meta = function (chosen) {
-	return $author$project$Articles$GenderAndSalery$meta;
-};
-var $author$project$Page$Article$init = F3(
-	function (key, session, params) {
-		var isCorrectId = function (article) {
-			return _Utils_eq(
-				$author$project$Articles$meta(article).id,
-				params.id);
-		};
-		var articleId = $elm$core$List$head(
-			A2($elm$core$List$filter, isCorrectId, $author$project$Articles$all));
-		return _Utils_Tuple2(
-			{article: $author$project$Articles$init, articleId: articleId, menu: $author$project$Ui$Menu$init, window: session.window},
-			$elm$core$Platform$Cmd$none);
-	});
-var $author$project$Page$Articles$init = F3(
-	function (key, session, params) {
-		return _Utils_Tuple2(
-			{menu: $author$project$Ui$Menu$init, window: session.window},
-			$elm$core$Platform$Cmd$none);
-	});
-var $author$project$Ui$Thumbnail$Group = F3(
-	function (title, order, ids) {
-		return {ids: ids, order: order, title: title};
-	});
-var $author$project$Examples$BarCharts__BarLabels = {$: 'BarCharts__BarLabels'};
-var $author$project$Examples$BarCharts__Basic = {$: 'BarCharts__Basic'};
-var $author$project$Examples$BarCharts__BinLabels = {$: 'BarCharts__BinLabels'};
-var $author$project$Examples$BarCharts__BinLabelsAdvanced = {$: 'BarCharts__BinLabelsAdvanced'};
-var $author$project$Examples$BarCharts__Borders = {$: 'BarCharts__Borders'};
-var $author$project$Examples$BarCharts__Color = {$: 'BarCharts__Color'};
-var $author$project$Examples$BarCharts__Corners = {$: 'BarCharts__Corners'};
-var $author$project$Examples$BarCharts__DataDependent = {$: 'BarCharts__DataDependent'};
-var $author$project$Examples$BarCharts__Gradient = {$: 'BarCharts__Gradient'};
-var $author$project$Examples$BarCharts__Highlight = {$: 'BarCharts__Highlight'};
-var $author$project$Examples$BarCharts__Histogram = {$: 'BarCharts__Histogram'};
-var $author$project$Examples$BarCharts__Legends = {$: 'BarCharts__Legends'};
-var $author$project$Examples$BarCharts__Margin = {$: 'BarCharts__Margin'};
-var $author$project$Examples$BarCharts__Opacity = {$: 'BarCharts__Opacity'};
-var $author$project$Examples$BarCharts__Pattern = {$: 'BarCharts__Pattern'};
-var $author$project$Examples$BarCharts__Spacing = {$: 'BarCharts__Spacing'};
-var $author$project$Examples$BarCharts__Stacked = {$: 'BarCharts__Stacked'};
-var $author$project$Examples$BarCharts__Title = {$: 'BarCharts__Title'};
-var $author$project$Examples$BarCharts__Tooltip = {$: 'BarCharts__Tooltip'};
-var $author$project$Examples$BarCharts__TooltipBin = {$: 'BarCharts__TooltipBin'};
-var $author$project$Examples$BarCharts__TooltipStack = {$: 'BarCharts__TooltipStack'};
-var $author$project$Examples$BarCharts__Ungroup = {$: 'BarCharts__Ungroup'};
-var $author$project$Examples$BarCharts__VariableWidth = {$: 'BarCharts__VariableWidth'};
-var $author$project$Examples$Frame__Amount = {$: 'Frame__Amount'};
-var $author$project$Examples$Frame__Arbitrary = {$: 'Frame__Arbitrary'};
-var $author$project$Examples$Frame__AxisLength = {$: 'Frame__AxisLength'};
-var $author$project$Examples$Frame__Background = {$: 'Frame__Background'};
-var $author$project$Examples$Frame__Basic = {$: 'Frame__Basic'};
-var $author$project$Examples$Frame__Color = {$: 'Frame__Color'};
-var $author$project$Examples$Frame__Coordinates = {$: 'Frame__Coordinates'};
-var $author$project$Examples$Frame__CustomElements = {$: 'Frame__CustomElements'};
-var $author$project$Examples$Frame__CustomFormat = {$: 'Frame__CustomFormat'};
-var $author$project$Examples$Frame__CustomLabels = {$: 'Frame__CustomLabels'};
-var $author$project$Examples$Frame__Dimensions = {$: 'Frame__Dimensions'};
-var $author$project$Examples$Frame__DotGrid = {$: 'Frame__DotGrid'};
-var $author$project$Examples$Frame__GridColor = {$: 'Frame__GridColor'};
-var $author$project$Examples$Frame__GridFilter = {$: 'Frame__GridFilter'};
-var $author$project$Examples$Frame__LabelWithLine = {$: 'Frame__LabelWithLine'};
-var $author$project$Examples$Frame__Legends = {$: 'Frame__Legends'};
-var $author$project$Examples$Frame__Lines = {$: 'Frame__Lines'};
-var $author$project$Examples$Frame__Margin = {$: 'Frame__Margin'};
-var $author$project$Examples$Frame__NoArrow = {$: 'Frame__NoArrow'};
-var $author$project$Examples$Frame__Offset = {$: 'Frame__Offset'};
-var $author$project$Examples$Frame__OnlyInts = {$: 'Frame__OnlyInts'};
-var $author$project$Examples$Frame__Padding = {$: 'Frame__Padding'};
-var $author$project$Examples$Frame__Position = {$: 'Frame__Position'};
-var $author$project$Examples$Frame__Rect = {$: 'Frame__Rect'};
-var $author$project$Examples$Frame__Times = {$: 'Frame__Times'};
-var $author$project$Examples$Frame__Titles = {$: 'Frame__Titles'};
-var $author$project$Examples$Frontpage__BasicArea = {$: 'Frontpage__BasicArea'};
-var $author$project$Examples$Frontpage__BasicBar = {$: 'Frontpage__BasicBar'};
-var $author$project$Examples$Frontpage__BasicBubble = {$: 'Frontpage__BasicBubble'};
-var $author$project$Examples$Frontpage__BasicLine = {$: 'Frontpage__BasicLine'};
-var $author$project$Examples$Frontpage__BasicNavigation = {$: 'Frontpage__BasicNavigation'};
-var $author$project$Examples$Frontpage__BasicScatter = {$: 'Frontpage__BasicScatter'};
-var $author$project$Examples$Frontpage__Concise = {$: 'Frontpage__Concise'};
-var $author$project$Examples$Frontpage__Familiar = {$: 'Frontpage__Familiar'};
-var $author$project$Examples$Interactivity__Background = {$: 'Interactivity__Background'};
-var $author$project$Examples$Interactivity__BasicArea = {$: 'Interactivity__BasicArea'};
-var $author$project$Examples$Interactivity__BasicBar = {$: 'Interactivity__BasicBar'};
-var $author$project$Examples$Interactivity__BasicBin = {$: 'Interactivity__BasicBin'};
-var $author$project$Examples$Interactivity__BasicLine = {$: 'Interactivity__BasicLine'};
-var $author$project$Examples$Interactivity__BasicStack = {$: 'Interactivity__BasicStack'};
-var $author$project$Examples$Interactivity__Border = {$: 'Interactivity__Border'};
-var $author$project$Examples$Interactivity__ChangeContent = {$: 'Interactivity__ChangeContent'};
-var $author$project$Examples$Interactivity__ChangeDot = {$: 'Interactivity__ChangeDot'};
-var $author$project$Examples$Interactivity__ChangeName = {$: 'Interactivity__ChangeName'};
-var $author$project$Examples$Interactivity__ChangeUnit = {$: 'Interactivity__ChangeUnit'};
-var $author$project$Examples$Interactivity__Coordinates = {$: 'Interactivity__Coordinates'};
-var $author$project$Examples$Interactivity__Direction = {$: 'Interactivity__Direction'};
-var $author$project$Examples$Interactivity__DoubleSearch = {$: 'Interactivity__DoubleSearch'};
-var $author$project$Examples$Interactivity__FilterSearch = {$: 'Interactivity__FilterSearch'};
-var $author$project$Examples$Interactivity__Focal = {$: 'Interactivity__Focal'};
-var $author$project$Examples$Interactivity__Multiple = {$: 'Interactivity__Multiple'};
-var $author$project$Examples$Interactivity__NoArrow = {$: 'Interactivity__NoArrow'};
-var $author$project$Examples$Interactivity__Offset = {$: 'Interactivity__Offset'};
-var $author$project$Examples$Interactivity__TrickyTooltip = {$: 'Interactivity__TrickyTooltip'};
-var $author$project$Examples$Interactivity__Zoom = {$: 'Interactivity__Zoom'};
-var $author$project$Examples$LineCharts__Area = {$: 'LineCharts__Area'};
-var $author$project$Examples$LineCharts__Basic = {$: 'LineCharts__Basic'};
-var $author$project$Examples$LineCharts__Color = {$: 'LineCharts__Color'};
-var $author$project$Examples$LineCharts__Dashed = {$: 'LineCharts__Dashed'};
-var $author$project$Examples$LineCharts__Dots = {$: 'LineCharts__Dots'};
-var $author$project$Examples$LineCharts__Gradient = {$: 'LineCharts__Gradient'};
-var $author$project$Examples$LineCharts__Labels = {$: 'LineCharts__Labels'};
-var $author$project$Examples$LineCharts__Legends = {$: 'LineCharts__Legends'};
-var $author$project$Examples$LineCharts__Missing = {$: 'LineCharts__Missing'};
-var $author$project$Examples$LineCharts__Montone = {$: 'LineCharts__Montone'};
-var $author$project$Examples$LineCharts__Pattern = {$: 'LineCharts__Pattern'};
-var $author$project$Examples$LineCharts__Stacked = {$: 'LineCharts__Stacked'};
-var $author$project$Examples$LineCharts__Stepped = {$: 'LineCharts__Stepped'};
-var $author$project$Examples$LineCharts__Tooltip = {$: 'LineCharts__Tooltip'};
-var $author$project$Examples$LineCharts__TooltipStack = {$: 'LineCharts__TooltipStack'};
-var $author$project$Examples$LineCharts__Width = {$: 'LineCharts__Width'};
-var $author$project$Examples$ScatterCharts__Basic = {$: 'ScatterCharts__Basic'};
-var $author$project$Examples$ScatterCharts__Borders = {$: 'ScatterCharts__Borders'};
-var $author$project$Examples$ScatterCharts__Colors = {$: 'ScatterCharts__Colors'};
-var $author$project$Examples$ScatterCharts__DataDependent = {$: 'ScatterCharts__DataDependent'};
-var $author$project$Examples$ScatterCharts__Highlight = {$: 'ScatterCharts__Highlight'};
-var $author$project$Examples$ScatterCharts__Labels = {$: 'ScatterCharts__Labels'};
-var $author$project$Examples$ScatterCharts__Legends = {$: 'ScatterCharts__Legends'};
-var $author$project$Examples$ScatterCharts__Opacity = {$: 'ScatterCharts__Opacity'};
-var $author$project$Examples$ScatterCharts__Shapes = {$: 'ScatterCharts__Shapes'};
-var $author$project$Examples$ScatterCharts__Sizes = {$: 'ScatterCharts__Sizes'};
-var $author$project$Examples$ScatterCharts__Tooltip = {$: 'ScatterCharts__Tooltip'};
-var $author$project$Examples$all = _List_fromArray(
-	[$author$project$Examples$BarCharts__Gradient, $author$project$Examples$BarCharts__VariableWidth, $author$project$Examples$BarCharts__Title, $author$project$Examples$BarCharts__TooltipStack, $author$project$Examples$BarCharts__Tooltip, $author$project$Examples$BarCharts__BarLabels, $author$project$Examples$BarCharts__Pattern, $author$project$Examples$BarCharts__Histogram, $author$project$Examples$BarCharts__BinLabelsAdvanced, $author$project$Examples$BarCharts__Spacing, $author$project$Examples$BarCharts__Highlight, $author$project$Examples$BarCharts__DataDependent, $author$project$Examples$BarCharts__Color, $author$project$Examples$BarCharts__TooltipBin, $author$project$Examples$BarCharts__Corners, $author$project$Examples$BarCharts__Ungroup, $author$project$Examples$BarCharts__BinLabels, $author$project$Examples$BarCharts__Stacked, $author$project$Examples$BarCharts__Margin, $author$project$Examples$BarCharts__Borders, $author$project$Examples$BarCharts__Opacity, $author$project$Examples$BarCharts__Legends, $author$project$Examples$BarCharts__Basic, $author$project$Examples$Frame__Lines, $author$project$Examples$Frame__Position, $author$project$Examples$Frame__Coordinates, $author$project$Examples$Frame__GridFilter, $author$project$Examples$Frame__Dimensions, $author$project$Examples$Frame__CustomElements, $author$project$Examples$Frame__NoArrow, $author$project$Examples$Frame__Background, $author$project$Examples$Frame__Rect, $author$project$Examples$Frame__Padding, $author$project$Examples$Frame__Times, $author$project$Examples$Frame__OnlyInts, $author$project$Examples$Frame__GridColor, $author$project$Examples$Frame__Offset, $author$project$Examples$Frame__Color, $author$project$Examples$Frame__Amount, $author$project$Examples$Frame__Titles, $author$project$Examples$Frame__CustomLabels, $author$project$Examples$Frame__Margin, $author$project$Examples$Frame__LabelWithLine, $author$project$Examples$Frame__DotGrid, $author$project$Examples$Frame__CustomFormat, $author$project$Examples$Frame__AxisLength, $author$project$Examples$Frame__Arbitrary, $author$project$Examples$Frame__Legends, $author$project$Examples$Frame__Basic, $author$project$Examples$Interactivity__ChangeContent, $author$project$Examples$Interactivity__Direction, $author$project$Examples$Interactivity__ChangeDot, $author$project$Examples$Interactivity__Border, $author$project$Examples$Interactivity__Zoom, $author$project$Examples$Interactivity__BasicBin, $author$project$Examples$Interactivity__BasicStack, $author$project$Examples$Interactivity__Coordinates, $author$project$Examples$Interactivity__ChangeName, $author$project$Examples$Interactivity__NoArrow, $author$project$Examples$Interactivity__FilterSearch, $author$project$Examples$Interactivity__Background, $author$project$Examples$Interactivity__BasicBar, $author$project$Examples$Interactivity__BasicArea, $author$project$Examples$Interactivity__TrickyTooltip, $author$project$Examples$Interactivity__Multiple, $author$project$Examples$Interactivity__BasicLine, $author$project$Examples$Interactivity__Offset, $author$project$Examples$Interactivity__DoubleSearch, $author$project$Examples$Interactivity__ChangeUnit, $author$project$Examples$Interactivity__Focal, $author$project$Examples$LineCharts__Area, $author$project$Examples$LineCharts__Gradient, $author$project$Examples$LineCharts__Width, $author$project$Examples$LineCharts__TooltipStack, $author$project$Examples$LineCharts__Tooltip, $author$project$Examples$LineCharts__Montone, $author$project$Examples$LineCharts__Pattern, $author$project$Examples$LineCharts__Dots, $author$project$Examples$LineCharts__Dashed, $author$project$Examples$LineCharts__Color, $author$project$Examples$LineCharts__Stepped, $author$project$Examples$LineCharts__Stacked, $author$project$Examples$LineCharts__Labels, $author$project$Examples$LineCharts__Missing, $author$project$Examples$LineCharts__Legends, $author$project$Examples$LineCharts__Basic, $author$project$Examples$Frontpage__BasicBubble, $author$project$Examples$Frontpage__BasicNavigation, $author$project$Examples$Frontpage__BasicBar, $author$project$Examples$Frontpage__BasicArea, $author$project$Examples$Frontpage__Concise, $author$project$Examples$Frontpage__BasicLine, $author$project$Examples$Frontpage__BasicScatter, $author$project$Examples$Frontpage__Familiar, $author$project$Examples$ScatterCharts__Colors, $author$project$Examples$ScatterCharts__Shapes, $author$project$Examples$ScatterCharts__Tooltip, $author$project$Examples$ScatterCharts__Highlight, $author$project$Examples$ScatterCharts__DataDependent, $author$project$Examples$ScatterCharts__Borders, $author$project$Examples$ScatterCharts__Labels, $author$project$Examples$ScatterCharts__Opacity, $author$project$Examples$ScatterCharts__Sizes, $author$project$Examples$ScatterCharts__Legends, $author$project$Examples$ScatterCharts__Basic]);
-var $elm$core$Dict$RBEmpty_elm_builtin = {$: 'RBEmpty_elm_builtin'};
-var $elm$core$Dict$empty = $elm$core$Dict$RBEmpty_elm_builtin;
-var $author$project$Examples$BarCharts$BarLabels$meta = {category: 'Bar charts', categoryOrder: 1, description: 'Add custom bar labels.', name: 'Labels for bars', order: 15};
-var $author$project$Examples$BarCharts$Basic$meta = {category: 'Bar charts', categoryOrder: 1, description: 'Make a basic bar chart.', name: 'Basic', order: 1};
-var $author$project$Examples$BarCharts$BinLabels$meta = {category: 'Bar charts', categoryOrder: 1, description: 'Add bin labels.', name: 'Labels for bins', order: 15};
-var $author$project$Examples$BarCharts$BinLabelsAdvanced$meta = {category: 'Bar charts', categoryOrder: 1, description: 'Add custom bin labels.', name: 'Advanced labels for bins', order: 15};
-var $author$project$Examples$BarCharts$Borders$meta = {category: 'Bar charts', categoryOrder: 1, description: 'Add border to bar.', name: 'Borders', order: 8};
-var $author$project$Examples$BarCharts$Color$meta = {category: 'Bar charts', categoryOrder: 1, description: 'Change bar color.', name: 'Color', order: 7};
-var $author$project$Examples$BarCharts$Corners$meta = {category: 'Bar charts', categoryOrder: 1, description: 'Add rounded corners to bar.', name: 'Corners', order: 9};
-var $author$project$Examples$BarCharts$DataDependent$meta = {category: 'Bar charts', categoryOrder: 1, description: 'Change bar based on data.', name: 'Data dependent styling', order: 12};
-var $author$project$Examples$BarCharts$Gradient$meta = {category: 'Bar charts', categoryOrder: 1, description: 'Add gradient to bar.', name: 'Gradient', order: 10};
-var $author$project$Examples$BarCharts$Highlight$meta = {category: 'Bar charts', categoryOrder: 1, description: 'Add highlight to bar.', name: 'Highlight', order: 20};
-var $author$project$Examples$BarCharts$Histogram$meta = {category: 'Bar charts', categoryOrder: 1, description: 'Make a histogram (control x value).', name: 'Histogram', order: 2};
-var $author$project$Examples$BarCharts$Legends$meta = {category: 'Bar charts', categoryOrder: 1, description: 'Add legends to bar chart.', name: 'Legends', order: 16};
-var $author$project$Examples$BarCharts$Margin$meta = {category: 'Bar charts', categoryOrder: 1, description: 'Change margins around bin.', name: 'Margin', order: 6};
-var $author$project$Examples$BarCharts$Opacity$meta = {category: 'Bar charts', categoryOrder: 1, description: 'Change opacity of bar.', name: 'Opacity', order: 10};
-var $author$project$Examples$BarCharts$Pattern$meta = {category: 'Bar charts', categoryOrder: 1, description: 'Change pattern of bar.', name: 'Pattern', order: 11};
-var $author$project$Examples$BarCharts$Spacing$meta = {category: 'Bar charts', categoryOrder: 1, description: 'Remove or add spacing between bars.', name: 'Spacing', order: 5};
-var $author$project$Examples$BarCharts$Stacked$meta = {category: 'Bar charts', categoryOrder: 1, description: 'Stack bars.', name: 'Stacked', order: 3};
-var $author$project$Examples$BarCharts$Title$meta = {category: 'Bar charts', categoryOrder: 1, description: 'Add labels to bar chart.', name: 'Titles', order: 16};
-var $author$project$Examples$BarCharts$Tooltip$meta = {category: 'Bar charts', categoryOrder: 1, description: 'Add a basic tooltip for nearest bar.', name: 'Tooltip', order: 12};
-var $author$project$Examples$BarCharts$TooltipBin$meta = {category: 'Bar charts', categoryOrder: 1, description: 'Add a tooltip for nearest bin.', name: 'Bin tooltip', order: 13};
-var $author$project$Examples$BarCharts$TooltipStack$meta = {category: 'Bar charts', categoryOrder: 1, description: 'Add a tooltip for nearest stack.', name: 'Stack tooltip', order: 14};
-var $author$project$Examples$BarCharts$Ungroup$meta = {category: 'Bar charts', categoryOrder: 1, description: 'Have bars overlap rather than be side-by-side.', name: 'Ungroup', order: 4};
-var $author$project$Examples$BarCharts$VariableWidth$meta = {category: 'Bar charts', categoryOrder: 1, description: 'Bars with varying widths.', name: 'Variable width', order: 2};
-var $author$project$Examples$Frame$Amount$meta = {category: 'Navigation', categoryOrder: 4, description: 'Change the number of labels or ticks.', name: 'Amount of labels/ticks', order: 6};
-var $author$project$Examples$Frame$Arbitrary$meta = {category: 'Navigation', categoryOrder: 4, description: 'Add custom SVG/HTML to your chart.', name: 'Arbitrary SVG and HTML', order: 35};
-var $author$project$Examples$Frame$AxisLength$meta = {category: 'Navigation', categoryOrder: 4, description: 'Change the length of your axis line.', name: 'Adjust axis line', order: 12};
-var $author$project$Examples$Frame$Background$meta = {category: 'Navigation', categoryOrder: 4, description: 'Color the frame.', name: 'Background', order: 18};
-var $author$project$Examples$Frame$Basic$meta = {category: 'Navigation', categoryOrder: 4, description: 'Add grid, axes, ticks, and labels.', name: 'Basic', order: 1};
-var $author$project$Examples$Frame$Color$meta = {category: 'Navigation', categoryOrder: 4, description: 'Change color of items.', name: 'Color', order: 2};
-var $author$project$Examples$Frame$Coordinates$meta = {category: 'Navigation', categoryOrder: 4, description: 'Using the low level coordinate system.', name: 'Coordinates', order: 39};
-var $author$project$Examples$Frame$CustomElements$meta = {category: 'Navigation', categoryOrder: 4, description: 'Add custom tracked elements', name: 'Custom chart elements', order: 100};
-var $author$project$Examples$Frame$CustomFormat$meta = {category: 'Navigation', categoryOrder: 4, description: 'Change how your labels are formatted.', name: 'Custom formatting', order: 9};
-var $author$project$Examples$Frame$CustomLabels$meta = {category: 'Navigation', categoryOrder: 4, description: 'Control labels entirely.', name: 'Custom labels', order: 9};
-var $author$project$Examples$Frame$Dimensions$meta = {category: 'Navigation', categoryOrder: 4, description: 'Limit or extend your range and domain.', name: 'Control dimensions', order: 11};
-var $author$project$Examples$Frame$DotGrid$meta = {category: 'Navigation', categoryOrder: 4, description: 'Use dots instead of grid lines.', name: 'Dotted grid', order: 13};
-var $author$project$Examples$Frame$GridColor$meta = {category: 'Navigation', categoryOrder: 4, description: 'Change color of grid.', name: 'Color of grid', order: 14};
-var $author$project$Examples$Frame$GridFilter$meta = {category: 'Navigation', categoryOrder: 4, description: 'Prevent automatically added gridlines.', name: 'Remove grid lines', order: 15};
-var $author$project$Examples$Frame$LabelWithLine$meta = {category: 'Navigation', categoryOrder: 4, description: 'Add a label and line to chart.', name: 'Label with line', order: 20};
-var $author$project$Examples$Frame$Legends$meta = {category: 'Navigation', categoryOrder: 4, description: 'Add legends to chart.', name: 'Legends', order: 21};
-var $author$project$Examples$Frame$Lines$meta = {category: 'Navigation', categoryOrder: 4, description: 'Add a guidence line.', name: 'Lines', order: 30};
-var $author$project$Examples$Frame$Margin$meta = {category: 'Navigation', categoryOrder: 4, description: 'Add margin to frame.', name: 'Margin', order: 17};
-var $author$project$Examples$Frame$NoArrow$meta = {category: 'Navigation', categoryOrder: 4, description: 'Remove arrow from axis line.', name: 'Remove arrow', order: 5};
-var $author$project$Examples$Frame$Offset$meta = {category: 'Navigation', categoryOrder: 4, description: 'Change position of labels.', name: 'Move labels', order: 4};
-var $author$project$Examples$Frame$OnlyInts$meta = {category: 'Navigation', categoryOrder: 4, description: 'Only show integer labels.', name: 'Only integers', order: 8};
-var $author$project$Examples$Frame$Padding$meta = {category: 'Navigation', categoryOrder: 4, description: 'Add padding to frame.', name: 'Padding', order: 16};
-var $author$project$Examples$Frame$Position$meta = {category: 'Navigation', categoryOrder: 4, description: 'Change color of position.', name: 'Position', order: 3};
-var $author$project$Examples$Frame$Rect$meta = {category: 'Navigation', categoryOrder: 4, description: 'Add a rectangle.', name: 'Rectangle', order: 31};
-var $author$project$Examples$Frame$Times$meta = {category: 'Navigation', categoryOrder: 4, description: 'Use dates as labels.', name: 'Timeline', order: 8};
-var $author$project$Examples$Frame$Titles$meta = {category: 'Navigation', categoryOrder: 4, description: 'Add titles to chart.', name: 'Titles', order: 20};
-var $author$project$Examples$Frontpage$BasicArea$meta = {category: 'Basic', categoryOrder: 2, description: 'Make a basic area chart.', name: 'Area chart', order: 1};
-var $author$project$Examples$Frontpage$BasicBar$meta = {category: 'Basic', categoryOrder: 1, description: 'Make a basic bar chart.', name: 'Bar chart', order: 1};
-var $author$project$Examples$Frontpage$BasicBubble$meta = {category: 'Basic', categoryOrder: 3, description: 'Make a basic bubble chart.', name: 'Bubble chart', order: 1};
-var $author$project$Examples$Frontpage$BasicLine$meta = {category: 'Basic', categoryOrder: 3, description: 'Make a basic line chart.', name: 'Line chart', order: 1};
-var $author$project$Examples$Frontpage$BasicNavigation$meta = {category: 'Basic', categoryOrder: 1, description: 'Add basic navigation items to chart.', name: 'Basic navigation', order: 1};
-var $author$project$Examples$Frontpage$BasicScatter$meta = {category: 'Basic', categoryOrder: 2, description: 'Make a basic scatter chart.', name: 'Scatter chart', order: 1};
-var $author$project$Examples$Frontpage$Concise$meta = {category: 'Front page', categoryOrder: 1, description: 'Add custom bar labels.', name: 'Labels for bars', order: 15};
-var $author$project$Examples$Frontpage$Familiar$meta = {category: 'Front page', categoryOrder: 2, description: 'Make a basic scatter chart.', name: 'Basic', order: 1};
-var $author$project$Examples$Interactivity$Background$meta = {category: 'Interactivity', categoryOrder: 5, description: 'Change background of tooltip.', name: 'Edit background', order: 12};
-var $author$project$Examples$Interactivity$BasicArea$meta = {category: 'Interactivity', categoryOrder: 5, description: 'Add tooltip for nearest stack in line or scatter chart.', name: 'Basic tooltip for area charts', order: 5};
-var $author$project$Examples$Interactivity$BasicBar$meta = {category: 'Interactivity', categoryOrder: 5, description: 'Add a tooltip for nearest bar.', name: 'Basic bar tooltip', order: 1};
-var $author$project$Examples$Interactivity$BasicBin$meta = {category: 'Interactivity', categoryOrder: 5, description: 'Add a tooltip for nearest bin.', name: 'Basic bin tooltip', order: 3};
-var $author$project$Examples$Interactivity$BasicLine$meta = {category: 'Interactivity', categoryOrder: 5, description: 'Add basic tooltip for line or scatter charts.', name: 'Basic tooltip for dots', order: 4};
-var $author$project$Examples$Interactivity$BasicStack$meta = {category: 'Interactivity', categoryOrder: 5, description: 'Add a tooltip for nearest stack.', name: 'Basic stack tooltip', order: 2};
-var $author$project$Examples$Interactivity$Border$meta = {category: 'Interactivity', categoryOrder: 5, description: 'Change border of tooltip.', name: 'Edit border', order: 11};
-var $author$project$Examples$Interactivity$ChangeContent$meta = {category: 'Interactivity', categoryOrder: 5, description: 'Change the content of the tooltip.', name: 'Change content', order: 7};
-var $author$project$Examples$Interactivity$ChangeDot$meta = {category: 'Interactivity', categoryOrder: 5, description: 'Change styling if hovered.', name: 'Change style based on events', order: 7};
-var $author$project$Examples$Interactivity$ChangeName$meta = {category: 'Interactivity', categoryOrder: 5, description: 'Change the default series name in tooltip.', name: 'Change name', order: 6};
-var $author$project$Examples$Interactivity$ChangeUnit$meta = {category: 'Interactivity', categoryOrder: 5, description: 'Change the value print in the tooltip.', name: 'Change value formatting', order: 7};
-var $elm$core$Basics$negate = function (n) {
-	return -n;
-};
-var $author$project$Examples$Interactivity$Coordinates$meta = {category: 'Interactivity', categoryOrder: 5, description: 'Get the hovered coordinates.', name: 'Basic coordinates', order: -1};
-var $author$project$Examples$Interactivity$Direction$meta = {category: 'Interactivity', categoryOrder: 5, description: 'Change direction of tooltip.', name: 'Direction', order: 8};
-var $author$project$Examples$Interactivity$DoubleSearch$meta = {category: 'Interactivity', categoryOrder: 5, description: 'Add more than one search.', name: 'Multiple tooltips', order: 17};
-var $author$project$Examples$Interactivity$FilterSearch$meta = {category: 'Interactivity', categoryOrder: 5, description: 'Narrow down tooltip item search.', name: 'Filter item search', order: 15};
-var $author$project$Examples$Interactivity$Focal$meta = {category: 'Interactivity', categoryOrder: 5, description: 'Determine where tooltip is placed in relation to item.', name: 'Set focal point', order: 11};
-var $author$project$Examples$Interactivity$Multiple$meta = {category: 'Interactivity', categoryOrder: 5, description: 'Add a tooltip for bars and series.', name: 'Mixed chart types', order: 13};
-var $author$project$Examples$Interactivity$NoArrow$meta = {category: 'Interactivity', categoryOrder: 5, description: 'Don\'t add pointer to tooltip.', name: 'Remove pointer', order: 8};
-var $author$project$Examples$Interactivity$Offset$meta = {category: 'Interactivity', categoryOrder: 5, description: 'Change distance of tooltip to item.', name: 'Edit offset', order: 9};
-var $author$project$Examples$Interactivity$TrickyTooltip$meta = {category: 'Interactivity', categoryOrder: 5, description: 'Add tooltip for each stack in hovered bin.', name: 'Multiple tooltips for single group', order: 20};
-var $author$project$Examples$Interactivity$Zoom$meta = {category: 'Interactivity', categoryOrder: 5, description: 'Add zoom effect.', name: 'Zoom', order: 20};
-var $author$project$Examples$LineCharts$Area$meta = {category: 'Line charts', categoryOrder: 3, description: 'Set opacity of the area under curve.', name: 'Area under curve', order: 9};
-var $author$project$Examples$LineCharts$Basic$meta = {category: 'Line charts', categoryOrder: 3, description: 'Use a linear interpolation.', name: 'Linear', order: 1};
-var $author$project$Examples$LineCharts$Color$meta = {category: 'Line charts', categoryOrder: 3, description: 'Change color of line.', name: 'Color', order: 4};
-var $author$project$Examples$LineCharts$Dashed$meta = {category: 'Line charts', categoryOrder: 3, description: 'Make a line dashed.', name: 'Dashed', order: 6};
-var $author$project$Examples$LineCharts$Dots$meta = {category: 'Line charts', categoryOrder: 3, description: 'Add dots to a line.', name: 'Dots', order: 7};
-var $author$project$Examples$LineCharts$Gradient$meta = {category: 'Line charts', categoryOrder: 3, description: 'Add a gradient to your area under the curve.', name: 'Gradient', order: 10};
-var $author$project$Examples$LineCharts$Labels$meta = {category: 'Line charts', categoryOrder: 3, description: 'Add custom labels on each data point.', name: 'Labels for each point', order: 12};
-var $author$project$Examples$LineCharts$Legends$meta = {category: 'Line charts', categoryOrder: 3, description: 'Add legends to your chart.', name: 'Legends', order: 12};
-var $author$project$Examples$LineCharts$Missing$meta = {category: 'Line charts', categoryOrder: 3, description: 'Handle missing data.', name: 'Missing data', order: 4};
-var $author$project$Examples$LineCharts$Montone$meta = {category: 'Line charts', categoryOrder: 3, description: 'Use a monotone interpolation.', name: 'Monotone', order: 2};
-var $author$project$Examples$LineCharts$Pattern$meta = {category: 'Line charts', categoryOrder: 3, description: 'Add a pattern to the area under the curve.', name: 'Pattern', order: 11};
-var $author$project$Examples$LineCharts$Stacked$meta = {category: 'Line charts', categoryOrder: 3, description: 'Stack lines.', name: 'Stacked', order: 8};
-var $author$project$Examples$LineCharts$Stepped$meta = {category: 'Line charts', categoryOrder: 3, description: 'Use a stepped interpolation.', name: 'Stepped', order: 3};
-var $author$project$Examples$LineCharts$Tooltip$meta = {category: 'Line charts', categoryOrder: 3, description: 'Add basic tooltip.', name: 'Tooltip', order: 13};
-var $author$project$Examples$LineCharts$TooltipStack$meta = {category: 'Line charts', categoryOrder: 3, description: 'Add tooltip for nearest stack.', name: 'Tooltip for stacks', order: 14};
-var $author$project$Examples$LineCharts$Width$meta = {category: 'Line charts', categoryOrder: 3, description: 'Change width of line.', name: 'Width', order: 5};
-var $author$project$Examples$ScatterCharts$Basic$meta = {category: 'Scatter charts', categoryOrder: 2, description: 'Make a basic scatter chart.', name: 'Basic', order: 1};
-var $author$project$Examples$ScatterCharts$Borders$meta = {category: 'Scatter charts', categoryOrder: 2, description: 'Change border of dots.', name: 'Borders', order: 5};
-var $author$project$Examples$ScatterCharts$Colors$meta = {category: 'Scatter charts', categoryOrder: 2, description: 'Change color of dots.', name: 'Color', order: 3};
-var $author$project$Examples$ScatterCharts$DataDependent$meta = {category: 'Scatter charts', categoryOrder: 2, description: 'Change styling of individual dots.', name: 'Data dependent styling', order: 7};
-var $author$project$Examples$ScatterCharts$Highlight$meta = {category: 'Scatter charts', categoryOrder: 2, description: 'Highlight dots.', name: 'Highlight', order: 6};
-var $author$project$Examples$ScatterCharts$Labels$meta = {category: 'Scatter charts', categoryOrder: 2, description: 'Add labels to each dot.', name: 'Labels', order: 9};
-var $author$project$Examples$ScatterCharts$Legends$meta = {category: 'Scatter charts', categoryOrder: 2, description: 'Add legends to scatter chart.', name: 'Legends', order: 10};
-var $author$project$Examples$ScatterCharts$Opacity$meta = {category: 'Scatter charts', categoryOrder: 2, description: 'Change opacity of dots.', name: 'Opacity', order: 6};
-var $author$project$Examples$ScatterCharts$Shapes$meta = {category: 'Scatter charts', categoryOrder: 2, description: 'Change shape of dots.', name: 'Shapes', order: 2};
-var $author$project$Examples$ScatterCharts$Sizes$meta = {category: 'Scatter charts', categoryOrder: 2, description: 'Change size of dots.', name: 'Sizes', order: 4};
-var $author$project$Examples$ScatterCharts$Tooltip$meta = {category: 'Scatter charts', categoryOrder: 2, description: 'Add basic tooltip.', name: 'Tooltip', order: 8};
-var $author$project$Examples$meta = function (chosen) {
-	switch (chosen.$) {
-		case 'BarCharts__Gradient':
-			return $author$project$Examples$BarCharts$Gradient$meta;
-		case 'BarCharts__VariableWidth':
-			return $author$project$Examples$BarCharts$VariableWidth$meta;
-		case 'BarCharts__Title':
-			return $author$project$Examples$BarCharts$Title$meta;
-		case 'BarCharts__TooltipStack':
-			return $author$project$Examples$BarCharts$TooltipStack$meta;
-		case 'BarCharts__Tooltip':
-			return $author$project$Examples$BarCharts$Tooltip$meta;
-		case 'BarCharts__BarLabels':
-			return $author$project$Examples$BarCharts$BarLabels$meta;
-		case 'BarCharts__Pattern':
-			return $author$project$Examples$BarCharts$Pattern$meta;
-		case 'BarCharts__Histogram':
-			return $author$project$Examples$BarCharts$Histogram$meta;
-		case 'BarCharts__BinLabelsAdvanced':
-			return $author$project$Examples$BarCharts$BinLabelsAdvanced$meta;
-		case 'BarCharts__Spacing':
-			return $author$project$Examples$BarCharts$Spacing$meta;
-		case 'BarCharts__Highlight':
-			return $author$project$Examples$BarCharts$Highlight$meta;
-		case 'BarCharts__DataDependent':
-			return $author$project$Examples$BarCharts$DataDependent$meta;
-		case 'BarCharts__Color':
-			return $author$project$Examples$BarCharts$Color$meta;
-		case 'BarCharts__TooltipBin':
-			return $author$project$Examples$BarCharts$TooltipBin$meta;
-		case 'BarCharts__Corners':
-			return $author$project$Examples$BarCharts$Corners$meta;
-		case 'BarCharts__Ungroup':
-			return $author$project$Examples$BarCharts$Ungroup$meta;
-		case 'BarCharts__BinLabels':
-			return $author$project$Examples$BarCharts$BinLabels$meta;
-		case 'BarCharts__Stacked':
-			return $author$project$Examples$BarCharts$Stacked$meta;
-		case 'BarCharts__Margin':
-			return $author$project$Examples$BarCharts$Margin$meta;
-		case 'BarCharts__Borders':
-			return $author$project$Examples$BarCharts$Borders$meta;
-		case 'BarCharts__Opacity':
-			return $author$project$Examples$BarCharts$Opacity$meta;
-		case 'BarCharts__Legends':
-			return $author$project$Examples$BarCharts$Legends$meta;
-		case 'BarCharts__Basic':
-			return $author$project$Examples$BarCharts$Basic$meta;
-		case 'Frame__Lines':
-			return $author$project$Examples$Frame$Lines$meta;
-		case 'Frame__Position':
-			return $author$project$Examples$Frame$Position$meta;
-		case 'Frame__Coordinates':
-			return $author$project$Examples$Frame$Coordinates$meta;
-		case 'Frame__GridFilter':
-			return $author$project$Examples$Frame$GridFilter$meta;
-		case 'Frame__Dimensions':
-			return $author$project$Examples$Frame$Dimensions$meta;
-		case 'Frame__CustomElements':
-			return $author$project$Examples$Frame$CustomElements$meta;
-		case 'Frame__NoArrow':
-			return $author$project$Examples$Frame$NoArrow$meta;
-		case 'Frame__Background':
-			return $author$project$Examples$Frame$Background$meta;
-		case 'Frame__Rect':
-			return $author$project$Examples$Frame$Rect$meta;
-		case 'Frame__Padding':
-			return $author$project$Examples$Frame$Padding$meta;
-		case 'Frame__Times':
-			return $author$project$Examples$Frame$Times$meta;
-		case 'Frame__OnlyInts':
-			return $author$project$Examples$Frame$OnlyInts$meta;
-		case 'Frame__GridColor':
-			return $author$project$Examples$Frame$GridColor$meta;
-		case 'Frame__Offset':
-			return $author$project$Examples$Frame$Offset$meta;
-		case 'Frame__Color':
-			return $author$project$Examples$Frame$Color$meta;
-		case 'Frame__Amount':
-			return $author$project$Examples$Frame$Amount$meta;
-		case 'Frame__Titles':
-			return $author$project$Examples$Frame$Titles$meta;
-		case 'Frame__CustomLabels':
-			return $author$project$Examples$Frame$CustomLabels$meta;
-		case 'Frame__Margin':
-			return $author$project$Examples$Frame$Margin$meta;
-		case 'Frame__LabelWithLine':
-			return $author$project$Examples$Frame$LabelWithLine$meta;
-		case 'Frame__DotGrid':
-			return $author$project$Examples$Frame$DotGrid$meta;
-		case 'Frame__CustomFormat':
-			return $author$project$Examples$Frame$CustomFormat$meta;
-		case 'Frame__AxisLength':
-			return $author$project$Examples$Frame$AxisLength$meta;
-		case 'Frame__Arbitrary':
-			return $author$project$Examples$Frame$Arbitrary$meta;
-		case 'Frame__Legends':
-			return $author$project$Examples$Frame$Legends$meta;
-		case 'Frame__Basic':
-			return $author$project$Examples$Frame$Basic$meta;
-		case 'Interactivity__ChangeContent':
-			return $author$project$Examples$Interactivity$ChangeContent$meta;
-		case 'Interactivity__Direction':
-			return $author$project$Examples$Interactivity$Direction$meta;
-		case 'Interactivity__ChangeDot':
-			return $author$project$Examples$Interactivity$ChangeDot$meta;
-		case 'Interactivity__Border':
-			return $author$project$Examples$Interactivity$Border$meta;
-		case 'Interactivity__Zoom':
-			return $author$project$Examples$Interactivity$Zoom$meta;
-		case 'Interactivity__BasicBin':
-			return $author$project$Examples$Interactivity$BasicBin$meta;
-		case 'Interactivity__BasicStack':
-			return $author$project$Examples$Interactivity$BasicStack$meta;
-		case 'Interactivity__Coordinates':
-			return $author$project$Examples$Interactivity$Coordinates$meta;
-		case 'Interactivity__ChangeName':
-			return $author$project$Examples$Interactivity$ChangeName$meta;
-		case 'Interactivity__NoArrow':
-			return $author$project$Examples$Interactivity$NoArrow$meta;
-		case 'Interactivity__FilterSearch':
-			return $author$project$Examples$Interactivity$FilterSearch$meta;
-		case 'Interactivity__Background':
-			return $author$project$Examples$Interactivity$Background$meta;
-		case 'Interactivity__BasicBar':
-			return $author$project$Examples$Interactivity$BasicBar$meta;
-		case 'Interactivity__BasicArea':
-			return $author$project$Examples$Interactivity$BasicArea$meta;
-		case 'Interactivity__TrickyTooltip':
-			return $author$project$Examples$Interactivity$TrickyTooltip$meta;
-		case 'Interactivity__Multiple':
-			return $author$project$Examples$Interactivity$Multiple$meta;
-		case 'Interactivity__BasicLine':
-			return $author$project$Examples$Interactivity$BasicLine$meta;
-		case 'Interactivity__Offset':
-			return $author$project$Examples$Interactivity$Offset$meta;
-		case 'Interactivity__DoubleSearch':
-			return $author$project$Examples$Interactivity$DoubleSearch$meta;
-		case 'Interactivity__ChangeUnit':
-			return $author$project$Examples$Interactivity$ChangeUnit$meta;
-		case 'Interactivity__Focal':
-			return $author$project$Examples$Interactivity$Focal$meta;
-		case 'LineCharts__Area':
-			return $author$project$Examples$LineCharts$Area$meta;
-		case 'LineCharts__Gradient':
-			return $author$project$Examples$LineCharts$Gradient$meta;
-		case 'LineCharts__Width':
-			return $author$project$Examples$LineCharts$Width$meta;
-		case 'LineCharts__TooltipStack':
-			return $author$project$Examples$LineCharts$TooltipStack$meta;
-		case 'LineCharts__Tooltip':
-			return $author$project$Examples$LineCharts$Tooltip$meta;
-		case 'LineCharts__Montone':
-			return $author$project$Examples$LineCharts$Montone$meta;
-		case 'LineCharts__Pattern':
-			return $author$project$Examples$LineCharts$Pattern$meta;
-		case 'LineCharts__Dots':
-			return $author$project$Examples$LineCharts$Dots$meta;
-		case 'LineCharts__Dashed':
-			return $author$project$Examples$LineCharts$Dashed$meta;
-		case 'LineCharts__Color':
-			return $author$project$Examples$LineCharts$Color$meta;
-		case 'LineCharts__Stepped':
-			return $author$project$Examples$LineCharts$Stepped$meta;
-		case 'LineCharts__Stacked':
-			return $author$project$Examples$LineCharts$Stacked$meta;
-		case 'LineCharts__Labels':
-			return $author$project$Examples$LineCharts$Labels$meta;
-		case 'LineCharts__Missing':
-			return $author$project$Examples$LineCharts$Missing$meta;
-		case 'LineCharts__Legends':
-			return $author$project$Examples$LineCharts$Legends$meta;
-		case 'LineCharts__Basic':
-			return $author$project$Examples$LineCharts$Basic$meta;
-		case 'Frontpage__BasicBubble':
-			return $author$project$Examples$Frontpage$BasicBubble$meta;
-		case 'Frontpage__BasicNavigation':
-			return $author$project$Examples$Frontpage$BasicNavigation$meta;
-		case 'Frontpage__BasicBar':
-			return $author$project$Examples$Frontpage$BasicBar$meta;
-		case 'Frontpage__BasicArea':
-			return $author$project$Examples$Frontpage$BasicArea$meta;
-		case 'Frontpage__Concise':
-			return $author$project$Examples$Frontpage$Concise$meta;
-		case 'Frontpage__BasicLine':
-			return $author$project$Examples$Frontpage$BasicLine$meta;
-		case 'Frontpage__BasicScatter':
-			return $author$project$Examples$Frontpage$BasicScatter$meta;
-		case 'Frontpage__Familiar':
-			return $author$project$Examples$Frontpage$Familiar$meta;
-		case 'ScatterCharts__Colors':
-			return $author$project$Examples$ScatterCharts$Colors$meta;
-		case 'ScatterCharts__Shapes':
-			return $author$project$Examples$ScatterCharts$Shapes$meta;
-		case 'ScatterCharts__Tooltip':
-			return $author$project$Examples$ScatterCharts$Tooltip$meta;
-		case 'ScatterCharts__Highlight':
-			return $author$project$Examples$ScatterCharts$Highlight$meta;
-		case 'ScatterCharts__DataDependent':
-			return $author$project$Examples$ScatterCharts$DataDependent$meta;
-		case 'ScatterCharts__Borders':
-			return $author$project$Examples$ScatterCharts$Borders$meta;
-		case 'ScatterCharts__Labels':
-			return $author$project$Examples$ScatterCharts$Labels$meta;
-		case 'ScatterCharts__Opacity':
-			return $author$project$Examples$ScatterCharts$Opacity$meta;
-		case 'ScatterCharts__Sizes':
-			return $author$project$Examples$ScatterCharts$Sizes$meta;
-		case 'ScatterCharts__Legends':
-			return $author$project$Examples$ScatterCharts$Legends$meta;
-		default:
-			return $author$project$Examples$ScatterCharts$Basic$meta;
-	}
-};
-var $elm$core$Basics$composeR = F3(
-	function (f, g, x) {
-		return g(
-			f(x));
-	});
-var $elm$core$String$replace = F3(
-	function (before, after, string) {
+var $elm$browser$Debugger$Main$download = F2(
+	function (metadata, history) {
+		var historyLength = $elm$browser$Debugger$History$size(history);
 		return A2(
-			$elm$core$String$join,
-			after,
-			A2($elm$core$String$split, before, string));
+			$elm$core$Task$perform,
+			function (_v0) {
+				return $elm$browser$Debugger$Main$NoOp;
+			},
+			A2(
+				_Debugger_download,
+				historyLength,
+				_Json_unwrap(
+					$elm$json$Json$Encode$object(
+						_List_fromArray(
+							[
+								_Utils_Tuple2(
+								'metadata',
+								$elm$browser$Debugger$Metadata$encode(metadata)),
+								_Utils_Tuple2(
+								'history',
+								$elm$browser$Debugger$History$encode(history))
+							])))));
 	});
-var $elm$core$String$toLower = _String_toLower;
-var $author$project$Ui$Thumbnail$urlify = A2(
-	$elm$core$Basics$composeR,
-	A2($elm$core$String$replace, ' ', '-'),
-	A2(
-		$elm$core$Basics$composeR,
-		A2($elm$core$String$replace, '/', '-'),
-		$elm$core$String$toLower));
-var $author$project$Ui$Thumbnail$toUrlGroup = function (title) {
-	return '/documentation/' + $author$project$Ui$Thumbnail$urlify(title);
+var $elm$browser$Debugger$Main$Vertical = F3(
+	function (a, b, c) {
+		return {$: 'Vertical', a: a, b: b, c: c};
+	});
+var $elm$browser$Debugger$Main$drag = F2(
+	function (info, layout) {
+		if (layout.$ === 'Horizontal') {
+			var status = layout.a;
+			var y = layout.c;
+			return A3($elm$browser$Debugger$Main$Horizontal, status, info.x / info.width, y);
+		} else {
+			var status = layout.a;
+			var x = layout.b;
+			return A3($elm$browser$Debugger$Main$Vertical, status, x, info.y / info.height);
+		}
+	});
+var $elm$browser$Debugger$History$Stepping = F2(
+	function (a, b) {
+		return {$: 'Stepping', a: a, b: b};
+	});
+var $elm$browser$Debugger$History$Done = F2(
+	function (a, b) {
+		return {$: 'Done', a: a, b: b};
+	});
+var $elm$browser$Debugger$History$getHelp = F3(
+	function (update, msg, getResult) {
+		if (getResult.$ === 'Done') {
+			return getResult;
+		} else {
+			var n = getResult.a;
+			var model = getResult.b;
+			return (!n) ? A2(
+				$elm$browser$Debugger$History$Done,
+				msg,
+				A2(update, msg, model).a) : A2(
+				$elm$browser$Debugger$History$Stepping,
+				n - 1,
+				A2(update, msg, model).a);
+		}
+	});
+var $elm$browser$Debugger$History$undone = function (getResult) {
+	undone:
+	while (true) {
+		if (getResult.$ === 'Done') {
+			var msg = getResult.a;
+			var model = getResult.b;
+			return _Utils_Tuple2(model, msg);
+		} else {
+			var $temp$getResult = getResult;
+			getResult = $temp$getResult;
+			continue undone;
+		}
+	}
 };
-var $elm$core$Basics$compare = _Utils_compare;
+var $elm$browser$Debugger$History$get = F3(
+	function (update, index, history) {
+		get:
+		while (true) {
+			var recent = history.recent;
+			var snapshotMax = history.numMessages - recent.numMessages;
+			if (_Utils_cmp(index, snapshotMax) > -1) {
+				return $elm$browser$Debugger$History$undone(
+					A3(
+						$elm$core$List$foldr,
+						$elm$browser$Debugger$History$getHelp(update),
+						A2($elm$browser$Debugger$History$Stepping, index - snapshotMax, recent.model),
+						recent.messages));
+			} else {
+				var _v0 = A2($elm$core$Array$get, (index / $elm$browser$Debugger$History$maxSnapshotSize) | 0, history.snapshots);
+				if (_v0.$ === 'Nothing') {
+					var $temp$update = update,
+						$temp$index = index,
+						$temp$history = history;
+					update = $temp$update;
+					index = $temp$index;
+					history = $temp$history;
+					continue get;
+				} else {
+					var model = _v0.a.model;
+					var messages = _v0.a.messages;
+					return $elm$browser$Debugger$History$undone(
+						A3(
+							$elm$core$Array$foldr,
+							$elm$browser$Debugger$History$getHelp(update),
+							A2($elm$browser$Debugger$History$Stepping, index % $elm$browser$Debugger$History$maxSnapshotSize, model),
+							messages));
+				}
+			}
+		}
+	});
+var $elm$browser$Debugger$History$getRecentMsg = function (history) {
+	getRecentMsg:
+	while (true) {
+		var _v0 = history.recent.messages;
+		if (!_v0.b) {
+			var $temp$history = history;
+			history = $temp$history;
+			continue getRecentMsg;
+		} else {
+			var first = _v0.a;
+			return first;
+		}
+	}
+};
 var $elm$core$Dict$get = F2(
 	function (targetKey, dict) {
 		get:
@@ -6014,114 +9514,243 @@ var $elm$core$Dict$get = F2(
 			}
 		}
 	});
-var $elm$core$Dict$Black = {$: 'Black'};
-var $elm$core$Dict$RBNode_elm_builtin = F5(
-	function (a, b, c, d, e) {
-		return {$: 'RBNode_elm_builtin', a: a, b: b, c: c, d: d, e: e};
-	});
-var $elm$core$Dict$Red = {$: 'Red'};
-var $elm$core$Dict$balance = F5(
-	function (color, key, value, left, right) {
-		if ((right.$ === 'RBNode_elm_builtin') && (right.a.$ === 'Red')) {
-			var _v1 = right.a;
-			var rK = right.b;
-			var rV = right.c;
-			var rLeft = right.d;
-			var rRight = right.e;
-			if ((left.$ === 'RBNode_elm_builtin') && (left.a.$ === 'Red')) {
-				var _v3 = left.a;
-				var lK = left.b;
-				var lV = left.c;
-				var lLeft = left.d;
-				var lRight = left.e;
-				return A5(
-					$elm$core$Dict$RBNode_elm_builtin,
-					$elm$core$Dict$Red,
-					key,
-					value,
-					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, lK, lV, lLeft, lRight),
-					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, rK, rV, rLeft, rRight));
-			} else {
-				return A5(
-					$elm$core$Dict$RBNode_elm_builtin,
-					color,
-					rK,
-					rV,
-					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, key, value, left, rLeft),
-					rRight);
-			}
+var $elm$browser$Debugger$Expando$mergeDictHelp = F3(
+	function (oldDict, key, value) {
+		var _v12 = A2($elm$core$Dict$get, key, oldDict);
+		if (_v12.$ === 'Nothing') {
+			return value;
 		} else {
-			if ((((left.$ === 'RBNode_elm_builtin') && (left.a.$ === 'Red')) && (left.d.$ === 'RBNode_elm_builtin')) && (left.d.a.$ === 'Red')) {
-				var _v5 = left.a;
-				var lK = left.b;
-				var lV = left.c;
-				var _v6 = left.d;
-				var _v7 = _v6.a;
-				var llK = _v6.b;
-				var llV = _v6.c;
-				var llLeft = _v6.d;
-				var llRight = _v6.e;
-				var lRight = left.e;
-				return A5(
-					$elm$core$Dict$RBNode_elm_builtin,
-					$elm$core$Dict$Red,
-					lK,
-					lV,
-					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, llK, llV, llLeft, llRight),
-					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, key, value, lRight, right));
-			} else {
-				return A5($elm$core$Dict$RBNode_elm_builtin, color, key, value, left, right);
-			}
+			var oldValue = _v12.a;
+			return A2($elm$browser$Debugger$Expando$mergeHelp, oldValue, value);
 		}
 	});
-var $elm$core$Dict$insertHelp = F3(
-	function (key, value, dict) {
-		if (dict.$ === 'RBEmpty_elm_builtin') {
-			return A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, key, value, $elm$core$Dict$RBEmpty_elm_builtin, $elm$core$Dict$RBEmpty_elm_builtin);
-		} else {
-			var nColor = dict.a;
-			var nKey = dict.b;
-			var nValue = dict.c;
-			var nLeft = dict.d;
-			var nRight = dict.e;
-			var _v1 = A2($elm$core$Basics$compare, key, nKey);
-			switch (_v1.$) {
-				case 'LT':
-					return A5(
-						$elm$core$Dict$balance,
-						nColor,
-						nKey,
-						nValue,
-						A3($elm$core$Dict$insertHelp, key, value, nLeft),
-						nRight);
-				case 'EQ':
-					return A5($elm$core$Dict$RBNode_elm_builtin, nColor, nKey, value, nLeft, nRight);
+var $elm$browser$Debugger$Expando$mergeHelp = F2(
+	function (old, _new) {
+		var _v3 = _Utils_Tuple2(old, _new);
+		_v3$6:
+		while (true) {
+			switch (_v3.b.$) {
+				case 'S':
+					return _new;
+				case 'Primitive':
+					return _new;
+				case 'Sequence':
+					if (_v3.a.$ === 'Sequence') {
+						var _v4 = _v3.a;
+						var isClosed = _v4.b;
+						var oldValues = _v4.c;
+						var _v5 = _v3.b;
+						var seqType = _v5.a;
+						var newValues = _v5.c;
+						return A3(
+							$elm$browser$Debugger$Expando$Sequence,
+							seqType,
+							isClosed,
+							A2($elm$browser$Debugger$Expando$mergeListHelp, oldValues, newValues));
+					} else {
+						break _v3$6;
+					}
+				case 'Dictionary':
+					if (_v3.a.$ === 'Dictionary') {
+						var _v6 = _v3.a;
+						var isClosed = _v6.a;
+						var _v7 = _v3.b;
+						var keyValuePairs = _v7.b;
+						return A2($elm$browser$Debugger$Expando$Dictionary, isClosed, keyValuePairs);
+					} else {
+						break _v3$6;
+					}
+				case 'Record':
+					if (_v3.a.$ === 'Record') {
+						var _v8 = _v3.a;
+						var isClosed = _v8.a;
+						var oldDict = _v8.b;
+						var _v9 = _v3.b;
+						var newDict = _v9.b;
+						return A2(
+							$elm$browser$Debugger$Expando$Record,
+							isClosed,
+							A2(
+								$elm$core$Dict$map,
+								$elm$browser$Debugger$Expando$mergeDictHelp(oldDict),
+								newDict));
+					} else {
+						break _v3$6;
+					}
 				default:
-					return A5(
-						$elm$core$Dict$balance,
-						nColor,
-						nKey,
-						nValue,
-						nLeft,
-						A3($elm$core$Dict$insertHelp, key, value, nRight));
+					if (_v3.a.$ === 'Constructor') {
+						var _v10 = _v3.a;
+						var isClosed = _v10.b;
+						var oldValues = _v10.c;
+						var _v11 = _v3.b;
+						var maybeName = _v11.a;
+						var newValues = _v11.c;
+						return A3(
+							$elm$browser$Debugger$Expando$Constructor,
+							maybeName,
+							isClosed,
+							A2($elm$browser$Debugger$Expando$mergeListHelp, oldValues, newValues));
+					} else {
+						break _v3$6;
+					}
+			}
+		}
+		return _new;
+	});
+var $elm$browser$Debugger$Expando$mergeListHelp = F2(
+	function (olds, news) {
+		var _v0 = _Utils_Tuple2(olds, news);
+		if (!_v0.a.b) {
+			return news;
+		} else {
+			if (!_v0.b.b) {
+				return news;
+			} else {
+				var _v1 = _v0.a;
+				var x = _v1.a;
+				var xs = _v1.b;
+				var _v2 = _v0.b;
+				var y = _v2.a;
+				var ys = _v2.b;
+				return A2(
+					$elm$core$List$cons,
+					A2($elm$browser$Debugger$Expando$mergeHelp, x, y),
+					A2($elm$browser$Debugger$Expando$mergeListHelp, xs, ys));
 			}
 		}
 	});
-var $elm$core$Dict$insert = F3(
-	function (key, value, dict) {
-		var _v0 = A3($elm$core$Dict$insertHelp, key, value, dict);
-		if ((_v0.$ === 'RBNode_elm_builtin') && (_v0.a.$ === 'Red')) {
-			var _v1 = _v0.a;
-			var k = _v0.b;
-			var v = _v0.c;
-			var l = _v0.d;
-			var r = _v0.e;
-			return A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, k, v, l, r);
+var $elm$browser$Debugger$Expando$merge = F2(
+	function (value, expando) {
+		return A2(
+			$elm$browser$Debugger$Expando$mergeHelp,
+			expando,
+			_Debugger_init(value));
+	});
+var $elm$browser$Debugger$Main$jumpUpdate = F3(
+	function (update, index, model) {
+		var history = $elm$browser$Debugger$Main$cachedHistory(model);
+		var currentMsg = $elm$browser$Debugger$History$getRecentMsg(history);
+		var currentModel = $elm$browser$Debugger$Main$getLatestModel(model.state);
+		var _v0 = A3($elm$browser$Debugger$History$get, update, index, history);
+		var indexModel = _v0.a;
+		var indexMsg = _v0.b;
+		return _Utils_update(
+			model,
+			{
+				expandoModel: A2($elm$browser$Debugger$Expando$merge, indexModel, model.expandoModel),
+				expandoMsg: A2($elm$browser$Debugger$Expando$merge, indexMsg, model.expandoMsg),
+				state: A5($elm$browser$Debugger$Main$Paused, index, indexModel, currentModel, currentMsg, history)
+			});
+	});
+var $elm$browser$Debugger$History$jsToElm = A2($elm$core$Basics$composeR, _Json_unwrap, _Debugger_unsafeCoerce);
+var $elm$browser$Debugger$History$decoder = F2(
+	function (initialModel, update) {
+		var addMessage = F2(
+			function (rawMsg, _v0) {
+				var model = _v0.a;
+				var history = _v0.b;
+				var msg = $elm$browser$Debugger$History$jsToElm(rawMsg);
+				return _Utils_Tuple2(
+					A2(update, msg, model),
+					A3($elm$browser$Debugger$History$add, msg, model, history));
+			});
+		var updateModel = function (rawMsgs) {
+			return A3(
+				$elm$core$List$foldl,
+				addMessage,
+				_Utils_Tuple2(
+					initialModel,
+					$elm$browser$Debugger$History$empty(initialModel)),
+				rawMsgs);
+		};
+		return A2(
+			$elm$json$Json$Decode$map,
+			updateModel,
+			$elm$json$Json$Decode$list($elm$json$Json$Decode$value));
+	});
+var $elm$browser$Debugger$History$getInitialModel = function (_v0) {
+	var snapshots = _v0.snapshots;
+	var recent = _v0.recent;
+	var _v1 = A2($elm$core$Array$get, 0, snapshots);
+	if (_v1.$ === 'Just') {
+		var model = _v1.a.model;
+		return model;
+	} else {
+		return recent.model;
+	}
+};
+var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
+var $elm$browser$Debugger$Main$loadNewHistory = F3(
+	function (rawHistory, update, model) {
+		var pureUserUpdate = F2(
+			function (msg, userModel) {
+				return A2(update, msg, userModel).a;
+			});
+		var initialUserModel = $elm$browser$Debugger$History$getInitialModel(model.history);
+		var decoder = A2($elm$browser$Debugger$History$decoder, initialUserModel, pureUserUpdate);
+		var _v0 = A2($elm$json$Json$Decode$decodeValue, decoder, rawHistory);
+		if (_v0.$ === 'Err') {
+			return _Utils_Tuple2(
+				_Utils_update(
+					model,
+					{overlay: $elm$browser$Debugger$Overlay$corruptImport}),
+				$elm$core$Platform$Cmd$none);
 		} else {
-			var x = _v0;
-			return x;
+			var _v1 = _v0.a;
+			var latestUserModel = _v1.a;
+			var newHistory = _v1.b;
+			return _Utils_Tuple2(
+				_Utils_update(
+					model,
+					{
+						expandoModel: $elm$browser$Debugger$Expando$init(latestUserModel),
+						expandoMsg: $elm$browser$Debugger$Expando$init(
+							$elm$browser$Debugger$History$getRecentMsg(newHistory)),
+						history: newHistory,
+						overlay: $elm$browser$Debugger$Overlay$none,
+						state: $elm$browser$Debugger$Main$Running(latestUserModel)
+					}),
+				$elm$core$Platform$Cmd$none);
 		}
 	});
+var $elm$browser$Debugger$Main$scroll = function (popout) {
+	return A2(
+		$elm$core$Task$perform,
+		$elm$core$Basics$always($elm$browser$Debugger$Main$NoOp),
+		_Debugger_scroll(popout));
+};
+var $elm$browser$Debugger$Main$scrollTo = F2(
+	function (id, popout) {
+		return A2(
+			$elm$core$Task$perform,
+			$elm$core$Basics$always($elm$browser$Debugger$Main$NoOp),
+			A2(_Debugger_scrollTo, id, popout));
+	});
+var $elm$browser$Debugger$Main$setDragStatus = F2(
+	function (status, layout) {
+		if (layout.$ === 'Horizontal') {
+			var x = layout.b;
+			var y = layout.c;
+			return A3($elm$browser$Debugger$Main$Horizontal, status, x, y);
+		} else {
+			var x = layout.b;
+			var y = layout.c;
+			return A3($elm$browser$Debugger$Main$Vertical, status, x, y);
+		}
+	});
+var $elm$browser$Debugger$Main$swapLayout = function (layout) {
+	if (layout.$ === 'Horizontal') {
+		var s = layout.a;
+		var x = layout.b;
+		var y = layout.c;
+		return A3($elm$browser$Debugger$Main$Vertical, s, x, y);
+	} else {
+		var s = layout.a;
+		var x = layout.b;
+		var y = layout.c;
+		return A3($elm$browser$Debugger$Main$Horizontal, s, x, y);
+	}
+};
 var $elm$core$Dict$getMin = function (dict) {
 	getMin:
 	while (true) {
@@ -6495,6 +10124,1212 @@ var $elm$core$Dict$update = F3(
 			return A2($elm$core$Dict$remove, targetKey, dictionary);
 		}
 	});
+var $elm$browser$Debugger$Expando$updateIndex = F3(
+	function (n, func, list) {
+		if (!list.b) {
+			return _List_Nil;
+		} else {
+			var x = list.a;
+			var xs = list.b;
+			return (n <= 0) ? A2(
+				$elm$core$List$cons,
+				func(x),
+				xs) : A2(
+				$elm$core$List$cons,
+				x,
+				A3($elm$browser$Debugger$Expando$updateIndex, n - 1, func, xs));
+		}
+	});
+var $elm$browser$Debugger$Expando$update = F2(
+	function (msg, value) {
+		switch (value.$) {
+			case 'S':
+				return value;
+			case 'Primitive':
+				return value;
+			case 'Sequence':
+				var seqType = value.a;
+				var isClosed = value.b;
+				var valueList = value.c;
+				switch (msg.$) {
+					case 'Toggle':
+						return A3($elm$browser$Debugger$Expando$Sequence, seqType, !isClosed, valueList);
+					case 'Index':
+						if (msg.a.$ === 'None') {
+							var _v3 = msg.a;
+							var index = msg.b;
+							var subMsg = msg.c;
+							return A3(
+								$elm$browser$Debugger$Expando$Sequence,
+								seqType,
+								isClosed,
+								A3(
+									$elm$browser$Debugger$Expando$updateIndex,
+									index,
+									$elm$browser$Debugger$Expando$update(subMsg),
+									valueList));
+						} else {
+							return value;
+						}
+					default:
+						return value;
+				}
+			case 'Dictionary':
+				var isClosed = value.a;
+				var keyValuePairs = value.b;
+				switch (msg.$) {
+					case 'Toggle':
+						return A2($elm$browser$Debugger$Expando$Dictionary, !isClosed, keyValuePairs);
+					case 'Index':
+						var redirect = msg.a;
+						var index = msg.b;
+						var subMsg = msg.c;
+						switch (redirect.$) {
+							case 'None':
+								return value;
+							case 'Key':
+								return A2(
+									$elm$browser$Debugger$Expando$Dictionary,
+									isClosed,
+									A3(
+										$elm$browser$Debugger$Expando$updateIndex,
+										index,
+										function (_v6) {
+											var k = _v6.a;
+											var v = _v6.b;
+											return _Utils_Tuple2(
+												A2($elm$browser$Debugger$Expando$update, subMsg, k),
+												v);
+										},
+										keyValuePairs));
+							default:
+								return A2(
+									$elm$browser$Debugger$Expando$Dictionary,
+									isClosed,
+									A3(
+										$elm$browser$Debugger$Expando$updateIndex,
+										index,
+										function (_v7) {
+											var k = _v7.a;
+											var v = _v7.b;
+											return _Utils_Tuple2(
+												k,
+												A2($elm$browser$Debugger$Expando$update, subMsg, v));
+										},
+										keyValuePairs));
+						}
+					default:
+						return value;
+				}
+			case 'Record':
+				var isClosed = value.a;
+				var valueDict = value.b;
+				switch (msg.$) {
+					case 'Toggle':
+						return A2($elm$browser$Debugger$Expando$Record, !isClosed, valueDict);
+					case 'Index':
+						return value;
+					default:
+						var field = msg.a;
+						var subMsg = msg.b;
+						return A2(
+							$elm$browser$Debugger$Expando$Record,
+							isClosed,
+							A3(
+								$elm$core$Dict$update,
+								field,
+								$elm$browser$Debugger$Expando$updateField(subMsg),
+								valueDict));
+				}
+			default:
+				var maybeName = value.a;
+				var isClosed = value.b;
+				var valueList = value.c;
+				switch (msg.$) {
+					case 'Toggle':
+						return A3($elm$browser$Debugger$Expando$Constructor, maybeName, !isClosed, valueList);
+					case 'Index':
+						if (msg.a.$ === 'None') {
+							var _v10 = msg.a;
+							var index = msg.b;
+							var subMsg = msg.c;
+							return A3(
+								$elm$browser$Debugger$Expando$Constructor,
+								maybeName,
+								isClosed,
+								A3(
+									$elm$browser$Debugger$Expando$updateIndex,
+									index,
+									$elm$browser$Debugger$Expando$update(subMsg),
+									valueList));
+						} else {
+							return value;
+						}
+					default:
+						return value;
+				}
+		}
+	});
+var $elm$browser$Debugger$Expando$updateField = F2(
+	function (msg, maybeExpando) {
+		if (maybeExpando.$ === 'Nothing') {
+			return maybeExpando;
+		} else {
+			var expando = maybeExpando.a;
+			return $elm$core$Maybe$Just(
+				A2($elm$browser$Debugger$Expando$update, msg, expando));
+		}
+	});
+var $elm$browser$Debugger$Main$Upload = function (a) {
+	return {$: 'Upload', a: a};
+};
+var $elm$browser$Debugger$Main$upload = function (popout) {
+	return A2(
+		$elm$core$Task$perform,
+		$elm$browser$Debugger$Main$Upload,
+		_Debugger_upload(popout));
+};
+var $elm$browser$Debugger$Overlay$BadMetadata = function (a) {
+	return {$: 'BadMetadata', a: a};
+};
+var $elm$browser$Debugger$Overlay$badMetadata = $elm$browser$Debugger$Overlay$BadMetadata;
+var $elm$browser$Debugger$Main$withGoodMetadata = F2(
+	function (model, func) {
+		var _v0 = model.metadata;
+		if (_v0.$ === 'Ok') {
+			var metadata = _v0.a;
+			return func(metadata);
+		} else {
+			var error = _v0.a;
+			return _Utils_Tuple2(
+				_Utils_update(
+					model,
+					{
+						overlay: $elm$browser$Debugger$Overlay$badMetadata(error)
+					}),
+				$elm$core$Platform$Cmd$none);
+		}
+	});
+var $elm$browser$Debugger$Main$wrapUpdate = F3(
+	function (update, msg, model) {
+		wrapUpdate:
+		while (true) {
+			switch (msg.$) {
+				case 'NoOp':
+					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				case 'UserMsg':
+					var userMsg = msg.a;
+					var userModel = $elm$browser$Debugger$Main$getLatestModel(model.state);
+					var newHistory = A3($elm$browser$Debugger$History$add, userMsg, userModel, model.history);
+					var _v1 = A2(update, userMsg, userModel);
+					var newUserModel = _v1.a;
+					var userCmds = _v1.b;
+					var commands = A2($elm$core$Platform$Cmd$map, $elm$browser$Debugger$Main$UserMsg, userCmds);
+					var _v2 = model.state;
+					if (_v2.$ === 'Running') {
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									expandoModel: A2($elm$browser$Debugger$Expando$merge, newUserModel, model.expandoModel),
+									expandoMsg: A2($elm$browser$Debugger$Expando$merge, userMsg, model.expandoMsg),
+									history: newHistory,
+									state: $elm$browser$Debugger$Main$Running(newUserModel)
+								}),
+							$elm$core$Platform$Cmd$batch(
+								_List_fromArray(
+									[
+										commands,
+										$elm$browser$Debugger$Main$scroll(model.popout)
+									])));
+					} else {
+						var index = _v2.a;
+						var indexModel = _v2.b;
+						var history = _v2.e;
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									history: newHistory,
+									state: A5($elm$browser$Debugger$Main$Paused, index, indexModel, newUserModel, userMsg, history)
+								}),
+							commands);
+					}
+				case 'TweakExpandoMsg':
+					var eMsg = msg.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								expandoMsg: A2($elm$browser$Debugger$Expando$update, eMsg, model.expandoMsg)
+							}),
+						$elm$core$Platform$Cmd$none);
+				case 'TweakExpandoModel':
+					var eMsg = msg.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								expandoModel: A2($elm$browser$Debugger$Expando$update, eMsg, model.expandoModel)
+							}),
+						$elm$core$Platform$Cmd$none);
+				case 'Resume':
+					var _v3 = model.state;
+					if (_v3.$ === 'Running') {
+						return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+					} else {
+						var userModel = _v3.c;
+						var userMsg = _v3.d;
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									expandoModel: A2($elm$browser$Debugger$Expando$merge, userModel, model.expandoModel),
+									expandoMsg: A2($elm$browser$Debugger$Expando$merge, userMsg, model.expandoMsg),
+									state: $elm$browser$Debugger$Main$Running(userModel)
+								}),
+							$elm$browser$Debugger$Main$scroll(model.popout));
+					}
+				case 'Jump':
+					var index = msg.a;
+					return _Utils_Tuple2(
+						A3($elm$browser$Debugger$Main$jumpUpdate, update, index, model),
+						$elm$core$Platform$Cmd$none);
+				case 'SliderJump':
+					var index = msg.a;
+					return _Utils_Tuple2(
+						A3($elm$browser$Debugger$Main$jumpUpdate, update, index, model),
+						A2(
+							$elm$browser$Debugger$Main$scrollTo,
+							$elm$browser$Debugger$History$idForMessageIndex(index),
+							model.popout));
+				case 'Open':
+					return _Utils_Tuple2(
+						model,
+						A2(
+							$elm$core$Task$perform,
+							$elm$core$Basics$always($elm$browser$Debugger$Main$NoOp),
+							_Debugger_open(model.popout)));
+				case 'Up':
+					var _v4 = model.state;
+					if (_v4.$ === 'Running') {
+						return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+					} else {
+						var i = _v4.a;
+						var history = _v4.e;
+						var targetIndex = i + 1;
+						if (_Utils_cmp(
+							targetIndex,
+							$elm$browser$Debugger$History$size(history)) < 0) {
+							var $temp$update = update,
+								$temp$msg = $elm$browser$Debugger$Main$SliderJump(targetIndex),
+								$temp$model = model;
+							update = $temp$update;
+							msg = $temp$msg;
+							model = $temp$model;
+							continue wrapUpdate;
+						} else {
+							var $temp$update = update,
+								$temp$msg = $elm$browser$Debugger$Main$Resume,
+								$temp$model = model;
+							update = $temp$update;
+							msg = $temp$msg;
+							model = $temp$model;
+							continue wrapUpdate;
+						}
+					}
+				case 'Down':
+					var _v5 = model.state;
+					if (_v5.$ === 'Running') {
+						var $temp$update = update,
+							$temp$msg = $elm$browser$Debugger$Main$Jump(
+							$elm$browser$Debugger$History$size(model.history) - 1),
+							$temp$model = model;
+						update = $temp$update;
+						msg = $temp$msg;
+						model = $temp$model;
+						continue wrapUpdate;
+					} else {
+						var index = _v5.a;
+						if (index > 0) {
+							var $temp$update = update,
+								$temp$msg = $elm$browser$Debugger$Main$SliderJump(index - 1),
+								$temp$model = model;
+							update = $temp$update;
+							msg = $temp$msg;
+							model = $temp$model;
+							continue wrapUpdate;
+						} else {
+							return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+						}
+					}
+				case 'Import':
+					return A2(
+						$elm$browser$Debugger$Main$withGoodMetadata,
+						model,
+						function (_v6) {
+							return _Utils_Tuple2(
+								model,
+								$elm$browser$Debugger$Main$upload(model.popout));
+						});
+				case 'Export':
+					return A2(
+						$elm$browser$Debugger$Main$withGoodMetadata,
+						model,
+						function (metadata) {
+							return _Utils_Tuple2(
+								model,
+								A2($elm$browser$Debugger$Main$download, metadata, model.history));
+						});
+				case 'Upload':
+					var jsonString = msg.a;
+					return A2(
+						$elm$browser$Debugger$Main$withGoodMetadata,
+						model,
+						function (metadata) {
+							var _v7 = A2($elm$browser$Debugger$Overlay$assessImport, metadata, jsonString);
+							if (_v7.$ === 'Err') {
+								var newOverlay = _v7.a;
+								return _Utils_Tuple2(
+									_Utils_update(
+										model,
+										{overlay: newOverlay}),
+									$elm$core$Platform$Cmd$none);
+							} else {
+								var rawHistory = _v7.a;
+								return A3($elm$browser$Debugger$Main$loadNewHistory, rawHistory, update, model);
+							}
+						});
+				case 'OverlayMsg':
+					var overlayMsg = msg.a;
+					var _v8 = A2($elm$browser$Debugger$Overlay$close, overlayMsg, model.overlay);
+					if (_v8.$ === 'Nothing') {
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{overlay: $elm$browser$Debugger$Overlay$none}),
+							$elm$core$Platform$Cmd$none);
+					} else {
+						var rawHistory = _v8.a;
+						return A3($elm$browser$Debugger$Main$loadNewHistory, rawHistory, update, model);
+					}
+				case 'SwapLayout':
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								layout: $elm$browser$Debugger$Main$swapLayout(model.layout)
+							}),
+						$elm$core$Platform$Cmd$none);
+				case 'DragStart':
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								layout: A2($elm$browser$Debugger$Main$setDragStatus, $elm$browser$Debugger$Main$Moving, model.layout)
+							}),
+						$elm$core$Platform$Cmd$none);
+				case 'Drag':
+					var info = msg.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								layout: A2($elm$browser$Debugger$Main$drag, info, model.layout)
+							}),
+						$elm$core$Platform$Cmd$none);
+				default:
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								layout: A2($elm$browser$Debugger$Main$setDragStatus, $elm$browser$Debugger$Main$Static, model.layout)
+							}),
+						$elm$core$Platform$Cmd$none);
+			}
+		}
+	});
+var $elm$browser$Browser$External = function (a) {
+	return {$: 'External', a: a};
+};
+var $elm$browser$Browser$Internal = function (a) {
+	return {$: 'Internal', a: a};
+};
+var $elm$browser$Browser$Dom$NotFound = function (a) {
+	return {$: 'NotFound', a: a};
+};
+var $elm$url$Url$Http = {$: 'Http'};
+var $elm$url$Url$Https = {$: 'Https'};
+var $elm$url$Url$Url = F6(
+	function (protocol, host, port_, path, query, fragment) {
+		return {fragment: fragment, host: host, path: path, port_: port_, protocol: protocol, query: query};
+	});
+var $elm$core$String$dropLeft = F2(
+	function (n, string) {
+		return (n < 1) ? string : A3(
+			$elm$core$String$slice,
+			n,
+			$elm$core$String$length(string),
+			string);
+	});
+var $elm$core$String$indexes = _String_indexes;
+var $elm$core$String$isEmpty = function (string) {
+	return string === '';
+};
+var $elm$url$Url$chompBeforePath = F5(
+	function (protocol, path, params, frag, str) {
+		if ($elm$core$String$isEmpty(str) || A2($elm$core$String$contains, '@', str)) {
+			return $elm$core$Maybe$Nothing;
+		} else {
+			var _v0 = A2($elm$core$String$indexes, ':', str);
+			if (!_v0.b) {
+				return $elm$core$Maybe$Just(
+					A6($elm$url$Url$Url, protocol, str, $elm$core$Maybe$Nothing, path, params, frag));
+			} else {
+				if (!_v0.b.b) {
+					var i = _v0.a;
+					var _v1 = $elm$core$String$toInt(
+						A2($elm$core$String$dropLeft, i + 1, str));
+					if (_v1.$ === 'Nothing') {
+						return $elm$core$Maybe$Nothing;
+					} else {
+						var port_ = _v1;
+						return $elm$core$Maybe$Just(
+							A6(
+								$elm$url$Url$Url,
+								protocol,
+								A2($elm$core$String$left, i, str),
+								port_,
+								path,
+								params,
+								frag));
+					}
+				} else {
+					return $elm$core$Maybe$Nothing;
+				}
+			}
+		}
+	});
+var $elm$url$Url$chompBeforeQuery = F4(
+	function (protocol, params, frag, str) {
+		if ($elm$core$String$isEmpty(str)) {
+			return $elm$core$Maybe$Nothing;
+		} else {
+			var _v0 = A2($elm$core$String$indexes, '/', str);
+			if (!_v0.b) {
+				return A5($elm$url$Url$chompBeforePath, protocol, '/', params, frag, str);
+			} else {
+				var i = _v0.a;
+				return A5(
+					$elm$url$Url$chompBeforePath,
+					protocol,
+					A2($elm$core$String$dropLeft, i, str),
+					params,
+					frag,
+					A2($elm$core$String$left, i, str));
+			}
+		}
+	});
+var $elm$url$Url$chompBeforeFragment = F3(
+	function (protocol, frag, str) {
+		if ($elm$core$String$isEmpty(str)) {
+			return $elm$core$Maybe$Nothing;
+		} else {
+			var _v0 = A2($elm$core$String$indexes, '?', str);
+			if (!_v0.b) {
+				return A4($elm$url$Url$chompBeforeQuery, protocol, $elm$core$Maybe$Nothing, frag, str);
+			} else {
+				var i = _v0.a;
+				return A4(
+					$elm$url$Url$chompBeforeQuery,
+					protocol,
+					$elm$core$Maybe$Just(
+						A2($elm$core$String$dropLeft, i + 1, str)),
+					frag,
+					A2($elm$core$String$left, i, str));
+			}
+		}
+	});
+var $elm$url$Url$chompAfterProtocol = F2(
+	function (protocol, str) {
+		if ($elm$core$String$isEmpty(str)) {
+			return $elm$core$Maybe$Nothing;
+		} else {
+			var _v0 = A2($elm$core$String$indexes, '#', str);
+			if (!_v0.b) {
+				return A3($elm$url$Url$chompBeforeFragment, protocol, $elm$core$Maybe$Nothing, str);
+			} else {
+				var i = _v0.a;
+				return A3(
+					$elm$url$Url$chompBeforeFragment,
+					protocol,
+					$elm$core$Maybe$Just(
+						A2($elm$core$String$dropLeft, i + 1, str)),
+					A2($elm$core$String$left, i, str));
+			}
+		}
+	});
+var $elm$core$String$startsWith = _String_startsWith;
+var $elm$url$Url$fromString = function (str) {
+	return A2($elm$core$String$startsWith, 'http://', str) ? A2(
+		$elm$url$Url$chompAfterProtocol,
+		$elm$url$Url$Http,
+		A2($elm$core$String$dropLeft, 7, str)) : (A2($elm$core$String$startsWith, 'https://', str) ? A2(
+		$elm$url$Url$chompAfterProtocol,
+		$elm$url$Url$Https,
+		A2($elm$core$String$dropLeft, 8, str)) : $elm$core$Maybe$Nothing);
+};
+var $elm$core$Basics$never = function (_v0) {
+	never:
+	while (true) {
+		var nvr = _v0.a;
+		var $temp$_v0 = nvr;
+		_v0 = $temp$_v0;
+		continue never;
+	}
+};
+var $elm$browser$Browser$application = _Browser_application;
+var $author$project$Main$Model = F3(
+	function (navigation, session, page) {
+		return {navigation: navigation, page: page, session: session};
+	});
+var $author$project$Main$Redirect = {$: 'Redirect'};
+var $author$project$Main$Page_Administration = function (a) {
+	return {$: 'Page_Administration', a: a};
+};
+var $author$project$Main$Page_Administration_Msg = function (a) {
+	return {$: 'Page_Administration_Msg', a: a};
+};
+var $author$project$Main$Page_Article = function (a) {
+	return {$: 'Page_Article', a: a};
+};
+var $author$project$Main$Page_Article_Msg = function (a) {
+	return {$: 'Page_Article_Msg', a: a};
+};
+var $author$project$Main$Page_Articles = function (a) {
+	return {$: 'Page_Articles', a: a};
+};
+var $author$project$Main$Page_Articles_Msg = function (a) {
+	return {$: 'Page_Articles_Msg', a: a};
+};
+var $author$project$Main$Page_Documentation = function (a) {
+	return {$: 'Page_Documentation', a: a};
+};
+var $author$project$Main$Page_Documentation_Msg = function (a) {
+	return {$: 'Page_Documentation_Msg', a: a};
+};
+var $author$project$Main$Page_Example = function (a) {
+	return {$: 'Page_Example', a: a};
+};
+var $author$project$Main$Page_Example_Msg = function (a) {
+	return {$: 'Page_Example_Msg', a: a};
+};
+var $author$project$Main$Page_GettingStarted = function (a) {
+	return {$: 'Page_GettingStarted', a: a};
+};
+var $author$project$Main$Page_GettingStarted_Msg = function (a) {
+	return {$: 'Page_GettingStarted_Msg', a: a};
+};
+var $author$project$Main$Page_Home = function (a) {
+	return {$: 'Page_Home', a: a};
+};
+var $author$project$Main$Page_Home_Msg = function (a) {
+	return {$: 'Page_Home_Msg', a: a};
+};
+var $author$project$Main$Page_Section = function (a) {
+	return {$: 'Page_Section', a: a};
+};
+var $author$project$Main$Page_Section_Msg = function (a) {
+	return {$: 'Page_Section_Msg', a: a};
+};
+var $author$project$Page$Administration$exit = F2(
+	function (model, session) {
+		return session;
+	});
+var $author$project$Page$Article$exit = F2(
+	function (model, session) {
+		return session;
+	});
+var $author$project$Page$Articles$exit = F2(
+	function (model, session) {
+		return session;
+	});
+var $author$project$Page$Documentation$exit = F2(
+	function (model, session) {
+		return session;
+	});
+var $author$project$Page$Example$exit = F2(
+	function (model, session) {
+		return session;
+	});
+var $author$project$Page$GettingStarted$exit = F2(
+	function (model, session) {
+		return session;
+	});
+var $author$project$Page$Home$exit = F2(
+	function (model, session) {
+		return _Utils_update(
+			session,
+			{window: model.window});
+	});
+var $author$project$Page$Section$exit = F2(
+	function (model, session) {
+		return session;
+	});
+var $author$project$Main$exit = function (model) {
+	var _v0 = model.page;
+	switch (_v0.$) {
+		case 'Redirect':
+			return model.session;
+		case 'NotFound':
+			return model.session;
+		case 'Page_Home':
+			var subModel = _v0.a;
+			return A2($author$project$Page$Home$exit, subModel, model.session);
+		case 'Page_Administration':
+			var subModel = _v0.a;
+			return A2($author$project$Page$Administration$exit, subModel, model.session);
+		case 'Page_Articles':
+			var subModel = _v0.a;
+			return A2($author$project$Page$Articles$exit, subModel, model.session);
+		case 'Page_Article':
+			var subModel = _v0.a;
+			return A2($author$project$Page$Article$exit, subModel, model.session);
+		case 'Page_Documentation':
+			var subModel = _v0.a;
+			return A2($author$project$Page$Documentation$exit, subModel, model.session);
+		case 'Page_Section':
+			var subModel = _v0.a;
+			return A2($author$project$Page$Section$exit, subModel, model.session);
+		case 'Page_Example':
+			var subModel = _v0.a;
+			return A2($author$project$Page$Example$exit, subModel, model.session);
+		default:
+			var subModel = _v0.a;
+			return A2($author$project$Page$GettingStarted$exit, subModel, model.session);
+	}
+};
+var $author$project$Ui$Menu$init = {isOpen: false};
+var $author$project$Page$Administration$init = F3(
+	function (key, session, params) {
+		return _Utils_Tuple2(
+			{menu: $author$project$Ui$Menu$init, window: session.window},
+			$elm$core$Platform$Cmd$none);
+	});
+var $author$project$Articles$GenderAndSalery = {$: 'GenderAndSalery'};
+var $author$project$Articles$all = _List_fromArray(
+	[$author$project$Articles$GenderAndSalery]);
+var $elm$core$List$filter = F2(
+	function (isGood, list) {
+		return A3(
+			$elm$core$List$foldr,
+			F2(
+				function (x, xs) {
+					return isGood(x) ? A2($elm$core$List$cons, x, xs) : xs;
+				}),
+			_List_Nil,
+			list);
+	});
+var $elm$core$List$head = function (list) {
+	if (list.b) {
+		var x = list.a;
+		var xs = list.b;
+		return $elm$core$Maybe$Just(x);
+	} else {
+		return $elm$core$Maybe$Nothing;
+	}
+};
+var $author$project$Articles$GenderAndSalery$Bars$init = {binSize: 5000, hovering: _List_Nil};
+var $author$project$Articles$GenderAndSalery$Bubble$init = {
+	hovering: _List_Nil,
+	moving: $elm$core$Maybe$Nothing,
+	zoomOffset: {x: 0, y: 0},
+	zoomPercentage: 100
+};
+var $author$project$Articles$GenderAndSalery$EducationChart$Long = {$: 'Long'};
+var $author$project$Articles$GenderAndSalery$EducationChart$Medium = {$: 'Medium'};
+var $author$project$Articles$GenderAndSalery$EducationChart$Researcher = {$: 'Researcher'};
+var $author$project$Articles$GenderAndSalery$EducationChart$Short = {$: 'Short'};
+var $author$project$Articles$GenderAndSalery$EducationChart$Stacked = {$: 'Stacked'};
+var $author$project$Articles$GenderAndSalery$EducationChart$init = {
+	education: _List_fromArray(
+		[$author$project$Articles$GenderAndSalery$EducationChart$Short, $author$project$Articles$GenderAndSalery$EducationChart$Medium, $author$project$Articles$GenderAndSalery$EducationChart$Long, $author$project$Articles$GenderAndSalery$EducationChart$Researcher]),
+	hovering: _List_Nil,
+	stacking: $author$project$Articles$GenderAndSalery$EducationChart$Stacked
+};
+var $author$project$Articles$GenderAndSalery$init = {bars: $author$project$Articles$GenderAndSalery$Bars$init, bubbles: $author$project$Articles$GenderAndSalery$Bubble$init, education: $author$project$Articles$GenderAndSalery$EducationChart$init, year: 2019};
+var $author$project$Articles$init = {example0: $author$project$Articles$GenderAndSalery$init};
+var $author$project$Articles$GenderAndSalery$meta = {id: 'gender-equality-in-denmark'};
+var $author$project$Articles$meta = function (chosen) {
+	return $author$project$Articles$GenderAndSalery$meta;
+};
+var $author$project$Page$Article$init = F3(
+	function (key, session, params) {
+		var isCorrectId = function (article) {
+			return _Utils_eq(
+				$author$project$Articles$meta(article).id,
+				params.id);
+		};
+		var articleId = $elm$core$List$head(
+			A2($elm$core$List$filter, isCorrectId, $author$project$Articles$all));
+		return _Utils_Tuple2(
+			{article: $author$project$Articles$init, articleId: articleId, menu: $author$project$Ui$Menu$init, window: session.window},
+			$elm$core$Platform$Cmd$none);
+	});
+var $author$project$Page$Articles$init = F3(
+	function (key, session, params) {
+		return _Utils_Tuple2(
+			{menu: $author$project$Ui$Menu$init, window: session.window},
+			$elm$core$Platform$Cmd$none);
+	});
+var $author$project$Ui$Thumbnail$Group = F3(
+	function (title, order, ids) {
+		return {ids: ids, order: order, title: title};
+	});
+var $author$project$Examples$BarCharts__BarLabels = {$: 'BarCharts__BarLabels'};
+var $author$project$Examples$BarCharts__Basic = {$: 'BarCharts__Basic'};
+var $author$project$Examples$BarCharts__BinLabels = {$: 'BarCharts__BinLabels'};
+var $author$project$Examples$BarCharts__BinLabelsAdvanced = {$: 'BarCharts__BinLabelsAdvanced'};
+var $author$project$Examples$BarCharts__Borders = {$: 'BarCharts__Borders'};
+var $author$project$Examples$BarCharts__Color = {$: 'BarCharts__Color'};
+var $author$project$Examples$BarCharts__Corners = {$: 'BarCharts__Corners'};
+var $author$project$Examples$BarCharts__DataDependent = {$: 'BarCharts__DataDependent'};
+var $author$project$Examples$BarCharts__Gradient = {$: 'BarCharts__Gradient'};
+var $author$project$Examples$BarCharts__Highlight = {$: 'BarCharts__Highlight'};
+var $author$project$Examples$BarCharts__Histogram = {$: 'BarCharts__Histogram'};
+var $author$project$Examples$BarCharts__Legends = {$: 'BarCharts__Legends'};
+var $author$project$Examples$BarCharts__Margin = {$: 'BarCharts__Margin'};
+var $author$project$Examples$BarCharts__Opacity = {$: 'BarCharts__Opacity'};
+var $author$project$Examples$BarCharts__Pattern = {$: 'BarCharts__Pattern'};
+var $author$project$Examples$BarCharts__Spacing = {$: 'BarCharts__Spacing'};
+var $author$project$Examples$BarCharts__Stacked = {$: 'BarCharts__Stacked'};
+var $author$project$Examples$BarCharts__Title = {$: 'BarCharts__Title'};
+var $author$project$Examples$BarCharts__Tooltip = {$: 'BarCharts__Tooltip'};
+var $author$project$Examples$BarCharts__TooltipBin = {$: 'BarCharts__TooltipBin'};
+var $author$project$Examples$BarCharts__TooltipStack = {$: 'BarCharts__TooltipStack'};
+var $author$project$Examples$BarCharts__Ungroup = {$: 'BarCharts__Ungroup'};
+var $author$project$Examples$BarCharts__VariableWidth = {$: 'BarCharts__VariableWidth'};
+var $author$project$Examples$Frame__Amount = {$: 'Frame__Amount'};
+var $author$project$Examples$Frame__Arbitrary = {$: 'Frame__Arbitrary'};
+var $author$project$Examples$Frame__AxisLength = {$: 'Frame__AxisLength'};
+var $author$project$Examples$Frame__Background = {$: 'Frame__Background'};
+var $author$project$Examples$Frame__Basic = {$: 'Frame__Basic'};
+var $author$project$Examples$Frame__Color = {$: 'Frame__Color'};
+var $author$project$Examples$Frame__Coordinates = {$: 'Frame__Coordinates'};
+var $author$project$Examples$Frame__CustomElements = {$: 'Frame__CustomElements'};
+var $author$project$Examples$Frame__CustomFormat = {$: 'Frame__CustomFormat'};
+var $author$project$Examples$Frame__CustomLabels = {$: 'Frame__CustomLabels'};
+var $author$project$Examples$Frame__Dimensions = {$: 'Frame__Dimensions'};
+var $author$project$Examples$Frame__DotGrid = {$: 'Frame__DotGrid'};
+var $author$project$Examples$Frame__GridColor = {$: 'Frame__GridColor'};
+var $author$project$Examples$Frame__GridFilter = {$: 'Frame__GridFilter'};
+var $author$project$Examples$Frame__LabelWithLine = {$: 'Frame__LabelWithLine'};
+var $author$project$Examples$Frame__Legends = {$: 'Frame__Legends'};
+var $author$project$Examples$Frame__Lines = {$: 'Frame__Lines'};
+var $author$project$Examples$Frame__Margin = {$: 'Frame__Margin'};
+var $author$project$Examples$Frame__NoArrow = {$: 'Frame__NoArrow'};
+var $author$project$Examples$Frame__Offset = {$: 'Frame__Offset'};
+var $author$project$Examples$Frame__OnlyInts = {$: 'Frame__OnlyInts'};
+var $author$project$Examples$Frame__Padding = {$: 'Frame__Padding'};
+var $author$project$Examples$Frame__Position = {$: 'Frame__Position'};
+var $author$project$Examples$Frame__Rect = {$: 'Frame__Rect'};
+var $author$project$Examples$Frame__Times = {$: 'Frame__Times'};
+var $author$project$Examples$Frame__Titles = {$: 'Frame__Titles'};
+var $author$project$Examples$Frontpage__BasicArea = {$: 'Frontpage__BasicArea'};
+var $author$project$Examples$Frontpage__BasicBar = {$: 'Frontpage__BasicBar'};
+var $author$project$Examples$Frontpage__BasicBubble = {$: 'Frontpage__BasicBubble'};
+var $author$project$Examples$Frontpage__BasicLine = {$: 'Frontpage__BasicLine'};
+var $author$project$Examples$Frontpage__BasicNavigation = {$: 'Frontpage__BasicNavigation'};
+var $author$project$Examples$Frontpage__BasicScatter = {$: 'Frontpage__BasicScatter'};
+var $author$project$Examples$Frontpage__Concise = {$: 'Frontpage__Concise'};
+var $author$project$Examples$Frontpage__Familiar = {$: 'Frontpage__Familiar'};
+var $author$project$Examples$Interactivity__Background = {$: 'Interactivity__Background'};
+var $author$project$Examples$Interactivity__BasicArea = {$: 'Interactivity__BasicArea'};
+var $author$project$Examples$Interactivity__BasicBar = {$: 'Interactivity__BasicBar'};
+var $author$project$Examples$Interactivity__BasicBin = {$: 'Interactivity__BasicBin'};
+var $author$project$Examples$Interactivity__BasicLine = {$: 'Interactivity__BasicLine'};
+var $author$project$Examples$Interactivity__BasicStack = {$: 'Interactivity__BasicStack'};
+var $author$project$Examples$Interactivity__Border = {$: 'Interactivity__Border'};
+var $author$project$Examples$Interactivity__ChangeContent = {$: 'Interactivity__ChangeContent'};
+var $author$project$Examples$Interactivity__ChangeDot = {$: 'Interactivity__ChangeDot'};
+var $author$project$Examples$Interactivity__ChangeName = {$: 'Interactivity__ChangeName'};
+var $author$project$Examples$Interactivity__ChangeUnit = {$: 'Interactivity__ChangeUnit'};
+var $author$project$Examples$Interactivity__Coordinates = {$: 'Interactivity__Coordinates'};
+var $author$project$Examples$Interactivity__Direction = {$: 'Interactivity__Direction'};
+var $author$project$Examples$Interactivity__DoubleSearch = {$: 'Interactivity__DoubleSearch'};
+var $author$project$Examples$Interactivity__FilterSearch = {$: 'Interactivity__FilterSearch'};
+var $author$project$Examples$Interactivity__Focal = {$: 'Interactivity__Focal'};
+var $author$project$Examples$Interactivity__Multiple = {$: 'Interactivity__Multiple'};
+var $author$project$Examples$Interactivity__NoArrow = {$: 'Interactivity__NoArrow'};
+var $author$project$Examples$Interactivity__Offset = {$: 'Interactivity__Offset'};
+var $author$project$Examples$Interactivity__TrickyTooltip = {$: 'Interactivity__TrickyTooltip'};
+var $author$project$Examples$Interactivity__Zoom = {$: 'Interactivity__Zoom'};
+var $author$project$Examples$LineCharts__Area = {$: 'LineCharts__Area'};
+var $author$project$Examples$LineCharts__Basic = {$: 'LineCharts__Basic'};
+var $author$project$Examples$LineCharts__Color = {$: 'LineCharts__Color'};
+var $author$project$Examples$LineCharts__Dashed = {$: 'LineCharts__Dashed'};
+var $author$project$Examples$LineCharts__Dots = {$: 'LineCharts__Dots'};
+var $author$project$Examples$LineCharts__Gradient = {$: 'LineCharts__Gradient'};
+var $author$project$Examples$LineCharts__Labels = {$: 'LineCharts__Labels'};
+var $author$project$Examples$LineCharts__Legends = {$: 'LineCharts__Legends'};
+var $author$project$Examples$LineCharts__Missing = {$: 'LineCharts__Missing'};
+var $author$project$Examples$LineCharts__Montone = {$: 'LineCharts__Montone'};
+var $author$project$Examples$LineCharts__Pattern = {$: 'LineCharts__Pattern'};
+var $author$project$Examples$LineCharts__Stacked = {$: 'LineCharts__Stacked'};
+var $author$project$Examples$LineCharts__Stepped = {$: 'LineCharts__Stepped'};
+var $author$project$Examples$LineCharts__Tooltip = {$: 'LineCharts__Tooltip'};
+var $author$project$Examples$LineCharts__TooltipStack = {$: 'LineCharts__TooltipStack'};
+var $author$project$Examples$LineCharts__Width = {$: 'LineCharts__Width'};
+var $author$project$Examples$ScatterCharts__Basic = {$: 'ScatterCharts__Basic'};
+var $author$project$Examples$ScatterCharts__Borders = {$: 'ScatterCharts__Borders'};
+var $author$project$Examples$ScatterCharts__Colors = {$: 'ScatterCharts__Colors'};
+var $author$project$Examples$ScatterCharts__DataDependent = {$: 'ScatterCharts__DataDependent'};
+var $author$project$Examples$ScatterCharts__Highlight = {$: 'ScatterCharts__Highlight'};
+var $author$project$Examples$ScatterCharts__Labels = {$: 'ScatterCharts__Labels'};
+var $author$project$Examples$ScatterCharts__Legends = {$: 'ScatterCharts__Legends'};
+var $author$project$Examples$ScatterCharts__Opacity = {$: 'ScatterCharts__Opacity'};
+var $author$project$Examples$ScatterCharts__Shapes = {$: 'ScatterCharts__Shapes'};
+var $author$project$Examples$ScatterCharts__Sizes = {$: 'ScatterCharts__Sizes'};
+var $author$project$Examples$ScatterCharts__Tooltip = {$: 'ScatterCharts__Tooltip'};
+var $author$project$Examples$all = _List_fromArray(
+	[$author$project$Examples$BarCharts__Gradient, $author$project$Examples$BarCharts__VariableWidth, $author$project$Examples$BarCharts__Title, $author$project$Examples$BarCharts__TooltipStack, $author$project$Examples$BarCharts__Tooltip, $author$project$Examples$BarCharts__BarLabels, $author$project$Examples$BarCharts__Pattern, $author$project$Examples$BarCharts__Histogram, $author$project$Examples$BarCharts__BinLabelsAdvanced, $author$project$Examples$BarCharts__Spacing, $author$project$Examples$BarCharts__Highlight, $author$project$Examples$BarCharts__DataDependent, $author$project$Examples$BarCharts__Color, $author$project$Examples$BarCharts__TooltipBin, $author$project$Examples$BarCharts__Corners, $author$project$Examples$BarCharts__Ungroup, $author$project$Examples$BarCharts__BinLabels, $author$project$Examples$BarCharts__Stacked, $author$project$Examples$BarCharts__Margin, $author$project$Examples$BarCharts__Borders, $author$project$Examples$BarCharts__Opacity, $author$project$Examples$BarCharts__Legends, $author$project$Examples$BarCharts__Basic, $author$project$Examples$Frame__Lines, $author$project$Examples$Frame__Position, $author$project$Examples$Frame__Coordinates, $author$project$Examples$Frame__GridFilter, $author$project$Examples$Frame__Dimensions, $author$project$Examples$Frame__CustomElements, $author$project$Examples$Frame__NoArrow, $author$project$Examples$Frame__Background, $author$project$Examples$Frame__Rect, $author$project$Examples$Frame__Padding, $author$project$Examples$Frame__Times, $author$project$Examples$Frame__OnlyInts, $author$project$Examples$Frame__GridColor, $author$project$Examples$Frame__Offset, $author$project$Examples$Frame__Color, $author$project$Examples$Frame__Amount, $author$project$Examples$Frame__Titles, $author$project$Examples$Frame__CustomLabels, $author$project$Examples$Frame__Margin, $author$project$Examples$Frame__LabelWithLine, $author$project$Examples$Frame__DotGrid, $author$project$Examples$Frame__CustomFormat, $author$project$Examples$Frame__AxisLength, $author$project$Examples$Frame__Arbitrary, $author$project$Examples$Frame__Legends, $author$project$Examples$Frame__Basic, $author$project$Examples$Interactivity__ChangeContent, $author$project$Examples$Interactivity__Direction, $author$project$Examples$Interactivity__ChangeDot, $author$project$Examples$Interactivity__Border, $author$project$Examples$Interactivity__Zoom, $author$project$Examples$Interactivity__BasicBin, $author$project$Examples$Interactivity__BasicStack, $author$project$Examples$Interactivity__Coordinates, $author$project$Examples$Interactivity__ChangeName, $author$project$Examples$Interactivity__NoArrow, $author$project$Examples$Interactivity__FilterSearch, $author$project$Examples$Interactivity__Background, $author$project$Examples$Interactivity__BasicBar, $author$project$Examples$Interactivity__BasicArea, $author$project$Examples$Interactivity__TrickyTooltip, $author$project$Examples$Interactivity__Multiple, $author$project$Examples$Interactivity__BasicLine, $author$project$Examples$Interactivity__Offset, $author$project$Examples$Interactivity__DoubleSearch, $author$project$Examples$Interactivity__ChangeUnit, $author$project$Examples$Interactivity__Focal, $author$project$Examples$LineCharts__Area, $author$project$Examples$LineCharts__Gradient, $author$project$Examples$LineCharts__Width, $author$project$Examples$LineCharts__TooltipStack, $author$project$Examples$LineCharts__Tooltip, $author$project$Examples$LineCharts__Montone, $author$project$Examples$LineCharts__Pattern, $author$project$Examples$LineCharts__Dots, $author$project$Examples$LineCharts__Dashed, $author$project$Examples$LineCharts__Color, $author$project$Examples$LineCharts__Stepped, $author$project$Examples$LineCharts__Stacked, $author$project$Examples$LineCharts__Labels, $author$project$Examples$LineCharts__Missing, $author$project$Examples$LineCharts__Legends, $author$project$Examples$LineCharts__Basic, $author$project$Examples$Frontpage__BasicBubble, $author$project$Examples$Frontpage__BasicNavigation, $author$project$Examples$Frontpage__BasicBar, $author$project$Examples$Frontpage__BasicArea, $author$project$Examples$Frontpage__Concise, $author$project$Examples$Frontpage__BasicLine, $author$project$Examples$Frontpage__BasicScatter, $author$project$Examples$Frontpage__Familiar, $author$project$Examples$ScatterCharts__Colors, $author$project$Examples$ScatterCharts__Shapes, $author$project$Examples$ScatterCharts__Tooltip, $author$project$Examples$ScatterCharts__Highlight, $author$project$Examples$ScatterCharts__DataDependent, $author$project$Examples$ScatterCharts__Borders, $author$project$Examples$ScatterCharts__Labels, $author$project$Examples$ScatterCharts__Opacity, $author$project$Examples$ScatterCharts__Sizes, $author$project$Examples$ScatterCharts__Legends, $author$project$Examples$ScatterCharts__Basic]);
+var $author$project$Examples$BarCharts$BarLabels$meta = {category: 'Bar charts', categoryOrder: 1, description: 'Add custom bar labels.', name: 'Labels for bars', order: 15};
+var $author$project$Examples$BarCharts$Basic$meta = {category: 'Bar charts', categoryOrder: 1, description: 'Make a basic bar chart.', name: 'Basic', order: 1};
+var $author$project$Examples$BarCharts$BinLabels$meta = {category: 'Bar charts', categoryOrder: 1, description: 'Add bin labels.', name: 'Labels for bins', order: 15};
+var $author$project$Examples$BarCharts$BinLabelsAdvanced$meta = {category: 'Bar charts', categoryOrder: 1, description: 'Add custom bin labels.', name: 'Advanced labels for bins', order: 15};
+var $author$project$Examples$BarCharts$Borders$meta = {category: 'Bar charts', categoryOrder: 1, description: 'Add border to bar.', name: 'Borders', order: 8};
+var $author$project$Examples$BarCharts$Color$meta = {category: 'Bar charts', categoryOrder: 1, description: 'Change bar color.', name: 'Color', order: 7};
+var $author$project$Examples$BarCharts$Corners$meta = {category: 'Bar charts', categoryOrder: 1, description: 'Add rounded corners to bar.', name: 'Corners', order: 9};
+var $author$project$Examples$BarCharts$DataDependent$meta = {category: 'Bar charts', categoryOrder: 1, description: 'Change bar based on data.', name: 'Data dependent styling', order: 12};
+var $author$project$Examples$BarCharts$Gradient$meta = {category: 'Bar charts', categoryOrder: 1, description: 'Add gradient to bar.', name: 'Gradient', order: 10};
+var $author$project$Examples$BarCharts$Highlight$meta = {category: 'Bar charts', categoryOrder: 1, description: 'Add highlight to bar.', name: 'Highlight', order: 20};
+var $author$project$Examples$BarCharts$Histogram$meta = {category: 'Bar charts', categoryOrder: 1, description: 'Make a histogram (control x value).', name: 'Histogram', order: 2};
+var $author$project$Examples$BarCharts$Legends$meta = {category: 'Bar charts', categoryOrder: 1, description: 'Add legends to bar chart.', name: 'Legends', order: 16};
+var $author$project$Examples$BarCharts$Margin$meta = {category: 'Bar charts', categoryOrder: 1, description: 'Change margins around bin.', name: 'Margin', order: 6};
+var $author$project$Examples$BarCharts$Opacity$meta = {category: 'Bar charts', categoryOrder: 1, description: 'Change opacity of bar.', name: 'Opacity', order: 10};
+var $author$project$Examples$BarCharts$Pattern$meta = {category: 'Bar charts', categoryOrder: 1, description: 'Change pattern of bar.', name: 'Pattern', order: 11};
+var $author$project$Examples$BarCharts$Spacing$meta = {category: 'Bar charts', categoryOrder: 1, description: 'Remove or add spacing between bars.', name: 'Spacing', order: 5};
+var $author$project$Examples$BarCharts$Stacked$meta = {category: 'Bar charts', categoryOrder: 1, description: 'Stack bars.', name: 'Stacked', order: 3};
+var $author$project$Examples$BarCharts$Title$meta = {category: 'Bar charts', categoryOrder: 1, description: 'Add labels to bar chart.', name: 'Titles', order: 16};
+var $author$project$Examples$BarCharts$Tooltip$meta = {category: 'Bar charts', categoryOrder: 1, description: 'Add a basic tooltip for nearest bar.', name: 'Tooltip', order: 12};
+var $author$project$Examples$BarCharts$TooltipBin$meta = {category: 'Bar charts', categoryOrder: 1, description: 'Add a tooltip for nearest bin.', name: 'Bin tooltip', order: 13};
+var $author$project$Examples$BarCharts$TooltipStack$meta = {category: 'Bar charts', categoryOrder: 1, description: 'Add a tooltip for nearest stack.', name: 'Stack tooltip', order: 14};
+var $author$project$Examples$BarCharts$Ungroup$meta = {category: 'Bar charts', categoryOrder: 1, description: 'Have bars overlap rather than be side-by-side.', name: 'Ungroup', order: 4};
+var $author$project$Examples$BarCharts$VariableWidth$meta = {category: 'Bar charts', categoryOrder: 1, description: 'Bars with varying widths.', name: 'Variable width', order: 2};
+var $author$project$Examples$Frame$Amount$meta = {category: 'Navigation', categoryOrder: 4, description: 'Change the number of labels or ticks.', name: 'Amount of labels/ticks', order: 6};
+var $author$project$Examples$Frame$Arbitrary$meta = {category: 'Navigation', categoryOrder: 4, description: 'Add custom SVG/HTML to your chart.', name: 'Arbitrary SVG and HTML', order: 35};
+var $author$project$Examples$Frame$AxisLength$meta = {category: 'Navigation', categoryOrder: 4, description: 'Change the length of your axis line.', name: 'Adjust axis line', order: 12};
+var $author$project$Examples$Frame$Background$meta = {category: 'Navigation', categoryOrder: 4, description: 'Color the frame.', name: 'Background', order: 18};
+var $author$project$Examples$Frame$Basic$meta = {category: 'Navigation', categoryOrder: 4, description: 'Add grid, axes, ticks, and labels.', name: 'Basic', order: 1};
+var $author$project$Examples$Frame$Color$meta = {category: 'Navigation', categoryOrder: 4, description: 'Change color of items.', name: 'Color', order: 2};
+var $author$project$Examples$Frame$Coordinates$meta = {category: 'Navigation', categoryOrder: 4, description: 'Using the low level coordinate system.', name: 'Coordinates', order: 39};
+var $author$project$Examples$Frame$CustomElements$meta = {category: 'Navigation', categoryOrder: 4, description: 'Add custom tracked elements', name: 'Custom chart elements', order: 100};
+var $author$project$Examples$Frame$CustomFormat$meta = {category: 'Navigation', categoryOrder: 4, description: 'Change how your labels are formatted.', name: 'Custom formatting', order: 9};
+var $author$project$Examples$Frame$CustomLabels$meta = {category: 'Navigation', categoryOrder: 4, description: 'Control labels entirely.', name: 'Custom labels', order: 9};
+var $author$project$Examples$Frame$Dimensions$meta = {category: 'Navigation', categoryOrder: 4, description: 'Limit or extend your range and domain.', name: 'Control dimensions', order: 11};
+var $author$project$Examples$Frame$DotGrid$meta = {category: 'Navigation', categoryOrder: 4, description: 'Use dots instead of grid lines.', name: 'Dotted grid', order: 13};
+var $author$project$Examples$Frame$GridColor$meta = {category: 'Navigation', categoryOrder: 4, description: 'Change color of grid.', name: 'Color of grid', order: 14};
+var $author$project$Examples$Frame$GridFilter$meta = {category: 'Navigation', categoryOrder: 4, description: 'Prevent automatically added gridlines.', name: 'Remove grid lines', order: 15};
+var $author$project$Examples$Frame$LabelWithLine$meta = {category: 'Navigation', categoryOrder: 4, description: 'Add a label and line to chart.', name: 'Label with line', order: 20};
+var $author$project$Examples$Frame$Legends$meta = {category: 'Navigation', categoryOrder: 4, description: 'Add legends to chart.', name: 'Legends', order: 21};
+var $author$project$Examples$Frame$Lines$meta = {category: 'Navigation', categoryOrder: 4, description: 'Add a guidence line.', name: 'Lines', order: 30};
+var $author$project$Examples$Frame$Margin$meta = {category: 'Navigation', categoryOrder: 4, description: 'Add margin to frame.', name: 'Margin', order: 17};
+var $author$project$Examples$Frame$NoArrow$meta = {category: 'Navigation', categoryOrder: 4, description: 'Remove arrow from axis line.', name: 'Remove arrow', order: 5};
+var $author$project$Examples$Frame$Offset$meta = {category: 'Navigation', categoryOrder: 4, description: 'Change position of labels.', name: 'Move labels', order: 4};
+var $author$project$Examples$Frame$OnlyInts$meta = {category: 'Navigation', categoryOrder: 4, description: 'Only show integer labels.', name: 'Only integers', order: 8};
+var $author$project$Examples$Frame$Padding$meta = {category: 'Navigation', categoryOrder: 4, description: 'Add padding to frame.', name: 'Padding', order: 16};
+var $author$project$Examples$Frame$Position$meta = {category: 'Navigation', categoryOrder: 4, description: 'Change color of position.', name: 'Position', order: 3};
+var $author$project$Examples$Frame$Rect$meta = {category: 'Navigation', categoryOrder: 4, description: 'Add a rectangle.', name: 'Rectangle', order: 31};
+var $author$project$Examples$Frame$Times$meta = {category: 'Navigation', categoryOrder: 4, description: 'Use dates as labels.', name: 'Timeline', order: 8};
+var $author$project$Examples$Frame$Titles$meta = {category: 'Navigation', categoryOrder: 4, description: 'Add titles to chart.', name: 'Titles', order: 20};
+var $author$project$Examples$Frontpage$BasicArea$meta = {category: 'Basic', categoryOrder: 2, description: 'Make a basic area chart.', name: 'Area chart', order: 1};
+var $author$project$Examples$Frontpage$BasicBar$meta = {category: 'Basic', categoryOrder: 1, description: 'Make a basic bar chart.', name: 'Bar chart', order: 1};
+var $author$project$Examples$Frontpage$BasicBubble$meta = {category: 'Basic', categoryOrder: 3, description: 'Make a basic bubble chart.', name: 'Bubble chart', order: 1};
+var $author$project$Examples$Frontpage$BasicLine$meta = {category: 'Basic', categoryOrder: 3, description: 'Make a basic line chart.', name: 'Line chart', order: 1};
+var $author$project$Examples$Frontpage$BasicNavigation$meta = {category: 'Basic', categoryOrder: 1, description: 'Add basic navigation items to chart.', name: 'Basic navigation', order: 1};
+var $author$project$Examples$Frontpage$BasicScatter$meta = {category: 'Basic', categoryOrder: 2, description: 'Make a basic scatter chart.', name: 'Scatter chart', order: 1};
+var $author$project$Examples$Frontpage$Concise$meta = {category: 'Front page', categoryOrder: 1, description: 'Add custom bar labels.', name: 'Labels for bars', order: 15};
+var $author$project$Examples$Frontpage$Familiar$meta = {category: 'Front page', categoryOrder: 2, description: 'Make a basic scatter chart.', name: 'Basic', order: 1};
+var $author$project$Examples$Interactivity$Background$meta = {category: 'Interactivity', categoryOrder: 5, description: 'Change background of tooltip.', name: 'Edit background', order: 12};
+var $author$project$Examples$Interactivity$BasicArea$meta = {category: 'Interactivity', categoryOrder: 5, description: 'Add tooltip for nearest stack in line or scatter chart.', name: 'Basic tooltip for area charts', order: 5};
+var $author$project$Examples$Interactivity$BasicBar$meta = {category: 'Interactivity', categoryOrder: 5, description: 'Add a tooltip for nearest bar.', name: 'Basic bar tooltip', order: 1};
+var $author$project$Examples$Interactivity$BasicBin$meta = {category: 'Interactivity', categoryOrder: 5, description: 'Add a tooltip for nearest bin.', name: 'Basic bin tooltip', order: 3};
+var $author$project$Examples$Interactivity$BasicLine$meta = {category: 'Interactivity', categoryOrder: 5, description: 'Add basic tooltip for line or scatter charts.', name: 'Basic tooltip for dots', order: 4};
+var $author$project$Examples$Interactivity$BasicStack$meta = {category: 'Interactivity', categoryOrder: 5, description: 'Add a tooltip for nearest stack.', name: 'Basic stack tooltip', order: 2};
+var $author$project$Examples$Interactivity$Border$meta = {category: 'Interactivity', categoryOrder: 5, description: 'Change border of tooltip.', name: 'Edit border', order: 11};
+var $author$project$Examples$Interactivity$ChangeContent$meta = {category: 'Interactivity', categoryOrder: 5, description: 'Change the content of the tooltip.', name: 'Change content', order: 7};
+var $author$project$Examples$Interactivity$ChangeDot$meta = {category: 'Interactivity', categoryOrder: 5, description: 'Change styling if hovered.', name: 'Change style based on events', order: 7};
+var $author$project$Examples$Interactivity$ChangeName$meta = {category: 'Interactivity', categoryOrder: 5, description: 'Change the default series name in tooltip.', name: 'Change name', order: 6};
+var $author$project$Examples$Interactivity$ChangeUnit$meta = {category: 'Interactivity', categoryOrder: 5, description: 'Change the value print in the tooltip.', name: 'Change value formatting', order: 7};
+var $author$project$Examples$Interactivity$Coordinates$meta = {category: 'Interactivity', categoryOrder: 5, description: 'Get the hovered coordinates.', name: 'Basic coordinates', order: -1};
+var $author$project$Examples$Interactivity$Direction$meta = {category: 'Interactivity', categoryOrder: 5, description: 'Change direction of tooltip.', name: 'Direction', order: 8};
+var $author$project$Examples$Interactivity$DoubleSearch$meta = {category: 'Interactivity', categoryOrder: 5, description: 'Add more than one search.', name: 'Multiple tooltips', order: 17};
+var $author$project$Examples$Interactivity$FilterSearch$meta = {category: 'Interactivity', categoryOrder: 5, description: 'Narrow down tooltip item search.', name: 'Filter item search', order: 15};
+var $author$project$Examples$Interactivity$Focal$meta = {category: 'Interactivity', categoryOrder: 5, description: 'Determine where tooltip is placed in relation to item.', name: 'Set focal point', order: 11};
+var $author$project$Examples$Interactivity$Multiple$meta = {category: 'Interactivity', categoryOrder: 5, description: 'Add a tooltip for bars and series.', name: 'Mixed chart types', order: 13};
+var $author$project$Examples$Interactivity$NoArrow$meta = {category: 'Interactivity', categoryOrder: 5, description: 'Don\'t add pointer to tooltip.', name: 'Remove pointer', order: 8};
+var $author$project$Examples$Interactivity$Offset$meta = {category: 'Interactivity', categoryOrder: 5, description: 'Change distance of tooltip to item.', name: 'Edit offset', order: 9};
+var $author$project$Examples$Interactivity$TrickyTooltip$meta = {category: 'Interactivity', categoryOrder: 5, description: 'Add tooltip for each stack in hovered bin.', name: 'Multiple tooltips for single group', order: 20};
+var $author$project$Examples$Interactivity$Zoom$meta = {category: 'Interactivity', categoryOrder: 5, description: 'Add zoom effect.', name: 'Zoom', order: 20};
+var $author$project$Examples$LineCharts$Area$meta = {category: 'Line charts', categoryOrder: 3, description: 'Set opacity of the area under curve.', name: 'Area under curve', order: 9};
+var $author$project$Examples$LineCharts$Basic$meta = {category: 'Line charts', categoryOrder: 3, description: 'Use a linear interpolation.', name: 'Linear', order: 1};
+var $author$project$Examples$LineCharts$Color$meta = {category: 'Line charts', categoryOrder: 3, description: 'Change color of line.', name: 'Color', order: 4};
+var $author$project$Examples$LineCharts$Dashed$meta = {category: 'Line charts', categoryOrder: 3, description: 'Make a line dashed.', name: 'Dashed', order: 6};
+var $author$project$Examples$LineCharts$Dots$meta = {category: 'Line charts', categoryOrder: 3, description: 'Add dots to a line.', name: 'Dots', order: 7};
+var $author$project$Examples$LineCharts$Gradient$meta = {category: 'Line charts', categoryOrder: 3, description: 'Add a gradient to your area under the curve.', name: 'Gradient', order: 10};
+var $author$project$Examples$LineCharts$Labels$meta = {category: 'Line charts', categoryOrder: 3, description: 'Add custom labels on each data point.', name: 'Labels for each point', order: 12};
+var $author$project$Examples$LineCharts$Legends$meta = {category: 'Line charts', categoryOrder: 3, description: 'Add legends to your chart.', name: 'Legends', order: 12};
+var $author$project$Examples$LineCharts$Missing$meta = {category: 'Line charts', categoryOrder: 3, description: 'Handle missing data.', name: 'Missing data', order: 4};
+var $author$project$Examples$LineCharts$Montone$meta = {category: 'Line charts', categoryOrder: 3, description: 'Use a monotone interpolation.', name: 'Monotone', order: 2};
+var $author$project$Examples$LineCharts$Pattern$meta = {category: 'Line charts', categoryOrder: 3, description: 'Add a pattern to the area under the curve.', name: 'Pattern', order: 11};
+var $author$project$Examples$LineCharts$Stacked$meta = {category: 'Line charts', categoryOrder: 3, description: 'Stack lines.', name: 'Stacked', order: 8};
+var $author$project$Examples$LineCharts$Stepped$meta = {category: 'Line charts', categoryOrder: 3, description: 'Use a stepped interpolation.', name: 'Stepped', order: 3};
+var $author$project$Examples$LineCharts$Tooltip$meta = {category: 'Line charts', categoryOrder: 3, description: 'Add basic tooltip.', name: 'Tooltip', order: 13};
+var $author$project$Examples$LineCharts$TooltipStack$meta = {category: 'Line charts', categoryOrder: 3, description: 'Add tooltip for nearest stack.', name: 'Tooltip for stacks', order: 14};
+var $author$project$Examples$LineCharts$Width$meta = {category: 'Line charts', categoryOrder: 3, description: 'Change width of line.', name: 'Width', order: 5};
+var $author$project$Examples$ScatterCharts$Basic$meta = {category: 'Scatter charts', categoryOrder: 2, description: 'Make a basic scatter chart.', name: 'Basic', order: 1};
+var $author$project$Examples$ScatterCharts$Borders$meta = {category: 'Scatter charts', categoryOrder: 2, description: 'Change border of dots.', name: 'Borders', order: 5};
+var $author$project$Examples$ScatterCharts$Colors$meta = {category: 'Scatter charts', categoryOrder: 2, description: 'Change color of dots.', name: 'Color', order: 3};
+var $author$project$Examples$ScatterCharts$DataDependent$meta = {category: 'Scatter charts', categoryOrder: 2, description: 'Change styling of individual dots.', name: 'Data dependent styling', order: 7};
+var $author$project$Examples$ScatterCharts$Highlight$meta = {category: 'Scatter charts', categoryOrder: 2, description: 'Highlight dots.', name: 'Highlight', order: 6};
+var $author$project$Examples$ScatterCharts$Labels$meta = {category: 'Scatter charts', categoryOrder: 2, description: 'Add labels to each dot.', name: 'Labels', order: 9};
+var $author$project$Examples$ScatterCharts$Legends$meta = {category: 'Scatter charts', categoryOrder: 2, description: 'Add legends to scatter chart.', name: 'Legends', order: 10};
+var $author$project$Examples$ScatterCharts$Opacity$meta = {category: 'Scatter charts', categoryOrder: 2, description: 'Change opacity of dots.', name: 'Opacity', order: 6};
+var $author$project$Examples$ScatterCharts$Shapes$meta = {category: 'Scatter charts', categoryOrder: 2, description: 'Change shape of dots.', name: 'Shapes', order: 2};
+var $author$project$Examples$ScatterCharts$Sizes$meta = {category: 'Scatter charts', categoryOrder: 2, description: 'Change size of dots.', name: 'Sizes', order: 4};
+var $author$project$Examples$ScatterCharts$Tooltip$meta = {category: 'Scatter charts', categoryOrder: 2, description: 'Add basic tooltip.', name: 'Tooltip', order: 8};
+var $author$project$Examples$meta = function (chosen) {
+	switch (chosen.$) {
+		case 'BarCharts__Gradient':
+			return $author$project$Examples$BarCharts$Gradient$meta;
+		case 'BarCharts__VariableWidth':
+			return $author$project$Examples$BarCharts$VariableWidth$meta;
+		case 'BarCharts__Title':
+			return $author$project$Examples$BarCharts$Title$meta;
+		case 'BarCharts__TooltipStack':
+			return $author$project$Examples$BarCharts$TooltipStack$meta;
+		case 'BarCharts__Tooltip':
+			return $author$project$Examples$BarCharts$Tooltip$meta;
+		case 'BarCharts__BarLabels':
+			return $author$project$Examples$BarCharts$BarLabels$meta;
+		case 'BarCharts__Pattern':
+			return $author$project$Examples$BarCharts$Pattern$meta;
+		case 'BarCharts__Histogram':
+			return $author$project$Examples$BarCharts$Histogram$meta;
+		case 'BarCharts__BinLabelsAdvanced':
+			return $author$project$Examples$BarCharts$BinLabelsAdvanced$meta;
+		case 'BarCharts__Spacing':
+			return $author$project$Examples$BarCharts$Spacing$meta;
+		case 'BarCharts__Highlight':
+			return $author$project$Examples$BarCharts$Highlight$meta;
+		case 'BarCharts__DataDependent':
+			return $author$project$Examples$BarCharts$DataDependent$meta;
+		case 'BarCharts__Color':
+			return $author$project$Examples$BarCharts$Color$meta;
+		case 'BarCharts__TooltipBin':
+			return $author$project$Examples$BarCharts$TooltipBin$meta;
+		case 'BarCharts__Corners':
+			return $author$project$Examples$BarCharts$Corners$meta;
+		case 'BarCharts__Ungroup':
+			return $author$project$Examples$BarCharts$Ungroup$meta;
+		case 'BarCharts__BinLabels':
+			return $author$project$Examples$BarCharts$BinLabels$meta;
+		case 'BarCharts__Stacked':
+			return $author$project$Examples$BarCharts$Stacked$meta;
+		case 'BarCharts__Margin':
+			return $author$project$Examples$BarCharts$Margin$meta;
+		case 'BarCharts__Borders':
+			return $author$project$Examples$BarCharts$Borders$meta;
+		case 'BarCharts__Opacity':
+			return $author$project$Examples$BarCharts$Opacity$meta;
+		case 'BarCharts__Legends':
+			return $author$project$Examples$BarCharts$Legends$meta;
+		case 'BarCharts__Basic':
+			return $author$project$Examples$BarCharts$Basic$meta;
+		case 'Frame__Lines':
+			return $author$project$Examples$Frame$Lines$meta;
+		case 'Frame__Position':
+			return $author$project$Examples$Frame$Position$meta;
+		case 'Frame__Coordinates':
+			return $author$project$Examples$Frame$Coordinates$meta;
+		case 'Frame__GridFilter':
+			return $author$project$Examples$Frame$GridFilter$meta;
+		case 'Frame__Dimensions':
+			return $author$project$Examples$Frame$Dimensions$meta;
+		case 'Frame__CustomElements':
+			return $author$project$Examples$Frame$CustomElements$meta;
+		case 'Frame__NoArrow':
+			return $author$project$Examples$Frame$NoArrow$meta;
+		case 'Frame__Background':
+			return $author$project$Examples$Frame$Background$meta;
+		case 'Frame__Rect':
+			return $author$project$Examples$Frame$Rect$meta;
+		case 'Frame__Padding':
+			return $author$project$Examples$Frame$Padding$meta;
+		case 'Frame__Times':
+			return $author$project$Examples$Frame$Times$meta;
+		case 'Frame__OnlyInts':
+			return $author$project$Examples$Frame$OnlyInts$meta;
+		case 'Frame__GridColor':
+			return $author$project$Examples$Frame$GridColor$meta;
+		case 'Frame__Offset':
+			return $author$project$Examples$Frame$Offset$meta;
+		case 'Frame__Color':
+			return $author$project$Examples$Frame$Color$meta;
+		case 'Frame__Amount':
+			return $author$project$Examples$Frame$Amount$meta;
+		case 'Frame__Titles':
+			return $author$project$Examples$Frame$Titles$meta;
+		case 'Frame__CustomLabels':
+			return $author$project$Examples$Frame$CustomLabels$meta;
+		case 'Frame__Margin':
+			return $author$project$Examples$Frame$Margin$meta;
+		case 'Frame__LabelWithLine':
+			return $author$project$Examples$Frame$LabelWithLine$meta;
+		case 'Frame__DotGrid':
+			return $author$project$Examples$Frame$DotGrid$meta;
+		case 'Frame__CustomFormat':
+			return $author$project$Examples$Frame$CustomFormat$meta;
+		case 'Frame__AxisLength':
+			return $author$project$Examples$Frame$AxisLength$meta;
+		case 'Frame__Arbitrary':
+			return $author$project$Examples$Frame$Arbitrary$meta;
+		case 'Frame__Legends':
+			return $author$project$Examples$Frame$Legends$meta;
+		case 'Frame__Basic':
+			return $author$project$Examples$Frame$Basic$meta;
+		case 'Interactivity__ChangeContent':
+			return $author$project$Examples$Interactivity$ChangeContent$meta;
+		case 'Interactivity__Direction':
+			return $author$project$Examples$Interactivity$Direction$meta;
+		case 'Interactivity__ChangeDot':
+			return $author$project$Examples$Interactivity$ChangeDot$meta;
+		case 'Interactivity__Border':
+			return $author$project$Examples$Interactivity$Border$meta;
+		case 'Interactivity__Zoom':
+			return $author$project$Examples$Interactivity$Zoom$meta;
+		case 'Interactivity__BasicBin':
+			return $author$project$Examples$Interactivity$BasicBin$meta;
+		case 'Interactivity__BasicStack':
+			return $author$project$Examples$Interactivity$BasicStack$meta;
+		case 'Interactivity__Coordinates':
+			return $author$project$Examples$Interactivity$Coordinates$meta;
+		case 'Interactivity__ChangeName':
+			return $author$project$Examples$Interactivity$ChangeName$meta;
+		case 'Interactivity__NoArrow':
+			return $author$project$Examples$Interactivity$NoArrow$meta;
+		case 'Interactivity__FilterSearch':
+			return $author$project$Examples$Interactivity$FilterSearch$meta;
+		case 'Interactivity__Background':
+			return $author$project$Examples$Interactivity$Background$meta;
+		case 'Interactivity__BasicBar':
+			return $author$project$Examples$Interactivity$BasicBar$meta;
+		case 'Interactivity__BasicArea':
+			return $author$project$Examples$Interactivity$BasicArea$meta;
+		case 'Interactivity__TrickyTooltip':
+			return $author$project$Examples$Interactivity$TrickyTooltip$meta;
+		case 'Interactivity__Multiple':
+			return $author$project$Examples$Interactivity$Multiple$meta;
+		case 'Interactivity__BasicLine':
+			return $author$project$Examples$Interactivity$BasicLine$meta;
+		case 'Interactivity__Offset':
+			return $author$project$Examples$Interactivity$Offset$meta;
+		case 'Interactivity__DoubleSearch':
+			return $author$project$Examples$Interactivity$DoubleSearch$meta;
+		case 'Interactivity__ChangeUnit':
+			return $author$project$Examples$Interactivity$ChangeUnit$meta;
+		case 'Interactivity__Focal':
+			return $author$project$Examples$Interactivity$Focal$meta;
+		case 'LineCharts__Area':
+			return $author$project$Examples$LineCharts$Area$meta;
+		case 'LineCharts__Gradient':
+			return $author$project$Examples$LineCharts$Gradient$meta;
+		case 'LineCharts__Width':
+			return $author$project$Examples$LineCharts$Width$meta;
+		case 'LineCharts__TooltipStack':
+			return $author$project$Examples$LineCharts$TooltipStack$meta;
+		case 'LineCharts__Tooltip':
+			return $author$project$Examples$LineCharts$Tooltip$meta;
+		case 'LineCharts__Montone':
+			return $author$project$Examples$LineCharts$Montone$meta;
+		case 'LineCharts__Pattern':
+			return $author$project$Examples$LineCharts$Pattern$meta;
+		case 'LineCharts__Dots':
+			return $author$project$Examples$LineCharts$Dots$meta;
+		case 'LineCharts__Dashed':
+			return $author$project$Examples$LineCharts$Dashed$meta;
+		case 'LineCharts__Color':
+			return $author$project$Examples$LineCharts$Color$meta;
+		case 'LineCharts__Stepped':
+			return $author$project$Examples$LineCharts$Stepped$meta;
+		case 'LineCharts__Stacked':
+			return $author$project$Examples$LineCharts$Stacked$meta;
+		case 'LineCharts__Labels':
+			return $author$project$Examples$LineCharts$Labels$meta;
+		case 'LineCharts__Missing':
+			return $author$project$Examples$LineCharts$Missing$meta;
+		case 'LineCharts__Legends':
+			return $author$project$Examples$LineCharts$Legends$meta;
+		case 'LineCharts__Basic':
+			return $author$project$Examples$LineCharts$Basic$meta;
+		case 'Frontpage__BasicBubble':
+			return $author$project$Examples$Frontpage$BasicBubble$meta;
+		case 'Frontpage__BasicNavigation':
+			return $author$project$Examples$Frontpage$BasicNavigation$meta;
+		case 'Frontpage__BasicBar':
+			return $author$project$Examples$Frontpage$BasicBar$meta;
+		case 'Frontpage__BasicArea':
+			return $author$project$Examples$Frontpage$BasicArea$meta;
+		case 'Frontpage__Concise':
+			return $author$project$Examples$Frontpage$Concise$meta;
+		case 'Frontpage__BasicLine':
+			return $author$project$Examples$Frontpage$BasicLine$meta;
+		case 'Frontpage__BasicScatter':
+			return $author$project$Examples$Frontpage$BasicScatter$meta;
+		case 'Frontpage__Familiar':
+			return $author$project$Examples$Frontpage$Familiar$meta;
+		case 'ScatterCharts__Colors':
+			return $author$project$Examples$ScatterCharts$Colors$meta;
+		case 'ScatterCharts__Shapes':
+			return $author$project$Examples$ScatterCharts$Shapes$meta;
+		case 'ScatterCharts__Tooltip':
+			return $author$project$Examples$ScatterCharts$Tooltip$meta;
+		case 'ScatterCharts__Highlight':
+			return $author$project$Examples$ScatterCharts$Highlight$meta;
+		case 'ScatterCharts__DataDependent':
+			return $author$project$Examples$ScatterCharts$DataDependent$meta;
+		case 'ScatterCharts__Borders':
+			return $author$project$Examples$ScatterCharts$Borders$meta;
+		case 'ScatterCharts__Labels':
+			return $author$project$Examples$ScatterCharts$Labels$meta;
+		case 'ScatterCharts__Opacity':
+			return $author$project$Examples$ScatterCharts$Opacity$meta;
+		case 'ScatterCharts__Sizes':
+			return $author$project$Examples$ScatterCharts$Sizes$meta;
+		case 'ScatterCharts__Legends':
+			return $author$project$Examples$ScatterCharts$Legends$meta;
+		default:
+			return $author$project$Examples$ScatterCharts$Basic$meta;
+	}
+};
+var $elm$core$String$replace = F3(
+	function (before, after, string) {
+		return A2(
+			$elm$core$String$join,
+			after,
+			A2($elm$core$String$split, before, string));
+	});
+var $elm$core$String$toLower = _String_toLower;
+var $author$project$Ui$Thumbnail$urlify = A2(
+	$elm$core$Basics$composeR,
+	A2($elm$core$String$replace, ' ', '-'),
+	A2(
+		$elm$core$Basics$composeR,
+		A2($elm$core$String$replace, '/', '-'),
+		$elm$core$String$toLower));
+var $author$project$Ui$Thumbnail$toUrlGroup = function (title) {
+	return '/documentation/' + $author$project$Ui$Thumbnail$urlify(title);
+};
 var $author$project$Ui$Thumbnail$dictGroups = function () {
 	var updateCat = F3(
 		function (meta, id, maybeIds) {
@@ -6526,31 +11361,12 @@ var $author$project$Ui$Thumbnail$dictGroups = function () {
 	return A3($elm$core$List$foldl, groupBy, $elm$core$Dict$empty, $author$project$Examples$all);
 }();
 var $elm$core$List$sortBy = _List_sortBy;
-var $elm$core$Dict$values = function (dict) {
-	return A3(
-		$elm$core$Dict$foldr,
-		F3(
-			function (key, value, valueList) {
-				return A2($elm$core$List$cons, value, valueList);
-			}),
-		_List_Nil,
-		dict);
-};
 var $author$project$Ui$Thumbnail$groups = A2(
 	$elm$core$List$sortBy,
 	function ($) {
 		return $.order;
 	},
 	$elm$core$Dict$values($author$project$Ui$Thumbnail$dictGroups));
-var $elm$core$Maybe$withDefault = F2(
-	function (_default, maybe) {
-		if (maybe.$ === 'Just') {
-			var value = maybe.a;
-			return value;
-		} else {
-			return _default;
-		}
-	});
 var $author$project$Ui$Thumbnail$firstGroup = A2(
 	$elm$core$Maybe$withDefault,
 	A3($author$project$Ui$Thumbnail$Group, '', 1, _List_Nil),
@@ -6703,7 +11519,6 @@ var $author$project$Page$Home$init = F3(
 			$elm$core$Platform$Cmd$none);
 	});
 var $elm$browser$Browser$Navigation$pushUrl = _Browser_pushUrl;
-var $elm$core$Platform$Cmd$map = _Platform_map;
 var $author$project$Main$updateWith = F4(
 	function (toModel, toMsg, model, _v0) {
 		var subModel = _v0.a;
@@ -6980,22 +11795,6 @@ var $elm$url$Url$Parser$map = F2(
 						A5($elm$url$Url$Parser$State, visited, unvisited, params, frag, subValue)));
 			});
 	});
-var $elm$core$List$append = F2(
-	function (xs, ys) {
-		if (!ys.b) {
-			return xs;
-		} else {
-			return A3($elm$core$List$foldr, $elm$core$List$cons, ys, xs);
-		}
-	});
-var $elm$core$List$concat = function (lists) {
-	return A3($elm$core$List$foldr, $elm$core$List$append, _List_Nil, lists);
-};
-var $elm$core$List$concatMap = F2(
-	function (f, list) {
-		return $elm$core$List$concat(
-			A2($elm$core$List$map, f, list));
-	});
 var $elm$url$Url$Parser$oneOf = function (parsers) {
 	return $elm$url$Url$Parser$Parser(
 		function (state) {
@@ -7133,13 +11932,10 @@ var $author$project$Route$fromUrl = function (url) {
 var $author$project$Session$Session = function (window) {
 	return {window: window};
 };
-var $elm$json$Json$Decode$decodeValue = _Json_run;
 var $author$project$Session$Window = F2(
 	function (width, height) {
 		return {height: height, width: width};
 	});
-var $elm$json$Json$Decode$field = _Json_decodeField;
-var $elm$json$Json$Decode$int = _Json_decodeInt;
 var $author$project$Session$decoder = A3(
 	$elm$json$Json$Decode$map2,
 	$author$project$Session$Window,
@@ -7166,7 +11962,6 @@ var $author$project$Main$init = F3(
 				$author$project$Session$init(flags),
 				$author$project$Main$Redirect));
 	});
-var $elm$core$Platform$Sub$map = _Platform_map;
 var $elm$core$Platform$Sub$batch = _Platform_batch;
 var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
 var $author$project$Page$Administration$OnResize = F2(
@@ -7200,105 +11995,7 @@ var $elm$browser$Browser$Events$addKey = function (sub) {
 			name),
 		sub);
 };
-var $elm$core$Dict$fromList = function (assocs) {
-	return A3(
-		$elm$core$List$foldl,
-		F2(
-			function (_v0, dict) {
-				var key = _v0.a;
-				var value = _v0.b;
-				return A3($elm$core$Dict$insert, key, value, dict);
-			}),
-		$elm$core$Dict$empty,
-		assocs);
-};
 var $elm$core$Process$kill = _Scheduler_kill;
-var $elm$core$Dict$foldl = F3(
-	function (func, acc, dict) {
-		foldl:
-		while (true) {
-			if (dict.$ === 'RBEmpty_elm_builtin') {
-				return acc;
-			} else {
-				var key = dict.b;
-				var value = dict.c;
-				var left = dict.d;
-				var right = dict.e;
-				var $temp$func = func,
-					$temp$acc = A3(
-					func,
-					key,
-					value,
-					A3($elm$core$Dict$foldl, func, acc, left)),
-					$temp$dict = right;
-				func = $temp$func;
-				acc = $temp$acc;
-				dict = $temp$dict;
-				continue foldl;
-			}
-		}
-	});
-var $elm$core$Dict$merge = F6(
-	function (leftStep, bothStep, rightStep, leftDict, rightDict, initialResult) {
-		var stepState = F3(
-			function (rKey, rValue, _v0) {
-				stepState:
-				while (true) {
-					var list = _v0.a;
-					var result = _v0.b;
-					if (!list.b) {
-						return _Utils_Tuple2(
-							list,
-							A3(rightStep, rKey, rValue, result));
-					} else {
-						var _v2 = list.a;
-						var lKey = _v2.a;
-						var lValue = _v2.b;
-						var rest = list.b;
-						if (_Utils_cmp(lKey, rKey) < 0) {
-							var $temp$rKey = rKey,
-								$temp$rValue = rValue,
-								$temp$_v0 = _Utils_Tuple2(
-								rest,
-								A3(leftStep, lKey, lValue, result));
-							rKey = $temp$rKey;
-							rValue = $temp$rValue;
-							_v0 = $temp$_v0;
-							continue stepState;
-						} else {
-							if (_Utils_cmp(lKey, rKey) > 0) {
-								return _Utils_Tuple2(
-									list,
-									A3(rightStep, rKey, rValue, result));
-							} else {
-								return _Utils_Tuple2(
-									rest,
-									A4(bothStep, lKey, lValue, rValue, result));
-							}
-						}
-					}
-				}
-			});
-		var _v3 = A3(
-			$elm$core$Dict$foldl,
-			stepState,
-			_Utils_Tuple2(
-				$elm$core$Dict$toList(leftDict),
-				initialResult),
-			rightDict);
-		var leftovers = _v3.a;
-		var intermediateResult = _v3.b;
-		return A3(
-			$elm$core$List$foldl,
-			F2(
-				function (_v4, result) {
-					var k = _v4.a;
-					var v = _v4.b;
-					return A3(leftStep, k, v, result);
-				}),
-			intermediateResult,
-			leftovers);
-	});
 var $elm$browser$Browser$Events$Event = F2(
 	function (key, event) {
 		return {event: event, key: key};
@@ -7401,24 +12098,6 @@ var $elm$browser$Browser$Events$onEffects = F3(
 				},
 				$elm$core$Task$sequence(
 					A2($elm$core$List$map, $elm$core$Process$kill, deadPids))));
-	});
-var $elm$core$List$maybeCons = F3(
-	function (f, mx, xs) {
-		var _v0 = f(mx);
-		if (_v0.$ === 'Just') {
-			var x = _v0.a;
-			return A2($elm$core$List$cons, x, xs);
-		} else {
-			return xs;
-		}
-	});
-var $elm$core$List$filterMap = F2(
-	function (f, xs) {
-		return A3(
-			$elm$core$List$foldr,
-			$elm$core$List$maybeCons(f),
-			_List_Nil,
-			xs);
 	});
 var $elm$browser$Browser$Events$onSelfMsg = F3(
 	function (router, _v0, state) {
@@ -7616,7 +12295,6 @@ var $elm$url$Url$toString = function (url) {
 					_Utils_ap(http, url.host)),
 				url.path)));
 };
-var $elm$core$Basics$not = _Basics_not;
 var $author$project$Ui$Menu$update = F2(
 	function (msg, model) {
 		return _Utils_update(
@@ -7670,31 +12348,26 @@ var $author$project$Articles$GenderAndSalery$Bars$update = F2(
 				{binSize: binSize, hovering: _List_Nil});
 		}
 	});
-var $elm$core$Basics$min = F2(
-	function (x, y) {
-		return (_Utils_cmp(x, y) < 0) ? x : y;
-	});
 var $author$project$Articles$GenderAndSalery$Bubble$update = F2(
 	function (msg, model) {
 		switch (msg.$) {
 			case 'OnHover':
 				var hovering = msg.a;
 				var coords = msg.b;
-				var _v1 = model.selection;
+				var _v1 = model.moving;
 				if (_v1.$ === 'Nothing') {
 					return _Utils_update(
 						model,
 						{hovering: hovering});
 				} else {
-					var select = _v1.a;
+					var _v2 = _v1.a;
+					var start = _v2.a;
 					return _Utils_update(
 						model,
 						{
 							hovering: _List_Nil,
-							selection: $elm$core$Maybe$Just(
-								_Utils_update(
-									select,
-									{b: coords}))
+							moving: $elm$core$Maybe$Just(
+								_Utils_Tuple2(start, coords))
 						});
 				}
 			case 'OnMouseDown':
@@ -7702,45 +12375,57 @@ var $author$project$Articles$GenderAndSalery$Bubble$update = F2(
 				return _Utils_update(
 					model,
 					{
-						selection: $elm$core$Maybe$Just(
-							{a: coords, b: coords})
+						moving: $elm$core$Maybe$Just(
+							_Utils_Tuple2(coords, coords))
 					});
 			case 'OnMouseUp':
 				var coords = msg.a;
-				var _v2 = model.selection;
-				if (_v2.$ === 'Nothing') {
+				var _v3 = model.moving;
+				if (_v3.$ === 'Nothing') {
 					return model;
 				} else {
-					var select = _v2.a;
-					return _Utils_eq(select.a, coords) ? _Utils_update(
-						model,
-						{selection: $elm$core$Maybe$Nothing, window: $elm$core$Maybe$Nothing}) : _Utils_update(
+					var _v4 = _v3.a;
+					var start = _v4.a;
+					return _Utils_update(
 						model,
 						{
-							selection: $elm$core$Maybe$Nothing,
-							window: $elm$core$Maybe$Just(
-								{
-									x1: A2($elm$core$Basics$min, select.a.x, coords.x),
-									x2: A2($elm$core$Basics$max, select.a.x, coords.x),
-									y1: A2($elm$core$Basics$min, select.a.y, coords.y),
-									y2: A2($elm$core$Basics$max, select.a.y, coords.y)
-								})
+							moving: $elm$core$Maybe$Nothing,
+							zoomOffset: {x: (model.zoomOffset.x + coords.x) - start.x, y: (model.zoomOffset.y + coords.y) - start.y}
 						});
 				}
-			case 'OnReset':
+			case 'OnZoomIn':
 				return _Utils_update(
 					model,
-					{hovering: _List_Nil});
+					{zoomPercentage: model.zoomPercentage + 20});
+			case 'OnZoomOut':
+				return _Utils_update(
+					model,
+					{
+						zoomPercentage: A2($elm$core$Basics$max, model.zoomPercentage - 20, 100)
+					});
+			case 'OnZoomReset':
+				return _Utils_update(
+					model,
+					{zoomPercentage: 100});
 			default:
-				return _Utils_update(
-					model,
-					{window: $elm$core$Maybe$Nothing});
+				var _v5 = model.moving;
+				if (_v5.$ === 'Nothing') {
+					return _Utils_update(
+						model,
+						{hovering: _List_Nil, moving: $elm$core$Maybe$Nothing});
+				} else {
+					var _v6 = _v5.a;
+					var start = _v6.a;
+					var end = _v6.b;
+					return _Utils_update(
+						model,
+						{
+							hovering: _List_Nil,
+							moving: $elm$core$Maybe$Nothing,
+							zoomOffset: {x: (model.zoomOffset.x + end.x) - start.x, y: (model.zoomOffset.y + end.y) - start.y}
+						});
+				}
 		}
-	});
-var $elm$core$Basics$composeL = F3(
-	function (g, f, x) {
-		return g(
-			f(x));
 	});
 var $author$project$Articles$GenderAndSalery$EducationChart$toEducationOrder = function (ed) {
 	switch (ed.$) {
@@ -8266,6 +12951,10 @@ var $author$project$Examples$Interactivity$Zoom$Zoomed = F2(
 var $author$project$Examples$Interactivity$Zoom$Zooming = F2(
 	function (a, b) {
 		return {$: 'Zooming', a: a, b: b};
+	});
+var $elm$core$Basics$min = F2(
+	function (x, y) {
+		return (_Utils_cmp(x, y) < 0) ? x : y;
 	});
 var $author$project$Examples$Interactivity$Zoom$update = F2(
 	function (msg, model) {
@@ -9568,11 +14257,6 @@ var $author$project$Main$update = F2(
 		}
 		return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 	});
-var $elm$json$Json$Decode$value = _Json_decodeValue;
-var $elm$virtual_dom$VirtualDom$map = _VirtualDom_map;
-var $elm$html$Html$map = $elm$virtual_dom$VirtualDom$map;
-var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
-var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
 var $author$project$Page$Administration$MenuMsg = function (a) {
 	return {$: 'MenuMsg', a: a};
 };
@@ -9689,7 +14373,6 @@ var $mdgriffith$elm_ui$Internal$Flag$Flag = function (a) {
 var $mdgriffith$elm_ui$Internal$Flag$Second = function (a) {
 	return {$: 'Second', a: a};
 };
-var $elm$core$Bitwise$shiftLeftBy = _Bitwise_shiftLeftBy;
 var $mdgriffith$elm_ui$Internal$Flag$flag = function (i) {
 	return (i > 31) ? $mdgriffith$elm_ui$Internal$Flag$Second(1 << (i - 32)) : $mdgriffith$elm_ui$Internal$Flag$Flag(1 << i);
 };
@@ -9697,16 +14380,6 @@ var $mdgriffith$elm_ui$Internal$Flag$alignBottom = $mdgriffith$elm_ui$Internal$F
 var $mdgriffith$elm_ui$Internal$Flag$alignRight = $mdgriffith$elm_ui$Internal$Flag$flag(40);
 var $mdgriffith$elm_ui$Internal$Flag$centerX = $mdgriffith$elm_ui$Internal$Flag$flag(42);
 var $mdgriffith$elm_ui$Internal$Flag$centerY = $mdgriffith$elm_ui$Internal$Flag$flag(43);
-var $elm$json$Json$Encode$string = _Json_wrap;
-var $elm$html$Html$Attributes$stringProperty = F2(
-	function (key, string) {
-		return A2(
-			_VirtualDom_property,
-			key,
-			$elm$json$Json$Encode$string(string));
-	});
-var $elm$html$Html$Attributes$class = $elm$html$Html$Attributes$stringProperty('className');
-var $elm$html$Html$div = _VirtualDom_node('div');
 var $elm$core$Set$Set_elm_builtin = function (a) {
 	return {$: 'Set_elm_builtin', a: a};
 };
@@ -9730,10 +14403,6 @@ var $mdgriffith$elm_ui$Internal$Model$lengthClassName = function (x) {
 			var len = x.b;
 			return 'max' + ($elm$core$String$fromInt(max) + $mdgriffith$elm_ui$Internal$Model$lengthClassName(len));
 	}
-};
-var $elm$core$Tuple$second = function (_v0) {
-	var y = _v0.b;
-	return y;
 };
 var $elm$core$Basics$round = _Basics_round;
 var $mdgriffith$elm_ui$Internal$Model$floatClass = function (x) {
@@ -9900,7 +14569,6 @@ var $mdgriffith$elm_ui$Internal$Model$Style = F2(
 var $mdgriffith$elm_ui$Internal$Style$dot = function (c) {
 	return '.' + c;
 };
-var $elm$core$String$fromFloat = _String_fromNumber;
 var $mdgriffith$elm_ui$Internal$Model$formatColor = function (_v0) {
 	var red = _v0.a;
 	var green = _v0.b;
@@ -10059,10 +14727,6 @@ var $mdgriffith$elm_ui$Internal$Model$renderFocusStyle = function (focus) {
 						A2($mdgriffith$elm_ui$Internal$Model$Property, 'outline', 'none'))
 					])))
 		]);
-};
-var $elm$virtual_dom$VirtualDom$node = function (tag) {
-	return _VirtualDom_node(
-		_VirtualDom_noScript(tag));
 };
 var $elm$virtual_dom$VirtualDom$property = F2(
 	function (key, value) {
@@ -12124,28 +16788,6 @@ var $mdgriffith$elm_ui$Internal$Model$staticRoot = function (opts) {
 				_List_Nil);
 	}
 };
-var $elm$json$Json$Encode$list = F2(
-	function (func, entries) {
-		return _Json_wrap(
-			A3(
-				$elm$core$List$foldl,
-				_Json_addEntry(func),
-				_Json_emptyArray(_Utils_Tuple0),
-				entries));
-	});
-var $elm$json$Json$Encode$object = function (pairs) {
-	return _Json_wrap(
-		A3(
-			$elm$core$List$foldl,
-			F2(
-				function (_v0, obj) {
-					var k = _v0.a;
-					var v = _v0.b;
-					return A3(_Json_addField, k, v, obj);
-				}),
-			_Json_emptyObject(_Utils_Tuple0),
-			pairs));
-};
 var $elm$core$List$any = F2(
 	function (isOkay, list) {
 		any:
@@ -12913,7 +17555,6 @@ var $elm$core$List$minimum = function (list) {
 		return $elm$core$Maybe$Nothing;
 	}
 };
-var $elm$core$Basics$neq = _Utils_notEqual;
 var $mdgriffith$elm_ui$Internal$Model$convertAdjustment = function (adjustment) {
 	var lines = _List_fromArray(
 		[adjustment.capital, adjustment.baseline, adjustment.descender, adjustment.lowercase]);
@@ -13194,12 +17835,6 @@ var $mdgriffith$elm_ui$Internal$Model$embedWith = F4(
 	});
 var $mdgriffith$elm_ui$Internal$Flag$heightBetween = $mdgriffith$elm_ui$Internal$Flag$flag(45);
 var $mdgriffith$elm_ui$Internal$Flag$heightFill = $mdgriffith$elm_ui$Internal$Flag$flag(37);
-var $elm$virtual_dom$VirtualDom$keyedNode = function (tag) {
-	return _VirtualDom_keyedNode(
-		_VirtualDom_noScript(tag));
-};
-var $elm$html$Html$p = _VirtualDom_node('p');
-var $elm$core$Bitwise$and = _Bitwise_and;
 var $mdgriffith$elm_ui$Internal$Flag$present = F2(
 	function (myFlag, _v0) {
 		var fieldOne = _v0.a;
@@ -13353,13 +17988,6 @@ var $mdgriffith$elm_ui$Internal$Model$finalizeNode = F6(
 				return html;
 		}
 	});
-var $elm$core$List$isEmpty = function (xs) {
-	if (!xs.b) {
-		return true;
-	} else {
-		return false;
-	}
-};
 var $mdgriffith$elm_ui$Internal$Model$textElementClasses = $mdgriffith$elm_ui$Internal$Style$classes.any + (' ' + ($mdgriffith$elm_ui$Internal$Style$classes.text + (' ' + ($mdgriffith$elm_ui$Internal$Style$classes.widthContent + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.heightContent)))));
 var $mdgriffith$elm_ui$Internal$Model$textElement = function (str) {
 	return A2(
@@ -13752,13 +18380,6 @@ var $mdgriffith$elm_ui$Internal$Model$alignYName = function (align) {
 			return $mdgriffith$elm_ui$Internal$Style$classes.alignedVertically + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.alignCenterY);
 	}
 };
-var $elm$virtual_dom$VirtualDom$attribute = F2(
-	function (key, value) {
-		return A2(
-			_VirtualDom_attribute,
-			_VirtualDom_noOnOrFormAction(key),
-			_VirtualDom_noJavaScriptOrHtmlUri(value));
-	});
 var $mdgriffith$elm_ui$Internal$Model$FullTransform = F4(
 	function (a, b, c, d) {
 		return {$: 'FullTransform', a: a, b: b, c: c, d: d};
@@ -14046,7 +18667,6 @@ var $mdgriffith$elm_ui$Internal$Model$renderWidth = function (w) {
 	}
 };
 var $mdgriffith$elm_ui$Internal$Flag$borderWidth = $mdgriffith$elm_ui$Internal$Flag$flag(27);
-var $elm$core$Basics$ge = _Utils_ge;
 var $mdgriffith$elm_ui$Internal$Model$skippable = F2(
 	function (flag, style) {
 		if (_Utils_eq(flag, $mdgriffith$elm_ui$Internal$Flag$borderWidth)) {
@@ -15011,21 +19631,10 @@ var $mdgriffith$elm_ui$Internal$Model$Fill = function (a) {
 	return {$: 'Fill', a: a};
 };
 var $mdgriffith$elm_ui$Element$fill = $mdgriffith$elm_ui$Internal$Model$Fill(1);
-var $elm$core$Basics$always = F2(
-	function (a, _v0) {
-		return a;
-	});
 var $mdgriffith$elm_ui$Internal$Model$unstyled = A2($elm$core$Basics$composeL, $mdgriffith$elm_ui$Internal$Model$Unstyled, $elm$core$Basics$always);
 var $mdgriffith$elm_ui$Element$html = $mdgriffith$elm_ui$Internal$Model$unstyled;
-var $elm$html$Html$li = _VirtualDom_node('li');
 var $mdgriffith$elm_ui$Internal$Model$Attr = function (a) {
 	return {$: 'Attr', a: a};
-};
-var $elm$html$Html$Attributes$href = function (url) {
-	return A2(
-		$elm$html$Html$Attributes$stringProperty,
-		'href',
-		_VirtualDom_noJavaScriptUri(url));
 };
 var $mdgriffith$elm_ui$Internal$Model$htmlClass = function (cls) {
 	return $mdgriffith$elm_ui$Internal$Model$Attr(
@@ -15300,23 +19909,6 @@ var $mdgriffith$elm_ui$Element$Input$hasFocusStyle = function (attr) {
 var $mdgriffith$elm_ui$Element$Input$focusDefault = function (attrs) {
 	return A2($elm$core$List$any, $mdgriffith$elm_ui$Element$Input$hasFocusStyle, attrs) ? $mdgriffith$elm_ui$Internal$Model$NoAttribute : $mdgriffith$elm_ui$Internal$Model$htmlClass('focusable');
 };
-var $elm$virtual_dom$VirtualDom$Normal = function (a) {
-	return {$: 'Normal', a: a};
-};
-var $elm$virtual_dom$VirtualDom$on = _VirtualDom_on;
-var $elm$html$Html$Events$on = F2(
-	function (event, decoder) {
-		return A2(
-			$elm$virtual_dom$VirtualDom$on,
-			event,
-			$elm$virtual_dom$VirtualDom$Normal(decoder));
-	});
-var $elm$html$Html$Events$onClick = function (msg) {
-	return A2(
-		$elm$html$Html$Events$on,
-		'click',
-		$elm$json$Json$Decode$succeed(msg));
-};
 var $mdgriffith$elm_ui$Element$Events$onClick = A2($elm$core$Basics$composeL, $mdgriffith$elm_ui$Internal$Model$Attr, $elm$html$Html$Events$onClick);
 var $elm$json$Json$Decode$andThen = _Json_andThen;
 var $elm$json$Json$Decode$fail = _Json_fail;
@@ -15330,7 +19922,6 @@ var $elm$html$Html$Events$preventDefaultOn = F2(
 			event,
 			$elm$virtual_dom$VirtualDom$MayPreventDefault(decoder));
 	});
-var $elm$json$Json$Decode$string = _Json_decodeString;
 var $mdgriffith$elm_ui$Element$Input$onKeyLookup = function (lookup) {
 	var decode = function (code) {
 		var _v0 = lookup(code);
@@ -15773,8 +20364,6 @@ var $author$project$Ui$Menu$small = F2(
 					$author$project$Ui$Menu$links) : $mdgriffith$elm_ui$Element$none
 				]));
 	});
-var $elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
-var $elm$html$Html$Attributes$style = $elm$virtual_dom$VirtualDom$style;
 var $mdgriffith$elm_ui$Internal$Model$AsTextColumn = {$: 'AsTextColumn'};
 var $mdgriffith$elm_ui$Internal$Model$asTextColumn = $mdgriffith$elm_ui$Internal$Model$AsTextColumn;
 var $mdgriffith$elm_ui$Internal$Model$Min = F2(
@@ -15801,7 +20390,6 @@ var $mdgriffith$elm_ui$Element$textColumn = F2(
 				attrs),
 			$mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
 	});
-var $elm$html$Html$ul = _VirtualDom_node('ul');
 var $mdgriffith$elm_ui$Internal$Model$Colored = F3(
 	function (a, b, c) {
 		return {$: 'Colored', a: a, b: b, c: c};
@@ -17145,27 +21733,6 @@ var $BrianHicks$elm_csv$Csv$Decode$FieldNotFound = function (a) {
 var $BrianHicks$elm_csv$Csv$Decode$FieldNotProvided = function (a) {
 	return {$: 'FieldNotProvided', a: a};
 };
-var $elm$core$List$drop = F2(
-	function (n, list) {
-		drop:
-		while (true) {
-			if (n <= 0) {
-				return list;
-			} else {
-				if (!list.b) {
-					return list;
-				} else {
-					var x = list.a;
-					var xs = list.b;
-					var $temp$n = n - 1,
-						$temp$list = xs;
-					n = $temp$n;
-					list = $temp$list;
-					continue drop;
-				}
-			}
-		}
-	});
 var $BrianHicks$elm_csv$Csv$Decode$Column = function (a) {
 	return {$: 'Column', a: a};
 };
@@ -17854,39 +22421,6 @@ var $mdgriffith$elm_ui$Element$Input$isHiddenLabel = function (label) {
 		return false;
 	}
 };
-var $elm$html$Html$Attributes$max = $elm$html$Html$Attributes$stringProperty('max');
-var $elm$html$Html$Attributes$min = $elm$html$Html$Attributes$stringProperty('min');
-var $elm$html$Html$Events$alwaysStop = function (x) {
-	return _Utils_Tuple2(x, true);
-};
-var $elm$virtual_dom$VirtualDom$MayStopPropagation = function (a) {
-	return {$: 'MayStopPropagation', a: a};
-};
-var $elm$html$Html$Events$stopPropagationOn = F2(
-	function (event, decoder) {
-		return A2(
-			$elm$virtual_dom$VirtualDom$on,
-			event,
-			$elm$virtual_dom$VirtualDom$MayStopPropagation(decoder));
-	});
-var $elm$json$Json$Decode$at = F2(
-	function (fields, decoder) {
-		return A3($elm$core$List$foldr, $elm$json$Json$Decode$field, decoder, fields);
-	});
-var $elm$html$Html$Events$targetValue = A2(
-	$elm$json$Json$Decode$at,
-	_List_fromArray(
-		['target', 'value']),
-	$elm$json$Json$Decode$string);
-var $elm$html$Html$Events$onInput = function (tagger) {
-	return A2(
-		$elm$html$Html$Events$stopPropagationOn,
-		'input',
-		A2(
-			$elm$json$Json$Decode$map,
-			$elm$html$Html$Events$alwaysStop,
-			A2($elm$json$Json$Decode$map, tagger, $elm$html$Html$Events$targetValue)));
-};
 var $mdgriffith$elm_ui$Element$spacingXY = F2(
 	function (x, y) {
 		return A2(
@@ -17901,8 +22435,6 @@ var $mdgriffith$elm_ui$Element$spacingXY = F2(
 var $elm$html$Html$Attributes$step = function (n) {
 	return A2($elm$html$Html$Attributes$stringProperty, 'step', n);
 };
-var $elm$html$Html$Attributes$type_ = $elm$html$Html$Attributes$stringProperty('type');
-var $elm$html$Html$Attributes$value = $elm$html$Html$Attributes$stringProperty('value');
 var $elm$core$Basics$abs = function (n) {
 	return (n < 0) ? (-n) : n;
 };
@@ -18742,26 +23274,6 @@ var $elm$core$Tuple$pair = F2(
 	function (a, b) {
 		return _Utils_Tuple2(a, b);
 	});
-var $elm$core$Dict$sizeHelp = F2(
-	function (n, dict) {
-		sizeHelp:
-		while (true) {
-			if (dict.$ === 'RBEmpty_elm_builtin') {
-				return n;
-			} else {
-				var left = dict.d;
-				var right = dict.e;
-				var $temp$n = A2($elm$core$Dict$sizeHelp, n + 1, right),
-					$temp$dict = left;
-				n = $temp$n;
-				dict = $temp$dict;
-				continue sizeHelp;
-			}
-		}
-	});
-var $elm$core$Dict$size = function (dict) {
-	return A2($elm$core$Dict$sizeHelp, 0, dict);
-};
 var $author$project$Internal$Helpers$toDefault = F3(
 	function (_default, items, index) {
 		var dict = $elm$core$Dict$fromList(
@@ -20088,8 +24600,6 @@ var $author$project$Internal$Svg$Event = F2(
 	function (name, handler) {
 		return {handler: handler, name: name};
 	});
-var $elm$json$Json$Decode$map3 = _Json_map3;
-var $elm$json$Json$Decode$float = _Json_decodeFloat;
 var $debois$elm_dom$DOM$offsetHeight = A2($elm$json$Json$Decode$field, 'offsetHeight', $elm$json$Json$Decode$float);
 var $debois$elm_dom$DOM$offsetWidth = A2($elm$json$Json$Decode$field, 'offsetWidth', $elm$json$Json$Decode$float);
 var $elm$json$Json$Decode$map4 = _Json_map4;
@@ -23292,7 +27802,61 @@ var $author$project$Articles$GenderAndSalery$Bars$view = F2(
 					A2($elm$core$List$concatMap, $author$project$Articles$GenderAndSalery$Bars$viewTooltip, model.hovering))
 				]));
 	});
-var $author$project$Articles$GenderAndSalery$Bubble$OnExitWindow = {$: 'OnExitWindow'};
+var $author$project$Articles$GenderAndSalery$Bubble$OnZoomIn = {$: 'OnZoomIn'};
+var $author$project$Articles$GenderAndSalery$Bubble$OnZoomOut = {$: 'OnZoomOut'};
+var $author$project$Articles$GenderAndSalery$Bubble$OnZoomReset = {$: 'OnZoomReset'};
+var $feathericons$elm_feather$FeatherIcons$minus = A2(
+	$feathericons$elm_feather$FeatherIcons$makeBuilder,
+	'minus',
+	_List_fromArray(
+		[
+			A2(
+			$elm$svg$Svg$line,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$x1('5'),
+					$elm$svg$Svg$Attributes$y1('12'),
+					$elm$svg$Svg$Attributes$x2('19'),
+					$elm$svg$Svg$Attributes$y2('12')
+				]),
+			_List_Nil)
+		]));
+var $mdgriffith$elm_ui$Internal$Model$MoveX = function (a) {
+	return {$: 'MoveX', a: a};
+};
+var $mdgriffith$elm_ui$Internal$Flag$moveX = $mdgriffith$elm_ui$Internal$Flag$flag(25);
+var $mdgriffith$elm_ui$Element$moveRight = function (x) {
+	return A2(
+		$mdgriffith$elm_ui$Internal$Model$TransformComponent,
+		$mdgriffith$elm_ui$Internal$Flag$moveX,
+		$mdgriffith$elm_ui$Internal$Model$MoveX(x));
+};
+var $feathericons$elm_feather$FeatherIcons$plus = A2(
+	$feathericons$elm_feather$FeatherIcons$makeBuilder,
+	'plus',
+	_List_fromArray(
+		[
+			A2(
+			$elm$svg$Svg$line,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$x1('12'),
+					$elm$svg$Svg$Attributes$y1('5'),
+					$elm$svg$Svg$Attributes$x2('12'),
+					$elm$svg$Svg$Attributes$y2('19')
+				]),
+			_List_Nil),
+			A2(
+			$elm$svg$Svg$line,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$x1('5'),
+					$elm$svg$Svg$Attributes$y1('12'),
+					$elm$svg$Svg$Attributes$x2('19'),
+					$elm$svg$Svg$Attributes$y2('12')
+				]),
+			_List_Nil)
+		]));
 var $author$project$Articles$GenderAndSalery$Bubble$OnHover = F2(
 	function (a, b) {
 		return {$: 'OnHover', a: a, b: b};
@@ -23309,7 +27873,6 @@ var $author$project$Chart$Attributes$break = function (config) {
 		config,
 		{_break: true});
 };
-var $elm$html$Html$button = _VirtualDom_node('button');
 var $author$project$Chart$Attributes$domain = F2(
 	function (v, config) {
 		return _Utils_update(
@@ -23400,16 +27963,6 @@ var $author$project$Chart$eachItem = function (func) {
 						is));
 			}));
 };
-var $author$project$Chart$Attributes$exactly = F3(
-	function (exact, _v0, _v1) {
-		return exact;
-	});
-var $author$project$Internal$Events$getCoords = $author$project$Internal$Events$Decoder(
-	F3(
-		function (_v0, plane, searched) {
-			return searched;
-		}));
-var $author$project$Chart$Events$getCoords = $author$project$Internal$Events$getCoords;
 var $author$project$Internal$Svg$distanceY = F3(
 	function (plane, searched, point) {
 		return $elm$core$Basics$abs(
@@ -23475,56 +28028,19 @@ var $author$project$Internal$Events$getNearest = function (grouping) {
 			}));
 };
 var $author$project$Chart$Events$getNearest = $author$project$Internal$Events$getNearest;
-var $author$project$Chart$Attributes$highest = F3(
-	function (v, edit, b) {
-		return _Utils_update(
-			b,
-			{
-				max: A3(edit, v, b.max, b.dataMax)
-			});
+var $author$project$Internal$Svg$fromCartesian = F2(
+	function (plane, point) {
+		return {
+			x: A2($author$project$Internal$Coordinates$toSVGX, plane, point.x),
+			y: A2($author$project$Internal$Coordinates$toSVGY, plane, point.y)
+		};
 	});
-var $author$project$Chart$HtmlElement = function (a) {
-	return {$: 'HtmlElement', a: a};
-};
-var $author$project$Internal$Svg$positionHtml = F7(
-	function (plane, x, y, xOff, yOff, attrs, content) {
-		var yPercentage = ((A2($author$project$Internal$Coordinates$toSVGY, plane, y) - yOff) * 100) / plane.height;
-		var xPercentage = ((A2($author$project$Internal$Coordinates$toSVGX, plane, x) + xOff) * 100) / plane.width;
-		var posititonStyles = _List_fromArray(
-			[
-				A2(
-				$elm$html$Html$Attributes$style,
-				'left',
-				$elm$core$String$fromFloat(xPercentage) + '%'),
-				A2(
-				$elm$html$Html$Attributes$style,
-				'top',
-				$elm$core$String$fromFloat(yPercentage) + '%'),
-				A2($elm$html$Html$Attributes$style, 'margin-right', '-400px'),
-				A2($elm$html$Html$Attributes$style, 'position', 'absolute')
-			]);
-		return A2(
-			$elm$html$Html$div,
-			_Utils_ap(posititonStyles, attrs),
-			content);
-	});
-var $author$project$Chart$Svg$positionHtml = $author$project$Internal$Svg$positionHtml;
-var $author$project$Chart$htmlAt = F6(
-	function (toX, toY, xOff, yOff, att, view) {
-		return $author$project$Chart$HtmlElement(
-			F2(
-				function (p, _v0) {
-					return A7(
-						$author$project$Chart$Svg$positionHtml,
-						p,
-						toX(p.x),
-						toY(p.y),
-						xOff,
-						yOff,
-						att,
-						view);
-				}));
-	});
+var $author$project$Internal$Events$getSvgCoords = $author$project$Internal$Events$Decoder(
+	F3(
+		function (_v0, plane, searched) {
+			return A2($author$project$Internal$Svg$fromCartesian, plane, searched);
+		}));
+var $author$project$Chart$Events$getSvgCoords = $author$project$Internal$Events$getSvgCoords;
 var $author$project$Chart$Attributes$htmlAttrs = F2(
 	function (v, config) {
 		return _Utils_update(
@@ -23574,11 +28090,6 @@ var $author$project$Chart$Attributes$noGrid = function (config) {
 		config,
 		{grid: false});
 };
-var $author$project$Chart$none = $author$project$Chart$HtmlElement(
-	F2(
-		function (_v0, _v1) {
-			return $elm$html$Html$text('');
-		}));
 var $author$project$Chart$Events$onMouseDown = F2(
 	function (onMsg, decoder) {
 		return A2(
@@ -23586,6 +28097,12 @@ var $author$project$Chart$Events$onMouseDown = F2(
 			'mousedown',
 			A2($author$project$Chart$Events$map, onMsg, decoder));
 	});
+var $author$project$Internal$Events$getCoords = $author$project$Internal$Events$Decoder(
+	F3(
+		function (_v0, plane, searched) {
+			return searched;
+		}));
+var $author$project$Chart$Events$getCoords = $author$project$Internal$Events$getCoords;
 var $author$project$Chart$Events$onMouseLeave = function (onMsg) {
 	return A2(
 		$author$project$Chart$Events$on,
@@ -23618,219 +28135,6 @@ var $author$project$Chart$Attributes$range = F2(
 			config,
 			{range: v});
 	});
-var $author$project$Internal$Svg$defaultRect = {attrs: _List_Nil, border: 'rgba(210, 210, 210, 1)', borderWidth: 1, color: 'rgba(210, 210, 210, 0.5)', opacity: 1, x1: $elm$core$Maybe$Nothing, x2: $elm$core$Maybe$Nothing, y1: $elm$core$Maybe$Nothing, y2: $elm$core$Maybe$Nothing};
-var $author$project$Internal$Svg$rect = F2(
-	function (plane, config) {
-		var _v0 = function () {
-			var _v3 = _Utils_Tuple2(
-				_Utils_Tuple2(config.x1, config.x2),
-				_Utils_Tuple2(config.y1, config.y2));
-			_v3$11:
-			while (true) {
-				if (_v3.a.a.$ === 'Just') {
-					if (_v3.a.b.$ === 'Nothing') {
-						if (_v3.b.a.$ === 'Nothing') {
-							if (_v3.b.b.$ === 'Nothing') {
-								var _v8 = _v3.a;
-								var a = _v8.a.a;
-								var _v9 = _v8.b;
-								var _v10 = _v3.b;
-								var _v11 = _v10.a;
-								var _v12 = _v10.b;
-								return _Utils_Tuple2(
-									_Utils_Tuple2(a, a),
-									_Utils_Tuple2(plane.y.min, plane.y.max));
-							} else {
-								break _v3$11;
-							}
-						} else {
-							if (_v3.b.b.$ === 'Just') {
-								var _v35 = _v3.a;
-								var c = _v35.a.a;
-								var _v36 = _v35.b;
-								var _v37 = _v3.b;
-								var a = _v37.a.a;
-								var b = _v37.b.a;
-								return _Utils_Tuple2(
-									_Utils_Tuple2(c, c),
-									_Utils_Tuple2(a, b));
-							} else {
-								break _v3$11;
-							}
-						}
-					} else {
-						if (_v3.b.a.$ === 'Nothing') {
-							if (_v3.b.b.$ === 'Nothing') {
-								var _v4 = _v3.a;
-								var a = _v4.a.a;
-								var b = _v4.b.a;
-								var _v5 = _v3.b;
-								var _v6 = _v5.a;
-								var _v7 = _v5.b;
-								return _Utils_Tuple2(
-									_Utils_Tuple2(a, b),
-									_Utils_Tuple2(plane.y.min, plane.y.max));
-							} else {
-								var _v38 = _v3.a;
-								var a = _v38.a.a;
-								var b = _v38.b.a;
-								var _v39 = _v3.b;
-								var _v40 = _v39.a;
-								var c = _v39.b.a;
-								return _Utils_Tuple2(
-									_Utils_Tuple2(a, b),
-									_Utils_Tuple2(c, c));
-							}
-						} else {
-							if (_v3.b.b.$ === 'Nothing') {
-								var _v41 = _v3.a;
-								var a = _v41.a.a;
-								var b = _v41.b.a;
-								var _v42 = _v3.b;
-								var c = _v42.a.a;
-								var _v43 = _v42.b;
-								return _Utils_Tuple2(
-									_Utils_Tuple2(a, b),
-									_Utils_Tuple2(c, c));
-							} else {
-								break _v3$11;
-							}
-						}
-					}
-				} else {
-					if (_v3.a.b.$ === 'Just') {
-						if (_v3.b.a.$ === 'Nothing') {
-							if (_v3.b.b.$ === 'Nothing') {
-								var _v13 = _v3.a;
-								var _v14 = _v13.a;
-								var b = _v13.b.a;
-								var _v15 = _v3.b;
-								var _v16 = _v15.a;
-								var _v17 = _v15.b;
-								return _Utils_Tuple2(
-									_Utils_Tuple2(b, b),
-									_Utils_Tuple2(plane.y.min, plane.y.max));
-							} else {
-								break _v3$11;
-							}
-						} else {
-							if (_v3.b.b.$ === 'Just') {
-								var _v32 = _v3.a;
-								var _v33 = _v32.a;
-								var c = _v32.b.a;
-								var _v34 = _v3.b;
-								var a = _v34.a.a;
-								var b = _v34.b.a;
-								return _Utils_Tuple2(
-									_Utils_Tuple2(c, c),
-									_Utils_Tuple2(a, b));
-							} else {
-								break _v3$11;
-							}
-						}
-					} else {
-						if (_v3.b.a.$ === 'Just') {
-							if (_v3.b.b.$ === 'Just') {
-								var _v18 = _v3.a;
-								var _v19 = _v18.a;
-								var _v20 = _v18.b;
-								var _v21 = _v3.b;
-								var a = _v21.a.a;
-								var b = _v21.b.a;
-								return _Utils_Tuple2(
-									_Utils_Tuple2(plane.x.min, plane.x.min),
-									_Utils_Tuple2(a, b));
-							} else {
-								var _v22 = _v3.a;
-								var _v23 = _v22.a;
-								var _v24 = _v22.b;
-								var _v25 = _v3.b;
-								var a = _v25.a.a;
-								var _v26 = _v25.b;
-								return _Utils_Tuple2(
-									_Utils_Tuple2(plane.x.min, plane.x.max),
-									_Utils_Tuple2(a, a));
-							}
-						} else {
-							if (_v3.b.b.$ === 'Just') {
-								var _v27 = _v3.a;
-								var _v28 = _v27.a;
-								var _v29 = _v27.b;
-								var _v30 = _v3.b;
-								var _v31 = _v30.a;
-								var b = _v30.b.a;
-								return _Utils_Tuple2(
-									_Utils_Tuple2(plane.x.min, plane.x.max),
-									_Utils_Tuple2(b, b));
-							} else {
-								var _v44 = _v3.a;
-								var _v45 = _v44.a;
-								var _v46 = _v44.b;
-								var _v47 = _v3.b;
-								var _v48 = _v47.a;
-								var _v49 = _v47.b;
-								return _Utils_Tuple2(
-									_Utils_Tuple2(plane.x.min, plane.x.max),
-									_Utils_Tuple2(plane.y.min, plane.y.max));
-							}
-						}
-					}
-				}
-			}
-			return _Utils_Tuple2(
-				_Utils_Tuple2(
-					A2($elm$core$Maybe$withDefault, plane.x.min, config.x1),
-					A2($elm$core$Maybe$withDefault, plane.x.max, config.x2)),
-				_Utils_Tuple2(
-					A2($elm$core$Maybe$withDefault, plane.y.min, config.y1),
-					A2($elm$core$Maybe$withDefault, plane.y.max, config.y2)));
-		}();
-		var _v1 = _v0.a;
-		var x1_ = _v1.a;
-		var x2_ = _v1.b;
-		var _v2 = _v0.b;
-		var y1_ = _v2.a;
-		var y2_ = _v2.b;
-		var cmds = _List_fromArray(
-			[
-				A2($author$project$Internal$Commands$Move, x1_, y1_),
-				A2($author$project$Internal$Commands$Line, x1_, y1_),
-				A2($author$project$Internal$Commands$Line, x2_, y1_),
-				A2($author$project$Internal$Commands$Line, x2_, y2_),
-				A2($author$project$Internal$Commands$Line, x1_, y2_),
-				A2($author$project$Internal$Commands$Line, x1_, y1_)
-			]);
-		return A4(
-			$author$project$Internal$Svg$withAttrs,
-			config.attrs,
-			$elm$svg$Svg$path,
-			_List_fromArray(
-				[
-					$elm$svg$Svg$Attributes$class('elm-charts__rect'),
-					$elm$svg$Svg$Attributes$fill(config.color),
-					$elm$svg$Svg$Attributes$fillOpacity(
-					$elm$core$String$fromFloat(config.opacity)),
-					$elm$svg$Svg$Attributes$stroke(config.border),
-					$elm$svg$Svg$Attributes$strokeWidth(
-					$elm$core$String$fromFloat(config.borderWidth)),
-					$elm$svg$Svg$Attributes$d(
-					A2($author$project$Internal$Commands$description, plane, cmds))
-				]),
-			_List_Nil);
-	});
-var $author$project$Chart$Svg$rect = F2(
-	function (plane, edits) {
-		return A2(
-			$author$project$Internal$Svg$rect,
-			plane,
-			A2($author$project$Internal$Helpers$apply, edits, $author$project$Internal$Svg$defaultRect));
-	});
-var $author$project$Chart$rect = function (attrs) {
-	return $author$project$Chart$SvgElement(
-		function (p) {
-			return A2($author$project$Chart$Svg$rect, p, attrs);
-		});
-};
 var $author$project$Internal$Item$getDataIndex = function (_v0) {
 	var item = _v0.a;
 	return item.config.tooltipInfo.data;
@@ -24911,7 +29215,7 @@ var $author$project$Articles$GenderAndSalery$Bubble$salarySeries = F5(
 								return _Utils_ap(
 									_List_fromArray(
 										[
-											$author$project$Chart$Attributes$size(d.numOfBoth / size)
+											$author$project$Chart$Attributes$size(((d.numOfBoth / size) * model.zoomPercentage) / 100)
 										]),
 									color);
 							}),
@@ -24936,7 +29240,9 @@ var $author$project$Articles$GenderAndSalery$Bubble$salarySeries = F5(
 					$elm$core$Basics$eq(year)),
 				$author$project$Articles$GenderAndSalery$Data$data));
 	});
-var $elm$html$Html$span = _VirtualDom_node('span');
+var $author$project$Chart$HtmlElement = function (a) {
+	return {$: 'HtmlElement', a: a};
+};
 var $author$project$Chart$html = function (func) {
 	return $author$project$Chart$HtmlElement(
 		F2(
@@ -24962,7 +29268,28 @@ var $author$project$Internal$Coordinates$bottom = function (pos) {
 var $author$project$Internal$Coordinates$left = function (pos) {
 	return {x: pos.x1, y: pos.y1 + ((pos.y2 - pos.y1) / 2)};
 };
-var $elm$html$Html$node = $elm$virtual_dom$VirtualDom$node;
+var $author$project$Internal$Svg$positionHtml = F7(
+	function (plane, x, y, xOff, yOff, attrs, content) {
+		var yPercentage = ((A2($author$project$Internal$Coordinates$toSVGY, plane, y) - yOff) * 100) / plane.height;
+		var xPercentage = ((A2($author$project$Internal$Coordinates$toSVGX, plane, x) + xOff) * 100) / plane.width;
+		var posititonStyles = _List_fromArray(
+			[
+				A2(
+				$elm$html$Html$Attributes$style,
+				'left',
+				$elm$core$String$fromFloat(xPercentage) + '%'),
+				A2(
+				$elm$html$Html$Attributes$style,
+				'top',
+				$elm$core$String$fromFloat(yPercentage) + '%'),
+				A2($elm$html$Html$Attributes$style, 'margin-right', '-400px'),
+				A2($elm$html$Html$Attributes$style, 'position', 'absolute')
+			]);
+		return A2(
+			$elm$html$Html$div,
+			_Utils_ap(posititonStyles, attrs),
+			content);
+	});
 var $author$project$Internal$Coordinates$right = function (pos) {
 	return {x: pos.x2, y: pos.y1 + ((pos.y2 - pos.y1) / 2)};
 };
@@ -25367,16 +29694,1792 @@ var $author$project$Articles$GenderAndSalery$Bubble$tooltipContent = function (h
 					]))
 			]));
 };
-var $author$project$Chart$Attributes$amount = F2(
-	function (value, config) {
+var $author$project$Chart$Attributes$x2Svg = F2(
+	function (v, config) {
 		return _Utils_update(
 			config,
-			{amount: value});
+			{
+				x2Svg: $elm$core$Maybe$Just(v)
+			});
 	});
-var $author$project$Internal$Svg$Floats = {$: 'Floats'};
-var $author$project$Chart$TicksElement = F2(
+var $author$project$Chart$Attributes$y2Svg = F2(
+	function (v, config) {
+		return _Utils_update(
+			config,
+			{
+				y2Svg: $elm$core$Maybe$Just(v)
+			});
+	});
+var $author$project$Articles$GenderAndSalery$Bubble$viewChart = F2(
+	function (model, year) {
+		return A2(
+			$author$project$Chart$chart,
+			_List_fromArray(
+				[
+					$author$project$Chart$Attributes$height(550),
+					$author$project$Chart$Attributes$width(1000),
+					$author$project$Chart$Attributes$margin(
+					{bottom: 20, left: 0, right: 0, top: 0}),
+					$author$project$Chart$Attributes$padding(
+					function () {
+						var _v0 = function () {
+							var _v1 = model.moving;
+							if (_v1.$ === 'Just') {
+								var _v2 = _v1.a;
+								var start = _v2.a;
+								var end = _v2.b;
+								return _Utils_Tuple2(((model.zoomOffset.x + end.x) - start.x) * (1 - (model.zoomPercentage / 100)), ((model.zoomOffset.y + end.y) - start.y) * (1 - (model.zoomPercentage / 100)));
+							} else {
+								return _Utils_Tuple2(model.zoomOffset.x * (1 - (model.zoomPercentage / 100)), model.zoomOffset.y * (1 - (model.zoomPercentage / 100)));
+							}
+						}();
+						var xOff = _v0.a;
+						var yOff = _v0.b;
+						return {bottom: (550 - ((550 * model.zoomPercentage) / 100)) + yOff, left: (1000 - ((1000 * model.zoomPercentage) / 100)) - xOff, right: (1000 - ((1000 * model.zoomPercentage) / 100)) + xOff, top: (550 - ((550 * model.zoomPercentage) / 100)) - yOff};
+					}()),
+					$author$project$Chart$Attributes$range(
+					_List_fromArray(
+						[
+							A2($author$project$Chart$Attributes$lowest, 20000, $author$project$Chart$Attributes$orHigher)
+						])),
+					$author$project$Chart$Attributes$domain(
+					_List_fromArray(
+						[
+							A2($author$project$Chart$Attributes$lowest, 76, $author$project$Chart$Attributes$orHigher)
+						])),
+					A2(
+					$author$project$Chart$Events$on,
+					'mousemove',
+					A3(
+						$author$project$Chart$Events$map2,
+						$author$project$Articles$GenderAndSalery$Bubble$OnHover,
+						$author$project$Chart$Events$getNearest($author$project$Chart$Item$dots),
+						$author$project$Chart$Events$getSvgCoords)),
+					A2($author$project$Chart$Events$onMouseDown, $author$project$Articles$GenderAndSalery$Bubble$OnMouseDown, $author$project$Chart$Events$getSvgCoords),
+					A2($author$project$Chart$Events$onMouseUp, $author$project$Articles$GenderAndSalery$Bubble$OnMouseUp, $author$project$Chart$Events$getSvgCoords),
+					$author$project$Chart$Events$onMouseLeave($author$project$Articles$GenderAndSalery$Bubble$OnReset),
+					$author$project$Chart$Attributes$htmlAttrs(
+					_List_fromArray(
+						[
+							A2(
+							$elm$html$Html$Attributes$style,
+							'cursor',
+							function () {
+								var _v3 = model.moving;
+								if (_v3.$ === 'Just') {
+									return 'grabbing';
+								} else {
+									return 'grab';
+								}
+							}())
+						]))
+				]),
+			_List_fromArray(
+				[
+					A5(
+					$author$project$Chart$generate,
+					10,
+					$author$project$Chart$Svg$ints,
+					function ($) {
+						return $.x;
+					},
+					_List_Nil,
+					F2(
+						function (p, t) {
+							return _List_fromArray(
+								[
+									A2(
+									$author$project$Chart$xLabel,
+									_List_fromArray(
+										[
+											$author$project$Chart$Attributes$alignLeft,
+											$author$project$Chart$Attributes$moveUp(22),
+											$author$project$Chart$Attributes$moveRight(7),
+											$author$project$Chart$Attributes$x(t),
+											$author$project$Chart$Attributes$withGrid,
+											(t === 20000) ? $author$project$Chart$Attributes$noGrid : $elm$core$Basics$identity
+										]),
+									_List_fromArray(
+										[
+											$elm$svg$Svg$text(
+											$elm$core$String$fromInt((t / 1000) | 0) + 'k')
+										]))
+								]);
+						})),
+					A5(
+					$author$project$Chart$generate,
+					8,
+					$author$project$Chart$Svg$ints,
+					function ($) {
+						return $.y;
+					},
+					_List_Nil,
+					F2(
+						function (p, t) {
+							return _List_fromArray(
+								[
+									A2(
+									$author$project$Chart$yLabel,
+									_List_fromArray(
+										[
+											$author$project$Chart$Attributes$alignLeft,
+											$author$project$Chart$Attributes$withGrid,
+											$author$project$Chart$Attributes$moveUp(10),
+											$author$project$Chart$Attributes$moveRight(10),
+											$author$project$Chart$Attributes$y(t),
+											(t === 100) ? $author$project$Chart$Attributes$noGrid : $elm$core$Basics$identity
+										]),
+									_List_fromArray(
+										[
+											$elm$svg$Svg$text(
+											$elm$core$String$fromInt(t))
+										]))
+								]);
+						})),
+					$author$project$Chart$withPlane(
+					function (p) {
+						return _List_fromArray(
+							[
+								A3(
+								$author$project$Chart$label,
+								_List_fromArray(
+									[
+										$author$project$Chart$Attributes$fontSize(12),
+										$author$project$Chart$Attributes$moveDown(17),
+										$author$project$Chart$Attributes$alignRight
+									]),
+								_List_fromArray(
+									[
+										$elm$svg$Svg$text('Average salary')
+									]),
+								{x: p.x.max, y: p.y.min}),
+								A3(
+								$author$project$Chart$label,
+								_List_fromArray(
+									[
+										$author$project$Chart$Attributes$fontSize(12),
+										$author$project$Chart$Attributes$moveLeft(12),
+										$author$project$Chart$Attributes$alignRight,
+										$author$project$Chart$Attributes$rotate(90)
+									]),
+								_List_fromArray(
+									[
+										$elm$svg$Svg$text('Womens % of mens salary')
+									]),
+								{x: p.x.min, y: p.y.max}),
+								$author$project$Chart$line(
+								_List_fromArray(
+									[
+										$author$project$Chart$Attributes$dashed(
+										_List_fromArray(
+											[4, 2])),
+										$author$project$Chart$Attributes$opacity(0.7),
+										$author$project$Chart$Attributes$color('#f56dbc'),
+										$author$project$Chart$Attributes$x1(
+										$author$project$Articles$GenderAndSalery$Data$avgSalaryWomen(year))
+									])),
+								$author$project$Chart$line(
+								_List_fromArray(
+									[
+										$author$project$Chart$Attributes$dashed(
+										_List_fromArray(
+											[4, 2])),
+										$author$project$Chart$Attributes$opacity(0.7),
+										$author$project$Chart$Attributes$color('#58a9f6'),
+										$author$project$Chart$Attributes$x1(
+										$author$project$Articles$GenderAndSalery$Data$avgSalaryMen(year))
+									]))
+							]);
+					}),
+					$author$project$Chart$line(
+					_List_fromArray(
+						[
+							$author$project$Chart$Attributes$dashed(
+							_List_fromArray(
+								[3, 3])),
+							$author$project$Chart$Attributes$y1(100)
+						])),
+					A5($author$project$Articles$GenderAndSalery$Bubble$salarySeries, model, year, 0.9, 5, 150),
+					$author$project$Chart$eachItem(
+					F2(
+						function (p, product) {
+							var top = A2($author$project$Chart$Item$getTop, p, product);
+							var datum = $author$project$Chart$Item$getData(product);
+							var color = $author$project$Chart$Item$getColor(product);
+							return A2($elm$core$String$startsWith, '251 ', datum.sector) ? _List_fromArray(
+								[
+									$author$project$Chart$line(
+									_List_fromArray(
+										[
+											$author$project$Chart$Attributes$color(color),
+											$author$project$Chart$Attributes$break,
+											$author$project$Chart$Attributes$x1(top.x),
+											$author$project$Chart$Attributes$y1(top.y),
+											$author$project$Chart$Attributes$x2Svg(10),
+											$author$project$Chart$Attributes$y2Svg(10)
+										])),
+									A3(
+									$author$project$Chart$label,
+									_List_fromArray(
+										[
+											$author$project$Chart$Attributes$color(color),
+											$author$project$Chart$Attributes$alignLeft,
+											$author$project$Chart$Attributes$moveRight(13),
+											$author$project$Chart$Attributes$moveUp(7)
+										]),
+									_List_fromArray(
+										[
+											$elm$svg$Svg$text('Software engineering')
+										]),
+									top)
+								]) : _List_Nil;
+						})),
+					A2(
+					$author$project$Chart$each,
+					model.hovering,
+					F2(
+						function (p, item) {
+							return _List_fromArray(
+								[
+									A4(
+									$author$project$Chart$tooltip,
+									item,
+									_List_Nil,
+									_List_Nil,
+									_List_fromArray(
+										[
+											$author$project$Articles$GenderAndSalery$Bubble$tooltipContent(item)
+										]))
+								]);
+						}))
+				]));
+	});
+var $mdgriffith$elm_ui$Element$Border$widthXY = F2(
+	function (x, y) {
+		return A2(
+			$mdgriffith$elm_ui$Internal$Model$StyleClass,
+			$mdgriffith$elm_ui$Internal$Flag$borderWidth,
+			A5(
+				$mdgriffith$elm_ui$Internal$Model$BorderWidth,
+				'b-' + ($elm$core$String$fromInt(x) + ('-' + $elm$core$String$fromInt(y))),
+				y,
+				x,
+				y,
+				x));
+	});
+var $mdgriffith$elm_ui$Element$Border$widthEach = function (_v0) {
+	var bottom = _v0.bottom;
+	var top = _v0.top;
+	var left = _v0.left;
+	var right = _v0.right;
+	return (_Utils_eq(top, bottom) && _Utils_eq(left, right)) ? (_Utils_eq(top, right) ? $mdgriffith$elm_ui$Element$Border$width(top) : A2($mdgriffith$elm_ui$Element$Border$widthXY, left, top)) : A2(
+		$mdgriffith$elm_ui$Internal$Model$StyleClass,
+		$mdgriffith$elm_ui$Internal$Flag$borderWidth,
+		A5(
+			$mdgriffith$elm_ui$Internal$Model$BorderWidth,
+			'b-' + ($elm$core$String$fromInt(top) + ('-' + ($elm$core$String$fromInt(right) + ('-' + ($elm$core$String$fromInt(bottom) + ('-' + $elm$core$String$fromInt(left))))))),
+			top,
+			right,
+			bottom,
+			left));
+};
+var $feathericons$elm_feather$FeatherIcons$withSize = F2(
+	function (size, _v0) {
+		var attrs = _v0.a.attrs;
+		var src = _v0.a.src;
+		return $feathericons$elm_feather$FeatherIcons$Icon(
+			{
+				attrs: _Utils_update(
+					attrs,
+					{size: size}),
+				src: src
+			});
+	});
+var $author$project$Articles$GenderAndSalery$Bubble$view = F2(
+	function (model, year) {
+		return A2(
+			$mdgriffith$elm_ui$Element$column,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+					$mdgriffith$elm_ui$Element$spacing(30)
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$mdgriffith$elm_ui$Element$row,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$spacing(40),
+							$mdgriffith$elm_ui$Element$Font$bold
+						]),
+					_List_fromArray(
+						[
+							A2(
+							$mdgriffith$elm_ui$Element$row,
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$spacing(20),
+									$mdgriffith$elm_ui$Element$Font$size(12)
+								]),
+							function () {
+								var circle = F3(
+									function (color, a, b) {
+										return A2(
+											$mdgriffith$elm_ui$Element$row,
+											_List_fromArray(
+												[
+													$mdgriffith$elm_ui$Element$spacing(5)
+												]),
+											_List_fromArray(
+												[
+													A2(
+													$mdgriffith$elm_ui$Element$el,
+													_List_fromArray(
+														[
+															$mdgriffith$elm_ui$Element$Background$color(
+															color(0.4)),
+															$mdgriffith$elm_ui$Element$Border$color(
+															color(1)),
+															$mdgriffith$elm_ui$Element$Border$width(1),
+															$mdgriffith$elm_ui$Element$Border$rounded(50),
+															$mdgriffith$elm_ui$Element$width(
+															$mdgriffith$elm_ui$Element$px(10)),
+															$mdgriffith$elm_ui$Element$height(
+															$mdgriffith$elm_ui$Element$px(10))
+														]),
+													$mdgriffith$elm_ui$Element$none),
+													$mdgriffith$elm_ui$Element$text(
+													$elm$core$String$fromInt(a) + (' - ' + ($elm$core$String$fromInt(b) + '%')))
+												]));
+									});
+								return _List_fromArray(
+									[
+										$mdgriffith$elm_ui$Element$text('Percentage of women in sector\'s workforce: '),
+										A3(
+										circle,
+										A3($mdgriffith$elm_ui$Element$rgba255, 88, 169, 246),
+										0,
+										20),
+										A3(
+										circle,
+										A3($mdgriffith$elm_ui$Element$rgba255, 138, 145, 247),
+										20,
+										40),
+										A3(
+										circle,
+										A3($mdgriffith$elm_ui$Element$rgba255, 197, 121, 242),
+										40,
+										60),
+										A3(
+										circle,
+										A3($mdgriffith$elm_ui$Element$rgba255, 222, 116, 215),
+										60,
+										80),
+										A3(
+										circle,
+										A3($mdgriffith$elm_ui$Element$rgba255, 245, 109, 188),
+										80,
+										100)
+									]);
+							}()),
+							A2(
+							$mdgriffith$elm_ui$Element$row,
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$spacing(10)
+								]),
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$text('Zoom: '),
+									$mdgriffith$elm_ui$Element$text(
+									$elm$core$String$fromFloat(model.zoomPercentage) + '%'),
+									A2(
+									$mdgriffith$elm_ui$Element$row,
+									_List_fromArray(
+										[
+											$mdgriffith$elm_ui$Element$Border$width(1),
+											$mdgriffith$elm_ui$Element$Border$rounded(5),
+											$mdgriffith$elm_ui$Element$Border$color(
+											A3($mdgriffith$elm_ui$Element$rgb255, 220, 220, 220))
+										]),
+									_List_fromArray(
+										[
+											A2(
+											$mdgriffith$elm_ui$Element$Input$button,
+											_List_fromArray(
+												[
+													A2($mdgriffith$elm_ui$Element$paddingXY, 10, 5),
+													$mdgriffith$elm_ui$Element$Border$widthEach(
+													{bottom: 0, left: 0, right: 1, top: 0}),
+													$mdgriffith$elm_ui$Element$Border$color(
+													A3($mdgriffith$elm_ui$Element$rgb255, 220, 220, 220))
+												]),
+											{
+												label: $mdgriffith$elm_ui$Element$html(
+													A2(
+														$feathericons$elm_feather$FeatherIcons$toHtml,
+														_List_Nil,
+														A2($feathericons$elm_feather$FeatherIcons$withSize, 14, $feathericons$elm_feather$FeatherIcons$plus))),
+												onPress: $elm$core$Maybe$Just($author$project$Articles$GenderAndSalery$Bubble$OnZoomIn)
+											}),
+											A2(
+											$mdgriffith$elm_ui$Element$Input$button,
+											_List_fromArray(
+												[
+													A2($mdgriffith$elm_ui$Element$paddingXY, 10, 5),
+													$mdgriffith$elm_ui$Element$Border$widthEach(
+													{bottom: 0, left: 0, right: 1, top: 0}),
+													$mdgriffith$elm_ui$Element$Border$color(
+													A3($mdgriffith$elm_ui$Element$rgb255, 220, 220, 220))
+												]),
+											{
+												label: $mdgriffith$elm_ui$Element$html(
+													A2(
+														$feathericons$elm_feather$FeatherIcons$toHtml,
+														_List_Nil,
+														A2($feathericons$elm_feather$FeatherIcons$withSize, 14, $feathericons$elm_feather$FeatherIcons$minus))),
+												onPress: $elm$core$Maybe$Just($author$project$Articles$GenderAndSalery$Bubble$OnZoomOut)
+											}),
+											A2(
+											$mdgriffith$elm_ui$Element$Input$button,
+											_List_fromArray(
+												[
+													A2($mdgriffith$elm_ui$Element$paddingXY, 10, 5),
+													$mdgriffith$elm_ui$Element$Border$widthEach(
+													{bottom: 0, left: 0, right: 1, top: 0}),
+													$mdgriffith$elm_ui$Element$Border$color(
+													A3($mdgriffith$elm_ui$Element$rgb255, 220, 220, 220)),
+													$mdgriffith$elm_ui$Element$moveRight(1)
+												]),
+											{
+												label: $mdgriffith$elm_ui$Element$html(
+													A2(
+														$feathericons$elm_feather$FeatherIcons$toHtml,
+														_List_Nil,
+														A2($feathericons$elm_feather$FeatherIcons$withSize, 14, $feathericons$elm_feather$FeatherIcons$x))),
+												onPress: $elm$core$Maybe$Just($author$project$Articles$GenderAndSalery$Bubble$OnZoomReset)
+											})
+										]))
+								]))
+						])),
+					A2(
+					$mdgriffith$elm_ui$Element$el,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+						]),
+					$mdgriffith$elm_ui$Element$html(
+						A2($author$project$Articles$GenderAndSalery$Bubble$viewChart, model, year)))
+				]));
+	});
+var $author$project$Articles$GenderAndSalery$EducationChart$OnEducation = F2(
 	function (a, b) {
-		return {$: 'TicksElement', a: a, b: b};
+		return {$: 'OnEducation', a: a, b: b};
+	});
+var $author$project$Articles$GenderAndSalery$EducationChart$OnHover = function (a) {
+	return {$: 'OnHover', a: a};
+};
+var $author$project$Articles$GenderAndSalery$EducationChart$OnStackingOption = function (a) {
+	return {$: 'OnStackingOption', a: a};
+};
+var $author$project$Articles$GenderAndSalery$EducationChart$Seperate = {$: 'Seperate'};
+var $mdgriffith$elm_ui$Element$Input$tabindex = A2($elm$core$Basics$composeL, $mdgriffith$elm_ui$Internal$Model$Attr, $elm$html$Html$Attributes$tabindex);
+var $mdgriffith$elm_ui$Element$Input$checkbox = F2(
+	function (attrs, _v0) {
+		var label = _v0.label;
+		var icon = _v0.icon;
+		var checked = _v0.checked;
+		var onChange = _v0.onChange;
+		var attributes = _Utils_ap(
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$Input$isHiddenLabel(label) ? $mdgriffith$elm_ui$Internal$Model$NoAttribute : $mdgriffith$elm_ui$Element$spacing(6),
+					$mdgriffith$elm_ui$Internal$Model$Attr(
+					$elm$html$Html$Events$onClick(
+						onChange(!checked))),
+					$mdgriffith$elm_ui$Element$Region$announce,
+					$mdgriffith$elm_ui$Element$Input$onKeyLookup(
+					function (code) {
+						return _Utils_eq(code, $mdgriffith$elm_ui$Element$Input$enter) ? $elm$core$Maybe$Just(
+							onChange(!checked)) : (_Utils_eq(code, $mdgriffith$elm_ui$Element$Input$space) ? $elm$core$Maybe$Just(
+							onChange(!checked)) : $elm$core$Maybe$Nothing);
+					}),
+					$mdgriffith$elm_ui$Element$Input$tabindex(0),
+					$mdgriffith$elm_ui$Element$pointer,
+					$mdgriffith$elm_ui$Element$alignLeft,
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+				]),
+			attrs);
+		return A3(
+			$mdgriffith$elm_ui$Element$Input$applyLabel,
+			A2(
+				$elm$core$List$cons,
+				$mdgriffith$elm_ui$Internal$Model$Attr(
+					A2($elm$html$Html$Attributes$attribute, 'role', 'checkbox')),
+				A2(
+					$elm$core$List$cons,
+					$mdgriffith$elm_ui$Internal$Model$Attr(
+						A2(
+							$elm$html$Html$Attributes$attribute,
+							'aria-checked',
+							checked ? 'true' : 'false')),
+					A2(
+						$elm$core$List$cons,
+						$mdgriffith$elm_ui$Element$Input$hiddenLabelAttribute(label),
+						attributes))),
+			label,
+			A4(
+				$mdgriffith$elm_ui$Internal$Model$element,
+				$mdgriffith$elm_ui$Internal$Model$asEl,
+				$mdgriffith$elm_ui$Internal$Model$div,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$centerY,
+						$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
+						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink)
+					]),
+				$mdgriffith$elm_ui$Internal$Model$Unkeyed(
+					_List_fromArray(
+						[
+							icon(checked)
+						]))));
+	});
+var $mdgriffith$elm_ui$Internal$Flag$fontAlignment = $mdgriffith$elm_ui$Internal$Flag$flag(12);
+var $mdgriffith$elm_ui$Element$Font$center = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$fontAlignment, $mdgriffith$elm_ui$Internal$Style$classes.textCenter);
+var $mdgriffith$elm_ui$Internal$Model$InFront = {$: 'InFront'};
+var $mdgriffith$elm_ui$Element$inFront = function (element) {
+	return A2($mdgriffith$elm_ui$Element$createNearby, $mdgriffith$elm_ui$Internal$Model$InFront, element);
+};
+var $mdgriffith$elm_ui$Internal$Model$MoveY = function (a) {
+	return {$: 'MoveY', a: a};
+};
+var $mdgriffith$elm_ui$Internal$Flag$moveY = $mdgriffith$elm_ui$Internal$Flag$flag(26);
+var $mdgriffith$elm_ui$Element$moveUp = function (y) {
+	return A2(
+		$mdgriffith$elm_ui$Internal$Model$TransformComponent,
+		$mdgriffith$elm_ui$Internal$Flag$moveY,
+		$mdgriffith$elm_ui$Internal$Model$MoveY(-y));
+};
+var $mdgriffith$elm_ui$Element$rgb = F3(
+	function (r, g, b) {
+		return A4($mdgriffith$elm_ui$Internal$Model$Rgba, r, g, b, 1);
+	});
+var $mdgriffith$elm_ui$Element$rgba = $mdgriffith$elm_ui$Internal$Model$Rgba;
+var $mdgriffith$elm_ui$Internal$Model$Rotate = F2(
+	function (a, b) {
+		return {$: 'Rotate', a: a, b: b};
+	});
+var $mdgriffith$elm_ui$Internal$Flag$rotate = $mdgriffith$elm_ui$Internal$Flag$flag(24);
+var $mdgriffith$elm_ui$Element$rotate = function (angle) {
+	return A2(
+		$mdgriffith$elm_ui$Internal$Model$TransformComponent,
+		$mdgriffith$elm_ui$Internal$Flag$rotate,
+		A2(
+			$mdgriffith$elm_ui$Internal$Model$Rotate,
+			_Utils_Tuple3(0, 0, 1),
+			angle));
+};
+var $mdgriffith$elm_ui$Internal$Model$boxShadowClass = function (shadow) {
+	return $elm$core$String$concat(
+		_List_fromArray(
+			[
+				shadow.inset ? 'box-inset' : 'box-',
+				$mdgriffith$elm_ui$Internal$Model$floatClass(shadow.offset.a) + 'px',
+				$mdgriffith$elm_ui$Internal$Model$floatClass(shadow.offset.b) + 'px',
+				$mdgriffith$elm_ui$Internal$Model$floatClass(shadow.blur) + 'px',
+				$mdgriffith$elm_ui$Internal$Model$floatClass(shadow.size) + 'px',
+				$mdgriffith$elm_ui$Internal$Model$formatColorClass(shadow.color)
+			]));
+};
+var $mdgriffith$elm_ui$Internal$Flag$shadows = $mdgriffith$elm_ui$Internal$Flag$flag(19);
+var $mdgriffith$elm_ui$Element$Border$shadow = function (almostShade) {
+	var shade = {blur: almostShade.blur, color: almostShade.color, inset: false, offset: almostShade.offset, size: almostShade.size};
+	return A2(
+		$mdgriffith$elm_ui$Internal$Model$StyleClass,
+		$mdgriffith$elm_ui$Internal$Flag$shadows,
+		A3(
+			$mdgriffith$elm_ui$Internal$Model$Single,
+			$mdgriffith$elm_ui$Internal$Model$boxShadowClass(shade),
+			'box-shadow',
+			$mdgriffith$elm_ui$Internal$Model$formatBoxShadow(shade)));
+};
+var $mdgriffith$elm_ui$Internal$Model$Transparency = F2(
+	function (a, b) {
+		return {$: 'Transparency', a: a, b: b};
+	});
+var $mdgriffith$elm_ui$Internal$Flag$transparency = $mdgriffith$elm_ui$Internal$Flag$flag(0);
+var $mdgriffith$elm_ui$Element$transparent = function (on) {
+	return on ? A2(
+		$mdgriffith$elm_ui$Internal$Model$StyleClass,
+		$mdgriffith$elm_ui$Internal$Flag$transparency,
+		A2($mdgriffith$elm_ui$Internal$Model$Transparency, 'transparent', 1.0)) : A2(
+		$mdgriffith$elm_ui$Internal$Model$StyleClass,
+		$mdgriffith$elm_ui$Internal$Flag$transparency,
+		A2($mdgriffith$elm_ui$Internal$Model$Transparency, 'visible', 0.0));
+};
+var $mdgriffith$elm_ui$Element$Input$white = A3($mdgriffith$elm_ui$Element$rgb, 1, 1, 1);
+var $mdgriffith$elm_ui$Element$Input$defaultCheckbox = function (checked) {
+	return A2(
+		$mdgriffith$elm_ui$Element$el,
+		_List_fromArray(
+			[
+				$mdgriffith$elm_ui$Internal$Model$htmlClass('focusable'),
+				$mdgriffith$elm_ui$Element$width(
+				$mdgriffith$elm_ui$Element$px(14)),
+				$mdgriffith$elm_ui$Element$height(
+				$mdgriffith$elm_ui$Element$px(14)),
+				$mdgriffith$elm_ui$Element$Font$color($mdgriffith$elm_ui$Element$Input$white),
+				$mdgriffith$elm_ui$Element$centerY,
+				$mdgriffith$elm_ui$Element$Font$size(9),
+				$mdgriffith$elm_ui$Element$Font$center,
+				$mdgriffith$elm_ui$Element$Border$rounded(3),
+				$mdgriffith$elm_ui$Element$Border$color(
+				checked ? A3($mdgriffith$elm_ui$Element$rgb, 59 / 255, 153 / 255, 252 / 255) : A3($mdgriffith$elm_ui$Element$rgb, 211 / 255, 211 / 255, 211 / 255)),
+				$mdgriffith$elm_ui$Element$Border$shadow(
+				{
+					blur: 1,
+					color: checked ? A4($mdgriffith$elm_ui$Element$rgba, 238 / 255, 238 / 255, 238 / 255, 0) : A3($mdgriffith$elm_ui$Element$rgb, 238 / 255, 238 / 255, 238 / 255),
+					offset: _Utils_Tuple2(0, 0),
+					size: 1
+				}),
+				$mdgriffith$elm_ui$Element$Background$color(
+				checked ? A3($mdgriffith$elm_ui$Element$rgb, 59 / 255, 153 / 255, 252 / 255) : $mdgriffith$elm_ui$Element$Input$white),
+				$mdgriffith$elm_ui$Element$Border$width(
+				checked ? 0 : 1),
+				$mdgriffith$elm_ui$Element$inFront(
+				A2(
+					$mdgriffith$elm_ui$Element$el,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$Border$color($mdgriffith$elm_ui$Element$Input$white),
+							$mdgriffith$elm_ui$Element$height(
+							$mdgriffith$elm_ui$Element$px(6)),
+							$mdgriffith$elm_ui$Element$width(
+							$mdgriffith$elm_ui$Element$px(9)),
+							$mdgriffith$elm_ui$Element$rotate(
+							$elm$core$Basics$degrees(-45)),
+							$mdgriffith$elm_ui$Element$centerX,
+							$mdgriffith$elm_ui$Element$centerY,
+							$mdgriffith$elm_ui$Element$moveUp(1),
+							$mdgriffith$elm_ui$Element$transparent(!checked),
+							$mdgriffith$elm_ui$Element$Border$widthEach(
+							{bottom: 2, left: 2, right: 0, top: 0})
+						]),
+					$mdgriffith$elm_ui$Element$none))
+			]),
+		$mdgriffith$elm_ui$Element$none);
+};
+var $mdgriffith$elm_ui$Element$Input$HiddenLabel = function (a) {
+	return {$: 'HiddenLabel', a: a};
+};
+var $mdgriffith$elm_ui$Element$Input$labelHidden = $mdgriffith$elm_ui$Element$Input$HiddenLabel;
+var $mdgriffith$elm_ui$Element$Input$OnRight = {$: 'OnRight'};
+var $mdgriffith$elm_ui$Element$Input$labelRight = $mdgriffith$elm_ui$Element$Input$Label($mdgriffith$elm_ui$Element$Input$OnRight);
+var $mdgriffith$elm_ui$Element$Input$Option = F2(
+	function (a, b) {
+		return {$: 'Option', a: a, b: b};
+	});
+var $mdgriffith$elm_ui$Element$Input$defaultRadioOption = F2(
+	function (optionLabel, status) {
+		return A2(
+			$mdgriffith$elm_ui$Element$row,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$spacing(10),
+					$mdgriffith$elm_ui$Element$alignLeft,
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink)
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$mdgriffith$elm_ui$Element$el,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$width(
+							$mdgriffith$elm_ui$Element$px(14)),
+							$mdgriffith$elm_ui$Element$height(
+							$mdgriffith$elm_ui$Element$px(14)),
+							$mdgriffith$elm_ui$Element$Background$color($mdgriffith$elm_ui$Element$Input$white),
+							$mdgriffith$elm_ui$Element$Border$rounded(7),
+							function () {
+							if (status.$ === 'Selected') {
+								return $mdgriffith$elm_ui$Internal$Model$htmlClass('focusable');
+							} else {
+								return $mdgriffith$elm_ui$Internal$Model$NoAttribute;
+							}
+						}(),
+							$mdgriffith$elm_ui$Element$Border$width(
+							function () {
+								switch (status.$) {
+									case 'Idle':
+										return 1;
+									case 'Focused':
+										return 1;
+									default:
+										return 5;
+								}
+							}()),
+							$mdgriffith$elm_ui$Element$Border$color(
+							function () {
+								switch (status.$) {
+									case 'Idle':
+										return A3($mdgriffith$elm_ui$Element$rgb, 208 / 255, 208 / 255, 208 / 255);
+									case 'Focused':
+										return A3($mdgriffith$elm_ui$Element$rgb, 208 / 255, 208 / 255, 208 / 255);
+									default:
+										return A3($mdgriffith$elm_ui$Element$rgb, 59 / 255, 153 / 255, 252 / 255);
+								}
+							}())
+						]),
+					$mdgriffith$elm_ui$Element$none),
+					A2(
+					$mdgriffith$elm_ui$Element$el,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+							$mdgriffith$elm_ui$Internal$Model$htmlClass('unfocusable')
+						]),
+					optionLabel)
+				]));
+	});
+var $mdgriffith$elm_ui$Element$Input$option = F2(
+	function (val, txt) {
+		return A2(
+			$mdgriffith$elm_ui$Element$Input$Option,
+			val,
+			$mdgriffith$elm_ui$Element$Input$defaultRadioOption(txt));
+	});
+var $mdgriffith$elm_ui$Element$padding = function (x) {
+	var f = x;
+	return A2(
+		$mdgriffith$elm_ui$Internal$Model$StyleClass,
+		$mdgriffith$elm_ui$Internal$Flag$padding,
+		A5(
+			$mdgriffith$elm_ui$Internal$Model$PaddingStyle,
+			'p-' + $elm$core$String$fromInt(x),
+			f,
+			f,
+			f,
+			f));
+};
+var $mdgriffith$elm_ui$Element$Input$Row = {$: 'Row'};
+var $mdgriffith$elm_ui$Element$Input$AfterFound = {$: 'AfterFound'};
+var $mdgriffith$elm_ui$Element$Input$BeforeFound = {$: 'BeforeFound'};
+var $mdgriffith$elm_ui$Element$Input$Idle = {$: 'Idle'};
+var $mdgriffith$elm_ui$Element$Input$NotFound = {$: 'NotFound'};
+var $mdgriffith$elm_ui$Element$Input$Selected = {$: 'Selected'};
+var $mdgriffith$elm_ui$Element$Input$column = F2(
+	function (attributes, children) {
+		return A4(
+			$mdgriffith$elm_ui$Internal$Model$element,
+			$mdgriffith$elm_ui$Internal$Model$asColumn,
+			$mdgriffith$elm_ui$Internal$Model$div,
+			A2(
+				$elm$core$List$cons,
+				$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
+				A2(
+					$elm$core$List$cons,
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+					attributes)),
+			$mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
+	});
+var $mdgriffith$elm_ui$Element$Input$downArrow = 'ArrowDown';
+var $mdgriffith$elm_ui$Internal$Model$filter = function (attrs) {
+	return A3(
+		$elm$core$List$foldr,
+		F2(
+			function (x, _v0) {
+				var found = _v0.a;
+				var has = _v0.b;
+				switch (x.$) {
+					case 'NoAttribute':
+						return _Utils_Tuple2(found, has);
+					case 'Class':
+						var key = x.a;
+						return _Utils_Tuple2(
+							A2($elm$core$List$cons, x, found),
+							has);
+					case 'Attr':
+						var attr = x.a;
+						return _Utils_Tuple2(
+							A2($elm$core$List$cons, x, found),
+							has);
+					case 'StyleClass':
+						var style = x.b;
+						return _Utils_Tuple2(
+							A2($elm$core$List$cons, x, found),
+							has);
+					case 'Width':
+						var width = x.a;
+						return A2($elm$core$Set$member, 'width', has) ? _Utils_Tuple2(found, has) : _Utils_Tuple2(
+							A2($elm$core$List$cons, x, found),
+							A2($elm$core$Set$insert, 'width', has));
+					case 'Height':
+						var height = x.a;
+						return A2($elm$core$Set$member, 'height', has) ? _Utils_Tuple2(found, has) : _Utils_Tuple2(
+							A2($elm$core$List$cons, x, found),
+							A2($elm$core$Set$insert, 'height', has));
+					case 'Describe':
+						var description = x.a;
+						return A2($elm$core$Set$member, 'described', has) ? _Utils_Tuple2(found, has) : _Utils_Tuple2(
+							A2($elm$core$List$cons, x, found),
+							A2($elm$core$Set$insert, 'described', has));
+					case 'Nearby':
+						var location = x.a;
+						var elem = x.b;
+						return _Utils_Tuple2(
+							A2($elm$core$List$cons, x, found),
+							has);
+					case 'AlignX':
+						return A2($elm$core$Set$member, 'align-x', has) ? _Utils_Tuple2(found, has) : _Utils_Tuple2(
+							A2($elm$core$List$cons, x, found),
+							A2($elm$core$Set$insert, 'align-x', has));
+					case 'AlignY':
+						return A2($elm$core$Set$member, 'align-y', has) ? _Utils_Tuple2(found, has) : _Utils_Tuple2(
+							A2($elm$core$List$cons, x, found),
+							A2($elm$core$Set$insert, 'align-y', has));
+					default:
+						return A2($elm$core$Set$member, 'transform', has) ? _Utils_Tuple2(found, has) : _Utils_Tuple2(
+							A2($elm$core$List$cons, x, found),
+							A2($elm$core$Set$insert, 'transform', has));
+				}
+			}),
+		_Utils_Tuple2(_List_Nil, $elm$core$Set$empty),
+		attrs).a;
+};
+var $mdgriffith$elm_ui$Internal$Model$get = F2(
+	function (attrs, isAttr) {
+		return A3(
+			$elm$core$List$foldr,
+			F2(
+				function (x, found) {
+					return isAttr(x) ? A2($elm$core$List$cons, x, found) : found;
+				}),
+			_List_Nil,
+			$mdgriffith$elm_ui$Internal$Model$filter(attrs));
+	});
+var $mdgriffith$elm_ui$Element$Input$leftArrow = 'ArrowLeft';
+var $mdgriffith$elm_ui$Element$Input$rightArrow = 'ArrowRight';
+var $mdgriffith$elm_ui$Element$Input$row = F2(
+	function (attributes, children) {
+		return A4(
+			$mdgriffith$elm_ui$Internal$Model$element,
+			$mdgriffith$elm_ui$Internal$Model$asRow,
+			$mdgriffith$elm_ui$Internal$Model$div,
+			A2(
+				$elm$core$List$cons,
+				$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+				attributes),
+			$mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
+	});
+var $mdgriffith$elm_ui$Element$Input$upArrow = 'ArrowUp';
+var $mdgriffith$elm_ui$Element$Input$radioHelper = F3(
+	function (orientation, attrs, input) {
+		var track = F2(
+			function (opt, _v14) {
+				var found = _v14.a;
+				var prev = _v14.b;
+				var nxt = _v14.c;
+				var val = opt.a;
+				switch (found.$) {
+					case 'NotFound':
+						return _Utils_eq(
+							$elm$core$Maybe$Just(val),
+							input.selected) ? _Utils_Tuple3($mdgriffith$elm_ui$Element$Input$BeforeFound, prev, nxt) : _Utils_Tuple3(found, val, nxt);
+					case 'BeforeFound':
+						return _Utils_Tuple3($mdgriffith$elm_ui$Element$Input$AfterFound, prev, val);
+					default:
+						return _Utils_Tuple3(found, prev, nxt);
+				}
+			});
+		var renderOption = function (_v11) {
+			var val = _v11.a;
+			var view = _v11.b;
+			var status = _Utils_eq(
+				$elm$core$Maybe$Just(val),
+				input.selected) ? $mdgriffith$elm_ui$Element$Input$Selected : $mdgriffith$elm_ui$Element$Input$Idle;
+			return A2(
+				$mdgriffith$elm_ui$Element$el,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$pointer,
+						function () {
+						if (orientation.$ === 'Row') {
+							return $mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink);
+						} else {
+							return $mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill);
+						}
+					}(),
+						$mdgriffith$elm_ui$Element$Events$onClick(
+						input.onChange(val)),
+						function () {
+						if (status.$ === 'Selected') {
+							return $mdgriffith$elm_ui$Internal$Model$Attr(
+								A2($elm$html$Html$Attributes$attribute, 'aria-checked', 'true'));
+						} else {
+							return $mdgriffith$elm_ui$Internal$Model$Attr(
+								A2($elm$html$Html$Attributes$attribute, 'aria-checked', 'false'));
+						}
+					}(),
+						$mdgriffith$elm_ui$Internal$Model$Attr(
+						A2($elm$html$Html$Attributes$attribute, 'role', 'radio'))
+					]),
+				view(status));
+		};
+		var prevNext = function () {
+			var _v5 = input.options;
+			if (!_v5.b) {
+				return $elm$core$Maybe$Nothing;
+			} else {
+				var _v6 = _v5.a;
+				var val = _v6.a;
+				return function (_v7) {
+					var found = _v7.a;
+					var b = _v7.b;
+					var a = _v7.c;
+					switch (found.$) {
+						case 'NotFound':
+							return $elm$core$Maybe$Just(
+								_Utils_Tuple2(b, val));
+						case 'BeforeFound':
+							return $elm$core$Maybe$Just(
+								_Utils_Tuple2(b, val));
+						default:
+							return $elm$core$Maybe$Just(
+								_Utils_Tuple2(b, a));
+					}
+				}(
+					A3(
+						$elm$core$List$foldl,
+						track,
+						_Utils_Tuple3($mdgriffith$elm_ui$Element$Input$NotFound, val, val),
+						input.options));
+			}
+		}();
+		var optionArea = function () {
+			if (orientation.$ === 'Row') {
+				return A2(
+					$mdgriffith$elm_ui$Element$Input$row,
+					A2(
+						$elm$core$List$cons,
+						$mdgriffith$elm_ui$Element$Input$hiddenLabelAttribute(input.label),
+						attrs),
+					A2($elm$core$List$map, renderOption, input.options));
+			} else {
+				return A2(
+					$mdgriffith$elm_ui$Element$Input$column,
+					A2(
+						$elm$core$List$cons,
+						$mdgriffith$elm_ui$Element$Input$hiddenLabelAttribute(input.label),
+						attrs),
+					A2($elm$core$List$map, renderOption, input.options));
+			}
+		}();
+		var events = A2(
+			$mdgriffith$elm_ui$Internal$Model$get,
+			attrs,
+			function (attr) {
+				_v3$3:
+				while (true) {
+					switch (attr.$) {
+						case 'Width':
+							if (attr.a.$ === 'Fill') {
+								return true;
+							} else {
+								break _v3$3;
+							}
+						case 'Height':
+							if (attr.a.$ === 'Fill') {
+								return true;
+							} else {
+								break _v3$3;
+							}
+						case 'Attr':
+							return true;
+						default:
+							break _v3$3;
+					}
+				}
+				return false;
+			});
+		return A3(
+			$mdgriffith$elm_ui$Element$Input$applyLabel,
+			_Utils_ap(
+				A2(
+					$elm$core$List$filterMap,
+					$elm$core$Basics$identity,
+					_List_fromArray(
+						[
+							$elm$core$Maybe$Just($mdgriffith$elm_ui$Element$alignLeft),
+							$elm$core$Maybe$Just(
+							$mdgriffith$elm_ui$Element$Input$tabindex(0)),
+							$elm$core$Maybe$Just(
+							$mdgriffith$elm_ui$Internal$Model$htmlClass('focus')),
+							$elm$core$Maybe$Just($mdgriffith$elm_ui$Element$Region$announce),
+							$elm$core$Maybe$Just(
+							$mdgriffith$elm_ui$Internal$Model$Attr(
+								A2($elm$html$Html$Attributes$attribute, 'role', 'radiogroup'))),
+							function () {
+							if (prevNext.$ === 'Nothing') {
+								return $elm$core$Maybe$Nothing;
+							} else {
+								var _v1 = prevNext.a;
+								var prev = _v1.a;
+								var next = _v1.b;
+								return $elm$core$Maybe$Just(
+									$mdgriffith$elm_ui$Element$Input$onKeyLookup(
+										function (code) {
+											if (_Utils_eq(code, $mdgriffith$elm_ui$Element$Input$leftArrow)) {
+												return $elm$core$Maybe$Just(
+													input.onChange(prev));
+											} else {
+												if (_Utils_eq(code, $mdgriffith$elm_ui$Element$Input$upArrow)) {
+													return $elm$core$Maybe$Just(
+														input.onChange(prev));
+												} else {
+													if (_Utils_eq(code, $mdgriffith$elm_ui$Element$Input$rightArrow)) {
+														return $elm$core$Maybe$Just(
+															input.onChange(next));
+													} else {
+														if (_Utils_eq(code, $mdgriffith$elm_ui$Element$Input$downArrow)) {
+															return $elm$core$Maybe$Just(
+																input.onChange(next));
+														} else {
+															if (_Utils_eq(code, $mdgriffith$elm_ui$Element$Input$space)) {
+																var _v2 = input.selected;
+																if (_v2.$ === 'Nothing') {
+																	return $elm$core$Maybe$Just(
+																		input.onChange(prev));
+																} else {
+																	return $elm$core$Maybe$Nothing;
+																}
+															} else {
+																return $elm$core$Maybe$Nothing;
+															}
+														}
+													}
+												}
+											}
+										}));
+							}
+						}()
+						])),
+				events),
+			input.label,
+			optionArea);
+	});
+var $mdgriffith$elm_ui$Element$Input$radioRow = $mdgriffith$elm_ui$Element$Input$radioHelper($mdgriffith$elm_ui$Element$Input$Row);
+var $author$project$Chart$Item$getBottom = function (p) {
+	return A2(
+		$elm$core$Basics$composeR,
+		$author$project$Internal$Item$getPosition(p),
+		$author$project$Internal$Coordinates$bottom);
+};
+var $author$project$Chart$defaultLabel = {anchor: $author$project$Internal$Svg$defaultLabel.anchor, attrs: $author$project$Internal$Svg$defaultLabel.attrs, border: $author$project$Internal$Svg$defaultLabel.border, borderWidth: $author$project$Internal$Svg$defaultLabel.borderWidth, color: $author$project$Internal$Svg$defaultLabel.color, fontSize: $author$project$Internal$Svg$defaultLabel.fontSize, format: $elm$core$Maybe$Nothing, position: $author$project$Chart$Item$getBottom, rotate: $author$project$Internal$Svg$defaultLabel.rotate, uppercase: $author$project$Internal$Svg$defaultLabel.uppercase, xOff: $author$project$Internal$Svg$defaultLabel.xOff, yOff: $author$project$Internal$Svg$defaultLabel.yOff};
+var $author$project$Chart$eachCustom = F2(
+	function (grouping, func) {
+		return $author$project$Chart$SubElements(
+			F2(
+				function (p, items) {
+					var processed = A2($author$project$Chart$Item$apply, grouping, items);
+					return A2(
+						$elm$core$List$concatMap,
+						func(p),
+						processed);
+				}));
+	});
+var $author$project$Internal$Many$getData = function (_v0) {
+	var group_ = _v0.a;
+	return function (_v1) {
+		var x = _v1.a;
+		var xs = _v1.b;
+		return $author$project$Internal$Item$getDatum(x);
+	}(group_.config.items);
+};
+var $author$project$Chart$Item$getOneData = $author$project$Internal$Many$getData;
+var $author$project$Chart$svg = function (func) {
+	return $author$project$Chart$SvgElement(
+		function (p) {
+			return func(p);
+		});
+};
+var $author$project$Chart$toLabelFromItemLabel = function (config) {
+	return {anchor: config.anchor, attrs: config.attrs, border: config.border, borderWidth: config.borderWidth, color: config.color, fontSize: config.fontSize, rotate: config.rotate, uppercase: config.uppercase, xOff: config.xOff, yOff: config.yOff};
+};
+var $author$project$Chart$binLabels = F2(
+	function (toLabel, edits) {
+		return A2(
+			$author$project$Chart$eachCustom,
+			A2($author$project$Chart$Item$andThen, $author$project$Chart$Item$bins, $author$project$Chart$Item$bars),
+			F2(
+				function (p, item) {
+					var config = A2($author$project$Internal$Helpers$apply, edits, $author$project$Chart$defaultLabel);
+					var text = function () {
+						var _v1 = config.format;
+						if (_v1.$ === 'Just') {
+							var formatting = _v1.a;
+							return formatting(item);
+						} else {
+							return toLabel(
+								$author$project$Chart$Item$getOneData(item));
+						}
+					}();
+					return _List_fromArray(
+						[
+							$author$project$Chart$svg(
+							function (_v0) {
+								return A4(
+									$author$project$Internal$Svg$label,
+									p,
+									$author$project$Chart$toLabelFromItemLabel(config),
+									_List_fromArray(
+										[
+											$elm$svg$Svg$text(text)
+										]),
+									A2(config.position, p, item));
+							})
+						]);
+				}));
+	});
+var $author$project$Data$Education$Education = F5(
+	function (_short, medium, _long, bachelor, researcher) {
+		return {bachelor: bachelor, _long: _long, medium: medium, researcher: researcher, _short: _short};
+	});
+var $author$project$Data$Education$csv = 'NAME;GENDER;GROUP;2005;2006;2007;2008;2009;2010;2011;2012;2013;2014;2015;2016;2017;2018;2019;I alt;Mand;I ALT;811789;803830;798631;792918;781488;771967;761618;751681;748482;751398;760693;766521;770366;772843;774637\nI alt;Mand;FULDFORT VIDEREGAENDE UDDANNELSE;191338;194395;197446;200221;202674;204402;205575;206872;209984;214574;221123;228572;234990;241256;247919\nI alt;Mand;Fuldfort kort videregaende uddannelse;41226;41390;41420;41415;41199;40940;40386;39714;39072;38474;38112;41866;41748;41610;41888\nI alt;Mand;Fuldfort mellemlange videregaende uddannelser;63893;63755;63940;63893;63925;63844;63585;63430;64328;66154;68347;66809;69011;71518;74027\nI alt;Mand;Fuldfort bachelor;21126;21741;21990;22568;22818;23049;23537;23783;24507;25368;26619;26058;25710;25828;26245\nI alt;Mand;Fuldfort lange videregaende uddannelser;59934;62252;64666;66729;68955;70573;71828;73476;75310;77348;80450;85887;90261;93855;97705\nI alt;Mand;Fuldfort forskeruddannelser;5159;5257;5430;5616;5777;5996;6239;6469;6767;7230;7595;7952;8260;8445;8054\nI alt;Mand;IGANGV∆RENDE VIDEREGAENDE UDDANNELSE;28299;27464;25680;23947;23308;23905;25284;27205;28843;30178;30440;30100;30248;30311;29888\nI alt;Mand;Igangvarende korte videregaende uddannelser;3128;3174;2953;2859;3080;3432;3563;3682;3906;4368;4458;4829;5045;5078;5043\nI alt;Mand;Igangvarende mellemlange videregaende uddannelser;12165;12030;11316;10638;10449;10887;11768;12857;13501;14155;14641;14505;14621;14666;14772\nI alt;Mand;Igangvarende bachelor;7197;7149;7077;6672;6307;6055;6239;6641;7139;7293;7116;6642;6570;6403;6403\nI alt;Mand;Igangvarende lange videregaende uddannelser;5519;4813;3984;3316;2835;2715;2762;2964;3195;3248;3075;2974;2903;3084;2680\nI alt;Mand;Igangvarende forskeruddannelser;290;298;350;462;637;816;952;1061;1102;1114;1150;1150;1109;1080;990\nI alt;Mand;INGEN VIDEREGAENDE UDDANNELSE;592152;581971;575505;568750;555506;543660;530759;517604;509655;506646;509130;507849;505128;501276;496830\nI alt;Mand;Afbrudt videregaende uddannelse;40340;40583;41146;41538;41226;40984;40316;39784;39538;39929;40748;41666;42507;43223;44054\nI alt;Mand;Registreret uden videregaende uddannelse;498031;486212;475360;463710;451060;438097;424851;410655;399375;390310;383198;375948;369267;362239;356860\nI alt;Mand;Uoplyst;53781;55176;58999;63502;63220;64579;65592;67165;70742;76407;85184;90235;93354;95814;95916\nI alt;Kvinder;I ALT;794659;788300;783350;778266;769895;762226;752512;742726;738587;738915;744633;749059;752191;753273;755058\nI alt;Kvinder;FULDFØRT VIDEREGAENDE UDDANNELSE;252301;258584;264566;270251;275873;281598;286260;289908;295403;303201;312460;322413;331023;338674;347337\nI alt;Kvinder;Fuldfort kort videregaende uddannelse;29131;29247;29419;29493;29498;29827;29983;29997;29925;29872;30042;30949;31248;31589;32121\nI alt;Kvinder;Fuldfort mellemlange videregaende uddannelser;140201;141869;142970;143742;144471;145159;145203;144611;145202;147883;150147;151541;153167;154638;156612\nI alt;Kvinder;Fuldfort bachelor;25072;25782;26104;26789;27419;28480;29343;29775;30501;30851;31932;30922;30400;30272;30540\nI alt;Kvinder;Fuldfort lange videregaende uddannelser;54977;58560;62789;66756;70865;74229;77538;81016;84934;89282;94466;102667;109526;115186;121322\nI alt;Kvinder;Fuldført forskeruddannelser;2920;3126;3284;3471;3620;3903;4193;4509;4841;5313;5873;6334;6682;6989;6742\nI alt;Kvinder;IGANGV∆RENDE VIDEREGAENDE UDDANNELSE;36318;35286;33417;30956;29302;28448;28664;29874;30854;31647;32041;31874;33133;34611;35149\nI alt;Kvinder;Igangvarende korte videregaende uddannelser;2571;2578;2327;2123;2290;2459;2620;2761;2891;3130;3300;3353;3455;3530;3474\nI alt;Kvinder;Igangvarende mellemlange videregaende uddannelser;21690;21103;20057;18542;17275;16636;16935;17590;18143;18586;18856;19260;20328;21314;22135\nI alt;Kvinder;Igangvarende bachelor;6753;6738;6632;6394;6117;5801;5647;5794;5900;5944;5877;5493;5585;5817;5923\nI alt;Kvinder;Igangvarende lange videregaende uddannelser;5078;4628;4123;3547;3135;2921;2753;2954;3115;3170;3167;2927;2862;3024;2734\nI alt;Kvinder;Igangværende forskeruddannelser;226;239;278;350;485;631;709;775;805;817;841;841;903;926;883\nI alt;Kvinder;INGEN VIDEREGÅENDE UDDANNELSE;506040;494430;485367;477059;464720;452180;437588;422944;412330;404067;400132;394772;388035;379988;372572\nI alt;Kvinder;Afbrudt videregaende uddannelse;35065;35484;36243;36973;36904;36644;36003;35383;35152;35139;35539;35896;36342;36559;37241\nI alt;Kvinder;Registreret uden videregående uddannelse;413743;400901;388608;376151;362518;348841;334533;319468;306942;296785;287509;277792;267934;258029;249616\nI alt;Kvinder;Uoplyst;57232;58045;60516;63935;65298;66695;67052;68093;70236;72143;77084;81084;83759;85400;85715\n';
+var $author$project$Data$Education$Raw = function (name) {
+	return function (gender) {
+		return function (group) {
+			return function (y2005) {
+				return function (y2006) {
+					return function (y2007) {
+						return function (y2008) {
+							return function (y2009) {
+								return function (y2010) {
+									return function (y2011) {
+										return function (y2012) {
+											return function (y2013) {
+												return function (y2014) {
+													return function (y2015) {
+														return function (y2016) {
+															return function (y2017) {
+																return function (y2018) {
+																	return function (y2019) {
+																		return {gender: gender, group: group, name: name, y2005: y2005, y2006: y2006, y2007: y2007, y2008: y2008, y2009: y2009, y2010: y2010, y2011: y2011, y2012: y2012, y2013: y2013, y2014: y2014, y2015: y2015, y2016: y2016, y2017: y2017, y2018: y2018, y2019: y2019};
+																	};
+																};
+															};
+														};
+													};
+												};
+											};
+										};
+									};
+								};
+							};
+						};
+					};
+				};
+			};
+		};
+	};
+};
+var $BrianHicks$elm_csv$Csv$Decode$ExpectedFloat = function (a) {
+	return {$: 'ExpectedFloat', a: a};
+};
+var $BrianHicks$elm_csv$Csv$Decode$float = $BrianHicks$elm_csv$Csv$Decode$fromString(
+	function (value) {
+		var _v0 = $elm$core$String$toFloat(
+			$elm$core$String$trim(value));
+		if (_v0.$ === 'Just') {
+			var parsed = _v0.a;
+			return $elm$core$Result$Ok(parsed);
+		} else {
+			return $elm$core$Result$Err(
+				$BrianHicks$elm_csv$Csv$Decode$ExpectedFloat(value));
+		}
+	});
+var $author$project$Data$Education$decoder = A2(
+	$BrianHicks$elm_csv$Csv$Decode$pipeline,
+	A2($BrianHicks$elm_csv$Csv$Decode$field, '2019', $BrianHicks$elm_csv$Csv$Decode$float),
+	A2(
+		$BrianHicks$elm_csv$Csv$Decode$pipeline,
+		A2($BrianHicks$elm_csv$Csv$Decode$field, '2018', $BrianHicks$elm_csv$Csv$Decode$float),
+		A2(
+			$BrianHicks$elm_csv$Csv$Decode$pipeline,
+			A2($BrianHicks$elm_csv$Csv$Decode$field, '2017', $BrianHicks$elm_csv$Csv$Decode$float),
+			A2(
+				$BrianHicks$elm_csv$Csv$Decode$pipeline,
+				A2($BrianHicks$elm_csv$Csv$Decode$field, '2016', $BrianHicks$elm_csv$Csv$Decode$float),
+				A2(
+					$BrianHicks$elm_csv$Csv$Decode$pipeline,
+					A2($BrianHicks$elm_csv$Csv$Decode$field, '2015', $BrianHicks$elm_csv$Csv$Decode$float),
+					A2(
+						$BrianHicks$elm_csv$Csv$Decode$pipeline,
+						A2($BrianHicks$elm_csv$Csv$Decode$field, '2014', $BrianHicks$elm_csv$Csv$Decode$float),
+						A2(
+							$BrianHicks$elm_csv$Csv$Decode$pipeline,
+							A2($BrianHicks$elm_csv$Csv$Decode$field, '2013', $BrianHicks$elm_csv$Csv$Decode$float),
+							A2(
+								$BrianHicks$elm_csv$Csv$Decode$pipeline,
+								A2($BrianHicks$elm_csv$Csv$Decode$field, '2012', $BrianHicks$elm_csv$Csv$Decode$float),
+								A2(
+									$BrianHicks$elm_csv$Csv$Decode$pipeline,
+									A2($BrianHicks$elm_csv$Csv$Decode$field, '2011', $BrianHicks$elm_csv$Csv$Decode$float),
+									A2(
+										$BrianHicks$elm_csv$Csv$Decode$pipeline,
+										A2($BrianHicks$elm_csv$Csv$Decode$field, '2010', $BrianHicks$elm_csv$Csv$Decode$float),
+										A2(
+											$BrianHicks$elm_csv$Csv$Decode$pipeline,
+											A2($BrianHicks$elm_csv$Csv$Decode$field, '2009', $BrianHicks$elm_csv$Csv$Decode$float),
+											A2(
+												$BrianHicks$elm_csv$Csv$Decode$pipeline,
+												A2($BrianHicks$elm_csv$Csv$Decode$field, '2008', $BrianHicks$elm_csv$Csv$Decode$float),
+												A2(
+													$BrianHicks$elm_csv$Csv$Decode$pipeline,
+													A2($BrianHicks$elm_csv$Csv$Decode$field, '2007', $BrianHicks$elm_csv$Csv$Decode$float),
+													A2(
+														$BrianHicks$elm_csv$Csv$Decode$pipeline,
+														A2($BrianHicks$elm_csv$Csv$Decode$field, '2006', $BrianHicks$elm_csv$Csv$Decode$float),
+														A2(
+															$BrianHicks$elm_csv$Csv$Decode$pipeline,
+															A2($BrianHicks$elm_csv$Csv$Decode$field, '2005', $BrianHicks$elm_csv$Csv$Decode$float),
+															A2(
+																$BrianHicks$elm_csv$Csv$Decode$pipeline,
+																A2($BrianHicks$elm_csv$Csv$Decode$field, 'GROUP', $BrianHicks$elm_csv$Csv$Decode$string),
+																A2(
+																	$BrianHicks$elm_csv$Csv$Decode$pipeline,
+																	A2($BrianHicks$elm_csv$Csv$Decode$field, 'GENDER', $BrianHicks$elm_csv$Csv$Decode$string),
+																	A2(
+																		$BrianHicks$elm_csv$Csv$Decode$pipeline,
+																		A2($BrianHicks$elm_csv$Csv$Decode$field, 'NAME', $BrianHicks$elm_csv$Csv$Decode$string),
+																		$BrianHicks$elm_csv$Csv$Decode$into($author$project$Data$Education$Raw)))))))))))))))))));
+var $author$project$Data$Education$Group = F2(
+	function (name, amount) {
+		return {amount: amount, name: name};
+	});
+var $author$project$Data$Education$process = function () {
+	var updateGender = F3(
+		function (datum, raw, num) {
+			var _v2 = raw.gender;
+			switch (_v2) {
+				case 'Kvinder':
+					return $elm$core$Maybe$Just(
+						_Utils_update(
+							datum,
+							{
+								women: A2(
+									$elm$core$List$cons,
+									A2($author$project$Data$Education$Group, raw.group, num),
+									datum.women)
+							}));
+				case 'Mand':
+					return $elm$core$Maybe$Just(
+						_Utils_update(
+							datum,
+							{
+								men: A2(
+									$elm$core$List$cons,
+									A2($author$project$Data$Education$Group, raw.group, num),
+									datum.men)
+							}));
+				default:
+					return $elm$core$Maybe$Nothing;
+			}
+		});
+	var updateYear = F3(
+		function (raw, num, prev) {
+			if (prev.$ === 'Just') {
+				var datum = prev.a;
+				return A3(updateGender, datum, raw, num);
+			} else {
+				return A3(
+					updateGender,
+					{men: _List_Nil, women: _List_Nil},
+					raw,
+					num);
+			}
+		});
+	var fold = F2(
+		function (raw, acc) {
+			return A3(
+				$elm$core$Dict$update,
+				2019,
+				A2(updateYear, raw, raw.y2019),
+				A3(
+					$elm$core$Dict$update,
+					2018,
+					A2(updateYear, raw, raw.y2018),
+					A3(
+						$elm$core$Dict$update,
+						2017,
+						A2(updateYear, raw, raw.y2017),
+						A3(
+							$elm$core$Dict$update,
+							2016,
+							A2(updateYear, raw, raw.y2016),
+							A3(
+								$elm$core$Dict$update,
+								2015,
+								A2(updateYear, raw, raw.y2015),
+								A3(
+									$elm$core$Dict$update,
+									2014,
+									A2(updateYear, raw, raw.y2014),
+									A3(
+										$elm$core$Dict$update,
+										2013,
+										A2(updateYear, raw, raw.y2013),
+										A3(
+											$elm$core$Dict$update,
+											2012,
+											A2(updateYear, raw, raw.y2012),
+											A3(
+												$elm$core$Dict$update,
+												2011,
+												A2(updateYear, raw, raw.y2011),
+												A3(
+													$elm$core$Dict$update,
+													2010,
+													A2(updateYear, raw, raw.y2010),
+													A3(
+														$elm$core$Dict$update,
+														2009,
+														A2(updateYear, raw, raw.y2009),
+														A3(
+															$elm$core$Dict$update,
+															2008,
+															A2(updateYear, raw, raw.y2008),
+															A3(
+																$elm$core$Dict$update,
+																2007,
+																A2(updateYear, raw, raw.y2007),
+																A3(
+																	$elm$core$Dict$update,
+																	2006,
+																	A2(updateYear, raw, raw.y2006),
+																	A3(
+																		$elm$core$Dict$update,
+																		2005,
+																		A2(updateYear, raw, raw.y2005),
+																		acc)))))))))))))));
+		});
+	return A2(
+		$elm$core$Basics$composeR,
+		A2($elm$core$List$foldl, fold, $elm$core$Dict$empty),
+		A2(
+			$elm$core$Basics$composeR,
+			$elm$core$Dict$toList,
+			$elm$core$List$map(
+				function (_v0) {
+					var year = _v0.a;
+					var datum = _v0.b;
+					return {men: datum.men, women: datum.women, year: year};
+				})));
+}();
+var $author$project$Data$Education$basic = A2(
+	$elm$core$Result$withDefault,
+	_List_Nil,
+	A2(
+		$elm$core$Result$map,
+		$author$project$Data$Education$process,
+		A4(
+			$BrianHicks$elm_csv$Csv$Decode$decodeCustom,
+			{
+				fieldSeparator: _Utils_chr(';')
+			},
+			$BrianHicks$elm_csv$Csv$Decode$FieldNamesFromFirstRow,
+			$author$project$Data$Education$decoder,
+			$author$project$Data$Education$csv)));
+var $author$project$Data$Education$data = function () {
+	var _short = 'Fuldfort kort videregaende uddannelse';
+	var researcher2 = 'Fuldført forskeruddannelser';
+	var researcher = 'Fuldfort forskeruddannelser';
+	var ongoing = 'Igangvarende korte videregaende uddannelser';
+	var medium = 'Fuldfort mellemlange videregaende uddannelser';
+	var _long = 'Fuldfort lange videregaende uddannelser';
+	var findAmongst = F2(
+		function (ns, genderData) {
+			return A2(
+				$elm$core$Maybe$withDefault,
+				0,
+				A2(
+					$elm$core$Maybe$map,
+					function ($) {
+						return $.amount;
+					},
+					$elm$core$List$head(
+						A2(
+							$elm$core$List$filter,
+							function (g) {
+								return A2($elm$core$List$member, g.name, ns);
+							},
+							genderData))));
+		});
+	var bachelor = 'Fuldfort bachelor';
+	return A2(
+		$elm$core$List$filterMap,
+		function (d) {
+			var _v0 = _List_fromArray(
+				[
+					A2(
+					findAmongst,
+					_List_fromArray(
+						[_short]),
+					d.women),
+					A2(
+					findAmongst,
+					_List_fromArray(
+						[medium]),
+					d.women),
+					A2(
+					findAmongst,
+					_List_fromArray(
+						[_long]),
+					d.women),
+					A2(
+					findAmongst,
+					_List_fromArray(
+						[bachelor]),
+					d.women),
+					A2(
+					findAmongst,
+					_List_fromArray(
+						[researcher, researcher2]),
+					d.women),
+					A2(
+					findAmongst,
+					_List_fromArray(
+						[_short]),
+					d.men),
+					A2(
+					findAmongst,
+					_List_fromArray(
+						[medium]),
+					d.men),
+					A2(
+					findAmongst,
+					_List_fromArray(
+						[_long]),
+					d.men),
+					A2(
+					findAmongst,
+					_List_fromArray(
+						[bachelor]),
+					d.men),
+					A2(
+					findAmongst,
+					_List_fromArray(
+						[researcher, researcher2]),
+					d.men)
+				]);
+			if ((((((((((_v0.b && _v0.b.b) && _v0.b.b.b) && _v0.b.b.b.b) && _v0.b.b.b.b.b) && _v0.b.b.b.b.b.b) && _v0.b.b.b.b.b.b.b) && _v0.b.b.b.b.b.b.b.b) && _v0.b.b.b.b.b.b.b.b.b) && _v0.b.b.b.b.b.b.b.b.b.b) && (!_v0.b.b.b.b.b.b.b.b.b.b.b)) {
+				var shortWoman = _v0.a;
+				var _v1 = _v0.b;
+				var mediumWoman = _v1.a;
+				var _v2 = _v1.b;
+				var longWoman = _v2.a;
+				var _v3 = _v2.b;
+				var bachelorWoman = _v3.a;
+				var _v4 = _v3.b;
+				var researcherWoman = _v4.a;
+				var _v5 = _v4.b;
+				var shortMen = _v5.a;
+				var _v6 = _v5.b;
+				var mediumMen = _v6.a;
+				var _v7 = _v6.b;
+				var longMen = _v7.a;
+				var _v8 = _v7.b;
+				var bachelorMen = _v8.a;
+				var _v9 = _v8.b;
+				var researcherMen = _v9.a;
+				return $elm$core$Maybe$Just(
+					{
+						men: A5($author$project$Data$Education$Education, shortMen, mediumMen, longMen, bachelorMen, researcherMen),
+						women: A5($author$project$Data$Education$Education, shortWoman, mediumWoman, longWoman, bachelorWoman, researcherWoman),
+						year: d.year
+					});
+			} else {
+				var e = _v0;
+				return $elm$core$Maybe$Nothing;
+			}
+		},
+		$author$project$Data$Education$basic);
+}();
+var $author$project$Chart$Attributes$format = F2(
+	function (v, config) {
+		return _Utils_update(
+			config,
+			{
+				format: $elm$core$Maybe$Just(v)
+			});
+	});
+var $author$project$Internal$Svg$defaultRect = {attrs: _List_Nil, border: 'rgba(210, 210, 210, 1)', borderWidth: 1, color: 'rgba(210, 210, 210, 0.5)', opacity: 1, x1: $elm$core$Maybe$Nothing, x2: $elm$core$Maybe$Nothing, y1: $elm$core$Maybe$Nothing, y2: $elm$core$Maybe$Nothing};
+var $author$project$Internal$Svg$rect = F2(
+	function (plane, config) {
+		var _v0 = function () {
+			var _v3 = _Utils_Tuple2(
+				_Utils_Tuple2(config.x1, config.x2),
+				_Utils_Tuple2(config.y1, config.y2));
+			_v3$11:
+			while (true) {
+				if (_v3.a.a.$ === 'Just') {
+					if (_v3.a.b.$ === 'Nothing') {
+						if (_v3.b.a.$ === 'Nothing') {
+							if (_v3.b.b.$ === 'Nothing') {
+								var _v8 = _v3.a;
+								var a = _v8.a.a;
+								var _v9 = _v8.b;
+								var _v10 = _v3.b;
+								var _v11 = _v10.a;
+								var _v12 = _v10.b;
+								return _Utils_Tuple2(
+									_Utils_Tuple2(a, a),
+									_Utils_Tuple2(plane.y.min, plane.y.max));
+							} else {
+								break _v3$11;
+							}
+						} else {
+							if (_v3.b.b.$ === 'Just') {
+								var _v35 = _v3.a;
+								var c = _v35.a.a;
+								var _v36 = _v35.b;
+								var _v37 = _v3.b;
+								var a = _v37.a.a;
+								var b = _v37.b.a;
+								return _Utils_Tuple2(
+									_Utils_Tuple2(c, c),
+									_Utils_Tuple2(a, b));
+							} else {
+								break _v3$11;
+							}
+						}
+					} else {
+						if (_v3.b.a.$ === 'Nothing') {
+							if (_v3.b.b.$ === 'Nothing') {
+								var _v4 = _v3.a;
+								var a = _v4.a.a;
+								var b = _v4.b.a;
+								var _v5 = _v3.b;
+								var _v6 = _v5.a;
+								var _v7 = _v5.b;
+								return _Utils_Tuple2(
+									_Utils_Tuple2(a, b),
+									_Utils_Tuple2(plane.y.min, plane.y.max));
+							} else {
+								var _v38 = _v3.a;
+								var a = _v38.a.a;
+								var b = _v38.b.a;
+								var _v39 = _v3.b;
+								var _v40 = _v39.a;
+								var c = _v39.b.a;
+								return _Utils_Tuple2(
+									_Utils_Tuple2(a, b),
+									_Utils_Tuple2(c, c));
+							}
+						} else {
+							if (_v3.b.b.$ === 'Nothing') {
+								var _v41 = _v3.a;
+								var a = _v41.a.a;
+								var b = _v41.b.a;
+								var _v42 = _v3.b;
+								var c = _v42.a.a;
+								var _v43 = _v42.b;
+								return _Utils_Tuple2(
+									_Utils_Tuple2(a, b),
+									_Utils_Tuple2(c, c));
+							} else {
+								break _v3$11;
+							}
+						}
+					}
+				} else {
+					if (_v3.a.b.$ === 'Just') {
+						if (_v3.b.a.$ === 'Nothing') {
+							if (_v3.b.b.$ === 'Nothing') {
+								var _v13 = _v3.a;
+								var _v14 = _v13.a;
+								var b = _v13.b.a;
+								var _v15 = _v3.b;
+								var _v16 = _v15.a;
+								var _v17 = _v15.b;
+								return _Utils_Tuple2(
+									_Utils_Tuple2(b, b),
+									_Utils_Tuple2(plane.y.min, plane.y.max));
+							} else {
+								break _v3$11;
+							}
+						} else {
+							if (_v3.b.b.$ === 'Just') {
+								var _v32 = _v3.a;
+								var _v33 = _v32.a;
+								var c = _v32.b.a;
+								var _v34 = _v3.b;
+								var a = _v34.a.a;
+								var b = _v34.b.a;
+								return _Utils_Tuple2(
+									_Utils_Tuple2(c, c),
+									_Utils_Tuple2(a, b));
+							} else {
+								break _v3$11;
+							}
+						}
+					} else {
+						if (_v3.b.a.$ === 'Just') {
+							if (_v3.b.b.$ === 'Just') {
+								var _v18 = _v3.a;
+								var _v19 = _v18.a;
+								var _v20 = _v18.b;
+								var _v21 = _v3.b;
+								var a = _v21.a.a;
+								var b = _v21.b.a;
+								return _Utils_Tuple2(
+									_Utils_Tuple2(plane.x.min, plane.x.min),
+									_Utils_Tuple2(a, b));
+							} else {
+								var _v22 = _v3.a;
+								var _v23 = _v22.a;
+								var _v24 = _v22.b;
+								var _v25 = _v3.b;
+								var a = _v25.a.a;
+								var _v26 = _v25.b;
+								return _Utils_Tuple2(
+									_Utils_Tuple2(plane.x.min, plane.x.max),
+									_Utils_Tuple2(a, a));
+							}
+						} else {
+							if (_v3.b.b.$ === 'Just') {
+								var _v27 = _v3.a;
+								var _v28 = _v27.a;
+								var _v29 = _v27.b;
+								var _v30 = _v3.b;
+								var _v31 = _v30.a;
+								var b = _v30.b.a;
+								return _Utils_Tuple2(
+									_Utils_Tuple2(plane.x.min, plane.x.max),
+									_Utils_Tuple2(b, b));
+							} else {
+								var _v44 = _v3.a;
+								var _v45 = _v44.a;
+								var _v46 = _v44.b;
+								var _v47 = _v3.b;
+								var _v48 = _v47.a;
+								var _v49 = _v47.b;
+								return _Utils_Tuple2(
+									_Utils_Tuple2(plane.x.min, plane.x.max),
+									_Utils_Tuple2(plane.y.min, plane.y.max));
+							}
+						}
+					}
+				}
+			}
+			return _Utils_Tuple2(
+				_Utils_Tuple2(
+					A2($elm$core$Maybe$withDefault, plane.x.min, config.x1),
+					A2($elm$core$Maybe$withDefault, plane.x.max, config.x2)),
+				_Utils_Tuple2(
+					A2($elm$core$Maybe$withDefault, plane.y.min, config.y1),
+					A2($elm$core$Maybe$withDefault, plane.y.max, config.y2)));
+		}();
+		var _v1 = _v0.a;
+		var x1_ = _v1.a;
+		var x2_ = _v1.b;
+		var _v2 = _v0.b;
+		var y1_ = _v2.a;
+		var y2_ = _v2.b;
+		var cmds = _List_fromArray(
+			[
+				A2($author$project$Internal$Commands$Move, x1_, y1_),
+				A2($author$project$Internal$Commands$Line, x1_, y1_),
+				A2($author$project$Internal$Commands$Line, x2_, y1_),
+				A2($author$project$Internal$Commands$Line, x2_, y2_),
+				A2($author$project$Internal$Commands$Line, x1_, y2_),
+				A2($author$project$Internal$Commands$Line, x1_, y1_)
+			]);
+		return A4(
+			$author$project$Internal$Svg$withAttrs,
+			config.attrs,
+			$elm$svg$Svg$path,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$class('elm-charts__rect'),
+					$elm$svg$Svg$Attributes$fill(config.color),
+					$elm$svg$Svg$Attributes$fillOpacity(
+					$elm$core$String$fromFloat(config.opacity)),
+					$elm$svg$Svg$Attributes$stroke(config.border),
+					$elm$svg$Svg$Attributes$strokeWidth(
+					$elm$core$String$fromFloat(config.borderWidth)),
+					$elm$svg$Svg$Attributes$d(
+					A2($author$project$Internal$Commands$description, plane, cmds))
+				]),
+			_List_Nil);
+	});
+var $author$project$Chart$Svg$rect = F2(
+	function (plane, edits) {
+		return A2(
+			$author$project$Internal$Svg$rect,
+			plane,
+			A2($author$project$Internal$Helpers$apply, edits, $author$project$Internal$Svg$defaultRect));
+	});
+var $author$project$Chart$rect = function (attrs) {
+	return $author$project$Chart$SvgElement(
+		function (p) {
+			return A2($author$project$Chart$Svg$rect, p, attrs);
+		});
+};
+var $author$project$Internal$Property$stacked = function (properties) {
+	var toVisual = F2(
+		function (toYs_, datum) {
+			var vs = A2(
+				$elm$core$List$filterMap,
+				function (toY) {
+					return toY(datum);
+				},
+				toYs_);
+			return (!_Utils_eq(
+				$elm$core$List$length(vs),
+				$elm$core$List$length(toYs_))) ? $elm$core$Maybe$Nothing : $elm$core$Maybe$Just(
+				$elm$core$List$sum(vs));
+		});
+	var stack = F3(
+		function (list, prev, result) {
+			stack:
+			while (true) {
+				if (list.b) {
+					var one = list.a;
+					var rest = list.b;
+					var toYs_ = A2($elm$core$List$cons, one.value, prev);
+					var $temp$list = rest,
+						$temp$prev = toYs_,
+						$temp$result = A2(
+						$elm$core$List$cons,
+						_Utils_update(
+							one,
+							{
+								visual: toVisual(toYs_)
+							}),
+						result);
+					list = $temp$list;
+					prev = $temp$prev;
+					result = $temp$result;
+					continue stack;
+				} else {
+					return result;
+				}
+			}
+		});
+	var configs = A2(
+		$elm$core$List$concatMap,
+		$author$project$Internal$Property$toConfigs,
+		$elm$core$List$reverse(properties));
+	return $author$project$Internal$Property$Stacked(
+		A3(stack, configs, _List_Nil, _List_Nil));
+};
+var $author$project$Chart$stacked = $author$project$Internal$Property$stacked;
+var $author$project$Internal$Svg$Floats = {$: 'Floats'};
+var $author$project$Chart$LabelsElement = F3(
+	function (a, b, c) {
+		return {$: 'LabelsElement', a: a, b: b, c: c};
 	});
 var $ryannhg$date_format$DateFormat$Language$Language = F6(
 	function (toMonthName, toMonthAbbreviation, toWeekdayName, toWeekdayAbbreviation, toAmPm, toOrdinalSuffix) {
@@ -25867,14 +31970,6 @@ var $ryannhg$date_format$DateFormat$dayOfYear = F2(
 var $ryannhg$date_format$DateFormat$quarter = F2(
 	function (zone, posix) {
 		return (A2($ryannhg$date_format$DateFormat$monthNumber_, zone, posix) / 4) | 0;
-	});
-var $elm$core$String$right = F2(
-	function (n, string) {
-		return (n < 1) ? '' : A3(
-			$elm$core$String$slice,
-			-n,
-			$elm$core$String$length(string),
-			string);
 	});
 var $ryannhg$date_format$DateFormat$toFixedLength = F2(
 	function (totalChars, num) {
@@ -27380,1819 +33475,6 @@ var $author$project$Chart$generateValues = F4(
 						axis));
 		}
 	});
-var $author$project$Chart$Attributes$length = F2(
-	function (v, config) {
-		return _Utils_update(
-			config,
-			{length: v});
-	});
-var $author$project$Internal$Svg$defaultTick = {attrs: _List_Nil, color: 'rgb(210, 210, 210)', length: 5, width: 1};
-var $author$project$Internal$Svg$tick = F4(
-	function (plane, config, isX, point) {
-		return A4(
-			$author$project$Internal$Svg$withAttrs,
-			config.attrs,
-			$elm$svg$Svg$line,
-			_List_fromArray(
-				[
-					$elm$svg$Svg$Attributes$class('elm-charts__tick'),
-					$elm$svg$Svg$Attributes$stroke(config.color),
-					$elm$svg$Svg$Attributes$strokeWidth(
-					$elm$core$String$fromFloat(config.width)),
-					$elm$svg$Svg$Attributes$x1(
-					$elm$core$String$fromFloat(
-						A2($author$project$Internal$Coordinates$toSVGX, plane, point.x))),
-					$elm$svg$Svg$Attributes$x2(
-					$elm$core$String$fromFloat(
-						A2($author$project$Internal$Coordinates$toSVGX, plane, point.x) + (isX ? 0 : (-config.length)))),
-					$elm$svg$Svg$Attributes$y1(
-					$elm$core$String$fromFloat(
-						A2($author$project$Internal$Coordinates$toSVGY, plane, point.y))),
-					$elm$svg$Svg$Attributes$y2(
-					$elm$core$String$fromFloat(
-						A2($author$project$Internal$Coordinates$toSVGY, plane, point.y) + (isX ? config.length : 0)))
-				]),
-			_List_Nil);
-	});
-var $author$project$Internal$Svg$xTick = F3(
-	function (plane, config, point) {
-		return A4($author$project$Internal$Svg$tick, plane, config, true, point);
-	});
-var $author$project$Chart$Svg$xTick = F2(
-	function (plane, edits) {
-		return A2(
-			$author$project$Internal$Svg$xTick,
-			plane,
-			A2($author$project$Internal$Helpers$apply, edits, $author$project$Internal$Svg$defaultTick));
-	});
-var $author$project$Chart$xTicks = function (edits) {
-	var config = A2(
-		$author$project$Internal$Helpers$apply,
-		edits,
-		{amount: 5, color: '', flip: false, generate: $author$project$Internal$Svg$Floats, grid: true, height: 5, limits: _List_Nil, pinned: $author$project$Chart$Attributes$zero, width: 1});
-	var toTicks = function (p) {
-		return A2(
-			$elm$core$List$map,
-			function ($) {
-				return $.value;
-			},
-			A4(
-				$author$project$Chart$generateValues,
-				config.amount,
-				config.generate,
-				$elm$core$Maybe$Nothing,
-				A3(
-					$elm$core$List$foldl,
-					F2(
-						function (f, x) {
-							return f(x);
-						}),
-					p.x,
-					config.limits)));
-	};
-	var addTickValues = F2(
-		function (p, ts) {
-			return (!config.grid) ? ts : _Utils_update(
-				ts,
-				{
-					xs: _Utils_ap(
-						ts.xs,
-						toTicks(p))
-				});
-		});
-	return A2(
-		$author$project$Chart$TicksElement,
-		addTickValues,
-		function (p) {
-			var toTick = function (x) {
-				return A3(
-					$author$project$Chart$Svg$xTick,
-					p,
-					_List_fromArray(
-						[
-							$author$project$Chart$Attributes$color(config.color),
-							$author$project$Chart$Attributes$length(
-							config.flip ? (-config.height) : config.height),
-							$author$project$Chart$Attributes$width(config.width)
-						]),
-					{
-						x: x,
-						y: config.pinned(p.y)
-					});
-			};
-			return A2(
-				$elm$svg$Svg$g,
-				_List_fromArray(
-					[
-						$elm$svg$Svg$Attributes$class('elm-charts__x-ticks')
-					]),
-				A2(
-					$elm$core$List$map,
-					toTick,
-					toTicks(p)));
-		});
-};
-var $author$project$Internal$Svg$yTick = F3(
-	function (plane, config, point) {
-		return A4($author$project$Internal$Svg$tick, plane, config, false, point);
-	});
-var $author$project$Chart$Svg$yTick = F2(
-	function (plane, edits) {
-		return A2(
-			$author$project$Internal$Svg$yTick,
-			plane,
-			A2($author$project$Internal$Helpers$apply, edits, $author$project$Internal$Svg$defaultTick));
-	});
-var $author$project$Chart$yTicks = function (edits) {
-	var config = A2(
-		$author$project$Internal$Helpers$apply,
-		edits,
-		{amount: 5, color: '', flip: false, generate: $author$project$Internal$Svg$Floats, grid: true, height: 5, limits: _List_Nil, pinned: $author$project$Chart$Attributes$zero, width: 1});
-	var toTicks = function (p) {
-		return A2(
-			$elm$core$List$map,
-			function ($) {
-				return $.value;
-			},
-			A4(
-				$author$project$Chart$generateValues,
-				config.amount,
-				config.generate,
-				$elm$core$Maybe$Nothing,
-				A3(
-					$elm$core$List$foldl,
-					F2(
-						function (f, y) {
-							return f(y);
-						}),
-					p.y,
-					config.limits)));
-	};
-	var addTickValues = F2(
-		function (p, ts) {
-			return _Utils_update(
-				ts,
-				{
-					ys: _Utils_ap(
-						ts.ys,
-						toTicks(p))
-				});
-		});
-	return A2(
-		$author$project$Chart$TicksElement,
-		addTickValues,
-		function (p) {
-			var toTick = function (y) {
-				return A3(
-					$author$project$Chart$Svg$yTick,
-					p,
-					_List_fromArray(
-						[
-							$author$project$Chart$Attributes$color(config.color),
-							$author$project$Chart$Attributes$length(
-							config.flip ? (-config.height) : config.height),
-							$author$project$Chart$Attributes$width(config.width)
-						]),
-					{
-						x: config.pinned(p.x),
-						y: y
-					});
-			};
-			return A2(
-				$elm$svg$Svg$g,
-				_List_fromArray(
-					[
-						$elm$svg$Svg$Attributes$class('elm-charts__y-ticks')
-					]),
-				A2(
-					$elm$core$List$map,
-					toTick,
-					toTicks(p)));
-		});
-};
-var $author$project$Articles$GenderAndSalery$Bubble$viewMini = F2(
-	function (model, year) {
-		return A2(
-			$author$project$Chart$chart,
-			_List_fromArray(
-				[
-					$author$project$Chart$Attributes$height(100),
-					$author$project$Chart$Attributes$width(167),
-					$author$project$Chart$Attributes$padding(
-					{bottom: 0, left: 15, right: 15, top: 15}),
-					$author$project$Chart$Attributes$range(
-					_List_fromArray(
-						[
-							A2($author$project$Chart$Attributes$lowest, 20000, $author$project$Chart$Attributes$orHigher)
-						])),
-					$author$project$Chart$Attributes$domain(
-					_List_fromArray(
-						[
-							A2($author$project$Chart$Attributes$lowest, 76, $author$project$Chart$Attributes$orHigher)
-						]))
-				]),
-			_List_fromArray(
-				[
-					$author$project$Chart$grid(
-					_List_fromArray(
-						[
-							$author$project$Chart$Attributes$width(0.5)
-						])),
-					$author$project$Chart$xTicks(
-					_List_fromArray(
-						[
-							$author$project$Chart$Attributes$height(0),
-							$author$project$Chart$Attributes$amount(8)
-						])),
-					$author$project$Chart$yTicks(
-					_List_fromArray(
-						[
-							$author$project$Chart$Attributes$height(0),
-							$author$project$Chart$Attributes$amount(8)
-						])),
-					$author$project$Chart$line(
-					_List_fromArray(
-						[
-							$author$project$Chart$Attributes$dashed(
-							_List_fromArray(
-								[3, 3])),
-							$author$project$Chart$Attributes$y1(100),
-							$author$project$Chart$Attributes$width(0.5)
-						])),
-					function () {
-					var _v0 = model.window;
-					if (_v0.$ === 'Just') {
-						var select = _v0.a;
-						return $author$project$Chart$rect(
-							_List_fromArray(
-								[
-									$author$project$Chart$Attributes$color('#0000001F'),
-									$author$project$Chart$Attributes$borderWidth(0),
-									$author$project$Chart$Attributes$x1(select.x1),
-									$author$project$Chart$Attributes$x2(select.x2),
-									$author$project$Chart$Attributes$y1(select.y1),
-									$author$project$Chart$Attributes$y2(select.y2)
-								]));
-					} else {
-						return $author$project$Chart$none;
-					}
-				}(),
-					A5($author$project$Articles$GenderAndSalery$Bubble$salarySeries, model, year, 0.3, 3, 4000)
-				]));
-	});
-var $author$project$Chart$Attributes$x2Svg = F2(
-	function (v, config) {
-		return _Utils_update(
-			config,
-			{
-				x2Svg: $elm$core$Maybe$Just(v)
-			});
-	});
-var $author$project$Chart$Attributes$y2Svg = F2(
-	function (v, config) {
-		return _Utils_update(
-			config,
-			{
-				y2Svg: $elm$core$Maybe$Just(v)
-			});
-	});
-var $author$project$Articles$GenderAndSalery$Bubble$viewChart = F2(
-	function (model, year) {
-		return A2(
-			$author$project$Chart$chart,
-			_List_fromArray(
-				[
-					$author$project$Chart$Attributes$height(550),
-					$author$project$Chart$Attributes$width(1000),
-					$author$project$Chart$Attributes$margin(
-					{bottom: 20, left: 0, right: 0, top: 0}),
-					$author$project$Chart$Attributes$padding(
-					{bottom: 0, left: 15, right: 15, top: 30}),
-					$author$project$Chart$Attributes$range(
-					function () {
-						var _v0 = model.window;
-						if (_v0.$ === 'Just') {
-							var window = _v0.a;
-							return _List_fromArray(
-								[
-									A2($author$project$Chart$Attributes$lowest, window.x1, $author$project$Chart$Attributes$exactly),
-									A2($author$project$Chart$Attributes$highest, window.x2, $author$project$Chart$Attributes$exactly)
-								]);
-						} else {
-							return _List_fromArray(
-								[
-									A2($author$project$Chart$Attributes$lowest, 20000, $author$project$Chart$Attributes$orHigher)
-								]);
-						}
-					}()),
-					$author$project$Chart$Attributes$domain(
-					function () {
-						var _v1 = model.window;
-						if (_v1.$ === 'Just') {
-							var window = _v1.a;
-							return _List_fromArray(
-								[
-									A2($author$project$Chart$Attributes$lowest, window.y1, $author$project$Chart$Attributes$exactly),
-									A2($author$project$Chart$Attributes$highest, window.y2, $author$project$Chart$Attributes$exactly)
-								]);
-						} else {
-							return _List_fromArray(
-								[
-									A2($author$project$Chart$Attributes$lowest, 76, $author$project$Chart$Attributes$orHigher)
-								]);
-						}
-					}()),
-					A2(
-					$author$project$Chart$Events$on,
-					'mousemove',
-					A3(
-						$author$project$Chart$Events$map2,
-						$author$project$Articles$GenderAndSalery$Bubble$OnHover,
-						$author$project$Chart$Events$getNearest($author$project$Chart$Item$dots),
-						$author$project$Chart$Events$getCoords)),
-					A2($author$project$Chart$Events$onMouseDown, $author$project$Articles$GenderAndSalery$Bubble$OnMouseDown, $author$project$Chart$Events$getCoords),
-					A2($author$project$Chart$Events$onMouseUp, $author$project$Articles$GenderAndSalery$Bubble$OnMouseUp, $author$project$Chart$Events$getCoords),
-					$author$project$Chart$Events$onMouseLeave($author$project$Articles$GenderAndSalery$Bubble$OnReset),
-					$author$project$Chart$Attributes$htmlAttrs(
-					_List_fromArray(
-						[
-							A2($elm$html$Html$Attributes$style, 'cursor', 'crosshair')
-						]))
-				]),
-			_List_fromArray(
-				[
-					A5(
-					$author$project$Chart$generate,
-					10,
-					$author$project$Chart$Svg$ints,
-					function ($) {
-						return $.x;
-					},
-					_List_Nil,
-					F2(
-						function (p, t) {
-							return _List_fromArray(
-								[
-									A2(
-									$author$project$Chart$xLabel,
-									_List_fromArray(
-										[
-											$author$project$Chart$Attributes$alignLeft,
-											$author$project$Chart$Attributes$moveUp(22),
-											$author$project$Chart$Attributes$moveRight(7),
-											$author$project$Chart$Attributes$x(t),
-											$author$project$Chart$Attributes$withGrid,
-											(t === 20000) ? $author$project$Chart$Attributes$noGrid : $elm$core$Basics$identity
-										]),
-									_List_fromArray(
-										[
-											$elm$svg$Svg$text(
-											$elm$core$String$fromInt((t / 1000) | 0) + 'k')
-										]))
-								]);
-						})),
-					A5(
-					$author$project$Chart$generate,
-					8,
-					$author$project$Chart$Svg$ints,
-					function ($) {
-						return $.y;
-					},
-					_List_Nil,
-					F2(
-						function (p, t) {
-							return _List_fromArray(
-								[
-									A2(
-									$author$project$Chart$yLabel,
-									_List_fromArray(
-										[
-											$author$project$Chart$Attributes$alignLeft,
-											$author$project$Chart$Attributes$withGrid,
-											$author$project$Chart$Attributes$moveUp(10),
-											$author$project$Chart$Attributes$moveRight(10),
-											$author$project$Chart$Attributes$y(t),
-											(t === 100) ? $author$project$Chart$Attributes$noGrid : $elm$core$Basics$identity
-										]),
-									_List_fromArray(
-										[
-											$elm$svg$Svg$text(
-											$elm$core$String$fromInt(t))
-										]))
-								]);
-						})),
-					$author$project$Chart$withPlane(
-					function (p) {
-						return _List_fromArray(
-							[
-								A3(
-								$author$project$Chart$label,
-								_List_fromArray(
-									[
-										$author$project$Chart$Attributes$fontSize(12),
-										$author$project$Chart$Attributes$moveDown(17),
-										$author$project$Chart$Attributes$alignRight
-									]),
-								_List_fromArray(
-									[
-										$elm$svg$Svg$text('Average salary')
-									]),
-								{x: p.x.max, y: p.y.min}),
-								A3(
-								$author$project$Chart$label,
-								_List_fromArray(
-									[
-										$author$project$Chart$Attributes$fontSize(12),
-										$author$project$Chart$Attributes$moveLeft(12),
-										$author$project$Chart$Attributes$alignRight,
-										$author$project$Chart$Attributes$rotate(90)
-									]),
-								_List_fromArray(
-									[
-										$elm$svg$Svg$text('Womens % of mens salary')
-									]),
-								{x: p.x.min, y: p.y.max}),
-								$author$project$Chart$line(
-								_List_fromArray(
-									[
-										$author$project$Chart$Attributes$dashed(
-										_List_fromArray(
-											[4, 2])),
-										$author$project$Chart$Attributes$opacity(0.7),
-										$author$project$Chart$Attributes$color('#f56dbc'),
-										$author$project$Chart$Attributes$x1(
-										$author$project$Articles$GenderAndSalery$Data$avgSalaryWomen(year))
-									])),
-								$author$project$Chart$line(
-								_List_fromArray(
-									[
-										$author$project$Chart$Attributes$dashed(
-										_List_fromArray(
-											[4, 2])),
-										$author$project$Chart$Attributes$opacity(0.7),
-										$author$project$Chart$Attributes$color('#58a9f6'),
-										$author$project$Chart$Attributes$x1(
-										$author$project$Articles$GenderAndSalery$Data$avgSalaryMen(year))
-									]))
-							]);
-					}),
-					$author$project$Chart$line(
-					_List_fromArray(
-						[
-							$author$project$Chart$Attributes$dashed(
-							_List_fromArray(
-								[3, 3])),
-							$author$project$Chart$Attributes$y1(100)
-						])),
-					A5($author$project$Articles$GenderAndSalery$Bubble$salarySeries, model, year, 0.9, 5, 150),
-					$author$project$Chart$eachItem(
-					F2(
-						function (p, product) {
-							var top = A2($author$project$Chart$Item$getTop, p, product);
-							var datum = $author$project$Chart$Item$getData(product);
-							var color = $author$project$Chart$Item$getColor(product);
-							return A2($elm$core$String$startsWith, '251 ', datum.sector) ? _List_fromArray(
-								[
-									$author$project$Chart$line(
-									_List_fromArray(
-										[
-											$author$project$Chart$Attributes$color(color),
-											$author$project$Chart$Attributes$break,
-											$author$project$Chart$Attributes$x1(top.x),
-											$author$project$Chart$Attributes$y1(top.y),
-											$author$project$Chart$Attributes$x2Svg(10),
-											$author$project$Chart$Attributes$y2Svg(10)
-										])),
-									A3(
-									$author$project$Chart$label,
-									_List_fromArray(
-										[
-											$author$project$Chart$Attributes$color(color),
-											$author$project$Chart$Attributes$alignLeft,
-											$author$project$Chart$Attributes$moveRight(13),
-											$author$project$Chart$Attributes$moveUp(7)
-										]),
-									_List_fromArray(
-										[
-											$elm$svg$Svg$text('Software engineering')
-										]),
-									top)
-								]) : _List_Nil;
-						})),
-					function () {
-					var _v2 = model.window;
-					if (_v2.$ === 'Just') {
-						return A6(
-							$author$project$Chart$htmlAt,
-							function ($) {
-								return $.max;
-							},
-							function ($) {
-								return $.min;
-							},
-							-10,
-							20,
-							_List_fromArray(
-								[
-									A2($elm$html$Html$Attributes$style, 'transform', 'translate(-100%, -100%)'),
-									A2($elm$html$Html$Attributes$style, 'background', 'white'),
-									A2($elm$html$Html$Attributes$style, 'border', '1px solid rgb(210, 210, 210)'),
-									A2($elm$html$Html$Attributes$style, 'cursor', 'pointer'),
-									A2($elm$html$Html$Attributes$style, 'width', '167px'),
-									$elm$html$Html$Events$onClick($author$project$Articles$GenderAndSalery$Bubble$OnExitWindow)
-								]),
-							_List_fromArray(
-								[
-									A2($author$project$Articles$GenderAndSalery$Bubble$viewMini, model, year),
-									A2(
-									$elm$html$Html$button,
-									_List_fromArray(
-										[
-											A2($elm$html$Html$Attributes$style, 'position', 'absolute'),
-											A2($elm$html$Html$Attributes$style, 'top', '0'),
-											A2($elm$html$Html$Attributes$style, 'right', '0'),
-											A2($elm$html$Html$Attributes$style, 'background', 'transparent'),
-											A2($elm$html$Html$Attributes$style, 'color', 'rgb(100, 100, 100)'),
-											A2($elm$html$Html$Attributes$style, 'border', '0'),
-											A2($elm$html$Html$Attributes$style, 'height', '30px'),
-											A2($elm$html$Html$Attributes$style, 'width', '30px'),
-											A2($elm$html$Html$Attributes$style, 'padding', '0'),
-											A2($elm$html$Html$Attributes$style, 'margin', '0'),
-											A2($elm$html$Html$Attributes$style, 'cursor', 'pointer')
-										]),
-									_List_fromArray(
-										[
-											A2(
-											$elm$html$Html$span,
-											_List_fromArray(
-												[
-													A2($elm$html$Html$Attributes$style, 'font-size', '28px'),
-													A2($elm$html$Html$Attributes$style, 'position', 'absolute'),
-													A2($elm$html$Html$Attributes$style, 'top', '40%'),
-													A2($elm$html$Html$Attributes$style, 'left', '50%'),
-													A2($elm$html$Html$Attributes$style, 'transform', 'translate(-50%, -50%)'),
-													A2($elm$html$Html$Attributes$style, 'line-height', '10px')
-												]),
-											_List_fromArray(
-												[
-													$elm$html$Html$text('⨯')
-												]))
-										]))
-								]));
-					} else {
-						return $author$project$Chart$none;
-					}
-				}(),
-					A2(
-					$author$project$Chart$each,
-					model.hovering,
-					F2(
-						function (p, item) {
-							return _List_fromArray(
-								[
-									A4(
-									$author$project$Chart$tooltip,
-									item,
-									_List_Nil,
-									_List_Nil,
-									_List_fromArray(
-										[
-											$author$project$Articles$GenderAndSalery$Bubble$tooltipContent(item)
-										]))
-								]);
-						})),
-					function () {
-					var _v3 = model.selection;
-					if (_v3.$ === 'Just') {
-						var select = _v3.a;
-						return $author$project$Chart$rect(
-							_List_fromArray(
-								[
-									$author$project$Chart$Attributes$opacity(0.5),
-									$author$project$Chart$Attributes$x1(select.a.x),
-									$author$project$Chart$Attributes$x2(select.b.x),
-									$author$project$Chart$Attributes$y1(select.a.y),
-									$author$project$Chart$Attributes$y2(select.b.y)
-								]));
-					} else {
-						return $author$project$Chart$none;
-					}
-				}()
-				]));
-	});
-var $author$project$Articles$GenderAndSalery$Bubble$view = F2(
-	function (model, year) {
-		return A2(
-			$mdgriffith$elm_ui$Element$column,
-			_List_fromArray(
-				[
-					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-					$mdgriffith$elm_ui$Element$spacing(30)
-				]),
-			_List_fromArray(
-				[
-					A2(
-					$mdgriffith$elm_ui$Element$row,
-					_List_fromArray(
-						[
-							$mdgriffith$elm_ui$Element$spacing(20),
-							$mdgriffith$elm_ui$Element$Font$size(12),
-							$mdgriffith$elm_ui$Element$Font$bold
-						]),
-					function () {
-						var circle = F3(
-							function (color, a, b) {
-								return A2(
-									$mdgriffith$elm_ui$Element$row,
-									_List_fromArray(
-										[
-											$mdgriffith$elm_ui$Element$spacing(5)
-										]),
-									_List_fromArray(
-										[
-											A2(
-											$mdgriffith$elm_ui$Element$el,
-											_List_fromArray(
-												[
-													$mdgriffith$elm_ui$Element$Background$color(
-													color(0.4)),
-													$mdgriffith$elm_ui$Element$Border$color(
-													color(1)),
-													$mdgriffith$elm_ui$Element$Border$width(1),
-													$mdgriffith$elm_ui$Element$Border$rounded(50),
-													$mdgriffith$elm_ui$Element$width(
-													$mdgriffith$elm_ui$Element$px(10)),
-													$mdgriffith$elm_ui$Element$height(
-													$mdgriffith$elm_ui$Element$px(10))
-												]),
-											$mdgriffith$elm_ui$Element$none),
-											$mdgriffith$elm_ui$Element$text(
-											$elm$core$String$fromInt(a) + (' - ' + ($elm$core$String$fromInt(b) + '%')))
-										]));
-							});
-						return _List_fromArray(
-							[
-								$mdgriffith$elm_ui$Element$text('Percentage of women in sector\'s workforce: '),
-								A3(
-								circle,
-								A3($mdgriffith$elm_ui$Element$rgba255, 88, 169, 246),
-								0,
-								20),
-								A3(
-								circle,
-								A3($mdgriffith$elm_ui$Element$rgba255, 138, 145, 247),
-								20,
-								40),
-								A3(
-								circle,
-								A3($mdgriffith$elm_ui$Element$rgba255, 197, 121, 242),
-								40,
-								60),
-								A3(
-								circle,
-								A3($mdgriffith$elm_ui$Element$rgba255, 222, 116, 215),
-								60,
-								80),
-								A3(
-								circle,
-								A3($mdgriffith$elm_ui$Element$rgba255, 245, 109, 188),
-								80,
-								100)
-							]);
-					}()),
-					A2(
-					$mdgriffith$elm_ui$Element$el,
-					_List_fromArray(
-						[
-							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
-						]),
-					$mdgriffith$elm_ui$Element$html(
-						A2($author$project$Articles$GenderAndSalery$Bubble$viewChart, model, year)))
-				]));
-	});
-var $author$project$Articles$GenderAndSalery$EducationChart$OnEducation = F2(
-	function (a, b) {
-		return {$: 'OnEducation', a: a, b: b};
-	});
-var $author$project$Articles$GenderAndSalery$EducationChart$OnHover = function (a) {
-	return {$: 'OnHover', a: a};
-};
-var $author$project$Articles$GenderAndSalery$EducationChart$OnStackingOption = function (a) {
-	return {$: 'OnStackingOption', a: a};
-};
-var $author$project$Articles$GenderAndSalery$EducationChart$Seperate = {$: 'Seperate'};
-var $mdgriffith$elm_ui$Element$Input$tabindex = A2($elm$core$Basics$composeL, $mdgriffith$elm_ui$Internal$Model$Attr, $elm$html$Html$Attributes$tabindex);
-var $mdgriffith$elm_ui$Element$Input$checkbox = F2(
-	function (attrs, _v0) {
-		var label = _v0.label;
-		var icon = _v0.icon;
-		var checked = _v0.checked;
-		var onChange = _v0.onChange;
-		var attributes = _Utils_ap(
-			_List_fromArray(
-				[
-					$mdgriffith$elm_ui$Element$Input$isHiddenLabel(label) ? $mdgriffith$elm_ui$Internal$Model$NoAttribute : $mdgriffith$elm_ui$Element$spacing(6),
-					$mdgriffith$elm_ui$Internal$Model$Attr(
-					$elm$html$Html$Events$onClick(
-						onChange(!checked))),
-					$mdgriffith$elm_ui$Element$Region$announce,
-					$mdgriffith$elm_ui$Element$Input$onKeyLookup(
-					function (code) {
-						return _Utils_eq(code, $mdgriffith$elm_ui$Element$Input$enter) ? $elm$core$Maybe$Just(
-							onChange(!checked)) : (_Utils_eq(code, $mdgriffith$elm_ui$Element$Input$space) ? $elm$core$Maybe$Just(
-							onChange(!checked)) : $elm$core$Maybe$Nothing);
-					}),
-					$mdgriffith$elm_ui$Element$Input$tabindex(0),
-					$mdgriffith$elm_ui$Element$pointer,
-					$mdgriffith$elm_ui$Element$alignLeft,
-					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
-				]),
-			attrs);
-		return A3(
-			$mdgriffith$elm_ui$Element$Input$applyLabel,
-			A2(
-				$elm$core$List$cons,
-				$mdgriffith$elm_ui$Internal$Model$Attr(
-					A2($elm$html$Html$Attributes$attribute, 'role', 'checkbox')),
-				A2(
-					$elm$core$List$cons,
-					$mdgriffith$elm_ui$Internal$Model$Attr(
-						A2(
-							$elm$html$Html$Attributes$attribute,
-							'aria-checked',
-							checked ? 'true' : 'false')),
-					A2(
-						$elm$core$List$cons,
-						$mdgriffith$elm_ui$Element$Input$hiddenLabelAttribute(label),
-						attributes))),
-			label,
-			A4(
-				$mdgriffith$elm_ui$Internal$Model$element,
-				$mdgriffith$elm_ui$Internal$Model$asEl,
-				$mdgriffith$elm_ui$Internal$Model$div,
-				_List_fromArray(
-					[
-						$mdgriffith$elm_ui$Element$centerY,
-						$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
-						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink)
-					]),
-				$mdgriffith$elm_ui$Internal$Model$Unkeyed(
-					_List_fromArray(
-						[
-							icon(checked)
-						]))));
-	});
-var $mdgriffith$elm_ui$Internal$Flag$fontAlignment = $mdgriffith$elm_ui$Internal$Flag$flag(12);
-var $mdgriffith$elm_ui$Element$Font$center = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$fontAlignment, $mdgriffith$elm_ui$Internal$Style$classes.textCenter);
-var $mdgriffith$elm_ui$Internal$Model$InFront = {$: 'InFront'};
-var $mdgriffith$elm_ui$Element$inFront = function (element) {
-	return A2($mdgriffith$elm_ui$Element$createNearby, $mdgriffith$elm_ui$Internal$Model$InFront, element);
-};
-var $mdgriffith$elm_ui$Internal$Model$MoveY = function (a) {
-	return {$: 'MoveY', a: a};
-};
-var $mdgriffith$elm_ui$Internal$Flag$moveY = $mdgriffith$elm_ui$Internal$Flag$flag(26);
-var $mdgriffith$elm_ui$Element$moveUp = function (y) {
-	return A2(
-		$mdgriffith$elm_ui$Internal$Model$TransformComponent,
-		$mdgriffith$elm_ui$Internal$Flag$moveY,
-		$mdgriffith$elm_ui$Internal$Model$MoveY(-y));
-};
-var $mdgriffith$elm_ui$Element$rgb = F3(
-	function (r, g, b) {
-		return A4($mdgriffith$elm_ui$Internal$Model$Rgba, r, g, b, 1);
-	});
-var $mdgriffith$elm_ui$Element$rgba = $mdgriffith$elm_ui$Internal$Model$Rgba;
-var $mdgriffith$elm_ui$Internal$Model$Rotate = F2(
-	function (a, b) {
-		return {$: 'Rotate', a: a, b: b};
-	});
-var $mdgriffith$elm_ui$Internal$Flag$rotate = $mdgriffith$elm_ui$Internal$Flag$flag(24);
-var $mdgriffith$elm_ui$Element$rotate = function (angle) {
-	return A2(
-		$mdgriffith$elm_ui$Internal$Model$TransformComponent,
-		$mdgriffith$elm_ui$Internal$Flag$rotate,
-		A2(
-			$mdgriffith$elm_ui$Internal$Model$Rotate,
-			_Utils_Tuple3(0, 0, 1),
-			angle));
-};
-var $mdgriffith$elm_ui$Internal$Model$boxShadowClass = function (shadow) {
-	return $elm$core$String$concat(
-		_List_fromArray(
-			[
-				shadow.inset ? 'box-inset' : 'box-',
-				$mdgriffith$elm_ui$Internal$Model$floatClass(shadow.offset.a) + 'px',
-				$mdgriffith$elm_ui$Internal$Model$floatClass(shadow.offset.b) + 'px',
-				$mdgriffith$elm_ui$Internal$Model$floatClass(shadow.blur) + 'px',
-				$mdgriffith$elm_ui$Internal$Model$floatClass(shadow.size) + 'px',
-				$mdgriffith$elm_ui$Internal$Model$formatColorClass(shadow.color)
-			]));
-};
-var $mdgriffith$elm_ui$Internal$Flag$shadows = $mdgriffith$elm_ui$Internal$Flag$flag(19);
-var $mdgriffith$elm_ui$Element$Border$shadow = function (almostShade) {
-	var shade = {blur: almostShade.blur, color: almostShade.color, inset: false, offset: almostShade.offset, size: almostShade.size};
-	return A2(
-		$mdgriffith$elm_ui$Internal$Model$StyleClass,
-		$mdgriffith$elm_ui$Internal$Flag$shadows,
-		A3(
-			$mdgriffith$elm_ui$Internal$Model$Single,
-			$mdgriffith$elm_ui$Internal$Model$boxShadowClass(shade),
-			'box-shadow',
-			$mdgriffith$elm_ui$Internal$Model$formatBoxShadow(shade)));
-};
-var $mdgriffith$elm_ui$Internal$Model$Transparency = F2(
-	function (a, b) {
-		return {$: 'Transparency', a: a, b: b};
-	});
-var $mdgriffith$elm_ui$Internal$Flag$transparency = $mdgriffith$elm_ui$Internal$Flag$flag(0);
-var $mdgriffith$elm_ui$Element$transparent = function (on) {
-	return on ? A2(
-		$mdgriffith$elm_ui$Internal$Model$StyleClass,
-		$mdgriffith$elm_ui$Internal$Flag$transparency,
-		A2($mdgriffith$elm_ui$Internal$Model$Transparency, 'transparent', 1.0)) : A2(
-		$mdgriffith$elm_ui$Internal$Model$StyleClass,
-		$mdgriffith$elm_ui$Internal$Flag$transparency,
-		A2($mdgriffith$elm_ui$Internal$Model$Transparency, 'visible', 0.0));
-};
-var $mdgriffith$elm_ui$Element$Input$white = A3($mdgriffith$elm_ui$Element$rgb, 1, 1, 1);
-var $mdgriffith$elm_ui$Element$Border$widthXY = F2(
-	function (x, y) {
-		return A2(
-			$mdgriffith$elm_ui$Internal$Model$StyleClass,
-			$mdgriffith$elm_ui$Internal$Flag$borderWidth,
-			A5(
-				$mdgriffith$elm_ui$Internal$Model$BorderWidth,
-				'b-' + ($elm$core$String$fromInt(x) + ('-' + $elm$core$String$fromInt(y))),
-				y,
-				x,
-				y,
-				x));
-	});
-var $mdgriffith$elm_ui$Element$Border$widthEach = function (_v0) {
-	var bottom = _v0.bottom;
-	var top = _v0.top;
-	var left = _v0.left;
-	var right = _v0.right;
-	return (_Utils_eq(top, bottom) && _Utils_eq(left, right)) ? (_Utils_eq(top, right) ? $mdgriffith$elm_ui$Element$Border$width(top) : A2($mdgriffith$elm_ui$Element$Border$widthXY, left, top)) : A2(
-		$mdgriffith$elm_ui$Internal$Model$StyleClass,
-		$mdgriffith$elm_ui$Internal$Flag$borderWidth,
-		A5(
-			$mdgriffith$elm_ui$Internal$Model$BorderWidth,
-			'b-' + ($elm$core$String$fromInt(top) + ('-' + ($elm$core$String$fromInt(right) + ('-' + ($elm$core$String$fromInt(bottom) + ('-' + $elm$core$String$fromInt(left))))))),
-			top,
-			right,
-			bottom,
-			left));
-};
-var $mdgriffith$elm_ui$Element$Input$defaultCheckbox = function (checked) {
-	return A2(
-		$mdgriffith$elm_ui$Element$el,
-		_List_fromArray(
-			[
-				$mdgriffith$elm_ui$Internal$Model$htmlClass('focusable'),
-				$mdgriffith$elm_ui$Element$width(
-				$mdgriffith$elm_ui$Element$px(14)),
-				$mdgriffith$elm_ui$Element$height(
-				$mdgriffith$elm_ui$Element$px(14)),
-				$mdgriffith$elm_ui$Element$Font$color($mdgriffith$elm_ui$Element$Input$white),
-				$mdgriffith$elm_ui$Element$centerY,
-				$mdgriffith$elm_ui$Element$Font$size(9),
-				$mdgriffith$elm_ui$Element$Font$center,
-				$mdgriffith$elm_ui$Element$Border$rounded(3),
-				$mdgriffith$elm_ui$Element$Border$color(
-				checked ? A3($mdgriffith$elm_ui$Element$rgb, 59 / 255, 153 / 255, 252 / 255) : A3($mdgriffith$elm_ui$Element$rgb, 211 / 255, 211 / 255, 211 / 255)),
-				$mdgriffith$elm_ui$Element$Border$shadow(
-				{
-					blur: 1,
-					color: checked ? A4($mdgriffith$elm_ui$Element$rgba, 238 / 255, 238 / 255, 238 / 255, 0) : A3($mdgriffith$elm_ui$Element$rgb, 238 / 255, 238 / 255, 238 / 255),
-					offset: _Utils_Tuple2(0, 0),
-					size: 1
-				}),
-				$mdgriffith$elm_ui$Element$Background$color(
-				checked ? A3($mdgriffith$elm_ui$Element$rgb, 59 / 255, 153 / 255, 252 / 255) : $mdgriffith$elm_ui$Element$Input$white),
-				$mdgriffith$elm_ui$Element$Border$width(
-				checked ? 0 : 1),
-				$mdgriffith$elm_ui$Element$inFront(
-				A2(
-					$mdgriffith$elm_ui$Element$el,
-					_List_fromArray(
-						[
-							$mdgriffith$elm_ui$Element$Border$color($mdgriffith$elm_ui$Element$Input$white),
-							$mdgriffith$elm_ui$Element$height(
-							$mdgriffith$elm_ui$Element$px(6)),
-							$mdgriffith$elm_ui$Element$width(
-							$mdgriffith$elm_ui$Element$px(9)),
-							$mdgriffith$elm_ui$Element$rotate(
-							$elm$core$Basics$degrees(-45)),
-							$mdgriffith$elm_ui$Element$centerX,
-							$mdgriffith$elm_ui$Element$centerY,
-							$mdgriffith$elm_ui$Element$moveUp(1),
-							$mdgriffith$elm_ui$Element$transparent(!checked),
-							$mdgriffith$elm_ui$Element$Border$widthEach(
-							{bottom: 2, left: 2, right: 0, top: 0})
-						]),
-					$mdgriffith$elm_ui$Element$none))
-			]),
-		$mdgriffith$elm_ui$Element$none);
-};
-var $mdgriffith$elm_ui$Element$Input$HiddenLabel = function (a) {
-	return {$: 'HiddenLabel', a: a};
-};
-var $mdgriffith$elm_ui$Element$Input$labelHidden = $mdgriffith$elm_ui$Element$Input$HiddenLabel;
-var $mdgriffith$elm_ui$Element$Input$OnRight = {$: 'OnRight'};
-var $mdgriffith$elm_ui$Element$Input$labelRight = $mdgriffith$elm_ui$Element$Input$Label($mdgriffith$elm_ui$Element$Input$OnRight);
-var $mdgriffith$elm_ui$Element$Input$Option = F2(
-	function (a, b) {
-		return {$: 'Option', a: a, b: b};
-	});
-var $mdgriffith$elm_ui$Element$Input$defaultRadioOption = F2(
-	function (optionLabel, status) {
-		return A2(
-			$mdgriffith$elm_ui$Element$row,
-			_List_fromArray(
-				[
-					$mdgriffith$elm_ui$Element$spacing(10),
-					$mdgriffith$elm_ui$Element$alignLeft,
-					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink)
-				]),
-			_List_fromArray(
-				[
-					A2(
-					$mdgriffith$elm_ui$Element$el,
-					_List_fromArray(
-						[
-							$mdgriffith$elm_ui$Element$width(
-							$mdgriffith$elm_ui$Element$px(14)),
-							$mdgriffith$elm_ui$Element$height(
-							$mdgriffith$elm_ui$Element$px(14)),
-							$mdgriffith$elm_ui$Element$Background$color($mdgriffith$elm_ui$Element$Input$white),
-							$mdgriffith$elm_ui$Element$Border$rounded(7),
-							function () {
-							if (status.$ === 'Selected') {
-								return $mdgriffith$elm_ui$Internal$Model$htmlClass('focusable');
-							} else {
-								return $mdgriffith$elm_ui$Internal$Model$NoAttribute;
-							}
-						}(),
-							$mdgriffith$elm_ui$Element$Border$width(
-							function () {
-								switch (status.$) {
-									case 'Idle':
-										return 1;
-									case 'Focused':
-										return 1;
-									default:
-										return 5;
-								}
-							}()),
-							$mdgriffith$elm_ui$Element$Border$color(
-							function () {
-								switch (status.$) {
-									case 'Idle':
-										return A3($mdgriffith$elm_ui$Element$rgb, 208 / 255, 208 / 255, 208 / 255);
-									case 'Focused':
-										return A3($mdgriffith$elm_ui$Element$rgb, 208 / 255, 208 / 255, 208 / 255);
-									default:
-										return A3($mdgriffith$elm_ui$Element$rgb, 59 / 255, 153 / 255, 252 / 255);
-								}
-							}())
-						]),
-					$mdgriffith$elm_ui$Element$none),
-					A2(
-					$mdgriffith$elm_ui$Element$el,
-					_List_fromArray(
-						[
-							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-							$mdgriffith$elm_ui$Internal$Model$htmlClass('unfocusable')
-						]),
-					optionLabel)
-				]));
-	});
-var $mdgriffith$elm_ui$Element$Input$option = F2(
-	function (val, txt) {
-		return A2(
-			$mdgriffith$elm_ui$Element$Input$Option,
-			val,
-			$mdgriffith$elm_ui$Element$Input$defaultRadioOption(txt));
-	});
-var $mdgriffith$elm_ui$Element$padding = function (x) {
-	var f = x;
-	return A2(
-		$mdgriffith$elm_ui$Internal$Model$StyleClass,
-		$mdgriffith$elm_ui$Internal$Flag$padding,
-		A5(
-			$mdgriffith$elm_ui$Internal$Model$PaddingStyle,
-			'p-' + $elm$core$String$fromInt(x),
-			f,
-			f,
-			f,
-			f));
-};
-var $mdgriffith$elm_ui$Element$Input$Row = {$: 'Row'};
-var $mdgriffith$elm_ui$Element$Input$AfterFound = {$: 'AfterFound'};
-var $mdgriffith$elm_ui$Element$Input$BeforeFound = {$: 'BeforeFound'};
-var $mdgriffith$elm_ui$Element$Input$Idle = {$: 'Idle'};
-var $mdgriffith$elm_ui$Element$Input$NotFound = {$: 'NotFound'};
-var $mdgriffith$elm_ui$Element$Input$Selected = {$: 'Selected'};
-var $mdgriffith$elm_ui$Element$Input$column = F2(
-	function (attributes, children) {
-		return A4(
-			$mdgriffith$elm_ui$Internal$Model$element,
-			$mdgriffith$elm_ui$Internal$Model$asColumn,
-			$mdgriffith$elm_ui$Internal$Model$div,
-			A2(
-				$elm$core$List$cons,
-				$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
-				A2(
-					$elm$core$List$cons,
-					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-					attributes)),
-			$mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
-	});
-var $mdgriffith$elm_ui$Element$Input$downArrow = 'ArrowDown';
-var $mdgriffith$elm_ui$Internal$Model$filter = function (attrs) {
-	return A3(
-		$elm$core$List$foldr,
-		F2(
-			function (x, _v0) {
-				var found = _v0.a;
-				var has = _v0.b;
-				switch (x.$) {
-					case 'NoAttribute':
-						return _Utils_Tuple2(found, has);
-					case 'Class':
-						var key = x.a;
-						return _Utils_Tuple2(
-							A2($elm$core$List$cons, x, found),
-							has);
-					case 'Attr':
-						var attr = x.a;
-						return _Utils_Tuple2(
-							A2($elm$core$List$cons, x, found),
-							has);
-					case 'StyleClass':
-						var style = x.b;
-						return _Utils_Tuple2(
-							A2($elm$core$List$cons, x, found),
-							has);
-					case 'Width':
-						var width = x.a;
-						return A2($elm$core$Set$member, 'width', has) ? _Utils_Tuple2(found, has) : _Utils_Tuple2(
-							A2($elm$core$List$cons, x, found),
-							A2($elm$core$Set$insert, 'width', has));
-					case 'Height':
-						var height = x.a;
-						return A2($elm$core$Set$member, 'height', has) ? _Utils_Tuple2(found, has) : _Utils_Tuple2(
-							A2($elm$core$List$cons, x, found),
-							A2($elm$core$Set$insert, 'height', has));
-					case 'Describe':
-						var description = x.a;
-						return A2($elm$core$Set$member, 'described', has) ? _Utils_Tuple2(found, has) : _Utils_Tuple2(
-							A2($elm$core$List$cons, x, found),
-							A2($elm$core$Set$insert, 'described', has));
-					case 'Nearby':
-						var location = x.a;
-						var elem = x.b;
-						return _Utils_Tuple2(
-							A2($elm$core$List$cons, x, found),
-							has);
-					case 'AlignX':
-						return A2($elm$core$Set$member, 'align-x', has) ? _Utils_Tuple2(found, has) : _Utils_Tuple2(
-							A2($elm$core$List$cons, x, found),
-							A2($elm$core$Set$insert, 'align-x', has));
-					case 'AlignY':
-						return A2($elm$core$Set$member, 'align-y', has) ? _Utils_Tuple2(found, has) : _Utils_Tuple2(
-							A2($elm$core$List$cons, x, found),
-							A2($elm$core$Set$insert, 'align-y', has));
-					default:
-						return A2($elm$core$Set$member, 'transform', has) ? _Utils_Tuple2(found, has) : _Utils_Tuple2(
-							A2($elm$core$List$cons, x, found),
-							A2($elm$core$Set$insert, 'transform', has));
-				}
-			}),
-		_Utils_Tuple2(_List_Nil, $elm$core$Set$empty),
-		attrs).a;
-};
-var $mdgriffith$elm_ui$Internal$Model$get = F2(
-	function (attrs, isAttr) {
-		return A3(
-			$elm$core$List$foldr,
-			F2(
-				function (x, found) {
-					return isAttr(x) ? A2($elm$core$List$cons, x, found) : found;
-				}),
-			_List_Nil,
-			$mdgriffith$elm_ui$Internal$Model$filter(attrs));
-	});
-var $mdgriffith$elm_ui$Element$Input$leftArrow = 'ArrowLeft';
-var $mdgriffith$elm_ui$Element$Input$rightArrow = 'ArrowRight';
-var $mdgriffith$elm_ui$Element$Input$row = F2(
-	function (attributes, children) {
-		return A4(
-			$mdgriffith$elm_ui$Internal$Model$element,
-			$mdgriffith$elm_ui$Internal$Model$asRow,
-			$mdgriffith$elm_ui$Internal$Model$div,
-			A2(
-				$elm$core$List$cons,
-				$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-				attributes),
-			$mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
-	});
-var $mdgriffith$elm_ui$Element$Input$upArrow = 'ArrowUp';
-var $mdgriffith$elm_ui$Element$Input$radioHelper = F3(
-	function (orientation, attrs, input) {
-		var track = F2(
-			function (opt, _v14) {
-				var found = _v14.a;
-				var prev = _v14.b;
-				var nxt = _v14.c;
-				var val = opt.a;
-				switch (found.$) {
-					case 'NotFound':
-						return _Utils_eq(
-							$elm$core$Maybe$Just(val),
-							input.selected) ? _Utils_Tuple3($mdgriffith$elm_ui$Element$Input$BeforeFound, prev, nxt) : _Utils_Tuple3(found, val, nxt);
-					case 'BeforeFound':
-						return _Utils_Tuple3($mdgriffith$elm_ui$Element$Input$AfterFound, prev, val);
-					default:
-						return _Utils_Tuple3(found, prev, nxt);
-				}
-			});
-		var renderOption = function (_v11) {
-			var val = _v11.a;
-			var view = _v11.b;
-			var status = _Utils_eq(
-				$elm$core$Maybe$Just(val),
-				input.selected) ? $mdgriffith$elm_ui$Element$Input$Selected : $mdgriffith$elm_ui$Element$Input$Idle;
-			return A2(
-				$mdgriffith$elm_ui$Element$el,
-				_List_fromArray(
-					[
-						$mdgriffith$elm_ui$Element$pointer,
-						function () {
-						if (orientation.$ === 'Row') {
-							return $mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink);
-						} else {
-							return $mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill);
-						}
-					}(),
-						$mdgriffith$elm_ui$Element$Events$onClick(
-						input.onChange(val)),
-						function () {
-						if (status.$ === 'Selected') {
-							return $mdgriffith$elm_ui$Internal$Model$Attr(
-								A2($elm$html$Html$Attributes$attribute, 'aria-checked', 'true'));
-						} else {
-							return $mdgriffith$elm_ui$Internal$Model$Attr(
-								A2($elm$html$Html$Attributes$attribute, 'aria-checked', 'false'));
-						}
-					}(),
-						$mdgriffith$elm_ui$Internal$Model$Attr(
-						A2($elm$html$Html$Attributes$attribute, 'role', 'radio'))
-					]),
-				view(status));
-		};
-		var prevNext = function () {
-			var _v5 = input.options;
-			if (!_v5.b) {
-				return $elm$core$Maybe$Nothing;
-			} else {
-				var _v6 = _v5.a;
-				var val = _v6.a;
-				return function (_v7) {
-					var found = _v7.a;
-					var b = _v7.b;
-					var a = _v7.c;
-					switch (found.$) {
-						case 'NotFound':
-							return $elm$core$Maybe$Just(
-								_Utils_Tuple2(b, val));
-						case 'BeforeFound':
-							return $elm$core$Maybe$Just(
-								_Utils_Tuple2(b, val));
-						default:
-							return $elm$core$Maybe$Just(
-								_Utils_Tuple2(b, a));
-					}
-				}(
-					A3(
-						$elm$core$List$foldl,
-						track,
-						_Utils_Tuple3($mdgriffith$elm_ui$Element$Input$NotFound, val, val),
-						input.options));
-			}
-		}();
-		var optionArea = function () {
-			if (orientation.$ === 'Row') {
-				return A2(
-					$mdgriffith$elm_ui$Element$Input$row,
-					A2(
-						$elm$core$List$cons,
-						$mdgriffith$elm_ui$Element$Input$hiddenLabelAttribute(input.label),
-						attrs),
-					A2($elm$core$List$map, renderOption, input.options));
-			} else {
-				return A2(
-					$mdgriffith$elm_ui$Element$Input$column,
-					A2(
-						$elm$core$List$cons,
-						$mdgriffith$elm_ui$Element$Input$hiddenLabelAttribute(input.label),
-						attrs),
-					A2($elm$core$List$map, renderOption, input.options));
-			}
-		}();
-		var events = A2(
-			$mdgriffith$elm_ui$Internal$Model$get,
-			attrs,
-			function (attr) {
-				_v3$3:
-				while (true) {
-					switch (attr.$) {
-						case 'Width':
-							if (attr.a.$ === 'Fill') {
-								return true;
-							} else {
-								break _v3$3;
-							}
-						case 'Height':
-							if (attr.a.$ === 'Fill') {
-								return true;
-							} else {
-								break _v3$3;
-							}
-						case 'Attr':
-							return true;
-						default:
-							break _v3$3;
-					}
-				}
-				return false;
-			});
-		return A3(
-			$mdgriffith$elm_ui$Element$Input$applyLabel,
-			_Utils_ap(
-				A2(
-					$elm$core$List$filterMap,
-					$elm$core$Basics$identity,
-					_List_fromArray(
-						[
-							$elm$core$Maybe$Just($mdgriffith$elm_ui$Element$alignLeft),
-							$elm$core$Maybe$Just(
-							$mdgriffith$elm_ui$Element$Input$tabindex(0)),
-							$elm$core$Maybe$Just(
-							$mdgriffith$elm_ui$Internal$Model$htmlClass('focus')),
-							$elm$core$Maybe$Just($mdgriffith$elm_ui$Element$Region$announce),
-							$elm$core$Maybe$Just(
-							$mdgriffith$elm_ui$Internal$Model$Attr(
-								A2($elm$html$Html$Attributes$attribute, 'role', 'radiogroup'))),
-							function () {
-							if (prevNext.$ === 'Nothing') {
-								return $elm$core$Maybe$Nothing;
-							} else {
-								var _v1 = prevNext.a;
-								var prev = _v1.a;
-								var next = _v1.b;
-								return $elm$core$Maybe$Just(
-									$mdgriffith$elm_ui$Element$Input$onKeyLookup(
-										function (code) {
-											if (_Utils_eq(code, $mdgriffith$elm_ui$Element$Input$leftArrow)) {
-												return $elm$core$Maybe$Just(
-													input.onChange(prev));
-											} else {
-												if (_Utils_eq(code, $mdgriffith$elm_ui$Element$Input$upArrow)) {
-													return $elm$core$Maybe$Just(
-														input.onChange(prev));
-												} else {
-													if (_Utils_eq(code, $mdgriffith$elm_ui$Element$Input$rightArrow)) {
-														return $elm$core$Maybe$Just(
-															input.onChange(next));
-													} else {
-														if (_Utils_eq(code, $mdgriffith$elm_ui$Element$Input$downArrow)) {
-															return $elm$core$Maybe$Just(
-																input.onChange(next));
-														} else {
-															if (_Utils_eq(code, $mdgriffith$elm_ui$Element$Input$space)) {
-																var _v2 = input.selected;
-																if (_v2.$ === 'Nothing') {
-																	return $elm$core$Maybe$Just(
-																		input.onChange(prev));
-																} else {
-																	return $elm$core$Maybe$Nothing;
-																}
-															} else {
-																return $elm$core$Maybe$Nothing;
-															}
-														}
-													}
-												}
-											}
-										}));
-							}
-						}()
-						])),
-				events),
-			input.label,
-			optionArea);
-	});
-var $mdgriffith$elm_ui$Element$Input$radioRow = $mdgriffith$elm_ui$Element$Input$radioHelper($mdgriffith$elm_ui$Element$Input$Row);
-var $author$project$Chart$Item$getBottom = function (p) {
-	return A2(
-		$elm$core$Basics$composeR,
-		$author$project$Internal$Item$getPosition(p),
-		$author$project$Internal$Coordinates$bottom);
-};
-var $author$project$Chart$defaultLabel = {anchor: $author$project$Internal$Svg$defaultLabel.anchor, attrs: $author$project$Internal$Svg$defaultLabel.attrs, border: $author$project$Internal$Svg$defaultLabel.border, borderWidth: $author$project$Internal$Svg$defaultLabel.borderWidth, color: $author$project$Internal$Svg$defaultLabel.color, fontSize: $author$project$Internal$Svg$defaultLabel.fontSize, format: $elm$core$Maybe$Nothing, position: $author$project$Chart$Item$getBottom, rotate: $author$project$Internal$Svg$defaultLabel.rotate, uppercase: $author$project$Internal$Svg$defaultLabel.uppercase, xOff: $author$project$Internal$Svg$defaultLabel.xOff, yOff: $author$project$Internal$Svg$defaultLabel.yOff};
-var $author$project$Chart$eachCustom = F2(
-	function (grouping, func) {
-		return $author$project$Chart$SubElements(
-			F2(
-				function (p, items) {
-					var processed = A2($author$project$Chart$Item$apply, grouping, items);
-					return A2(
-						$elm$core$List$concatMap,
-						func(p),
-						processed);
-				}));
-	});
-var $author$project$Internal$Many$getData = function (_v0) {
-	var group_ = _v0.a;
-	return function (_v1) {
-		var x = _v1.a;
-		var xs = _v1.b;
-		return $author$project$Internal$Item$getDatum(x);
-	}(group_.config.items);
-};
-var $author$project$Chart$Item$getOneData = $author$project$Internal$Many$getData;
-var $author$project$Chart$svg = function (func) {
-	return $author$project$Chart$SvgElement(
-		function (p) {
-			return func(p);
-		});
-};
-var $author$project$Chart$toLabelFromItemLabel = function (config) {
-	return {anchor: config.anchor, attrs: config.attrs, border: config.border, borderWidth: config.borderWidth, color: config.color, fontSize: config.fontSize, rotate: config.rotate, uppercase: config.uppercase, xOff: config.xOff, yOff: config.yOff};
-};
-var $author$project$Chart$binLabels = F2(
-	function (toLabel, edits) {
-		return A2(
-			$author$project$Chart$eachCustom,
-			A2($author$project$Chart$Item$andThen, $author$project$Chart$Item$bins, $author$project$Chart$Item$bars),
-			F2(
-				function (p, item) {
-					var config = A2($author$project$Internal$Helpers$apply, edits, $author$project$Chart$defaultLabel);
-					var text = function () {
-						var _v1 = config.format;
-						if (_v1.$ === 'Just') {
-							var formatting = _v1.a;
-							return formatting(item);
-						} else {
-							return toLabel(
-								$author$project$Chart$Item$getOneData(item));
-						}
-					}();
-					return _List_fromArray(
-						[
-							$author$project$Chart$svg(
-							function (_v0) {
-								return A4(
-									$author$project$Internal$Svg$label,
-									p,
-									$author$project$Chart$toLabelFromItemLabel(config),
-									_List_fromArray(
-										[
-											$elm$svg$Svg$text(text)
-										]),
-									A2(config.position, p, item));
-							})
-						]);
-				}));
-	});
-var $author$project$Data$Education$Education = F5(
-	function (_short, medium, _long, bachelor, researcher) {
-		return {bachelor: bachelor, _long: _long, medium: medium, researcher: researcher, _short: _short};
-	});
-var $author$project$Data$Education$csv = 'NAME;GENDER;GROUP;2005;2006;2007;2008;2009;2010;2011;2012;2013;2014;2015;2016;2017;2018;2019;I alt;Mand;I ALT;811789;803830;798631;792918;781488;771967;761618;751681;748482;751398;760693;766521;770366;772843;774637\nI alt;Mand;FULDFORT VIDEREGAENDE UDDANNELSE;191338;194395;197446;200221;202674;204402;205575;206872;209984;214574;221123;228572;234990;241256;247919\nI alt;Mand;Fuldfort kort videregaende uddannelse;41226;41390;41420;41415;41199;40940;40386;39714;39072;38474;38112;41866;41748;41610;41888\nI alt;Mand;Fuldfort mellemlange videregaende uddannelser;63893;63755;63940;63893;63925;63844;63585;63430;64328;66154;68347;66809;69011;71518;74027\nI alt;Mand;Fuldfort bachelor;21126;21741;21990;22568;22818;23049;23537;23783;24507;25368;26619;26058;25710;25828;26245\nI alt;Mand;Fuldfort lange videregaende uddannelser;59934;62252;64666;66729;68955;70573;71828;73476;75310;77348;80450;85887;90261;93855;97705\nI alt;Mand;Fuldfort forskeruddannelser;5159;5257;5430;5616;5777;5996;6239;6469;6767;7230;7595;7952;8260;8445;8054\nI alt;Mand;IGANGV∆RENDE VIDEREGAENDE UDDANNELSE;28299;27464;25680;23947;23308;23905;25284;27205;28843;30178;30440;30100;30248;30311;29888\nI alt;Mand;Igangvarende korte videregaende uddannelser;3128;3174;2953;2859;3080;3432;3563;3682;3906;4368;4458;4829;5045;5078;5043\nI alt;Mand;Igangvarende mellemlange videregaende uddannelser;12165;12030;11316;10638;10449;10887;11768;12857;13501;14155;14641;14505;14621;14666;14772\nI alt;Mand;Igangvarende bachelor;7197;7149;7077;6672;6307;6055;6239;6641;7139;7293;7116;6642;6570;6403;6403\nI alt;Mand;Igangvarende lange videregaende uddannelser;5519;4813;3984;3316;2835;2715;2762;2964;3195;3248;3075;2974;2903;3084;2680\nI alt;Mand;Igangvarende forskeruddannelser;290;298;350;462;637;816;952;1061;1102;1114;1150;1150;1109;1080;990\nI alt;Mand;INGEN VIDEREGAENDE UDDANNELSE;592152;581971;575505;568750;555506;543660;530759;517604;509655;506646;509130;507849;505128;501276;496830\nI alt;Mand;Afbrudt videregaende uddannelse;40340;40583;41146;41538;41226;40984;40316;39784;39538;39929;40748;41666;42507;43223;44054\nI alt;Mand;Registreret uden videregaende uddannelse;498031;486212;475360;463710;451060;438097;424851;410655;399375;390310;383198;375948;369267;362239;356860\nI alt;Mand;Uoplyst;53781;55176;58999;63502;63220;64579;65592;67165;70742;76407;85184;90235;93354;95814;95916\nI alt;Kvinder;I ALT;794659;788300;783350;778266;769895;762226;752512;742726;738587;738915;744633;749059;752191;753273;755058\nI alt;Kvinder;FULDFØRT VIDEREGAENDE UDDANNELSE;252301;258584;264566;270251;275873;281598;286260;289908;295403;303201;312460;322413;331023;338674;347337\nI alt;Kvinder;Fuldfort kort videregaende uddannelse;29131;29247;29419;29493;29498;29827;29983;29997;29925;29872;30042;30949;31248;31589;32121\nI alt;Kvinder;Fuldfort mellemlange videregaende uddannelser;140201;141869;142970;143742;144471;145159;145203;144611;145202;147883;150147;151541;153167;154638;156612\nI alt;Kvinder;Fuldfort bachelor;25072;25782;26104;26789;27419;28480;29343;29775;30501;30851;31932;30922;30400;30272;30540\nI alt;Kvinder;Fuldfort lange videregaende uddannelser;54977;58560;62789;66756;70865;74229;77538;81016;84934;89282;94466;102667;109526;115186;121322\nI alt;Kvinder;Fuldført forskeruddannelser;2920;3126;3284;3471;3620;3903;4193;4509;4841;5313;5873;6334;6682;6989;6742\nI alt;Kvinder;IGANGV∆RENDE VIDEREGAENDE UDDANNELSE;36318;35286;33417;30956;29302;28448;28664;29874;30854;31647;32041;31874;33133;34611;35149\nI alt;Kvinder;Igangvarende korte videregaende uddannelser;2571;2578;2327;2123;2290;2459;2620;2761;2891;3130;3300;3353;3455;3530;3474\nI alt;Kvinder;Igangvarende mellemlange videregaende uddannelser;21690;21103;20057;18542;17275;16636;16935;17590;18143;18586;18856;19260;20328;21314;22135\nI alt;Kvinder;Igangvarende bachelor;6753;6738;6632;6394;6117;5801;5647;5794;5900;5944;5877;5493;5585;5817;5923\nI alt;Kvinder;Igangvarende lange videregaende uddannelser;5078;4628;4123;3547;3135;2921;2753;2954;3115;3170;3167;2927;2862;3024;2734\nI alt;Kvinder;Igangværende forskeruddannelser;226;239;278;350;485;631;709;775;805;817;841;841;903;926;883\nI alt;Kvinder;INGEN VIDEREGÅENDE UDDANNELSE;506040;494430;485367;477059;464720;452180;437588;422944;412330;404067;400132;394772;388035;379988;372572\nI alt;Kvinder;Afbrudt videregaende uddannelse;35065;35484;36243;36973;36904;36644;36003;35383;35152;35139;35539;35896;36342;36559;37241\nI alt;Kvinder;Registreret uden videregående uddannelse;413743;400901;388608;376151;362518;348841;334533;319468;306942;296785;287509;277792;267934;258029;249616\nI alt;Kvinder;Uoplyst;57232;58045;60516;63935;65298;66695;67052;68093;70236;72143;77084;81084;83759;85400;85715\n';
-var $author$project$Data$Education$Raw = function (name) {
-	return function (gender) {
-		return function (group) {
-			return function (y2005) {
-				return function (y2006) {
-					return function (y2007) {
-						return function (y2008) {
-							return function (y2009) {
-								return function (y2010) {
-									return function (y2011) {
-										return function (y2012) {
-											return function (y2013) {
-												return function (y2014) {
-													return function (y2015) {
-														return function (y2016) {
-															return function (y2017) {
-																return function (y2018) {
-																	return function (y2019) {
-																		return {gender: gender, group: group, name: name, y2005: y2005, y2006: y2006, y2007: y2007, y2008: y2008, y2009: y2009, y2010: y2010, y2011: y2011, y2012: y2012, y2013: y2013, y2014: y2014, y2015: y2015, y2016: y2016, y2017: y2017, y2018: y2018, y2019: y2019};
-																	};
-																};
-															};
-														};
-													};
-												};
-											};
-										};
-									};
-								};
-							};
-						};
-					};
-				};
-			};
-		};
-	};
-};
-var $BrianHicks$elm_csv$Csv$Decode$ExpectedFloat = function (a) {
-	return {$: 'ExpectedFloat', a: a};
-};
-var $BrianHicks$elm_csv$Csv$Decode$float = $BrianHicks$elm_csv$Csv$Decode$fromString(
-	function (value) {
-		var _v0 = $elm$core$String$toFloat(
-			$elm$core$String$trim(value));
-		if (_v0.$ === 'Just') {
-			var parsed = _v0.a;
-			return $elm$core$Result$Ok(parsed);
-		} else {
-			return $elm$core$Result$Err(
-				$BrianHicks$elm_csv$Csv$Decode$ExpectedFloat(value));
-		}
-	});
-var $author$project$Data$Education$decoder = A2(
-	$BrianHicks$elm_csv$Csv$Decode$pipeline,
-	A2($BrianHicks$elm_csv$Csv$Decode$field, '2019', $BrianHicks$elm_csv$Csv$Decode$float),
-	A2(
-		$BrianHicks$elm_csv$Csv$Decode$pipeline,
-		A2($BrianHicks$elm_csv$Csv$Decode$field, '2018', $BrianHicks$elm_csv$Csv$Decode$float),
-		A2(
-			$BrianHicks$elm_csv$Csv$Decode$pipeline,
-			A2($BrianHicks$elm_csv$Csv$Decode$field, '2017', $BrianHicks$elm_csv$Csv$Decode$float),
-			A2(
-				$BrianHicks$elm_csv$Csv$Decode$pipeline,
-				A2($BrianHicks$elm_csv$Csv$Decode$field, '2016', $BrianHicks$elm_csv$Csv$Decode$float),
-				A2(
-					$BrianHicks$elm_csv$Csv$Decode$pipeline,
-					A2($BrianHicks$elm_csv$Csv$Decode$field, '2015', $BrianHicks$elm_csv$Csv$Decode$float),
-					A2(
-						$BrianHicks$elm_csv$Csv$Decode$pipeline,
-						A2($BrianHicks$elm_csv$Csv$Decode$field, '2014', $BrianHicks$elm_csv$Csv$Decode$float),
-						A2(
-							$BrianHicks$elm_csv$Csv$Decode$pipeline,
-							A2($BrianHicks$elm_csv$Csv$Decode$field, '2013', $BrianHicks$elm_csv$Csv$Decode$float),
-							A2(
-								$BrianHicks$elm_csv$Csv$Decode$pipeline,
-								A2($BrianHicks$elm_csv$Csv$Decode$field, '2012', $BrianHicks$elm_csv$Csv$Decode$float),
-								A2(
-									$BrianHicks$elm_csv$Csv$Decode$pipeline,
-									A2($BrianHicks$elm_csv$Csv$Decode$field, '2011', $BrianHicks$elm_csv$Csv$Decode$float),
-									A2(
-										$BrianHicks$elm_csv$Csv$Decode$pipeline,
-										A2($BrianHicks$elm_csv$Csv$Decode$field, '2010', $BrianHicks$elm_csv$Csv$Decode$float),
-										A2(
-											$BrianHicks$elm_csv$Csv$Decode$pipeline,
-											A2($BrianHicks$elm_csv$Csv$Decode$field, '2009', $BrianHicks$elm_csv$Csv$Decode$float),
-											A2(
-												$BrianHicks$elm_csv$Csv$Decode$pipeline,
-												A2($BrianHicks$elm_csv$Csv$Decode$field, '2008', $BrianHicks$elm_csv$Csv$Decode$float),
-												A2(
-													$BrianHicks$elm_csv$Csv$Decode$pipeline,
-													A2($BrianHicks$elm_csv$Csv$Decode$field, '2007', $BrianHicks$elm_csv$Csv$Decode$float),
-													A2(
-														$BrianHicks$elm_csv$Csv$Decode$pipeline,
-														A2($BrianHicks$elm_csv$Csv$Decode$field, '2006', $BrianHicks$elm_csv$Csv$Decode$float),
-														A2(
-															$BrianHicks$elm_csv$Csv$Decode$pipeline,
-															A2($BrianHicks$elm_csv$Csv$Decode$field, '2005', $BrianHicks$elm_csv$Csv$Decode$float),
-															A2(
-																$BrianHicks$elm_csv$Csv$Decode$pipeline,
-																A2($BrianHicks$elm_csv$Csv$Decode$field, 'GROUP', $BrianHicks$elm_csv$Csv$Decode$string),
-																A2(
-																	$BrianHicks$elm_csv$Csv$Decode$pipeline,
-																	A2($BrianHicks$elm_csv$Csv$Decode$field, 'GENDER', $BrianHicks$elm_csv$Csv$Decode$string),
-																	A2(
-																		$BrianHicks$elm_csv$Csv$Decode$pipeline,
-																		A2($BrianHicks$elm_csv$Csv$Decode$field, 'NAME', $BrianHicks$elm_csv$Csv$Decode$string),
-																		$BrianHicks$elm_csv$Csv$Decode$into($author$project$Data$Education$Raw)))))))))))))))))));
-var $author$project$Data$Education$Group = F2(
-	function (name, amount) {
-		return {amount: amount, name: name};
-	});
-var $author$project$Data$Education$process = function () {
-	var updateGender = F3(
-		function (datum, raw, num) {
-			var _v2 = raw.gender;
-			switch (_v2) {
-				case 'Kvinder':
-					return $elm$core$Maybe$Just(
-						_Utils_update(
-							datum,
-							{
-								women: A2(
-									$elm$core$List$cons,
-									A2($author$project$Data$Education$Group, raw.group, num),
-									datum.women)
-							}));
-				case 'Mand':
-					return $elm$core$Maybe$Just(
-						_Utils_update(
-							datum,
-							{
-								men: A2(
-									$elm$core$List$cons,
-									A2($author$project$Data$Education$Group, raw.group, num),
-									datum.men)
-							}));
-				default:
-					return $elm$core$Maybe$Nothing;
-			}
-		});
-	var updateYear = F3(
-		function (raw, num, prev) {
-			if (prev.$ === 'Just') {
-				var datum = prev.a;
-				return A3(updateGender, datum, raw, num);
-			} else {
-				return A3(
-					updateGender,
-					{men: _List_Nil, women: _List_Nil},
-					raw,
-					num);
-			}
-		});
-	var fold = F2(
-		function (raw, acc) {
-			return A3(
-				$elm$core$Dict$update,
-				2019,
-				A2(updateYear, raw, raw.y2019),
-				A3(
-					$elm$core$Dict$update,
-					2018,
-					A2(updateYear, raw, raw.y2018),
-					A3(
-						$elm$core$Dict$update,
-						2017,
-						A2(updateYear, raw, raw.y2017),
-						A3(
-							$elm$core$Dict$update,
-							2016,
-							A2(updateYear, raw, raw.y2016),
-							A3(
-								$elm$core$Dict$update,
-								2015,
-								A2(updateYear, raw, raw.y2015),
-								A3(
-									$elm$core$Dict$update,
-									2014,
-									A2(updateYear, raw, raw.y2014),
-									A3(
-										$elm$core$Dict$update,
-										2013,
-										A2(updateYear, raw, raw.y2013),
-										A3(
-											$elm$core$Dict$update,
-											2012,
-											A2(updateYear, raw, raw.y2012),
-											A3(
-												$elm$core$Dict$update,
-												2011,
-												A2(updateYear, raw, raw.y2011),
-												A3(
-													$elm$core$Dict$update,
-													2010,
-													A2(updateYear, raw, raw.y2010),
-													A3(
-														$elm$core$Dict$update,
-														2009,
-														A2(updateYear, raw, raw.y2009),
-														A3(
-															$elm$core$Dict$update,
-															2008,
-															A2(updateYear, raw, raw.y2008),
-															A3(
-																$elm$core$Dict$update,
-																2007,
-																A2(updateYear, raw, raw.y2007),
-																A3(
-																	$elm$core$Dict$update,
-																	2006,
-																	A2(updateYear, raw, raw.y2006),
-																	A3(
-																		$elm$core$Dict$update,
-																		2005,
-																		A2(updateYear, raw, raw.y2005),
-																		acc)))))))))))))));
-		});
-	return A2(
-		$elm$core$Basics$composeR,
-		A2($elm$core$List$foldl, fold, $elm$core$Dict$empty),
-		A2(
-			$elm$core$Basics$composeR,
-			$elm$core$Dict$toList,
-			$elm$core$List$map(
-				function (_v0) {
-					var year = _v0.a;
-					var datum = _v0.b;
-					return {men: datum.men, women: datum.women, year: year};
-				})));
-}();
-var $author$project$Data$Education$basic = A2(
-	$elm$core$Result$withDefault,
-	_List_Nil,
-	A2(
-		$elm$core$Result$map,
-		$author$project$Data$Education$process,
-		A4(
-			$BrianHicks$elm_csv$Csv$Decode$decodeCustom,
-			{
-				fieldSeparator: _Utils_chr(';')
-			},
-			$BrianHicks$elm_csv$Csv$Decode$FieldNamesFromFirstRow,
-			$author$project$Data$Education$decoder,
-			$author$project$Data$Education$csv)));
-var $author$project$Data$Education$data = function () {
-	var _short = 'Fuldfort kort videregaende uddannelse';
-	var researcher2 = 'Fuldført forskeruddannelser';
-	var researcher = 'Fuldfort forskeruddannelser';
-	var ongoing = 'Igangvarende korte videregaende uddannelser';
-	var medium = 'Fuldfort mellemlange videregaende uddannelser';
-	var _long = 'Fuldfort lange videregaende uddannelser';
-	var findAmongst = F2(
-		function (ns, genderData) {
-			return A2(
-				$elm$core$Maybe$withDefault,
-				0,
-				A2(
-					$elm$core$Maybe$map,
-					function ($) {
-						return $.amount;
-					},
-					$elm$core$List$head(
-						A2(
-							$elm$core$List$filter,
-							function (g) {
-								return A2($elm$core$List$member, g.name, ns);
-							},
-							genderData))));
-		});
-	var bachelor = 'Fuldfort bachelor';
-	return A2(
-		$elm$core$List$filterMap,
-		function (d) {
-			var _v0 = _List_fromArray(
-				[
-					A2(
-					findAmongst,
-					_List_fromArray(
-						[_short]),
-					d.women),
-					A2(
-					findAmongst,
-					_List_fromArray(
-						[medium]),
-					d.women),
-					A2(
-					findAmongst,
-					_List_fromArray(
-						[_long]),
-					d.women),
-					A2(
-					findAmongst,
-					_List_fromArray(
-						[bachelor]),
-					d.women),
-					A2(
-					findAmongst,
-					_List_fromArray(
-						[researcher, researcher2]),
-					d.women),
-					A2(
-					findAmongst,
-					_List_fromArray(
-						[_short]),
-					d.men),
-					A2(
-					findAmongst,
-					_List_fromArray(
-						[medium]),
-					d.men),
-					A2(
-					findAmongst,
-					_List_fromArray(
-						[_long]),
-					d.men),
-					A2(
-					findAmongst,
-					_List_fromArray(
-						[bachelor]),
-					d.men),
-					A2(
-					findAmongst,
-					_List_fromArray(
-						[researcher, researcher2]),
-					d.men)
-				]);
-			if ((((((((((_v0.b && _v0.b.b) && _v0.b.b.b) && _v0.b.b.b.b) && _v0.b.b.b.b.b) && _v0.b.b.b.b.b.b) && _v0.b.b.b.b.b.b.b) && _v0.b.b.b.b.b.b.b.b) && _v0.b.b.b.b.b.b.b.b.b) && _v0.b.b.b.b.b.b.b.b.b.b) && (!_v0.b.b.b.b.b.b.b.b.b.b.b)) {
-				var shortWoman = _v0.a;
-				var _v1 = _v0.b;
-				var mediumWoman = _v1.a;
-				var _v2 = _v1.b;
-				var longWoman = _v2.a;
-				var _v3 = _v2.b;
-				var bachelorWoman = _v3.a;
-				var _v4 = _v3.b;
-				var researcherWoman = _v4.a;
-				var _v5 = _v4.b;
-				var shortMen = _v5.a;
-				var _v6 = _v5.b;
-				var mediumMen = _v6.a;
-				var _v7 = _v6.b;
-				var longMen = _v7.a;
-				var _v8 = _v7.b;
-				var bachelorMen = _v8.a;
-				var _v9 = _v8.b;
-				var researcherMen = _v9.a;
-				return $elm$core$Maybe$Just(
-					{
-						men: A5($author$project$Data$Education$Education, shortMen, mediumMen, longMen, bachelorMen, researcherMen),
-						women: A5($author$project$Data$Education$Education, shortWoman, mediumWoman, longWoman, bachelorWoman, researcherWoman),
-						year: d.year
-					});
-			} else {
-				var e = _v0;
-				return $elm$core$Maybe$Nothing;
-			}
-		},
-		$author$project$Data$Education$basic);
-}();
-var $author$project$Chart$Attributes$format = F2(
-	function (v, config) {
-		return _Utils_update(
-			config,
-			{
-				format: $elm$core$Maybe$Just(v)
-			});
-	});
-var $author$project$Internal$Property$stacked = function (properties) {
-	var toVisual = F2(
-		function (toYs_, datum) {
-			var vs = A2(
-				$elm$core$List$filterMap,
-				function (toY) {
-					return toY(datum);
-				},
-				toYs_);
-			return (!_Utils_eq(
-				$elm$core$List$length(vs),
-				$elm$core$List$length(toYs_))) ? $elm$core$Maybe$Nothing : $elm$core$Maybe$Just(
-				$elm$core$List$sum(vs));
-		});
-	var stack = F3(
-		function (list, prev, result) {
-			stack:
-			while (true) {
-				if (list.b) {
-					var one = list.a;
-					var rest = list.b;
-					var toYs_ = A2($elm$core$List$cons, one.value, prev);
-					var $temp$list = rest,
-						$temp$prev = toYs_,
-						$temp$result = A2(
-						$elm$core$List$cons,
-						_Utils_update(
-							one,
-							{
-								visual: toVisual(toYs_)
-							}),
-						result);
-					list = $temp$list;
-					prev = $temp$prev;
-					result = $temp$result;
-					continue stack;
-				} else {
-					return result;
-				}
-			}
-		});
-	var configs = A2(
-		$elm$core$List$concatMap,
-		$author$project$Internal$Property$toConfigs,
-		$elm$core$List$reverse(properties));
-	return $author$project$Internal$Property$Stacked(
-		A3(stack, configs, _List_Nil, _List_Nil));
-};
-var $author$project$Chart$stacked = $author$project$Internal$Property$stacked;
-var $author$project$Chart$LabelsElement = F3(
-	function (a, b, c) {
-		return {$: 'LabelsElement', a: a, b: b, c: c};
-	});
 var $author$project$Chart$yLabels = function (edits) {
 	var toTicks = F2(
 		function (p, config) {
@@ -29762,8 +34044,6 @@ var $author$project$Articles$GenderAndSalery$view = function (model) {
 					$mdgriffith$elm_ui$Element$el,
 					_List_fromArray(
 						[
-							$mdgriffith$elm_ui$Element$paddingEach(
-							{bottom: 0, left: 0, right: 0, top: 0}),
 							$mdgriffith$elm_ui$Element$width(
 							A2($mdgriffith$elm_ui$Element$maximum, 1000, $mdgriffith$elm_ui$Element$fill))
 						]),
@@ -29782,8 +34062,6 @@ var $author$project$Articles$GenderAndSalery$view = function (model) {
 					$mdgriffith$elm_ui$Element$el,
 					_List_fromArray(
 						[
-							$mdgriffith$elm_ui$Element$paddingEach(
-							{bottom: 0, left: 0, right: 0, top: 0}),
 							$mdgriffith$elm_ui$Element$width(
 							A2($mdgriffith$elm_ui$Element$maximum, 1000, $mdgriffith$elm_ui$Element$fill))
 						]),
@@ -29802,8 +34080,6 @@ var $author$project$Articles$GenderAndSalery$view = function (model) {
 					$mdgriffith$elm_ui$Element$el,
 					_List_fromArray(
 						[
-							$mdgriffith$elm_ui$Element$paddingEach(
-							{bottom: 0, left: 0, right: 0, top: 0}),
 							$mdgriffith$elm_ui$Element$width(
 							A2($mdgriffith$elm_ui$Element$maximum, 1000, $mdgriffith$elm_ui$Element$fill))
 						]),
@@ -33170,6 +37446,128 @@ var $author$project$Examples$BarCharts$VariableWidth$view = function (model) {
 				$author$project$Examples$BarCharts$VariableWidth$data)
 			]));
 };
+var $author$project$Chart$Attributes$amount = F2(
+	function (value, config) {
+		return _Utils_update(
+			config,
+			{amount: value});
+	});
+var $author$project$Chart$TicksElement = F2(
+	function (a, b) {
+		return {$: 'TicksElement', a: a, b: b};
+	});
+var $author$project$Chart$Attributes$length = F2(
+	function (v, config) {
+		return _Utils_update(
+			config,
+			{length: v});
+	});
+var $author$project$Internal$Svg$defaultTick = {attrs: _List_Nil, color: 'rgb(210, 210, 210)', length: 5, width: 1};
+var $author$project$Internal$Svg$tick = F4(
+	function (plane, config, isX, point) {
+		return A4(
+			$author$project$Internal$Svg$withAttrs,
+			config.attrs,
+			$elm$svg$Svg$line,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$class('elm-charts__tick'),
+					$elm$svg$Svg$Attributes$stroke(config.color),
+					$elm$svg$Svg$Attributes$strokeWidth(
+					$elm$core$String$fromFloat(config.width)),
+					$elm$svg$Svg$Attributes$x1(
+					$elm$core$String$fromFloat(
+						A2($author$project$Internal$Coordinates$toSVGX, plane, point.x))),
+					$elm$svg$Svg$Attributes$x2(
+					$elm$core$String$fromFloat(
+						A2($author$project$Internal$Coordinates$toSVGX, plane, point.x) + (isX ? 0 : (-config.length)))),
+					$elm$svg$Svg$Attributes$y1(
+					$elm$core$String$fromFloat(
+						A2($author$project$Internal$Coordinates$toSVGY, plane, point.y))),
+					$elm$svg$Svg$Attributes$y2(
+					$elm$core$String$fromFloat(
+						A2($author$project$Internal$Coordinates$toSVGY, plane, point.y) + (isX ? config.length : 0)))
+				]),
+			_List_Nil);
+	});
+var $author$project$Internal$Svg$xTick = F3(
+	function (plane, config, point) {
+		return A4($author$project$Internal$Svg$tick, plane, config, true, point);
+	});
+var $author$project$Chart$Svg$xTick = F2(
+	function (plane, edits) {
+		return A2(
+			$author$project$Internal$Svg$xTick,
+			plane,
+			A2($author$project$Internal$Helpers$apply, edits, $author$project$Internal$Svg$defaultTick));
+	});
+var $author$project$Chart$xTicks = function (edits) {
+	var config = A2(
+		$author$project$Internal$Helpers$apply,
+		edits,
+		{amount: 5, color: '', flip: false, generate: $author$project$Internal$Svg$Floats, grid: true, height: 5, limits: _List_Nil, pinned: $author$project$Chart$Attributes$zero, width: 1});
+	var toTicks = function (p) {
+		return A2(
+			$elm$core$List$map,
+			function ($) {
+				return $.value;
+			},
+			A4(
+				$author$project$Chart$generateValues,
+				config.amount,
+				config.generate,
+				$elm$core$Maybe$Nothing,
+				A3(
+					$elm$core$List$foldl,
+					F2(
+						function (f, x) {
+							return f(x);
+						}),
+					p.x,
+					config.limits)));
+	};
+	var addTickValues = F2(
+		function (p, ts) {
+			return (!config.grid) ? ts : _Utils_update(
+				ts,
+				{
+					xs: _Utils_ap(
+						ts.xs,
+						toTicks(p))
+				});
+		});
+	return A2(
+		$author$project$Chart$TicksElement,
+		addTickValues,
+		function (p) {
+			var toTick = function (x) {
+				return A3(
+					$author$project$Chart$Svg$xTick,
+					p,
+					_List_fromArray(
+						[
+							$author$project$Chart$Attributes$color(config.color),
+							$author$project$Chart$Attributes$length(
+							config.flip ? (-config.height) : config.height),
+							$author$project$Chart$Attributes$width(config.width)
+						]),
+					{
+						x: x,
+						y: config.pinned(p.y)
+					});
+			};
+			return A2(
+				$elm$svg$Svg$g,
+				_List_fromArray(
+					[
+						$elm$svg$Svg$Attributes$class('elm-charts__x-ticks')
+					]),
+				A2(
+					$elm$core$List$map,
+					toTick,
+					toTicks(p)));
+		});
+};
 var $author$project$Examples$Frame$Amount$view = function (model) {
 	return A2(
 		$author$project$Chart$chart,
@@ -33193,6 +37591,23 @@ var $author$project$Examples$Frame$Amount$view = function (model) {
 					]))
 			]));
 };
+var $author$project$Chart$Svg$positionHtml = $author$project$Internal$Svg$positionHtml;
+var $author$project$Chart$htmlAt = F6(
+	function (toX, toY, xOff, yOff, att, view) {
+		return $author$project$Chart$HtmlElement(
+			F2(
+				function (p, _v0) {
+					return A7(
+						$author$project$Chart$Svg$positionHtml,
+						p,
+						toX(p.x),
+						toY(p.y),
+						xOff,
+						yOff,
+						att,
+						view);
+				}));
+	});
 var $author$project$Chart$Attributes$percent = F2(
 	function (per, b) {
 		return b.min + ((b.max - b.min) * (per / 100));
@@ -33305,6 +37720,84 @@ var $author$project$Chart$yAxis = function (edits) {
 					]));
 		});
 };
+var $author$project$Internal$Svg$yTick = F3(
+	function (plane, config, point) {
+		return A4($author$project$Internal$Svg$tick, plane, config, false, point);
+	});
+var $author$project$Chart$Svg$yTick = F2(
+	function (plane, edits) {
+		return A2(
+			$author$project$Internal$Svg$yTick,
+			plane,
+			A2($author$project$Internal$Helpers$apply, edits, $author$project$Internal$Svg$defaultTick));
+	});
+var $author$project$Chart$yTicks = function (edits) {
+	var config = A2(
+		$author$project$Internal$Helpers$apply,
+		edits,
+		{amount: 5, color: '', flip: false, generate: $author$project$Internal$Svg$Floats, grid: true, height: 5, limits: _List_Nil, pinned: $author$project$Chart$Attributes$zero, width: 1});
+	var toTicks = function (p) {
+		return A2(
+			$elm$core$List$map,
+			function ($) {
+				return $.value;
+			},
+			A4(
+				$author$project$Chart$generateValues,
+				config.amount,
+				config.generate,
+				$elm$core$Maybe$Nothing,
+				A3(
+					$elm$core$List$foldl,
+					F2(
+						function (f, y) {
+							return f(y);
+						}),
+					p.y,
+					config.limits)));
+	};
+	var addTickValues = F2(
+		function (p, ts) {
+			return _Utils_update(
+				ts,
+				{
+					ys: _Utils_ap(
+						ts.ys,
+						toTicks(p))
+				});
+		});
+	return A2(
+		$author$project$Chart$TicksElement,
+		addTickValues,
+		function (p) {
+			var toTick = function (y) {
+				return A3(
+					$author$project$Chart$Svg$yTick,
+					p,
+					_List_fromArray(
+						[
+							$author$project$Chart$Attributes$color(config.color),
+							$author$project$Chart$Attributes$length(
+							config.flip ? (-config.height) : config.height),
+							$author$project$Chart$Attributes$width(config.width)
+						]),
+					{
+						x: config.pinned(p.x),
+						y: y
+					});
+			};
+			return A2(
+				$elm$svg$Svg$g,
+				_List_fromArray(
+					[
+						$elm$svg$Svg$Attributes$class('elm-charts__y-ticks')
+					]),
+				A2(
+					$elm$core$List$map,
+					toTick,
+					toTicks(p)));
+		});
+};
 var $author$project$Examples$Frame$Arbitrary$view = function (model) {
 	return A2(
 		$author$project$Chart$chart,
@@ -33369,6 +37862,14 @@ var $author$project$Examples$Frame$Arbitrary$view = function (model) {
 					]))
 			]));
 };
+var $author$project$Chart$Attributes$highest = F3(
+	function (v, edit, b) {
+		return _Utils_update(
+			b,
+			{
+				max: A3(edit, v, b.max, b.dataMax)
+			});
+	});
 var $author$project$Chart$interpolated = F2(
 	function (y, inter) {
 		return A2(
@@ -33545,13 +38046,6 @@ var $author$project$Examples$Frame$Color$view = function (model) {
 					]))
 			]));
 };
-var $author$project$Internal$Svg$fromCartesian = F2(
-	function (plane, point) {
-		return {
-			x: A2($author$project$Internal$Coordinates$toSVGX, plane, point.x),
-			y: A2($author$project$Internal$Coordinates$toSVGY, plane, point.y)
-		};
-	});
 var $author$project$Chart$Svg$fromCartesian = $author$project$Internal$Svg$fromCartesian;
 var $author$project$Chart$Svg$fromSvg = $author$project$Internal$Svg$fromSvg;
 var $author$project$Examples$Frame$Coordinates$view = function (model) {
@@ -33986,6 +38480,10 @@ var $author$project$Examples$Frame$LabelWithLine$data = _List_fromArray(
 	[
 		A2($author$project$Examples$Frame$LabelWithLine$Datum, 5, 6)
 	]);
+var $author$project$Chart$Attributes$exactly = F3(
+	function (exact, _v0, _v1) {
+		return exact;
+	});
 var $author$project$Chart$scatter = function (y) {
 	return A2(
 		$author$project$Internal$Property$property,
@@ -36348,6 +40846,11 @@ var $author$project$Examples$Interactivity$ChangeUnit$view = function (model) {
 var $author$project$Examples$Interactivity$Coordinates$OnHover = function (a) {
 	return {$: 'OnHover', a: a};
 };
+var $author$project$Chart$none = $author$project$Chart$HtmlElement(
+	F2(
+		function (_v0, _v1) {
+			return $elm$html$Html$text('');
+		}));
 var $author$project$Examples$Interactivity$Coordinates$view = function (model) {
 	return A2(
 		$author$project$Chart$chart,
@@ -40991,7 +45494,6 @@ var $author$project$Examples$smallCode = function (chosen) {
 			return $author$project$Examples$ScatterCharts$Basic$smallCode;
 	}
 };
-var $elm$html$Html$code = _VirtualDom_node('code');
 var $pablohirafuji$elm_syntax_highlight$SyntaxHighlight$HCode = function (a) {
 	return {$: 'HCode', a: a};
 };
@@ -42892,24 +47394,6 @@ var $pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Theme$GitHub$requiredSty
 		$pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Style$Hex('#795da3'))
 };
 var $pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Theme$GitHub$theme = {customStyles: _List_Nil, requiredStyles: $pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Theme$GitHub$requiredStyles};
-var $elm$core$List$intersperse = F2(
-	function (sep, xs) {
-		if (!xs.b) {
-			return _List_Nil;
-		} else {
-			var hd = xs.a;
-			var tl = xs.b;
-			var step = F2(
-				function (x, rest) {
-					return A2(
-						$elm$core$List$cons,
-						sep,
-						A2($elm$core$List$cons, x, rest));
-				});
-			var spersed = A3($elm$core$List$foldr, step, _List_Nil, tl);
-			return A2($elm$core$List$cons, hd, spersed);
-		}
-	});
 var $pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Language$Css$atRuleToFragment = function (a) {
 	switch (a.$) {
 		case 'Identifier':
@@ -45601,4 +50085,4 @@ var $author$project$Main$view = function (model) {
 };
 var $author$project$Main$main = $elm$browser$Browser$application(
 	{init: $author$project$Main$init, onUrlChange: $author$project$Main$ChangedUrl, onUrlRequest: $author$project$Main$ClickedLink, subscriptions: $author$project$Main$subscriptions, update: $author$project$Main$update, view: $author$project$Main$view});
-_Platform_export({'Main':{'init':$author$project$Main$main($elm$json$Json$Decode$value)(0)}});}(this));
+_Platform_export({'Main':{'init':$author$project$Main$main($elm$json$Json$Decode$value)({"versions":{"elm":"0.19.1"},"types":{"message":"Main.Msg","aliases":{"Page.Documentation.Msg":{"args":[],"type":"Page.Section.Msg"},"Url.Url":{"args":[],"type":"{ protocol : Url.Protocol, host : String.String, port_ : Maybe.Maybe Basics.Int, path : String.String, query : Maybe.Maybe String.String, fragment : Maybe.Maybe String.String }"},"Chart.Item.Any":{"args":[],"type":"Internal.Item.Any"},"Chart.Item.One":{"args":["data","x"],"type":"Internal.Item.One data x"},"Internal.Item.One":{"args":["data","x"],"type":"Internal.Item.Rendered { product : x, tooltipInfo : Internal.Item.TooltipInfo, values : Internal.Item.Values data, toAny : x -> Internal.Item.Any }"},"Internal.Item.TooltipInfo":{"args":[],"type":"{ property : Basics.Int, stack : Basics.Int, data : Basics.Int, index : Basics.Int, elIndex : Basics.Int, name : Maybe.Maybe String.String, color : String.String, border : String.String, borderWidth : Basics.Float, formatted : String.String }"},"Internal.Item.Values":{"args":["data"],"type":"{ datum : data, x1 : Basics.Float, x2 : Basics.Float, y : Basics.Float, isReal : Basics.Bool }"},"Svg.Attribute":{"args":["msg"],"type":"VirtualDom.Attribute msg"},"Internal.Coordinates.Axis":{"args":[],"type":"{ dataMin : Basics.Float, dataMax : Basics.Float, min : Basics.Float, max : Basics.Float }"},"Chart.Item.Bar":{"args":[],"type":"Internal.Svg.Bar"},"Internal.Svg.Bar":{"args":[],"type":"{ roundTop : Basics.Float, roundBottom : Basics.Float, color : String.String, border : String.String, borderWidth : Basics.Float, opacity : Basics.Float, design : Maybe.Maybe Internal.Svg.Design, attrs : List.List (Svg.Attribute Basics.Never), highlight : Basics.Float, highlightWidth : Basics.Float, highlightColor : String.String }"},"Charts.Dashboard2.Datum":{"args":[],"type":"{ x : Basics.Float, y : Basics.Float }"},"Charts.Dashboard3.Datum":{"args":[],"type":"{ x : Basics.Float, y : Maybe.Maybe Basics.Float }"},"Charts.Dashboard4.Datum":{"args":[],"type":"{ score : Maybe.Maybe Basics.Float, name : String.String }"},"Data.Iris.Datum":{"args":[],"type":"{ sepalLength : Basics.Float, sepalWidth : Basics.Float, petalLength : Basics.Float, petalWidth : Basics.Float, species : Data.Iris.Species }"},"Examples.Frontpage.Concise.Datum":{"args":[],"type":"{ cats : Basics.Float, dogs : Basics.Float, people : Basics.Float, country : String.String }"},"Chart.Item.Dot":{"args":[],"type":"Internal.Svg.Dot"},"Internal.Svg.Dot":{"args":[],"type":"{ color : String.String, opacity : Basics.Float, size : Basics.Float, border : String.String, borderWidth : Basics.Float, highlight : Basics.Float, highlightWidth : Basics.Float, highlightColor : String.String, shape : Maybe.Maybe Internal.Svg.Shape }"},"Html.Html":{"args":["msg"],"type":"VirtualDom.Node msg"},"Chart.Item.Many":{"args":["data","x"],"type":"Internal.Many.Many (Chart.Item.One data x)"},"Internal.Many.Many":{"args":["x"],"type":"Internal.Item.Rendered { items : ( x, List.List x ) }"},"Internal.Coordinates.Margin":{"args":[],"type":"{ top : Basics.Float, right : Basics.Float, left : Basics.Float, bottom : Basics.Float }"},"Internal.Coordinates.Plane":{"args":[],"type":"{ width : Basics.Float, height : Basics.Float, margin : Internal.Coordinates.Margin, x : Internal.Coordinates.Axis, y : Internal.Coordinates.Axis }"},"Internal.Coordinates.Position":{"args":[],"type":"{ x1 : Basics.Float, x2 : Basics.Float, y1 : Basics.Float, y2 : Basics.Float }"},"Svg.Svg":{"args":["msg"],"type":"VirtualDom.Node msg"},"Internal.Helpers.Attribute":{"args":["c"],"type":"c -> c"},"Charts.Dashboard1.BarDatum":{"args":[],"type":"{ x : Basics.Float, y : Maybe.Maybe Basics.Float, z : Maybe.Maybe Basics.Float }"},"Charts.Landing.BarDatum":{"args":[],"type":"{ x : Basics.Float, y : Maybe.Maybe Basics.Float, z : Maybe.Maybe Basics.Float }"},"Examples.BarCharts.Highlight.Datum":{"args":[],"type":"{ x : Basics.Float, x1 : Basics.Float, y : Basics.Float, z : Basics.Float, v : Basics.Float, w : Basics.Float, p : Basics.Float, q : Basics.Float }"},"Examples.BarCharts.Tooltip.Datum":{"args":[],"type":"{ x : Basics.Float, x1 : Basics.Float, y : Basics.Float, z : Basics.Float, v : Basics.Float, w : Basics.Float, p : Basics.Float, q : Basics.Float }"},"Examples.BarCharts.TooltipBin.Datum":{"args":[],"type":"{ x : Basics.Float, x1 : Basics.Float, y : Basics.Float, z : Basics.Float, v : Basics.Float, w : Basics.Float, p : Basics.Float, q : Basics.Float }"},"Examples.BarCharts.TooltipStack.Datum":{"args":[],"type":"{ x : Basics.Float, x1 : Basics.Float, y : Basics.Float, z : Basics.Float, v : Basics.Float, w : Basics.Float, p : Basics.Float, q : Basics.Float }"},"Examples.Interactivity.Background.Datum":{"args":[],"type":"{ x : Basics.Float, x1 : Basics.Float, y : Basics.Float, z : Basics.Float, v : Basics.Float, w : Basics.Float, p : Basics.Float, q : Basics.Float }"},"Examples.Interactivity.BasicArea.Datum":{"args":[],"type":"{ x : Basics.Float, y : Basics.Float, z : Basics.Float, v : Basics.Float, w : Basics.Float, p : Basics.Float, q : Basics.Float }"},"Examples.Interactivity.BasicBar.Datum":{"args":[],"type":"{ x : Basics.Float, x1 : Basics.Float, y : Basics.Float, z : Basics.Float, v : Basics.Float, w : Basics.Float, p : Basics.Float, q : Basics.Float }"},"Examples.Interactivity.BasicBin.Datum":{"args":[],"type":"{ x : Basics.Float, x1 : Basics.Float, y : Basics.Float, z : Basics.Float, v : Basics.Float, w : Basics.Float, p : Basics.Float, q : Basics.Float }"},"Examples.Interactivity.BasicLine.Datum":{"args":[],"type":"{ x : Basics.Float, y : Basics.Float, z : Basics.Float, v : Basics.Float, w : Basics.Float, p : Basics.Float, q : Basics.Float }"},"Examples.Interactivity.BasicStack.Datum":{"args":[],"type":"{ x : Basics.Float, x1 : Basics.Float, y : Basics.Float, z : Basics.Float, v : Basics.Float, w : Basics.Float, p : Basics.Float, q : Basics.Float }"},"Examples.Interactivity.Border.Datum":{"args":[],"type":"{ x : Basics.Float, x1 : Basics.Float, y : Basics.Float, z : Basics.Float, v : Basics.Float, w : Basics.Float, p : Basics.Float, q : Basics.Float }"},"Examples.Interactivity.ChangeContent.Datum":{"args":[],"type":"{ x : Basics.Float, x1 : Basics.Float, y : Basics.Float, z : Basics.Float, v : Basics.Float, w : Basics.Float, p : Basics.Float, q : Basics.Float }"},"Examples.Interactivity.ChangeDot.Datum":{"args":[],"type":"{ x : Basics.Float, y : Basics.Float, z : Basics.Float, v : Basics.Float, w : Basics.Float, p : Basics.Float, q : Basics.Float }"},"Examples.Interactivity.ChangeName.Datum":{"args":[],"type":"{ x : Basics.Float, x1 : Basics.Float, y : Basics.Float, z : Basics.Float, v : Basics.Float, w : Basics.Float, p : Basics.Float, q : Basics.Float }"},"Examples.Interactivity.ChangeUnit.Datum":{"args":[],"type":"{ x : Basics.Float, x1 : Basics.Float, y : Basics.Float, z : Basics.Float, v : Basics.Float, w : Basics.Float, p : Basics.Float, q : Basics.Float }"},"Examples.Interactivity.Direction.Datum":{"args":[],"type":"{ x : Basics.Float, x1 : Basics.Float, y : Basics.Float, z : Basics.Float, v : Basics.Float, w : Basics.Float, p : Basics.Float, q : Basics.Float }"},"Examples.Interactivity.DoubleSearch.Datum":{"args":[],"type":"{ x : Basics.Float, x1 : Basics.Float, x2 : Basics.Float, y : Basics.Float, z : Basics.Float, v : Basics.Float, w : Basics.Float, p : Basics.Float, q : Basics.Float }"},"Examples.Interactivity.FilterSearch.Datum":{"args":[],"type":"{ x : Basics.Float, x1 : Basics.Float, x2 : Basics.Float, y : Basics.Float, z : Basics.Float, v : Basics.Float, w : Basics.Float, p : Basics.Float, q : Basics.Float }"},"Examples.Interactivity.Focal.Datum":{"args":[],"type":"{ x : Basics.Float, x1 : Basics.Float, y : Basics.Float, z : Basics.Float, v : Basics.Float, w : Basics.Float, p : Basics.Float, q : Basics.Float }"},"Examples.Interactivity.Multiple.Datum":{"args":[],"type":"{ x : Basics.Float, x1 : Basics.Float, x2 : Basics.Float, y : Basics.Float, z : Basics.Float, v : Basics.Float, w : Basics.Float, p : Basics.Float, q : Basics.Float }"},"Examples.Interactivity.NoArrow.Datum":{"args":[],"type":"{ x : Basics.Float, x1 : Basics.Float, y : Basics.Float, z : Basics.Float, v : Basics.Float, w : Basics.Float, p : Basics.Float, q : Basics.Float }"},"Examples.Interactivity.Offset.Datum":{"args":[],"type":"{ x : Basics.Float, x1 : Basics.Float, y : Basics.Float, z : Basics.Float, v : Basics.Float, w : Basics.Float, p : Basics.Float, q : Basics.Float }"},"Examples.Interactivity.TrickyTooltip.Datum":{"args":[],"type":"{ x : Basics.Float, x1 : Basics.Float, y : Basics.Float, z : Basics.Float, v : Basics.Float, w : Basics.Float, p : Basics.Float, q : Basics.Float }"},"Examples.LineCharts.Tooltip.Datum":{"args":[],"type":"{ x : Basics.Float, y : Basics.Float, z : Basics.Float, v : Basics.Float, w : Basics.Float, p : Basics.Float, q : Basics.Float }"},"Examples.LineCharts.TooltipStack.Datum":{"args":[],"type":"{ x : Basics.Float, y : Basics.Float, z : Basics.Float, v : Basics.Float, w : Basics.Float, p : Basics.Float, q : Basics.Float }"},"Examples.ScatterCharts.Tooltip.Datum":{"args":[],"type":"{ x : Basics.Float, y : Basics.Float, z : Basics.Float, v : Basics.Float, w : Basics.Float, p : Basics.Float, q : Basics.Float }"},"Charts.Dashboard1.DotDatum":{"args":[],"type":"{ x : Basics.Float, y : Basics.Float }"},"Charts.Landing.DotDatum":{"args":[],"type":"{ x : Basics.Float, y : Basics.Float }"},"Internal.Svg.Pattern":{"args":[],"type":"{ color : String.String, width : Basics.Float, spacing : Basics.Float, rotate : Basics.Float }"},"Chart.Events.Point":{"args":[],"type":"{ x : Basics.Float, y : Basics.Float }"},"Articles.GenderAndSalery.Bars.Binned":{"args":[],"type":"{ bin : Basics.Float, data : List.List Articles.GenderAndSalery.Bars.GenderBin }"},"Articles.GenderAndSalery.Data.Datum":{"args":[],"type":"{ year : Basics.Float, sector : String.String, numOfBoth : Basics.Float, numOfWomen : Basics.Float, numOfMen : Basics.Float, salaryBoth : Basics.Float, salaryWomen : Basics.Float, salaryMen : Basics.Float }"},"Data.Education.Education":{"args":[],"type":"{ short : Basics.Float, medium : Basics.Float, long : Basics.Float, bachelor : Basics.Float, researcher : Basics.Float }"},"Articles.GenderAndSalery.Bars.GenderBin":{"args":[],"type":"{ salary : Basics.Float, amount : Basics.Float, kind : String.String, sector : String.String }"},"Chart.Svg.Point":{"args":[],"type":"{ x : Basics.Float, y : Basics.Float }"},"Data.Education.Year":{"args":[],"type":"{ year : Basics.Float, women : Data.Education.Education, men : Data.Education.Education }"}},"unions":{"Main.Msg":{"args":[],"tags":{"ChangedUrl":["Url.Url"],"ClickedLink":["Browser.UrlRequest"],"Page_Home_Msg":["Page.Home.Msg"],"Page_Administration_Msg":["Page.Administration.Msg"],"Page_Articles_Msg":["Page.Articles.Msg"],"Page_Article_Msg":["Page.Article.Msg"],"Page_Documentation_Msg":["Page.Documentation.Msg"],"Page_Section_Msg":["Page.Section.Msg"],"Page_Example_Msg":["Page.Example.Msg"],"Page_GettingStarted_Msg":["Page.GettingStarted.Msg"]}},"Basics.Int":{"args":[],"tags":{"Int":[]}},"Maybe.Maybe":{"args":["a"],"tags":{"Just":["a"],"Nothing":[]}},"Page.Administration.Msg":{"args":[],"tags":{"OnResize":["Basics.Int","Basics.Int"],"MenuMsg":["Ui.Menu.Msg"]}},"Page.Article.Msg":{"args":[],"tags":{"MenuMsg":["Ui.Menu.Msg"],"ArticleMsg":["Articles.Msg"]}},"Page.Articles.Msg":{"args":[],"tags":{"MenuMsg":["Ui.Menu.Msg"],"None":[]}},"Page.Example.Msg":{"args":[],"tags":{"OnResize":["Basics.Int","Basics.Int"],"MenuMsg":["Ui.Menu.Msg"],"OnExampleMsg":["Examples.Msg"],"OnToggleCode":[]}},"Page.GettingStarted.Msg":{"args":[],"tags":{"OnResize":["Basics.Int","Basics.Int"],"MenuMsg":["Ui.Menu.Msg"],"None":[]}},"Page.Home.Msg":{"args":[],"tags":{"OnResize":["Basics.Int","Basics.Int"],"MenuMsg":["Ui.Menu.Msg"],"LandingMsg":["Charts.Landing.Msg"],"ConciseMsg":["Examples.Frontpage.Concise.Msg"],"FamiliarToggle":[],"OnHover":["List.List (Chart.Item.One { year : Basics.Float, income : Basics.Float } Chart.Item.Any)"],"None":[],"Dashboard1Msg":["Charts.Dashboard1.Msg"],"Dashboard2Msg":["Charts.Dashboard2.Msg"],"Dashboard3Msg":["Charts.Dashboard3.Msg"],"Dashboard4Msg":["Charts.Dashboard4.Msg"],"Dashboard5Msg":["Charts.Dashboard5.Msg"]}},"Page.Section.Msg":{"args":[],"tags":{"OnResize":["Basics.Int","Basics.Int"],"MenuMsg":["Ui.Menu.Msg"],"OnExampleMsg":["Examples.Msg"]}},"Url.Protocol":{"args":[],"tags":{"Http":[],"Https":[]}},"String.String":{"args":[],"tags":{"String":[]}},"Browser.UrlRequest":{"args":[],"tags":{"Internal":["Url.Url"],"External":["String.String"]}},"Internal.Item.Any":{"args":[],"tags":{"Dot":["Internal.Svg.Dot"],"Bar":["Internal.Svg.Bar"],"Custom":[]}},"Basics.Bool":{"args":[],"tags":{"True":[],"False":[]}},"Basics.Float":{"args":[],"tags":{"Float":[]}},"List.List":{"args":["a"],"tags":{}},"Articles.Msg":{"args":[],"tags":{"ExampleMsg0":["Articles.GenderAndSalery.Msg"]}},"Charts.Dashboard1.Msg":{"args":[],"tags":{"OnHover":["List.List (Chart.Item.One Charts.Dashboard1.Datum Chart.Item.Dot)","List.List (Chart.Item.Many Charts.Dashboard1.Datum Chart.Item.Bar)"]}},"Charts.Dashboard2.Msg":{"args":[],"tags":{"OnHover":["List.List (Chart.Item.One Charts.Dashboard2.Datum Chart.Item.Dot)"]}},"Charts.Dashboard3.Msg":{"args":[],"tags":{"OnHover":["List.List (Chart.Item.One Charts.Dashboard3.Datum Chart.Item.Dot)"]}},"Charts.Dashboard4.Msg":{"args":[],"tags":{"OnHover":["List.List (Chart.Item.One Charts.Dashboard4.Datum Chart.Item.Bar)"]}},"Charts.Dashboard5.Msg":{"args":[],"tags":{"OnHover":["List.List (Chart.Item.One Data.Iris.Datum Chart.Item.Dot)"]}},"Charts.Landing.Msg":{"args":[],"tags":{"OnHover":["List.List (Chart.Item.One Charts.Landing.Datum Chart.Item.Dot)","List.List (Chart.Item.Many Charts.Landing.Datum Chart.Item.Bar)"]}},"Examples.Msg":{"args":[],"tags":{"ExampleMsg0":["Examples.BarCharts.Gradient.Msg"],"ExampleMsg1":["Examples.BarCharts.VariableWidth.Msg"],"ExampleMsg2":["Examples.BarCharts.Title.Msg"],"ExampleMsg3":["Examples.BarCharts.TooltipStack.Msg"],"ExampleMsg4":["Examples.BarCharts.Tooltip.Msg"],"ExampleMsg5":["Examples.BarCharts.BarLabels.Msg"],"ExampleMsg6":["Examples.BarCharts.Pattern.Msg"],"ExampleMsg7":["Examples.BarCharts.Histogram.Msg"],"ExampleMsg8":["Examples.BarCharts.BinLabelsAdvanced.Msg"],"ExampleMsg9":["Examples.BarCharts.Spacing.Msg"],"ExampleMsg10":["Examples.BarCharts.Highlight.Msg"],"ExampleMsg11":["Examples.BarCharts.DataDependent.Msg"],"ExampleMsg12":["Examples.BarCharts.Color.Msg"],"ExampleMsg13":["Examples.BarCharts.TooltipBin.Msg"],"ExampleMsg14":["Examples.BarCharts.Corners.Msg"],"ExampleMsg15":["Examples.BarCharts.Ungroup.Msg"],"ExampleMsg16":["Examples.BarCharts.BinLabels.Msg"],"ExampleMsg17":["Examples.BarCharts.Stacked.Msg"],"ExampleMsg18":["Examples.BarCharts.Margin.Msg"],"ExampleMsg19":["Examples.BarCharts.Borders.Msg"],"ExampleMsg20":["Examples.BarCharts.Opacity.Msg"],"ExampleMsg21":["Examples.BarCharts.Legends.Msg"],"ExampleMsg22":["Examples.BarCharts.Basic.Msg"],"ExampleMsg23":["Examples.Frame.Lines.Msg"],"ExampleMsg24":["Examples.Frame.Position.Msg"],"ExampleMsg25":["Examples.Frame.Coordinates.Msg"],"ExampleMsg26":["Examples.Frame.GridFilter.Msg"],"ExampleMsg27":["Examples.Frame.Dimensions.Msg"],"ExampleMsg28":["Examples.Frame.CustomElements.Msg"],"ExampleMsg29":["Examples.Frame.NoArrow.Msg"],"ExampleMsg30":["Examples.Frame.Background.Msg"],"ExampleMsg31":["Examples.Frame.Rect.Msg"],"ExampleMsg32":["Examples.Frame.Padding.Msg"],"ExampleMsg33":["Examples.Frame.Times.Msg"],"ExampleMsg34":["Examples.Frame.OnlyInts.Msg"],"ExampleMsg35":["Examples.Frame.GridColor.Msg"],"ExampleMsg36":["Examples.Frame.Offset.Msg"],"ExampleMsg37":["Examples.Frame.Color.Msg"],"ExampleMsg38":["Examples.Frame.Amount.Msg"],"ExampleMsg39":["Examples.Frame.Titles.Msg"],"ExampleMsg40":["Examples.Frame.CustomLabels.Msg"],"ExampleMsg41":["Examples.Frame.Margin.Msg"],"ExampleMsg42":["Examples.Frame.LabelWithLine.Msg"],"ExampleMsg43":["Examples.Frame.DotGrid.Msg"],"ExampleMsg44":["Examples.Frame.CustomFormat.Msg"],"ExampleMsg45":["Examples.Frame.AxisLength.Msg"],"ExampleMsg46":["Examples.Frame.Arbitrary.Msg"],"ExampleMsg47":["Examples.Frame.Legends.Msg"],"ExampleMsg48":["Examples.Frame.Basic.Msg"],"ExampleMsg49":["Examples.Interactivity.ChangeContent.Msg"],"ExampleMsg50":["Examples.Interactivity.Direction.Msg"],"ExampleMsg51":["Examples.Interactivity.ChangeDot.Msg"],"ExampleMsg52":["Examples.Interactivity.Border.Msg"],"ExampleMsg53":["Examples.Interactivity.Zoom.Msg"],"ExampleMsg54":["Examples.Interactivity.BasicBin.Msg"],"ExampleMsg55":["Examples.Interactivity.BasicStack.Msg"],"ExampleMsg56":["Examples.Interactivity.Coordinates.Msg"],"ExampleMsg57":["Examples.Interactivity.ChangeName.Msg"],"ExampleMsg58":["Examples.Interactivity.NoArrow.Msg"],"ExampleMsg59":["Examples.Interactivity.FilterSearch.Msg"],"ExampleMsg60":["Examples.Interactivity.Background.Msg"],"ExampleMsg61":["Examples.Interactivity.BasicBar.Msg"],"ExampleMsg62":["Examples.Interactivity.BasicArea.Msg"],"ExampleMsg63":["Examples.Interactivity.TrickyTooltip.Msg"],"ExampleMsg64":["Examples.Interactivity.Multiple.Msg"],"ExampleMsg65":["Examples.Interactivity.BasicLine.Msg"],"ExampleMsg66":["Examples.Interactivity.Offset.Msg"],"ExampleMsg67":["Examples.Interactivity.DoubleSearch.Msg"],"ExampleMsg68":["Examples.Interactivity.ChangeUnit.Msg"],"ExampleMsg69":["Examples.Interactivity.Focal.Msg"],"ExampleMsg70":["Examples.LineCharts.Area.Msg"],"ExampleMsg71":["Examples.LineCharts.Gradient.Msg"],"ExampleMsg72":["Examples.LineCharts.Width.Msg"],"ExampleMsg73":["Examples.LineCharts.TooltipStack.Msg"],"ExampleMsg74":["Examples.LineCharts.Tooltip.Msg"],"ExampleMsg75":["Examples.LineCharts.Montone.Msg"],"ExampleMsg76":["Examples.LineCharts.Pattern.Msg"],"ExampleMsg77":["Examples.LineCharts.Dots.Msg"],"ExampleMsg78":["Examples.LineCharts.Dashed.Msg"],"ExampleMsg79":["Examples.LineCharts.Color.Msg"],"ExampleMsg80":["Examples.LineCharts.Stepped.Msg"],"ExampleMsg81":["Examples.LineCharts.Stacked.Msg"],"ExampleMsg82":["Examples.LineCharts.Labels.Msg"],"ExampleMsg83":["Examples.LineCharts.Missing.Msg"],"ExampleMsg84":["Examples.LineCharts.Legends.Msg"],"ExampleMsg85":["Examples.LineCharts.Basic.Msg"],"ExampleMsg86":["Examples.Frontpage.BasicBubble.Msg"],"ExampleMsg87":["Examples.Frontpage.BasicNavigation.Msg"],"ExampleMsg88":["Examples.Frontpage.BasicBar.Msg"],"ExampleMsg89":["Examples.Frontpage.BasicArea.Msg"],"ExampleMsg90":["Examples.Frontpage.Concise.Msg"],"ExampleMsg91":["Examples.Frontpage.BasicLine.Msg"],"ExampleMsg92":["Examples.Frontpage.BasicScatter.Msg"],"ExampleMsg93":["Examples.Frontpage.Familiar.Msg"],"ExampleMsg94":["Examples.ScatterCharts.Colors.Msg"],"ExampleMsg95":["Examples.ScatterCharts.Shapes.Msg"],"ExampleMsg96":["Examples.ScatterCharts.Tooltip.Msg"],"ExampleMsg97":["Examples.ScatterCharts.Highlight.Msg"],"ExampleMsg98":["Examples.ScatterCharts.DataDependent.Msg"],"ExampleMsg99":["Examples.ScatterCharts.Borders.Msg"],"ExampleMsg100":["Examples.ScatterCharts.Labels.Msg"],"ExampleMsg101":["Examples.ScatterCharts.Opacity.Msg"],"ExampleMsg102":["Examples.ScatterCharts.Sizes.Msg"],"ExampleMsg103":["Examples.ScatterCharts.Legends.Msg"],"ExampleMsg104":["Examples.ScatterCharts.Basic.Msg"]}},"Examples.Frontpage.Concise.Msg":{"args":[],"tags":{"OnHover":["List.List (Chart.Item.Many Examples.Frontpage.Concise.Datum Chart.Item.Any)"]}},"Ui.Menu.Msg":{"args":[],"tags":{"OnToggle":[]}},"Internal.Item.Rendered":{"args":["a"],"tags":{"Rendered":["{ config : a, toLimits : a -> Internal.Coordinates.Position, toPosition : Internal.Coordinates.Plane -> a -> Internal.Coordinates.Position, toSvg : Internal.Coordinates.Plane -> a -> Internal.Coordinates.Position -> Svg.Svg Basics.Never, toHtml : a -> List.List (Html.Html Basics.Never) }"]}},"VirtualDom.Attribute":{"args":["msg"],"tags":{"Attribute":[]}},"Charts.Dashboard1.Datum":{"args":[],"tags":{"Bar":["Charts.Dashboard1.BarDatum"],"Dot":["Charts.Dashboard1.DotDatum"]}},"Charts.Landing.Datum":{"args":[],"tags":{"Bar":["Charts.Landing.BarDatum"],"Dot":["Charts.Landing.DotDatum"]}},"Internal.Svg.Design":{"args":[],"tags":{"Striped":["List.List (Internal.Helpers.Attribute Internal.Svg.Pattern)"],"Dotted":["List.List (Internal.Helpers.Attribute Internal.Svg.Pattern)"],"Gradient":["List.List String.String"]}},"Articles.GenderAndSalery.Msg":{"args":[],"tags":{"BubbleMsg":["Articles.GenderAndSalery.Bubble.Msg"],"BarsMsg":["Articles.GenderAndSalery.Bars.Msg"],"EducationMsg":["Articles.GenderAndSalery.EducationChart.Msg"],"OnYear":["Basics.Float"]}},"Examples.BarCharts.BarLabels.Msg":{"args":[],"tags":{"Msg":[]}},"Examples.BarCharts.Basic.Msg":{"args":[],"tags":{"Msg":[]}},"Examples.BarCharts.BinLabels.Msg":{"args":[],"tags":{"Msg":[]}},"Examples.BarCharts.BinLabelsAdvanced.Msg":{"args":[],"tags":{"Msg":[]}},"Examples.BarCharts.Borders.Msg":{"args":[],"tags":{"Msg":[]}},"Examples.BarCharts.Color.Msg":{"args":[],"tags":{"Msg":[]}},"Examples.BarCharts.Corners.Msg":{"args":[],"tags":{"Msg":[]}},"Examples.BarCharts.DataDependent.Msg":{"args":[],"tags":{"Msg":[]}},"Examples.BarCharts.Gradient.Msg":{"args":[],"tags":{"Msg":[]}},"Examples.BarCharts.Highlight.Msg":{"args":[],"tags":{"OnHover":["List.List (Chart.Item.One Examples.BarCharts.Highlight.Datum Chart.Item.Bar)"]}},"Examples.BarCharts.Histogram.Msg":{"args":[],"tags":{"Msg":[]}},"Examples.BarCharts.Legends.Msg":{"args":[],"tags":{"Msg":[]}},"Examples.BarCharts.Margin.Msg":{"args":[],"tags":{"Msg":[]}},"Examples.BarCharts.Opacity.Msg":{"args":[],"tags":{"Msg":[]}},"Examples.BarCharts.Pattern.Msg":{"args":[],"tags":{"Msg":[]}},"Examples.BarCharts.Spacing.Msg":{"args":[],"tags":{"Msg":[]}},"Examples.BarCharts.Stacked.Msg":{"args":[],"tags":{"Msg":[]}},"Examples.BarCharts.Title.Msg":{"args":[],"tags":{"Msg":[]}},"Examples.BarCharts.Tooltip.Msg":{"args":[],"tags":{"OnHover":["List.List (Chart.Item.One Examples.BarCharts.Tooltip.Datum Chart.Item.Bar)"]}},"Examples.BarCharts.TooltipBin.Msg":{"args":[],"tags":{"OnHover":["List.List (Chart.Item.Many Examples.BarCharts.TooltipBin.Datum Chart.Item.Any)"]}},"Examples.BarCharts.TooltipStack.Msg":{"args":[],"tags":{"OnHover":["List.List (Chart.Item.Many Examples.BarCharts.TooltipStack.Datum Chart.Item.Any)"]}},"Examples.BarCharts.Ungroup.Msg":{"args":[],"tags":{"Msg":[]}},"Examples.BarCharts.VariableWidth.Msg":{"args":[],"tags":{"Msg":[]}},"Examples.Frame.Amount.Msg":{"args":[],"tags":{"Msg":[]}},"Examples.Frame.Arbitrary.Msg":{"args":[],"tags":{"Msg":[]}},"Examples.Frame.AxisLength.Msg":{"args":[],"tags":{"Msg":[]}},"Examples.Frame.Background.Msg":{"args":[],"tags":{"Msg":[]}},"Examples.Frame.Basic.Msg":{"args":[],"tags":{"Msg":[]}},"Examples.Frame.Color.Msg":{"args":[],"tags":{"Msg":[]}},"Examples.Frame.Coordinates.Msg":{"args":[],"tags":{"Msg":[]}},"Examples.Frame.CustomElements.Msg":{"args":[],"tags":{"OnHover":["List.List (Chart.Item.One { x : Basics.Float, y : Basics.Float } Chart.Item.Any)"]}},"Examples.Frame.CustomFormat.Msg":{"args":[],"tags":{"Msg":[]}},"Examples.Frame.CustomLabels.Msg":{"args":[],"tags":{"Msg":[]}},"Examples.Frame.Dimensions.Msg":{"args":[],"tags":{"Msg":[]}},"Examples.Frame.DotGrid.Msg":{"args":[],"tags":{"Msg":[]}},"Examples.Frame.GridColor.Msg":{"args":[],"tags":{"Msg":[]}},"Examples.Frame.GridFilter.Msg":{"args":[],"tags":{"Msg":[]}},"Examples.Frame.LabelWithLine.Msg":{"args":[],"tags":{"Msg":[]}},"Examples.Frame.Legends.Msg":{"args":[],"tags":{"Msg":[]}},"Examples.Frame.Lines.Msg":{"args":[],"tags":{"Msg":[]}},"Examples.Frame.Margin.Msg":{"args":[],"tags":{"Msg":[]}},"Examples.Frame.NoArrow.Msg":{"args":[],"tags":{"Msg":[]}},"Examples.Frame.Offset.Msg":{"args":[],"tags":{"Msg":[]}},"Examples.Frame.OnlyInts.Msg":{"args":[],"tags":{"Msg":[]}},"Examples.Frame.Padding.Msg":{"args":[],"tags":{"Msg":[]}},"Examples.Frame.Position.Msg":{"args":[],"tags":{"Msg":[]}},"Examples.Frame.Rect.Msg":{"args":[],"tags":{"Msg":[]}},"Examples.Frame.Times.Msg":{"args":[],"tags":{"Msg":[]}},"Examples.Frame.Titles.Msg":{"args":[],"tags":{"Msg":[]}},"Examples.Frontpage.BasicArea.Msg":{"args":[],"tags":{"Msg":[]}},"Examples.Frontpage.BasicBar.Msg":{"args":[],"tags":{"Msg":[]}},"Examples.Frontpage.BasicBubble.Msg":{"args":[],"tags":{"Msg":[]}},"Examples.Frontpage.BasicLine.Msg":{"args":[],"tags":{"Msg":[]}},"Examples.Frontpage.BasicNavigation.Msg":{"args":[],"tags":{"Msg":[]}},"Examples.Frontpage.BasicScatter.Msg":{"args":[],"tags":{"Msg":[]}},"Examples.Frontpage.Familiar.Msg":{"args":[],"tags":{"Msg":[]}},"Examples.Interactivity.Background.Msg":{"args":[],"tags":{"OnHover":["List.List (Chart.Item.One Examples.Interactivity.Background.Datum Chart.Item.Bar)"]}},"Examples.Interactivity.BasicArea.Msg":{"args":[],"tags":{"OnHover":["List.List (Chart.Item.Many Examples.Interactivity.BasicArea.Datum Chart.Item.Any)"]}},"Examples.Interactivity.BasicBar.Msg":{"args":[],"tags":{"OnHover":["List.List (Chart.Item.One Examples.Interactivity.BasicBar.Datum Chart.Item.Bar)"]}},"Examples.Interactivity.BasicBin.Msg":{"args":[],"tags":{"OnHover":["List.List (Chart.Item.Many Examples.Interactivity.BasicBin.Datum Chart.Item.Any)"]}},"Examples.Interactivity.BasicLine.Msg":{"args":[],"tags":{"OnHover":["List.List (Chart.Item.One Examples.Interactivity.BasicLine.Datum Chart.Item.Dot)"]}},"Examples.Interactivity.BasicStack.Msg":{"args":[],"tags":{"OnHover":["List.List (Chart.Item.Many Examples.Interactivity.BasicStack.Datum Chart.Item.Any)"]}},"Examples.Interactivity.Border.Msg":{"args":[],"tags":{"OnHover":["List.List (Chart.Item.One Examples.Interactivity.Border.Datum Chart.Item.Bar)"]}},"Examples.Interactivity.ChangeContent.Msg":{"args":[],"tags":{"OnHover":["List.List (Chart.Item.One Examples.Interactivity.ChangeContent.Datum Chart.Item.Dot)"]}},"Examples.Interactivity.ChangeDot.Msg":{"args":[],"tags":{"OnHover":["List.List (Chart.Item.One Examples.Interactivity.ChangeDot.Datum Chart.Item.Dot)"]}},"Examples.Interactivity.ChangeName.Msg":{"args":[],"tags":{"OnHover":["List.List (Chart.Item.Many Examples.Interactivity.ChangeName.Datum Chart.Item.Any)"]}},"Examples.Interactivity.ChangeUnit.Msg":{"args":[],"tags":{"OnHover":["List.List (Chart.Item.Many Examples.Interactivity.ChangeUnit.Datum Chart.Item.Any)"]}},"Examples.Interactivity.Coordinates.Msg":{"args":[],"tags":{"OnHover":["Maybe.Maybe Chart.Events.Point"]}},"Examples.Interactivity.Direction.Msg":{"args":[],"tags":{"OnHover":["List.List (Chart.Item.One Examples.Interactivity.Direction.Datum Chart.Item.Dot)"]}},"Examples.Interactivity.DoubleSearch.Msg":{"args":[],"tags":{"OnHover":["List.List (Chart.Item.One Examples.Interactivity.DoubleSearch.Datum Chart.Item.Dot)","List.List (Chart.Item.One Examples.Interactivity.DoubleSearch.Datum Chart.Item.Bar)"]}},"Examples.Interactivity.FilterSearch.Msg":{"args":[],"tags":{"OnHover":["List.List (Chart.Item.Many Examples.Interactivity.FilterSearch.Datum Chart.Item.Dot)"]}},"Examples.Interactivity.Focal.Msg":{"args":[],"tags":{"OnHover":["List.List (Chart.Item.One Examples.Interactivity.Focal.Datum Chart.Item.Bar)"]}},"Examples.Interactivity.Multiple.Msg":{"args":[],"tags":{"OnHover":["List.List (Chart.Item.One Examples.Interactivity.Multiple.Datum Chart.Item.Any)"]}},"Examples.Interactivity.NoArrow.Msg":{"args":[],"tags":{"OnHover":["List.List (Chart.Item.One Examples.Interactivity.NoArrow.Datum Chart.Item.Dot)"]}},"Examples.Interactivity.Offset.Msg":{"args":[],"tags":{"OnHover":["List.List (Chart.Item.One Examples.Interactivity.Offset.Datum Chart.Item.Dot)"]}},"Examples.Interactivity.TrickyTooltip.Msg":{"args":[],"tags":{"OnHover":["List.List (Chart.Item.Many Examples.Interactivity.TrickyTooltip.Datum Chart.Item.Bar)"]}},"Examples.Interactivity.Zoom.Msg":{"args":[],"tags":{"OnDown":["Chart.Events.Point"],"OnMove":["Chart.Events.Point"],"OnUp":["Chart.Events.Point"],"OnReset":[]}},"Examples.LineCharts.Area.Msg":{"args":[],"tags":{"Msg":[]}},"Examples.LineCharts.Basic.Msg":{"args":[],"tags":{"Msg":[]}},"Examples.LineCharts.Color.Msg":{"args":[],"tags":{"Msg":[]}},"Examples.LineCharts.Dashed.Msg":{"args":[],"tags":{"Msg":[]}},"Examples.LineCharts.Dots.Msg":{"args":[],"tags":{"Msg":[]}},"Examples.LineCharts.Gradient.Msg":{"args":[],"tags":{"Msg":[]}},"Examples.LineCharts.Labels.Msg":{"args":[],"tags":{"Msg":[]}},"Examples.LineCharts.Legends.Msg":{"args":[],"tags":{"Msg":[]}},"Examples.LineCharts.Missing.Msg":{"args":[],"tags":{"Msg":[]}},"Examples.LineCharts.Montone.Msg":{"args":[],"tags":{"Msg":[]}},"Examples.LineCharts.Pattern.Msg":{"args":[],"tags":{"Msg":[]}},"Examples.LineCharts.Stacked.Msg":{"args":[],"tags":{"Msg":[]}},"Examples.LineCharts.Stepped.Msg":{"args":[],"tags":{"Msg":[]}},"Examples.LineCharts.Tooltip.Msg":{"args":[],"tags":{"OnHover":["List.List (Chart.Item.One Examples.LineCharts.Tooltip.Datum Chart.Item.Dot)"]}},"Examples.LineCharts.TooltipStack.Msg":{"args":[],"tags":{"OnHover":["List.List (Chart.Item.Many Examples.LineCharts.TooltipStack.Datum Chart.Item.Any)"]}},"Examples.LineCharts.Width.Msg":{"args":[],"tags":{"Msg":[]}},"Examples.ScatterCharts.Basic.Msg":{"args":[],"tags":{"Msg":[]}},"Examples.ScatterCharts.Borders.Msg":{"args":[],"tags":{"Msg":[]}},"Examples.ScatterCharts.Colors.Msg":{"args":[],"tags":{"Msg":[]}},"Examples.ScatterCharts.DataDependent.Msg":{"args":[],"tags":{"Msg":[]}},"Examples.ScatterCharts.Highlight.Msg":{"args":[],"tags":{"Msg":[]}},"Examples.ScatterCharts.Labels.Msg":{"args":[],"tags":{"Msg":[]}},"Examples.ScatterCharts.Legends.Msg":{"args":[],"tags":{"Msg":[]}},"Examples.ScatterCharts.Opacity.Msg":{"args":[],"tags":{"Msg":[]}},"Examples.ScatterCharts.Shapes.Msg":{"args":[],"tags":{"Msg":[]}},"Examples.ScatterCharts.Sizes.Msg":{"args":[],"tags":{"Msg":[]}},"Examples.ScatterCharts.Tooltip.Msg":{"args":[],"tags":{"OnHover":["List.List (Chart.Item.One Examples.ScatterCharts.Tooltip.Datum Chart.Item.Dot)"]}},"Basics.Never":{"args":[],"tags":{"JustOneMore":["Basics.Never"]}},"VirtualDom.Node":{"args":["msg"],"tags":{"Node":[]}},"Internal.Svg.Shape":{"args":[],"tags":{"Circle":[],"Triangle":[],"Square":[],"Diamond":[],"Cross":[],"Plus":[]}},"Data.Iris.Species":{"args":[],"tags":{"Setosa":[],"Versicolor":[],"Virginica":[]}},"Articles.GenderAndSalery.Bars.Msg":{"args":[],"tags":{"OnHover":["List.List (Chart.Item.Many Articles.GenderAndSalery.Bars.Binned Chart.Item.Bar)"],"OnBinSize":["Basics.Float"]}},"Articles.GenderAndSalery.Bubble.Msg":{"args":[],"tags":{"OnHover":["List.List (Chart.Item.One Articles.GenderAndSalery.Data.Datum Chart.Item.Dot)","Chart.Svg.Point"],"OnMouseDown":["Chart.Svg.Point"],"OnMouseUp":["Chart.Svg.Point"],"OnZoomIn":[],"OnZoomOut":[],"OnZoomReset":[],"OnReset":[]}},"Articles.GenderAndSalery.EducationChart.Msg":{"args":[],"tags":{"OnHover":["List.List (Chart.Item.Many Data.Education.Year Chart.Item.Bar)"],"OnStackingOption":["Articles.GenderAndSalery.EducationChart.StackingOption"],"OnEducation":["Articles.GenderAndSalery.EducationChart.Education","Basics.Bool"]}},"Articles.GenderAndSalery.EducationChart.Education":{"args":[],"tags":{"Short":[],"Medium":[],"Long":[],"Researcher":[]}},"Articles.GenderAndSalery.EducationChart.StackingOption":{"args":[],"tags":{"Stacked":[],"Seperate":[]}}}}})}});}(this));

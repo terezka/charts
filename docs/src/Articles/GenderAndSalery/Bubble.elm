@@ -14,24 +14,28 @@ import Chart.Svg as CS
 
 import Element as E
 import Element.Font as F
+import Element.Input as I
 import Element.Border as B
 import Element.Background as BG
 
 import Articles.GenderAndSalery.Data as Salary
+import FeatherIcons as Icon
 
 
 type alias Model =
-  { selection : Maybe { a : CS.Point, b : CS.Point }
-  , hovering : List (CI.One Salary.Datum CI.Dot)
-  , window : Maybe CS.Position
+  { hovering : List (CI.One Salary.Datum CI.Dot)
+  , moving : Maybe ( CS.Point, CS.Point )
+  , zoomOffset : CS.Point
+  , zoomPercentage : Float
   }
 
 
 init : Model
 init =
-  { selection = Nothing
-  , hovering = []
-  , window = Nothing
+  { hovering = []
+  , moving = Nothing
+  , zoomOffset = { x = 0, y = 0 }
+  , zoomPercentage = 100
   }
 
 
@@ -39,42 +43,58 @@ type Msg
   = OnHover (List (CI.One Salary.Datum CI.Dot)) CS.Point
   | OnMouseDown CS.Point
   | OnMouseUp CS.Point
+  | OnZoomIn
+  | OnZoomOut
+  | OnZoomReset
   | OnReset
-  | OnExitWindow
 
 
 update : Msg -> Model -> Model
 update msg model =
   case msg of
     OnHover hovering coords ->
-      case model.selection of
-        Nothing -> { model | hovering = hovering }
-        Just select -> { model | selection = Just { select | b = coords }, hovering = [] }
+      case model.moving of
+        Nothing ->
+          { model | hovering = hovering }
+
+        Just ( start, _ ) ->
+          { model | hovering = [], moving = Just ( start, coords ) }
 
     OnMouseDown coords ->
-      { model | selection = Just { a = coords, b = coords } }
+      { model | moving = Just ( coords, coords ) }
 
     OnMouseUp coords ->
-      case model.selection of
-        Nothing -> model
-        Just select ->
-          if select.a == coords
-          then { model | selection = Nothing, window = Nothing }
-          else
-            { model | selection = Nothing
-            , window = Just
-                { x1 = min select.a.x coords.x
-                , x2 = max select.a.x coords.x
-                , y1 = min select.a.y coords.y
-                , y2 = max select.a.y coords.y
-                }
-            }
+      case model.moving of
+        Nothing ->
+          model
+
+        Just ( start, _ ) ->
+          { model | moving = Nothing, zoomOffset =
+              { x = model.zoomOffset.x + coords.x - start.x
+              , y = model.zoomOffset.y + coords.y - start.y
+              }
+          }
+
+    OnZoomIn ->
+      { model | zoomPercentage = model.zoomPercentage + 20 }
+
+    OnZoomOut ->
+      { model | zoomPercentage = max (model.zoomPercentage - 20) 100 }
+
+    OnZoomReset ->
+      { model | zoomPercentage = 100 }
 
     OnReset ->
-      { model | hovering = [] }
+      case model.moving of
+        Nothing ->
+          { model | hovering = [], moving = Nothing }
 
-    OnExitWindow ->
-      { model | window = Nothing }
+        Just ( start, end ) ->
+          { model | hovering = [], moving = Nothing, zoomOffset =
+              { x = model.zoomOffset.x + end.x - start.x
+              , y = model.zoomOffset.y + end.y - start.y
+              }
+          }
 
 
 view : Model -> Float -> E.Element Msg
@@ -84,34 +104,76 @@ view model year =
     , E.spacing 30
     ]
     [ E.row
-        [ E.spacing 20
-        , F.size 12
+        [ E.spacing 40
         , F.bold
-        ] <|
-        let circle color a b =
-              E.row [ E.spacing 5 ]
-                [ E.el
-                    [ BG.color (color 0.4)
-                    , B.color (color 1)
-                    , B.width 1
-                    , B.rounded 50
-                    , E.width (E.px 10)
-                    , E.height (E.px 10)
+        ]
+        [ E.row
+            [ E.spacing 20
+            , F.size 12
+            ] <|
+            let circle color a b =
+                  E.row [ E.spacing 5 ]
+                    [ E.el
+                        [ BG.color (color 0.4)
+                        , B.color (color 1)
+                        , B.width 1
+                        , B.rounded 50
+                        , E.width (E.px 10)
+                        , E.height (E.px 10)
+                        ]
+                        E.none
+                    , E.text (String.fromInt a ++ " - " ++ String.fromInt b ++ "%")
                     ]
-                    E.none
-                , E.text (String.fromInt a ++ " - " ++ String.fromInt b ++ "%")
+            in
+            [ E.text "Percentage of women in sector's workforce: "
+            , circle (E.rgba255 88  169 246)  0 20  -- most blue
+            , circle (E.rgba255 138 145 247) 20 40  -- blue
+            , circle (E.rgba255 197 121 242) 40 60  -- middle
+            , circle (E.rgba255 222 116 215) 60 80  -- pink
+            , circle (E.rgba255 245 109 188) 80 100 -- most pink
+            ]
+
+        , E.row
+            [ E.spacing 10 ]
+            [ E.text "Zoom: "
+            , E.text (String.fromFloat model.zoomPercentage ++ "%")
+            , E.row
+                [ B.width 1
+                , B.rounded 5
+                , B.color (E.rgb255 220 220 220)
                 ]
-        in
-        [ E.text "Percentage of women in sector's workforce: "
-        , circle (E.rgba255 88  169 246)  0 20  -- most blue
-        , circle (E.rgba255 138 145 247) 20 40  -- blue
-        , circle (E.rgba255 197 121 242) 40 60  -- middle
-        , circle (E.rgba255 222 116 215) 60 80  -- pink
-        , circle (E.rgba255 245 109 188) 80 100 -- most pink
+                [ I.button
+                    [ E.paddingXY 10 5
+                    , B.widthEach { top = 0, right = 1, bottom = 0, left = 0 }
+                    , B.color (E.rgb255 220 220 220)
+                    ]
+                    { onPress = Just OnZoomIn
+                    , label = E.html (Icon.toHtml [] <| Icon.withSize 14 <| Icon.plus)
+                    }
+                , I.button
+                    [ E.paddingXY 10 5
+                    , B.widthEach { top = 0, right = 1, bottom = 0, left = 0 }
+                    , B.color (E.rgb255 220 220 220)
+                    ]
+                    { onPress = Just OnZoomOut
+                    , label = E.html (Icon.toHtml [] <| Icon.withSize 14 <| Icon.minus)
+                    }
+                , I.button
+                    [ E.paddingXY 10 5
+                    , B.widthEach { top = 0, right = 1, bottom = 0, left = 0 }
+                    , B.color (E.rgb255 220 220 220)
+                    , E.moveRight 1
+                    ]
+                    { onPress = Just OnZoomReset
+                    , label = E.html (Icon.toHtml [] <| Icon.withSize 14 <| Icon.x)
+                    }
+                ]
+            ]
         ]
 
     , E.el [ E.width E.fill ] (E.html (viewChart model year))
     ]
+
 
 viewChart : Model -> Float -> H.Html Msg
 viewChart model year =
@@ -119,27 +181,41 @@ viewChart model year =
     [ CA.height 550
     , CA.width 1000
     , CA.margin { top = 0, bottom = 20, left = 0, right = 0 }
-    , CA.padding { top = 30, bottom = 0, left = 15, right = 15 }
+    , CA.padding <|
+        let ( xOff, yOff ) =
+              case model.moving of
+                Just ( start, end ) ->
+                  ( (model.zoomOffset.x + end.x - start.x) * (1 - model.zoomPercentage / 100)
+                  , (model.zoomOffset.y + end.y - start.y) * (1 - model.zoomPercentage / 100)
+                  )
 
-    , CA.range <|
-        case model.window of
-          Just window -> [ CA.lowest window.x1 CA.exactly, CA.highest window.x2 CA.exactly ]
-          Nothing -> [ CA.lowest 20000 CA.orHigher ]
+                Nothing ->
+                  ( model.zoomOffset.x * (1 - model.zoomPercentage / 100)
+                  , model.zoomOffset.y * (1 - model.zoomPercentage / 100)
+                  )
+        in
+        { top = 550 - (550 * model.zoomPercentage / 100) - yOff
+        , bottom = 550 - (550 * model.zoomPercentage / 100) + yOff
+        , left = 1000 - (1000 * model.zoomPercentage / 100) - xOff
+        , right = 1000 - (1000 * model.zoomPercentage / 100) + xOff
+        }
 
-    , CA.domain <|
-        case model.window of
-          Just window -> [ CA.lowest window.y1 CA.exactly, CA.highest window.y2 CA.exactly ]
-          Nothing -> [ CA.lowest 76 CA.orHigher ]
+    , CA.range [ CA.lowest 20000 CA.orHigher ]
+    , CA.domain [ CA.lowest 76 CA.orHigher ]
 
     , CE.on "mousemove" <|
-        CE.map2 OnHover (CE.getNearest CI.dots) CE.getCoords
+        CE.map2 OnHover (CE.getNearest CI.dots) CE.getSvgCoords
 
-    , CE.onMouseDown OnMouseDown CE.getCoords
-    , CE.onMouseUp OnMouseUp CE.getCoords
+    , CE.onMouseDown OnMouseDown CE.getSvgCoords
+    , CE.onMouseUp OnMouseUp CE.getSvgCoords
     , CE.onMouseLeave OnReset
 
     , CA.htmlAttrs
-        [ HA.style "cursor" "crosshair" ]
+        [ HA.style "cursor" <|
+            case model.moving of
+              Just _ -> "grabbing"
+              Nothing -> "grab"
+        ]
     ]
     [ C.generate 10 CS.ints .x [] <| \p t ->
         [ C.xLabel
@@ -184,51 +260,51 @@ viewChart model year =
         else
           []
 
-    , case model.window of
-        Just _ ->
-         C.htmlAt .max .min -10 20
-            [ HA.style "transform" "translate(-100%, -100%)"
-            , HA.style "background" "white"
-            , HA.style "border" "1px solid rgb(210, 210, 210)"
-            , HA.style "cursor" "pointer"
-            , HA.style "width" "167px"
-            , HE.onClick OnExitWindow
-            ]
-            [ viewMini model year
-            , H.button
-                [ HA.style "position" "absolute"
-                , HA.style "top" "0"
-                , HA.style "right" "0"
-                , HA.style "background" "transparent"
-                , HA.style "color" "rgb(100, 100, 100)"
-                , HA.style "border" "0"
-                , HA.style "height" "30px"
-                , HA.style "width" "30px"
-                , HA.style "padding" "0"
-                , HA.style "margin" "0"
-                , HA.style "cursor" "pointer"
-                ]
-                [ H.span
-                    [ HA.style "font-size" "28px"
-                    , HA.style "position" "absolute"
-                    , HA.style "top" "40%"
-                    , HA.style "left" "50%"
-                    , HA.style "transform" "translate(-50%, -50%)"
-                    , HA.style "line-height" "10px"
-                    ]
-                    [ H.text "⨯" ]
-                ]
-            ]
+    --, case model.window of
+    --    Just _ ->
+    --     C.htmlAt .max .min -10 20
+    --        [ HA.style "transform" "translate(-100%, -100%)"
+    --        , HA.style "background" "white"
+    --        , HA.style "border" "1px solid rgb(210, 210, 210)"
+    --        , HA.style "cursor" "pointer"
+    --        , HA.style "width" "167px"
+    --        , HE.onClick OnExitWindow
+    --        ]
+    --        [ viewMini model year
+    --        , H.button
+    --            [ HA.style "position" "absolute"
+    --            , HA.style "top" "0"
+    --            , HA.style "right" "0"
+    --            , HA.style "background" "transparent"
+    --            , HA.style "color" "rgb(100, 100, 100)"
+    --            , HA.style "border" "0"
+    --            , HA.style "height" "30px"
+    --            , HA.style "width" "30px"
+    --            , HA.style "padding" "0"
+    --            , HA.style "margin" "0"
+    --            , HA.style "cursor" "pointer"
+    --            ]
+    --            [ H.span
+    --                [ HA.style "font-size" "28px"
+    --                , HA.style "position" "absolute"
+    --                , HA.style "top" "40%"
+    --                , HA.style "left" "50%"
+    --                , HA.style "transform" "translate(-50%, -50%)"
+    --                , HA.style "line-height" "10px"
+    --                ]
+    --                [ H.text "⨯" ]
+    --            ]
+    --        ]
 
-        Nothing ->
-          C.none
+        --Nothing ->
+        --  C.none
 
     , C.each model.hovering <| \p item ->
         [ C.tooltip item [] [] [ tooltipContent item ] ]
 
-    , case model.selection of
-        Just select -> C.rect [ CA.opacity 0.5, CA.x1 select.a.x, CA.x2 select.b.x, CA.y1 select.a.y, CA.y2 select.b.y ]
-        Nothing -> C.none
+    --, case model.selection of
+    --    Just select -> C.rect [ CA.opacity 0.5, CA.x1 select.a.x, CA.x2 select.b.x, CA.y1 select.a.y, CA.y2 select.b.y ]
+    --    Nothing -> C.none
     ]
 
 
@@ -246,9 +322,9 @@ viewMini model year =
     , C.yTicks [ CA.height 0, CA.amount 8 ]
     , C.line [ CA.dashed [ 3, 3 ], CA.y1 100, CA.width 0.5 ]
 
-    , case model.window of
-        Just select -> C.rect [ CA.color "#0000001F", CA.borderWidth 0, CA.x1 select.x1, CA.x2 select.x2, CA.y1 select.y1, CA.y2 select.y2 ]
-        Nothing -> C.none
+    --, case model.window of
+    --    Just select -> C.rect [ CA.color "#0000001F", CA.borderWidth 0, CA.x1 select.x1, CA.x2 select.x2, CA.y1 select.y1, CA.y2 select.y2 ]
+    --    Nothing -> C.none
 
     , salarySeries model year 0.3 3 4000
     ]
@@ -274,7 +350,7 @@ salarySeries model year border highlightSize size =
                         then [ CA.border "#de74d7", CA.color "#de74d7" ]
                         else [ CA.border "#f56dbc", CA.color "#f56dbc" ]
                   in
-                  [ CA.size (d.numOfBoth / size) ] ++ color
+                  [ CA.size ((d.numOfBoth / size) * model.zoomPercentage / 100) ] ++ color
                 )
           |> C.amongst model.hovering (\d -> [ CA.highlight 0.4, CA.highlightWidth highlightSize, CA.opacity 0.6 ])
       ]
