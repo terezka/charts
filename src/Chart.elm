@@ -2915,8 +2915,25 @@ binned binWidth func data =
 
       toBin datum =
         floor (func datum / binWidth)
+
+      fillHoles bins =
+        let keys = Dict.keys bins
+            smallest = Maybe.withDefault 0 (List.minimum keys)
+            largest = Maybe.withDefault 0 (List.maximum keys)
+            eachKey k bs =
+              if k + 1 >= largest
+                then bs
+                else eachKey (k + 1) (addIfMissing (k + 1) bs)
+
+            addIfMissing k bs =
+              case Dict.get k bs of
+                Just _ -> bs
+                Nothing -> Dict.insert k [] bs
+        in
+        eachKey smallest bins
   in
   List.foldr fold Dict.empty data
+    |> fillHoles
     |> Dict.toList
     |> List.map (\( bin, ds ) -> { bin = toFloat bin * binWidth, data = ds })
 
