@@ -94,7 +94,7 @@ view model =
           , Layout.heading model.window "Gallery"
 
           , E.paragraph
-              [ E.paddingEach { top = 10, bottom = 40, left = 0, right = 0 }
+              [ E.paddingEach { top = 30, bottom = 40, left = 0, right = 0 }
               , F.size 14
               , E.width (E.px 600)
               ]
@@ -103,16 +103,32 @@ view model =
 
           , E.wrappedRow [] <|
               let link id =
-                    let url = (Articles.meta id).id in
+                    let meta = Articles.meta id in
                     E.link
                       [ E.width (E.px 300)
                       , E.height E.fill
                       ]
-                      { url = Route.articles ++ "/" ++ url
+                      { url = Route.articles ++ "/" ++ meta.id
                       , label =
-                          (Articles.view Articles.init id).landing ()
-                            |> E.el [ E.width E.fill, E.height E.fill ]
-                            |> E.map (\_ -> None)
+                          let form = Articles.view Articles.init id in
+                          E.column
+                            [ E.width E.fill
+                            , E.height E.fill
+                            , E.spacing 20
+                            ]
+                            [ E.textColumn
+                                [ E.width E.fill
+                                , E.spacing 5
+                                ]
+                                [ E.paragraph [ F.size 16 ] [ E.text form.title ]
+                                , E.paragraph [ F.size 12 ] [ E.text form.abstract ]
+                                ]
+                            , E.el
+                                [ E.width E.fill
+                                , E.height E.fill
+                                ]
+                                (E.map (\_ -> None) (form.landing ()))
+                            ]
                       }
               in
               List.map link Articles.all

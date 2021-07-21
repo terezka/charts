@@ -14,7 +14,8 @@ import Articles.GenderAndSalery.Data as Salary
 
 
 meta =
-  { id = "salary-distribution-in-denmark" }
+  { id = "salary-distribution-in-denmark"
+  }
 
 
 type alias Model =
@@ -57,6 +58,7 @@ update msg model =
 view : Model -> Article.Article Msg
 view model =
   { title = "Salary distribution in Denmark"
+  , abstract = "Denmark is often praised for its gender equality. But how equal are men and women really?"
   , landing = \_ -> E.html <| H.map BubbleMsg (Bubble.viewChart model.bubbles 2019)
   , body = \_ ->
       [ E.paragraph

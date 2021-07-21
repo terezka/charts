@@ -1,4 +1,4 @@
-module Articles.GenderAndSalery.Bubble exposing (Model, Msg, init, update, view, viewChart)
+module Articles.GenderAndSalery.Bubble exposing (Model, Msg, init, update, view, viewChart, viewMini)
 
 import Html as H
 import Html.Attributes as HA
@@ -194,7 +194,7 @@ viewChart model year =
             , HA.style "width" "167px"
             , HE.onClick OnExitWindow
             ]
-            [ viewSalaryDiscrepancyMini model year
+            [ viewMini model year
             , H.button
                 [ HA.style "position" "absolute"
                 , HA.style "top" "0"
@@ -232,8 +232,8 @@ viewChart model year =
     ]
 
 
-viewSalaryDiscrepancyMini : Model -> Float -> H.Html Msg
-viewSalaryDiscrepancyMini model year =
+viewMini : Model -> Float -> H.Html Msg
+viewMini model year =
   C.chart
     [ CA.height 100
     , CA.width 167
@@ -241,13 +241,16 @@ viewSalaryDiscrepancyMini model year =
     , CA.range [ CA.lowest 20000 CA.orHigher ]
     , CA.domain [ CA.lowest 76 CA.orHigher ]
     ]
-    [ C.line [ CA.dashed [ 3, 3 ], CA.y1 100, CA.width 0.5 ]
+    [ C.grid [ CA.width 0.5 ]
+    , C.xTicks [ CA.height 0, CA.amount 8 ]
+    , C.yTicks [ CA.height 0, CA.amount 8 ]
+    , C.line [ CA.dashed [ 3, 3 ], CA.y1 100, CA.width 0.5 ]
 
-     , case model.window of
+    , case model.window of
         Just select -> C.rect [ CA.color "#0000001F", CA.borderWidth 0, CA.x1 select.x1, CA.x2 select.x2, CA.y1 select.y1, CA.y2 select.y2 ]
         Nothing -> C.none
 
-    , salarySeries model year 0.5 3 4000
+    , salarySeries model year 0.3 3 4000
     ]
 
 
