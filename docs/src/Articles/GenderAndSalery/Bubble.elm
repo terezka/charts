@@ -70,8 +70,8 @@ update msg model =
 
         Just ( start, _ ) ->
           { model | moving = Nothing, zoomOffset =
-              { x = model.zoomOffset.x + coords.x - start.x
-              , y = model.zoomOffset.y + coords.y - start.y
+              { x = model.zoomOffset.x + start.x - coords.x
+              , y = model.zoomOffset.y + start.y - coords.y
               }
           }
 
@@ -82,7 +82,7 @@ update msg model =
       { model | zoomPercentage = max (model.zoomPercentage - 20) 100 }
 
     OnZoomReset ->
-      { model | zoomPercentage = 100 }
+      { model | zoomPercentage = 100, zoomOffset = { x = 0, y = 0 } }
 
     OnReset ->
       case model.moving of
@@ -91,8 +91,8 @@ update msg model =
 
         Just ( start, end ) ->
           { model | hovering = [], moving = Nothing, zoomOffset =
-              { x = model.zoomOffset.x + end.x - start.x
-              , y = model.zoomOffset.y + end.y - start.y
+              { x = model.zoomOffset.x + start.x - end.x
+              , y = model.zoomOffset.y + start.y - end.y
               }
           }
 
@@ -185,13 +185,13 @@ viewChart model year =
         let ( xOff, yOff ) =
               case model.moving of
                 Just ( start, end ) ->
-                  ( (model.zoomOffset.x + end.x - start.x) * (1 - model.zoomPercentage / 100)
-                  , (model.zoomOffset.y + end.y - start.y) * (1 - model.zoomPercentage / 100)
+                  ( (model.zoomOffset.x + start.x - end.x) * (model.zoomPercentage / 100)
+                  , (model.zoomOffset.y + start.y - end.y) * (model.zoomPercentage / 100)
                   )
 
                 Nothing ->
-                  ( model.zoomOffset.x * (1 - model.zoomPercentage / 100)
-                  , model.zoomOffset.y * (1 - model.zoomPercentage / 100)
+                  ( model.zoomOffset.x * (model.zoomPercentage / 100)
+                  , model.zoomOffset.y * (model.zoomPercentage / 100)
                   )
         in
         { top = 550 - (550 * model.zoomPercentage / 100) - yOff

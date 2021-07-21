@@ -12390,7 +12390,7 @@ var $author$project$Articles$GenderAndSalery$Bubble$update = F2(
 						model,
 						{
 							moving: $elm$core$Maybe$Nothing,
-							zoomOffset: {x: (model.zoomOffset.x + coords.x) - start.x, y: (model.zoomOffset.y + coords.y) - start.y}
+							zoomOffset: {x: (model.zoomOffset.x + start.x) - coords.x, y: (model.zoomOffset.y + start.y) - coords.y}
 						});
 				}
 			case 'OnZoomIn':
@@ -12406,7 +12406,10 @@ var $author$project$Articles$GenderAndSalery$Bubble$update = F2(
 			case 'OnZoomReset':
 				return _Utils_update(
 					model,
-					{zoomPercentage: 100});
+					{
+						zoomOffset: {x: 0, y: 0},
+						zoomPercentage: 100
+					});
 			default:
 				var _v5 = model.moving;
 				if (_v5.$ === 'Nothing') {
@@ -12422,7 +12425,7 @@ var $author$project$Articles$GenderAndSalery$Bubble$update = F2(
 						{
 							hovering: _List_Nil,
 							moving: $elm$core$Maybe$Nothing,
-							zoomOffset: {x: (model.zoomOffset.x + end.x) - start.x, y: (model.zoomOffset.y + end.y) - start.y}
+							zoomOffset: {x: (model.zoomOffset.x + start.x) - end.x, y: (model.zoomOffset.y + start.y) - end.y}
 						});
 				}
 		}
@@ -29728,9 +29731,9 @@ var $author$project$Articles$GenderAndSalery$Bubble$viewChart = F2(
 								var _v2 = _v1.a;
 								var start = _v2.a;
 								var end = _v2.b;
-								return _Utils_Tuple2(((model.zoomOffset.x + end.x) - start.x) * (1 - (model.zoomPercentage / 100)), ((model.zoomOffset.y + end.y) - start.y) * (1 - (model.zoomPercentage / 100)));
+								return _Utils_Tuple2(((model.zoomOffset.x + start.x) - end.x) * (model.zoomPercentage / 100), ((model.zoomOffset.y + start.y) - end.y) * (model.zoomPercentage / 100));
 							} else {
-								return _Utils_Tuple2(model.zoomOffset.x * (1 - (model.zoomPercentage / 100)), model.zoomOffset.y * (1 - (model.zoomPercentage / 100)));
+								return _Utils_Tuple2(model.zoomOffset.x * (model.zoomPercentage / 100), model.zoomOffset.y * (model.zoomPercentage / 100));
 							}
 						}();
 						var xOff = _v0.a;
