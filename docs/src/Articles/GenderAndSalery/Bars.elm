@@ -80,32 +80,31 @@ view model year =
     , E.width (E.px 1000)
     , E.height E.fill
     ]
-    [ I.slider
-        [ E.height (E.px 30)
-        , E.width (E.px 150)
+    --[ I.slider
+    --    [ E.height (E.px 30)
+    --    , E.width (E.px 150)
 
-        -- Here is where we're creating/styling the "track"
-        , E.behindContent
-            (E.el
-                [ E.width E.fill
-                , E.height (E.px 2)
-                , E.centerY
-                , BG.color (E.rgb255 180 180 180)
-                , B.rounded 2
-                ]
-                E.none
-            )
-        ]
-        { onChange = OnBinSize
-        , label = I.labelAbove [] (E.text "Bin size")
-        , min = 5000
-        , max = 20000
-        , step = Just 1000
-        , value = model.binSize
-        , thumb = I.defaultThumb
-        }
-
-    , E.el [ E.width E.fill ] <| E.html <| viewChart model year
+    --    -- Here is where we're creating/styling the "track"
+    --    , E.behindContent
+    --        (E.el
+    --            [ E.width E.fill
+    --            , E.height (E.px 2)
+    --            , E.centerY
+    --            , BG.color (E.rgb255 180 180 180)
+    --            , B.rounded 2
+    --            ]
+    --            E.none
+    --        )
+    --    ]
+    --    { onChange = OnBinSize
+    --    , label = I.labelAbove [] (E.text "Bin size")
+    --    , min = 5000
+    --    , max = 20000
+    --    , step = Just 1000
+    --    , value = model.binSize
+    --    , thumb = I.defaultThumb
+    --    }
+    [ E.el [ E.width E.fill ] <| E.html <| viewChart model year
 
     , E.row
         [ E.width E.fill
@@ -139,10 +138,10 @@ viewChart model year =
           |> List.sum
   in
   C.chart
-    [ CA.height 430
+    [ CA.height 400
     , CA.width 1000
-    , CA.margin { top = 40, bottom = 50, left = 0, right = 0 }
-    , CA.padding { top = 15, bottom = 0, left = 0, right = 0 }
+    , CA.margin { top = 0, bottom = 30, left = 0, right = 0 }
+    , CA.padding { top = 15, bottom = 20, left = 40, right = 30 }
 
     , CI.real
         |> CI.andThen CI.bars
@@ -152,36 +151,48 @@ viewChart model year =
     ]
     [ C.grid []
 
-    , C.withPlane <| \p ->
-        let produceLabels current acc =
-              if current > p.x.max then acc else
-              produceLabels (current + model.binSize) (acc ++ viewLabels current)
-
-            viewLabels value =
+    , C.eachBin <| \p bin ->
+        let viewLabels value =
               [ C.xLabel
-                  [ CA.fontSize 8
-                  , CA.x value, CA.y 0, CA.moveUp 5
+                  [ CA.fontSize 11
+                  , CA.x value
+                  , CA.y 0
+                  , CA.alignLeft
+                  , CA.moveRight 3
+                  , CA.moveUp 3
                   ]
                   [ S.text (String.fromFloat (value / 1000) ++ "k") ]
-              , C.xTick
-                  [ CA.x value, CA.y 0 ]
               ]
+
+            limits =
+              CI.getLimits bin
         in
-        produceLabels p.x.min []
+        viewLabels limits.x1
 
     , C.generate 5 C.floats .y [] <| \p y ->
-        [ C.yLabel [ CA.fontSize 10, CA.x p.x.min, CA.y y, CA.withGrid ] [ S.text <| String.fromFloat (y / 1000) ++ "k" ] ]
+        [ C.yLabel
+            [ CA.fontSize 11
+            , CA.x p.x.min
+            , CA.y y
+            , CA.withGrid
+            , CA.alignLeft
+            , CA.moveUp 10
+            , CA.moveRight 10
+            ]
+            [ S.text <| String.fromFloat (y / 1000) ++ "k" ]
+        ]
 
     , C.bars
         [ CA.x1 .bin
         , CA.x2 (.bin >> (+) model.binSize)
-        , CA.margin 0.2
+        , CA.margin 0.25
         , CA.roundTop 0.2
         , CA.roundBottom 0.2
+        , CA.withGrid
         ]
-        [ C.bar (howMany "women") [ CA.color "#f56dbc", CA.gradient [ "#de74d7EE", "#f56dbc80" ] ]
+        [ C.bar (howMany "women") [ CA.color "#f56dbc", CA.gradient [ "#de74d7DE", "#f56dbc80" ] ]
             |> C.named "women"
-        , C.bar (howMany "men") [ CA.color "#58a9f6", CA.gradient [ "#8a91f7EE", "#58a9f680" ] ]
+        , C.bar (howMany "men") [ CA.color "#58a9f6", CA.gradient [ "#8a91f7DE", "#58a9f680" ] ]
             |> C.named "men"
         ]
         (C.binned model.binSize .salary (womensData ++ mensData))
@@ -215,15 +226,14 @@ viewChart model year =
         List.indexedMap viewLabel hoveredBars
           |> List.concat
 
-    , C.labelAt CA.middle .max [ CA.fontSize 14, CA.moveUp 20 ] [ S.text "How many women and men in each salary bracket?" ]
-
-    , C.labelAt .min .max [ CA.fontSize 10, CA.alignRight, CA.moveLeft 8, CA.moveUp 10 ] [ S.text "# of people" ]
-    , C.labelAt CA.middle .min [ CA.fontSize 10, CA.moveDown 30 ] [ S.text "Salary brackets" ]
+    , C.labelAt .min .max [ CA.fontSize 12, CA.alignRight, CA.moveLeft 12, CA.moveDown 3, CA.rotate 90 ] [ S.text "# of people" ]
+    , C.labelAt .max .min [ CA.fontSize 12, CA.alignRight, CA.moveDown 20 ] [ S.text "Salary brackets" ]
 
     , C.legendsAt .max .max [ CA.alignRight, CA.moveLeft 20 ] []
     ]
 
 
+viewTooltip : CI.Many Binned CI.Bar -> List (E.Element msg)
 viewTooltip chartBin =
   let viewJobs chartBar =
         let color = CI.getColor chartBar

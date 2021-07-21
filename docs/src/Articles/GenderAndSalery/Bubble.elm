@@ -91,7 +91,7 @@ view model year =
         let circle color a b =
               E.row [ E.spacing 5 ]
                 [ E.el
-                    [ BG.color (color 0.7)
+                    [ BG.color (color 0.4)
                     , B.color (color 1)
                     , B.width 1
                     , B.rounded 50
@@ -102,7 +102,7 @@ view model year =
                 , E.text (String.fromInt a ++ " - " ++ String.fromInt b ++ "%")
                 ]
         in
-        [ E.text "Percentage of women in the workforce: "
+        [ E.text "Percentage of women in sector's workforce: "
         , circle (E.rgba255 88  169 246)  0 20  -- most blue
         , circle (E.rgba255 138 145 247) 20 40  -- blue
         , circle (E.rgba255 197 121 242) 40 60  -- middle
@@ -116,9 +116,9 @@ view model year =
 viewChart : Model -> Float -> H.Html Msg
 viewChart model year =
   C.chart
-    [ CA.height 600
+    [ CA.height 550
     , CA.width 1000
-    , CA.margin { top = 0, bottom = 30, left = 0, right = 0 }
+    , CA.margin { top = 0, bottom = 20, left = 0, right = 0 }
     , CA.padding { top = 30, bottom = 0, left = 15, right = 15 }
 
     , CA.range <|
@@ -162,10 +162,10 @@ viewChart model year =
       ]
 
     , C.withPlane <| \p ->
-        [ C.label [ CA.fontSize 12, CA.moveDown 20, CA.alignRight ] [ S.text "Average salary in DKK" ] { x = p.x.max, y = p.y.min }
-        , C.label [ CA.fontSize 12, CA.moveLeft 15, CA.alignRight, CA.rotate 90 ] [ S.text "Womens % of mens salary" ] { x = p.x.min, y = p.y.max }
-        , C.line [ CA.dashed [ 4, 2 ], CA.opacity 0.7, CA.color "#f56dbc", CA.x1 Salary.avgSalaryWomen ]
-        , C.line [ CA.dashed [ 4, 2 ], CA.opacity 0.7, CA.color "#58a9f6", CA.x1 Salary.avgSalaryMen ]
+        [ C.label [ CA.fontSize 12, CA.moveDown 17, CA.alignRight ] [ S.text "Average salary in DKK" ] { x = p.x.max, y = p.y.min }
+        , C.label [ CA.fontSize 12, CA.moveLeft 12, CA.alignRight, CA.rotate 90 ] [ S.text "Womens % of mens salary" ] { x = p.x.min, y = p.y.max }
+        , C.line [ CA.dashed [ 4, 2 ], CA.opacity 0.7, CA.color "#f56dbc", CA.x1 (Salary.avgSalaryWomen year) ]
+        , C.line [ CA.dashed [ 4, 2 ], CA.opacity 0.7, CA.color "#58a9f6", CA.x1 (Salary.avgSalaryMen year) ]
         ]
 
     , C.line [ CA.dashed [ 3, 3 ], CA.y1 100 ]
