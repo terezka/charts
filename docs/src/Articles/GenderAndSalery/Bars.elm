@@ -79,32 +79,66 @@ view model year =
     [ EE.onMouseLeave (OnHover [])
     , E.width (E.px 1000)
     , E.height E.fill
+    , E.spacing 20
     ]
-    --[ I.slider
-    --    [ E.height (E.px 30)
-    --    , E.width (E.px 150)
+    [ E.row
+        [ E.spacing 20
+        , F.size 12
+        , F.bold
+        ] <|
+        let circle color name =
+              E.row [ E.spacing 5 ]
+                [ E.el
+                    [ BG.color (color 0.8)
+                    , B.rounded 50
+                    , E.width (E.px 10)
+                    , E.height (E.px 10)
+                    ]
+                    E.none
+                , E.text name
+                ]
+        in
+        [ I.slider
+            [ E.height (E.px 30)
+            , E.width (E.px 100)
+            , E.spacing 10
+            , E.behindContent <|
+                E.el
+                    [ E.width E.fill
+                    , E.height (E.px 10)
+                    , E.centerY
+                    , BG.color (E.rgb255 220 220 220)
+                    , B.rounded 10
+                    ]
+                    E.none
+            ]
+            { onChange = OnBinSize
+            , label =
+                I.labelLeft
+                  [ E.centerY
+                  , F.size 12
+                  , F.bold
+                  ]
+                  (E.text "Bin size")
+            , min = 5000
+            , max = 20000
+            , step = Just 1000
+            , value = model.binSize
+            , thumb =
+                I.thumb
+                  [ E.height (E.px 15)
+                  , E.width (E.px 15)
+                  , BG.color (E.rgb255 255 255 255)
+                  , B.color (E.rgb255 180 180 180)
+                  , B.width 1
+                  , B.rounded 10
+                  ]
+            }
+        , circle (E.rgba255 88  169 246) "Men"  -- most blue
+        , circle (E.rgba255 245 109 188) "Women" -- most pink
+        ]
 
-    --    -- Here is where we're creating/styling the "track"
-    --    , E.behindContent
-    --        (E.el
-    --            [ E.width E.fill
-    --            , E.height (E.px 2)
-    --            , E.centerY
-    --            , BG.color (E.rgb255 180 180 180)
-    --            , B.rounded 2
-    --            ]
-    --            E.none
-    --        )
-    --    ]
-    --    { onChange = OnBinSize
-    --    , label = I.labelAbove [] (E.text "Bin size")
-    --    , min = 5000
-    --    , max = 20000
-    --    , step = Just 1000
-    --    , value = model.binSize
-    --    , thumb = I.defaultThumb
-    --    }
-    [ E.el [ E.width E.fill ] <| E.html <| viewChart model year
+    , E.el [ E.width E.fill ] <| E.html <| viewChart model year
 
     , E.row
         [ E.width E.fill
@@ -138,10 +172,10 @@ viewChart model year =
           |> List.sum
   in
   C.chart
-    [ CA.height 400
+    [ CA.height 300
     , CA.width 1000
     , CA.margin { top = 0, bottom = 30, left = 0, right = 0 }
-    , CA.padding { top = 15, bottom = 20, left = 40, right = 30 }
+    , CA.padding { top = 15, bottom = 20, left = 40, right = 0 }
 
     , CI.real
         |> CI.andThen CI.bars
@@ -190,9 +224,9 @@ viewChart model year =
         , CA.roundBottom 0.2
         , CA.withGrid
         ]
-        [ C.bar (howMany "women") [ CA.color "#f56dbc", CA.gradient [ "#de74d7DE", "#f56dbc80" ] ]
+        [ C.bar (howMany "women") [ CA.color "#f56dbc", CA.gradient [ "#de74d7CE", "#f56dbc80" ] ]
             |> C.named "women"
-        , C.bar (howMany "men") [ CA.color "#58a9f6", CA.gradient [ "#8a91f7DE", "#58a9f680" ] ]
+        , C.bar (howMany "men") [ CA.color "#58a9f6", CA.gradient [ "#8a91f7CE", "#58a9f680" ] ]
             |> C.named "men"
         ]
         (C.binned model.binSize .salary (womensData ++ mensData))
@@ -226,10 +260,10 @@ viewChart model year =
         List.indexedMap viewLabel hoveredBars
           |> List.concat
 
-    , C.labelAt .min .max [ CA.fontSize 12, CA.alignRight, CA.moveLeft 12, CA.moveDown 3, CA.rotate 90 ] [ S.text "# of people" ]
-    , C.labelAt .max .min [ CA.fontSize 12, CA.alignRight, CA.moveDown 20 ] [ S.text "Salary brackets" ]
+    , C.labelAt .min .max [ CA.fontSize 12, CA.alignRight, CA.moveLeft 12, CA.moveDown 3, CA.rotate 90 ] [ S.text "People" ]
+    , C.labelAt .max .min [ CA.fontSize 12, CA.alignRight, CA.moveDown 15 ] [ S.text "Salary" ]
 
-    , C.legendsAt .max .max [ CA.alignRight, CA.moveLeft 20 ] []
+    --, C.legendsAt .max .max [ CA.alignRight, CA.moveLeft 20 ] []
     ]
 
 
