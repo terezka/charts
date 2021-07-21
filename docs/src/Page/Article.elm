@@ -101,11 +101,14 @@ view model =
 
           , case model.articleId of
               Nothing ->
-                E.text "Article not found."
+                Layout.heading model.window "Article not found."
 
               Just id ->
                 let form = Articles.view model.article id in
-                E.column [ E.spacing 40 ] (Layout.heading model.window form.title :: List.map (E.map ArticleMsg) form.body)
+                E.column [ E.spacing 40 ]
+                  [ Layout.heading model.window form.title
+                  , E.column [ E.spacing 30 ] (List.map (E.map ArticleMsg) (form.body ()))
+                  ]
           ]
     }
 

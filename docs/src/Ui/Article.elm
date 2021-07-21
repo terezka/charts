@@ -10,14 +10,14 @@ import Element.Background as BG
 
 type alias Article msg =
   { title : String
-  , landing : E.Element msg
-  , body : List (E.Element msg)
+  , landing : () -> E.Element msg
+  , body : () -> List (E.Element msg)
   }
 
 
 map : (a -> b) -> Article a -> Article b
 map func a =
   { title = a.title
-  , landing = E.map func a.landing
-  , body = List.map (E.map func) a.body
+  , landing = \x -> E.map func (a.landing x)
+  , body = \x -> List.map (E.map func) (a.body x)
   }

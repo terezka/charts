@@ -110,7 +110,7 @@ view model =
                       ]
                       { url = "/gallery/" ++ url
                       , label =
-                          (Articles.view Articles.init id).landing
+                          (Articles.view Articles.init id).landing ()
                             |> E.el [ E.width E.fill, E.height E.fill ]
                             |> E.map (\_ -> None)
                       }

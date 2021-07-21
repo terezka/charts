@@ -861,9 +861,9 @@ bar plane config point =
         , y2 = pos.y2 + highlightWidthCarY
         }
 
-      w = abs (pos.x2 - pos.x1)
-      roundingTop = Coord.scaleSVGX plane w * 0.5 * (clamp 0 1 config.roundTop)
-      roundingBottom = Coord.scaleSVGX plane w * 0.5 * (clamp 0 1 config.roundBottom)
+      width = abs (pos.x2 - pos.x1)
+      roundingTop = Coord.scaleSVGX plane width * 0.5 * (clamp 0 1 config.roundTop)
+      roundingBottom = Coord.scaleSVGX plane width * 0.5 * (clamp 0 1 config.roundBottom)
       radiusTopX = Coord.scaleCartesianX plane roundingTop
       radiusTopY = Coord.scaleCartesianY plane roundingTop
       radiusBottomX = Coord.scaleCartesianX plane roundingBottom

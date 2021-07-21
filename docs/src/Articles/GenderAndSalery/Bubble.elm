@@ -24,7 +24,6 @@ type alias Model =
   { selection : Maybe { a : CS.Point, b : CS.Point }
   , hovering : List (CI.One Salary.Datum CI.Dot)
   , window : Maybe CS.Position
-  , year : Float
   }
 
 
@@ -33,7 +32,6 @@ init =
   { selection = Nothing
   , hovering = []
   , window = Nothing
-  , year = 2019
   }
 
 
@@ -43,7 +41,6 @@ type Msg
   | OnMouseUp CS.Point
   | OnReset
   | OnExitWindow
-  | OnYear Float
 
 
 update : Msg -> Model -> Model
@@ -79,17 +76,50 @@ update msg model =
     OnExitWindow ->
       { model | window = Nothing }
 
-    OnYear year ->
-      { model | year = year }
 
+view : Model -> Float -> E.Element Msg
+view model year =
+  E.column
+    [ E.width E.fill
+    , E.spacing 30
+    ]
+    [ E.row
+        [ E.spacing 20
+        , F.size 12
+        , F.bold
+        ] <|
+        let circle color a b =
+              E.row [ E.spacing 5 ]
+                [ E.el
+                    [ BG.color (color 0.7)
+                    , B.color (color 1)
+                    , B.width 1
+                    , B.rounded 50
+                    , E.width (E.px 10)
+                    , E.height (E.px 10)
+                    ]
+                    E.none
+                , E.text (String.fromInt a ++ " - " ++ String.fromInt b ++ "%")
+                ]
+        in
+        [ E.text "Percentage of women in the workforce: "
+        , circle (E.rgba255 88  169 246)  0 20  -- most blue
+        , circle (E.rgba255 138 145 247) 20 40  -- blue
+        , circle (E.rgba255 197 121 242) 40 60  -- middle
+        , circle (E.rgba255 222 116 215) 60 80  -- pink
+        , circle (E.rgba255 245 109 188) 80 100 -- most pink
+        ]
 
-view : Model -> H.Html Msg
-view model =
+    , E.el [ E.width E.fill ] (E.html (viewChart model year))
+    ]
+
+viewChart : Model -> Float -> H.Html Msg
+viewChart model year =
   C.chart
     [ CA.height 600
     , CA.width 1000
-    , CA.margin { top = 0, bottom = 50, left = 0, right = 0 }
-    , CA.padding { top = 15, bottom = 0, left = 15, right = 15 }
+    , CA.margin { top = 0, bottom = 30, left = 0, right = 0 }
+    , CA.padding { top = 30, bottom = 0, left = 15, right = 15 }
 
     , CA.range <|
         case model.window of
@@ -113,17 +143,17 @@ view model =
     ]
     [ C.generate 10 CS.ints .x [] <| \p t ->
         [ C.xLabel
-            [ CA.alignLeft, CA.moveUp 20, CA.moveRight 3, CA.x (toFloat t), CA.withGrid
+            [ CA.alignLeft, CA.moveUp 22, CA.moveRight 7, CA.x (toFloat t), CA.withGrid
             , if t == 20000 then CA.noGrid else identity
             ]
-            [ S.text (String.fromInt t) ]
+            [ S.text (String.fromInt (t // 1000) ++ "k") ]
         ]
 
     , C.generate 8 CS.ints .y [] <| \p t ->
         [ C.yLabel
             [ CA.alignLeft
             , CA.withGrid
-            , CA.moveUp 7
+            , CA.moveUp 10
             , CA.moveRight 10
             , CA.y (toFloat t)
             , if t == 100 then CA.noGrid else identity
@@ -132,17 +162,15 @@ view model =
       ]
 
     , C.withPlane <| \p ->
-        [ C.label [ CA.fontSize 14, CA.moveDown -3 ] [ S.text ("Salary distribution in Denmark " ++ String.fromFloat model.year) ] { x = CA.middle p.x, y = p.y.max }
-        , C.label [ CA.fontSize 11, CA.moveDown 12 ] [ S.text "Data from Danmarks Statestik" ] { x = CA.middle p.x, y = p.y.max }
-        , C.label [ CA.fontSize 12, CA.moveDown 25 ] [ S.text "Average salary in DKK" ] { x = CA.middle p.x, y = p.y.min }
-        , C.label [ CA.fontSize 12, CA.moveLeft 15, CA.rotate 90 ] [ S.text "Womens percentage of mens salary" ] { x = p.x.min, y = CA.middle p.y }
+        [ C.label [ CA.fontSize 12, CA.moveDown 20, CA.alignRight ] [ S.text "Average salary in DKK" ] { x = p.x.max, y = p.y.min }
+        , C.label [ CA.fontSize 12, CA.moveLeft 15, CA.alignRight, CA.rotate 90 ] [ S.text "Womens % of mens salary" ] { x = p.x.min, y = p.y.max }
         , C.line [ CA.dashed [ 4, 2 ], CA.opacity 0.7, CA.color "#f56dbc", CA.x1 Salary.avgSalaryWomen ]
         , C.line [ CA.dashed [ 4, 2 ], CA.opacity 0.7, CA.color "#58a9f6", CA.x1 Salary.avgSalaryMen ]
         ]
 
     , C.line [ CA.dashed [ 3, 3 ], CA.y1 100 ]
 
-    , salarySeries model 0.7 5 200
+    , salarySeries model year 0.9 5 150
 
     , C.eachItem <| \p product ->
         let datum = CI.getData product
@@ -166,7 +194,7 @@ view model =
             , HA.style "width" "167px"
             , HE.onClick OnExitWindow
             ]
-            [ viewSalaryDiscrepancyMini model
+            [ viewSalaryDiscrepancyMini model year
             , H.button
                 [ HA.style "position" "absolute"
                 , HA.style "top" "0"
@@ -201,45 +229,11 @@ view model =
     , case model.selection of
         Just select -> C.rect [ CA.opacity 0.5, CA.x1 select.a.x, CA.x2 select.b.x, CA.y1 select.a.y, CA.y2 select.b.y ]
         Nothing -> C.none
-
-    , C.svg <| \_ ->
-        S.defs []
-          [ S.linearGradient
-              [ SA.id "colorscale", SA.x1 "0", SA.x2 "100%", SA.y1 "0", SA.y2 "0" ]
-              [ S.stop [ SA.offset "0%", SA.stopColor "#f56dbc" ] [] -- most pink
-              , S.stop [ SA.offset "30%", SA.stopColor "#de74d7" ] [] -- pink
-              , S.stop [ SA.offset "50%", SA.stopColor "#c579f2" ] [] -- middle
-              , S.stop [ SA.offset "70%", SA.stopColor "#8a91f7" ] [] -- blue
-              , S.stop [ SA.offset "100%", SA.stopColor "#58a9f6" ] [] -- most blue
-              ]
-          ]
-
-    , C.withPlane <| \p ->
-        let scaleX = CS.lengthInCartesianX p
-            scaleY = CS.lengthInCartesianY p
-            x1 = p.x.max - scaleX 150
-            x2 = p.x.max - scaleX 20
-            y1 = p.y.max - scaleY 13
-            y2 = p.y.max - scaleY 10
-        in
-        [ C.rect [ CA.borderWidth 0, CA.x1 x1, CA.x2 x2, CA.y1 y1, CA.y2 y2, CA.color "url(#colorscale)" ]
-        , C.label [ CA.fontSize 10 ] [ S.text "more women" ] { x = x1, y = p.y.max - scaleY 25 }
-        , C.label [ CA.fontSize 10 ] [ S.text "more men" ] { x = x2, y = p.y.max - scaleY 25 }
-        , C.htmlAt .max .max -45 -45
-            [ HA.style "color" "rgb(90 90 90)"
-            , HA.style "cursor" "pointer"
-            ]
-            [ H.div [ HE.onClick (OnYear 2016) ] [ H.text "2016" ]
-            , H.div [ HE.onClick (OnYear 2017) ] [ H.text "2017" ]
-            , H.div [ HE.onClick (OnYear 2018) ] [ H.text "2018" ]
-            , H.div [ HE.onClick (OnYear 2019) ] [ H.text "2019" ]
-            ]
-        ]
     ]
 
 
-viewSalaryDiscrepancyMini : Model -> H.Html Msg
-viewSalaryDiscrepancyMini model =
+viewSalaryDiscrepancyMini : Model -> Float -> H.Html Msg
+viewSalaryDiscrepancyMini model year =
   C.chart
     [ CA.height 100
     , CA.width 167
@@ -250,20 +244,21 @@ viewSalaryDiscrepancyMini model =
     [ C.line [ CA.dashed [ 3, 3 ], CA.y1 100, CA.width 0.5 ]
 
      , case model.window of
-        Just select -> C.rect [ CA.borderWidth 0, CA.x1 select.x1, CA.x2 select.x2, CA.y1 select.y1, CA.y2 select.y2 ]
+        Just select -> C.rect [ CA.color "#0000001F", CA.borderWidth 0, CA.x1 select.x1, CA.x2 select.x2, CA.y1 select.y1, CA.y2 select.y2 ]
         Nothing -> C.none
 
-    , salarySeries model 0.5 3 4000
+    , salarySeries model year 0.5 3 4000
     ]
 
 
-salarySeries : Model -> Float -> Float -> Float -> C.Element Salary.Datum Msg
-salarySeries model border highlightSize size =
+salarySeries : Model -> Float -> Float -> Float -> Float -> C.Element Salary.Datum Msg
+salarySeries model year border highlightSize size =
   C.series .salaryBoth
       [ C.scatterMaybe Salary.womenSalaryPerc
           [ CA.opacity 0.4, CA.circle, CA.border CA.blue, CA.borderWidth border ]
             |> C.variation (\i d ->
-                  let precentOfWomen = Salary.womenPerc d
+                  let precentOfWomen =
+                        Salary.womenPerc d
 
                       color =
                         if precentOfWomen < 20
@@ -280,7 +275,7 @@ salarySeries model border highlightSize size =
                 )
           |> C.amongst model.hovering (\d -> [ CA.highlight 0.4, CA.highlightWidth highlightSize, CA.opacity 0.6 ])
       ]
-      (List.filter (.year >> (==) model.year) Salary.data)
+      (List.filter (.year >> (==) year) Salary.data)
 
 
 tooltipContent : CI.One Salary.Datum CI.Dot -> H.Html msg

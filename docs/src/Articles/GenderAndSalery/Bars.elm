@@ -1,4 +1,4 @@
-module Articles.GenderAndSalery.Bars exposing (Model, Msg, init, update, view)
+module Articles.GenderAndSalery.Bars exposing (Model, Msg, init, reset, update, view)
 
 import Html as H
 import Html.Attributes as HA
@@ -29,7 +29,6 @@ import Chart.Events
 type alias Model =
   { hovering : List (CI.Many Binned CI.Bar)
   , binSize : Float
-  , year : Float
   }
 
 
@@ -51,13 +50,16 @@ init : Model
 init =
   { hovering = []
   , binSize = 5000
-  , year = 2019
   }
+
+
+reset : Model -> Model
+reset model =
+  { model | hovering = [] }
 
 
 type Msg
   = OnHover (List (CI.Many Binned CI.Bar))
-  | OnYear Float
   | OnBinSize Float
 
 
@@ -67,15 +69,12 @@ update msg model =
     OnHover hovering ->
       { model | hovering = hovering }
 
-    OnYear year ->
-      { model | year = year, hovering = [] }
-
     OnBinSize binSize ->
       { model | binSize = binSize, hovering = [] }
 
 
-view : Model -> E.Element Msg
-view model =
+view : Model -> Float -> E.Element Msg
+view model year =
   E.column
     [ EE.onMouseLeave (OnHover [])
     , E.width (E.px 1000)
@@ -106,7 +105,7 @@ view model =
         , thumb = I.defaultThumb
         }
 
-    , E.el [ E.width E.fill ] <| E.html <| viewChart model
+    , E.el [ E.width E.fill ] <| E.html <| viewChart model year
 
     , E.row
         [ E.width E.fill
@@ -116,11 +115,11 @@ view model =
     ]
 
 
-viewChart : Model -> H.Html Msg
-viewChart model =
+viewChart : Model -> Float -> H.Html Msg
+viewChart model year =
   let yearData =
         Salary.data
-          |> List.filter (.year >> (==) model.year)
+          |> List.filter (.year >> (==) year)
 
       womensData =
         yearData
@@ -171,12 +170,12 @@ viewChart model =
         produceLabels p.x.min []
 
     , C.generate 5 C.floats .y [] <| \p y ->
-        [ C.yLabel [ CA.fontSize 10, CA.x p.x.min, CA.y y ] [ S.text <| String.fromFloat (y / 1000) ++ "k" ] ]
+        [ C.yLabel [ CA.fontSize 10, CA.x p.x.min, CA.y y, CA.withGrid ] [ S.text <| String.fromFloat (y / 1000) ++ "k" ] ]
 
     , C.bars
         [ CA.x1 .bin
         , CA.x2 (.bin >> (+) model.binSize)
-        , CA.margin 0.25
+        , CA.margin 0.2
         , CA.roundTop 0.2
         , CA.roundBottom 0.2
         ]
@@ -217,27 +216,11 @@ viewChart model =
           |> List.concat
 
     , C.labelAt CA.middle .max [ CA.fontSize 14, CA.moveUp 20 ] [ S.text "How many women and men in each salary bracket?" ]
-    , C.labelAt CA.middle .max [ CA.fontSize 11, CA.moveUp 5 ] [ S.text "Data from Danmarks Statestik" ]
 
     , C.labelAt .min .max [ CA.fontSize 10, CA.alignRight, CA.moveLeft 8, CA.moveUp 10 ] [ S.text "# of people" ]
     , C.labelAt CA.middle .min [ CA.fontSize 10, CA.moveDown 30 ] [ S.text "Salary brackets" ]
 
     , C.legendsAt .max .max [ CA.alignRight, CA.moveLeft 20 ] []
-
-    , let viewYear year =
-            H.div
-              [ HE.onClick (OnYear year) ]
-              [ H.text (if model.year == year then "→ " else "")
-              , H.text (String.fromFloat year)
-              ]
-      in
-      C.htmlAt .max .max -20 -30
-        [ HA.style "color" "rgb(90 90 90)"
-        , HA.style "cursor" "pointer"
-        , HA.style "text-align" "right"
-        , HA.style "transform" "translateX(-100%)"
-        ]
-        (List.map viewYear [ 2016, 2017, 2018, 2019 ])
     ]
 
 
