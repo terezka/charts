@@ -8,19 +8,21 @@ import Element.Border as B
 import Element.Input as I
 import Element.Background as BG
 import Ui.Article as Article
+import Articles.GenderAndSalery.Data as Salary
 import Articles.GenderAndSalery.Bubble as Bubble
 import Articles.GenderAndSalery.Bars as Bars
-import Articles.GenderAndSalery.Data as Salary
+import Articles.GenderAndSalery.EducationChart as Education
 
 
 meta =
-  { id = "salary-distribution-in-denmark"
+  { id = "gender-equality-in-denmark"
   }
 
 
 type alias Model =
   { bubbles : Bubble.Model
   , bars : Bars.Model
+  , education : Education.Model
   , year : Float
   }
 
@@ -29,6 +31,7 @@ init : Model
 init  =
   { bubbles = Bubble.init
   , bars = Bars.init
+  , education = Education.init
   , year = 2019
   }
 
@@ -36,6 +39,7 @@ init  =
 type Msg
   = BubbleMsg Bubble.Msg
   | BarsMsg Bars.Msg
+  | EducationMsg Education.Msg
   | OnYear Float
 
 
@@ -48,20 +52,31 @@ update msg model =
     BarsMsg subMsg ->
       { model | bars = Bars.update subMsg model.bars }
 
+    EducationMsg subMsg ->
+      { model | education = Education.update subMsg model.education }
+
     OnYear year ->
       { model | year = year
       , bubbles = Bubble.init
+      , education = Education.reset model.education
       , bars = Bars.reset model.bars
       }
 
 
 view : Model -> Article.Article Msg
 view model =
-  { title = "Salary distribution in Denmark"
-  , abstract = "Denmark is often praised for its gender equality. But how equal are men and women really?"
+  { title = "Gender equality in Denmark"
+  , abstract = "Denmark is often praised for its gender equality. But even in one of the most equal countries in the world, how equal are men and women really?"
   , landing = \_ -> E.html <| H.map BubbleMsg (Bubble.viewChart model.bubbles 2019)
   , body = \_ ->
       [ E.paragraph
+          [ E.width (E.maximum 600 E.fill)
+          , F.size 14
+          , F.italic
+          ]
+          [ E.text "Denmark is often praised for its gender equality. But even in one of the most equal countries in the world, how equal are men and women really?" ]
+
+      , E.paragraph
           [ F.size 14
           , E.width (E.maximum 600 E.fill)
           ]
@@ -111,18 +126,23 @@ view model =
           ]
 
       , E.el
-          [ E.paddingEach { top = 0, bottom = 0, left = 0, right = 0 }
-          , E.width (E.maximum 1000 E.fill)
+          [ E.width (E.maximum 1000 E.fill)
           ]
           (E.map BubbleMsg (Bubble.view model.bubbles model.year))
 
-      --, E.el [ F.size 14 ] (E.text "Women in each salary bracket")
+      , E.el [ F.size 16 ] (E.text "Women in each salary bracket")
 
       , E.el
-          [ E.paddingEach { top = 0, bottom = 0, left = 0, right = 0 }
-          , E.width (E.maximum 1000 E.fill)
+          [ E.width (E.maximum 1000 E.fill)
           ]
           (E.map BarsMsg (Bars.view model.bars model.year))
+
+      , E.el [ F.size 18 ] (E.text "Women and men's education")
+
+      , E.el
+          [ E.width (E.maximum 1000 E.fill)
+          ]
+          (E.map EducationMsg (Education.view model.education))
 
       , E.el [ F.size 14 ] (E.text "Source: Danmarks Statestik.")
       ]
