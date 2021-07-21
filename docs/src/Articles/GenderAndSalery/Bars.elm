@@ -1,4 +1,4 @@
-module Charts.SalaryDistBar exposing (Model, Msg, init, update, view)
+module Articles.GenderAndSalery.Bars exposing (Model, Msg, init, update, view)
 
 import Html as H
 import Html.Attributes as HA
@@ -7,9 +7,7 @@ import Svg as S exposing (Svg, svg, g, circle, text_, text)
 import Svg.Attributes as SA exposing (width, height, stroke, fill, r, transform)
 import Browser
 import Time
-import Data.Iris as Iris
-import Data.Salary as Salary
-import Data.Education as Education
+import Articles.GenderAndSalery.Data as Salary
 import Dict
 
 import Chart as C

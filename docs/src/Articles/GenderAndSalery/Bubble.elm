@@ -1,4 +1,4 @@
-module Charts.SalaryDist exposing (Model, Msg, init, update, view)
+module Articles.GenderAndSalery.Bubble exposing (Model, Msg, init, update, view)
 
 import Html as H
 import Html.Attributes as HA

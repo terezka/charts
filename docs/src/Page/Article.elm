@@ -1,4 +1,4 @@
-module Page.Gallery exposing (Model, Params, Msg, init, subscriptions, exit, update, view)
+module Page.Article exposing (Model, Params, Msg, init, subscriptions, exit, update, view)
 
 
 import Browser exposing (Document)
@@ -18,18 +18,19 @@ import Articles
 
 
 
-
 -- MODEL
 
 
 type alias Model =
   { window : Session.Window
   , menu : Menu.Model
+  , articleId : Maybe Articles.Id
+  , article : Articles.Model
   }
 
 
 type alias Params =
-  ()
+  { id : String }
 
 
 
@@ -38,8 +39,16 @@ type alias Params =
 
 init : Navigation.Key -> Session -> Params -> ( Model, Cmd Msg )
 init key session params =
+  let isCorrectId article =
+        (Articles.meta article).id == params.id
+
+      articleId =
+        List.head (List.filter isCorrectId Articles.all)
+  in
   ( { window = session.window
     , menu = Menu.init
+    , articleId = articleId
+    , article = Articles.init
     }
   , Cmd.none
   )
@@ -56,8 +65,7 @@ exit model session =
 
 type Msg
   = MenuMsg Menu.Msg
-  | None
-
+  | ArticleMsg Articles.Msg
 
 
 update : Navigation.Key -> Msg -> Model -> ( Model, Cmd Msg )
@@ -66,8 +74,8 @@ update key msg model =
     MenuMsg subMsg ->
       ( { model | menu = Menu.update subMsg model.menu }, Cmd.none )
 
-    None ->
-      ( model, Cmd.none )
+    ArticleMsg subMsg ->
+      ( { model | article = Articles.update subMsg model.article }, Cmd.none )
 
 
 
@@ -91,31 +99,13 @@ view model =
           [ Menu.small model.window model.menu
               |> E.map MenuMsg
 
-          , Layout.heading model.window "Gallery"
+          , case model.articleId of
+              Nothing ->
+                E.text "Article not found."
 
-          , E.paragraph
-              [ E.paddingEach { top = 10, bottom = 40, left = 0, right = 0 }
-              , F.size 14
-              , E.width (E.px 600)
-              ]
-              [ E.text "Examples of charts build with elm-charts using real data."
-              ]
-
-          , E.wrappedRow [] <|
-              let link id =
-                    let url = (Articles.meta id).id in
-                    E.link
-                      [ E.width (E.px 200)
-                      , E.height E.fill
-                      ]
-                      { url = "/gallery/" ++ url
-                      , label =
-                          (Articles.view Articles.init id).landing
-                            |> E.el [ E.width E.fill, E.height E.fill ]
-                            |> E.map (\_ -> None)
-                      }
-              in
-              List.map link Articles.all
+              Just id ->
+                let form = Articles.view model.article id in
+                E.column [ E.spacing 40 ] (Layout.heading model.window form.title :: List.map (E.map ArticleMsg) form.body)
           ]
     }
 
