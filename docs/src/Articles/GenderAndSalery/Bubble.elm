@@ -204,7 +204,7 @@ viewChart model year =
     , CA.domain [ CA.lowest 76 CA.orHigher ]
 
     , CE.on "mousemove" <|
-        CE.map2 OnHover (CE.getNearest CI.dots) CE.getSvgCoords
+        CE.map2 OnHover (CE.getWithin 40 CI.dots) CE.getSvgCoords
 
     , CE.onMouseDown OnMouseDown CE.getSvgCoords
     , CE.onMouseUp OnMouseUp CE.getSvgCoords

@@ -27966,6 +27966,19 @@ var $author$project$Chart$eachItem = function (func) {
 						is));
 			}));
 };
+var $author$project$Internal$Svg$fromCartesian = F2(
+	function (plane, point) {
+		return {
+			x: A2($author$project$Internal$Coordinates$toSVGX, plane, point.x),
+			y: A2($author$project$Internal$Coordinates$toSVGY, plane, point.y)
+		};
+	});
+var $author$project$Internal$Events$getSvgCoords = $author$project$Internal$Events$Decoder(
+	F3(
+		function (_v0, plane, searched) {
+			return A2($author$project$Internal$Svg$fromCartesian, plane, searched);
+		}));
+var $author$project$Chart$Events$getSvgCoords = $author$project$Internal$Events$getSvgCoords;
 var $author$project$Internal$Svg$distanceY = F3(
 	function (plane, searched, point) {
 		return $elm$core$Basics$abs(
@@ -28013,37 +28026,49 @@ var $author$project$Internal$Svg$getNearestHelp = F4(
 			toPosition,
 			A3($elm$core$List$foldl, getClosest, _List_Nil, items));
 	});
-var $author$project$Internal$Svg$getNearest = F4(
-	function (toPosition, items, plane, searched) {
-		return A4($author$project$Internal$Svg$getNearestHelp, toPosition, items, plane, searched);
+var $author$project$Internal$Svg$withinRadius = F4(
+	function (plane, radius, searched, point) {
+		return _Utils_cmp(
+			A3($author$project$Internal$Svg$distanceSquared, plane, searched, point),
+			A2($elm$core$Basics$pow, radius, 2)) < 1;
 	});
-var $author$project$Internal$Events$getNearest = function (grouping) {
-	var toPos = grouping.a;
-	return $author$project$Internal$Events$Decoder(
-		F2(
-			function (items, plane) {
-				var groups = A2($author$project$Internal$Many$apply, grouping, items);
-				return A3(
-					$author$project$Internal$Svg$getNearest,
-					toPos(plane),
-					groups,
-					plane);
-			}));
-};
-var $author$project$Chart$Events$getNearest = $author$project$Internal$Events$getNearest;
-var $author$project$Internal$Svg$fromCartesian = F2(
-	function (plane, point) {
-		return {
-			x: A2($author$project$Internal$Coordinates$toSVGX, plane, point.x),
-			y: A2($author$project$Internal$Coordinates$toSVGY, plane, point.y)
+var $author$project$Internal$Svg$getWithin = F5(
+	function (radius, toPosition, items, plane, searched) {
+		var toPoint = function (i) {
+			return A2(
+				$author$project$Internal$Svg$closestPoint,
+				toPosition(i),
+				searched);
 		};
+		var keepIfEligible = function (closest) {
+			return A4(
+				$author$project$Internal$Svg$withinRadius,
+				plane,
+				radius,
+				searched,
+				toPoint(closest));
+		};
+		return A2(
+			$elm$core$List$filter,
+			keepIfEligible,
+			A4($author$project$Internal$Svg$getNearestHelp, toPosition, items, plane, searched));
 	});
-var $author$project$Internal$Events$getSvgCoords = $author$project$Internal$Events$Decoder(
-	F3(
-		function (_v0, plane, searched) {
-			return A2($author$project$Internal$Svg$fromCartesian, plane, searched);
-		}));
-var $author$project$Chart$Events$getSvgCoords = $author$project$Internal$Events$getSvgCoords;
+var $author$project$Internal$Events$getWithin = F2(
+	function (radius, grouping) {
+		var toPos = grouping.a;
+		return $author$project$Internal$Events$Decoder(
+			F2(
+				function (items, plane) {
+					var groups = A2($author$project$Internal$Many$apply, grouping, items);
+					return A4(
+						$author$project$Internal$Svg$getWithin,
+						radius,
+						toPos(plane),
+						groups,
+						plane);
+				}));
+	});
+var $author$project$Chart$Events$getWithin = $author$project$Internal$Events$getWithin;
 var $author$project$Chart$Attributes$htmlAttrs = F2(
 	function (v, config) {
 		return _Utils_update(
@@ -29756,7 +29781,7 @@ var $author$project$Articles$GenderAndSalery$Bubble$viewChart = F2(
 					A3(
 						$author$project$Chart$Events$map2,
 						$author$project$Articles$GenderAndSalery$Bubble$OnHover,
-						$author$project$Chart$Events$getNearest($author$project$Chart$Item$dots),
+						A2($author$project$Chart$Events$getWithin, 40, $author$project$Chart$Item$dots),
 						$author$project$Chart$Events$getSvgCoords)),
 					A2($author$project$Chart$Events$onMouseDown, $author$project$Articles$GenderAndSalery$Bubble$OnMouseDown, $author$project$Chart$Events$getSvgCoords),
 					A2($author$project$Chart$Events$onMouseUp, $author$project$Articles$GenderAndSalery$Bubble$OnMouseUp, $author$project$Chart$Events$getSvgCoords),
@@ -36096,6 +36121,24 @@ var $author$project$Examples$BarCharts$Highlight$data = _List_fromArray(
 		A8($author$project$Examples$BarCharts$Highlight$Datum, 2.0, 0.4, 2.2, 4.2, 5.3, 5.7, 6.2, 7.8),
 		A8($author$project$Examples$BarCharts$Highlight$Datum, 3.0, 0.6, 1.0, 3.2, 4.8, 5.4, 7.2, 8.3)
 	]);
+var $author$project$Internal$Svg$getNearest = F4(
+	function (toPosition, items, plane, searched) {
+		return A4($author$project$Internal$Svg$getNearestHelp, toPosition, items, plane, searched);
+	});
+var $author$project$Internal$Events$getNearest = function (grouping) {
+	var toPos = grouping.a;
+	return $author$project$Internal$Events$Decoder(
+		F2(
+			function (items, plane) {
+				var groups = A2($author$project$Internal$Many$apply, grouping, items);
+				return A3(
+					$author$project$Internal$Svg$getNearest,
+					toPos(plane),
+					groups,
+					plane);
+			}));
+};
+var $author$project$Chart$Events$getNearest = $author$project$Internal$Events$getNearest;
 var $author$project$Examples$BarCharts$Highlight$view = function (model) {
 	return A2(
 		$author$project$Chart$chart,
