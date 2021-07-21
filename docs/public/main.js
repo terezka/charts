@@ -26118,7 +26118,7 @@ var $author$project$Page$Articles$view = function (model) {
 													$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill)
 												]),
 											A2($author$project$Articles$view, $author$project$Articles$init, id).hZ(0))),
-									jw: '/gallery/' + url
+									jw: $author$project$Route$articles + ('/' + url)
 								});
 						};
 						return A2($elm$core$List$map, link, $author$project$Articles$all);

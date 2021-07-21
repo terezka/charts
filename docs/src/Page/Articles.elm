@@ -108,7 +108,7 @@ view model =
                       [ E.width (E.px 300)
                       , E.height E.fill
                       ]
-                      { url = "/gallery/" ++ url
+                      { url = Route.articles ++ "/" ++ url
                       , label =
                           (Articles.view Articles.init id).landing ()
                             |> E.el [ E.width E.fill, E.height E.fill ]
