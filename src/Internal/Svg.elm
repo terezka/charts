@@ -869,11 +869,16 @@ bar plane config point =
       radiusBottomX = Coord.scaleCartesianX plane roundingBottom
       radiusBottomY = Coord.scaleCartesianY plane roundingBottom
 
+      height = abs (pos.y2 - pos.y1)
+      ( roundTop, roundBottom ) =
+        if height - radiusTopY - radiusBottomY <= 0 || width - radiusTopX - radiusBottomX <= 0
+        then ( 0, 0 ) else ( config.roundTop, config.roundBottom )
+
       ( commands, highlightCommands, highlightCut ) =
         if pos.y1 == pos.y2 then
           ( [], [], highlightPos )
         else
-          case ( config.roundTop > 0, config.roundBottom > 0 ) of
+          case ( roundTop > 0, roundBottom > 0 ) of
             ( False, False ) ->
               ( [ C.Move pos.x1 pos.y1
                 , C.Line pos.x1 pos.y2
