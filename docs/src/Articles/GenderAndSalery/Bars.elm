@@ -144,11 +144,11 @@ view model year =
 
     , E.el [ E.width E.fill ] <| E.html <| viewChart model year
 
-    , E.row
-        [ E.width E.fill
-        , E.spacing 20
-        ]
-        (List.concatMap viewTooltip model.hovering)
+    --, E.row
+    --    [ E.width E.fill
+    --    , E.spacing 20
+    --    ]
+    --    (List.concatMap viewTooltip model.hovering)
     ]
 
 
@@ -178,7 +178,7 @@ viewChart model year =
   C.chart
     [ CA.height 300
     , CA.width 1000
-    , CA.margin { top = 0, bottom = 30, left = 0, right = 0 }
+    , CA.margin { top = 0, bottom = 10, left = 0, right = 0 }
     , CA.padding { top = 20, bottom = 20, left = 40, right = 0 }
 
     , CI.real

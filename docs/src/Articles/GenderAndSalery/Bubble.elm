@@ -43,6 +43,7 @@ type Msg
   = OnHover (List (CI.One Salary.Datum CI.Dot)) CS.Point
   | OnMouseDown CS.Point
   | OnMouseUp CS.Point
+  | OnDoubleClick CS.Point
   | OnZoomIn
   | OnZoomOut
   | OnZoomReset
@@ -74,6 +75,9 @@ update msg model =
               , y = model.zoomOffset.y + start.y - coords.y
               }
           }
+
+    OnDoubleClick _ ->
+      { model | zoomPercentage = model.zoomPercentage + 20 }
 
     OnZoomIn ->
       { model | zoomPercentage = model.zoomPercentage + 20 }
@@ -205,13 +209,14 @@ viewChart model year =
 
     , CE.on "mousemove" <|
         CE.map2 OnHover (CE.getWithin 40 CI.dots) CE.getSvgCoords
-
     , CE.onMouseDown OnMouseDown CE.getSvgCoords
     , CE.onMouseUp OnMouseUp CE.getSvgCoords
+    , CE.onDoubleClick OnDoubleClick CE.getSvgCoords
     , CE.onMouseLeave OnReset
 
     , CA.htmlAttrs
-        [ HA.style "cursor" <|
+        [ HA.style "user-select" "none"
+        , HA.style "cursor" <|
             case model.moving of
               Just _ -> "grabbing"
               Nothing -> "grab"
@@ -364,7 +369,7 @@ tooltipContent hovered =
       percentOfSalary = round (Maybe.withDefault 0 (Salary.womenSalaryPerc datum))
       percentOfSalaryMen = round (Maybe.withDefault 0 (Salary.menSalaryPerc datum))
   in
-  H.div []
+  H.div [ HA.style "user-select" "none" ]
     [ H.h4
         [ HA.style "width" "240px"
         , HA.style "margin-top" "5px"
