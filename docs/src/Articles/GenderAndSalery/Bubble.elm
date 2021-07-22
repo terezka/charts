@@ -77,11 +77,11 @@ update msg model =
           }
 
     OnDoubleClick coords ->
-      let newZoom = model.zoomPercentage in
+      let newZoom = model.zoomPercentage + 20 in
       { model | zoomPercentage = newZoom
       , zoomOffset =
-          { x = model.zoomOffset.x + coords.x - 1000 / 2
-          , y = model.zoomOffset.y + coords.y - 550 / 2
+          { x = (model.zoomOffset.x + coords.x - 1000 / 2) * newZoom / 100
+          , y = (model.zoomOffset.y + coords.y - 550 / 2) * newZoom / 100
           }
       }
 
@@ -193,7 +193,10 @@ viewChart model year =
     , CA.width 1000
     , CA.margin { top = 0, bottom = 20, left = 0, right = 0 }
     , CA.padding <|
-        let ( xOff, yOff ) =
+        let percentage =
+              model.zoomPercentage - (100 - model.zoomPercentage) / 2
+
+            ( xOff, yOff ) =
               case model.moving of
                 Just ( start, end ) ->
                   ( (model.zoomOffset.x + start.x - end.x)
@@ -205,10 +208,10 @@ viewChart model year =
                   , model.zoomOffset.y
                   )
         in
-        { top = 550 - (550 * model.zoomPercentage / 100) - yOff
-        , bottom = 550 - (550 * model.zoomPercentage / 100) + yOff
-        , left = 1000 - (1000 * model.zoomPercentage / 100) - xOff
-        , right = 1000 - (1000 * model.zoomPercentage / 100) + xOff
+        { top = 550 - (550 * percentage / 100) - yOff
+        , bottom = 550 - (550 * percentage / 100) + yOff
+        , left = 1000 - (1000 * percentage / 100) - xOff
+        , right = 1000 - (1000 * percentage / 100) + xOff
         }
 
     , CA.range [ CA.lowest 20000 CA.orHigher ]

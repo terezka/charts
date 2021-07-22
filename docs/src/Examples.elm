@@ -70,48 +70,49 @@ import Examples.Interactivity.FilterSearch as Example59
 import Examples.Interactivity.Background as Example60
 import Examples.Interactivity.BasicBar as Example61
 import Examples.Interactivity.BasicArea as Example62
-import Examples.Interactivity.TrickyTooltip as Example63
-import Examples.Interactivity.Multiple as Example64
-import Examples.Interactivity.BasicLine as Example65
-import Examples.Interactivity.Offset as Example66
-import Examples.Interactivity.DoubleSearch as Example67
-import Examples.Interactivity.ChangeUnit as Example68
-import Examples.Interactivity.Focal as Example69
-import Examples.LineCharts.Area as Example70
-import Examples.LineCharts.Gradient as Example71
-import Examples.LineCharts.Width as Example72
-import Examples.LineCharts.TooltipStack as Example73
-import Examples.LineCharts.Tooltip as Example74
-import Examples.LineCharts.Montone as Example75
-import Examples.LineCharts.Pattern as Example76
-import Examples.LineCharts.Dots as Example77
-import Examples.LineCharts.Dashed as Example78
-import Examples.LineCharts.Color as Example79
-import Examples.LineCharts.Stepped as Example80
-import Examples.LineCharts.Stacked as Example81
-import Examples.LineCharts.Labels as Example82
-import Examples.LineCharts.Missing as Example83
-import Examples.LineCharts.Legends as Example84
-import Examples.LineCharts.Basic as Example85
-import Examples.Frontpage.BasicBubble as Example86
-import Examples.Frontpage.BasicNavigation as Example87
-import Examples.Frontpage.BasicBar as Example88
-import Examples.Frontpage.BasicArea as Example89
-import Examples.Frontpage.Concise as Example90
-import Examples.Frontpage.BasicLine as Example91
-import Examples.Frontpage.BasicScatter as Example92
-import Examples.Frontpage.Familiar as Example93
-import Examples.ScatterCharts.Colors as Example94
-import Examples.ScatterCharts.Shapes as Example95
-import Examples.ScatterCharts.Tooltip as Example96
-import Examples.ScatterCharts.Highlight as Example97
-import Examples.ScatterCharts.DataDependent as Example98
-import Examples.ScatterCharts.Borders as Example99
-import Examples.ScatterCharts.Labels as Example100
-import Examples.ScatterCharts.Opacity as Example101
-import Examples.ScatterCharts.Sizes as Example102
-import Examples.ScatterCharts.Legends as Example103
-import Examples.ScatterCharts.Basic as Example104
+import Examples.Interactivity.ZoomAlt as Example63
+import Examples.Interactivity.TrickyTooltip as Example64
+import Examples.Interactivity.Multiple as Example65
+import Examples.Interactivity.BasicLine as Example66
+import Examples.Interactivity.Offset as Example67
+import Examples.Interactivity.DoubleSearch as Example68
+import Examples.Interactivity.ChangeUnit as Example69
+import Examples.Interactivity.Focal as Example70
+import Examples.LineCharts.Area as Example71
+import Examples.LineCharts.Gradient as Example72
+import Examples.LineCharts.Width as Example73
+import Examples.LineCharts.TooltipStack as Example74
+import Examples.LineCharts.Tooltip as Example75
+import Examples.LineCharts.Montone as Example76
+import Examples.LineCharts.Pattern as Example77
+import Examples.LineCharts.Dots as Example78
+import Examples.LineCharts.Dashed as Example79
+import Examples.LineCharts.Color as Example80
+import Examples.LineCharts.Stepped as Example81
+import Examples.LineCharts.Stacked as Example82
+import Examples.LineCharts.Labels as Example83
+import Examples.LineCharts.Missing as Example84
+import Examples.LineCharts.Legends as Example85
+import Examples.LineCharts.Basic as Example86
+import Examples.Frontpage.BasicBubble as Example87
+import Examples.Frontpage.BasicNavigation as Example88
+import Examples.Frontpage.BasicBar as Example89
+import Examples.Frontpage.BasicArea as Example90
+import Examples.Frontpage.Concise as Example91
+import Examples.Frontpage.BasicLine as Example92
+import Examples.Frontpage.BasicScatter as Example93
+import Examples.Frontpage.Familiar as Example94
+import Examples.ScatterCharts.Colors as Example95
+import Examples.ScatterCharts.Shapes as Example96
+import Examples.ScatterCharts.Tooltip as Example97
+import Examples.ScatterCharts.Highlight as Example98
+import Examples.ScatterCharts.DataDependent as Example99
+import Examples.ScatterCharts.Borders as Example100
+import Examples.ScatterCharts.Labels as Example101
+import Examples.ScatterCharts.Opacity as Example102
+import Examples.ScatterCharts.Sizes as Example103
+import Examples.ScatterCharts.Legends as Example104
+import Examples.ScatterCharts.Basic as Example105
 
 
 type Id
@@ -178,6 +179,7 @@ type Id
   | Interactivity__Background
   | Interactivity__BasicBar
   | Interactivity__BasicArea
+  | Interactivity__ZoomAlt
   | Interactivity__TrickyTooltip
   | Interactivity__Multiple
   | Interactivity__BasicLine
@@ -328,6 +330,7 @@ type alias Model =
   , example102 : Example102.Model
   , example103 : Example103.Model
   , example104 : Example104.Model
+  , example105 : Example105.Model
   }
 
 
@@ -437,6 +440,7 @@ init =
   , example102 = Example102.init
   , example103 = Example103.init
   , example104 = Example104.init
+  , example105 = Example105.init
   }
 
 
@@ -546,6 +550,7 @@ type Msg
   | ExampleMsg102 Example102.Msg
   | ExampleMsg103 Example103.Msg
   | ExampleMsg104 Example104.Msg
+  | ExampleMsg105 Example105.Msg
 
 
 update msg model =
@@ -655,6 +660,7 @@ update msg model =
     ExampleMsg102 sub -> { model | example102 = Example102.update sub model.example102 }
     ExampleMsg103 sub -> { model | example103 = Example103.update sub model.example103 }
     ExampleMsg104 sub -> { model | example104 = Example104.update sub model.example104 }
+    ExampleMsg105 sub -> { model | example105 = Example105.update sub model.example105 }
 
 
 view model chosen =
@@ -722,48 +728,49 @@ view model chosen =
     Interactivity__Background -> Html.map ExampleMsg60 (Example60.view model.example60)
     Interactivity__BasicBar -> Html.map ExampleMsg61 (Example61.view model.example61)
     Interactivity__BasicArea -> Html.map ExampleMsg62 (Example62.view model.example62)
-    Interactivity__TrickyTooltip -> Html.map ExampleMsg63 (Example63.view model.example63)
-    Interactivity__Multiple -> Html.map ExampleMsg64 (Example64.view model.example64)
-    Interactivity__BasicLine -> Html.map ExampleMsg65 (Example65.view model.example65)
-    Interactivity__Offset -> Html.map ExampleMsg66 (Example66.view model.example66)
-    Interactivity__DoubleSearch -> Html.map ExampleMsg67 (Example67.view model.example67)
-    Interactivity__ChangeUnit -> Html.map ExampleMsg68 (Example68.view model.example68)
-    Interactivity__Focal -> Html.map ExampleMsg69 (Example69.view model.example69)
-    LineCharts__Area -> Html.map ExampleMsg70 (Example70.view model.example70)
-    LineCharts__Gradient -> Html.map ExampleMsg71 (Example71.view model.example71)
-    LineCharts__Width -> Html.map ExampleMsg72 (Example72.view model.example72)
-    LineCharts__TooltipStack -> Html.map ExampleMsg73 (Example73.view model.example73)
-    LineCharts__Tooltip -> Html.map ExampleMsg74 (Example74.view model.example74)
-    LineCharts__Montone -> Html.map ExampleMsg75 (Example75.view model.example75)
-    LineCharts__Pattern -> Html.map ExampleMsg76 (Example76.view model.example76)
-    LineCharts__Dots -> Html.map ExampleMsg77 (Example77.view model.example77)
-    LineCharts__Dashed -> Html.map ExampleMsg78 (Example78.view model.example78)
-    LineCharts__Color -> Html.map ExampleMsg79 (Example79.view model.example79)
-    LineCharts__Stepped -> Html.map ExampleMsg80 (Example80.view model.example80)
-    LineCharts__Stacked -> Html.map ExampleMsg81 (Example81.view model.example81)
-    LineCharts__Labels -> Html.map ExampleMsg82 (Example82.view model.example82)
-    LineCharts__Missing -> Html.map ExampleMsg83 (Example83.view model.example83)
-    LineCharts__Legends -> Html.map ExampleMsg84 (Example84.view model.example84)
-    LineCharts__Basic -> Html.map ExampleMsg85 (Example85.view model.example85)
-    Frontpage__BasicBubble -> Html.map ExampleMsg86 (Example86.view model.example86)
-    Frontpage__BasicNavigation -> Html.map ExampleMsg87 (Example87.view model.example87)
-    Frontpage__BasicBar -> Html.map ExampleMsg88 (Example88.view model.example88)
-    Frontpage__BasicArea -> Html.map ExampleMsg89 (Example89.view model.example89)
-    Frontpage__Concise -> Html.map ExampleMsg90 (Example90.view model.example90)
-    Frontpage__BasicLine -> Html.map ExampleMsg91 (Example91.view model.example91)
-    Frontpage__BasicScatter -> Html.map ExampleMsg92 (Example92.view model.example92)
-    Frontpage__Familiar -> Html.map ExampleMsg93 (Example93.view model.example93)
-    ScatterCharts__Colors -> Html.map ExampleMsg94 (Example94.view model.example94)
-    ScatterCharts__Shapes -> Html.map ExampleMsg95 (Example95.view model.example95)
-    ScatterCharts__Tooltip -> Html.map ExampleMsg96 (Example96.view model.example96)
-    ScatterCharts__Highlight -> Html.map ExampleMsg97 (Example97.view model.example97)
-    ScatterCharts__DataDependent -> Html.map ExampleMsg98 (Example98.view model.example98)
-    ScatterCharts__Borders -> Html.map ExampleMsg99 (Example99.view model.example99)
-    ScatterCharts__Labels -> Html.map ExampleMsg100 (Example100.view model.example100)
-    ScatterCharts__Opacity -> Html.map ExampleMsg101 (Example101.view model.example101)
-    ScatterCharts__Sizes -> Html.map ExampleMsg102 (Example102.view model.example102)
-    ScatterCharts__Legends -> Html.map ExampleMsg103 (Example103.view model.example103)
-    ScatterCharts__Basic -> Html.map ExampleMsg104 (Example104.view model.example104)
+    Interactivity__ZoomAlt -> Html.map ExampleMsg63 (Example63.view model.example63)
+    Interactivity__TrickyTooltip -> Html.map ExampleMsg64 (Example64.view model.example64)
+    Interactivity__Multiple -> Html.map ExampleMsg65 (Example65.view model.example65)
+    Interactivity__BasicLine -> Html.map ExampleMsg66 (Example66.view model.example66)
+    Interactivity__Offset -> Html.map ExampleMsg67 (Example67.view model.example67)
+    Interactivity__DoubleSearch -> Html.map ExampleMsg68 (Example68.view model.example68)
+    Interactivity__ChangeUnit -> Html.map ExampleMsg69 (Example69.view model.example69)
+    Interactivity__Focal -> Html.map ExampleMsg70 (Example70.view model.example70)
+    LineCharts__Area -> Html.map ExampleMsg71 (Example71.view model.example71)
+    LineCharts__Gradient -> Html.map ExampleMsg72 (Example72.view model.example72)
+    LineCharts__Width -> Html.map ExampleMsg73 (Example73.view model.example73)
+    LineCharts__TooltipStack -> Html.map ExampleMsg74 (Example74.view model.example74)
+    LineCharts__Tooltip -> Html.map ExampleMsg75 (Example75.view model.example75)
+    LineCharts__Montone -> Html.map ExampleMsg76 (Example76.view model.example76)
+    LineCharts__Pattern -> Html.map ExampleMsg77 (Example77.view model.example77)
+    LineCharts__Dots -> Html.map ExampleMsg78 (Example78.view model.example78)
+    LineCharts__Dashed -> Html.map ExampleMsg79 (Example79.view model.example79)
+    LineCharts__Color -> Html.map ExampleMsg80 (Example80.view model.example80)
+    LineCharts__Stepped -> Html.map ExampleMsg81 (Example81.view model.example81)
+    LineCharts__Stacked -> Html.map ExampleMsg82 (Example82.view model.example82)
+    LineCharts__Labels -> Html.map ExampleMsg83 (Example83.view model.example83)
+    LineCharts__Missing -> Html.map ExampleMsg84 (Example84.view model.example84)
+    LineCharts__Legends -> Html.map ExampleMsg85 (Example85.view model.example85)
+    LineCharts__Basic -> Html.map ExampleMsg86 (Example86.view model.example86)
+    Frontpage__BasicBubble -> Html.map ExampleMsg87 (Example87.view model.example87)
+    Frontpage__BasicNavigation -> Html.map ExampleMsg88 (Example88.view model.example88)
+    Frontpage__BasicBar -> Html.map ExampleMsg89 (Example89.view model.example89)
+    Frontpage__BasicArea -> Html.map ExampleMsg90 (Example90.view model.example90)
+    Frontpage__Concise -> Html.map ExampleMsg91 (Example91.view model.example91)
+    Frontpage__BasicLine -> Html.map ExampleMsg92 (Example92.view model.example92)
+    Frontpage__BasicScatter -> Html.map ExampleMsg93 (Example93.view model.example93)
+    Frontpage__Familiar -> Html.map ExampleMsg94 (Example94.view model.example94)
+    ScatterCharts__Colors -> Html.map ExampleMsg95 (Example95.view model.example95)
+    ScatterCharts__Shapes -> Html.map ExampleMsg96 (Example96.view model.example96)
+    ScatterCharts__Tooltip -> Html.map ExampleMsg97 (Example97.view model.example97)
+    ScatterCharts__Highlight -> Html.map ExampleMsg98 (Example98.view model.example98)
+    ScatterCharts__DataDependent -> Html.map ExampleMsg99 (Example99.view model.example99)
+    ScatterCharts__Borders -> Html.map ExampleMsg100 (Example100.view model.example100)
+    ScatterCharts__Labels -> Html.map ExampleMsg101 (Example101.view model.example101)
+    ScatterCharts__Opacity -> Html.map ExampleMsg102 (Example102.view model.example102)
+    ScatterCharts__Sizes -> Html.map ExampleMsg103 (Example103.view model.example103)
+    ScatterCharts__Legends -> Html.map ExampleMsg104 (Example104.view model.example104)
+    ScatterCharts__Basic -> Html.map ExampleMsg105 (Example105.view model.example105)
 
 
 smallCode : Id -> String
@@ -832,48 +839,49 @@ smallCode chosen =
     Interactivity__Background -> Example60.smallCode
     Interactivity__BasicBar -> Example61.smallCode
     Interactivity__BasicArea -> Example62.smallCode
-    Interactivity__TrickyTooltip -> Example63.smallCode
-    Interactivity__Multiple -> Example64.smallCode
-    Interactivity__BasicLine -> Example65.smallCode
-    Interactivity__Offset -> Example66.smallCode
-    Interactivity__DoubleSearch -> Example67.smallCode
-    Interactivity__ChangeUnit -> Example68.smallCode
-    Interactivity__Focal -> Example69.smallCode
-    LineCharts__Area -> Example70.smallCode
-    LineCharts__Gradient -> Example71.smallCode
-    LineCharts__Width -> Example72.smallCode
-    LineCharts__TooltipStack -> Example73.smallCode
-    LineCharts__Tooltip -> Example74.smallCode
-    LineCharts__Montone -> Example75.smallCode
-    LineCharts__Pattern -> Example76.smallCode
-    LineCharts__Dots -> Example77.smallCode
-    LineCharts__Dashed -> Example78.smallCode
-    LineCharts__Color -> Example79.smallCode
-    LineCharts__Stepped -> Example80.smallCode
-    LineCharts__Stacked -> Example81.smallCode
-    LineCharts__Labels -> Example82.smallCode
-    LineCharts__Missing -> Example83.smallCode
-    LineCharts__Legends -> Example84.smallCode
-    LineCharts__Basic -> Example85.smallCode
-    Frontpage__BasicBubble -> Example86.smallCode
-    Frontpage__BasicNavigation -> Example87.smallCode
-    Frontpage__BasicBar -> Example88.smallCode
-    Frontpage__BasicArea -> Example89.smallCode
-    Frontpage__Concise -> Example90.smallCode
-    Frontpage__BasicLine -> Example91.smallCode
-    Frontpage__BasicScatter -> Example92.smallCode
-    Frontpage__Familiar -> Example93.smallCode
-    ScatterCharts__Colors -> Example94.smallCode
-    ScatterCharts__Shapes -> Example95.smallCode
-    ScatterCharts__Tooltip -> Example96.smallCode
-    ScatterCharts__Highlight -> Example97.smallCode
-    ScatterCharts__DataDependent -> Example98.smallCode
-    ScatterCharts__Borders -> Example99.smallCode
-    ScatterCharts__Labels -> Example100.smallCode
-    ScatterCharts__Opacity -> Example101.smallCode
-    ScatterCharts__Sizes -> Example102.smallCode
-    ScatterCharts__Legends -> Example103.smallCode
-    ScatterCharts__Basic -> Example104.smallCode
+    Interactivity__ZoomAlt -> Example63.smallCode
+    Interactivity__TrickyTooltip -> Example64.smallCode
+    Interactivity__Multiple -> Example65.smallCode
+    Interactivity__BasicLine -> Example66.smallCode
+    Interactivity__Offset -> Example67.smallCode
+    Interactivity__DoubleSearch -> Example68.smallCode
+    Interactivity__ChangeUnit -> Example69.smallCode
+    Interactivity__Focal -> Example70.smallCode
+    LineCharts__Area -> Example71.smallCode
+    LineCharts__Gradient -> Example72.smallCode
+    LineCharts__Width -> Example73.smallCode
+    LineCharts__TooltipStack -> Example74.smallCode
+    LineCharts__Tooltip -> Example75.smallCode
+    LineCharts__Montone -> Example76.smallCode
+    LineCharts__Pattern -> Example77.smallCode
+    LineCharts__Dots -> Example78.smallCode
+    LineCharts__Dashed -> Example79.smallCode
+    LineCharts__Color -> Example80.smallCode
+    LineCharts__Stepped -> Example81.smallCode
+    LineCharts__Stacked -> Example82.smallCode
+    LineCharts__Labels -> Example83.smallCode
+    LineCharts__Missing -> Example84.smallCode
+    LineCharts__Legends -> Example85.smallCode
+    LineCharts__Basic -> Example86.smallCode
+    Frontpage__BasicBubble -> Example87.smallCode
+    Frontpage__BasicNavigation -> Example88.smallCode
+    Frontpage__BasicBar -> Example89.smallCode
+    Frontpage__BasicArea -> Example90.smallCode
+    Frontpage__Concise -> Example91.smallCode
+    Frontpage__BasicLine -> Example92.smallCode
+    Frontpage__BasicScatter -> Example93.smallCode
+    Frontpage__Familiar -> Example94.smallCode
+    ScatterCharts__Colors -> Example95.smallCode
+    ScatterCharts__Shapes -> Example96.smallCode
+    ScatterCharts__Tooltip -> Example97.smallCode
+    ScatterCharts__Highlight -> Example98.smallCode
+    ScatterCharts__DataDependent -> Example99.smallCode
+    ScatterCharts__Borders -> Example100.smallCode
+    ScatterCharts__Labels -> Example101.smallCode
+    ScatterCharts__Opacity -> Example102.smallCode
+    ScatterCharts__Sizes -> Example103.smallCode
+    ScatterCharts__Legends -> Example104.smallCode
+    ScatterCharts__Basic -> Example105.smallCode
 
 
 largeCode : Id -> String
@@ -942,48 +950,49 @@ largeCode chosen =
     Interactivity__Background -> Example60.largeCode
     Interactivity__BasicBar -> Example61.largeCode
     Interactivity__BasicArea -> Example62.largeCode
-    Interactivity__TrickyTooltip -> Example63.largeCode
-    Interactivity__Multiple -> Example64.largeCode
-    Interactivity__BasicLine -> Example65.largeCode
-    Interactivity__Offset -> Example66.largeCode
-    Interactivity__DoubleSearch -> Example67.largeCode
-    Interactivity__ChangeUnit -> Example68.largeCode
-    Interactivity__Focal -> Example69.largeCode
-    LineCharts__Area -> Example70.largeCode
-    LineCharts__Gradient -> Example71.largeCode
-    LineCharts__Width -> Example72.largeCode
-    LineCharts__TooltipStack -> Example73.largeCode
-    LineCharts__Tooltip -> Example74.largeCode
-    LineCharts__Montone -> Example75.largeCode
-    LineCharts__Pattern -> Example76.largeCode
-    LineCharts__Dots -> Example77.largeCode
-    LineCharts__Dashed -> Example78.largeCode
-    LineCharts__Color -> Example79.largeCode
-    LineCharts__Stepped -> Example80.largeCode
-    LineCharts__Stacked -> Example81.largeCode
-    LineCharts__Labels -> Example82.largeCode
-    LineCharts__Missing -> Example83.largeCode
-    LineCharts__Legends -> Example84.largeCode
-    LineCharts__Basic -> Example85.largeCode
-    Frontpage__BasicBubble -> Example86.largeCode
-    Frontpage__BasicNavigation -> Example87.largeCode
-    Frontpage__BasicBar -> Example88.largeCode
-    Frontpage__BasicArea -> Example89.largeCode
-    Frontpage__Concise -> Example90.largeCode
-    Frontpage__BasicLine -> Example91.largeCode
-    Frontpage__BasicScatter -> Example92.largeCode
-    Frontpage__Familiar -> Example93.largeCode
-    ScatterCharts__Colors -> Example94.largeCode
-    ScatterCharts__Shapes -> Example95.largeCode
-    ScatterCharts__Tooltip -> Example96.largeCode
-    ScatterCharts__Highlight -> Example97.largeCode
-    ScatterCharts__DataDependent -> Example98.largeCode
-    ScatterCharts__Borders -> Example99.largeCode
-    ScatterCharts__Labels -> Example100.largeCode
-    ScatterCharts__Opacity -> Example101.largeCode
-    ScatterCharts__Sizes -> Example102.largeCode
-    ScatterCharts__Legends -> Example103.largeCode
-    ScatterCharts__Basic -> Example104.largeCode
+    Interactivity__ZoomAlt -> Example63.largeCode
+    Interactivity__TrickyTooltip -> Example64.largeCode
+    Interactivity__Multiple -> Example65.largeCode
+    Interactivity__BasicLine -> Example66.largeCode
+    Interactivity__Offset -> Example67.largeCode
+    Interactivity__DoubleSearch -> Example68.largeCode
+    Interactivity__ChangeUnit -> Example69.largeCode
+    Interactivity__Focal -> Example70.largeCode
+    LineCharts__Area -> Example71.largeCode
+    LineCharts__Gradient -> Example72.largeCode
+    LineCharts__Width -> Example73.largeCode
+    LineCharts__TooltipStack -> Example74.largeCode
+    LineCharts__Tooltip -> Example75.largeCode
+    LineCharts__Montone -> Example76.largeCode
+    LineCharts__Pattern -> Example77.largeCode
+    LineCharts__Dots -> Example78.largeCode
+    LineCharts__Dashed -> Example79.largeCode
+    LineCharts__Color -> Example80.largeCode
+    LineCharts__Stepped -> Example81.largeCode
+    LineCharts__Stacked -> Example82.largeCode
+    LineCharts__Labels -> Example83.largeCode
+    LineCharts__Missing -> Example84.largeCode
+    LineCharts__Legends -> Example85.largeCode
+    LineCharts__Basic -> Example86.largeCode
+    Frontpage__BasicBubble -> Example87.largeCode
+    Frontpage__BasicNavigation -> Example88.largeCode
+    Frontpage__BasicBar -> Example89.largeCode
+    Frontpage__BasicArea -> Example90.largeCode
+    Frontpage__Concise -> Example91.largeCode
+    Frontpage__BasicLine -> Example92.largeCode
+    Frontpage__BasicScatter -> Example93.largeCode
+    Frontpage__Familiar -> Example94.largeCode
+    ScatterCharts__Colors -> Example95.largeCode
+    ScatterCharts__Shapes -> Example96.largeCode
+    ScatterCharts__Tooltip -> Example97.largeCode
+    ScatterCharts__Highlight -> Example98.largeCode
+    ScatterCharts__DataDependent -> Example99.largeCode
+    ScatterCharts__Borders -> Example100.largeCode
+    ScatterCharts__Labels -> Example101.largeCode
+    ScatterCharts__Opacity -> Example102.largeCode
+    ScatterCharts__Sizes -> Example103.largeCode
+    ScatterCharts__Legends -> Example104.largeCode
+    ScatterCharts__Basic -> Example105.largeCode
 
 
 name : Id -> String
@@ -1052,6 +1061,7 @@ name chosen =
     Interactivity__Background -> "Examples.Interactivity.Background"
     Interactivity__BasicBar -> "Examples.Interactivity.BasicBar"
     Interactivity__BasicArea -> "Examples.Interactivity.BasicArea"
+    Interactivity__ZoomAlt -> "Examples.Interactivity.ZoomAlt"
     Interactivity__TrickyTooltip -> "Examples.Interactivity.TrickyTooltip"
     Interactivity__Multiple -> "Examples.Interactivity.Multiple"
     Interactivity__BasicLine -> "Examples.Interactivity.BasicLine"
@@ -1161,48 +1171,49 @@ meta chosen =
     Interactivity__Background -> Example60.meta
     Interactivity__BasicBar -> Example61.meta
     Interactivity__BasicArea -> Example62.meta
-    Interactivity__TrickyTooltip -> Example63.meta
-    Interactivity__Multiple -> Example64.meta
-    Interactivity__BasicLine -> Example65.meta
-    Interactivity__Offset -> Example66.meta
-    Interactivity__DoubleSearch -> Example67.meta
-    Interactivity__ChangeUnit -> Example68.meta
-    Interactivity__Focal -> Example69.meta
-    LineCharts__Area -> Example70.meta
-    LineCharts__Gradient -> Example71.meta
-    LineCharts__Width -> Example72.meta
-    LineCharts__TooltipStack -> Example73.meta
-    LineCharts__Tooltip -> Example74.meta
-    LineCharts__Montone -> Example75.meta
-    LineCharts__Pattern -> Example76.meta
-    LineCharts__Dots -> Example77.meta
-    LineCharts__Dashed -> Example78.meta
-    LineCharts__Color -> Example79.meta
-    LineCharts__Stepped -> Example80.meta
-    LineCharts__Stacked -> Example81.meta
-    LineCharts__Labels -> Example82.meta
-    LineCharts__Missing -> Example83.meta
-    LineCharts__Legends -> Example84.meta
-    LineCharts__Basic -> Example85.meta
-    Frontpage__BasicBubble -> Example86.meta
-    Frontpage__BasicNavigation -> Example87.meta
-    Frontpage__BasicBar -> Example88.meta
-    Frontpage__BasicArea -> Example89.meta
-    Frontpage__Concise -> Example90.meta
-    Frontpage__BasicLine -> Example91.meta
-    Frontpage__BasicScatter -> Example92.meta
-    Frontpage__Familiar -> Example93.meta
-    ScatterCharts__Colors -> Example94.meta
-    ScatterCharts__Shapes -> Example95.meta
-    ScatterCharts__Tooltip -> Example96.meta
-    ScatterCharts__Highlight -> Example97.meta
-    ScatterCharts__DataDependent -> Example98.meta
-    ScatterCharts__Borders -> Example99.meta
-    ScatterCharts__Labels -> Example100.meta
-    ScatterCharts__Opacity -> Example101.meta
-    ScatterCharts__Sizes -> Example102.meta
-    ScatterCharts__Legends -> Example103.meta
-    ScatterCharts__Basic -> Example104.meta
+    Interactivity__ZoomAlt -> Example63.meta
+    Interactivity__TrickyTooltip -> Example64.meta
+    Interactivity__Multiple -> Example65.meta
+    Interactivity__BasicLine -> Example66.meta
+    Interactivity__Offset -> Example67.meta
+    Interactivity__DoubleSearch -> Example68.meta
+    Interactivity__ChangeUnit -> Example69.meta
+    Interactivity__Focal -> Example70.meta
+    LineCharts__Area -> Example71.meta
+    LineCharts__Gradient -> Example72.meta
+    LineCharts__Width -> Example73.meta
+    LineCharts__TooltipStack -> Example74.meta
+    LineCharts__Tooltip -> Example75.meta
+    LineCharts__Montone -> Example76.meta
+    LineCharts__Pattern -> Example77.meta
+    LineCharts__Dots -> Example78.meta
+    LineCharts__Dashed -> Example79.meta
+    LineCharts__Color -> Example80.meta
+    LineCharts__Stepped -> Example81.meta
+    LineCharts__Stacked -> Example82.meta
+    LineCharts__Labels -> Example83.meta
+    LineCharts__Missing -> Example84.meta
+    LineCharts__Legends -> Example85.meta
+    LineCharts__Basic -> Example86.meta
+    Frontpage__BasicBubble -> Example87.meta
+    Frontpage__BasicNavigation -> Example88.meta
+    Frontpage__BasicBar -> Example89.meta
+    Frontpage__BasicArea -> Example90.meta
+    Frontpage__Concise -> Example91.meta
+    Frontpage__BasicLine -> Example92.meta
+    Frontpage__BasicScatter -> Example93.meta
+    Frontpage__Familiar -> Example94.meta
+    ScatterCharts__Colors -> Example95.meta
+    ScatterCharts__Shapes -> Example96.meta
+    ScatterCharts__Tooltip -> Example97.meta
+    ScatterCharts__Highlight -> Example98.meta
+    ScatterCharts__DataDependent -> Example99.meta
+    ScatterCharts__Borders -> Example100.meta
+    ScatterCharts__Labels -> Example101.meta
+    ScatterCharts__Opacity -> Example102.meta
+    ScatterCharts__Sizes -> Example103.meta
+    ScatterCharts__Legends -> Example104.meta
+    ScatterCharts__Basic -> Example105.meta
 
 
 all : List Id
@@ -1270,6 +1281,7 @@ all =
   , Interactivity__Background
   , Interactivity__BasicBar
   , Interactivity__BasicArea
+  , Interactivity__ZoomAlt
   , Interactivity__TrickyTooltip
   , Interactivity__Multiple
   , Interactivity__BasicLine
