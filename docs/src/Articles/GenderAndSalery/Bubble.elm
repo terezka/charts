@@ -76,14 +76,20 @@ update msg model =
               }
           }
 
-    OnDoubleClick _ ->
-      { model | zoomPercentage = model.zoomPercentage + 20 }
+    OnDoubleClick coords ->
+      let newZoom = model.zoomPercentage in
+      { model | zoomPercentage = newZoom
+      , zoomOffset =
+          { x = model.zoomOffset.x + coords.x - 1000 / 2
+          , y = model.zoomOffset.y + coords.y - 550 / 2
+          }
+      }
 
     OnZoomIn ->
       { model | zoomPercentage = model.zoomPercentage + 20 }
 
     OnZoomOut ->
-      { model | zoomPercentage = max (model.zoomPercentage - 20) 100 }
+      { model | zoomPercentage = model.zoomPercentage - 20 }
 
     OnZoomReset ->
       { model | zoomPercentage = 100, zoomOffset = { x = 0, y = 0 } }
@@ -140,6 +146,7 @@ view model year =
         , E.row
             [ E.spacing 10 ]
             [ E.text "Zoom: "
+            , E.text (Debug.toString model.zoomOffset ++ " - ")
             , E.text (String.fromFloat model.zoomPercentage ++ "%")
             , E.row
                 [ B.width 1
@@ -264,6 +271,11 @@ viewChart model year =
           ]
         else
           []
+
+    , C.withPlane <| \p ->
+        [ C.line [ CA.color "red", CA.y1 (CA.middle p.y) ]
+        , C.line [ CA.color "red", CA.x1 (CA.middle p.x) ]
+        ]
 
     --, case model.window of
     --    Just _ ->
