@@ -55,7 +55,7 @@ update msg model =
           model
 
         Just ( start, _ ) ->
-          { model | moving = Just <| Debug.log "moving" ( start, coords ) }
+          { model | moving = Just ( start, coords ) }
 
     OnMouseUp coords ->
       case model.moving of
