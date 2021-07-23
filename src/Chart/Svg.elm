@@ -17,7 +17,7 @@ module Chart.Svg exposing
 
   , position, positionHtml
 
-  , Plane, Axis, Margin, Position, Point
+  , Plane, Axis, Position, Point
   , fromSvg, fromCartesian
   , lengthInSvgX, lengthInSvgY
   , lengthInCartesianX, lengthInCartesianY
@@ -540,20 +540,8 @@ Using this you'll be able to translate cartesian coordinates into SVG ones and b
 
 -}
 type alias Plane =
-  { width : Float
-  , height : Float
-  , margin : Margin
-  , x : Axis
+  { x : Axis
   , y : Axis
-  }
-
-
-{-| -}
-type alias Margin =
-  { top : Float
-  , right : Float
-  , left : Float
-  , bottom : Float
   }
 
 
@@ -566,9 +554,19 @@ type alias Margin =
 
 -}
 type alias Axis =
-  { dataMin : Float
+  { length : Float
+  , marginMin : Float
+  , marginMax : Float
+  , dataMin : Float
   , dataMax : Float
   , min : Float
+  , max : Float
+  }
+
+
+{-| -}
+type alias Limit =
+  { min : Float
   , max : Float
   }
 

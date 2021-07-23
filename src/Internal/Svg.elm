@@ -60,8 +60,8 @@ container plane config below chartEls above =
           , HA.style "height" "100%"
           ]
         else
-          [ HA.style "width" (String.fromFloat plane.width ++ "px")
-          , HA.style "height" (String.fromFloat plane.height ++ "px")
+          [ HA.style "width" (String.fromFloat plane.x.length ++ "px")
+          , HA.style "height" (String.fromFloat plane.y.length ++ "px")
           ]
 
       htmlAttrs =
@@ -74,12 +74,12 @@ container plane config below chartEls above =
 
       svgAttrsSize =
         if config.responsive then
-          [ SA.viewBox ("0 0 " ++ String.fromFloat plane.width ++ " " ++ String.fromFloat plane.height)
+          [ SA.viewBox ("0 0 " ++ String.fromFloat plane.x.length ++ " " ++ String.fromFloat plane.y.length)
           , HA.style "display" "block"
           ]
         else
-          [ SA.width (String.fromFloat plane.width)
-          , SA.height (String.fromFloat plane.height)
+          [ SA.width (String.fromFloat plane.x.length)
+          , SA.height (String.fromFloat plane.y.length)
           , HA.style "display" "block"
           ]
 
@@ -90,10 +90,10 @@ container plane config below chartEls above =
         SE.on event.name (decoder plane event.handler)
 
       chartPosition =
-        [ SA.x (String.fromFloat plane.margin.left)
-        , SA.y (String.fromFloat plane.margin.top)
-        , SA.width (String.fromFloat (plane.width - plane.margin.left - plane.margin.right))
-        , SA.height (String.fromFloat (plane.height - plane.margin.bottom - plane.margin.top))
+        [ SA.x (String.fromFloat plane.x.marginMin)
+        , SA.y (String.fromFloat plane.y.marginMin)
+        , SA.width (String.fromFloat (Coord.innerWidth plane))
+        , SA.height (String.fromFloat (Coord.innerHeight plane))
         , SA.fill "transparent"
         ]
   in
@@ -601,11 +601,8 @@ defaultLineLegend =
 barLegend : Legend msg -> Bar ->  Html msg
 barLegend config barConfig =
   let fakePlane =
-        { width = config.width
-        , height = config.height
-        , margin = Coord.Margin 0 0 0 0
-        , x = Coord.Axis 0 10 0 10
-        , y = Coord.Axis 0 10 0 10
+        { x = Coord.Axis config.width 0 0 0 10 0 10
+        , y = Coord.Axis config.height 0 0 0 10 0 10
         }
 
       fontStyle =
@@ -640,11 +637,8 @@ lineLegend config interConfig dotConfig =
         if interConfig.opacity == 0 then topMargin else 0
 
       fakePlane =
-        { width = config.width
-        , height = config.height
-        , margin = Coord.Margin 0 0 0 0
-        , x = Coord.Axis 0 10 0 10
-        , y = Coord.Axis 0 10 0 10
+        { x = Coord.Axis config.width 0 0 0 10 0 10
+        , y = Coord.Axis config.height 0 0 0 10 0 10
         }
 
       fontStyle =
@@ -1399,9 +1393,9 @@ defaultTooltip =
 tooltip : Plane -> Position -> Tooltip -> List (H.Attribute Never) -> List (H.Html Never) -> H.Html msg
 tooltip plane pos config htmlAttrs content =
   let distanceTop = Coord.toSVGY plane pos.y2
-      distanceBottom = plane.height - Coord.toSVGY plane pos.y1
+      distanceBottom = plane.y.length - Coord.toSVGY plane pos.y1
       distanceLeft = Coord.toSVGX plane pos.x2
-      distanceRight = plane.width - Coord.toSVGX plane pos.x1
+      distanceRight = plane.x.length - Coord.toSVGX plane pos.x1
 
       direction =
         case config.direction of
@@ -1491,8 +1485,8 @@ position plane rotation x_ y_ xOff_ yOff_ =
 positionHtml : Plane -> Float -> Float -> Float -> Float -> List (H.Attribute msg) -> List (H.Html msg) -> H.Html msg
 positionHtml plane x y xOff yOff attrs content =
     let
-        xPercentage = (Coord.toSVGX plane x + xOff) * 100 / plane.width
-        yPercentage = (Coord.toSVGY plane y - yOff) * 100 / plane.height
+        xPercentage = (Coord.toSVGX plane x + xOff) * 100 / plane.x.length
+        yPercentage = (Coord.toSVGY plane y - yOff) * 100 / plane.y.length
 
         posititonStyles =
           [ HA.style "left" (String.fromFloat xPercentage ++ "%")
@@ -1654,21 +1648,24 @@ decoder plane toMsg =
   let
     handle mouseX mouseY box =
       let
-        widthPercent = box.width / plane.width
-        heightPercent = box.height / plane.height
+        widthPercent = box.width / plane.x.length
+        heightPercent = box.height / plane.y.length
 
         xPrev = plane.x
         yPrev = plane.y
 
         newPlane =
           { plane
-          | width = box.width
-          , height = box.height
-          , margin =
-              { top = plane.margin.top * heightPercent
-              , right = plane.margin.right * widthPercent
-              , left = plane.margin.left * widthPercent
-              , bottom = plane.margin.bottom * heightPercent
+          | x =
+              { xPrev | length = box.width
+              , marginMin = plane.x.marginMin * widthPercent
+              , marginMax = plane.x.marginMax * widthPercent
+              }
+          , y =
+              { yPrev
+              | length = box.height
+              , marginMin = plane.y.marginMin * heightPercent
+              , marginMax = plane.y.marginMax * heightPercent
               }
           }
 

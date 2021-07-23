@@ -25,8 +25,9 @@ import FeatherIcons as Icon
 type alias Model =
   { hovering : List (CI.One Salary.Datum CI.Dot)
   , moving : Maybe ( CS.Point, CS.Point )
-  , zoomOffset : CS.Point
-  , zoomPercentage : Float
+  , offset : CS.Point
+  , center : CS.Point
+  , percentage : Float
   }
 
 
@@ -34,13 +35,14 @@ init : Model
 init =
   { hovering = []
   , moving = Nothing
-  , zoomOffset = { x = 0, y = 0 }
-  , zoomPercentage = 100
+  , offset = { x = 0, y = 0 }
+  , center = { x = 0, y = 0 }
+  , percentage = 100
   }
 
 
 type Msg
-  = OnHover (List (CI.One Salary.Datum CI.Dot)) CS.Point
+  = OnMouseMove (List (CI.One Salary.Datum CI.Dot)) CS.Point
   | OnMouseDown CS.Point
   | OnMouseUp CS.Point
   | OnDoubleClick CS.Point
@@ -53,7 +55,10 @@ type Msg
 update : Msg -> Model -> Model
 update msg model =
   case msg of
-    OnHover hovering coords ->
+    OnMouseDown coords ->
+      { model | moving = Just ( coords, coords ) }
+
+    OnMouseMove hovering coords ->
       case model.moving of
         Nothing ->
           { model | hovering = hovering }
@@ -61,50 +66,36 @@ update msg model =
         Just ( start, _ ) ->
           { model | hovering = [], moving = Just ( start, coords ) }
 
-    OnMouseDown coords ->
-      { model | moving = Just ( coords, coords ) }
-
     OnMouseUp coords ->
       case model.moving of
         Nothing ->
           model
 
         Just ( start, _ ) ->
-          { model | moving = Nothing, zoomOffset =
-              { x = model.zoomOffset.x + start.x - coords.x
-              , y = model.zoomOffset.y + start.y - coords.y
+          { model | moving = Nothing, offset =
+              { x = model.offset.x + start.x - coords.x
+              , y = model.offset.y + start.y - coords.y
               }
           }
 
     OnDoubleClick coords ->
-      let newZoom = model.zoomPercentage + 20 in
-      { model | zoomPercentage = newZoom
-      , zoomOffset =
-          { x = (model.zoomOffset.x + coords.x - 1000 / 2) * newZoom / 100
-          , y = (model.zoomOffset.y + coords.y - 550 / 2) * newZoom / 100
-          }
+      { model
+      | percentage = model.percentage + 20
+      , center = coords
+      , offset = { x = 0, y = 0 }
       }
 
     OnZoomIn ->
-      { model | zoomPercentage = model.zoomPercentage + 20 }
+      { model | percentage = model.percentage + 20 }
 
     OnZoomOut ->
-      { model | zoomPercentage = model.zoomPercentage - 20 }
+      { model | percentage = model.percentage - 20 }
 
     OnZoomReset ->
-      { model | zoomPercentage = 100, zoomOffset = { x = 0, y = 0 } }
+      { model | percentage = 100, offset = { x = 0, y = 0 }, center = { x = 0, y = 0 } }
 
     OnReset ->
-      case model.moving of
-        Nothing ->
-          { model | hovering = [], moving = Nothing }
-
-        Just ( start, end ) ->
-          { model | hovering = [], moving = Nothing, zoomOffset =
-              { x = model.zoomOffset.x + start.x - end.x
-              , y = model.zoomOffset.y + start.y - end.y
-              }
-          }
+      { model | hovering = [], moving = Nothing }
 
 
 view : Model -> Float -> E.Element Msg
@@ -146,8 +137,7 @@ view model year =
         , E.row
             [ E.spacing 10 ]
             [ E.text "Zoom: "
-            , E.text (Debug.toString model.zoomOffset ++ " - ")
-            , E.text (String.fromFloat model.zoomPercentage ++ "%")
+            , E.text (String.fromFloat model.percentage ++ "%")
             , E.row
                 [ B.width 1
                 , B.rounded 5
@@ -188,40 +178,34 @@ view model year =
 
 viewChart : Model -> Float -> H.Html Msg
 viewChart model year =
+  let ( xOff, yOff ) =
+        case model.moving of
+          Just ( a, b ) ->
+            ( model.offset.x + a.x - b.x
+            , model.offset.y + a.y - b.y
+            )
+
+          Nothing ->
+            ( model.offset.x
+            , model.offset.y
+            )
+
+      ( centerX, centerY ) =
+        if model.center.x == 0 && model.center.y == 0
+        then ( identity, identity )
+        else ( CA.centerAt model.center.x, CA.centerAt model.center.y )
+  in
   C.chart
     [ CA.height 550
     , CA.width 1000
     , CA.margin { top = 0, bottom = 20, left = 0, right = 0 }
-    , CA.padding <|
-        let percentage =
-              model.zoomPercentage - (100 - model.zoomPercentage) / 2
+    , CA.range [ CA.lowest 20000 CA.orHigher, CA.zoom model.percentage, centerX, CA.pad -xOff xOff ]
+    , CA.domain [ CA.lowest 76 CA.orHigher, CA.zoom model.percentage, centerY, CA.pad yOff -yOff ]
 
-            ( xOff, yOff ) =
-              case model.moving of
-                Just ( start, end ) ->
-                  ( (model.zoomOffset.x + start.x - end.x)
-                  , (model.zoomOffset.y + start.y - end.y)
-                  )
-
-                Nothing ->
-                  ( model.zoomOffset.x
-                  , model.zoomOffset.y
-                  )
-        in
-        { top = 550 - (550 * percentage / 100) - yOff
-        , bottom = 550 - (550 * percentage / 100) + yOff
-        , left = 1000 - (1000 * percentage / 100) - xOff
-        , right = 1000 - (1000 * percentage / 100) + xOff
-        }
-
-    , CA.range [ CA.lowest 20000 CA.orHigher ]
-    , CA.domain [ CA.lowest 76 CA.orHigher ]
-
-    , CE.on "mousemove" <|
-        CE.map2 OnHover (CE.getWithin 40 CI.dots) CE.getSvgCoords
+    , CE.on "mousemove" (CE.map2 OnMouseMove (CE.getWithin 40 CI.dots) CE.getSvgCoords)
     , CE.onMouseDown OnMouseDown CE.getSvgCoords
     , CE.onMouseUp OnMouseUp CE.getSvgCoords
-    , CE.onDoubleClick OnDoubleClick CE.getSvgCoords
+    , CE.onDoubleClick OnDoubleClick CE.getCoords
     , CE.onMouseLeave OnReset
 
     , CA.htmlAttrs
@@ -370,7 +354,7 @@ salarySeries model year border highlightSize size =
                         then [ CA.border "#de74d7", CA.color "#de74d7" ]
                         else [ CA.border "#f56dbc", CA.color "#f56dbc" ]
                   in
-                  [ CA.size ((d.numOfBoth / size) * model.zoomPercentage / 100) ] ++ color
+                  [ CA.size ((d.numOfBoth / size) * model.percentage / 100) ] ++ color
                 )
           |> C.amongst model.hovering (\d -> [ CA.highlight 0.4, CA.highlightWidth highlightSize, CA.opacity 0.6 ])
       ]
