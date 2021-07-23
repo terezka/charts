@@ -17,8 +17,8 @@ import Chart.Svg as CS
 
 {-| @SMALL -}
 type alias Model =
-  { movingOffset : Maybe CS.Point
-  , center : CS.Point
+  { center : CS.Point
+  , offsetDrag : Maybe CS.Point
   , offset : CS.Point
   , percentage : Float
   }
@@ -26,8 +26,8 @@ type alias Model =
 
 init : Model
 init =
-  { movingOffset = Nothing
-  , center = { x = 0, y = 0 }
+  { center = { x = 0, y = 0 }
+  , offsetDrag = Nothing
   , offset = { x = 0, y = 0 }
   , percentage = 100
   }
@@ -47,10 +47,10 @@ update : Msg -> Model -> Model
 update msg model =
   case msg of
     OnMouseDown off ->
-      { model | movingOffset = Just off }
+      { model | offsetDrag = Just off }
 
     OnMouseMove off ->
-      case model.movingOffset of
+      case model.offsetDrag of
         Just start ->
           { model | offset = { x = start.x - off.x, y = start.y - off.y } }
 
@@ -58,24 +58,24 @@ update msg model =
           model
 
     OnMouseUp off coord ->
-      case model.movingOffset of
+      case model.offsetDrag of
         Just start ->
           if start == off then
-            { model | center = coord, movingOffset = Nothing }
+            { model | center = coord, offsetDrag = Nothing }
           else
             { model | center =
                 { x = model.center.x + start.x - off.x
                 , y = model.center.y + start.y - off.y
                 }
             , offset = { x = 0, y = 0 }
-            , movingOffset = Nothing
+            , offsetDrag = Nothing
             }
 
         Nothing ->
           { model | center = off, offset = { x = 0, y = 0 } }
 
     OnMouseLeave ->
-      { model | movingOffset = Nothing
+      { model | offsetDrag = Nothing
       , center =
           { x = model.center.x + model.offset.x
           , y = model.center.y + model.offset.y
