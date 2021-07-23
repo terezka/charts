@@ -127,27 +127,29 @@ view model =
     , C.yTicks [ CA.amount 10, CA.ints ]
 
     , C.series .x
-        [ C.scatter .y [ CA.size 10 ] ]
-        [ { x = -100, y = -100 }
-        , { x = -40, y = -30 }
-        , { x = 20, y = 80 }
-        , { x = 40, y = 50 }
-        , { x = 0, y = 0 }
-        , { x = 20, y = 80 }
-        , { x = 40, y = 50 }
-        , { x = 80, y = 20 }
-        , { x = 100, y = 100 }
+        [ C.scatter .y [ CA.opacity 0.2, CA.borderWidth 1 ]
+            |> C.variation (\_ d -> [ CA.size (d.s * model.percentage / 100) ])
+        ]
+        [ { x = -100, y = -100, s = 40 }
+        , { x = -80, y = -30, s = 30 }
+        , { x = -60, y = 80, s = 60 }
+        , { x = -50, y = 50, s = 70 }
+        , { x = 20, y = 80, s = 40 }
+        , { x = 30, y = -20, s = 60 }
+        , { x = 40, y = 50, s = 80 }
+        , { x = 80, y = 20, s = 50 }
+        , { x = 100, y = 100, s = 40 }
         ]
 
     , C.withPlane <| \p ->
-        [ C.line [ CA.color "red", CA.y1 (CA.middle p.y) ]
-        , C.line [ CA.color "red", CA.x1 (CA.middle p.x) ]
+        [ C.line [ CA.color CA.darkGray, CA.dashed [ 6, 6 ], CA.y1 (CA.middle p.y) ]
+        , C.line [ CA.color CA.darkGray, CA.dashed [ 6, 6 ], CA.x1 (CA.middle p.x) ]
         ]
 
     , C.htmlAt .max .max 0 0
         [ HA.style "transform" "translateX(-100%)" ]
-        [ H.button [ HE.onClick OnZoomIn ] [ H.text "+" ]
-        , H.button [ HE.onClick OnZoomOut ] [ H.text "-" ]
+        [ H.button [ HE.onClick OnZoomIn, HA.style "margin-right" "5px" ] [ H.text "+" ]
+        , H.button [ HE.onClick OnZoomOut, HA.style "margin-right" "5px" ] [ H.text "-" ]
         , H.button [ HE.onClick OnZoomReset ] [ H.text "⨯" ]
         ]
     ]
@@ -276,27 +278,29 @@ view model =
     , C.yTicks [ CA.amount 10, CA.ints ]
 
     , C.series .x
-        [ C.scatter .y [ CA.size 10 ] ]
-        [ { x = -100, y = -100 }
-        , { x = -40, y = -30 }
-        , { x = 20, y = 80 }
-        , { x = 40, y = 50 }
-        , { x = 0, y = 0 }
-        , { x = 20, y = 80 }
-        , { x = 40, y = 50 }
-        , { x = 80, y = 20 }
-        , { x = 100, y = 100 }
+        [ C.scatter .y [ CA.opacity 0.2, CA.borderWidth 1 ]
+            |> C.variation (\\_ d -> [ CA.size (d.s * model.percentage / 100) ])
+        ]
+        [ { x = -100, y = -100, s = 40 }
+        , { x = -80, y = -30, s = 30 }
+        , { x = -60, y = 80, s = 60 }
+        , { x = -50, y = 50, s = 70 }
+        , { x = 20, y = 80, s = 40 }
+        , { x = 30, y = -20, s = 60 }
+        , { x = 40, y = 50, s = 80 }
+        , { x = 80, y = 20, s = 50 }
+        , { x = 100, y = 100, s = 40 }
         ]
 
     , C.withPlane <| \\p ->
-        [ C.line [ CA.color "red", CA.y1 (CA.middle p.y) ]
-        , C.line [ CA.color "red", CA.x1 (CA.middle p.x) ]
+        [ C.line [ CA.color CA.darkGray, CA.dashed [ 6, 6 ], CA.y1 (CA.middle p.y) ]
+        , C.line [ CA.color CA.darkGray, CA.dashed [ 6, 6 ], CA.x1 (CA.middle p.x) ]
         ]
 
     , C.htmlAt .max .max 0 0
         [ HA.style "transform" "translateX(-100%)" ]
-        [ H.button [ HE.onClick OnZoomIn ] [ H.text "+" ]
-        , H.button [ HE.onClick OnZoomOut ] [ H.text "-" ]
+        [ H.button [ HE.onClick OnZoomIn, HA.style "margin-right" "5px" ] [ H.text "+" ]
+        , H.button [ HE.onClick OnZoomOut, HA.style "margin-right" "5px" ] [ H.text "-" ]
         , H.button [ HE.onClick OnZoomReset ] [ H.text "⨯" ]
         ]
     ]
@@ -430,27 +434,29 @@ view model =
     , C.yTicks [ CA.amount 10, CA.ints ]
 
     , C.series .x
-        [ C.scatter .y [ CA.size 10 ] ]
-        [ { x = -100, y = -100 }
-        , { x = -40, y = -30 }
-        , { x = 20, y = 80 }
-        , { x = 40, y = 50 }
-        , { x = 0, y = 0 }
-        , { x = 20, y = 80 }
-        , { x = 40, y = 50 }
-        , { x = 80, y = 20 }
-        , { x = 100, y = 100 }
+        [ C.scatter .y [ CA.opacity 0.2, CA.borderWidth 1 ]
+            |> C.variation (\\_ d -> [ CA.size (d.s * model.percentage / 100) ])
+        ]
+        [ { x = -100, y = -100, s = 40 }
+        , { x = -80, y = -30, s = 30 }
+        , { x = -60, y = 80, s = 60 }
+        , { x = -50, y = 50, s = 70 }
+        , { x = 20, y = 80, s = 40 }
+        , { x = 30, y = -20, s = 60 }
+        , { x = 40, y = 50, s = 80 }
+        , { x = 80, y = 20, s = 50 }
+        , { x = 100, y = 100, s = 40 }
         ]
 
     , C.withPlane <| \\p ->
-        [ C.line [ CA.color "red", CA.y1 (CA.middle p.y) ]
-        , C.line [ CA.color "red", CA.x1 (CA.middle p.x) ]
+        [ C.line [ CA.color CA.darkGray, CA.dashed [ 6, 6 ], CA.y1 (CA.middle p.y) ]
+        , C.line [ CA.color CA.darkGray, CA.dashed [ 6, 6 ], CA.x1 (CA.middle p.x) ]
         ]
 
     , C.htmlAt .max .max 0 0
         [ HA.style "transform" "translateX(-100%)" ]
-        [ H.button [ HE.onClick OnZoomIn ] [ H.text "+" ]
-        , H.button [ HE.onClick OnZoomOut ] [ H.text "-" ]
+        [ H.button [ HE.onClick OnZoomIn, HA.style "margin-right" "5px" ] [ H.text "+" ]
+        , H.button [ HE.onClick OnZoomOut, HA.style "margin-right" "5px" ] [ H.text "-" ]
         , H.button [ HE.onClick OnZoomReset ] [ H.text "⨯" ]
         ]
     ]
