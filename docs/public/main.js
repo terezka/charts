@@ -6646,7 +6646,7 @@ var $author$project$Examples$Interactivity$Zoom$NoZoom = {$: 'NoZoom'};
 var $author$project$Examples$Interactivity$Zoom$init = $author$project$Examples$Interactivity$Zoom$NoZoom;
 var $author$project$Examples$Interactivity$ZoomAlt$init = {
 	center: {x: 0, y: 0},
-	moving: $elm$core$Maybe$Nothing,
+	movingOffset: $elm$core$Maybe$Nothing,
 	offset: {x: 0, y: 0},
 	percentage: 100
 };
@@ -8363,66 +8363,55 @@ var $author$project$Examples$Interactivity$ZoomAlt$update = F2(
 	function (msg, model) {
 		switch (msg.$) {
 			case 'OnMouseDown':
-				var coords = msg.a;
+				var off = msg.a;
 				return _Utils_update(
 					model,
 					{
-						moving: $elm$core$Maybe$Just(
-							_Utils_Tuple2(coords, coords))
+						movingOffset: $elm$core$Maybe$Just(off)
 					});
 			case 'OnMouseMove':
-				var coords = msg.a;
-				var _v1 = model.moving;
-				if (_v1.$ === 'Nothing') {
-					return model;
-				} else {
-					var _v2 = _v1.a;
-					var start = _v2.a;
+				var off = msg.a;
+				var _v1 = model.movingOffset;
+				if (_v1.$ === 'Just') {
+					var start = _v1.a;
 					return _Utils_update(
 						model,
 						{
-							moving: $elm$core$Maybe$Just(
-								_Utils_Tuple2(start, coords))
+							offset: {x: start.x - off.x, y: start.y - off.y}
 						});
+				} else {
+					return model;
 				}
 			case 'OnMouseUp':
-				var coords = msg.a;
-				var _v3 = model.moving;
-				if (_v3.$ === 'Nothing') {
-					return model;
+				var off = msg.a;
+				var coord = msg.b;
+				var _v2 = model.movingOffset;
+				if (_v2.$ === 'Just') {
+					var start = _v2.a;
+					return _Utils_eq(start, off) ? _Utils_update(
+						model,
+						{center: coord, movingOffset: $elm$core$Maybe$Nothing}) : _Utils_update(
+						model,
+						{
+							center: {x: (model.center.x + start.x) - off.x, y: (model.center.y + start.y) - off.y},
+							movingOffset: $elm$core$Maybe$Nothing,
+							offset: {x: 0, y: 0}
+						});
 				} else {
-					var _v4 = _v3.a;
-					var start = _v4.a;
 					return _Utils_update(
 						model,
 						{
-							moving: $elm$core$Maybe$Nothing,
-							offset: {x: (model.offset.x + start.x) - coords.x, y: (model.offset.y + start.y) - coords.y}
+							center: off,
+							offset: {x: 0, y: 0}
 						});
 				}
 			case 'OnMouseLeave':
-				var _v5 = model.moving;
-				if (_v5.$ === 'Nothing') {
-					return model;
-				} else {
-					var _v6 = _v5.a;
-					var start = _v6.a;
-					var coords = _v6.b;
-					return _Utils_update(
-						model,
-						{
-							moving: $elm$core$Maybe$Nothing,
-							offset: {x: (model.offset.x + start.x) - coords.x, y: (model.offset.y + start.y) - coords.y}
-						});
-				}
-			case 'OnDoubleClick':
-				var coords = msg.a;
 				return _Utils_update(
 					model,
 					{
-						center: coords,
-						offset: {x: 0, y: 0},
-						percentage: model.percentage + 20
+						center: {x: model.center.x + model.offset.x, y: model.center.y + model.offset.y},
+						movingOffset: $elm$core$Maybe$Nothing,
+						offset: {x: 0, y: 0}
 					});
 			case 'OnZoomIn':
 				return _Utils_update(
@@ -37768,9 +37757,6 @@ var $author$project$Examples$Interactivity$Zoom$view = function (model) {
 			}()
 			]));
 };
-var $author$project$Examples$Interactivity$ZoomAlt$OnDoubleClick = function (a) {
-	return {$: 'OnDoubleClick', a: a};
-};
 var $author$project$Examples$Interactivity$ZoomAlt$OnMouseDown = function (a) {
 	return {$: 'OnMouseDown', a: a};
 };
@@ -37778,13 +37764,23 @@ var $author$project$Examples$Interactivity$ZoomAlt$OnMouseLeave = {$: 'OnMouseLe
 var $author$project$Examples$Interactivity$ZoomAlt$OnMouseMove = function (a) {
 	return {$: 'OnMouseMove', a: a};
 };
-var $author$project$Examples$Interactivity$ZoomAlt$OnMouseUp = function (a) {
-	return {$: 'OnMouseUp', a: a};
-};
+var $author$project$Examples$Interactivity$ZoomAlt$OnMouseUp = F2(
+	function (a, b) {
+		return {$: 'OnMouseUp', a: a, b: b};
+	});
 var $author$project$Examples$Interactivity$ZoomAlt$OnZoomIn = {$: 'OnZoomIn'};
 var $author$project$Examples$Interactivity$ZoomAlt$OnZoomOut = {$: 'OnZoomOut'};
 var $author$project$Examples$Interactivity$ZoomAlt$OnZoomReset = {$: 'OnZoomReset'};
 var $author$project$Chart$Attributes$darkGray = $author$project$Internal$Helpers$darkGray;
+var $author$project$Internal$Events$getOffset = $author$project$Internal$Events$Decoder(
+	F3(
+		function (_v0, plane, searched) {
+			return {
+				x: searched.x - (plane.x.min + ($author$project$Internal$Coordinates$range(plane.x) / 2)),
+				y: searched.y - (plane.y.min + ($author$project$Internal$Coordinates$range(plane.y) / 2))
+			};
+		}));
+var $author$project$Chart$Events$getOffset = $author$project$Internal$Events$getOffset;
 var $author$project$Chart$Attributes$move = F2(
 	function (v, axis) {
 		return _Utils_update(
@@ -37792,19 +37788,6 @@ var $author$project$Chart$Attributes$move = F2(
 			{max: axis.max + v, min: axis.min + v});
 	});
 var $author$project$Examples$Interactivity$ZoomAlt$view = function (model) {
-	var _v0 = function () {
-		var _v1 = model.moving;
-		if (_v1.$ === 'Just') {
-			var _v2 = _v1.a;
-			var a = _v2.a;
-			var b = _v2.b;
-			return _Utils_Tuple2((model.offset.x + a.x) - b.x, (model.offset.y + a.y) - b.y);
-		} else {
-			return _Utils_Tuple2(model.offset.x, model.offset.y);
-		}
-	}();
-	var xOff = _v0.a;
-	var yOff = _v0.b;
 	return A2(
 		$author$project$Chart$chart,
 		_List_fromArray(
@@ -37815,36 +37798,27 @@ var $author$project$Examples$Interactivity$ZoomAlt$view = function (model) {
 				_List_fromArray(
 					[
 						$author$project$Chart$Attributes$zoom(model.percentage),
-						$author$project$Chart$Attributes$move(model.center.x),
-						A2($author$project$Chart$Attributes$pad, -xOff, xOff)
+						$author$project$Chart$Attributes$centerAt(model.center.x),
+						$author$project$Chart$Attributes$move(model.offset.x)
 					])),
 				$author$project$Chart$Attributes$domain(
 				_List_fromArray(
 					[
 						$author$project$Chart$Attributes$zoom(model.percentage),
-						$author$project$Chart$Attributes$move(model.center.y),
-						A2($author$project$Chart$Attributes$pad, yOff, -yOff)
+						$author$project$Chart$Attributes$centerAt(model.center.y),
+						$author$project$Chart$Attributes$move(model.offset.y)
 					])),
-				A2($author$project$Chart$Events$onMouseDown, $author$project$Examples$Interactivity$ZoomAlt$OnMouseDown, $author$project$Chart$Events$getSvgCoords),
-				A2($author$project$Chart$Events$onMouseMove, $author$project$Examples$Interactivity$ZoomAlt$OnMouseMove, $author$project$Chart$Events$getSvgCoords),
-				A2($author$project$Chart$Events$onMouseUp, $author$project$Examples$Interactivity$ZoomAlt$OnMouseUp, $author$project$Chart$Events$getSvgCoords),
+				A2($author$project$Chart$Events$onMouseDown, $author$project$Examples$Interactivity$ZoomAlt$OnMouseDown, $author$project$Chart$Events$getOffset),
+				A2($author$project$Chart$Events$onMouseMove, $author$project$Examples$Interactivity$ZoomAlt$OnMouseMove, $author$project$Chart$Events$getOffset),
+				A2(
+				$author$project$Chart$Events$on,
+				'mouseup',
+				A3($author$project$Chart$Events$map2, $author$project$Examples$Interactivity$ZoomAlt$OnMouseUp, $author$project$Chart$Events$getOffset, $author$project$Chart$Events$getCoords)),
 				$author$project$Chart$Events$onMouseLeave($author$project$Examples$Interactivity$ZoomAlt$OnMouseLeave),
-				A2($author$project$Chart$Events$onDoubleClick, $author$project$Examples$Interactivity$ZoomAlt$OnDoubleClick, $author$project$Chart$Events$getCoords),
 				$author$project$Chart$Attributes$htmlAttrs(
 				_List_fromArray(
 					[
-						A2($elm$html$Html$Attributes$style, 'user-select', 'none'),
-						A2(
-						$elm$html$Html$Attributes$style,
-						'cursor',
-						function () {
-							var _v3 = model.moving;
-							if (_v3.$ === 'Just') {
-								return 'grabbing';
-							} else {
-								return 'grab';
-							}
-						}())
+						A2($elm$html$Html$Attributes$style, 'user-select', 'none')
 					]))
 			]),
 		_List_fromArray(
@@ -37887,7 +37861,7 @@ var $author$project$Examples$Interactivity$ZoomAlt$view = function (model) {
 						A2(
 						$author$project$Chart$variation,
 						F2(
-							function (_v4, d) {
+							function (_v0, d) {
 								return _List_fromArray(
 									[
 										$author$project$Chart$Attributes$size((d.s * model.percentage) / 100)
@@ -40829,7 +40803,7 @@ var $author$project$Examples$Interactivity$NoArrow$largeCode = '\nimport Html as
 var $author$project$Examples$Interactivity$Offset$largeCode = '\nimport Html as H\nimport Svg as S\nimport Chart as C\nimport Chart.Attributes as CA\nimport Chart.Events as CE\nimport Chart.Item as CI\n\n\ntype alias Model =\n  { hovering : List (CI.One Datum CI.Dot) }\n\n\ninit : Model\ninit =\n  { hovering = [] }\n\n\ntype Msg\n  = OnHover (List (CI.One Datum CI.Dot))\n\n\nupdate : Msg -> Model -> Model\nupdate msg model =\n  case msg of\n    OnHover hovering ->\n      { model | hovering = hovering }\n\n\nview : Model -> H.Html Msg\nview model =\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    , CE.onMouseMove OnHover (CE.getNearest CI.dots)\n    , CE.onMouseLeave (OnHover [])\n    ]\n    [ C.xLabels [ CA.withGrid ]\n    , C.yLabels [ CA.withGrid ]\n    , C.series .x\n        [ C.scatter .y [ CA.size 60, CA.opacity 0.3, CA.borderWidth 1 ]\n        , C.scatter .z [ CA.size 50, CA.opacity 0.3, CA.borderWidth 1 ]\n        ]\n        data\n    , C.each model.hovering <| \\p item ->\n        [ C.tooltip item [ CA.offset 0 ] [] [] ]\n    ]\n  ';
 var $author$project$Examples$Interactivity$TrickyTooltip$largeCode = '\nimport Html as H\nimport Svg as S\nimport Chart as C\nimport Chart.Attributes as CA\nimport Chart.Events as CE\nimport Chart.Item as CI\n\n\ntype alias Model =\n  { hovering : List (CI.Many Datum CI.Bar) }\n\n\ninit : Model\ninit =\n  { hovering = [] }\n\n\ntype Msg\n  = OnHover (List (CI.Many Datum CI.Bar))\n\n\nupdate : Msg -> Model -> Model\nupdate msg model =\n  case msg of\n    OnHover hovering ->\n      { model | hovering = hovering }\n\n\nview : Model -> H.Html Msg\nview model =\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    , CA.padding { top = 0, bottom = 0, left = 10, right = 10 }\n    , CI.bars\n        |> CI.andThen CI.bins\n        |> CE.getNearest\n        |> CE.onMouseMove OnHover\n    , CE.onMouseLeave (OnHover [])\n    ]\n    [ C.yLabels [ CA.withGrid, CA.pinned .min ]\n    , C.xLabels []\n    , C.bars\n        []\n        [ C.bar .w []\n        , C.stacked\n            [ C.bar .p []\n            , C.bar .q []\n            ]\n        ]\n        data\n    , C.each model.hovering <| \\p bin ->\n        let stacks = CI.apply CI.stacks (CI.getMembers bin)\n            toTooltip stack = C.tooltip stack [ CA.onLeftOrRight ] [] []\n        in\n        List.map toTooltip stacks\n    ]\n  ';
 var $author$project$Examples$Interactivity$Zoom$largeCode = '\nimport Html as H\nimport Html.Attributes as HA\nimport Html.Events as HE\nimport Svg as S\nimport Chart as C\nimport Chart.Attributes as CA\nimport Chart.Events as CE\nimport Chart.Item as CI\nimport Data.Iris\n\n\ntype Model\n  = NoZoom\n  | Zooming CE.Point CE.Point\n  | ReZooming CE.Point CE.Point CE.Point CE.Point\n  | Zoomed CE.Point CE.Point\n\n\ngetNewSelection : Model -> Maybe ( CE.Point, CE.Point )\ngetNewSelection model =\n  case model of\n    NoZoom -> Nothing\n    Zooming start end -> Just ( start, end )\n    ReZooming _ _ start end -> Just ( start, end )\n    Zoomed _ _ -> Nothing\n\n\ngetCurrentWindow : Model -> Maybe ( CE.Point, CE.Point )\ngetCurrentWindow model =\n  case model of\n    NoZoom -> Nothing\n    Zooming _ _ -> Nothing\n    ReZooming start end _ _ -> Just ( start, end )\n    Zoomed start end -> Just ( start, end )\n\n\n\ninit : Model\ninit =\n  NoZoom\n\n\ntype Msg\n  = OnDown CE.Point\n  | OnMove CE.Point\n  | OnUp CE.Point\n  | OnReset\n\n\nupdate : Msg -> Model -> Model\nupdate msg model =\n  case msg of\n    OnDown point ->\n      case model of\n        NoZoom ->\n          Zooming point point\n\n        Zoomed start end ->\n          ReZooming start end point point\n\n        _ -> model\n\n    OnMove point ->\n      case model of\n        Zooming start _ ->\n          Zooming start point\n\n        ReZooming startOld endOld start _ ->\n          ReZooming startOld endOld start point\n\n        _ ->\n          model\n\n    OnUp point ->\n      case model of\n        Zooming start _ ->\n          Zoomed\n            { x = min start.x point.x, y = min start.y point.y }\n            { x = max start.x point.x, y = max start.y point.y }\n\n        ReZooming _ _ start _ ->\n          Zoomed\n            { x = min start.x point.x, y = min start.y point.y }\n            { x = max start.x point.x, y = max start.y point.y }\n\n        _ ->\n          model\n\n    OnReset ->\n      NoZoom\n\n\nview : Model -> H.Html Msg\nview model =\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    , CA.htmlAttrs [ HA.style "cursor" "crosshair" ]\n\n    , CE.onMouseDown OnDown CE.getCoords\n    , CE.onMouseMove OnMove CE.getCoords\n    , CE.onMouseUp OnUp CE.getCoords\n\n    , case getCurrentWindow model of\n        Just ( start, end ) ->\n          CA.range\n            [ CA.lowest start.x CA.exactly\n            , CA.highest end.x CA.exactly\n            ]\n\n        Nothing ->\n          CA.range []\n\n    , case getCurrentWindow model of\n        Just ( start, end ) ->\n          CA.domain\n            [ CA.lowest start.y CA.exactly\n            , CA.highest end.y CA.exactly\n            ]\n\n        Nothing ->\n          CA.range []\n    ]\n    [ C.xLabels [ CA.withGrid ]\n    , C.yLabels [ CA.withGrid ]\n\n    , C.series .sepalWidth\n        [ C.scatterMaybe (Data.Iris.only Data.Iris.Setosa .petalWidth)\n            [ CA.size 3, CA.color "white", CA.borderWidth 1, CA.circle ]\n        , C.scatterMaybe (Data.Iris.only Data.Iris.Versicolor .petalWidth)\n            [ CA.size 3, CA.color "white", CA.borderWidth 1, CA.square ]\n        , C.scatterMaybe (Data.Iris.only Data.Iris.Virginica .petalWidth)\n            [ CA.size 3, CA.color "white", CA.borderWidth 1, CA.diamond ]\n        ]\n        Data.Iris.data\n\n    , case getNewSelection model of\n        Just ( start, end ) ->\n          C.rect\n            [ CA.x1 start.x\n            , CA.x2 end.x\n            , CA.y1 start.y\n            , CA.y2 end.y\n            ]\n\n        Nothing ->\n          C.none\n\n    , case getCurrentWindow model of\n        Just ( start, end ) ->\n          C.htmlAt .max .max -10 -10\n            [ HA.style "transform" "translateX(-100%)"\n            ]\n            [ H.button\n                [ HE.onClick OnReset\n                , HA.style "border" "1px solid black"\n                , HA.style "border-radius" "5px"\n                , HA.style "padding" "2px 10px"\n                , HA.style "background" "white"\n                , HA.style "font-size" "14px"\n                ]\n                [ H.text "Reset" ]\n            ]\n\n        Nothing ->\n          C.none\n    ]\n  ';
-var $author$project$Examples$Interactivity$ZoomAlt$largeCode = '\nimport Html as H exposing (Html)\nimport Html.Attributes as HA\nimport Html.Events as HE\nimport Svg as S\nimport Svg.Attributes as SA\n\nimport Chart as C\nimport Chart.Attributes as CA\nimport Chart.Events as CE\nimport Chart.Item as CI\nimport Chart.Svg as CS\n\n\n\ntype alias Model =\n  { moving : Maybe ( CS.Point, CS.Point )\n  , offset : CS.Point\n  , center : CS.Point\n  , percentage : Float\n  }\n\n\ninit : Model\ninit =\n  { moving = Nothing\n  , offset = { x = 0, y = 0 }\n  , center = { x = 0, y = 0 }\n  , percentage = 100\n  }\n\n\ntype Msg\n  = OnMouseMove CS.Point\n  | OnMouseDown CS.Point\n  | OnMouseUp CS.Point\n  | OnMouseLeave\n  | OnDoubleClick CS.Point\n  | OnZoomIn\n  | OnZoomOut\n  | OnZoomReset\n\n\nupdate : Msg -> Model -> Model\nupdate msg model =\n  case msg of\n    OnMouseDown coords ->\n      { model | moving = Just ( coords, coords ) }\n\n    OnMouseMove coords ->\n      case model.moving of\n        Nothing ->\n          model\n\n        Just ( start, _ ) ->\n          { model | moving = Just ( start, coords ) }\n\n    OnMouseUp coords ->\n      case model.moving of\n        Nothing ->\n          model\n\n        Just ( start, _ ) ->\n          { model | moving = Nothing, offset =\n              { x = model.offset.x + start.x - coords.x\n              , y = model.offset.y + start.y - coords.y\n              }\n          }\n\n    OnMouseLeave ->\n      case model.moving of\n        Nothing ->\n          model\n\n        Just ( start, coords ) ->\n          { model | moving = Nothing, offset =\n              { x = model.offset.x + start.x - coords.x\n              , y = model.offset.y + start.y - coords.y\n              }\n          }\n\n    OnDoubleClick coords ->\n      { model\n      | percentage = model.percentage + 20\n      , center = coords\n      , offset = { x = 0, y = 0 }\n      }\n\n    OnZoomIn ->\n      { model | percentage = model.percentage + 20 }\n\n    OnZoomOut ->\n      { model | percentage = max 1 (model.percentage - 20) }\n\n    OnZoomReset ->\n      { model | percentage = 100, offset = { x = 0, y = 0 }, center = { x = 0, y = 0 } }\n\n\nview : Model -> Html Msg\nview model =\n  let ( xOff, yOff ) =\n        case model.moving of\n          Just ( a, b ) ->\n            ( model.offset.x + a.x - b.x\n            , model.offset.y + a.y - b.y\n            )\n\n          Nothing ->\n            ( model.offset.x\n            , model.offset.y\n            )\n  in\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    , CA.range [ CA.zoom model.percentage, CA.move model.center.x, CA.pad -xOff xOff ]\n    , CA.domain [ CA.zoom model.percentage, CA.move model.center.y, CA.pad yOff -yOff ]\n\n    , CE.onMouseDown OnMouseDown CE.getSvgCoords\n    , CE.onMouseMove OnMouseMove CE.getSvgCoords\n    , CE.onMouseUp OnMouseUp CE.getSvgCoords\n    , CE.onMouseLeave OnMouseLeave\n    , CE.onDoubleClick OnDoubleClick CE.getCoords\n\n    , CA.htmlAttrs\n        [ HA.style "user-select" "none"\n        , HA.style "cursor" <|\n            case model.moving of\n              Just _ -> "grabbing"\n              Nothing -> "grab"\n        ]\n    ]\n    [ C.xLabels [ CA.withGrid, CA.amount 10, CA.ints, CA.fontSize 9 ]\n    , C.yLabels [ CA.withGrid, CA.amount 10, CA.ints, CA.fontSize 9 ]\n    , C.xTicks [ CA.amount 10, CA.ints ]\n    , C.yTicks [ CA.amount 10, CA.ints ]\n\n    , C.series .x\n        [ C.scatter .y [ CA.opacity 0.2, CA.borderWidth 1 ]\n            |> C.variation (\\_ d -> [ CA.size (d.s * model.percentage / 100) ])\n        ]\n        [ { x = -100, y = -100, s = 40 }\n        , { x = -80, y = -30, s = 30 }\n        , { x = -60, y = 80, s = 60 }\n        , { x = -50, y = 50, s = 70 }\n        , { x = 20, y = 80, s = 40 }\n        , { x = 30, y = -20, s = 60 }\n        , { x = 40, y = 50, s = 80 }\n        , { x = 80, y = 20, s = 50 }\n        , { x = 100, y = 100, s = 40 }\n        ]\n\n    , C.withPlane <| \\p ->\n        [ C.line [ CA.color CA.darkGray, CA.dashed [ 6, 6 ], CA.y1 (CA.middle p.y) ]\n        , C.line [ CA.color CA.darkGray, CA.dashed [ 6, 6 ], CA.x1 (CA.middle p.x) ]\n        ]\n\n    , C.htmlAt .max .max 0 0\n        [ HA.style "transform" "translateX(-100%)" ]\n        [ H.button [ HE.onClick OnZoomIn, HA.style "margin-right" "5px" ] [ H.text "+" ]\n        , H.button [ HE.onClick OnZoomOut, HA.style "margin-right" "5px" ] [ H.text "-" ]\n        , H.button [ HE.onClick OnZoomReset ] [ H.text "⨯" ]\n        ]\n    ]\n  ';
+var $author$project$Examples$Interactivity$ZoomAlt$largeCode = '\nimport Html as H exposing (Html)\nimport Html.Attributes as HA\nimport Html.Events as HE\nimport Svg as S\nimport Svg.Attributes as SA\n\nimport Chart as C\nimport Chart.Attributes as CA\nimport Chart.Events as CE\nimport Chart.Item as CI\nimport Chart.Svg as CS\n\n\n\ntype alias Model =\n  { movingOffset : Maybe CS.Point\n  , center : CS.Point\n  , offset : CS.Point\n  , percentage : Float\n  }\n\n\ninit : Model\ninit =\n  { movingOffset = Nothing\n  , center = { x = 0, y = 0 }\n  , offset = { x = 0, y = 0 }\n  , percentage = 100\n  }\n\n\ntype Msg\n  = OnMouseMove CS.Point\n  | OnMouseDown CS.Point\n  | OnMouseUp CS.Point CS.Point\n  | OnMouseLeave\n  | OnZoomIn\n  | OnZoomOut\n  | OnZoomReset\n\n\nupdate : Msg -> Model -> Model\nupdate msg model =\n  case msg of\n    OnMouseDown off ->\n      { model | movingOffset = Just off }\n\n    OnMouseMove off ->\n      case model.movingOffset of\n        Just start ->\n          { model | offset = { x = start.x - off.x, y = start.y - off.y } }\n\n        Nothing ->\n          model\n\n    OnMouseUp off coord ->\n      case model.movingOffset of\n        Just start ->\n          if start == off then\n            { model | center = coord, movingOffset = Nothing }\n          else\n            { model | center =\n                { x = model.center.x + start.x - off.x\n                , y = model.center.y + start.y - off.y\n                }\n            , offset = { x = 0, y = 0 }\n            , movingOffset = Nothing\n            }\n\n        Nothing ->\n          { model | center = off, offset = { x = 0, y = 0 } }\n\n    OnMouseLeave ->\n      { model | movingOffset = Nothing\n      , center =\n          { x = model.center.x + model.offset.x\n          , y = model.center.y + model.offset.y\n          }\n      , offset = { x = 0, y = 0 }\n      }\n\n    OnZoomIn ->\n      { model | percentage = model.percentage + 20 }\n\n    OnZoomOut ->\n      { model | percentage = max 1 (model.percentage - 20) }\n\n    OnZoomReset ->\n      { model | percentage = 100, center = { x = 0, y = 0 }, offset = { x = 0, y = 0 } }\n\n\nview : Model -> Html Msg\nview model =\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    , CA.range [ CA.zoom model.percentage, CA.centerAt model.center.x, CA.move model.offset.x ]\n    , CA.domain [ CA.zoom model.percentage, CA.centerAt model.center.y, CA.move model.offset.y ]\n\n    , CE.onMouseDown OnMouseDown CE.getOffset\n    , CE.onMouseMove OnMouseMove CE.getOffset\n    , CE.on "mouseup" (CE.map2 OnMouseUp CE.getOffset CE.getCoords)\n    , CE.onMouseLeave OnMouseLeave\n\n    , CA.htmlAttrs\n        [ HA.style "user-select" "none"\n        --, HA.style "cursor" <|\n        --    case model.moving of\n        --      Just _ -> "grabbing"\n        --      Nothing -> "grab"\n        ]\n    ]\n    [ C.xLabels [ CA.withGrid, CA.amount 10, CA.ints, CA.fontSize 9 ]\n    , C.yLabels [ CA.withGrid, CA.amount 10, CA.ints, CA.fontSize 9 ]\n    , C.xTicks [ CA.amount 10, CA.ints ]\n    , C.yTicks [ CA.amount 10, CA.ints ]\n\n    , C.series .x\n        [ C.scatter .y [ CA.opacity 0.2, CA.borderWidth 1 ]\n            |> C.variation (\\_ d -> [ CA.size (d.s * model.percentage / 100) ])\n        ]\n        [ { x = -100, y = -100, s = 40 }\n        , { x = -80, y = -30, s = 30 }\n        , { x = -60, y = 80, s = 60 }\n        , { x = -50, y = 50, s = 70 }\n        , { x = 20, y = 80, s = 40 }\n        , { x = 30, y = -20, s = 60 }\n        , { x = 40, y = 50, s = 80 }\n        , { x = 80, y = 20, s = 50 }\n        , { x = 100, y = 100, s = 40 }\n        ]\n\n    , C.withPlane <| \\p ->\n        [ C.line [ CA.color CA.darkGray, CA.dashed [ 6, 6 ], CA.y1 (CA.middle p.y) ]\n        , C.line [ CA.color CA.darkGray, CA.dashed [ 6, 6 ], CA.x1 (CA.middle p.x) ]\n        ]\n\n    , C.htmlAt .max .max 0 0\n        [ HA.style "transform" "translateX(-100%)" ]\n        [ H.button [ HE.onClick OnZoomIn, HA.style "margin-right" "5px" ] [ H.text "+" ]\n        , H.button [ HE.onClick OnZoomOut, HA.style "margin-right" "5px" ] [ H.text "-" ]\n        , H.button [ HE.onClick OnZoomReset ] [ H.text "⨯" ]\n        ]\n    ]\n  ';
 var $author$project$Examples$LineCharts$Area$largeCode = '\nimport Html as H\nimport Chart as C\nimport Chart.Attributes as CA\n\n\nview : Model -> H.Html Msg\nview model =\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    ]\n    [ C.xLabels []\n    , C.yLabels [ CA.withGrid ]\n    , C.series .x\n        [ C.interpolated .y [ CA.opacity 0.2 ] []\n        , C.interpolated .z [ CA.opacity 0.2 ] []\n        ]\n        data\n    ]\n  ';
 var $author$project$Examples$LineCharts$Basic$largeCode = '\nimport Html as H\nimport Chart as C\nimport Chart.Attributes as CA\n\n\nview : Model -> H.Html Msg\nview model =\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    ]\n    [ C.xLabels []\n    , C.yLabels [ CA.withGrid ]\n    , C.series .x\n        [ C.interpolated .y [  ] []\n        , C.interpolated .z [  ] []\n        ]\n        data\n    ]\n  ';
 var $author$project$Examples$LineCharts$Color$largeCode = '\nimport Html as H\nimport Chart as C\nimport Chart.Attributes as CA\n\n\nview : Model -> H.Html Msg\nview model =\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    ]\n    [ C.xLabels []\n    , C.yLabels [ CA.withGrid ]\n    , C.series .x\n        [ C.interpolated .y [ CA.color CA.red ] []\n        , C.interpolated .z [ CA.color CA.orange ] []\n        ]\n        data\n    ]\n  ';
@@ -41151,7 +41125,7 @@ var $author$project$Examples$Interactivity$NoArrow$smallCode = '\n  C.chart\n   
 var $author$project$Examples$Interactivity$Offset$smallCode = '\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    , CE.onMouseMove OnHover (CE.getNearest CI.dots)\n    , CE.onMouseLeave (OnHover [])\n    ]\n    [ C.xLabels [ CA.withGrid ]\n    , C.yLabels [ CA.withGrid ]\n    , C.series .x\n        [ C.scatter .y [ CA.size 60, CA.opacity 0.3, CA.borderWidth 1 ]\n        , C.scatter .z [ CA.size 50, CA.opacity 0.3, CA.borderWidth 1 ]\n        ]\n        data\n    , C.each model.hovering <| \\p item ->\n        [ C.tooltip item [ CA.offset 0 ] [] [] ]\n    ]\n  ';
 var $author$project$Examples$Interactivity$TrickyTooltip$smallCode = '\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    , CA.padding { top = 0, bottom = 0, left = 10, right = 10 }\n    , CI.bars\n        |> CI.andThen CI.bins\n        |> CE.getNearest\n        |> CE.onMouseMove OnHover\n    , CE.onMouseLeave (OnHover [])\n    ]\n    [ C.yLabels [ CA.withGrid, CA.pinned .min ]\n    , C.xLabels []\n    , C.bars\n        []\n        [ C.bar .w []\n        , C.stacked\n            [ C.bar .p []\n            , C.bar .q []\n            ]\n        ]\n        data\n    , C.each model.hovering <| \\p bin ->\n        let stacks = CI.apply CI.stacks (CI.getMembers bin)\n            toTooltip stack = C.tooltip stack [ CA.onLeftOrRight ] [] []\n        in\n        List.map toTooltip stacks\n    ]\n  ';
 var $author$project$Examples$Interactivity$Zoom$smallCode = '\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    , CA.htmlAttrs [ HA.style "cursor" "crosshair" ]\n\n    , CE.onMouseDown OnDown CE.getCoords\n    , CE.onMouseMove OnMove CE.getCoords\n    , CE.onMouseUp OnUp CE.getCoords\n\n    , case getCurrentWindow model of\n        Just ( start, end ) ->\n          CA.range\n            [ CA.lowest start.x CA.exactly\n            , CA.highest end.x CA.exactly\n            ]\n\n        Nothing ->\n          CA.range []\n\n    , case getCurrentWindow model of\n        Just ( start, end ) ->\n          CA.domain\n            [ CA.lowest start.y CA.exactly\n            , CA.highest end.y CA.exactly\n            ]\n\n        Nothing ->\n          CA.range []\n    ]\n    [ C.xLabels [ CA.withGrid ]\n    , C.yLabels [ CA.withGrid ]\n\n    , C.series .sepalWidth\n        [ C.scatterMaybe (Data.Iris.only Data.Iris.Setosa .petalWidth)\n            [ CA.size 3, CA.color "white", CA.borderWidth 1, CA.circle ]\n        , C.scatterMaybe (Data.Iris.only Data.Iris.Versicolor .petalWidth)\n            [ CA.size 3, CA.color "white", CA.borderWidth 1, CA.square ]\n        , C.scatterMaybe (Data.Iris.only Data.Iris.Virginica .petalWidth)\n            [ CA.size 3, CA.color "white", CA.borderWidth 1, CA.diamond ]\n        ]\n        Data.Iris.data\n\n    , case getNewSelection model of\n        Just ( start, end ) ->\n          C.rect\n            [ CA.x1 start.x\n            , CA.x2 end.x\n            , CA.y1 start.y\n            , CA.y2 end.y\n            ]\n\n        Nothing ->\n          C.none\n\n    , case getCurrentWindow model of\n        Just ( start, end ) ->\n          C.htmlAt .max .max -10 -10\n            [ HA.style "transform" "translateX(-100%)"\n            ]\n            [ H.button\n                [ HE.onClick OnReset\n                , HA.style "border" "1px solid black"\n                , HA.style "border-radius" "5px"\n                , HA.style "padding" "2px 10px"\n                , HA.style "background" "white"\n                , HA.style "font-size" "14px"\n                ]\n                [ H.text "Reset" ]\n            ]\n\n        Nothing ->\n          C.none\n    ]\n  ';
-var $author$project$Examples$Interactivity$ZoomAlt$smallCode = '\ntype alias Model =\n  { moving : Maybe ( CS.Point, CS.Point )\n  , offset : CS.Point\n  , center : CS.Point\n  , percentage : Float\n  }\n\n\ninit : Model\ninit =\n  { moving = Nothing\n  , offset = { x = 0, y = 0 }\n  , center = { x = 0, y = 0 }\n  , percentage = 100\n  }\n\n\ntype Msg\n  = OnMouseMove CS.Point\n  | OnMouseDown CS.Point\n  | OnMouseUp CS.Point\n  | OnMouseLeave\n  | OnDoubleClick CS.Point\n  | OnZoomIn\n  | OnZoomOut\n  | OnZoomReset\n\n\nupdate : Msg -> Model -> Model\nupdate msg model =\n  case msg of\n    OnMouseDown coords ->\n      { model | moving = Just ( coords, coords ) }\n\n    OnMouseMove coords ->\n      case model.moving of\n        Nothing ->\n          model\n\n        Just ( start, _ ) ->\n          { model | moving = Just ( start, coords ) }\n\n    OnMouseUp coords ->\n      case model.moving of\n        Nothing ->\n          model\n\n        Just ( start, _ ) ->\n          { model | moving = Nothing, offset =\n              { x = model.offset.x + start.x - coords.x\n              , y = model.offset.y + start.y - coords.y\n              }\n          }\n\n    OnMouseLeave ->\n      case model.moving of\n        Nothing ->\n          model\n\n        Just ( start, coords ) ->\n          { model | moving = Nothing, offset =\n              { x = model.offset.x + start.x - coords.x\n              , y = model.offset.y + start.y - coords.y\n              }\n          }\n\n    OnDoubleClick coords ->\n      { model\n      | percentage = model.percentage + 20\n      , center = coords\n      , offset = { x = 0, y = 0 }\n      }\n\n    OnZoomIn ->\n      { model | percentage = model.percentage + 20 }\n\n    OnZoomOut ->\n      { model | percentage = max 1 (model.percentage - 20) }\n\n    OnZoomReset ->\n      { model | percentage = 100, offset = { x = 0, y = 0 }, center = { x = 0, y = 0 } }\n\n\nview : Model -> Html Msg\nview model =\n  let ( xOff, yOff ) =\n        case model.moving of\n          Just ( a, b ) ->\n            ( model.offset.x + a.x - b.x\n            , model.offset.y + a.y - b.y\n            )\n\n          Nothing ->\n            ( model.offset.x\n            , model.offset.y\n            )\n  in\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    , CA.range [ CA.zoom model.percentage, CA.move model.center.x, CA.pad -xOff xOff ]\n    , CA.domain [ CA.zoom model.percentage, CA.move model.center.y, CA.pad yOff -yOff ]\n\n    , CE.onMouseDown OnMouseDown CE.getSvgCoords\n    , CE.onMouseMove OnMouseMove CE.getSvgCoords\n    , CE.onMouseUp OnMouseUp CE.getSvgCoords\n    , CE.onMouseLeave OnMouseLeave\n    , CE.onDoubleClick OnDoubleClick CE.getCoords\n\n    , CA.htmlAttrs\n        [ HA.style "user-select" "none"\n        , HA.style "cursor" <|\n            case model.moving of\n              Just _ -> "grabbing"\n              Nothing -> "grab"\n        ]\n    ]\n    [ C.xLabels [ CA.withGrid, CA.amount 10, CA.ints, CA.fontSize 9 ]\n    , C.yLabels [ CA.withGrid, CA.amount 10, CA.ints, CA.fontSize 9 ]\n    , C.xTicks [ CA.amount 10, CA.ints ]\n    , C.yTicks [ CA.amount 10, CA.ints ]\n\n    , C.series .x\n        [ C.scatter .y [ CA.opacity 0.2, CA.borderWidth 1 ]\n            |> C.variation (\\_ d -> [ CA.size (d.s * model.percentage / 100) ])\n        ]\n        [ { x = -100, y = -100, s = 40 }\n        , { x = -80, y = -30, s = 30 }\n        , { x = -60, y = 80, s = 60 }\n        , { x = -50, y = 50, s = 70 }\n        , { x = 20, y = 80, s = 40 }\n        , { x = 30, y = -20, s = 60 }\n        , { x = 40, y = 50, s = 80 }\n        , { x = 80, y = 20, s = 50 }\n        , { x = 100, y = 100, s = 40 }\n        ]\n\n    , C.withPlane <| \\p ->\n        [ C.line [ CA.color CA.darkGray, CA.dashed [ 6, 6 ], CA.y1 (CA.middle p.y) ]\n        , C.line [ CA.color CA.darkGray, CA.dashed [ 6, 6 ], CA.x1 (CA.middle p.x) ]\n        ]\n\n    , C.htmlAt .max .max 0 0\n        [ HA.style "transform" "translateX(-100%)" ]\n        [ H.button [ HE.onClick OnZoomIn, HA.style "margin-right" "5px" ] [ H.text "+" ]\n        , H.button [ HE.onClick OnZoomOut, HA.style "margin-right" "5px" ] [ H.text "-" ]\n        , H.button [ HE.onClick OnZoomReset ] [ H.text "⨯" ]\n        ]\n    ]\n  ';
+var $author$project$Examples$Interactivity$ZoomAlt$smallCode = '\ntype alias Model =\n  { movingOffset : Maybe CS.Point\n  , center : CS.Point\n  , offset : CS.Point\n  , percentage : Float\n  }\n\n\ninit : Model\ninit =\n  { movingOffset = Nothing\n  , center = { x = 0, y = 0 }\n  , offset = { x = 0, y = 0 }\n  , percentage = 100\n  }\n\n\ntype Msg\n  = OnMouseMove CS.Point\n  | OnMouseDown CS.Point\n  | OnMouseUp CS.Point CS.Point\n  | OnMouseLeave\n  | OnZoomIn\n  | OnZoomOut\n  | OnZoomReset\n\n\nupdate : Msg -> Model -> Model\nupdate msg model =\n  case msg of\n    OnMouseDown off ->\n      { model | movingOffset = Just off }\n\n    OnMouseMove off ->\n      case model.movingOffset of\n        Just start ->\n          { model | offset = { x = start.x - off.x, y = start.y - off.y } }\n\n        Nothing ->\n          model\n\n    OnMouseUp off coord ->\n      case model.movingOffset of\n        Just start ->\n          if start == off then\n            { model | center = coord, movingOffset = Nothing }\n          else\n            { model | center =\n                { x = model.center.x + start.x - off.x\n                , y = model.center.y + start.y - off.y\n                }\n            , offset = { x = 0, y = 0 }\n            , movingOffset = Nothing\n            }\n\n        Nothing ->\n          { model | center = off, offset = { x = 0, y = 0 } }\n\n    OnMouseLeave ->\n      { model | movingOffset = Nothing\n      , center =\n          { x = model.center.x + model.offset.x\n          , y = model.center.y + model.offset.y\n          }\n      , offset = { x = 0, y = 0 }\n      }\n\n    OnZoomIn ->\n      { model | percentage = model.percentage + 20 }\n\n    OnZoomOut ->\n      { model | percentage = max 1 (model.percentage - 20) }\n\n    OnZoomReset ->\n      { model | percentage = 100, center = { x = 0, y = 0 }, offset = { x = 0, y = 0 } }\n\n\nview : Model -> Html Msg\nview model =\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    , CA.range [ CA.zoom model.percentage, CA.centerAt model.center.x, CA.move model.offset.x ]\n    , CA.domain [ CA.zoom model.percentage, CA.centerAt model.center.y, CA.move model.offset.y ]\n\n    , CE.onMouseDown OnMouseDown CE.getOffset\n    , CE.onMouseMove OnMouseMove CE.getOffset\n    , CE.on "mouseup" (CE.map2 OnMouseUp CE.getOffset CE.getCoords)\n    , CE.onMouseLeave OnMouseLeave\n\n    , CA.htmlAttrs\n        [ HA.style "user-select" "none"\n        --, HA.style "cursor" <|\n        --    case model.moving of\n        --      Just _ -> "grabbing"\n        --      Nothing -> "grab"\n        ]\n    ]\n    [ C.xLabels [ CA.withGrid, CA.amount 10, CA.ints, CA.fontSize 9 ]\n    , C.yLabels [ CA.withGrid, CA.amount 10, CA.ints, CA.fontSize 9 ]\n    , C.xTicks [ CA.amount 10, CA.ints ]\n    , C.yTicks [ CA.amount 10, CA.ints ]\n\n    , C.series .x\n        [ C.scatter .y [ CA.opacity 0.2, CA.borderWidth 1 ]\n            |> C.variation (\\_ d -> [ CA.size (d.s * model.percentage / 100) ])\n        ]\n        [ { x = -100, y = -100, s = 40 }\n        , { x = -80, y = -30, s = 30 }\n        , { x = -60, y = 80, s = 60 }\n        , { x = -50, y = 50, s = 70 }\n        , { x = 20, y = 80, s = 40 }\n        , { x = 30, y = -20, s = 60 }\n        , { x = 40, y = 50, s = 80 }\n        , { x = 80, y = 20, s = 50 }\n        , { x = 100, y = 100, s = 40 }\n        ]\n\n    , C.withPlane <| \\p ->\n        [ C.line [ CA.color CA.darkGray, CA.dashed [ 6, 6 ], CA.y1 (CA.middle p.y) ]\n        , C.line [ CA.color CA.darkGray, CA.dashed [ 6, 6 ], CA.x1 (CA.middle p.x) ]\n        ]\n\n    , C.htmlAt .max .max 0 0\n        [ HA.style "transform" "translateX(-100%)" ]\n        [ H.button [ HE.onClick OnZoomIn, HA.style "margin-right" "5px" ] [ H.text "+" ]\n        , H.button [ HE.onClick OnZoomOut, HA.style "margin-right" "5px" ] [ H.text "-" ]\n        , H.button [ HE.onClick OnZoomReset ] [ H.text "⨯" ]\n        ]\n    ]\n  ';
 var $author$project$Examples$LineCharts$Area$smallCode = '\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    ]\n    [ C.xLabels []\n    , C.yLabels [ CA.withGrid ]\n    , C.series .x\n        [ C.interpolated .y [ CA.opacity 0.2 ] []\n        , C.interpolated .z [ CA.opacity 0.2 ] []\n        ]\n        data\n    ]\n  ';
 var $author$project$Examples$LineCharts$Basic$smallCode = '\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    ]\n    [ C.xLabels []\n    , C.yLabels [ CA.withGrid ]\n    , C.series .x\n        [ C.interpolated .y [  ] []\n        , C.interpolated .z [  ] []\n        ]\n        data\n    ]\n  ';
 var $author$project$Examples$LineCharts$Color$smallCode = '\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    ]\n    [ C.xLabels []\n    , C.yLabels [ CA.withGrid ]\n    , C.series .x\n        [ C.interpolated .y [ CA.color CA.red ] []\n        , C.interpolated .z [ CA.color CA.orange ] []\n        ]\n        data\n    ]\n  ';

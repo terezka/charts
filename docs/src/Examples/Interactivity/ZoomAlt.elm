@@ -18,18 +18,18 @@ import Chart.Svg as CS
 
 
 type alias Model =
-  { moving : Maybe ( CS.Point, CS.Point )
-  , offset : CS.Point
+  { movingOffset : Maybe CS.Point
   , center : CS.Point
+  , offset : CS.Point
   , percentage : Float
   }
 
 
 init : Model
 init =
-  { moving = Nothing
-  , offset = { x = 0, y = 0 }
+  { movingOffset = Nothing
   , center = { x = 0, y = 0 }
+  , offset = { x = 0, y = 0 }
   , percentage = 100
   }
 
@@ -37,9 +37,8 @@ init =
 type Msg
   = OnMouseMove CS.Point
   | OnMouseDown CS.Point
-  | OnMouseUp CS.Point
+  | OnMouseUp CS.Point CS.Point
   | OnMouseLeave
-  | OnDoubleClick CS.Point
   | OnZoomIn
   | OnZoomOut
   | OnZoomReset
@@ -48,45 +47,40 @@ type Msg
 update : Msg -> Model -> Model
 update msg model =
   case msg of
-    OnMouseDown coords ->
-      { model | moving = Just ( coords, coords ) }
+    OnMouseDown off ->
+      { model | movingOffset = Just off }
 
-    OnMouseMove coords ->
-      case model.moving of
+    OnMouseMove off ->
+      case model.movingOffset of
+        Just start ->
+          { model | offset = { x = start.x - off.x, y = start.y - off.y } }
+
         Nothing ->
           model
 
-        Just ( start, _ ) ->
-          { model | moving = Just ( start, coords ) }
+    OnMouseUp off coord ->
+      case model.movingOffset of
+        Just start ->
+          if start == off then
+            { model | center = coord, movingOffset = Nothing }
+          else
+            { model | center =
+                { x = model.center.x + start.x - off.x
+                , y = model.center.y + start.y - off.y
+                }
+            , offset = { x = 0, y = 0 }
+            , movingOffset = Nothing
+            }
 
-    OnMouseUp coords ->
-      case model.moving of
         Nothing ->
-          model
-
-        Just ( start, _ ) ->
-          { model | moving = Nothing, offset =
-              { x = model.offset.x + start.x - coords.x
-              , y = model.offset.y + start.y - coords.y
-              }
-          }
+          { model | center = off, offset = { x = 0, y = 0 } }
 
     OnMouseLeave ->
-      case model.moving of
-        Nothing ->
-          model
-
-        Just ( start, coords ) ->
-          { model | moving = Nothing, offset =
-              { x = model.offset.x + start.x - coords.x
-              , y = model.offset.y + start.y - coords.y
-              }
+      { model | movingOffset = Nothing
+      , center =
+          { x = model.center.x + model.offset.x
+          , y = model.center.y + model.offset.y
           }
-
-    OnDoubleClick coords ->
-      { model
-      | percentage = model.percentage + 20
-      , center = coords
       , offset = { x = 0, y = 0 }
       }
 
@@ -97,41 +91,28 @@ update msg model =
       { model | percentage = max 1 (model.percentage - 20) }
 
     OnZoomReset ->
-      { model | percentage = 100, offset = { x = 0, y = 0 }, center = { x = 0, y = 0 } }
+      { model | percentage = 100, center = { x = 0, y = 0 }, offset = { x = 0, y = 0 } }
 
 
 view : Model -> Html Msg
 view model =
-  let ( xOff, yOff ) =
-        case model.moving of
-          Just ( a, b ) ->
-            ( model.offset.x + a.x - b.x
-            , model.offset.y + a.y - b.y
-            )
-
-          Nothing ->
-            ( model.offset.x
-            , model.offset.y
-            )
-  in
   C.chart
     [ CA.height 300
     , CA.width 300
-    , CA.range [ CA.zoom model.percentage, CA.move model.center.x, CA.pad -xOff xOff ]
-    , CA.domain [ CA.zoom model.percentage, CA.move model.center.y, CA.pad yOff -yOff ]
+    , CA.range [ CA.zoom model.percentage, CA.centerAt model.center.x, CA.move model.offset.x ]
+    , CA.domain [ CA.zoom model.percentage, CA.centerAt model.center.y, CA.move model.offset.y ]
 
-    , CE.onMouseDown OnMouseDown CE.getSvgCoords
-    , CE.onMouseMove OnMouseMove CE.getSvgCoords
-    , CE.onMouseUp OnMouseUp CE.getSvgCoords
+    , CE.onMouseDown OnMouseDown CE.getOffset
+    , CE.onMouseMove OnMouseMove CE.getOffset
+    , CE.on "mouseup" (CE.map2 OnMouseUp CE.getOffset CE.getCoords)
     , CE.onMouseLeave OnMouseLeave
-    , CE.onDoubleClick OnDoubleClick CE.getCoords
 
     , CA.htmlAttrs
         [ HA.style "user-select" "none"
-        , HA.style "cursor" <|
-            case model.moving of
-              Just _ -> "grabbing"
-              Nothing -> "grab"
+        --, HA.style "cursor" <|
+        --    case model.moving of
+        --      Just _ -> "grabbing"
+        --      Nothing -> "grab"
         ]
     ]
     [ C.xLabels [ CA.withGrid, CA.amount 10, CA.ints, CA.fontSize 9 ]
@@ -182,18 +163,18 @@ smallCode : String
 smallCode =
   """
 type alias Model =
-  { moving : Maybe ( CS.Point, CS.Point )
-  , offset : CS.Point
+  { movingOffset : Maybe CS.Point
   , center : CS.Point
+  , offset : CS.Point
   , percentage : Float
   }
 
 
 init : Model
 init =
-  { moving = Nothing
-  , offset = { x = 0, y = 0 }
+  { movingOffset = Nothing
   , center = { x = 0, y = 0 }
+  , offset = { x = 0, y = 0 }
   , percentage = 100
   }
 
@@ -201,9 +182,8 @@ init =
 type Msg
   = OnMouseMove CS.Point
   | OnMouseDown CS.Point
-  | OnMouseUp CS.Point
+  | OnMouseUp CS.Point CS.Point
   | OnMouseLeave
-  | OnDoubleClick CS.Point
   | OnZoomIn
   | OnZoomOut
   | OnZoomReset
@@ -212,45 +192,40 @@ type Msg
 update : Msg -> Model -> Model
 update msg model =
   case msg of
-    OnMouseDown coords ->
-      { model | moving = Just ( coords, coords ) }
+    OnMouseDown off ->
+      { model | movingOffset = Just off }
 
-    OnMouseMove coords ->
-      case model.moving of
+    OnMouseMove off ->
+      case model.movingOffset of
+        Just start ->
+          { model | offset = { x = start.x - off.x, y = start.y - off.y } }
+
         Nothing ->
           model
 
-        Just ( start, _ ) ->
-          { model | moving = Just ( start, coords ) }
+    OnMouseUp off coord ->
+      case model.movingOffset of
+        Just start ->
+          if start == off then
+            { model | center = coord, movingOffset = Nothing }
+          else
+            { model | center =
+                { x = model.center.x + start.x - off.x
+                , y = model.center.y + start.y - off.y
+                }
+            , offset = { x = 0, y = 0 }
+            , movingOffset = Nothing
+            }
 
-    OnMouseUp coords ->
-      case model.moving of
         Nothing ->
-          model
-
-        Just ( start, _ ) ->
-          { model | moving = Nothing, offset =
-              { x = model.offset.x + start.x - coords.x
-              , y = model.offset.y + start.y - coords.y
-              }
-          }
+          { model | center = off, offset = { x = 0, y = 0 } }
 
     OnMouseLeave ->
-      case model.moving of
-        Nothing ->
-          model
-
-        Just ( start, coords ) ->
-          { model | moving = Nothing, offset =
-              { x = model.offset.x + start.x - coords.x
-              , y = model.offset.y + start.y - coords.y
-              }
+      { model | movingOffset = Nothing
+      , center =
+          { x = model.center.x + model.offset.x
+          , y = model.center.y + model.offset.y
           }
-
-    OnDoubleClick coords ->
-      { model
-      | percentage = model.percentage + 20
-      , center = coords
       , offset = { x = 0, y = 0 }
       }
 
@@ -261,41 +236,28 @@ update msg model =
       { model | percentage = max 1 (model.percentage - 20) }
 
     OnZoomReset ->
-      { model | percentage = 100, offset = { x = 0, y = 0 }, center = { x = 0, y = 0 } }
+      { model | percentage = 100, center = { x = 0, y = 0 }, offset = { x = 0, y = 0 } }
 
 
 view : Model -> Html Msg
 view model =
-  let ( xOff, yOff ) =
-        case model.moving of
-          Just ( a, b ) ->
-            ( model.offset.x + a.x - b.x
-            , model.offset.y + a.y - b.y
-            )
-
-          Nothing ->
-            ( model.offset.x
-            , model.offset.y
-            )
-  in
   C.chart
     [ CA.height 300
     , CA.width 300
-    , CA.range [ CA.zoom model.percentage, CA.move model.center.x, CA.pad -xOff xOff ]
-    , CA.domain [ CA.zoom model.percentage, CA.move model.center.y, CA.pad yOff -yOff ]
+    , CA.range [ CA.zoom model.percentage, CA.centerAt model.center.x, CA.move model.offset.x ]
+    , CA.domain [ CA.zoom model.percentage, CA.centerAt model.center.y, CA.move model.offset.y ]
 
-    , CE.onMouseDown OnMouseDown CE.getSvgCoords
-    , CE.onMouseMove OnMouseMove CE.getSvgCoords
-    , CE.onMouseUp OnMouseUp CE.getSvgCoords
+    , CE.onMouseDown OnMouseDown CE.getOffset
+    , CE.onMouseMove OnMouseMove CE.getOffset
+    , CE.on "mouseup" (CE.map2 OnMouseUp CE.getOffset CE.getCoords)
     , CE.onMouseLeave OnMouseLeave
-    , CE.onDoubleClick OnDoubleClick CE.getCoords
 
     , CA.htmlAttrs
         [ HA.style "user-select" "none"
-        , HA.style "cursor" <|
-            case model.moving of
-              Just _ -> "grabbing"
-              Nothing -> "grab"
+        --, HA.style "cursor" <|
+        --    case model.moving of
+        --      Just _ -> "grabbing"
+        --      Nothing -> "grab"
         ]
     ]
     [ C.xLabels [ CA.withGrid, CA.amount 10, CA.ints, CA.fontSize 9 ]
@@ -351,18 +313,18 @@ import Chart.Svg as CS
 
 
 type alias Model =
-  { moving : Maybe ( CS.Point, CS.Point )
-  , offset : CS.Point
+  { movingOffset : Maybe CS.Point
   , center : CS.Point
+  , offset : CS.Point
   , percentage : Float
   }
 
 
 init : Model
 init =
-  { moving = Nothing
-  , offset = { x = 0, y = 0 }
+  { movingOffset = Nothing
   , center = { x = 0, y = 0 }
+  , offset = { x = 0, y = 0 }
   , percentage = 100
   }
 
@@ -370,9 +332,8 @@ init =
 type Msg
   = OnMouseMove CS.Point
   | OnMouseDown CS.Point
-  | OnMouseUp CS.Point
+  | OnMouseUp CS.Point CS.Point
   | OnMouseLeave
-  | OnDoubleClick CS.Point
   | OnZoomIn
   | OnZoomOut
   | OnZoomReset
@@ -381,45 +342,40 @@ type Msg
 update : Msg -> Model -> Model
 update msg model =
   case msg of
-    OnMouseDown coords ->
-      { model | moving = Just ( coords, coords ) }
+    OnMouseDown off ->
+      { model | movingOffset = Just off }
 
-    OnMouseMove coords ->
-      case model.moving of
+    OnMouseMove off ->
+      case model.movingOffset of
+        Just start ->
+          { model | offset = { x = start.x - off.x, y = start.y - off.y } }
+
         Nothing ->
           model
 
-        Just ( start, _ ) ->
-          { model | moving = Just ( start, coords ) }
+    OnMouseUp off coord ->
+      case model.movingOffset of
+        Just start ->
+          if start == off then
+            { model | center = coord, movingOffset = Nothing }
+          else
+            { model | center =
+                { x = model.center.x + start.x - off.x
+                , y = model.center.y + start.y - off.y
+                }
+            , offset = { x = 0, y = 0 }
+            , movingOffset = Nothing
+            }
 
-    OnMouseUp coords ->
-      case model.moving of
         Nothing ->
-          model
-
-        Just ( start, _ ) ->
-          { model | moving = Nothing, offset =
-              { x = model.offset.x + start.x - coords.x
-              , y = model.offset.y + start.y - coords.y
-              }
-          }
+          { model | center = off, offset = { x = 0, y = 0 } }
 
     OnMouseLeave ->
-      case model.moving of
-        Nothing ->
-          model
-
-        Just ( start, coords ) ->
-          { model | moving = Nothing, offset =
-              { x = model.offset.x + start.x - coords.x
-              , y = model.offset.y + start.y - coords.y
-              }
+      { model | movingOffset = Nothing
+      , center =
+          { x = model.center.x + model.offset.x
+          , y = model.center.y + model.offset.y
           }
-
-    OnDoubleClick coords ->
-      { model
-      | percentage = model.percentage + 20
-      , center = coords
       , offset = { x = 0, y = 0 }
       }
 
@@ -430,41 +386,28 @@ update msg model =
       { model | percentage = max 1 (model.percentage - 20) }
 
     OnZoomReset ->
-      { model | percentage = 100, offset = { x = 0, y = 0 }, center = { x = 0, y = 0 } }
+      { model | percentage = 100, center = { x = 0, y = 0 }, offset = { x = 0, y = 0 } }
 
 
 view : Model -> Html Msg
 view model =
-  let ( xOff, yOff ) =
-        case model.moving of
-          Just ( a, b ) ->
-            ( model.offset.x + a.x - b.x
-            , model.offset.y + a.y - b.y
-            )
-
-          Nothing ->
-            ( model.offset.x
-            , model.offset.y
-            )
-  in
   C.chart
     [ CA.height 300
     , CA.width 300
-    , CA.range [ CA.zoom model.percentage, CA.move model.center.x, CA.pad -xOff xOff ]
-    , CA.domain [ CA.zoom model.percentage, CA.move model.center.y, CA.pad yOff -yOff ]
+    , CA.range [ CA.zoom model.percentage, CA.centerAt model.center.x, CA.move model.offset.x ]
+    , CA.domain [ CA.zoom model.percentage, CA.centerAt model.center.y, CA.move model.offset.y ]
 
-    , CE.onMouseDown OnMouseDown CE.getSvgCoords
-    , CE.onMouseMove OnMouseMove CE.getSvgCoords
-    , CE.onMouseUp OnMouseUp CE.getSvgCoords
+    , CE.onMouseDown OnMouseDown CE.getOffset
+    , CE.onMouseMove OnMouseMove CE.getOffset
+    , CE.on "mouseup" (CE.map2 OnMouseUp CE.getOffset CE.getCoords)
     , CE.onMouseLeave OnMouseLeave
-    , CE.onDoubleClick OnDoubleClick CE.getCoords
 
     , CA.htmlAttrs
         [ HA.style "user-select" "none"
-        , HA.style "cursor" <|
-            case model.moving of
-              Just _ -> "grabbing"
-              Nothing -> "grab"
+        --, HA.style "cursor" <|
+        --    case model.moving of
+        --      Just _ -> "grabbing"
+        --      Nothing -> "grab"
         ]
     ]
     [ C.xLabels [ CA.withGrid, CA.amount 10, CA.ints, CA.fontSize 9 ]
