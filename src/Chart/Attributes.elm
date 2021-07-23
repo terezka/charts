@@ -224,7 +224,7 @@ less v o _ =
 zoom : Float -> Attribute C.Axis
 zoom per axis =
   let full = axis.max - axis.min
-      zoomedFull = full / (per / 100)
+      zoomedFull = full / (max 1 per / 100)
       off = (full - zoomedFull) / 2
   in
   { axis | min = axis.min + off, max = axis.max - off }

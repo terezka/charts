@@ -37,6 +37,7 @@ type Msg
   = OnMouseMove CS.Point
   | OnMouseDown CS.Point
   | OnMouseUp CS.Point
+  | OnMouseLeave
   | OnDoubleClick CS.Point
   | OnZoomIn
   | OnZoomOut
@@ -69,6 +70,18 @@ update msg model =
               }
           }
 
+    OnMouseLeave ->
+      case model.moving of
+        Nothing ->
+          model
+
+        Just ( start, coords ) ->
+          { model | moving = Nothing, offset =
+              { x = model.offset.x + start.x - coords.x
+              , y = model.offset.y + start.y - coords.y
+              }
+          }
+
     OnDoubleClick coords ->
       { model
       | percentage = model.percentage + 20
@@ -80,7 +93,7 @@ update msg model =
       { model | percentage = model.percentage + 20 }
 
     OnZoomOut ->
-      { model | percentage = model.percentage - 20 }
+      { model | percentage = max 1 (model.percentage - 20) }
 
     OnZoomReset ->
       { model | percentage = 100, offset = { x = 0, y = 0 }, center = { x = 0, y = 0 } }
@@ -103,13 +116,13 @@ view model =
   C.chart
     [ CA.height 300
     , CA.width 300
-    , CA.padding { top = -yOff, bottom = yOff, left = -xOff, right = xOff }
-    , CA.range [ CA.zoom model.percentage, CA.move model.center.x ]
-    , CA.domain [ CA.zoom model.percentage, CA.move model.center.y ]
+    , CA.range [ CA.zoom model.percentage, CA.move model.center.x, CA.pad -xOff xOff ]
+    , CA.domain [ CA.zoom model.percentage, CA.move model.center.y, CA.pad yOff -yOff ]
 
     , CE.onMouseDown OnMouseDown CE.getSvgCoords
     , CE.onMouseMove OnMouseMove CE.getSvgCoords
     , CE.onMouseUp OnMouseUp CE.getSvgCoords
+    , CE.onMouseLeave OnMouseLeave
     , CE.onDoubleClick OnDoubleClick CE.getCoords
 
     , CA.htmlAttrs
@@ -120,8 +133,8 @@ view model =
               Nothing -> "grab"
         ]
     ]
-    [ C.xLabels [ CA.withGrid, CA.amount 10, CA.ints ]
-    , C.yLabels [ CA.withGrid, CA.amount 10, CA.ints ]
+    [ C.xLabels [ CA.withGrid, CA.amount 10, CA.ints, CA.fontSize 9 ]
+    , C.yLabels [ CA.withGrid, CA.amount 10, CA.ints, CA.fontSize 9 ]
     , C.xTicks [ CA.amount 10, CA.ints ]
     , C.yTicks [ CA.amount 10, CA.ints ]
 
@@ -159,8 +172,8 @@ view model =
 meta =
   { category = "Interactivity"
   , categoryOrder = 5
-  , name = "Traditional zoom"
+  , name = "Zoom"
   , description = "Add zoom effect."
-  , order = 21
+  , order = 20
   }
 
