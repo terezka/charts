@@ -41369,6 +41369,10 @@ var $author$project$Examples$smallCode = function (chosen) {
 			return $author$project$Examples$ScatterCharts$Basic$smallCode;
 	}
 };
+var $elm$virtual_dom$VirtualDom$lazy = _VirtualDom_lazy;
+var $elm$html$Html$Lazy$lazy = $elm$virtual_dom$VirtualDom$lazy;
+var $mdgriffith$elm_ui$Internal$Model$Monospace = {$: 'Monospace'};
+var $mdgriffith$elm_ui$Element$Font$monospace = $mdgriffith$elm_ui$Internal$Model$Monospace;
 var $elm$html$Html$code = _VirtualDom_node('code');
 var $pablohirafuji$elm_syntax_highlight$SyntaxHighlight$HCode = function (a) {
 	return {$: 'HCode', a: a};
@@ -43562,10 +43566,6 @@ var $pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Theme$Type$toCss = funct
 var $pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Theme$GitHub$css = $pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Theme$Type$toCss($pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Theme$GitHub$theme);
 var $pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Theme$gitHub = $pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Theme$GitHub$css;
 var $pablohirafuji$elm_syntax_highlight$SyntaxHighlight$gitHub = $pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Theme($pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Theme$gitHub);
-var $elm$virtual_dom$VirtualDom$lazy = _VirtualDom_lazy;
-var $elm$html$Html$Lazy$lazy = $elm$virtual_dom$VirtualDom$lazy;
-var $mdgriffith$elm_ui$Internal$Model$Monospace = {$: 'Monospace'};
-var $mdgriffith$elm_ui$Element$Font$monospace = $mdgriffith$elm_ui$Internal$Model$Monospace;
 var $elm$html$Html$pre = _VirtualDom_node('pre');
 var $pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Line$Add = {$: 'Add'};
 var $pablohirafuji$elm_syntax_highlight$SyntaxHighlight$Line$Del = {$: 'Del'};
@@ -43753,37 +43753,37 @@ var $pablohirafuji$elm_syntax_highlight$SyntaxHighlight$useTheme = function (_v0
 				$elm$html$Html$text(theme)
 			]));
 };
+var $author$project$Ui$Code$viewCode = function (code) {
+	return A2(
+		$elm$html$Html$div,
+		_List_Nil,
+		_List_fromArray(
+			[
+				$pablohirafuji$elm_syntax_highlight$SyntaxHighlight$useTheme($pablohirafuji$elm_syntax_highlight$SyntaxHighlight$gitHub),
+				A2(
+				$elm$core$Result$withDefault,
+				A2(
+					$elm$html$Html$pre,
+					_List_Nil,
+					_List_fromArray(
+						[
+							A2(
+							$elm$html$Html$code,
+							_List_Nil,
+							_List_fromArray(
+								[
+									$elm$html$Html$text(code)
+								]))
+						])),
+				A2(
+					$elm$core$Result$map,
+					$pablohirafuji$elm_syntax_highlight$SyntaxHighlight$toBlockHtml(
+						$elm$core$Maybe$Just(1)),
+					$pablohirafuji$elm_syntax_highlight$SyntaxHighlight$elm(
+						$author$project$Ui$Code$fixIndent(code))))
+			]));
+};
 var $author$project$Ui$Code$view = function (code) {
-	var viewCode = function (c) {
-		return A2(
-			$elm$html$Html$div,
-			_List_Nil,
-			_List_fromArray(
-				[
-					$pablohirafuji$elm_syntax_highlight$SyntaxHighlight$useTheme($pablohirafuji$elm_syntax_highlight$SyntaxHighlight$gitHub),
-					A2(
-					$elm$core$Result$withDefault,
-					A2(
-						$elm$html$Html$pre,
-						_List_Nil,
-						_List_fromArray(
-							[
-								A2(
-								$elm$html$Html$code,
-								_List_Nil,
-								_List_fromArray(
-									[
-										$elm$html$Html$text(c)
-									]))
-							])),
-					A2(
-						$elm$core$Result$map,
-						$pablohirafuji$elm_syntax_highlight$SyntaxHighlight$toBlockHtml(
-							$elm$core$Maybe$Just(1)),
-						$pablohirafuji$elm_syntax_highlight$SyntaxHighlight$elm(
-							$author$project$Ui$Code$fixIndent(c))))
-				]));
-	};
 	return A2(
 		$mdgriffith$elm_ui$Element$el,
 		_List_fromArray(
@@ -43808,7 +43808,7 @@ var $author$project$Ui$Code$view = function (code) {
 				$mdgriffith$elm_ui$Element$alignTop
 			]),
 		$mdgriffith$elm_ui$Element$html(
-			A2($elm$html$Html$Lazy$lazy, viewCode, code)));
+			A2($elm$html$Html$Lazy$lazy, $author$project$Ui$Code$viewCode, code)));
 };
 var $author$project$Page$Example$viewContent = function (model) {
 	var viewToggler = A2(

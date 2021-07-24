@@ -15,17 +15,6 @@ import SyntaxHighlight as SH
 
 view : String -> E.Element msg
 view code =
-  let viewCode c =
-        H.div []
-            [ SH.useTheme SH.gitHub
-            , c
-                |> fixIndent
-                |> SH.elm
-                |> Result.map (SH.toBlockHtml (Just 1))
-                |> Result.withDefault (H.pre [] [ H.code [] [ H.text c ]])
-            ]
-
-  in
   HL.lazy viewCode code
     |> E.html
     |> E.el
@@ -38,6 +27,18 @@ view code =
         , F.size 14
         , F.family [ F.typeface "Source Code Pro", F.monospace ]
         , E.alignTop
+        ]
+
+
+viewCode : String -> H.Html msg
+viewCode code =
+    H.div []
+        [ SH.useTheme SH.gitHub
+        , code
+            |> fixIndent
+            |> SH.elm
+            |> Result.map (SH.toBlockHtml (Just 1))
+            |> Result.withDefault (H.pre [] [ H.code [] [ H.text code ]])
         ]
 
 
