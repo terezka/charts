@@ -18,17 +18,21 @@ import Chart.Svg as CS
 {-| @SMALL -}
 type alias Model =
   { center : CS.Point
-  , offsetDrag : Maybe CS.Point
-  , offset : CS.Point
+  , dragging : Dragging
   , percentage : Float
   }
+
+
+type Dragging
+  = CouldStillBeClick CS.Point
+  | ForSureDragging CS.Point
+  | None
 
 
 init : Model
 init =
   { center = { x = 0, y = 0 }
-  , offsetDrag = Nothing
-  , offset = { x = 0, y = 0 }
+  , dragging = None
   , percentage = 100
   }
 
@@ -46,42 +50,42 @@ type Msg
 update : Msg -> Model -> Model
 update msg model =
   case msg of
-    OnMouseDown off ->
-      { model | offsetDrag = Just off }
+    OnMouseDown offset ->
+      { model | dragging = CouldStillBeClick offset }
 
-    OnMouseMove off ->
-      case model.offsetDrag of
-        Just start ->
-          { model | offset = { x = start.x - off.x, y = start.y - off.y } }
-
-        Nothing ->
-          model
-
-    OnMouseUp off coord ->
-      case model.offsetDrag of
-        Just start ->
-          if start == off then
-            { model | center = coord, offsetDrag = Nothing }
+    OnMouseMove offset ->
+      case model.dragging of
+        CouldStillBeClick prevOffset ->
+          if prevOffset == offset then
+            model
           else
-            { model | center =
-                { x = model.center.x + start.x - off.x
-                , y = model.center.y + start.y - off.y
-                }
-            , offset = { x = 0, y = 0 }
-            , offsetDrag = Nothing
+            { model | center = updateCenter model.center prevOffset offset
+            , dragging = ForSureDragging offset
             }
 
-        Nothing ->
-          { model | center = off, offset = { x = 0, y = 0 } }
+        ForSureDragging prevOffset ->
+          { model | center = updateCenter model.center prevOffset offset
+          , dragging = ForSureDragging offset
+          }
+
+        None ->
+          model
+
+    OnMouseUp offset coord ->
+      case model.dragging of
+        CouldStillBeClick prevOffset ->
+          { model | center = coord, dragging = None }
+
+        ForSureDragging prevOffset ->
+          { model | center = updateCenter model.center prevOffset offset
+          , dragging = None
+          }
+
+        None ->
+          { model | center = offset }
 
     OnMouseLeave ->
-      { model | offsetDrag = Nothing
-      , center =
-          { x = model.center.x + model.offset.x
-          , y = model.center.y + model.offset.y
-          }
-      , offset = { x = 0, y = 0 }
-      }
+      { model | dragging = None }
 
     OnZoomIn ->
       { model | percentage = model.percentage + 20 }
@@ -90,7 +94,14 @@ update msg model =
       { model | percentage = max 1 (model.percentage - 20) }
 
     OnZoomReset ->
-      { model | percentage = 100, center = { x = 0, y = 0 }, offset = { x = 0, y = 0 } }
+      { model | percentage = 100, center = { x = 0, y = 0 } }
+
+
+updateCenter : CS.Point -> CS.Point -> CS.Point -> CS.Point
+updateCenter center prevOffset offset =
+  { x = center.x + (prevOffset.x - offset.x)
+  , y = center.y + (prevOffset.y - offset.y)
+  }
 
 
 view : Model -> Html Msg
@@ -98,8 +109,8 @@ view model =
   C.chart
     [ CA.height 300
     , CA.width 300
-    , CA.range [ CA.zoom model.percentage, CA.centerAt model.center.x, CA.move model.offset.x ]
-    , CA.domain [ CA.zoom model.percentage, CA.centerAt model.center.y, CA.move model.offset.y ]
+    , CA.range [ CA.zoom model.percentage, CA.centerAt model.center.x ]
+    , CA.domain [ CA.zoom model.percentage, CA.centerAt model.center.y ]
 
     , CE.onMouseDown OnMouseDown CE.getOffset
     , CE.onMouseMove OnMouseMove CE.getOffset
