@@ -119,10 +119,11 @@ view model =
 
     , CA.htmlAttrs
         [ HA.style "user-select" "none"
-        --, HA.style "cursor" <|
-        --    case model.moving of
-        --      Just _ -> "grabbing"
-        --      Nothing -> "grab"
+        , HA.style "cursor" <|
+            case model.dragging of
+              CouldStillBeClick _ -> "grabbing"
+              ForSureDragging _ -> "grabbing"
+              None -> "grab"
         ]
     ]
     [ C.xLabels [ CA.withGrid, CA.amount 10, CA.ints, CA.fontSize 9 ]
