@@ -944,6 +944,11 @@ The example below illustrates the configuration:
           , CA.format (\num -> String.fromFloat num ++ "°")
               -- Format the "nice" number
 
+          , CA.ellipsis 40 10
+              -- Add ellipsis. Arguments are width and height of label.
+              -- Note: There is no SVG feature for ellipsis, so this
+              -- turns labels into HTML.
+
           , CA.pinned .max  -- Change what y position the labels are set at
                             -- .max is at the very top
                             -- .min is at the very bottom
@@ -1140,6 +1145,10 @@ A full list of possible attributes:
           , CA.rotate 90    -- Rotate label 90 degrees
           , CA.uppercase    -- Make uppercase
           , CA.flip         -- Flip to opposite direction
+          , CA.ellipsis 40 10
+              -- Add ellipsis. Arguments are width and height of label.
+              -- Note: There is no SVG feature for ellipsis, so this
+              -- turns labels into HTML.
 
           , CA.withGrid     -- Add grid line by each label.
           ]
@@ -2735,6 +2744,11 @@ Other attributes you can use:
 
       , CA.rotate 90    -- Rotate label 90 degrees
       , CA.uppercase    -- Make uppercase
+
+      , CA.ellipsis 40 10
+          -- Add ellipsis. Arguments are width and height of label.
+          -- Note: There is no SVG feature for ellipsis, so this
+          -- turns labels into HTML.
 
        -- Add arbitrary SVG attributes to your labels.
       , CA.attrs [ SA.class "my-label" ]

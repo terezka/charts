@@ -500,7 +500,7 @@ format v config =
   { config | format = Just v }
 
 
-{-| -}
+{-| Note: There is no SVG feature for ellipsis, so this turns labels into HTML. -}
 ellipsis : Float -> Float -> Attribute { a | ellipsis : Maybe { height : Float, width : Float } }
 ellipsis w h config =
   { config | ellipsis = Just { width = w, height = h } }
