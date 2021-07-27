@@ -759,6 +759,7 @@ label plane config inner point =
             , HA.style "white-space" "nowrap"
             , HA.style "overflow" "hidden"
             , HA.style "text-overflow" "ellipsis"
+            , HA.style "height" "100%"
             , HA.style "pointer-events" "none"
             , HA.style "color" config.color
             , fontStyle

@@ -20,14 +20,14 @@ view model =
     , C.yTicks []
     , C.yLabels
         [ CA.format (\y -> String.fromFloat y ++ " yyyyyyy")
-        , CA.ellipsis 35 16 -- width: 35, height: 10
+        , CA.ellipsis 35 20 -- width: 35, height: 10
         ]
 
     , C.xAxis [ CA.noArrow ]
     , C.xTicks []
     , C.xLabels
         [ CA.format (\x -> String.fromFloat x ++ " xxxxxxx")
-        , CA.ellipsis 35 16
+        , CA.ellipsis 35 20
         ]
     ]
 {-| @SMALL END -}
