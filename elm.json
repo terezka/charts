@@ -1,7 +1,7 @@
 {
     "type": "package",
     "name": "terezka/charts",
-    "summary": "SVG charts components in Elm.",
+    "summary": "Nighly version of terezka/elm-charts.",
     "license": "BSD-3-Clause",
     "version": "18.0.0",
     "exposed-modules": [
