@@ -6,7 +6,9 @@ module Chart.Attributes exposing
 
   -- LIMITS
   , range, domain, limits
-  , lowest, highest, orLower, orHigher, exactly, more, less, window, zoom, move, centerAt, pad, likeData, zero, middle, percent
+  , lowest, highest, orLower, orHigher, exactly, more, less, window, likeData
+  , zoom, move, centerAt, pad
+  , zero, middle, percent
 
   -- LABELS
   , fontSize, uppercase, format, position
@@ -67,7 +69,9 @@ below are only guiding.
 
 ## Limits
 @docs range, domain, limits
-@docs lowest, highest, orLower, orHigher, exactly, more, less, window, likeData, zero, middle, percent
+@docs lowest, highest, orLower, orHigher, exactly, more, less, window, likeData
+@docs zoom, move, centerAt, pad
+@docs zero, middle, percent
 
 ## Labels
 @docs fontSize, uppercase, format, position
@@ -130,17 +134,17 @@ type alias Attribute c =
 
 {-| Change the lower bound of an axis.
 
-    CA.lowest -5 CA.orLower initial  -- { dataMin = 0, dataMax = 10, min = -5, max = 10 }
-    CA.lowest -5 CA.orHigher initial -- { dataMin = 0, dataMax = 10, min = 0, max = 10 }
-    CA.lowest 2 CA.exactly initial   -- { dataMin = 0, dataMax = 10, min = 2, max = 10 }
-    CA.lowest 2 CA.less initial   -- { dataMin = 0, dataMax = 10, min = -2, max = 10 }
-    CA.lowest 3 CA.more initial   -- { dataMin = 0, dataMax = 10, min = 3, max = 10 }
+    CA.lowest -5 CA.orLower initial  -- { initial | min = -5, max = 10 }
+    CA.lowest -5 CA.orHigher initial -- { initial | min = 0, max = 10 }
+    CA.lowest 2 CA.exactly initial   -- { initial | min = 2, max = 10 }
+    CA.lowest 2 CA.less initial   -- { initial | min = -2, max = 10 }
+    CA.lowest 3 CA.more initial   -- { initial | min = 3, max = 10 }
 
 where
 
-    initial : Axis
+    initial : Chart.Svg.Axis
     initial =
-      { dataMin = 0, dataMax = 10, min = 0, max = 10 }
+      { .. | min = 0, max = 10 }
 
 -}
 lowest : Float -> (Float -> Float -> Float -> Float) -> Attribute C.Axis
@@ -166,13 +170,13 @@ likeData b =
 
 {-| Set an axis to an exact window.
 
-    CA.window 2 5 initial   -- { dataMin = 0, dataMax = 10, min = 2, max = 5 }
+    CA.window 2 5 initial   -- { initial | min = 2, max = 5 }
 
 where
 
     initial : Axis
     initial =
-      { dataMin = 0, dataMax = 10, min = 0, max = 10 }
+      { .. | min = 0, max = 10 }
 
 -}
 window : Float -> Float -> Attribute C.Axis
@@ -220,7 +224,11 @@ less v o _ =
   o - v
 
 
-{-| -}
+{-| Zoom with a certain percentage.
+
+    CA.range [ CA.zoom 150 ]
+
+-}
 zoom : Float -> Attribute C.Axis
 zoom per axis =
   let full = axis.max - axis.min
@@ -230,20 +238,44 @@ zoom per axis =
   { axis | min = axis.min + off, max = axis.max - off }
 
 
-{-| -}
+{-| Offset entire range.
+
+    CA.move 5 initial   -- { initial | min = 5, max = 15 }
+
+where
+
+    initial : Axis
+    initial =
+      { .. | min = 0, max = 10 }
+
+-}
 move : Float -> Attribute C.Axis
 move v axis =
   { axis | min = axis.min + v, max = axis.max + v }
 
 
-{-| -}
+{-| Add padding (in px) to range/domain.
+
+    CA.range [ CA.pad 5 10 ]
+
+-}
 pad : Float -> Float -> Attribute C.Axis
 pad minPad maxPad axis =
   let scale = C.scaleCartesian axis in
   { axis | min = axis.min - scale minPad, max = axis.max + scale maxPad }
 
 
-{-| -}
+{-| Center range/domain at certain point.
+
+    CA.centerAt 20 initial -- { initial | min = -30, max = 70 }
+
+where
+
+    initial : Axis
+    initial =
+      { .. | min = 0, max = 100 }
+
+-}
 centerAt : Float -> Attribute C.Axis
 centerAt v axis =
   let full = axis.max - axis.min in
