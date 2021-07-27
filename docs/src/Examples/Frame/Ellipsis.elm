@@ -21,7 +21,7 @@ view model =
     , C.yTicks []
     , C.yLabels
         [ CA.format (\y -> String.fromFloat y ++ " yyyyyyy")
-        , CA.ellipsis 35 16
+        , CA.ellipsis 35 16 -- width: 35, height: 10
         ]
 
     , C.xAxis [ CA.noArrow ]
@@ -72,7 +72,7 @@ smallCode =
     , C.yTicks []
     , C.yLabels
         [ CA.format (\\y -> String.fromFloat y ++ " yyyyyyy")
-        , CA.ellipsis 35 16
+        , CA.ellipsis 35 16 -- width: 35, height: 10
         ]
 
     , C.xAxis [ CA.noArrow ]
@@ -106,7 +106,7 @@ view model =
     , C.yTicks []
     , C.yLabels
         [ CA.format (\\y -> String.fromFloat y ++ " yyyyyyy")
-        , CA.ellipsis 35 16
+        , CA.ellipsis 35 16 -- width: 35, height: 10
         ]
 
     , C.xAxis [ CA.noArrow ]
