@@ -75,7 +75,7 @@ below are only guiding.
 
 ## Labels
 @docs fontSize, uppercase, format, position
-@docs alignLeft, alignRight, alignMiddle, content
+@docs alignLeft, alignRight, alignMiddle, ellipsis
 
 ## Axis
 @docs amount, flip, pinned

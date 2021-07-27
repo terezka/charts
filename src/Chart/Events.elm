@@ -10,10 +10,12 @@ module Chart.Events exposing
 
 # Event handlers
 @docs Attribute, Event
-@docs onMouseMove, onMouseLeave, onMouseUp, onMouseDown, onClick, on
+@docs onMouseMove, onMouseLeave, onMouseUp, onMouseDown, onClick, onDoubleClick, on
 
 ## Decoders
-@docs Decoder, Point, getCoords, getNearest, getNearestX, getWithin, getWithinX
+@docs Decoder, Point
+@docs getNearest, getNearestX, getWithin, getWithinX
+@docs getCoords, getSvgCoords, getOffset
 @docs map, map2, map3, map4
 
 -}
