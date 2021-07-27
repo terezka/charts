@@ -687,6 +687,7 @@ type alias Label =
   , rotate : Float
   , uppercase : Bool
   , attrs : List (S.Attribute Never)
+  , ellipsis : Maybe { height : Float, width : Float }
   }
 
 
@@ -702,36 +703,77 @@ defaultLabel =
   , rotate = 0
   , uppercase = False
   , attrs = []
+  , ellipsis = Nothing
   }
 
 
 {-| -}
 label : Plane -> Label -> List (Svg msg) -> Point -> Svg msg
 label plane config inner point =
-  let fontStyle =
-        case config.fontSize of
-          Just size_ -> "font-size: " ++ String.fromInt size_ ++ "px;"
-          Nothing -> ""
+  case config.ellipsis of
+    Nothing ->
+      let fontStyle =
+            case config.fontSize of
+              Just size_ -> "font-size: " ++ String.fromInt size_ ++ "px;"
+              Nothing -> ""
 
-      anchorStyle =
-        case config.anchor of
-          Nothing -> "text-anchor: middle;"
-          Just End -> "text-anchor: end;"
-          Just Start -> "text-anchor: start;"
-          Just Middle -> "text-anchor: middle;"
+          anchorStyle =
+            case config.anchor of
+              Nothing -> "text-anchor: middle;"
+              Just End -> "text-anchor: end;"
+              Just Start -> "text-anchor: start;"
+              Just Middle -> "text-anchor: middle;"
 
-      uppercaseStyle =
-        if config.uppercase then "text-transform: uppercase;" else ""
-  in
-  withAttrs config.attrs S.text_
-    [ SA.class "elm-charts__label"
-    , SA.stroke config.border
-    , SA.strokeWidth (String.fromFloat config.borderWidth)
-    , SA.fill config.color
-    , position plane -config.rotate point.x point.y config.xOff config.yOff
-    , SA.style <| String.join " " [ "pointer-events: none;", fontStyle, anchorStyle, uppercaseStyle ]
-    ]
-    [ S.tspan [] inner ]
+          uppercaseStyle =
+            if config.uppercase then "text-transform: uppercase;" else ""
+      in
+      withAttrs config.attrs S.text_
+        [ SA.class "elm-charts__label"
+        , SA.stroke config.border
+        , SA.strokeWidth (String.fromFloat config.borderWidth)
+        , SA.fill config.color
+        , position plane -config.rotate point.x point.y config.xOff config.yOff
+        , SA.style <| String.join " " [ "pointer-events: none;", fontStyle, anchorStyle, uppercaseStyle ]
+        ]
+        [ S.tspan [] inner ]
+
+    Just ellipsis ->
+      let fontStyle =
+            case config.fontSize of
+              Just size_ -> HA.style "font-size"  (String.fromInt size_ ++ "px")
+              Nothing -> HA.style "" ""
+
+          xOffWithAnchor =
+            case config.anchor of
+              Nothing -> config.xOff - ellipsis.width / 2
+              Just End -> config.xOff - ellipsis.width
+              Just Start -> 0
+              Just Middle -> config.xOff - ellipsis.width / 2
+
+          uppercaseStyle =
+            if config.uppercase then HA.style "text-transform" "uppercase" else HA.style "" ""
+      in
+      withAttrs config.attrs S.foreignObject
+        [ SA.class "elm-charts__label"
+        , SA.class "elm-charts__html-label"
+        , SA.width (String.fromFloat ellipsis.width)
+        , SA.height (String.fromFloat ellipsis.height)
+        , position plane -config.rotate point.x point.y xOffWithAnchor (config.yOff - 10)
+        ]
+        [ H.div
+            [ HA.attribute "xmlns" "http://www.w3.org/1999/xhtml"
+            , HA.style "white-space" "nowrap"
+            , HA.style "overflow" "hidden"
+            , HA.style "text-overflow" "ellipsis"
+            , HA.style "pointer-events" "none"
+            , HA.style "color" config.color
+            , fontStyle
+            , uppercaseStyle
+            ]
+            inner
+        ]
+
+
 
 
 

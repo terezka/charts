@@ -902,6 +902,8 @@ type alias Labels =
   , format : Maybe (Float -> String)
   , rotate : Float
   , grid : Bool
+  , attrs : List (S.Attribute Never)
+  , ellipsis : Maybe { height : Float, width : Float}
   }
 
 
@@ -976,6 +978,8 @@ xLabels edits =
           , uppercase = False
           , rotate = 0
           , fontSize = Nothing
+          , attrs = []
+          , ellipsis = Nothing
           }
 
       toTicks p config =
@@ -998,6 +1002,8 @@ xLabels edits =
             , fontSize = config.fontSize
             , uppercase = config.uppercase
             , rotate = config.rotate
+            , attrs = config.attrs
+            , ellipsis = config.ellipsis
             }
             [ S.text item.label ]
             { x = item.value
@@ -1028,6 +1034,8 @@ yLabels edits =
           , uppercase = False
           , fontSize = Nothing
           , rotate = 0
+          , attrs = []
+          , ellipsis = Nothing
           }
 
       toTicks p config =
@@ -1049,6 +1057,8 @@ yLabels edits =
             , fontSize = config.fontSize
             , uppercase = config.uppercase
             , rotate = config.rotate
+            , attrs = config.attrs
+            , ellipsis = config.ellipsis
             , anchor =
                 case config.anchor of
                   Nothing -> Just (if config.flip then IS.Start else IS.End)
@@ -1077,6 +1087,8 @@ type alias Label =
   , uppercase : Bool
   , flip : Bool
   , grid : Bool
+  , attrs : List (S.Attribute Never)
+  , ellipsis : Maybe { height : Float, width : Float}
   }
 
 
@@ -1146,6 +1158,8 @@ xLabel edits inner =
           , rotate = 0
           , flip = False
           , grid = False
+          , attrs = []
+          , ellipsis = Nothing
           }
 
       toTickValues p config ts =
@@ -1168,7 +1182,8 @@ xLabel edits inner =
       , color = config.color
       , anchor = config.anchor
       , rotate = config.rotate
-      , attrs = []
+      , attrs = config.attrs
+      , ellipsis = config.ellipsis
       }
       string
       { x = config.x, y = config.y }
@@ -1196,6 +1211,8 @@ yLabel edits inner =
           , rotate = 0
           , flip = False
           , grid = False
+          , attrs = []
+          , ellipsis = Nothing
           }
 
       toTickValues p config ts =
@@ -1221,7 +1238,8 @@ yLabel edits inner =
             Nothing -> Just (if config.flip then IS.Start else IS.End)
             Just anchor -> Just anchor
       , rotate = config.rotate
-      , attrs = []
+      , attrs = config.attrs
+      , ellipsis = config.ellipsis
       }
       string
       { x = config.x, y = config.y }
@@ -1774,6 +1792,7 @@ type alias ItemLabel a =
   , rotate : Float
   , uppercase : Bool
   , attrs : List (S.Attribute Never)
+  , ellipsis : Maybe { height : Float, width : Float}
   , position : CS.Plane -> a -> CS.Point
   , format : Maybe (a -> String)
   }
@@ -1791,6 +1810,7 @@ defaultLabel =
   , rotate = IS.defaultLabel.rotate
   , uppercase = IS.defaultLabel.uppercase
   , attrs = IS.defaultLabel.attrs
+  , ellipsis = IS.defaultLabel.ellipsis
   , position = CI.getBottom
   , format = Nothing
   }
@@ -1807,6 +1827,7 @@ toLabelFromItemLabel config =
   , fontSize = config.fontSize
   , uppercase = config.uppercase
   , rotate = config.rotate
+  , ellipsis = config.ellipsis
   , attrs = config.attrs
   }
 
