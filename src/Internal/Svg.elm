@@ -681,7 +681,7 @@ type alias Label =
   , rotate : Float
   , uppercase : Bool
   , attrs : List (S.Attribute Never)
-  , ellipsis : Maybe { height : Float, width : Float }
+  , ellipsis : Maybe { width : Float, height : Float }
   }
 
 

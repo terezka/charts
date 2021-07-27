@@ -912,7 +912,7 @@ type alias Labels =
   , rotate : Float
   , grid : Bool
   , attrs : List (S.Attribute Never)
-  , ellipsis : Maybe { height : Float, width : Float}
+  , ellipsis : Maybe { width : Float, height : Float }
   }
 
 
@@ -1102,7 +1102,7 @@ type alias Label =
   , flip : Bool
   , grid : Bool
   , attrs : List (S.Attribute Never)
-  , ellipsis : Maybe { height : Float, width : Float}
+  , ellipsis : Maybe { width : Float, height : Float }
   }
 
 
@@ -1810,7 +1810,7 @@ type alias ItemLabel a =
   , rotate : Float
   , uppercase : Bool
   , attrs : List (S.Attribute Never)
-  , ellipsis : Maybe { height : Float, width : Float}
+  , ellipsis : Maybe { width : Float, height : Float }
   , position : CS.Plane -> a -> CS.Point
   , format : Maybe (a -> String)
   }
