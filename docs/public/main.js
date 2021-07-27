@@ -17960,34 +17960,52 @@ var $author$project$Internal$Svg$label = F4(
 		} else {
 			var ellipsis = _v0.a;
 			var xOffWithAnchor = function () {
-				var _v7 = config.anchor;
-				if (_v7.$ === 'Nothing') {
+				var _v11 = config.anchor;
+				if (_v11.$ === 'Nothing') {
 					return config.xOff - (ellipsis.width / 2);
 				} else {
-					switch (_v7.a.$) {
+					switch (_v11.a.$) {
 						case 'End':
-							var _v8 = _v7.a;
+							var _v12 = _v11.a;
 							return config.xOff - ellipsis.width;
 						case 'Start':
-							var _v9 = _v7.a;
+							var _v13 = _v11.a;
 							return config.xOff;
 						default:
-							var _v10 = _v7.a;
+							var _v14 = _v11.a;
 							return config.xOff - (ellipsis.width / 2);
 					}
 				}
 			}();
 			var uppercaseStyle = config.uppercase ? A2($elm$html$Html$Attributes$style, 'text-transform', 'uppercase') : A2($elm$html$Html$Attributes$style, '', '');
 			var fontStyle = function () {
-				var _v6 = config.fontSize;
-				if (_v6.$ === 'Just') {
-					var size_ = _v6.a;
+				var _v10 = config.fontSize;
+				if (_v10.$ === 'Just') {
+					var size_ = _v10.a;
 					return A2(
 						$elm$html$Html$Attributes$style,
 						'font-size',
 						$elm$core$String$fromInt(size_) + 'px');
 				} else {
 					return A2($elm$html$Html$Attributes$style, '', '');
+				}
+			}();
+			var anchorStyle = function () {
+				var _v6 = config.anchor;
+				if (_v6.$ === 'Nothing') {
+					return A2($elm$html$Html$Attributes$style, 'text-align', 'center');
+				} else {
+					switch (_v6.a.$) {
+						case 'End':
+							var _v7 = _v6.a;
+							return A2($elm$html$Html$Attributes$style, 'text-align', 'right');
+						case 'Start':
+							var _v8 = _v6.a;
+							return A2($elm$html$Html$Attributes$style, 'text-align', 'left');
+						default:
+							var _v9 = _v6.a;
+							return A2($elm$html$Html$Attributes$style, 'text-align', 'center');
+					}
 				}
 			}();
 			return A4(
@@ -18018,7 +18036,8 @@ var $author$project$Internal$Svg$label = F4(
 								A2($elm$html$Html$Attributes$style, 'pointer-events', 'none'),
 								A2($elm$html$Html$Attributes$style, 'color', config.color),
 								fontStyle,
-								uppercaseStyle
+								uppercaseStyle,
+								anchorStyle
 							]),
 						inner)
 					]));

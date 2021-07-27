@@ -744,6 +744,13 @@ label plane config inner point =
               Just Start -> config.xOff
               Just Middle -> config.xOff - ellipsis.width / 2
 
+          anchorStyle =
+            case config.anchor of
+              Nothing -> HA.style "text-align" "center"
+              Just End -> HA.style "text-align" "right"
+              Just Start -> HA.style "text-align" "left"
+              Just Middle -> HA.style "text-align" "center"
+
           uppercaseStyle =
             if config.uppercase then HA.style "text-transform" "uppercase" else HA.style "" ""
       in
@@ -764,6 +771,7 @@ label plane config inner point =
             , HA.style "color" config.color
             , fontStyle
             , uppercaseStyle
+            , anchorStyle
             ]
             inner
         ]
