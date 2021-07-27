@@ -82,7 +82,7 @@ update msg model =
           }
 
         None ->
-          { model | center = offset }
+          model
 
     OnMouseLeave ->
       { model | dragging = None }
@@ -152,7 +152,8 @@ view model =
 
     , C.htmlAt .max .max 0 0
         [ HA.style "transform" "translateX(-100%)" ]
-        [ H.button [ HE.onClick OnZoomIn, HA.style "margin-right" "5px" ] [ H.text "+" ]
+        [ H.span [ HA.style "margin-right" "5px" ] [ H.text (String.fromFloat model.percentage ++ "%") ]
+        , H.button [ HE.onClick OnZoomIn, HA.style "margin-right" "5px" ] [ H.text "+" ]
         , H.button [ HE.onClick OnZoomOut, HA.style "margin-right" "5px" ] [ H.text "-" ]
         , H.button [ HE.onClick OnZoomReset ] [ H.text "⨯" ]
         ]
