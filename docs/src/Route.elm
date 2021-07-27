@@ -1,4 +1,4 @@
-module Route exposing (Route(..), top, administration, articles, article, documentation, section, example, gettingStarted, fromUrl, replaceUrl, toString)
+module Route exposing (Route(..), top, administration, documentation, section, example, gettingStarted, fromUrl, replaceUrl, toString)
 
 import Browser.Navigation as Navigation
 import Url exposing (Url)
@@ -15,16 +15,6 @@ top =
 administration : String
 administration =
   toString <| Administration 
-
-
-articles : String
-articles =
-  toString <| Articles 
-
-
-article : { id : String } -> String
-article params =
-  toString <| Articles_String_ params.id
 
 
 documentation : String
@@ -50,8 +40,6 @@ gettingStarted =
 type Route
     = Top 
     | Administration 
-    | Articles 
-    | Articles_String_ String
     | Documentation 
     | Documentation_String_ String
     | Documentation_String__String_ String String
@@ -77,12 +65,6 @@ toString route =
         Administration  ->
             Builder.absolute ["administration"] (List.filterMap identity [])
 
-        Articles  ->
-            Builder.absolute ["articles"] (List.filterMap identity [])
-
-        Articles_String_ p1 ->
-            Builder.absolute ["articles", p1] (List.filterMap identity [])
-
         Documentation  ->
             Builder.absolute ["documentation"] (List.filterMap identity [])
 
@@ -104,8 +86,6 @@ parser =
     oneOf
         [ Parser.map Top Parser.top
         , Parser.map Administration (s "administration")
-        , Parser.map Articles (s "articles")
-        , Parser.map Articles_String_ (s "articles" </> string)
         , Parser.map Documentation (s "documentation")
         , Parser.map Documentation_String_ (s "documentation" </> string)
         , Parser.map Documentation_String__String_ (s "documentation" </> string </> string)

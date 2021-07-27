@@ -5,8 +5,6 @@ import Browser.Navigation as Navigation
 import Html
 import Page.Home
 import Page.Administration
-import Page.Articles
-import Page.Article
 import Page.Documentation
 import Page.Section
 import Page.Example
@@ -39,8 +37,6 @@ type Page
     | NotFound
     | Page_Home Page.Home.Model
     | Page_Administration Page.Administration.Model
-    | Page_Articles Page.Articles.Model
-    | Page_Article Page.Article.Model
     | Page_Documentation Page.Documentation.Model
     | Page_Section Page.Section.Model
     | Page_Example Page.Example.Model
@@ -77,12 +73,6 @@ view model =
         Page_Administration subModel ->
             viewPage Page_Administration_Msg (Page.Administration.view subModel)
 
-        Page_Articles subModel ->
-            viewPage Page_Articles_Msg (Page.Articles.view subModel)
-
-        Page_Article subModel ->
-            viewPage Page_Article_Msg (Page.Article.view subModel)
-
         Page_Documentation subModel ->
             viewPage Page_Documentation_Msg (Page.Documentation.view subModel)
 
@@ -101,8 +91,6 @@ type Msg
     | ClickedLink Browser.UrlRequest
     | Page_Home_Msg Page.Home.Msg
     | Page_Administration_Msg Page.Administration.Msg
-    | Page_Articles_Msg Page.Articles.Msg
-    | Page_Article_Msg Page.Article.Msg
     | Page_Documentation_Msg Page.Documentation.Msg
     | Page_Section_Msg Page.Section.Msg
     | Page_Example_Msg Page.Example.Msg
@@ -134,14 +122,6 @@ update msg model =
         ( Page_Administration_Msg subMsg, Page_Administration subModel ) ->
             Page.Administration.update model.navigation subMsg subModel
                 |> updateWith Page_Administration Page_Administration_Msg model
-
-        ( Page_Articles_Msg subMsg, Page_Articles subModel ) ->
-            Page.Articles.update model.navigation subMsg subModel
-                |> updateWith Page_Articles Page_Articles_Msg model
-
-        ( Page_Article_Msg subMsg, Page_Article subModel ) ->
-            Page.Article.update model.navigation subMsg subModel
-                |> updateWith Page_Article Page_Article_Msg model
 
         ( Page_Documentation_Msg subMsg, Page_Documentation subModel ) ->
             Page.Documentation.update model.navigation subMsg subModel
@@ -179,12 +159,6 @@ subscriptions model =
         Page_Administration subModel ->
             Sub.map Page_Administration_Msg (Page.Administration.subscriptions subModel)
 
-        Page_Articles subModel ->
-            Sub.map Page_Articles_Msg (Page.Articles.subscriptions subModel)
-
-        Page_Article subModel ->
-            Sub.map Page_Article_Msg (Page.Article.subscriptions subModel)
-
         Page_Documentation subModel ->
             Sub.map Page_Documentation_Msg (Page.Documentation.subscriptions subModel)
 
@@ -218,14 +192,6 @@ changeRouteTo maybeRoute old =
         Just (Route.Administration ) ->
             Page.Administration.init model.navigation session ()
                 |> updateWith Page_Administration Page_Administration_Msg model
-
-        Just (Route.Articles ) ->
-            Page.Articles.init model.navigation session ()
-                |> updateWith Page_Articles Page_Articles_Msg model
-
-        Just (Route.Articles_String_ p1) ->
-            Page.Article.init model.navigation session { id = p1 }
-                |> updateWith Page_Article Page_Article_Msg model
 
         Just (Route.Documentation ) ->
             Page.Documentation.init model.navigation session ()
@@ -265,12 +231,6 @@ exit model =
 
         Page_Administration subModel ->
             Page.Administration.exit subModel model.session
-
-        Page_Articles subModel ->
-            Page.Articles.exit subModel model.session
-
-        Page_Article subModel ->
-            Page.Article.exit subModel model.session
 
         Page_Documentation subModel ->
             Page.Documentation.exit subModel model.session

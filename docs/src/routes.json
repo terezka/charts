@@ -1,8 +1,6 @@
 { "/": { "module": "Page.Home", "name": "top" }
 , "/getting-started": { "module": "Page.GettingStarted", "name": "gettingStarted" }
 , "/administration": { "module": "Page.Administration", "name": "administration" }
-, "/articles": { "module": "Page.Articles", "name": "articles" }
-, "/articles/id:string": { "module": "Page.Article", "name": "article" }
 , "/documentation": { "module": "Page.Documentation", "name": "documentation" }
 , "/documentation/section:string": { "module": "Page.Section", "name": "section" }
 , "/documentation/section:string/example:string": { "module": "Page.Example", "name": "example" }
