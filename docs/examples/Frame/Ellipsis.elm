@@ -27,7 +27,7 @@ view model =
     , C.xTicks []
     , C.xLabels
         [ CA.format (\x -> String.fromFloat x ++ " xxxxxxx")
-        , CA.ellipsis 35 10
+        , CA.ellipsis 35 16
         ]
     ]
 {-| @SMALL END -}
