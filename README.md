@@ -1,6 +1,6 @@
 # elm-charts-alpha
 
-Make charts! Alpha version, so liable to changes.
+This is the nightly version of [`terezka/elm-charts`](https://package.elm-lang.org/packages/terezka/elm-charts/latest/). This has faster updates, but also more breaking changes!
 
 ```elm
 
