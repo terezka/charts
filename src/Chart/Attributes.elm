@@ -10,7 +10,7 @@ module Chart.Attributes exposing
 
   -- LABELS
   , fontSize, uppercase, format, position
-  , alignLeft, alignRight, alignMiddle, content
+  , alignLeft, alignRight, alignMiddle, ellipsis
 
   -- AXIS
   , amount, flip, pinned
@@ -501,6 +501,12 @@ format v config =
 
 
 {-| -}
+ellipsis : Float -> Float -> Attribute { a | ellipsis : Maybe { height : Float, width : Float } }
+ellipsis w h config =
+  { config | ellipsis = Just { width = w, height = h } }
+
+
+{-| -}
 position : x -> Attribute { a | position : x }
 position v config =
   { config | position = v }
@@ -813,13 +819,6 @@ plus config =
 cross : Attribute { a | shape : Maybe CS.Shape }
 cross config =
   { config | shape = Just CS.Cross }
-
-
-{-| -}
-content : v -> Attribute { a | content : v }
-content v config =
-  { config | content = v }
-
 
 
 {-| -}
