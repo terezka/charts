@@ -15,6 +15,7 @@ view model =
   C.chart
     [ CA.height 300
     , CA.width 300
+    , CA.margin { top = 10, left = 45, bottom = 25, right = 15 }
     ]
     [ C.yAxis [ CA.noArrow ]
     , C.yTicks []
@@ -65,6 +66,7 @@ smallCode =
   C.chart
     [ CA.height 300
     , CA.width 300
+    , CA.margin { top = 10, left = 45, bottom = 25, right = 15 }
     ]
     [ C.yAxis [ CA.noArrow ]
     , C.yTicks []
@@ -98,6 +100,7 @@ view model =
   C.chart
     [ CA.height 300
     , CA.width 300
+    , CA.margin { top = 10, left = 45, bottom = 25, right = 15 }
     ]
     [ C.yAxis [ CA.noArrow ]
     , C.yTicks []
