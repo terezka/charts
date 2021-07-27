@@ -741,7 +741,7 @@ label plane config inner point =
             case config.anchor of
               Nothing -> config.xOff - ellipsis.width / 2
               Just End -> config.xOff - ellipsis.width
-              Just Start -> 0
+              Just Start -> config.xOff
               Just Middle -> config.xOff - ellipsis.width / 2
 
           uppercaseStyle =

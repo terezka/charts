@@ -17970,7 +17970,7 @@ var $author$project$Internal$Svg$label = F4(
 							return config.xOff - ellipsis.width;
 						case 'Start':
 							var _v9 = _v7.a;
-							return 0;
+							return config.xOff;
 						default:
 							var _v10 = _v7.a;
 							return config.xOff - (ellipsis.width / 2);
