@@ -6,7 +6,7 @@ module Chart.Attributes exposing
 
   -- LIMITS
   , range, domain, limits
-  , lowest, highest, orLower, orHigher, exactly, more, less, window, likeData, zero, middle, percent
+  , lowest, highest, orLower, orHigher, exactly, more, less, window, zoom, move, centerAt, pad, likeData, zero, middle, percent
 
   -- LABELS
   , fontSize, uppercase, format, position
@@ -218,6 +218,36 @@ more v o _ =
 less : Float -> Float -> Float -> Float
 less v o _ =
   o - v
+
+
+{-| -}
+zoom : Float -> Attribute C.Axis
+zoom per axis =
+  let full = axis.max - axis.min
+      zoomedFull = full / (max 1 per / 100)
+      off = (full - zoomedFull) / 2
+  in
+  { axis | min = axis.min + off, max = axis.max - off }
+
+
+{-| -}
+move : Float -> Attribute C.Axis
+move v axis =
+  { axis | min = axis.min + v, max = axis.max + v }
+
+
+{-| -}
+pad : Float -> Float -> Attribute C.Axis
+pad minPad maxPad axis =
+  let scale = C.scaleCartesian axis in
+  { axis | min = axis.min - scale minPad, max = axis.max + scale maxPad }
+
+
+{-| -}
+centerAt : Float -> Attribute C.Axis
+centerAt v axis =
+  let full = axis.max - axis.min in
+  { axis | min = v - full / 2, max = v + full / 2 }
 
 
 {-| Given an axis, find the value within it closest to zero.

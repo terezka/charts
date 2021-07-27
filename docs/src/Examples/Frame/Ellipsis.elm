@@ -38,7 +38,7 @@ meta =
   , categoryOrder = 4
   , name = "Ellipsis"
   , description = "Add ellipsis to labels (Note: uses HTML labels)."
-  , order = 6
+  , order = 8
   }
 
 

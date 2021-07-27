@@ -387,14 +387,27 @@ definePlane config elements =
           SvgElement _ -> acc
           HtmlElement _ -> acc
 
+      width = max 1 (config.width - config.padding.left - config.padding.right)
+      height = max 1 (config.height - config.padding.bottom - config.padding.top)
+
       limits_ =
         List.foldl collectLimits [] elements
           |> C.foldPosition identity
-          |> \pos -> { x = toLimit pos.x1 pos.x2, y = toLimit pos.y1 pos.y2 }
+          |> \pos ->
+                { x = toLimit width config.margin.left config.margin.right pos.x1 pos.x2
+                , y = toLimit height config.margin.top config.margin.bottom pos.y1 pos.y2
+                }
           |> \{ x, y } -> { x = fixSingles x, y = fixSingles y }
 
-      toLimit min max =
-        { min = min, max = max, dataMin = min, dataMax = max }
+      toLimit length marginMin marginMax min max =
+        { length = length
+        , marginMin = marginMin
+        , marginMax = marginMax
+        , min = min
+        , max = max
+        , dataMin = min
+        , dataMax = max
+        }
 
       fixSingles bs =
         if bs.min == bs.max then { bs | max = bs.min + 10 } else bs
@@ -410,10 +423,7 @@ definePlane config elements =
           some -> List.foldl (\f b -> f b) limits_.y some
 
       unpadded =
-        { width = max 1 (config.width - config.padding.left - config.padding.right)
-        , height = max 1 (config.height - config.padding.bottom - config.padding.top)
-        , margin = config.margin
-        , x = calcRange
+        { x = calcRange
         , y = calcDomain
         }
 
@@ -429,17 +439,16 @@ definePlane config elements =
       yMin = calcDomain.min - scalePadY config.padding.bottom
       yMax = calcDomain.max + scalePadY config.padding.top
   in
-  { width = config.width
-  , height = config.height
-  , margin = config.margin
-  , x =
+  { x =
       { calcRange
-      | min = min xMin xMax
+      | length = config.width
+      , min = min xMin xMax
       , max = max xMin xMax
       }
   , y =
       { calcDomain
-      | min = min yMin yMax
+      | length = config.height
+      , min = min yMin yMax
       , max = max yMin yMax
       }
   }
@@ -2936,8 +2945,25 @@ binned binWidth func data =
 
       toBin datum =
         floor (func datum / binWidth)
+
+      fillHoles bins =
+        let keys = Dict.keys bins
+            smallest = Maybe.withDefault 0 (List.minimum keys)
+            largest = Maybe.withDefault 0 (List.maximum keys)
+            eachKey k bs =
+              if k + 1 >= largest
+                then bs
+                else eachKey (k + 1) (addIfMissing (k + 1) bs)
+
+            addIfMissing k bs =
+              case Dict.get k bs of
+                Just _ -> bs
+                Nothing -> Dict.insert k [] bs
+        in
+        eachKey smallest bins
   in
   List.foldr fold Dict.empty data
+    |> fillHoles
     |> Dict.toList
     |> List.map (\( bin, ds ) -> { bin = toFloat bin * binWidth, data = ds })
 
