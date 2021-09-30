@@ -3,7 +3,7 @@
     "name": "terezka/charts",
     "summary": "Nighly version of terezka/elm-charts with newest features.",
     "license": "BSD-3-Clause",
-    "version": "18.0.5",
+    "version": "18.0.6",
     "exposed-modules": [
         "Chart.Attributes",
         "Chart.Events",
@@ -23,7 +23,7 @@
         "elm-explorations/test": "1.2.2 <= v < 2.0.0",
         "myrho/elm-round": "1.0.4 <= v < 2.0.0",
         "ryannhg/date-format": "2.3.0 <= v < 3.0.0",
-        "terezka/intervals": "2.0.0 <= v < 3.0.0"
+        "terezka/intervals": "2.0.1 <= v < 3.0.0"
     },
     "test-dependencies": {}
 }
