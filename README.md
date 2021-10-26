@@ -1,6 +1,6 @@
 # elm-charts-alpha
 
-This is the nightly version of [`terezka/elm-charts`](https://package.elm-lang.org/packages/terezka/elm-charts/latest/). This has faster updates, but also more breaking changes! Currently published on Elm packages as `terezka/charts` but will be moved to `terezka/elm-charts-alpha` soon!
+This is the alpha version of [`terezka/elm-charts`](https://package.elm-lang.org/packages/terezka/elm-charts/latest/). This has faster updates, but also more breaking changes! Currently published on Elm packages as `terezka/charts`, but may be moved to `terezka/elm-charts-alpha` soon.
 
 ```elm
 
