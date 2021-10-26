@@ -85,6 +85,7 @@ below are only guiding.
 ## Coordinates
 @docs x, y, x1, y1, x2, y2, x2Svg, y2Svg, length
 @docs moveLeft, moveRight, moveUp, moveDown
+@docs hideOverflow
 
 ## Decoration
 @docs border, borderWidth, color, opacity, highlight, highlightWidth, highlightColor, background, noArrow, rotate

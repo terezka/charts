@@ -97,6 +97,7 @@ You can see what attributes are applicable given their configuration record.
 @docs fromSvg, fromCartesian
 @docs lengthInSvgX, lengthInSvgY
 @docs lengthInCartesianX, lengthInCartesianY
+@docs hideOverflow
 
 # Seaching
 @docs getNearest, getNearestX, getWithin, getWithinX
@@ -640,7 +641,9 @@ lengthInCartesianY =
   Internal.Svg.lengthInCartesianY
 
 
-{-| Hide overflow. -}
+{-| Hide overflow. Sometimes your element might reach outside the chart area.
+This will cut the excess.
+-}
 hideOverflow : Plane -> S.Attribute Never
 hideOverflow =
   Internal.Svg.withinChartArea
