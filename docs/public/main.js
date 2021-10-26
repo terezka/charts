@@ -15970,7 +15970,7 @@ var $author$project$Page$Administration$view = function (model) {
 									$mdgriffith$elm_ui$Element$text('Here are some upcoming features and improvements in approximate order of priority. '),
 									$mdgriffith$elm_ui$Element$text('If you have more suggestions or have wishes regarding the priority, then '),
 									$mdgriffith$elm_ui$Element$text('you\'re welcome to '),
-									A2($author$project$Ui$Layout$link, 'https://github.com/terezka/elm-charts/issues', 'open an issue'),
+									A2($author$project$Ui$Layout$link, 'https://github.com/terezka/charts/issues', 'open an issue'),
 									$mdgriffith$elm_ui$Element$text(' or contact me directly.')
 								])),
 							A2(
@@ -16024,9 +16024,9 @@ var $author$project$Page$Administration$view = function (model) {
 						]),
 					_List_fromArray(
 						[
-							A2($author$project$Ui$Layout$link, 'https://github.com/terezka/elm-charts', 'GitHub'),
+							A2($author$project$Ui$Layout$link, 'https://github.com/terezka/charts', 'GitHub'),
 							A2($author$project$Ui$Layout$link, 'https://twitter.com/tereza_sokol', 'Twitter'),
-							A2($author$project$Ui$Layout$link, 'https://github.com/terezka/elm-charts/issues', 'Report an issue'),
+							A2($author$project$Ui$Layout$link, 'https://github.com/terezka/charts/issues', 'Report an issue'),
 							A2($author$project$Ui$Layout$link, 'mailto:terezasokol@gmail.com', 'Contact')
 						]))
 				])),
@@ -35244,7 +35244,7 @@ var $author$project$Page$Section$view = function (model) {
 								[$mdgriffith$elm_ui$Element$Font$underline]),
 							{
 								dM: $mdgriffith$elm_ui$Element$text('official Elm documentation'),
-								jq: 'https://package.elm-lang.org/packages/terezka/elm-charts/latest'
+								jq: 'https://package.elm-lang.org/packages/terezka/charts/latest'
 							}),
 							$mdgriffith$elm_ui$Element$text('.')
 						])),
@@ -38567,7 +38567,7 @@ var $author$project$Page$Example$view = function (model) {
 								[$mdgriffith$elm_ui$Element$Font$underline]),
 							{
 								dM: $mdgriffith$elm_ui$Element$text('official Elm documentation'),
-								jq: 'https://package.elm-lang.org/packages/terezka/elm-charts/latest'
+								jq: 'https://package.elm-lang.org/packages/terezka/charts/latest'
 							}),
 							$mdgriffith$elm_ui$Element$text('.')
 						])),
@@ -38638,7 +38638,7 @@ var $author$project$Page$GettingStarted$view = function (model) {
 								[$mdgriffith$elm_ui$Element$Font$underline]),
 							{
 								dM: $mdgriffith$elm_ui$Element$text('official Elm documentation'),
-								jq: 'https://package.elm-lang.org/packages/terezka/elm-charts/latest'
+								jq: 'https://package.elm-lang.org/packages/terezka/charts/latest'
 							}),
 							$mdgriffith$elm_ui$Element$text('. Install by running the following command in your project directory:')
 						])),
