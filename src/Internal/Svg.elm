@@ -1229,6 +1229,7 @@ type alias Dot =
   , highlightWidth : Float
   , highlightColor : String
   , shape : Maybe Shape
+  , hideOverflow : Bool
   }
 
 
@@ -1252,16 +1253,20 @@ defaultDot =
   , highlightWidth = 5
   , highlightColor = ""
   , shape = Nothing
+  , hideOverflow = False
   }
 
 
 {-| -}
 dot : Plane -> (data -> Float) -> (data -> Float) -> Dot -> data -> Svg msg
 dot plane toX toY config datum_ =
-  let x_ = Coord.toSVGX plane (toX datum_)
-      y_ = Coord.toSVGY plane (toY datum_)
+  let xOrg = toX datum_
+      yOrg = toY datum_
+      x_ = Coord.toSVGX plane xOrg
+      y_ = Coord.toSVGY plane yOrg
       area_ = 2 * pi * config.size
       highlightColor = if config.highlightColor == "" then config.color else config.highlightColor
+      showDot = isWithinPlane plane xOrg yOrg || config.hideOverflow
 
       styleAttrs =
         [ SA.stroke (if config.border == "" then config.color else config.border)
@@ -1269,6 +1274,7 @@ dot plane toX toY config datum_ =
         , SA.fillOpacity (String.fromFloat config.opacity)
         , SA.fill config.color
         , SA.class "elm-charts__dot"
+        , if config.hideOverflow then withinChartArea plane else SA.class ""
         ]
 
       highlightAttrs =
@@ -1289,7 +1295,7 @@ dot plane toX toY config datum_ =
         else
           toEl (toAttrs 0 ++ styleAttrs) []
   in
-  if not (isWithinPlane plane (toX datum_) (toY datum_)) then S.text "" else
+  if not showDot then S.text "" else
   case config.shape of
     Nothing ->
       S.text ""

@@ -393,6 +393,7 @@ type alias Dot =
   , highlightWidth : Float
   , highlightColor : String
   , shape : Maybe Internal.Svg.Shape
+  , hideOverflow : Bool
   }
 
 

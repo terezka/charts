@@ -134,7 +134,7 @@ view model =
 
     , C.series .x
         [ C.scatter .y [ CA.opacity 0.2, CA.borderWidth 1 ]
-            |> C.variation (\_ d -> [ CA.size (d.s * model.percentage / 100) ])
+            |> C.variation (\_ d -> [ CA.size (d.s * model.percentage / 100), CA.hideOverflow ])
         ]
         [ { x = -100, y = -100, s = 40 }
         , { x = -80, y = -30, s = 30 }
@@ -304,7 +304,7 @@ view model =
 
     , C.series .x
         [ C.scatter .y [ CA.opacity 0.2, CA.borderWidth 1 ]
-            |> C.variation (\\_ d -> [ CA.size (d.s * model.percentage / 100) ])
+            |> C.variation (\\_ d -> [ CA.size (d.s * model.percentage / 100), CA.hideOverflow ])
         ]
         [ { x = -100, y = -100, s = 40 }
         , { x = -80, y = -30, s = 30 }
@@ -479,7 +479,7 @@ view model =
 
     , C.series .x
         [ C.scatter .y [ CA.opacity 0.2, CA.borderWidth 1 ]
-            |> C.variation (\\_ d -> [ CA.size (d.s * model.percentage / 100) ])
+            |> C.variation (\\_ d -> [ CA.size (d.s * model.percentage / 100), CA.hideOverflow ])
         ]
         [ { x = -100, y = -100, s = 40 }
         , { x = -80, y = -30, s = 30 }
