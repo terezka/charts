@@ -157,12 +157,12 @@ toId plane =
   in
   String.join "_"
     [ "elm-charts__id"
-    , numToStr plane.width
-    , numToStr plane.height
+    , numToStr plane.x.length
     , numToStr plane.x.min
     , numToStr plane.x.max
     , numToStr plane.x.marginMin
     , numToStr plane.x.marginMax
+    , numToStr plane.y.length
     , numToStr plane.y.min
     , numToStr plane.y.max
     , numToStr plane.y.marginMin
