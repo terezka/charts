@@ -5592,7 +5592,7 @@ var $author$project$Examples$Frame$NoArrow$meta = {g6: 'Navigation', g7: 4, hn: 
 var $author$project$Examples$Frame$Offset$meta = {g6: 'Navigation', g7: 4, hn: 'Change position of labels.', dP: 'Move labels', id: 4};
 var $author$project$Examples$Frame$OnlyInts$meta = {g6: 'Navigation', g7: 4, hn: 'Only show integer labels.', dP: 'Only integers', id: 7};
 var $author$project$Examples$Frame$Padding$meta = {g6: 'Navigation', g7: 4, hn: 'Add padding to frame.', dP: 'Padding', id: 16};
-var $author$project$Examples$Frame$Position$meta = {g6: 'Navigation', g7: 4, hn: 'Change color of position.', dP: 'Position', id: 3};
+var $author$project$Examples$Frame$Position$meta = {g6: 'Navigation', g7: 4, hn: 'Change position of items.', dP: 'Position', id: 3};
 var $author$project$Examples$Frame$Rect$meta = {g6: 'Navigation', g7: 4, hn: 'Add a rectangle.', dP: 'Rectangle', id: 31};
 var $author$project$Examples$Frame$Times$meta = {g6: 'Navigation', g7: 4, hn: 'Use dates as labels.', dP: 'Timeline', id: 7};
 var $author$project$Examples$Frame$Titles$meta = {g6: 'Navigation', g7: 4, hn: 'Add titles to chart.', dP: 'Titles', id: 20};
@@ -7310,8 +7310,8 @@ var $elm$core$List$filterMap = F2(
 	});
 var $elm$browser$Browser$Events$onSelfMsg = F3(
 	function (router, _v0, state) {
-		var key = _v0.fz;
 		var event = _v0.fb;
+		var key = _v0.fz;
 		var toMessage = function (_v2) {
 			var subKey = _v2.a;
 			var _v3 = _v2.b;
@@ -12817,8 +12817,8 @@ var $mdgriffith$elm_ui$Internal$Model$toStyleSheetString = F2(
 			combine,
 			{dS: _List_Nil, dj: _List_Nil},
 			stylesheet);
-		var topLevel = _v0.dj;
 		var rules = _v0.dS;
+		var topLevel = _v0.dj;
 		return _Utils_ap(
 			$mdgriffith$elm_ui$Internal$Model$renderTopLevelValues(topLevel),
 			$elm$core$String$concat(rules));
@@ -14764,8 +14764,8 @@ var $mdgriffith$elm_ui$Internal$Model$htmlClass = function (cls) {
 var $elm$html$Html$Attributes$rel = _VirtualDom_attribute('rel');
 var $mdgriffith$elm_ui$Element$link = F2(
 	function (attrs, _v0) {
-		var url = _v0.jq;
 		var label = _v0.dM;
+		var url = _v0.jq;
 		return A4(
 			$mdgriffith$elm_ui$Internal$Model$element,
 			$mdgriffith$elm_ui$Internal$Model$asEl,
@@ -14864,10 +14864,10 @@ var $mdgriffith$elm_ui$Internal$Model$paddingName = F4(
 		return 'pad-' + ($elm$core$String$fromInt(top) + ('-' + ($elm$core$String$fromInt(right) + ('-' + ($elm$core$String$fromInt(bottom) + ('-' + $elm$core$String$fromInt(left)))))));
 	});
 var $mdgriffith$elm_ui$Element$paddingEach = function (_v0) {
-	var top = _v0.di;
-	var right = _v0.c6;
-	var bottom = _v0.a5;
 	var left = _v0.c3;
+	var bottom = _v0.a5;
+	var right = _v0.c6;
+	var top = _v0.di;
 	if (_Utils_eq(top, right) && (_Utils_eq(top, bottom) && _Utils_eq(top, left))) {
 		var topFloat = top;
 		return A2(
@@ -15101,8 +15101,8 @@ var $elm$html$Html$Attributes$tabindex = function (n) {
 };
 var $mdgriffith$elm_ui$Element$Input$button = F2(
 	function (attrs, _v0) {
-		var onPress = _v0.h8;
 		var label = _v0.dM;
+		var onPress = _v0.h8;
 		return A4(
 			$mdgriffith$elm_ui$Internal$Model$element,
 			$mdgriffith$elm_ui$Internal$Model$asEl,
@@ -15734,8 +15734,8 @@ var $mdgriffith$elm_ui$Internal$Model$toHtml = F2(
 				var html = el.a;
 				return html($mdgriffith$elm_ui$Internal$Model$asEl);
 			case 1:
-				var styles = el.a.iL;
 				var html = el.a.hH;
+				var styles = el.a.iL;
 				return A2(
 					html,
 					mode(styles),
@@ -15970,7 +15970,7 @@ var $author$project$Page$Administration$view = function (model) {
 									$mdgriffith$elm_ui$Element$text('Here are some upcoming features and improvements in approximate order of priority. '),
 									$mdgriffith$elm_ui$Element$text('If you have more suggestions or have wishes regarding the priority, then '),
 									$mdgriffith$elm_ui$Element$text('you\'re welcome to '),
-									A2($author$project$Ui$Layout$link, 'https://github.com/terezka/charts/issues', 'open an issue'),
+									A2($author$project$Ui$Layout$link, 'https://github.com/terezka/elm-charts/issues', 'open an issue'),
 									$mdgriffith$elm_ui$Element$text(' or contact me directly.')
 								])),
 							A2(
@@ -16024,9 +16024,9 @@ var $author$project$Page$Administration$view = function (model) {
 						]),
 					_List_fromArray(
 						[
-							A2($author$project$Ui$Layout$link, 'https://github.com/terezka/charts', 'GitHub'),
+							A2($author$project$Ui$Layout$link, 'https://github.com/terezka/elm-charts', 'GitHub'),
 							A2($author$project$Ui$Layout$link, 'https://twitter.com/tereza_sokol', 'Twitter'),
-							A2($author$project$Ui$Layout$link, 'https://github.com/terezka/charts/issues', 'Report an issue'),
+							A2($author$project$Ui$Layout$link, 'https://github.com/terezka/elm-charts/issues', 'Report an issue'),
 							A2($author$project$Ui$Layout$link, 'mailto:terezasokol@gmail.com', 'Contact')
 						]))
 				])),
@@ -21996,13 +21996,13 @@ var $terezka$intervals$Intervals$Time$ceilingDay = F3(
 var $justinmimbs$time_extra$Time$Extra$Hour = 12;
 var $justinmimbs$time_extra$Time$Extra$partsToPosix = F2(
 	function (zone, _v0) {
-		var year = _v0.dq;
-		var month = _v0.fE;
-		var day = _v0.e4;
-		var hour = _v0.eh;
-		var minute = _v0.er;
-		var second = _v0.eA;
 		var millisecond = _v0.eq;
+		var second = _v0.eA;
+		var minute = _v0.er;
+		var hour = _v0.eh;
+		var day = _v0.e4;
+		var month = _v0.fE;
+		var year = _v0.dq;
 		return A3(
 			$justinmimbs$time_extra$Time$Extra$posixFromDateTime,
 			zone,
@@ -23210,10 +23210,10 @@ var $mdgriffith$elm_ui$Element$Border$widthXY = F2(
 				x));
 	});
 var $mdgriffith$elm_ui$Element$Border$widthEach = function (_v0) {
-	var bottom = _v0.a5;
-	var top = _v0.di;
-	var left = _v0.c3;
 	var right = _v0.c6;
+	var left = _v0.c3;
+	var top = _v0.di;
+	var bottom = _v0.a5;
 	return (_Utils_eq(top, bottom) && _Utils_eq(left, right)) ? (_Utils_eq(top, right) ? $mdgriffith$elm_ui$Element$Border$width(top) : A2($mdgriffith$elm_ui$Element$Border$widthXY, left, top)) : A2(
 		$mdgriffith$elm_ui$Internal$Model$StyleClass,
 		$mdgriffith$elm_ui$Internal$Flag$borderWidth,
@@ -35244,7 +35244,7 @@ var $author$project$Page$Section$view = function (model) {
 								[$mdgriffith$elm_ui$Element$Font$underline]),
 							{
 								dM: $mdgriffith$elm_ui$Element$text('official Elm documentation'),
-								jq: 'https://package.elm-lang.org/packages/terezka/charts/latest'
+								jq: 'https://package.elm-lang.org/packages/terezka/elm-charts/latest'
 							}),
 							$mdgriffith$elm_ui$Element$text('.')
 						])),
@@ -35386,7 +35386,6 @@ var $author$project$Page$Example$OnExampleMsg = function (a) {
 	return {$: 2, a: a};
 };
 var $author$project$Page$Example$OnToggleCode = {$: 3};
-var $mdgriffith$elm_ui$Element$fillPortion = $mdgriffith$elm_ui$Internal$Model$Fill;
 var $author$project$Examples$first = 0;
 var $author$project$Examples$BarCharts$BarLabels$largeCode = '\nimport Html as H\nimport Svg as S\nimport Chart as C\nimport Chart.Attributes as CA\nimport Chart.Events as CE\nimport Chart.Item as CI\n\n\nview : Model -> H.Html Msg\nview model =\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    ]\n    [ C.xLabels []\n    , C.yLabels [ CA.withGrid ]\n    , C.bars []\n        [ C.bar .q []\n        , C.bar .p []\n        ]\n        data\n\n    , C.barLabels [ CA.moveDown 15, CA.color "white" ]\n    ]\n  ';
 var $author$project$Examples$BarCharts$Basic$largeCode = '\nimport Html as H\nimport Svg as S\nimport Chart as C\nimport Chart.Attributes as CA\n\n\nview : Model -> H.Html Msg\nview model =\n  C.chart\n    [ CA.height 300\n    , CA.width 300\n    ]\n    [ C.xLabels []\n    , C.yLabels [ CA.withGrid ]\n    , C.bars []\n        [ C.bar .z []\n        , C.bar .y []\n        ]\n        data\n    ]\n  ';
@@ -38354,9 +38353,8 @@ var $author$project$Ui$Code$view = function (code) {
 				$mdgriffith$elm_ui$Element$htmlAttribute(
 				A2($elm$html$Html$Attributes$style, 'padding', '0 20px')),
 				$mdgriffith$elm_ui$Element$htmlAttribute(
-				A2($elm$html$Html$Attributes$style, 'overflow-x', 'auto')),
-				$mdgriffith$elm_ui$Element$htmlAttribute(
 				A2($elm$html$Html$Attributes$style, 'line-height', '1.3')),
+				$mdgriffith$elm_ui$Element$scrollbarX,
 				$mdgriffith$elm_ui$Element$Font$size(14),
 				$mdgriffith$elm_ui$Element$Font$family(
 				_List_fromArray(
@@ -38364,7 +38362,9 @@ var $author$project$Ui$Code$view = function (code) {
 						$mdgriffith$elm_ui$Element$Font$typeface('Source Code Pro'),
 						$mdgriffith$elm_ui$Element$Font$monospace
 					])),
-				$mdgriffith$elm_ui$Element$alignTop
+				$mdgriffith$elm_ui$Element$alignTop,
+				$mdgriffith$elm_ui$Element$Background$color(
+				A3($mdgriffith$elm_ui$Element$rgb255, 250, 250, 250))
 			]),
 		$mdgriffith$elm_ui$Element$html(
 			A2($elm$html$Html$Lazy$lazy, $author$project$Ui$Code$viewCode, code)));
@@ -38439,6 +38439,7 @@ var $author$project$Page$Example$viewContent = function (model) {
 						$mdgriffith$elm_ui$Element$minimum,
 						300,
 						A2($mdgriffith$elm_ui$Element$maximum, 320, $mdgriffith$elm_ui$Element$fill))),
+					$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
 					isCenter ? $mdgriffith$elm_ui$Element$centerX : $mdgriffith$elm_ui$Element$alignTop,
 					$mdgriffith$elm_ui$Element$alignTop,
 					$mdgriffith$elm_ui$Element$paddingEach(
@@ -38450,17 +38451,8 @@ var $author$project$Page$Example$viewContent = function (model) {
 				$mdgriffith$elm_ui$Element$html(
 					A2($author$project$Examples$view, model.cZ, currentId))));
 	};
-	var viewCode = A2(
-		$mdgriffith$elm_ui$Element$el,
-		_List_fromArray(
-			[
-				$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-				$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
-				$mdgriffith$elm_ui$Element$Background$color(
-				A3($mdgriffith$elm_ui$Element$rgb255, 250, 250, 250))
-			]),
-		$author$project$Ui$Code$view(
-			model.aY ? $author$project$Examples$largeCode(currentId) : $author$project$Examples$smallCode(currentId)));
+	var viewCode = $author$project$Ui$Code$view(
+		model.aY ? $author$project$Examples$largeCode(currentId) : $author$project$Examples$smallCode(currentId));
 	var _v0 = $author$project$Ui$Layout$screen(model.a0);
 	switch (_v0) {
 		case 2:
@@ -38477,6 +38469,7 @@ var $author$project$Page$Example$viewContent = function (model) {
 				_List_fromArray(
 					[
 						viewText,
+						viewToggler,
 						A2(
 						$mdgriffith$elm_ui$Element$row,
 						_List_fromArray(
@@ -38489,17 +38482,7 @@ var $author$project$Page$Example$viewContent = function (model) {
 						_List_fromArray(
 							[
 								viewChart(false),
-								A2(
-								$mdgriffith$elm_ui$Element$column,
-								_List_fromArray(
-									[
-										$mdgriffith$elm_ui$Element$width(
-										$mdgriffith$elm_ui$Element$fillPortion(2)),
-										$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
-										$mdgriffith$elm_ui$Element$spacing(20)
-									]),
-								_List_fromArray(
-									[viewToggler, viewCode]))
+								viewCode
 							]))
 					]));
 		case 1:
@@ -38516,30 +38499,16 @@ var $author$project$Page$Example$viewContent = function (model) {
 				_List_fromArray(
 					[
 						viewText,
+						viewChart(true),
+						viewToggler,
 						A2(
-						$mdgriffith$elm_ui$Element$row,
+						$mdgriffith$elm_ui$Element$el,
 						_List_fromArray(
 							[
-								$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
 								$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
-								$mdgriffith$elm_ui$Element$spacing(50),
-								$mdgriffith$elm_ui$Element$alignTop
+								$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
 							]),
-						_List_fromArray(
-							[
-								viewChart(false),
-								A2(
-								$mdgriffith$elm_ui$Element$column,
-								_List_fromArray(
-									[
-										$mdgriffith$elm_ui$Element$width(
-										$mdgriffith$elm_ui$Element$fillPortion(2)),
-										$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
-										$mdgriffith$elm_ui$Element$spacing(20)
-									]),
-								_List_fromArray(
-									[viewToggler, viewCode]))
-							]))
+						viewCode)
 					]));
 		default:
 			return A2(
@@ -38547,6 +38516,7 @@ var $author$project$Page$Example$viewContent = function (model) {
 				_List_fromArray(
 					[
 						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+						$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
 						$mdgriffith$elm_ui$Element$paddingEach(
 						{a5: 0, c3: 0, c6: 0, di: 20}),
 						$mdgriffith$elm_ui$Element$spacing(30)
@@ -38557,16 +38527,13 @@ var $author$project$Page$Example$viewContent = function (model) {
 						viewChart(true),
 						viewToggler,
 						A2(
-						$mdgriffith$elm_ui$Element$column,
+						$mdgriffith$elm_ui$Element$el,
 						_List_fromArray(
 							[
-								$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-								$mdgriffith$elm_ui$Element$alignTop,
-								$mdgriffith$elm_ui$Element$centerX,
-								$mdgriffith$elm_ui$Element$spacing(20)
+								$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
+								$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
 							]),
-						_List_fromArray(
-							[viewCode]))
+						viewCode)
 					]));
 	}
 };
@@ -38600,7 +38567,7 @@ var $author$project$Page$Example$view = function (model) {
 								[$mdgriffith$elm_ui$Element$Font$underline]),
 							{
 								dM: $mdgriffith$elm_ui$Element$text('official Elm documentation'),
-								jq: 'https://package.elm-lang.org/packages/terezka/charts/latest'
+								jq: 'https://package.elm-lang.org/packages/terezka/elm-charts/latest'
 							}),
 							$mdgriffith$elm_ui$Element$text('.')
 						])),
@@ -38671,7 +38638,7 @@ var $author$project$Page$GettingStarted$view = function (model) {
 								[$mdgriffith$elm_ui$Element$Font$underline]),
 							{
 								dM: $mdgriffith$elm_ui$Element$text('official Elm documentation'),
-								jq: 'https://package.elm-lang.org/packages/terezka/charts/latest'
+								jq: 'https://package.elm-lang.org/packages/terezka/elm-charts/latest'
 							}),
 							$mdgriffith$elm_ui$Element$text('. Install by running the following command in your project directory:')
 						])),
