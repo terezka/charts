@@ -145,6 +145,32 @@ type alias Limit =
 
 
 
+-- ID
+
+
+{-| An id for the clip path. This needs to be unique for the particular dimensions
+of the chart, but not necessarily for the whole document. -}
+toId : Plane -> String
+toId plane =
+  let numToStr =
+        String.fromFloat >> String.replace "." "-"
+  in
+  String.join "_"
+    [ "elm-charts__id"
+    , numToStr plane.width
+    , numToStr plane.height
+    , numToStr plane.x.min
+    , numToStr plane.x.max
+    , numToStr plane.x.marginMin
+    , numToStr plane.x.marginMax
+    , numToStr plane.y.min
+    , numToStr plane.y.max
+    , numToStr plane.y.marginMin
+    , numToStr plane.y.marginMax
+    ]
+
+
+
 -- TRANSLATION
 
 

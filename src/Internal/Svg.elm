@@ -70,7 +70,7 @@ container plane config below chartEls above =
       chart =
         S.svg
           (svgAttrsSize ++ config.attrs)
-          (chartEls ++ [catcher])
+          ([clipPathDefs] ++ chartEls ++ [catcher])
 
       svgAttrsSize =
         if config.responsive then
@@ -96,6 +96,13 @@ container plane config below chartEls above =
         , SA.height (String.fromFloat (Coord.innerHeight plane))
         , SA.fill "transparent"
         ]
+
+      clipPathDefs =
+        S.defs []
+          [ S.clipPath
+            [ SA.id (Coord.toId plane) ]
+            [ S.rect chartPosition [] ]
+          ]
   in
   H.div
     [ HA.class "elm-charts__container"
@@ -182,6 +189,7 @@ type alias Line =
   , opacity : Float
   , break : Bool
   , flip : Bool
+  , hideOverflow : Bool
   , attrs : List (S.Attribute Never)
   }
 
@@ -204,6 +212,7 @@ defaultLine =
   , opacity = 1
   , break = False
   , flip = False
+  , hideOverflow = False
   , attrs = []
   }
 
@@ -357,6 +366,7 @@ line plane config =
     , SA.strokeOpacity (String.fromFloat config.opacity)
     , SA.strokeDasharray (String.join " " <| List.map String.fromFloat config.dashed)
     , SA.d (C.description plane cmds)
+    , if config.hideOverflow then withinChartArea plane else SA.class ""
     ]
     []
 
@@ -372,6 +382,7 @@ type alias Rect =
   , border : String
   , borderWidth : Float
   , opacity : Float
+  , hideOverflow : Bool
   , attrs : List (S.Attribute Never)
   }
 
@@ -386,6 +397,7 @@ defaultRect =
   , border = "rgba(210, 210, 210, 1)"
   , borderWidth = 1
   , opacity = 1
+  , hideOverflow = False
   , attrs = []
   }
 
@@ -457,6 +469,7 @@ rect plane config =
     , SA.stroke config.border
     , SA.strokeWidth (String.fromFloat config.borderWidth)
     , SA.d (C.description plane cmds)
+    , if config.hideOverflow then withinChartArea plane else SA.class ""
     ]
     []
 
@@ -680,6 +693,7 @@ type alias Label =
   , anchor : Maybe Anchor
   , rotate : Float
   , uppercase : Bool
+  , hideOverflow : Bool
   , attrs : List (S.Attribute Never)
   , ellipsis : Maybe { width : Float, height : Float }
   }
@@ -696,6 +710,7 @@ defaultLabel =
   , anchor = Nothing
   , rotate = 0
   , uppercase = False
+  , hideOverflow = False
   , attrs = []
   , ellipsis = Nothing
   }
@@ -919,9 +934,9 @@ bar plane config point =
         if height - radiusTopY * 0.8 - radiusBottomY * 0.8 <= 0 || width - radiusTopX * 0.8 - radiusBottomX * 0.8 <= 0
         then ( 0, 0 ) else ( config.roundTop, config.roundBottom )
 
-      ( commands, highlightCommands, highlightCut ) =
+      ( commands, highlightCommands ) =
         if pos.y1 == pos.y2 then
-          ( [], [], highlightPos )
+          ( [], [] )
         else
           case ( roundTop > 0, roundBottom > 0 ) of
             ( False, False ) ->
@@ -941,11 +956,6 @@ bar plane config point =
                 , C.Line pos.x1 pos.y2
                 , C.Line pos.x1 pos.y1
                 ]
-              , { x1 = pos.x1 - highlightWidthCarX
-                , x2 = pos.x2 + highlightWidthCarX
-                , y1 = pos.y1
-                , y2 = pos.y2 + highlightWidthCarY
-                }
               )
 
             ( True, False ) ->
@@ -971,11 +981,6 @@ bar plane config point =
                 , C.Arc roundingTop roundingTop -45 False False pos.x1 (pos.y2 - radiusTopY)
                 , C.Line pos.x1 pos.y1
                 ]
-              , { x1 = pos.x1 - highlightWidthCarX
-                , x2 = pos.x2 + highlightWidthCarX
-                , y1 = pos.y1
-                , y2 = pos.y2 + highlightWidthCarY
-                }
               )
 
             ( False, True ) ->
@@ -1002,11 +1007,6 @@ bar plane config point =
                 , C.Line pos.x1 (pos.y1 + radiusBottomY)
                 , C.Line pos.x2 pos.y1
                 ]
-              , { x1 = pos.x1 - highlightWidthCarX
-                , x2 = pos.x2 + highlightWidthCarX
-                , y1 = pos.y1 - highlightWidthCarY
-                , y2 = pos.y2 + highlightWidthCarY
-                }
               )
 
             ( True, True ) ->
@@ -1039,24 +1039,19 @@ bar plane config point =
                 , C.Line pos.x1 (pos.y1 + radiusBottomY)
                 , C.Line pos.x2 pos.y1
                 ]
-              , { x1 = pos.x1 - highlightWidthCarX
-                , x2 = pos.x2 + highlightWidthCarX
-                , y1 = pos.y1 - highlightWidthCarY
-                , y2 = pos.y2 + highlightWidthCarY
-                }
               )
 
       viewAuraBar fill =
         if config.highlight == 0 then
-          viewBar fill config.opacity config.border config.borderWidth 1 commands pos
+          viewBar fill config.opacity config.border config.borderWidth 1 commands
         else
           S.g
             [ SA.class "elm-charts__bar-with-highlight" ]
-            [ viewBar highlightColor config.highlight "transparent" 0 0 highlightCommands highlightCut
-            , viewBar fill config.opacity config.border config.borderWidth 1 commands pos
+            [ viewBar highlightColor config.highlight "transparent" 0 0 highlightCommands
+            , viewBar fill config.opacity config.border config.borderWidth 1 commands
             ]
 
-      viewBar fill fillOpacity border borderWidth strokeOpacity cmds limits =
+      viewBar fill fillOpacity border borderWidth strokeOpacity cmds =
           withAttrs config.attrs S.path
             [ SA.class "elm-charts__bar"
             , SA.fill fill
@@ -1065,7 +1060,7 @@ bar plane config point =
             , SA.strokeWidth (String.fromFloat borderWidth)
             , SA.strokeOpacity (String.fromFloat strokeOpacity)
             , SA.d (C.description plane cmds)
-            , SA.style (clipperStyle plane limits)
+            , withinChartArea plane
             ]
             []
   in
@@ -1122,10 +1117,7 @@ defaultInterpolation =
 {-| -}
 interpolation : Plane -> (data -> Float) -> (data -> Maybe Float) -> Interpolation -> List data -> Svg msg
 interpolation plane toX toY config data =
-  let limits =
-        Coord.fromProps [toX >> Just] [toY] data
-
-      view ( first, cmds, _ ) =
+  let view ( first, cmds, _ ) =
         withAttrs config.attrs S.path
           [ SA.class "elm-charts__interpolation-section"
           , SA.fill "transparent"
@@ -1133,7 +1125,7 @@ interpolation plane toX toY config data =
           , SA.strokeDasharray (String.join " " <| List.map String.fromFloat config.dashed)
           , SA.strokeWidth (String.fromFloat config.width)
           , SA.d (C.description plane (Move first.x first.y :: cmds))
-          , SA.style (clipperStyle plane limits)
+          , withinChartArea plane
           ]
           []
   in
@@ -1159,10 +1151,7 @@ defaultArea =
 {-| -}
 area : Plane -> (data -> Float) -> Maybe (data -> Maybe Float) -> (data -> Maybe Float) -> Interpolation -> List data -> Svg msg
 area plane toX toY2M toY config data =
-  let limits =
-        Coord.fromProps [toX >> Just] [toY, Maybe.withDefault (always (Just 0)) toY2M] data
-
-      ( patternDefs, fill ) =
+  let ( patternDefs, fill ) =
         case config.design of
           Nothing -> ( S.text "", config.color )
           Just design -> toPattern config.color design
@@ -1175,7 +1164,7 @@ area plane toX toY2M toY config data =
           , SA.strokeWidth "0"
           , SA.fillRule "evenodd"
           , SA.d (C.description plane cmds)
-          , SA.style (clipperStyle plane limits)
+          , withinChartArea plane
           ]
           []
 
@@ -1935,24 +1924,6 @@ tooltipPointerStyle direction className background borderColor =
   """
 
 
-clipperStyle : Plane -> Coord.Position -> String
-clipperStyle plane limits =
-  let leftCut = (plane.x.min - limits.x1) / abs (limits.x2 - limits.x1) * 100
-      rightCut = (plane.x.max - limits.x2) / abs (limits.x2 - limits.x1) * 100
-      bottomCut = (plane.y.min - limits.y1) / abs (limits.y2 - limits.y1) * 100
-      topCut = (plane.y.max - limits.y2) / abs (limits.y2 - limits.y1) * 100
-
-      path =
-        String.join " "
-          [ String.fromFloat -topCut ++ "%"
-          , String.fromFloat -rightCut ++ "%"
-          , String.fromFloat bottomCut ++ "%"
-          , String.fromFloat leftCut ++ "%"
-          ]
-  in
-  "clip-path: inset(" ++ path ++ ");"
-
-
 
 -- INTERVALS
 
@@ -2163,3 +2134,7 @@ withAttrs : List (S.Attribute Never) -> (List (S.Attribute msg) -> List (S.Svg m
 withAttrs attrs toEl defaultAttrs =
   toEl (defaultAttrs ++ List.map (HA.map never) attrs)
 
+
+withinChartArea : Plane -> S.Attribute msg
+withinChartArea plane =
+  SA.clipPath <| "url(#" ++ Coord.toId plane ++ ")"

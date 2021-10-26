@@ -1202,6 +1202,7 @@ xLabel edits inner =
       , rotate = config.rotate
       , attrs = config.attrs
       , ellipsis = config.ellipsis
+      , hideOverflow = False
       }
       string
       { x = config.x, y = config.y }
@@ -1258,6 +1259,7 @@ yLabel edits inner =
       , rotate = config.rotate
       , attrs = config.attrs
       , ellipsis = config.ellipsis
+      , hideOverflow = False
       }
       string
       { x = config.x, y = config.y }
@@ -1846,6 +1848,7 @@ toLabelFromItemLabel config =
   , uppercase = config.uppercase
   , rotate = config.rotate
   , ellipsis = config.ellipsis
+  , hideOverflow = False
   , attrs = config.attrs
   }
 
