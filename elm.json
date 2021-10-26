@@ -3,7 +3,7 @@
     "name": "terezka/charts",
     "summary": "Nighly version of terezka/elm-charts with newest features.",
     "license": "BSD-3-Clause",
-    "version": "20.0.0",
+    "version": "20.0.1",
     "exposed-modules": [
         "Chart.Attributes",
         "Chart.Events",
