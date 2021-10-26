@@ -911,6 +911,7 @@ type alias Labels =
   , format : Maybe (Float -> String)
   , rotate : Float
   , grid : Bool
+  , hideOverflow : Bool
   , attrs : List (S.Attribute Never)
   , ellipsis : Maybe { width : Float, height : Float }
   }
@@ -948,6 +949,8 @@ The example below illustrates the configuration:
               -- Add ellipsis. Arguments are width and height of label.
               -- Note: There is no SVG feature for ellipsis, so this
               -- turns labels into HTML.
+
+          , CA.hideOverflow -- Cut off labels if exeeding chart bounds
 
           , CA.pinned .max  -- Change what y position the labels are set at
                             -- .max is at the very top
@@ -993,6 +996,7 @@ xLabels edits =
           , rotate = 0
           , fontSize = Nothing
           , attrs = []
+          , hideOverflow = False
           , ellipsis = Nothing
           }
 
@@ -1017,6 +1021,7 @@ xLabels edits =
             , uppercase = config.uppercase
             , rotate = config.rotate
             , attrs = config.attrs
+            , hideOverflow = config.hideOverflow
             , ellipsis = config.ellipsis
             }
             [ S.text item.label ]
@@ -1049,6 +1054,7 @@ yLabels edits =
           , fontSize = Nothing
           , rotate = 0
           , attrs = []
+          , hideOverflow = False
           , ellipsis = Nothing
           }
 
@@ -1073,6 +1079,7 @@ yLabels edits =
             , rotate = config.rotate
             , attrs = config.attrs
             , ellipsis = config.ellipsis
+            , hideOverflow = config.hideOverflow
             , anchor =
                 case config.anchor of
                   Nothing -> Just (if config.flip then IS.Start else IS.End)
@@ -1101,6 +1108,7 @@ type alias Label =
   , uppercase : Bool
   , flip : Bool
   , grid : Bool
+  , hideOverflow : Bool
   , attrs : List (S.Attribute Never)
   , ellipsis : Maybe { width : Float, height : Float }
   }
@@ -1145,6 +1153,7 @@ A full list of possible attributes:
           , CA.rotate 90    -- Rotate label 90 degrees
           , CA.uppercase    -- Make uppercase
           , CA.flip         -- Flip to opposite direction
+          , CA.hideOverflow -- Cut off labels if exeeding chart bounds
           , CA.ellipsis 40 10
               -- Add ellipsis. Arguments are width and height of label.
               -- Note: There is no SVG feature for ellipsis, so this
@@ -1177,6 +1186,7 @@ xLabel edits inner =
           , flip = False
           , grid = False
           , attrs = []
+          , hideOverflow = False
           , ellipsis = Nothing
           }
 
@@ -1202,7 +1212,7 @@ xLabel edits inner =
       , rotate = config.rotate
       , attrs = config.attrs
       , ellipsis = config.ellipsis
-      , hideOverflow = False
+      , hideOverflow = config.hideOverflow
       }
       string
       { x = config.x, y = config.y }
@@ -1231,6 +1241,7 @@ yLabel edits inner =
           , flip = False
           , grid = False
           , attrs = []
+          , hideOverflow = False
           , ellipsis = Nothing
           }
 
@@ -1259,7 +1270,7 @@ yLabel edits inner =
       , rotate = config.rotate
       , attrs = config.attrs
       , ellipsis = config.ellipsis
-      , hideOverflow = False
+      , hideOverflow = config.hideOverflow
       }
       string
       { x = config.x, y = config.y }
@@ -1814,6 +1825,7 @@ type alias ItemLabel a =
   , attrs : List (S.Attribute Never)
   , ellipsis : Maybe { width : Float, height : Float }
   , position : CS.Plane -> a -> CS.Point
+  , hideOverflow : Bool
   , format : Maybe (a -> String)
   }
 
@@ -1830,6 +1842,7 @@ defaultLabel =
   , rotate = IS.defaultLabel.rotate
   , uppercase = IS.defaultLabel.uppercase
   , attrs = IS.defaultLabel.attrs
+  , hideOverflow = IS.defaultLabel.hideOverflow
   , ellipsis = IS.defaultLabel.ellipsis
   , position = CI.getBottom
   , format = Nothing
@@ -1848,7 +1861,7 @@ toLabelFromItemLabel config =
   , uppercase = config.uppercase
   , rotate = config.rotate
   , ellipsis = config.ellipsis
-  , hideOverflow = False
+  , hideOverflow = config.hideOverflow
   , attrs = config.attrs
   }
 

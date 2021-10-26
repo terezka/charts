@@ -735,16 +735,23 @@ label plane config inner point =
 
           uppercaseStyle =
             if config.uppercase then "text-transform: uppercase;" else ""
+
+          withOverflowWrap el =
+            if config.hideOverflow then
+              S.g [ withinChartArea plane ] [ el ]
+            else
+              el
       in
-      withAttrs config.attrs S.text_
-        [ SA.class "elm-charts__label"
-        , SA.stroke config.border
-        , SA.strokeWidth (String.fromFloat config.borderWidth)
-        , SA.fill config.color
-        , position plane -config.rotate point.x point.y config.xOff config.yOff
-        , SA.style <| String.join " " [ "pointer-events: none;", fontStyle, anchorStyle, uppercaseStyle ]
-        ]
-        [ S.tspan [] inner ]
+      withOverflowWrap <|
+        withAttrs config.attrs S.text_
+          [ SA.class "elm-charts__label"
+          , SA.stroke config.border
+          , SA.strokeWidth (String.fromFloat config.borderWidth)
+          , SA.fill config.color
+          , position plane -config.rotate point.x point.y config.xOff config.yOff
+          , SA.style <| String.join " " [ "pointer-events: none;", fontStyle, anchorStyle, uppercaseStyle ]
+          ]
+          [ S.tspan [] inner ]
 
     Just ellipsis ->
       let fontStyle =
@@ -768,30 +775,35 @@ label plane config inner point =
 
           uppercaseStyle =
             if config.uppercase then HA.style "text-transform" "uppercase" else HA.style "" ""
+
+          withOverflowWrap el =
+            if config.hideOverflow then
+              S.g [ withinChartArea plane ] [ el ]
+            else
+              el
       in
-      withAttrs config.attrs S.foreignObject
-        [ SA.class "elm-charts__label"
-        , SA.class "elm-charts__html-label"
-        , SA.width (String.fromFloat ellipsis.width)
-        , SA.height (String.fromFloat ellipsis.height)
-        , position plane -config.rotate point.x point.y xOffWithAnchor (config.yOff - 10)
-        ]
-        [ H.div
-            [ HA.attribute "xmlns" "http://www.w3.org/1999/xhtml"
-            , HA.style "white-space" "nowrap"
-            , HA.style "overflow" "hidden"
-            , HA.style "text-overflow" "ellipsis"
-            , HA.style "height" "100%"
-            , HA.style "pointer-events" "none"
-            , HA.style "color" config.color
-            , fontStyle
-            , uppercaseStyle
-            , anchorStyle
-            ]
-            inner
-        ]
-
-
+      withOverflowWrap <|
+        withAttrs config.attrs S.foreignObject
+          [ SA.class "elm-charts__label"
+          , SA.class "elm-charts__html-label"
+          , SA.width (String.fromFloat ellipsis.width)
+          , SA.height (String.fromFloat ellipsis.height)
+          , position plane -config.rotate point.x point.y xOffWithAnchor (config.yOff - 10)
+          ]
+          [ H.div
+              [ HA.attribute "xmlns" "http://www.w3.org/1999/xhtml"
+              , HA.style "white-space" "nowrap"
+              , HA.style "overflow" "hidden"
+              , HA.style "text-overflow" "ellipsis"
+              , HA.style "height" "100%"
+              , HA.style "pointer-events" "none"
+              , HA.style "color" config.color
+              , fontStyle
+              , uppercaseStyle
+              , anchorStyle
+              ]
+              inner
+          ]
 
 
 
